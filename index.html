@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BallTrials · Which Color Wins? 3D Marble Race Tournaments</title>
+<meta name="description" content="3D marble race tournaments where colorful balls with big personalities battle through lava arenas. Races, survival trials and last-ball-standing showdowns. Which color wins? Pick your team." />
+<link rel="canonical" href="https://balltrials.com/" />
+<meta name="theme-color" content="#241159" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="BallTrials · Which Color Wins?" />
+<meta property="og:description" content="3D marble race tournaments. Colorful balls, lava arenas, one champion. Pick your team." />
+<meta property="og:url" content="https://balltrials.com/" />
+<meta property="og:image" content="https://balltrials.com/assets/og.jpg" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-64.png" />
+<link rel="apple-touch-icon" href="assets/logo-180.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "BallTrials",
+  "url": "https://balltrials.com/",
+  "logo": "https://balltrials.com/assets/logo-180.png",
+  "email": "contact@balltrials.com",
+  "sameAs": [
+    "https://www.youtube.com/@BallTrialsTV",
+    "https://www.instagram.com/balltrialstv",
+    "https://www.tiktok.com/@playballtrials",
+    "https://www.facebook.com/people/BallTrials/61591663522728/"
+  ]
+}
+</script>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+
+<canvas id="ambient" aria-hidden="true"></canvas>
+
+<button id="snd" data-ui aria-pressed="false" title="Sound on/off" aria-label="Toggle sound">🔊</button>
+
+<nav>
+  <a class="brand" href="#home"><img src="assets/logo-180.png" alt="" width="34" height="34" /> BallTrials</a>
+  <div class="links">
+    <a href="#watch">Watch</a>
+    <a href="#trials">The Trials</a>
+    <a href="game/">Game</a>
+    <a href="#follow">Follow</a>
+    <a href="#contact">Contact</a>
+    <a class="cta" href="https://www.youtube.com/@BallTrialsTV?sub_confirmation=1" target="_blank" rel="noopener">Subscribe</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- ══ HERO ══ -->
+  <header class="hero" id="home">
+    <img class="wordmark" src="assets/wordmark.png" alt="BallTrials" width="480" height="140" />
+    <h1>Which color wins? <span class="g">Pick your team.</span></h1>
+    <p class="sub">3D marble race tournaments where colorful balls with big personalities battle through lava arenas. New trials every week.</p>
+    <div class="trailer card rv" data-solid>
+      <div class="yt" data-id="kgqo12CT1hw" data-title="BallTrials channel trailer">
+        <div class="play"><span><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span></div>
+      </div>
+    </div>
+    <div class="actions">
+      <a class="btn btn-gold" href="https://www.youtube.com/@BallTrialsTV?sub_confirmation=1" target="_blank" rel="noopener">Subscribe on YouTube</a>
+      <a class="btn btn-ghost" href="#watch">Watch the trials</a>
+    </div>
+  </header>
+
+  <!-- ══ WHAT IS ══ -->
+  <section id="about">
+    <div class="sec-head rv">
+      <span class="kicker">What is BallTrials?</span>
+      <h2>Tiny balls. Huge drama.</h2>
+      <p>Pure physics, zero scripts: nobody knows who wins until it happens.</p>
+    </div>
+    <div class="pillars">
+      <div class="pillar card rv" data-solid>
+        <img class="ico-art" src="assets/art/balltrials-web-icon-races.png" alt="" width="88" height="88" loading="lazy" />
+        <h3>Marble Races</h3>
+        <p>Colorful balls with faces sprint, bounce and tumble through wild 3D courses full of traps.</p>
+      </div>
+      <div class="pillar card rv" data-solid>
+        <img class="ico-art" src="assets/art/balltrials-web-icon-tournaments.png" alt="" width="88" height="88" loading="lazy" />
+        <h3>Lava Tournaments</h3>
+        <p>Four teams, many trials, one champion. Full tournament episodes with points on the line.</p>
+      </div>
+      <div class="pillar card rv" data-solid>
+        <img class="ico-art" src="assets/art/balltrials-web-icon-survival.png" alt="" width="88" height="88" loading="lazy" />
+        <h3>Last One Standing</h3>
+        <p>Quick survival shorts where 8 colors fight the arena and only one makes it out.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ WATCH ══ -->
+  <section id="watch">
+    <div class="sec-head rv">
+      <span class="kicker">Watch</span>
+      <h2>The latest battles</h2>
+      <p>Full tournaments for the story, shorts for the thrill.</p>
+    </div>
+    <div class="tabs rv" data-ui>
+      <button class="tab on" data-tab="tournaments">🏆 Tournaments</button>
+      <button class="tab" data-tab="shorts">⚡ Shorts</button>
+    </div>
+    <div class="panel card on" id="panel-tournaments" data-solid>
+      <div class="vid-grid">
+        <div class="vid">
+          <div class="yt" data-id="hWfy77XtoH8" data-title="Lava Tournament #1"><div class="play"><span><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span></div></div>
+          <h4>Lava Tournament #1 · Which color wins?</h4>
+        </div>
+        <div class="vid">
+          <div class="yt" data-id="pK-f_n0y0PM" data-title="Lava Tournament #2"><div class="play"><span><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span></div></div>
+          <h4>Lava Tournament #2 · Closest one ever?!</h4>
+        </div>
+        <div class="vid">
+          <div class="yt" data-id="lgqY8mlygLQ" data-title="Lava Tournament #3"><div class="play"><span><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span></div></div>
+          <h4>Lava Tournament #3 · Tied 2-2-2-2 again?!</h4>
+        </div>
+        <div class="vid">
+          <div class="yt" data-id="sncbL52k8XU" data-title="Lava Tournament #4"><div class="play"><span><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span></div></div>
+          <h4>Lava Tournament #4 · The slide shows up 4 times 🎢</h4>
+        </div>
+      </div>
+      <div class="yt list" data-list="PLUdstHCgsMm0" data-thumb="hWfy77XtoH8" data-title="Lava Tournament: full series playlist">
+        <div class="play"><span><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span></div>
+        <div class="list-tag">▶ Play the full series</div>
+      </div>
+      <div class="watch-more"><a class="btn btn-ghost" href="https://www.youtube.com/@BallTrialsTV/videos" target="_blank" rel="noopener">See all on YouTube</a></div>
+    </div>
+    <div class="panel card" id="panel-shorts" data-solid>
+      <div class="short-grid">
+        <div class="vid"><div class="yt v" data-id="CyJVDitybwQ" data-title="8 colors, 1 survivor"><div class="play"><span><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span></div></div></div>
+        <div class="vid"><div class="yt v" data-id="IcJl9vxX3aw" data-title="Can green survive?"><div class="play"><span><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span></div></div></div>
+        <div class="vid"><div class="yt v" data-id="p_INXhCJU8U" data-title="Shrinking Floor"><div class="play"><span><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span></div></div></div>
+        <div class="vid"><div class="yt v" data-id="FYnN70C1yWE" data-title="Don't fall into the lava"><div class="play"><span><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span></div></div></div>
+        <div class="vid"><div class="yt v" data-id="8fuoZkPaTvc" data-title="Can red take it all?"><div class="play"><span><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span></div></div></div>
+        <div class="vid"><div class="yt v" data-id="XQt0II-Azx8" data-title="Can orange survive?"><div class="play"><span><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span></div></div></div>
+      </div>
+      <div class="yt list" data-list="PLanlpzPlgF-s" data-thumb="CyJVDitybwQ" data-title="Survival: Last Ball Standing playlist">
+        <div class="play"><span><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span></div>
+        <div class="list-tag">▶ Play the survival playlist</div>
+      </div>
+      <div class="watch-more"><a class="btn btn-ghost" href="https://www.youtube.com/@BallTrialsTV/shorts" target="_blank" rel="noopener">See all Shorts</a></div>
+    </div>
+  </section>
+
+  <!-- ══ TRIALS ══ -->
+  <section id="trials">
+    <div class="sec-head rv">
+      <span class="kicker">The Trials</span>
+      <h2>Seven ways to lose your marbles</h2>
+      <p>Every tournament mixes trials from this pool. More coming.</p>
+    </div>
+    <div class="trials">
+      <div class="trial card rv" data-solid>
+        <div class="t-media"><img src="assets/clips/suelo.jpg" alt="Shrinking Floor gameplay" loading="lazy" width="640" height="360" /><video muted loop playsinline preload="none" data-src="assets/clips/suelo.webm"></video></div>
+        <div class="t-body"><h3><span class="ico" data-mode="suelo">⬡</span>Shrinking Floor</h3><p>The arena vanishes tile by tile. Push or fall: last ball standing wins.</p></div>
+      </div>
+      <div class="trial card rv" data-solid>
+        <div class="t-media"><img src="assets/clips/race.jpg" alt="The Race gameplay" loading="lazy" width="640" height="360" /><video muted loop playsinline preload="none" data-src="assets/clips/race.webm"></video></div>
+        <div class="t-body"><h3><span class="ico" data-mode="race">🏁</span>The Race</h3><p>A dash to the finish through breakable barriers and speed boosts.</p></div>
+      </div>
+      <div class="trial card rv" data-solid>
+        <div class="t-media"><img src="assets/clips/cazador.jpg" alt="The Hunter gameplay" loading="lazy" width="640" height="360" /><video muted loop playsinline preload="none" data-src="assets/clips/cazador.webm"></video></div>
+        <div class="t-body"><h3><span class="ico" data-mode="cazador">😡</span>The Hunter</h3><p>A hungry predator chases the swarm. Outlast everyone to score.</p></div>
+      </div>
+      <div class="trial card rv" data-solid>
+        <div class="t-media"><img src="assets/clips/tobogan.jpg" alt="The Crazy Slide gameplay" loading="lazy" width="640" height="360" /><video muted loop playsinline preload="none" data-src="assets/clips/tobogan.webm"></video></div>
+        <div class="t-body"><h3><span class="ico" data-mode="tobogan">🎢</span>The Crazy Slide</h3><p>Downhill auto-runner chaos with lava snapping at your tail.</p></div>
+      </div>
+      <div class="trial card rv" data-solid>
+        <div class="t-media"><img src="assets/clips/plataforma.jpg" alt="The Platform gameplay" loading="lazy" width="640" height="360" /><video muted loop playsinline preload="none" data-src="assets/clips/plataforma.webm"></video></div>
+        <div class="t-body"><h3><span class="ico" data-mode="plataforma">🥊</span>The Platform</h3><p>Sumo on a ledge above boiling lava. One good bump ends you.</p></div>
+      </div>
+      <div class="trial card rv" data-solid>
+        <div class="t-media"><img src="assets/clips/gauntlet.jpg" alt="The Gauntlet gameplay" loading="lazy" width="640" height="360" /><video muted loop playsinline preload="none" data-src="assets/clips/gauntlet.webm"></video></div>
+        <div class="t-body"><h3><span class="ico" data-mode="gauntlet">⚙️</span>The Gauntlet</h3><p>Saws, pistons and swinging doors. First ones through score big.</p></div>
+      </div>
+      <div class="trial card rv" data-solid>
+        <div class="t-media"><img src="assets/clips/recolecta.jpg" alt="The Heist gameplay" loading="lazy" width="640" height="360" /><video muted loop playsinline preload="none" data-src="assets/clips/recolecta.webm"></video></div>
+        <div class="t-body"><h3><span class="ico" data-mode="recolecta">💎</span>The Heist</h3><p>No eliminations, just greed: grab the most loot before time runs out.</p></div>
+      </div>
+    </div>
+    <p style="text-align:center;color:var(--text-dim);font-size:13.5px;margin-top:14px" class="rv">Hover a card to watch it in motion. Real gameplay, straight from the engine.</p>
+  </section>
+
+  <!-- ══ GAME ══ -->
+  <section id="game">
+    <div class="game-strip card rv" data-solid>
+      <div class="cones">🚧⚠️🚧</div>
+      <h2>The BallTrials <span style="color:var(--gold)">Game</span></h2>
+      <p>Our little builders are hard at work. One day you will pick your ball and join the trials yourself.</p>
+      <div class="progress" aria-hidden="true"><i></i></div>
+      <a class="btn btn-gold" href="game/">Visit the construction site</a>
+    </div>
+  </section>
+
+  <!-- ══ FOLLOW ══ -->
+  <section id="follow">
+    <div class="sec-head rv">
+      <span class="kicker">Follow</span>
+      <h2>The trials are everywhere</h2>
+      <p>Same balls, more arenas. Catch the highlights wherever you scroll.</p>
+    </div>
+    <div class="follow-grid">
+      <a class="social card ytc rv" href="https://www.youtube.com/@BallTrialsTV" target="_blank" rel="noopener" data-solid>
+        <span class="s-ico"><svg viewBox="0 0 24 24"><path d="M23 7.5s-.2-1.6-.9-2.3c-.9-.9-1.9-.9-2.4-1C16.6 4 12 4 12 4s-4.6 0-7.7.2c-.5.1-1.5.1-2.4 1-.7.7-.9 2.3-.9 2.3S.8 9.4.8 11.3v1.4c0 1.9.2 3.8.2 3.8s.2 1.6.9 2.3c.9.9 2 .9 2.5 1 1.8.2 7.6.2 7.6.2s4.6 0 7.7-.2c.5-.1 1.5-.1 2.4-1 .7-.7.9-2.3.9-2.3s.2-1.9.2-3.8v-1.4c0-1.9-.2-3.8-.2-3.8zM9.8 15.3V8.7l6.4 3.3-6.4 3.3z"/></svg></span>
+        <span><b>YouTube</b><small>@BallTrialsTV · full trials</small></span>
+      </a>
+      <a class="social card ig rv" href="https://www.instagram.com/balltrialstv" target="_blank" rel="noopener" data-solid>
+        <span class="s-ico"><svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 1.2.1 1.8.2 2.2.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.4.4 1 .4 2.2.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c-.1 1.2-.2 1.8-.4 2.2-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.4.2-1 .4-2.2.4-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2-.1-1.8-.2-2.2-.4-.6-.2-1-.5-1.4-.9-.4-.4-.7-.8-.9-1.4-.2-.4-.4-1-.4-2.2-.1-1.3-.1-1.7-.1-4.9s0-3.6.1-4.9c.1-1.2.2-1.8.4-2.2.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.4-.2 1-.4 2.2-.4 1.3-.1 1.7-.1 4.9-.1zm0 2c-3.1 0-3.5 0-4.8.1-1.1.1-1.4.2-1.7.3-.4.2-.7.3-1 .6-.3.3-.5.6-.6 1-.1.3-.3.6-.3 1.7-.1 1.3-.1 1.7-.1 4.8s0 3.5.1 4.8c.1 1.1.2 1.4.3 1.7.2.4.3.7.6 1 .3.3.6.5 1 .6.3.1.6.3 1.7.3 1.3.1 1.7.1 4.8.1s3.5 0 4.8-.1c1.1-.1 1.4-.2 1.7-.3.4-.2.7-.3 1-.6.3-.3.5-.6.6-1 .1-.3.3-.6.3-1.7.1-1.3.1-1.7.1-4.8s0-3.5-.1-4.8c-.1-1.1-.2-1.4-.3-1.7-.2-.4-.3-.7-.6-1-.3-.3-.6-.5-1-.6-.3-.1-.6-.3-1.7-.3-1.3-.1-1.7-.1-4.8-.1zm0 3.4a4.4 4.4 0 1 1 0 8.8 4.4 4.4 0 0 1 0-8.8zm0 2a2.4 2.4 0 1 0 0 4.8 2.4 2.4 0 0 0 0-4.8zm5.6-2.9a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg></span>
+        <span><b>Instagram</b><small>@balltrialstv · reels</small></span>
+      </a>
+      <a class="social card tt rv" href="https://www.tiktok.com/@playballtrials" target="_blank" rel="noopener" data-solid>
+        <span class="s-ico"><svg viewBox="0 0 24 24"><path d="M16.6 2h3.1c.2 1.6 1 3.9 3.3 4.6v3.2c-1.4 0-2.9-.5-4.1-1.3v6.9c0 3.6-2.9 6.6-6.6 6.6S5.7 19 5.7 15.4c0-3.5 2.8-6.4 6.3-6.6v3.3a3.3 3.3 0 1 0 2.4 3.2V2h2.2z"/></svg></span>
+        <span><b>TikTok</b><small>@playballtrials · quick trials</small></span>
+      </a>
+      <a class="social card fb rv" href="https://www.facebook.com/people/BallTrials/61591663522728/" target="_blank" rel="noopener" data-solid>
+        <span class="s-ico"><svg viewBox="0 0 24 24"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.3c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12z"/></svg></span>
+        <span><b>Facebook</b><small>BallTrials · reels & clips</small></span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ══ CONTACT ══ -->
+  <section id="contact">
+    <div class="contact-card card rv" data-solid>
+      <span class="kicker">Contact</span>
+      <h2 style="margin:10px 0 12px">Say hi!</h2>
+      <p>Got an idea for a trial? A collab? A business inquiry? We read everything.</p>
+      <a class="btn btn-gold" href="mailto:contact@balltrials.com?subject=Hello%20BallTrials">contact@balltrials.com</a>
+    </div>
+  </section>
+
+  <footer>
+    <div class="foot-links">
+      <a href="#watch">Watch</a> · <a href="#trials">The Trials</a> · <a href="game/">Game</a> · <a href="#contact">Contact</a>
+    </div>
+    <div>© 2026 BallTrials · 100% original animation & audio · Made with 🧡 and a lot of lava</div>
+  </footer>
+
+</div>
+
+<script type="module">
+import { enableAudio, disableAudio, audioEnabled, audioPref, duckMusic, audioStats } from './audio.mjs';
+import { modeIconSvg } from './chassis/modeicons.mjs';
+window.__btAudio = audioStats;   // gancho de verificación headless
+
+// ── iconos de modo CANÓNICOS (los mismos dibujos que la tarjeta de ronda del vídeo; docs/39).
+//    El emoji del HTML queda como fallback si el módulo no carga. ──
+for (const el of document.querySelectorAll('.ico[data-mode]')){
+  const svg = modeIconSvg(el.dataset.mode); if (svg) el.innerHTML = svg;
+}
+
+// ── botón de sonido 🔊 (mudo por defecto; recuerda la preferencia) ──
+const snd = document.getElementById('snd');
+function paintSnd(){ const on = audioEnabled(); snd.classList.toggle('on', on); snd.textContent = on ? '🔊' : '🔇'; snd.setAttribute('aria-pressed', String(on)); }
+snd.addEventListener('click', async () => { if (audioEnabled()) disableAudio(); else await enableAudio(); paintSnd(); });
+if (audioPref()){                                  // volvió con sonido activado: el 1er gesto lo reactiva
+  const auto = async () => { if (!audioEnabled()){ await enableAudio(); paintSnd(); } };
+  addEventListener('pointerdown', auto, { once: true });
+}
+paintSnd();
+
+// ── lite-embeds de YouTube (miniatura → iframe al clic; data-id=vídeo, data-list=playlist) ──
+for (const el of document.querySelectorAll('.yt[data-id], .yt[data-list]')){
+  const thumb = el.dataset.id || el.dataset.thumb;
+  el.style.backgroundImage = `url(https://i.ytimg.com/vi/${thumb}/hqdefault.jpg)`;
+  el.setAttribute('role', 'button');
+  el.setAttribute('aria-label', `Play: ${el.dataset.title || 'video'}`);
+  el.addEventListener('click', () => {
+    if (el.querySelector('iframe')) return;
+    duckMusic();                                   // la música de fondo no compite con el vídeo
+    const f = document.createElement('iframe');
+    f.src = el.dataset.list
+      ? `https://www.youtube-nocookie.com/embed/videoseries?list=${el.dataset.list}&autoplay=1`
+      : `https://www.youtube-nocookie.com/embed/${el.dataset.id}?autoplay=1&rel=0`;
+    f.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+    f.allowFullscreen = true;
+    el.append(f);
+  }, { once: false });
+}
+
+// ── clips de modo: reproducir al hover (carga perezosa del webm) ──
+for (const card of document.querySelectorAll('.trial')){
+  const v = card.querySelector('video');
+  if (!v) continue;
+  card.addEventListener('mouseenter', () => {
+    if (!v.src) v.src = v.dataset.src;
+    card.classList.add('playing');
+    v.play().catch(() => {});
+  });
+  card.addEventListener('mouseleave', () => { card.classList.remove('playing'); v.pause(); });
+}
+
+// ── pestañas Tournaments / Shorts ──
+for (const t of document.querySelectorAll('.tab')){
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.toggle('on', x === t));
+    document.querySelectorAll('.panel').forEach(p => p.classList.toggle('on', p.id === 'panel-' + t.dataset.tab));
+  });
+}
+
+// ── reveal on scroll ──
+const io = new IntersectionObserver(es => {
+  for (const e of es) if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+}, { threshold: 0.12 });
+document.querySelectorAll('.rv').forEach(el => io.observe(el));
+</script>
+<script type="module" src="ambient.mjs"></script>
+
+</body>
+</html>

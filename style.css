@@ -1,0 +1,256 @@
+/* BallTrials · web oficial (F1)
+   Tono: púrpura #5024B5 + índigo #241159 de marca, oro #FBB915 en acciones.
+   Rollo Angry Birds: formas gordas, esquinas redondas, botones con squash. */
+
+:root{
+  --purple:#5024B5;
+  --purple-hi:#6d3ae0;
+  --indigo:#241159;
+  --ink:#160a38;
+  --card:#2b1666;
+  --card-2:#331b74;
+  --gold:#FBB915;
+  --gold-hi:#ffd24d;
+  --text:#f5efff;
+  --text-dim:#cdb9f2;
+  --red:#E8362F; --blue:#1E74E0; --green:#2FB84B; --yellow:#FFC525; --magenta:#E0249C; --cyan:#18C7D6;
+  --radius:26px;
+  --shadow:0 14px 40px rgba(10,4,32,.45);
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+html,body{margin:0;padding:0}
+body{
+  font-family:"Fredoka","Baloo 2",system-ui,"Segoe UI",sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(120% 80% at 50% -10%, var(--purple-hi) 0%, var(--purple) 42%, #3a1a8f 72%, var(--indigo) 100%)
+    fixed var(--indigo);
+  min-height:100%;
+  overflow-x:hidden;
+}
+
+/* el motor pinta aquí, detrás de todo; el contenido va en .page */
+#ambient{position:fixed;inset:0;z-index:0;pointer-events:none}
+.page{position:relative;z-index:1}
+
+::selection{background:var(--gold);color:var(--indigo)}
+
+/* ── NAV ─────────────────────────────────────────────── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:20;
+  display:flex;align-items:center;gap:18px;
+  padding:10px 22px;
+  background:rgba(22,10,56,.72);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+nav .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text);font-weight:600;font-size:18px}
+nav .brand img{width:34px;height:34px;border-radius:10px}
+nav .links{display:flex;gap:4px;margin-left:auto;align-items:center;flex-wrap:wrap}
+nav .links a{
+  color:var(--text-dim);text-decoration:none;font-weight:500;font-size:15px;
+  padding:8px 14px;border-radius:999px;transition:all .15s ease;
+}
+nav .links a:hover{color:#fff;background:rgba(255,255,255,.09)}
+nav .links a.cta{background:var(--gold);color:var(--indigo);font-weight:700}
+nav .links a.cta:hover{background:var(--gold-hi);transform:scale(1.06)}
+
+/* ── secciones base ──────────────────────────────────── */
+section{max-width:1120px;margin:0 auto;padding:96px 22px 0}
+.sec-head{text-align:center;margin-bottom:34px}
+.sec-head h2{font-size:clamp(30px,4.2vw,44px);font-weight:700;margin:0 0 8px;letter-spacing:.5px}
+.sec-head p{color:var(--text-dim);font-size:17px;margin:0}
+.kicker{display:inline-block;background:rgba(251,185,21,.16);color:var(--gold);border:1px solid rgba(251,185,21,.35);
+  font-size:13px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;padding:6px 14px;border-radius:999px;margin-bottom:14px}
+
+/* ── HERO ────────────────────────────────────────────── */
+.hero{
+  min-height:100svh;display:flex;flex-direction:column;justify-content:center;align-items:center;
+  text-align:center;padding-top:110px;padding-bottom:40px;position:relative;
+}
+.hero .wordmark{width:min(480px,78vw);height:auto;filter:drop-shadow(0 10px 30px rgba(0,0,0,.45))}
+.hero h1{
+  font-size:clamp(28px,4.6vw,52px);font-weight:700;margin:18px 0 6px;
+  text-shadow:0 3px 18px rgba(10,4,32,.55);
+}
+.hero h1 .g{color:var(--gold)}
+.hero .sub{max-width:640px;color:var(--text-dim);font-size:clamp(15px,2vw,19px);margin:0 0 30px;text-shadow:0 2px 12px rgba(10,4,32,.6)}
+.hero .actions{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:28px}
+.hero::after{
+  content:'';position:absolute;left:0;right:0;bottom:0;height:min(26vh,240px);z-index:-1;pointer-events:none;
+  background:url(assets/art/balltrials-web-tribuna.png) repeat-x bottom center/auto 100%;
+  opacity:.4;
+}
+
+.trailer{width:min(860px,92vw)}
+
+/* ── botones ─────────────────────────────────────────── */
+.btn{
+  display:inline-flex;align-items:center;gap:10px;
+  font-family:inherit;font-weight:700;font-size:17px;text-decoration:none;cursor:pointer;
+  padding:14px 28px;border-radius:999px;border:0;
+  transition:transform .12s cubic-bezier(.34,1.56,.64,1), background .15s, box-shadow .15s;
+}
+.btn:active{transform:scale(1.05,.92)}
+.btn-gold{background:var(--gold);color:var(--indigo);box-shadow:0 8px 24px rgba(251,185,21,.35)}
+.btn-gold:hover{background:var(--gold-hi);transform:scale(1.07,.97);box-shadow:0 10px 30px rgba(251,185,21,.5)}
+.btn-ghost{background:rgba(255,255,255,.1);color:#fff;border:2px solid rgba(255,255,255,.35)}
+.btn-ghost:hover{background:rgba(255,255,255,.18);transform:scale(1.05,.97)}
+
+/* ── tarjetas ────────────────────────────────────────── */
+.card{
+  background:linear-gradient(180deg,var(--card-2),var(--card));
+  border:1px solid rgba(255,255,255,.11);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+}
+
+/* pilares */
+.pillars{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px}
+.pillar{padding:30px 26px;text-align:center}
+.pillar .ico{font-size:44px;line-height:1;display:block;margin-bottom:14px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.35))}
+.pillar .ico-art{width:88px;height:88px;display:block;margin:0 auto 14px;filter:drop-shadow(0 6px 14px rgba(0,0,0,.4))}
+.pillar h3{margin:0 0 8px;font-size:22px;color:var(--gold)}
+.pillar p{margin:0;color:var(--text-dim);font-size:15.5px;line-height:1.5}
+
+/* ── WATCH ───────────────────────────────────────────── */
+.tabs{display:flex;gap:10px;justify-content:center;margin-bottom:26px}
+.tab{
+  font-family:inherit;font-size:16px;font-weight:700;cursor:pointer;
+  padding:11px 26px;border-radius:999px;border:2px solid rgba(255,255,255,.25);
+  background:transparent;color:var(--text-dim);transition:all .15s;
+}
+.tab:hover{color:#fff;border-color:rgba(255,255,255,.5)}
+.tab.on{background:var(--gold);border-color:var(--gold);color:var(--indigo)}
+.panel{display:none;padding:26px}
+.panel.on{display:block}
+.vid-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
+.short-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;max-width:920px;margin:0 auto}
+.vid h4{margin:10px 4px 0;font-size:15.5px;font-weight:600;color:var(--text-dim)}
+
+/* lite-embed de YouTube: miniatura + play; el iframe solo se carga al clic */
+.yt{
+  position:relative;width:100%;aspect-ratio:16/9;border-radius:18px;overflow:hidden;cursor:pointer;
+  background:#000 center/cover no-repeat;border:1px solid rgba(255,255,255,.14);
+}
+.yt.v{aspect-ratio:9/16}
+.yt iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.yt .play{
+  position:absolute;inset:0;display:grid;place-items:center;transition:background .2s;
+  background:rgba(12,5,30,.18);
+}
+.yt:hover .play{background:rgba(12,5,30,.02)}
+.yt .play span{
+  width:64px;height:46px;border-radius:14px;background:var(--gold);display:grid;place-items:center;
+  box-shadow:0 8px 22px rgba(0,0,0,.45);transition:transform .15s cubic-bezier(.34,1.56,.64,1);
+}
+.yt:hover .play span{transform:scale(1.12,1.02)}
+.yt .play svg{width:22px;height:22px;fill:var(--indigo);margin-left:2px}
+.watch-more{text-align:center;margin-top:26px}
+
+/* ── TRIALS ──────────────────────────────────────────── */
+.trials{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}
+.trial{padding:0;overflow:hidden;transition:transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s}
+.trial:hover{transform:translateY(-6px) scale(1.02);box-shadow:0 20px 46px rgba(10,4,32,.55)}
+.trial .t-media{position:relative;aspect-ratio:16/9;background:#140a26}
+.trial .t-media img,.trial .t-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.trial .t-media video{opacity:0;transition:opacity .25s}
+.trial.playing .t-media video{opacity:1}
+.trial .t-body{padding:16px 20px 20px}
+.trial .ico{font-size:19px;margin-right:6px}
+.trial .ico svg{width:18px;height:18px;vertical-align:-3px}   /* SVG canónico (docs/39 §10.2): sin sombra a 18px, sin retintar */
+.trial h3{margin:0 0 6px;font-size:19px;color:var(--gold)}
+.trial p{margin:0;color:var(--text-dim);font-size:14.5px;line-height:1.45}
+
+/* banner de playlist (lite-embed ancho) */
+.yt.list{aspect-ratio:16/5;margin-top:20px}
+.yt .list-tag{position:absolute;left:16px;bottom:14px;background:rgba(12,5,30,.78);
+  border:1px solid rgba(251,185,21,.4);color:var(--gold);padding:7px 14px;border-radius:999px;
+  font-weight:700;font-size:14px;pointer-events:none}
+
+/* ── GAME teaser ─────────────────────────────────────── */
+.game-strip{padding:44px 30px;text-align:center;border:2px dashed rgba(251,185,21,.55);position:relative;overflow:hidden}
+.game-strip::before{
+  content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:url(assets/art/balltrials-web-doodles.png) repeat;background-size:340px 340px;opacity:.07;
+}
+.game-strip>*{position:relative;z-index:1}
+.game-strip .cones{font-size:40px;letter-spacing:10px}
+.game-strip h2{font-size:clamp(26px,3.6vw,38px);margin:12px 0 6px}
+.game-strip p{color:var(--text-dim);max-width:560px;margin:0 auto 24px;font-size:16.5px}
+.progress{
+  width:min(420px,80%);height:18px;margin:0 auto 26px;border-radius:999px;overflow:hidden;
+  background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.15);
+}
+.progress i{
+  display:block;height:100%;width:34%;border-radius:999px;
+  background:repeating-linear-gradient(45deg,var(--gold) 0 12px,#d99b0a 12px 24px);
+  animation:crawl 1.2s linear infinite;
+}
+@keyframes crawl{to{background-position:34px 0}}
+
+/* ── FOLLOW ──────────────────────────────────────────── */
+.follow-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.social{
+  display:flex;align-items:center;gap:14px;padding:20px 22px;text-decoration:none;color:var(--text);
+  transition:transform .15s cubic-bezier(.34,1.56,.64,1);
+}
+a.social:hover{transform:scale(1.04,.99)}
+.social .s-ico{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;flex:none}
+.social .s-ico svg{width:24px;height:24px;fill:#fff}
+.social b{font-size:17px;display:block}
+.social small{color:var(--text-dim);font-size:13.5px}
+.social.ytc .s-ico{background:#ff0033}
+.social.ig .s-ico{background:linear-gradient(45deg,#feda75,#d62976 55%,#4f5bd5)}
+.social.tt .s-ico{background:#0f0f14}
+.social.fb .s-ico{background:#1877f2}
+.social.soon{opacity:.55;pointer-events:none}
+.social .soon-badge{margin-left:auto;font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--gold);
+  border:1px solid rgba(251,185,21,.45);padding:4px 9px;border-radius:999px;text-transform:uppercase;flex:none}
+
+/* ── CONTACT ─────────────────────────────────────────── */
+.contact-card{max-width:640px;margin:0 auto;padding:44px 34px;text-align:center}
+.contact-card p{color:var(--text-dim);font-size:16.5px;margin:0 0 26px}
+
+/* ── FOOTER ──────────────────────────────────────────── */
+footer{
+  margin-top:110px;padding:34px 22px 44px;text-align:center;
+  background:rgba(12,5,30,.55);border-top:1px solid rgba(255,255,255,.08);
+  color:var(--text-dim);font-size:14px;position:relative;z-index:1;
+}
+footer .foot-links{margin-bottom:10px}
+footer .foot-links a{color:var(--text-dim);text-decoration:none;margin:0 10px}
+footer .foot-links a:hover{color:#fff}
+
+/* ── botón de sonido ─────────────────────────────────── */
+#snd{
+  position:fixed;right:18px;bottom:18px;z-index:30;
+  width:54px;height:54px;border-radius:50%;cursor:pointer;font-size:22px;line-height:1;
+  background:rgba(22,10,56,.85);border:2px solid rgba(255,255,255,.25);color:#fff;
+  box-shadow:0 8px 24px rgba(10,4,32,.5);backdrop-filter:blur(8px);
+  transition:transform .12s cubic-bezier(.34,1.56,.64,1), background .15s, border-color .15s;
+}
+#snd:hover{transform:scale(1.1,.96)}
+#snd.on{background:var(--gold);border-color:var(--gold-hi)}
+
+/* ── accesibilidad: foco visible ─────────────────────── */
+a:focus-visible,button:focus-visible,.yt:focus-visible{
+  outline:3px solid var(--gold);outline-offset:3px;border-radius:12px;
+}
+
+/* ── reveal on scroll ────────────────────────────────── */
+.rv{opacity:0;transform:translateY(26px);transition:opacity .55s ease,transform .55s cubic-bezier(.22,1.2,.36,1)}
+.rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){
+  .rv{opacity:1;transform:none;transition:none}
+  html{scroll-behavior:auto}
+  .progress i{animation:none}
+}
+
+@media (max-width:760px){
+  nav .links a:not(.cta){display:none}
+  section{padding-top:72px}
+  .hero{padding-top:90px}
+}
