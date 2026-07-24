@@ -15,15 +15,28 @@
 <style>
   /*+AG doc 34 Fase E: Fredoka (biblia de marca docs/27 §3: redonda, gorda, amable). Fallback al stack previo si no carga. */
   @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap');
-  :root{ --ink:#eef2ff; --muted:#96a0c2; }
+  :root{ --ink:#eef2ff; --muted:#96a0c2;
+    /*+AG ALTO REAL DEL VIEWPORT en 3 escalones, de peor a mejor. Antes era 'height:100dvh' a secas: en un
+       navegador SIN dvh (WebView in-app de WhatsApp/Instagram, Safari < 15.4) esa declaracion se descarta
+       ENTERA, el alto pasaba a ser el del contenido y, con overflow:hidden, la barra de abajo se quedaba
+       FUERA de la pantalla. 1) 100vh siempre vale; 2) 100dvh si existe; 3) los px exactos de
+       visualViewport que fija fitViewport() (el unico que acierta en los navegadores in-app y cuando
+       iOS deja la barra de abajo encima del contenido).
+       Se combinan con min(), no sustituyendose: el JS solo puede ENCOGER, nunca agrandar. Asi, si un
+       valor en px se queda obsoleto (evento resize que no llega), lo peor que pasa es que sobre un
+       margen negro; jamas que la barra de abajo se salga de la pantalla, que es el fallo a evitar. */
+    --vh:100vh; --vhjs:100vh; }
+  @supports (height:100dvh){ :root{ --vh:100dvh; } }
   *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html,body{ margin:0; height:100%; background:#000; color:var(--ink);
     font-family:'Fredoka','Segoe UI Rounded','Nunito',system-ui,-apple-system,Arial,sans-serif; overflow:hidden; user-select:none; }
   /*+AG doc 34 Fase B: COLUMNA PORTRAIT. En movil llena la pantalla; en escritorio se centra como un telefono
      (max-width de columna, alto por dvh). Todas las pantallas son absolutas DENTRO de #app (antes fixed). */
   body{ display:grid; place-items:center; background:radial-gradient(120% 80% at 50% 0%, #14122e, #050509 70%); }
-  #app{ position:relative; width:100%; max-width:460px; height:100dvh; overflow:hidden; background:#06070f; }
-  @media(min-width:520px){ #app{ height:min(100dvh,940px); border-radius:30px; box-shadow:0 30px 90px #000d, 0 0 0 1px #ffffff14, inset 0 0 0 1px #ffffff08; } }
+  /* el 'height:100vh' suelto es la red de seguridad para navegadores sin min()/var(): si la linea de
+     abajo no la entienden, se quedan con esta y la app sigue midiendo una pantalla, no el contenido. */
+  #app{ position:relative; width:100%; max-width:460px; height:100vh; height:min(var(--vh),var(--vhjs)); overflow:hidden; background:#06070f; }
+  @media(min-width:520px){ #app{ height:min(var(--vh),var(--vhjs),940px); border-radius:30px; box-shadow:0 30px 90px #000d, 0 0 0 1px #ffffff14, inset 0 0 0 1px #ffffff08; } }
   #wrap{ position:absolute; inset:0; display:flex; flex-direction:column; }
   #stage{ position:relative; flex:1; min-height:0; }
   canvas{ display:block; width:100%; height:100%; touch-action:none; }
@@ -441,6 +454,14 @@
   /*+AG COPAS POR BOLA (doc 37): tarjeta de copas de la bola + tabla de 8 puestos en Resultados */
   #results{ overflow-y:auto; justify-content:flex-start; padding-top:calc(20px + env(safe-area-inset-top)); }
   #results .r-card{ margin-top:auto; }
+  /*+AG feedback Jaime 2026-07-24 ("se pierde parte de abajo"): en una pantalla corta el resumen es mas alto
+     que el movil y los botones quedaban BAJO EL PLIEGUE; solo se llegaba haciendo scroll a ciegas. Ahora la
+     fila de acciones va PEGADA abajo (sticky), siempre visible, y lo que se desplaza es el resumen. Sticky y
+     no fixed: en pantallas altas se queda en su sitio, sin flotar. El degradado tapa lo que pasa por detras. */
+  #results{ padding-bottom:0; }
+  #results .r-actions{ position:sticky; bottom:0; z-index:2; margin-top:14px;
+    padding:12px 0 calc(16px + env(safe-area-inset-bottom));
+    background:linear-gradient(#08071a00, #08071ae6 32%, #08071a 62%); }
   .r-cups{ width:100%; max-width:430px; display:flex; align-items:center; gap:12px; background:#fbb9150f; border:1px solid #fbb91544; border-radius:16px; padding:12px 15px; margin-top:12px;
     opacity:0; transform:translateY(8px); transition:opacity .32s, transform .32s; box-shadow:0 0 18px #fbb91518; }
   .r-cups.in{ opacity:1; transform:none; }
@@ -1018,6 +1039,23 @@
 
 <script>
 'use strict';
+//+AG AJUSTE AL VIEWPORT VISIBLE (feedback Jaime 2026-07-24: "se pierde parte de abajo").
+//  Fija --vh a los PIXELES exactos del area visible. visualViewport es el unico que acierta cuando el
+//  navegador tiene barras que se ocultan/aparecen y en los WebView in-app (WhatsApp, Instagram), donde
+//  100dvh puede no existir. Va lo PRIMERO del script: si algo peta despues, el alto ya esta bien.
+//  Decidido NO forzar pantalla completa (iOS Safari no tiene la API; ahi seria un juego roto de serie):
+//  la app se ajusta sola y quien pueda tiene el boton opcional de Ajustes (toggleFullscreen).
+function fitViewport(){
+  const ae=document.activeElement;
+  if(ae && (ae.tagName==='INPUT'||ae.tagName==='TEXTAREA')) return;   // teclado abierto: no encoger la app
+  const vv=window.visualViewport, h=Math.round(vv ? vv.height : window.innerHeight);
+  if(h>0) document.documentElement.style.setProperty('--vhjs', h+'px');   // solo encoge: el CSS hace min() con --vh
+}
+fitViewport();
+addEventListener('resize', fitViewport);
+addEventListener('pageshow', fitViewport);
+addEventListener('orientationchange', ()=>setTimeout(fitViewport,120));   // iOS reporta el alto viejo si se lee al vuelo
+if(window.visualViewport){ visualViewport.addEventListener('resize', fitViewport); visualViewport.addEventListener('scroll', fitViewport); }
 // ============================================================================
 //  MOTOR, port FIEL de prototipo-webgl/race/sim.js (canal). Física idéntica.
 //  Añadidos de prototipo marcados con //+AG (capa de agencia docs/21).
@@ -1942,6 +1980,7 @@ const MORE={
     // — Ajustes —
     setGfx:'🎮 Gráficos y rendimiento', setQuality:'Calidad', setQualitySub:'auto detecta tu equipo',
     setQualityOpts:['Auto','Baja','Media','Alta'], setRedFx:'Efectos reducidos', setRedFxSub:'menos partículas y sacudidas',
+    setFs:'Pantalla completa', setFsSub:'oculta las barras del navegador', setFsFail:'Tu navegador no ha permitido la pantalla completa',
     setAudio:'🔊 Audio', setSound:'Sonido', setSoundSub:'música y efectos',
     setA11y:'♿ Accesibilidad', setCb:'Modo daltónico', setCbSub:'sobre la codificación por forma+número',
     setCbOpts:['No','Prot','Deut','Trit'],
@@ -2072,6 +2111,7 @@ const MORE={
     // — Settings —
     setGfx:'🎮 Graphics and performance', setQuality:'Quality', setQualitySub:'auto detects your device',
     setQualityOpts:['Auto','Low','Medium','High'], setRedFx:'Reduced effects', setRedFxSub:'fewer particles and shakes',
+    setFs:'Fullscreen', setFsSub:'hides the browser bars', setFsFail:'Your browser would not allow fullscreen',
     setAudio:'🔊 Audio', setSound:'Sound', setSoundSub:'music and effects',
     setA11y:'♿ Accessibility', setCb:'Colourblind mode', setCbSub:'on top of the shape+number coding',
     setCbOpts:['Off','Prot','Deut','Trit'],
@@ -2822,6 +2862,21 @@ function startOnboarding(){ applyShell(); onbRec=onbSel='cohete'; el('onbQuiz').
 
 // ===== SETTINGS (doc 26): 7 grupos; persiste audio, calidad, efectos reducidos, daltonico, idioma =====
 function openSettings(){ applyShell(); buildSettings(); el('settings').classList.add('on'); }
+//+AG PANTALLA COMPLETA opcional (nunca forzada). iOS Safari NO tiene la API de fullscreen, asi que un
+//  auto-fullscreen dejaria el juego roto en medio parque movil; y donde SI existe hace falta un gesto del
+//  usuario. Por eso: boton en Ajustes, y la fila ni aparece donde el navegador no lo soporta.
+const FS_OK=!!(document.documentElement.requestFullscreen||document.documentElement.webkitRequestFullscreen);
+const fsOn=()=>!!(document.fullscreenElement||document.webkitFullscreenElement);
+function toggleFullscreen(){
+  try{
+    if(fsOn()){ const x=document.exitFullscreen||document.webkitExitFullscreen; x&&x.call(document); }
+    else { const e=document.documentElement, r=e.requestFullscreen||e.webkitRequestFullscreen;
+      const p=r&&r.call(e); if(p&&p.catch) p.catch(()=>toast(S().setFsFail)); }
+  }catch(err){ toast(S().setFsFail); }
+}
+//+AG al entrar/salir de pantalla completa cambia el alto visible: re-ajustar y refrescar el interruptor
+addEventListener('fullscreenchange', ()=>{ fitViewport(); if(el('settings').classList.contains('on')) buildSettings(); });
+addEventListener('webkitfullscreenchange', ()=>{ fitViewport(); if(el('settings').classList.contains('on')) buildSettings(); });
 function setPersist(){ persist(); }
 function segRow(label, sub, opts, cur, onpick){ const r=document.createElement('div'); r.className='set-row';
   r.innerHTML=`<div class="lb">${label}${sub?`<small>${sub}</small>`:''}</div>`;
@@ -2866,7 +2921,10 @@ function buildSettings(){ const S2=SAVE.settings, b=el('setBody'); b.innerHTML='
   //+AG GRAFICOS: calidad + efectos reducidos → se propagan al motor (&gfx=&redfx=), que baja el pixelRatio.
   b.appendChild(grp(s.setGfx, [
     segRow(s.setQuality, s.setQualitySub, [['auto',s.setQualityOpts[0]],['low',s.setQualityOpts[1]],['med',s.setQualityOpts[2]],['high',s.setQualityOpts[3]]], S2.quality, v=>{ S2.quality=v; setPersist(); }),
-    swRow(s.setRedFx, s.setRedFxSub, S2.reducedFx, v=>{ S2.reducedFx=v; setPersist(); }) ]));
+    swRow(s.setRedFx, s.setRedFxSub, S2.reducedFx, v=>{ S2.reducedFx=v; setPersist(); }),
+    //+AG pantalla completa: solo donde el navegador la soporta (en iOS no existe: fila oculta, cero botones muertos).
+    //   No se persiste a proposito: el navegador exige un gesto en cada visita, prometer que se recuerda seria mentir.
+    ...(FS_OK ? [swRow(s.setFs, s.setFsSub, fsOn(), ()=>toggleFullscreen())] : []) ]));
   //+AG ACCESIBILIDAD: daltonico. Persiste; el remap de paleta en el motor es trabajo futuro (declarado en el informe).
   //   La codificacion por forma+numero (sub) ya es siempre-activa en pista, asi que el modo no queda "roto".
   b.appendChild(grp(s.setA11y, [
