@@ -11,7 +11,6 @@ const COLS = {
   invert: [240, 70, 200],   // Cazador: "Caza Marcada" = redirige el objetivo a un rival (magenta, distinto de dash/swap)
   bumper: [150, 162, 198],   // acero (no es color de equipo ni naranja): OBSTÁCULO que rebota
   gem: [38, 220, 245], mega: [60, 232, 255],   // Recolecta: botín = diamante talla brillante cian
-  stun: [255, 230, 40],   // La Bomba: RAYO PARALIZANTE = rayo dentro de anillo (amarillo eléctrico ≠ dash cian)
 };
 const rgb = c => `rgb(${c[0]},${c[1]},${c[2]})`;
 const dark = (c, k = 0.5) => `rgb(${c[0] * k | 0},${c[1] * k | 0},${c[2] * k | 0})`;
@@ -63,9 +62,6 @@ const DRAW = {
     polyf(x, pts, rgb(c)); pline(x, pts, 'rgb(255,246,207)', 10); },
   boost(x, c, glow){ const box = [110, 96, 402, 416]; if (glow){ rr(x, box, 54, rgb(c)); return; }  // rampa: 3 chevrones ABAJO = acelera a meta
     rr(x, box, 54, dark(c), rgb(c), BW); for (const y of [150, 236, 322]) line(x, [[168, y], [256, y + 66], [344, y]], WHITE, 34); },
-  stun(x, c, glow){ if (!orbBase(x, c, glow)) return;   // RAYO dentro de ANILLO = paraliza (amarillo eléctrico)
-    ell(x, [156, 156, 356, 356], null, WHITE, 14);       // anillo de contención
-    polyf(x, [[288, 138], [190, 272], [252, 272], [214, 374], [330, 236], [268, 236]], WHITE); },   // rayo grueso centrado
   bumper(x, c, glow){ if (!orbBase(x, c, glow)) return;   // ondas de choque concéntricas = REBOTA (obstáculo de pinball)
     ell(x, [232, 232, 280, 280], WHITE);                  // centro
     for (const box of [[196, 196, 316, 316], [160, 160, 352, 352]]){ x.beginPath();

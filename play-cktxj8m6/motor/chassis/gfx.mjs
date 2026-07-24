@@ -275,8 +275,8 @@ function starTexture(fill){
   draw(30, 'rgba(14,11,20,0.92)'); draw(24, fill); draw(11, '#ffffff');
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
 }
-export function createStarBurst(scene, fills = ['#ffd84d', '#fff3c0']){
-  const texs = fills.map(starTexture);
+export function createStarBurst(scene){
+  const texs = [starTexture('#ffd84d'), starTexture('#fff3c0')];
   const pool = [], active = [];
   function burst(x, y, power, R = 1, nx = 0, ny = 0){
     const p = Math.max(0, Math.min(1, power));

@@ -28,39 +28,17 @@ export function createSynth({ SR, N, buf, rng }){
       let s;
       if (wave === 'tri') s = 4 * Math.abs(frac - 0.5) - 1;
       else if (wave === 'sine') s = Math.sin(2 * Math.PI * frac);
-      else if (wave === 'saw') s = 2 * frac - 1;
       else s = 0.7 * (frac < duty ? 1 : -1) + 0.3 * Math.sin(2 * Math.PI * frac);
       buf[idx] += s * (tt < 0.04 ? tt / 0.04 : Math.exp(-tt * decay)) * amp; }
   }
-  // FANFARRIA DE VICTORIA (v2, 2026-07-19). La v1 era un jingle chiptune de ~1,8 s con los MISMOS timbres
-  // (pulse/tri) que el resto de SFX del modo: se perdía en la mezcla y dejaba ~1,5 s de silencio sobre la
-  // celebración (feedback del dueño: "no hay fanfarria de victoria con la ganadora"). Ahora:
-  //   · TEXTURA PROPIA: metales = pila de sierras DESAFINADAS (nada más en el banco usa 'saw' apilado) → destaca
-  //     aunque suene encima del SFX de juego (regla: un sonido que debe destacar no comparte timbre, memoria).
-  //   · DURA ~2,9 s = cubre entero el WIN_HOLD de 90 f (3 s) → nunca queda la coronación en silencio.
-  //   · Forma: golpe (sub + platillo) → 2 estocadas de metales → ACORDE sostenido + campanillas ascendentes.
-  // Pico moderado a propósito: writeWavStereo normaliza a 0.9, y un pico alto aquí bajaría TODO lo demás.
+  // FANFARRIA DE VICTORIA "2ª prueba": arpegio staccato ascendente + ACORDE mayor resonante + chispa (satisfactoria)
   function jingleWin(vt, { minor = false } = {}){
-    // pila de sierras desafinadas (±0.4%) = "metales"; 3 voces por nota
-    const brass = (t, dur, f, amp, decay) => {
-      for (const d of [0.996, 1, 1.004]) note(t, dur, f * d, amp / 3, { wave: 'saw', decay });
-    };
-    // 1) GOLPE: sub grave que cae + platillo (ruido que se apaga) → marca el instante exacto de la coronación
-    add(vt, 0.55, 110, 45, 0.30, 0, 6);            // sub boom
-    add(vt, 0.70, 6000, 2500, 0.10, 1, 5);         // crash de ruido
-    // 2) DOS ESTOCADAS de metales (tónica → dominante): el "ta-DAA"
-    const root = minor ? [262, 311, 392] : [262, 330, 392];
-    const dom  = minor ? [294, 349, 440] : [294, 370, 440];
-    root.forEach(f => { brass(vt + 0.05, 0.40, f, 0.13, 5); brass(vt + 0.05, 0.40, f * 2, 0.09, 5); });
-    dom .forEach(f => { brass(vt + 0.52, 0.38, f, 0.13, 5); brass(vt + 0.52, 0.38, f * 2, 0.09, 5); });
-    // 3) ACORDE SOSTENIDO (~1,9 s, decay lento) → la celebración entera va con música debajo
-    const ct = vt + 0.95, hold = 1.95;
-    const chord = minor ? [131, 262, 311, 392, 523] : [131, 262, 330, 392, 523];
-    chord.forEach((f, i) => brass(ct, hold, f, i === 0 ? 0.11 : 0.09, 1.1));
-    note(ct, hold, 1047, 0.05, { wave: 'sine', decay: 0.9, vib: 0.004 });     // brillo
-    // 4) CAMPANILLAS ascendentes sobre el acorde (el "confeti" sonoro)
-    const spark = minor ? [784, 932, 1047, 1245, 1568] : [784, 988, 1175, 1319, 1568];
-    spark.forEach((f, i) => note(ct + 0.12 + i * 0.16, 0.30, f, 0.075, { wave: 'sine', decay: 6 }));
+    const arp = minor ? [523, 622, 784, 1047, 1245] : [523, 659, 784, 1047, 1319];
+    arp.forEach((f, i) => note(vt + i * 0.12, 0.11, f, 0.22, { wave: 'pulse', duty: 0.5, decay: 7 }));
+    const ct = vt + 5 * 0.12 + 0.05;
+    const chord = minor ? [220, 1047, 1245, 1568] : [262, 1047, 1319, 1568];
+    chord.forEach((f, i) => note(ct, 1.15, f, i === 0 ? 0.14 : 0.17, { wave: 'tri', decay: 1.7 }));
+    note(ct, 1.15, 2093, 0.07, { wave: 'sine', decay: 1.5, vib: 0.004 });
   }
   return { add, note, jingleWin };
 }

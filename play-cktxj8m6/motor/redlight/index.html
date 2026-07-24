@@ -1,0 +1,1381 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<!--+AG el HTML se sirve en INGLES (defecto del juego); ?lang=es lo traduce por JS (applyLang) -->
+<title>YouBall · Red Light Rush (WebGL) · The Marble Games</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#140a1e;font-family:system-ui,Segoe UI,sans-serif;color:#fff}
+  /* v7: crepúsculo caramelo (apenas visible tras el suelo, pero coherente). ?art=old lo revierte por JS. */
+  #bg{position:fixed;inset:0;z-index:-1;background:radial-gradient(120% 95% at 50% 30%,#4a1f5e 0%,#2a1440 55%,#160c22 100%)}
+  canvas{display:block;position:fixed;top:0;left:0;z-index:0}
+  /* anillo de HUD que tiñe el borde de verde/rojo/ámbar según el semáforo (sin tapar la acción) */
+  #ring{position:fixed;inset:0;z-index:2;pointer-events:none;box-shadow:inset 0 0 90px 14px rgba(0,0,0,0);transition:box-shadow .12s}
+  #ring.green{box-shadow:inset 0 0 90px 16px rgba(40,220,90,.34)}
+  #ring.red{box-shadow:inset 0 0 175px 40px rgba(255,30,24,.72)}
+  #ring.amber{box-shadow:inset 0 0 110px 20px rgba(255,180,20,.5)}
+  /* destello de EJECUCIÓN (solo preview; el vídeo lleva el fogonazo WebGL): flash rojo a pantalla completa */
+  #exflash{position:fixed;inset:0;z-index:3;pointer-events:none;background:radial-gradient(120% 100% at 50% 50%,rgba(255,40,30,.55),rgba(255,20,20,.28));opacity:0;transition:opacity .5s ease-out}
+  #exflash.hit{opacity:1;transition:opacity 0s}
+  /* farol/semáforo: siempre visible arriba-centro (referencia constante del estado, docs/44 §5) */
+  /* bajado bajo la franja de supervivencia (canvas, arriba) para no solaparla en el preview */
+  #farol{position:fixed;top:186px;left:50%;transform:translateX(-50%);z-index:6;display:flex;gap:10px;
+    background:rgba(12,8,20,.62);padding:10px 14px;border-radius:18px;box-shadow:0 3px 14px rgba(0,0,0,.6),0 0 0 2px rgba(255,255,255,.10);pointer-events:none}
+  #farol .lamp{width:32px;height:32px;border-radius:50%;background:#241f30;box-shadow:inset 0 0 7px rgba(0,0,0,.7);transition:background .08s,box-shadow .08s}
+  #farol .lamp.on-green{background:#25e070;box-shadow:0 0 16px 4px rgba(40,225,110,.8),inset 0 0 6px rgba(255,255,255,.4)}
+  #farol .lamp.on-amber{background:#ffbe18;box-shadow:0 0 16px 4px rgba(255,190,30,.85),inset 0 0 6px rgba(255,255,255,.5)}
+  #farol .lamp.on-red{background:#ff2d2d;box-shadow:0 0 18px 5px rgba(255,50,50,.9),inset 0 0 6px rgba(255,255,255,.35)}
+  /* HUD equipos arriba: BARRA de color = equipo · a su lado 3 casillas (bolas en meta, 0→3) */
+  #top{position:fixed;left:0;right:0;top:10px;display:flex;justify-content:center;gap:14px;pointer-events:none;user-select:none;z-index:5}
+  .tc{display:flex;align-items:center;gap:9px;background:rgba(0,0,0,.40);padding:6px 11px;border-radius:12px;transition:box-shadow .18s,background .18s}
+  .tc.lead{background:rgba(255,255,255,.10);box-shadow:0 0 0 2px rgba(255,255,255,.22),0 0 16px rgba(255,214,110,.30)}
+  .tc .disc{width:7px;height:22px;border-radius:4px}   /* BARRA vertical = identidad de equipo (no se confunde con un pip) */
+  .tc .pips{display:flex;gap:5px;padding-left:3px;border-left:1px solid rgba(255,255,255,.18)}   /* separador claro de la barra */
+  .tc .pip{width:13px;height:13px;border-radius:50%;box-sizing:border-box;border:2px solid rgba(255,255,255,.30);background:transparent}
+  /* minimapa VERTICAL a la derecha: meta arriba, spawn abajo, 12 dots por su Y */
+  #mini{position:fixed;right:16px;top:14%;bottom:14%;width:10px;border-radius:6px;z-index:5;
+    background:linear-gradient(0deg,rgba(255,255,255,.05),rgba(255,255,255,.13))}
+  #mini .fin{position:absolute;left:-4px;right:-4px;top:-3px;height:7px;border-radius:2px;
+    background:repeating-linear-gradient(90deg,#f4f4f4 0 5px,#0c0c0c 5px 10px)}
+  #mini .md{position:absolute;left:50%;width:13px;height:13px;border-radius:50%;transform:translate(-50%,50%);box-shadow:inset 0 -2px rgba(0,0,0,.3)}
+  #mini .md.fin{box-shadow:0 0 0 2px #ffd34d,0 0 8px rgba(255,211,77,.7)}
+  #mini .md.dead{opacity:.16;filter:grayscale(1)}
+  .keys{position:fixed;left:14px;bottom:34px;font-size:12px;color:#7d7596;z-index:5}
+  #snd{position:fixed;right:14px;bottom:30px;z-index:6;width:46px;height:46px;border-radius:50%;border:0;
+    background:rgba(0,0,0,.42);color:#fff;font-size:22px;line-height:46px;cursor:pointer;
+    box-shadow:0 0 0 2px rgba(255,255,255,.14);transition:transform .12s,box-shadow .18s,background .18s}
+  #snd:hover{transform:scale(1.08)}
+  #snd.on{background:rgba(120,80,255,.5);box-shadow:0 0 0 2px rgba(155,92,255,.6),0 0 16px rgba(120,80,255,.55)}
+  #snd.load{opacity:.55}
+  #snd:not(.on):not(.load){animation:sndpulse 2.2s ease-in-out infinite}
+  @keyframes sndpulse{0%,100%{box-shadow:0 0 0 2px rgba(255,255,255,.14)}50%{box-shadow:0 0 0 2px rgba(255,255,255,.30),0 0 14px rgba(255,255,255,.18)}}
+  #err{position:fixed;inset:0;display:none;place-items:center;padding:24px;color:#ffb4b4;text-align:center;z-index:9}
+  #fps{position:fixed;left:10px;top:10px;z-index:8;font:12px/1.3 monospace;color:#8fe;background:rgba(0,0,0,.45);padding:3px 7px;border-radius:6px;pointer-events:none}
+  /* HUD del SHORT individual: fila de pips (1 por color) arriba = quién sigue en carrera. DOM → sale en la captura
+     (page.screenshot). Solo visible con ?short=1. */
+  /* SHORT: fila de pips que se GRABA (page.screenshot a 1080×1920) → es el HUD del vídeo. Dimensionado por vw
+     (= lado MENOR en 9:16) con clamp: legible a 1080, sin inflarse en preview pequeño ni apaisado. Coherente con el censo. */
+  #pips{position:fixed;left:0;right:0;top:clamp(12px,1.4vw,20px);display:none;justify-content:center;gap:clamp(10px,1.7vw,20px);z-index:6;pointer-events:none}
+  #pips .pip{width:clamp(15px,3.2vw,38px);height:clamp(15px,3.2vw,38px);border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.6),inset 0 0 0 2px rgba(255,255,255,.35);transition:opacity .2s,filter .2s}
+  /* CTA like/suscríbete: solo al coronar al ganador (icónico, sin texto). Animado por JS por frame (determinista en captura). */
+  #cta{position:fixed;bottom:7.5%;left:50%;display:flex;align-items:center;gap:.34em;z-index:7;opacity:0;pointer-events:none;transform-origin:center bottom;font-size:4.3vh}
+  #cta .ic{display:flex;align-items:center;gap:.24em;background:rgba(8,6,16,.62);padding:.14em .5em;border-radius:.5em;box-shadow:0 4px 16px rgba(0,0,0,.5)}
+  #cta .thumb{display:inline-block;transform-origin:center}
+  #cta .bell{display:inline-block;transform-origin:50% 16%}
+  #cta .sp{font-size:.56em;filter:drop-shadow(0 0 8px rgba(255,215,90,.95))}
+  /*+AG CONTROLES del jugador (port del Cazador): fila de CARRILES (intención, arriba) + fila de acciones con
+     CORRER dominante (mantener), FRENAZO y los 3 boosters (Nitro/Fantasma/Súper) con recarga .cd. Touch-first. */
+  #controls{position:fixed;left:50%;bottom:calc(12px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:6;display:flex;flex-direction:column;gap:7px;
+    width:min(560px,94vw);font-family:'Segoe UI Rounded','Nunito',system-ui,sans-serif;user-select:none;touch-action:none}
+  #controls .row{display:flex;gap:8px}
+  #controls button{border:0;border-radius:16px;font-family:inherit;font-weight:900;color:#fff;cursor:pointer;
+    box-shadow:0 4px 0 #0009, inset 0 1px 0 #ffffff20;transition:transform .05s,filter .1s,box-shadow .1s;line-height:1.05;backdrop-filter:blur(3px)}
+  #controls button:active{transform:translateY(2px);box-shadow:0 2px 0 #0009}
+  #controls button .k{display:block;font-size:9px;opacity:.55;font-weight:800;margin-top:3px;letter-spacing:.08em}
+  #controls button .cd{display:block;font-size:11px;opacity:.8;font-weight:800}
+  /*+AG carriles (intención, estilo intenciones del Cazador): el activo lleva .on */
+  #laneRow button{flex:1;padding:9px 4px;font-size:clamp(11px,2.9vw,14px);background:rgba(30,24,42,.82)}
+  #laneRow button.on{background:linear-gradient(#9b8cff,#6f5be6);box-shadow:0 3px 0 #4133a0, inset 0 1px 0 #fff5}
+  #bRun{flex:2.6;padding:18px 6px;font-size:clamp(16px,4.4vw,23px);background:linear-gradient(#3ad07a,#1f9a56);box-shadow:0 4px 0 #14663a, inset 0 1px 0 #ffffff30}
+  #bRun.hold{background:linear-gradient(#5aec97,#2bb869);box-shadow:0 2px 0 #14663a,0 0 22px #3ad07acc, inset 0 1px 0 #ffffff40;transform:translateY(2px)}
+  #bRun.red{background:linear-gradient(#ff6b5a,#e23a2a);box-shadow:0 4px 0 #8a2016, inset 0 1px 0 #ffffff30}
+  #bRun.red.hold{background:linear-gradient(#ff8a78,#ff4a34);box-shadow:0 2px 0 #8a2016,0 0 26px #ff4a34ee, inset 0 1px 0 #ffffff40}
+  #bBrake,#bNitro,#bGhost,#bSup{flex:1;padding:12px 3px;font-size:clamp(10px,2.7vw,14px);background:rgba(30,24,42,.82)}
+  #bBrake.ready{background:linear-gradient(#8ea6ff,#5b6fe6);box-shadow:0 4px 0 #33409e, inset 0 1px 0 #ffffff30}
+  /*+AG boosters: cargado = color propio (nitro CIAN=velocidad · fantasma pálido translúcido · súper ORO=acción,
+     convención del juego); activo (.act) = encendido con glow. El súper cargado pulsa como el del Cazador. */
+  #bNitro.ready{background:linear-gradient(#59e0ff,#1f9ec8);box-shadow:0 4px 0 #0f5e7c, inset 0 1px 0 #ffffff30}
+  #bNitro.act{background:linear-gradient(#a8f2ff,#3fc2ea);color:#032230;box-shadow:0 2px 0 #0f5e7c,0 0 20px #59e0ffcc, inset 0 1px 0 #ffffff50}
+  #bGhost.ready{background:linear-gradient(#cfc6ea,#8f82c2);box-shadow:0 4px 0 #4d4275, inset 0 1px 0 #ffffff30}
+  #bGhost.act{background:linear-gradient(#efeaff88,#b9ace688);color:#f4f0ff;box-shadow:0 2px 0 #4d4275,0 0 18px #cfc6ea99, inset 0 1px 0 #ffffff50}
+  #bSup.ready{background:linear-gradient(#ffe27a,#ff9a3d);color:#3a2400;box-shadow:0 3px 0 #a85a12,0 0 18px #ffb03daa;animation:supPulse 1.1s ease-in-out infinite}
+  #bSup.act{background:linear-gradient(#fff3b8,#ffc44d);color:#3a2400;box-shadow:0 2px 0 #a85a12,0 0 26px #ffd34dee, inset 0 1px 0 #ffffff60}
+  @keyframes supPulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.25)}}
+  #controls button:disabled{opacity:.4;cursor:default}
+  #controls button.act:disabled{opacity:1}
+  #youlbl{position:fixed;z-index:5;transform:translate(-50%,-100%);font-weight:900;font-size:13px;color:#fff;
+    text-shadow:0 2px 6px #000,0 0 10px #0008;letter-spacing:.06em;pointer-events:none;opacity:0}
+  /*+AG estado ESPECTADOR: al morir se ocultan los controles y sale este cartel */
+  #controls.dead{opacity:0;pointer-events:none;transition:opacity .25s}
+  #spectator{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:7;display:none;
+    flex-direction:column;align-items:center;gap:5px;background:rgba(14,9,22,.86);border:1px solid rgba(255,120,90,.42);
+    border-radius:15px;padding:14px 30px;text-align:center;backdrop-filter:blur(4px);
+    font-family:'Segoe UI Rounded','Nunito',system-ui,sans-serif;box-shadow:0 10px 34px rgba(0,0,0,.55);animation:specIn .28s ease-out}
+  #spectator.show{display:flex}
+  @keyframes specIn{from{opacity:0;transform:translateX(-50%) translateY(10px) scale(.96)}to{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}
+  #spectator .big{font-size:clamp(22px,5vw,34px);font-weight:900;letter-spacing:.02em;text-shadow:0 2px 10px #000a}
+  #spectator .sub{font-size:14px;color:#d6c8dc;font-weight:600}
+  #spectator .rkey{font-size:12px;color:#9a8ca0;margin-top:3px;font-weight:700}
+  #spectator .rkey kbd{background:#ffffff1c;border-radius:5px;padding:1px 6px;font-family:inherit}
+  /*+AG boton SALIR del cartel de espectador (oro = accion, como JUGAR del shell). Solo visible en embed. */
+  #specExit{display:none;margin-top:9px;border:0;border-radius:13px;padding:12px 26px;cursor:pointer;
+    font-family:inherit;font-weight:900;font-size:15px;letter-spacing:.02em;color:#3a2400;
+    background:linear-gradient(#ffe27a,#ffab35);box-shadow:0 4px 0 #a85a12, inset 0 1px 0 #fff6;
+    transition:transform .06s,filter .12s}
+  #specExit:active{transform:translateY(2px);box-shadow:0 2px 0 #a85a12}
+  #spectator.embed #specExit{display:block}
+  #spectator.embed .rkey{display:none}
+  /*+AG cuenta atras 3-2-1-YA + "este eres tu" (la sim esta en pausa mientras) */
+  #count{position:fixed;inset:0;z-index:8;display:none;flex-direction:column;align-items:center;justify-content:center;gap:8px;pointer-events:none;
+    font-family:'Segoe UI Rounded','Nunito',system-ui,sans-serif}
+  #count.show{display:flex}
+  #count .n{font-size:clamp(64px,22vh,190px);font-weight:900;color:#fff;line-height:1;
+    text-shadow:0 6px 34px #000,0 0 46px rgba(120,220,140,.5);transition:color .1s}
+  #count .you{font-size:clamp(16px,3.6vw,28px);font-weight:800;color:#ffd23f;letter-spacing:.04em;text-shadow:0 2px 12px #000}
+</style>
+</head>
+<body>
+<script>
+/*+AG ?drive=1 (verificacion DOM/JS, docs/34): cuando el pane/iframe NO compone frames, el rAF nativo nunca
+   dispara y el juego no avanza. Este script CLASICO (corre ANTES que el modulo) encola los callbacks de rAF
+   y falsea performance.now; window.__driveFrames(n) bombea n frames sinteticos a 60fps desde consola/tests.
+   Sin ?drive=1 es un no-op total. NO toca la Sim ni el determinismo (solo el reloj del render). */
+if(new URLSearchParams(location.search).get('drive')==='1'){
+  window.__rafQ=[]; window.__drvT=1000;
+  window.requestAnimationFrame=function(cb){ window.__rafQ.push(cb); return window.__rafQ.length; };
+  window.cancelAnimationFrame=function(){};
+  performance.now=function(){ return window.__drvT; };
+  window.__driveFrames=function(n){ for(var i=0;i<n;i++){ window.__drvT+=1000/60; var q=window.__rafQ.splice(0); for(var k=0;k<q.length;k++){ q[k](window.__drvT); } } return window.__drvT; };
+}
+</script>
+
+<!-- Volver al shell de selección de modo. En embed lo oculta el JS (lo gestiona el shell). -->
+<a id="backMenu" href="../../index.html" style="position:fixed;top:calc(10px + env(safe-area-inset-top));left:12px;z-index:20;display:inline-flex;align-items:center;gap:5px;text-decoration:none;color:#eed2d2;background:rgba(0,0,0,.42);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:6px 12px;font-weight:800;font-size:13px;backdrop-filter:blur(3px);font-family:system-ui,Segoe UI,sans-serif">← Menu</a>
+<div id="bg"></div>
+<div id="ring"></div>
+<div id="exflash"></div>
+<div id="farol"><div class="lamp" id="lampR"></div><div class="lamp" id="lampA"></div><div class="lamp" id="lampG"></div></div>
+<div id="top"></div>
+<div id="pips"></div>
+<div id="cta"><b class="sp">✨</b><span class="ic"><b class="thumb">👍</b><b class="bell">🔔</b></span><b class="sp">✨</b></div>
+<div id="mini"></div>
+<div class="keys" id="keys">HOLD RUN on green &nbsp;·&nbsp; ←/→ or 1/2/3 = lane &nbsp;·&nbsp; F = brake &nbsp;·&nbsp; A/S/D = nitro/ghost/super &nbsp;·&nbsp; R = new round</div>
+<!--+AG etiqueta TÚ (DOM proyectado sobre tu bola) + controles + cuenta atras + cartel espectador -->
+<div id="youlbl">YOU</div>
+<div id="controls">
+  <div class="row" id="laneRow">
+    <button id="bLaneL"><span class="t">◀ LEFT</span><span class="k">←/1</span></button>
+    <button id="bLaneC" class="on"><span class="t">● CENTER</span><span class="k">2</span></button>
+    <button id="bLaneR"><span class="t">RIGHT ▶</span><span class="k">→/3</span></button>
+  </div>
+  <div class="row">
+    <button id="bRun"><span class="t">RUN</span><span class="k">HOLD · space/↑</span></button>
+    <button id="bBrake"><span class="t">BRAKE</span><span class="cd" id="cdBrake">F</span></button>
+    <button id="bNitro"><span class="t">⚡ NITRO</span><span class="cd" id="cdNitro">A</span></button>
+    <button id="bGhost"><span class="t">👻 GHOST</span><span class="cd" id="cdGhost">S</span></button>
+    <button id="bSup"><span class="t">⭐ SUPER</span><span class="cd" id="cdSup">0%</span></button>
+  </div>
+</div>
+<div id="count"><div class="n" id="countN"></div><div class="you" id="countYou">This is you</div></div>
+<div id="spectator">
+  <div class="big" id="specTitle"></div>
+  <div class="sub" id="specSub"></div>
+  <div class="rkey" id="specKey">You keep watching the match &nbsp;·&nbsp; <kbd>R</kbd> = new round</div>
+  <!--+AG SALIR: en embed, cobrar las copas por lo hecho y volver a Resultados sin esperar a que acabe la ronda -->
+  <button id="specExit">▸ SEE RESULTS</button>
+</div>
+<div id="err">The 3D modules failed to load from the CDN. Open this with internet access.</div>
+<div id="fps">fps —</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+}}
+</script>
+
+<script type="module">
+import { THREE, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createBloom, frameOrtho, BLOOM } from '../chassis/gfx.mjs';
+import { attachSquash } from '../chassis/squash.mjs';
+import { createCelebration } from '../chassis/celebration.mjs';
+import { createKillfeed } from '../chassis/killfeed.mjs';
+import { createCensusBoard } from '../chassis/censusboard.mjs';
+import { createCupoGauge } from '../chassis/cupogauge.mjs';
+import { createKillTags } from '../chassis/killtag.mjs';
+import { EmoBook, PRIO } from '../chassis/emotions.mjs';
+import { Sim, TEAMS, SHORT_COLORS, SHORT_COLORS_6, BALL_R, FPS, FIELD_W, FIELD_L, XL, XR, SPAWN_Y, GATE_Y, SAFE_Y } from './sim.js';
+import { createWebAudio } from '../chassis/webaudio.mjs';
+import { buildSfxBuffer } from './sfxmap.mjs';
+
+window.addEventListener('error', e => { document.getElementById('err').style.display='grid'; console.error(e.error||e.message); });
+
+const { renderer, scene, cam } = createStage();   // (?nobloom=1 = render sin bloom, para diagnosticar)
+//+AG doc 38 Fase 2: calidad del shell via &gfx=/&redfx= → baja el pixelRatio en low/med/efectos-reducidos (este modo
+//   ya corre SIN bloom por defecto, ver NO_BLOOM abajo, asi que la resolucion es la palanca util).
+(()=>{ const q=new URLSearchParams(location.search); let cap=2;
+  const g=q.get('gfx'); if(g==='low') cap=1; else if(g==='med') cap=1.5;
+  if(q.get('redfx')==='1') cap=Math.min(cap,1);
+  renderer.setPixelRatio(Math.min(devicePixelRatio, cap)); })();
+const P = createParticles(scene);
+const stars = createStarBurst(scene), starsInv = createStarBurst(scene, ['#9ff8ff', '#ffffff']), wind = createWindTrail(scene);
+const bloom = createBloom(renderer, scene, cam);
+
+// ---- PERFIL SHORT (vertical individual, docs/35): ?short=1 (u ?n=6|8). Sin params → torneo (4 equipos×3). ----
+// En individual son 8/6 colores (cada color = equipo de 1) → los módulos del chasis que indexan por equipo
+// (celebración/kill-feed/kill-tags) deben alimentarse con la PALETA correcta (PAL) o petan al indexar TEAMS[>3].
+// El censo (franja de 4 grupos, canvas) NO se usa en individual (como cazador/tobogan): la fila de pips DOM #pips
+// hace de indicador de supervivencia (también sale en la captura, page.screenshot).
+const _q0 = new URLSearchParams(location.search);
+const _shN = +(_q0.get('n') || 0);
+//+AG el shell lanza ?embed=1 (INDIVIDUAL N=8, portrait, balls[0]=jugador) o ?embed=1&fmt=team (POR EQUIPOS,
+//   Fase 3 docs/35): fmt=team NO activa el perfil short → torneo 4×3 con la capa de agencia sobre balls[0].
+const EMBED = _q0.get('embed') === '1';
+const TEAMFMT = _q0.get('fmt') === 'team';
+const SHORT_ON = (EMBED && !TEAMFMT) || _q0.get('short') === '1' || _shN === 6 || _shN === 8;
+const shortOpts = SHORT_ON ? { individual: true, n: (_shN === 6 ? 6 : 8) } : null;
+//+AG doc 39 abierto #1: ?stats=v,a,p,g,r,b (6 atributos EFECTIVOS de la bola equipada) → modificador SUTIL de física
+//   del jugador (balls[0]). Solo en INDIVIDUAL; ausente/mal formado = neutro. El torneo (fmt=team) no lo lee.
+if(shortOpts){ const _s=(_q0.get('stats')||'').split(',').map(Number); if(_s.length===6 && _s.every(v=>isFinite(v))) shortOpts.stats=_s; }
+const PAL = shortOpts ? (shortOpts.n === 6 ? SHORT_COLORS_6 : SHORT_COLORS) : TEAMS;
+
+const celeb = createCelebration(scene, PAL);
+// Kill feed degradado a HISTORIAL (patrón Tangent Blast del Carrusel, feedback Jaime 2026-07-18: el cartel roba
+// la mirada del punto de la ejecución): atenuado+retrasado; el "quién" lo pone el mini-tag EN el sitio.
+const killfeed = createKillfeed(scene, PAL, { alpha: 0.55, delay: 0.6 });
+// Franja SURVIVORS arriba (canvas => sale en el vídeo). El short la usa TAMBIÉN (feedback del dueño 2026-07-19:
+// "has quitado los contadores de cuántas quedan vivas"): con perfil short (fichas ~2x) y el plantel de 8 colores.
+const census = createCensusBoard(scene, SHORT_ON ? PAL : TEAMS, SHORT_ON ? { short: true } : {});
+const cupo = createCupoGauge(scene);                 // medidor de CUPO abajo-centro (asegurados al cruzar, 0→survTarget); oculto en standalone
+// clasificador de este modo para el censo: rank -1 = muerta, safe = cruzo a salvo, resto = viva/corriendo
+const rlCensus = b => (b.rank === -1 ? 'dead' : (b.safe ? 'safe' : 'alive'));
+const ktags = createKillTags(scene, PAL, { width: BALL_R*4.6 });   // chip ● #dorsal ✕ que nace donde cae la bola y sube
+
+// CALIDAD DE TEXTURAS: anisotropía máx + mipmaps trilineales → las texturas horneadas no se ven pixeladas/borrosas
+// (antes eran 64px estiradas). Aplicar a cada CanvasTexture con crispen().
+const MAXANI = renderer.capabilities.getMaxAnisotropy();
+function crispen(t){ t.anisotropy = MAXANI; t.generateMipmaps = true; t.minFilter = THREE.LinearMipmapLinearFilter; t.magFilter = THREE.LinearFilter; t.needsUpdate = true; return t; }
+
+const DANGER = 0xff2a2a, STEEL = 0x6a7180, STONE = 0x8b8792;
+// ---- ARTE v7 "GRAN FERIA" (docs/51): mapa cálido-sobre-frío, cero gris. ROJO y VERDE quedan RESERVADOS al
+//      semáforo (ninguna superficie grande los usa) → la señal se lee mejor. ?art=old = look gris anterior. ----
+const ARTV = new URLSearchParams(location.search).get('art') !== 'old';
+const STAR_ON = new URLSearchParams(location.search).get('star') !== '0';   // estrella de invencibilidad (default ON; ?star=0 = look viejo para A/B). Sin embudo no hay invencibles → standalone intacto.
+const CUPO_ON = new URLSearchParams(location.search).get('cupo') !== '0';    // medidor de CUPO del embudo (default ON; ?cupo=0 = look anterior). Solo aparece con survTarget (torneo).
+const SHIELD_ON = new URLSearchParams(location.search).get('shield') !== '0';// icono de ESCUDO sobre la bola protegida (default ON; ?shield=0 = look anterior). Ligado a la ventana b.starF (mismo criterio que el aura).
+// TORNEO (Marble Games): plantel con identidad + objetivo de censo por URL — los pasa el plan del ensamblador.
+//   ?roster=1-0,2-0,9-2…  (dorsal-color)   ?target=16   (sin ellos: partida standalone de siempre)
+const TORNEO_OPTS=(()=>{const q=new URLSearchParams(location.search);
+  const r=(q.get('roster')||'').split(',').filter(Boolean).map(p=>{const [n,t]=p.split('-');return {num:+n,team:+t};});
+  const t=q.has('target')?+q.get('target'):null;
+  return (r.length||t!=null)?{roster:r.length?r:undefined,survTarget:t!=null?t:undefined}:undefined;})();
+if(!ARTV) document.getElementById('bg').style.background='radial-gradient(120% 90% at 50% 30%,#161326 0%,#0d0b16 60%,#070610 100%)';   // A/B: fondo gris anterior
+const ART = {
+  apron:    0x241733,          // delantal violeta profundo (fuera de los muros, enmarca la pista)
+  track:    ['#c9663c','#d5744a','#f2e3c8'],   // pista: 2 terracotas alternas + línea crema (tick de progreso)
+  wall:     0xead9b8,          // muro crema
+  goal:     0xffd34d,          // dorado de meta (única cálida grande permitida)
+  mineBody: '#241b2e', mineRing: '#ff8c2e', mineSpike: '#f0dcc0',
+  rock:     0x35283a, lava: 0xff7a1e,          // boulder = roca volcánica + grietas lava (lava ≠ rojo señal)
+  chevron:  '#ffd21e', chevronBg: '#221d2b',   // bloqueador hazard amarillo/negro
+  ice:      0xbfeaff,          // barrera de HIELO
+  banner:   ['#ff7a4d','#4fc9d6','#ffd21e','#a86bff','#f2e3c8'],   // banderines (festivos, sin rojo/verde puros)
+};
+const matSteel = new THREE.MeshStandardMaterial({ color: STEEL, roughness: 0.45, metalness: 0.5, envMapIntensity: 0.4 });
+const matWall  = new THREE.MeshStandardMaterial({ color: ARTV?ART.wall:0x2a2e3e, roughness: ARTV?0.62:0.7, metalness: 0.2 });
+const matFloor = new THREE.MeshStandardMaterial({ color: ARTV?ART.apron:0x262433, roughness: 0.9 });   // v7: DELANTAL violeta (v5: gris)
+const matStone = new THREE.MeshStandardMaterial({ color: ARTV?ART.rock:STONE, roughness: 0.85, metalness: 0.1 });
+
+// ---- LUCES v7: cálidas para que el terracota CANTE + guardo el ambient para el tween rojo/verde. No toco
+//      gfx.mjs (compartido); ajusto las luces que createStage ya metió en la escena. ----
+let ambLight=null, keyLight=null; { const dirs=[]; scene.traverse(o=>{ if(o.isAmbientLight) ambLight=o; else if(o.isDirectionalLight) dirs.push(o); });
+  keyLight=dirs[0]||null;
+  if(ARTV){ scene.environmentIntensity=0.70;
+    if(ambLight){ ambLight.color.set(0xd8c8e8); ambLight.intensity=0.50; }
+    if(keyLight){ keyLight.color.set(0xfff0d8); keyLight.intensity=1.45; }   // key cálida
+    if(dirs[1]){ dirs[1].color.set(0x8fd0e8); dirs[1].intensity=0.45; } } }   // fill fría (contraste)
+// MOOD del semáforo EN LA ESCENA (feedback del dueño: "cuando se pone rojo tiene que NOTARSE mucho"): en ROJO la
+// escena ENTERA se tiñe de rojo peligro (ambient+key rojos) y en verde vuelve cálida. Va en el CANVAS → en el vídeo.
+const AMB_WARM=new THREE.Color(0xd8c8e8), AMB_RED=new THREE.Color(0xff2a20), AMB_I_WARM=0.50, AMB_I_RED=0.62;
+const KEY_WARM=new THREE.Color(0xfff0d8), KEY_RED=new THREE.Color(0xff4a34), KEY_I_WARM=1.45, KEY_I_RED=1.15;
+
+// ---- CÁMARA: ajuste por ANCHO (FIELD_W llena el frame), scroll en Y siguiendo al frente del pelotón (§5) ----
+// A/B de zoom out (?cam=a|b|c): el dueño elige por captura (feedback 2026-07-18 "no se ven bien las bolas").
+// margen mayor = más pista y contexto visibles (bolas algo más pequeñas); back mayor = pelotón más bajo, se ve
+// más de la manada estirada. 'a' = encuadre base de siempre (no regresa nada sin flag).
+const CAM_PRESETS = { a:{m:1.30,back:4.0}, b:{m:1.50,back:5.5}, c:{m:1.70,back:7.0} };
+const CAM_SEL = CAM_PRESETS[new URLSearchParams(location.search).get('cam')] || CAM_PRESETS.c;   // defecto: C (al dueño le gusta más de lejos, 2026-07-18)
+const CAM_MARGIN_X = CAM_SEL.m, CAM_BACK = CAM_SEL.back;
+let camY = SPAWN_Y + 6, camTargetY = camY, camMargin = CAM_MARGIN_X, shake = 0;
+
+// ---- CÁMARA DEL SHORT 9:16: ENCUADRE AL GRUPO (2026-07-19) ----------------------------------------------------
+// Qué pasaba: el short heredaba el encuadre del torneo, que se pide "por ancho" (FIELD_W*1.70 = 44 u). En 16:9 eso
+// deja 25 u de alto = zoom real (se ve medio campo y la cámara persigue al pelotón). En 9:16 el MISMO margen se
+// traduce en 78 u de ALTO para una pista de 48 → cabía el mapa entero y sobraba medio frame vacío.
+// Qué NO funciona: recortar a una ventana FIJA y estrecha centrada en la media del pelotón. Las bolas se pegan a
+// LOS DOS muros a la vez para esquivar los boulders (medido: x = -12.6 … +11.5) → frames enteros sin ninguna bola.
+// Lo que sí (y es lo que hace la cámara de 16:9): ENCUADRAR LA CAJA del pelotón vivo con margen y dejar que el
+// zoom respire — cerca cuando van juntas, abierta cuando se separan. Medido sobre 30 semillas: el pelotón ocupa
+// ≤12 u de ancho en el 60% de los frames y ≤18 u en el 87% → la mayor parte del short se ve DE CERCA de verdad.
+// Reglas del suavizado (nunca marear, nunca perder una bola):
+//   · ABRIR es rápido (una bola que se escapa entra en plano ya), CERRAR es lento (no hay bombeo de zoom).
+//   · La caja SIEMPRE cabe: el ancho pedido sale del máximo entre caja-en-X y caja-en-Y convertida a 9:16.
+//   · Clamp a los muros: con ancho < FIELD_W la cámara nunca enseña fuera de pista.
+// Márgenes APRETADOS (feedback del dueño 2026-07-20: "sobra espacio, podría hacer más zoom in"): la parrilla de
+// salida ocupa 9 u (4 columnas × 3.0) y con los márgenes anteriores el arranque salía a 18 u. Con maxW < FIELD_W,
+// en el tramo en que se pegan a los DOS muros la bola más extrema queda medio cortada por el borde: preferible a
+// alejar la cámara los 25 s restantes (y el muro no tiene nada que enseñar).
+const CAM_FIT = {
+  minW: 11.5,     // zoom máximo (ancho visible mínimo): bola ø0.84 → ~79 px en 1080
+  maxW: 24.5,     // zoom mínimo (la pista mide 26: se recorta medio metro de muro en el peor caso)
+  padX: 1.8,      // aire lateral alrededor de la caja del pelotón
+  padY: 2.4,      // aire arriba/abajo
+  aheadFrac: 0.10,// sesgo hacia donde se corre: el centro se desplaza un 10% del alto hacia la meta
+  crownW: 8.0     // CORONACIÓN: plano CORTO sobre la campeona (la línea de meta entra justo debajo)
+};
+//+AG cámara de JUGADOR (embed): el encuadre de grupo venía del VIDEO (ahí no hay jugador) y en el juego dejaba
+//    tu bola descentrada y el plano demasiado cerrado (feedback del dueño 2026-07-22: "céntrate en el jugador y
+//    no metas tanto zoom — combo de ambas"). Ancho FIJO más abierto que el minW del grupo → cero bombeo de zoom
+//    y siempre ves a los rivales de alrededor y la trampa que tienes delante.
+const PCAM_W = 15.5;
+const _camvQ = new URLSearchParams(location.search).get('camv');
+const SHORT_CAM_OLD = _camvQ === 'old';
+const PIPS_DOM = new URLSearchParams(location.search).get('pips') === '1';   // fila de pips DOM antigua (sustituida por la franja SURVIVORS)   // ?camv=old = encuadre ANTERIOR (el del torneo aplicado al 9:16), para A/B
+const BALL_RV = BALL_R;   // radio de DIBUJO = radio de colisión: con zoom de verdad NO hace falta agrandar la bola
+let camX = 0, camW = CAM_FIT.maxW, camWarm = false;   // camW = ancho visible actual; camWarm = ya hay encuadre (el 1er frame NO se suaviza)
+
+// ---- damero de la LÍNEA DE META ------------------------------------------------------------------------------
+// v8 (feedback del dueño 2026-07-19: "la línea de meta parece una barrera"): antes era una tira de 0.6 u con un
+// damero diminuto → a distancia se leía como un listón más, indistinguible de la barrera rompible. Ahora es una
+// BANDA ANCHA (2.4 u) de dos filas de cuadros GRANDES (~1.2 u de lado, el tamaño de una bola y media), que es
+// como se lee una meta de un vistazo. El damero se dibuja con la geometría, no con repeat de textura, para que
+// los cuadros midan lo mismo en unidades de mundo pase lo que pase con el zoom.
+const GATE_DEPTH = 2.4, GATE_SQ = 1.2;                  // profundidad de la banda y lado del cuadro (unidades)
+function checkerBand(widthU, depthU, sq){
+  const cols = Math.max(2, Math.round(widthU/sq)), rows = Math.max(2, Math.round(depthU/sq));
+  const c=document.createElement('canvas'); c.width=cols*16; c.height=rows*16; const x=c.getContext('2d');
+  for(let r=0;r<rows;r++) for(let i=0;i<cols;i++){ x.fillStyle=((i+r)&1)?'#101010':'#f7f7f7'; x.fillRect(i*16,r*16,16,16); }
+  const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace; t.magFilter=THREE.NearestFilter; return t; }
+
+// ---- PISTA v7.1: terracota PLANA con un brillo suave central (vignette, SIN líneas horizontales → se lee claro
+//      qué es área jugable). Feedback del dueño: menos líneas, más plano pero bonito. ----
+function trackTex(){ const c=document.createElement('canvas'); c.width=c.height=256; const x=c.getContext('2d');
+  const g=x.createRadialGradient(128,110,20,128,128,180); g.addColorStop(0,ART.track[1]); g.addColorStop(1,ART.track[0]);
+  x.fillStyle=g; x.fillRect(0,0,256,256);
+  const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace; return crispen(t); }
+function bannerTex(dir){ const c=document.createElement('canvas'); c.width=64;c.height=64; const x=c.getContext('2d');
+  const cols=ART.banner; for(let i=0;i<4;i++){ x.fillStyle=cols[i%cols.length]; const y=i*16;
+    x.beginPath(); if(dir>0){ x.moveTo(0,y); x.lineTo(0,y+16); x.lineTo(52,y+8); } else { x.moveTo(64,y); x.lineTo(64,y+16); x.lineTo(12,y+8); }
+    x.closePath(); x.fill(); }
+  const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace; t.wrapT=THREE.RepeatWrapping; return t; }
+
+// ---- arena estática: suelo (delantal + pista), muros, banderines, zona de meta ----
+{ const EXT_Y=FIELD_L+44, EXT_X=FIELD_W+26;   // suelo MUY holgado → al scrollar/temblar los bordes NUNCA muestran fondo negro
+  const fl=new THREE.Mesh(new THREE.PlaneGeometry(EXT_X,EXT_Y),matFloor); fl.position.set(0,FIELD_L/2,-0.6); scene.add(fl);   // DELANTAL (violeta en v7)
+  if(ARTV){ const track=new THREE.Mesh(new THREE.PlaneGeometry(FIELD_W,EXT_Y),new THREE.MeshStandardMaterial({map:trackTex(),roughness:0.72,metalness:0.0}));
+    track.position.set(0,FIELD_L/2,-0.45); scene.add(track);     // PISTA terracota PLANA (área jugable, entre los muros)
+    // BORDILLOS crema: dos líneas VERTICALES que delimitan claramente la calle jugable del delantal
+    const curbMat=new THREE.MeshBasicMaterial({color:0xf2e3c8,toneMapped:false});
+    for(const sx of [-1,1]){ const cb=new THREE.Mesh(new THREE.PlaneGeometry(0.28,EXT_Y),curbMat); cb.position.set(sx*(FIELD_W/2-0.2),FIELD_L/2,-0.4); scene.add(cb); } }
+  const wl=new THREE.Mesh(new THREE.BoxGeometry(0.5,EXT_Y,1.2),matWall); wl.position.set(XL-0.25,FIELD_L/2,0); scene.add(wl);
+  const wr=new THREE.Mesh(new THREE.BoxGeometry(0.5,EXT_Y,1.2),matWall); wr.position.set(XR+0.25,FIELD_L/2,0); scene.add(wr);
+  // línea de meta (damero) + zona segura (v7: DORADA, libera el verde para el semáforo; v5 era verde)
+  // META: banda de damero ANCHA centrada en la línea de cruce (GATE_Y) + un filo dorado a cada lado que la
+  // separa del asfalto (así no se confunde con la barrera ni con los bloqueadores rayados).
+  const gate=new THREE.Mesh(new THREE.PlaneGeometry(FIELD_W,GATE_DEPTH),
+    new THREE.MeshBasicMaterial({map:checkerBand(FIELD_W,GATE_DEPTH,GATE_SQ),toneMapped:false}));
+  gate.position.set(0,GATE_Y,0.1); scene.add(gate);
+  const edgeMat=new THREE.MeshBasicMaterial({color:ARTV?ART.goal:0xffd34d,toneMapped:false});
+  for(const sy of [-1,1]){ const e=new THREE.Mesh(new THREE.PlaneGeometry(FIELD_W,0.22),edgeMat);
+    e.position.set(0,GATE_Y+sy*(GATE_DEPTH/2+0.11),0.11); scene.add(e); }
+  const safe=new THREE.Mesh(new THREE.PlaneGeometry(FIELD_W,10),new THREE.MeshBasicMaterial({color:ARTV?ART.goal:0x1f5e37,transparent:true,opacity:ARTV?0.30:0.42})); safe.position.set(0,GATE_Y+5,-0.4); scene.add(safe);
+}
+
+// ---- obstáculos (meshes; se colocan leyendo la sim) ----
+let mineM=[], blockerM=[], barrierM=[], boulderM=[], popPool=[];
+let sim, emo, ballObjs, seed=1;
+let px, py, prevBoulderX;
+let hitstop=0;   // micro-freeze (preview): frames de rAF que la sim se congela tras una ejecución (que "aterrice")
+
+// MINA: se lee como "no pares aquí". Dibujada UNA vez en un canvas (pinchos + cuerpo + núcleo rojo) y compartida
+// como TEXTURA en todas → 2 meshes por mina (sprite + halo) en vez de ~12 → mucho menos coste de render.
+function mineTex(){ const c=document.createElement('canvas'); c.width=c.height=256; const x=c.getContext('2d'); const C=128;
+  const spike=ARTV?ART.mineSpike:'#aab2c0', body=ARTV?ART.mineBody:'#2b2f3a', ring=ARTV?ART.mineRing:'#5b6474';
+  x.strokeStyle=spike; x.lineWidth=18; x.lineCap='round';   // 8 pinchos (2× resolución → nítidos)
+  for(let i=0;i<8;i++){ const a=i/8*Math.PI*2; x.beginPath(); x.moveTo(C+Math.cos(a)*60,C+Math.sin(a)*60); x.lineTo(C+Math.cos(a)*104,C+Math.sin(a)*104); x.stroke(); }
+  x.fillStyle=body; x.beginPath(); x.arc(C,C,68,0,7); x.fill();                     // cuerpo
+  x.strokeStyle=ring; x.lineWidth=12; x.beginPath(); x.arc(C,C,58,0,7); x.stroke(); // aro
+  x.fillStyle='#5a1216'; x.beginPath(); x.arc(C,C,30,0,7); x.fill();                 // núcleo oscuro (se queda)
+  x.fillStyle='#ff3a28'; x.beginPath(); x.arc(C,C,14,0,7); x.fill();                 // luz ROJA (señal: se queda)
+  const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace; return crispen(t); }
+const MINE_TEX=mineTex();
+const matMineSprite=new THREE.MeshBasicMaterial({ map:MINE_TEX, transparent:true, depthWrite:false, toneMapped:false });
+function mineMesh(){ const g=new THREE.Group();
+  const sprite=new THREE.Mesh(new THREE.PlaneGeometry(2.1,2.1), matMineSprite); sprite.position.z=0.05; g.add(sprite);
+  const glow=new THREE.Mesh(new THREE.CircleGeometry(1.0,16), new THREE.MeshBasicMaterial({color:DANGER,toneMapped:false,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false})); glow.position.z=0.04; glow.layers.enable(BLOOM); g.add(glow);
+  g.userData={glow}; return g; }
+
+// texturas de aviso/ladrillo horneadas UNA vez y compartidas (sin clonar; el clon era el "artefacto negro")
+// RAYAS DE PELIGRO (bloqueador): alta resolución + SEAMLESS + se TESELA (no se estira) → nítidas a cualquier ancho.
+function stripeTex(){ const S=256; const c=document.createElement('canvas'); c.width=c.height=S; const x=c.getContext('2d');
+  x.fillStyle=ARTV?ART.chevronBg:'#4a5262'; x.fillRect(0,0,S,S);
+  x.strokeStyle=ARTV?ART.chevron:'#e8b41e'; x.lineWidth=S*0.28; x.lineCap='butt';
+  for(let i=-S;i<=S;i+=S/2){ x.beginPath(); x.moveTo(i,S); x.lineTo(i+S,0); x.stroke(); }   // diagonales 45°, periodo S/2 → seamless
+  const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace; t.wrapS=t.wrapT=THREE.RepeatWrapping; return crispen(t); }
+function brickTex(){ const c=document.createElement('canvas'); c.width=c.height=64; const x=c.getContext('2d');
+  x.fillStyle='#8a6b4a'; x.fillRect(0,0,64,64); x.strokeStyle='#4a3626'; x.lineWidth=3;   // LADRILLOS pequeños
+  for(let r=0;r<4;r++){ const off=(r%2)*8; x.beginPath(); x.moveTo(0,r*16); x.lineTo(64,r*16); x.stroke();
+    for(let cc=0;cc<4;cc++){ x.beginPath(); x.moveTo(off+cc*16,r*16); x.lineTo(off+cc*16,r*16+16); x.stroke(); } }
+  const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace; return t; }
+const STRIPE_TEX=stripeTex(), BRICK_TEX=brickTex();
+
+// BLOQUEADOR de media pista: 1 losa con rayas de aviso. La textura se TESELA por el ancho (no se estira) → nítida.
+const matBlocker = new THREE.MeshStandardMaterial({ map:STRIPE_TEX, roughness:0.55, metalness:0.35 });
+function blockerMesh(cx, width, thick){ STRIPE_TEX.repeat.set(width/3.2, 1);   // ~raya cada 1.5u; todos los bloqueadores tienen el mismo ancho
+  const slab=new THREE.Mesh(new THREE.BoxGeometry(width,thick,1.7),matBlocker); slab.position.set(cx,0,0.85); return slab; }
+
+// BARRERA ROMPIBLE. v7.2 (feedback del dueño): en vez de UNA losa fea, una REJILLA de ladrillitos de HIELO; solo
+// se rompen los que TOCA el pelotón (por la X de la bola que embiste) y cada uno BRILLA y ESTALLA al romperse.
+// (La sim la trata como una pieza sólida con HP compartida; esto es puro render: reparto el HP en ladrillos.)
+const BRICK_COLS=10, BRICK_ROWS=2;
+function barrierMesh(halfw, thick){ const g=new THREE.Group();
+  if(ARTV){
+    const mat=new THREE.MeshStandardMaterial({ color:ART.ice, roughness:0.14, metalness:0.0, transparent:true, opacity:0.9, emissive:0x3aa0c8, emissiveIntensity:0.35 });
+    const gap=0.12, bw=(halfw*2)/BRICK_COLS, bh=thick/BRICK_ROWS, bz=1.05;
+    const geo=new THREE.BoxGeometry(bw-gap, bh-gap*0.5, bz); const bricks=[];
+    for(let cx=0;cx<BRICK_COLS;cx++) for(let ry=0;ry<BRICK_ROWS;ry++){
+      const lx=-halfw+bw*(cx+0.5), ly=-thick/2+bh*(ry+0.5);
+      const m=new THREE.Mesh(geo,mat); m.position.set(lx,ly,bz/2+0.02); g.add(m);
+      bricks.push({m,x:lx,y:ly,row:ry,alive:true}); }
+    g.userData={ice:true,mat,bricks,aliveCount:bricks.length,total:bricks.length};
+  } else {
+    const m=new THREE.MeshStandardMaterial({ map:BRICK_TEX, roughness:0.85, metalness:0.05, emissive:0x000000 });
+    const slab=new THREE.Mesh(new THREE.BoxGeometry(halfw*2, thick, 1.9), m); slab.position.z=0.95; g.add(slab);
+    g.userData={slab,mat:m,ice:false};
+  }
+  return g; }
+// rompe UN ladrillo: el vivo más cercano (en X) a una bola que embiste (o el central), fila sur primero. BRILLA+ESTALLA.
+function breakBrick(group, bar){ const ud=group.userData; if(ud.aliveCount<=0) return;
+  let ballX=null, bd=1e9;
+  for(const b of sim.balls){ if(b.rank===-1||b.safe) continue;
+    if(Math.abs(b.y-bar.y)<1.5 && Math.abs(b.x-bar.xc)<12 && b.y<bar.y+0.6){ const d=Math.abs(b.y-bar.y); if(d<bd){bd=d;ballX=b.x;} } }
+  let best=null,bs=1e9; for(const br of ud.bricks){ if(!br.alive) continue; const wx=bar.xc+br.x;
+    const s=(ballX!=null?Math.abs(wx-ballX):Math.abs(wx-bar.xc))+br.row*0.4; if(s<bs){bs=s;best=br;} }
+  if(!best) return; best.alive=false; best.m.visible=false; ud.aliveCount--;
+  const wx=bar.xc+best.x, wy=bar.y+best.y;
+  flashAt(wx,wy,0xe4f6ff,1.0,0.95); P.burst(wx,wy,0.4,[0.8,0.96,1.0],15,6.5); P.burst(wx,wy,0.32,[1,1,1],8,4.2); P.ring(wx,wy,[0.7,0.95,1.0],0.5); }
+
+// MIRILLA de francotirador (aparece sobre la bola PILLADA moviéndose en rojo). REDISEÑO v7.1 (feedback del dueño
+// 2026-07-08): un MEDIDOR de peligro ROJO que se LLENA progresivamente mientras la bola se mueve en rojo; el disco
+// interior CRECE hasta llenar el aro y, al llenarse (charge→1), DISPARA. Todo rojo (peligro), sin amarillo.
+const scopeMat=c=>new THREE.MeshBasicMaterial({color:c,toneMapped:false,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending});
+function scopeMesh(){ const g=new THREE.Group();
+  const ring=new THREE.Mesh(new THREE.RingGeometry(0.94,1.10,48), scopeMat(0xff1818)); g.add(ring);      // aro de referencia (el "tope")
+  const fill=new THREE.Mesh(new THREE.CircleGeometry(0.94,36),   scopeMat(0xff2a2a)); fill.position.z=-0.01; g.add(fill);   // disco que CRECE = la carga
+  for(let k=0;k<4;k++){ const a=k*Math.PI/2, tick=new THREE.Mesh(new THREE.PlaneGeometry(0.6,0.11), scopeMat(0xff5a44));
+    tick.position.set(Math.cos(a)*1.28,Math.sin(a)*1.28,0); tick.rotation.z=a; g.add(tick); }   // marcas de mira (fuera del aro)
+  g.traverse(o=>{ if(o.isMesh) o.layers.enable(BLOOM); }); g.renderOrder=8; g.visible=false; g.userData={ring,fill}; return g; }
+const scopePool=[]; for(let i=0;i<6;i++){ const s=scopeMesh(); scene.add(s); scopePool.push(s); }
+
+// HAZ vertical del francotirador. Va en el CANVAS (aditivo) → SÍ aparece en el vídeo capturado, a diferencia
+// de un overlay DOM. Dos usos: (1) telegrafía del apuntado — fino, sigue a la bola, se aviva con el lock;
+// (2) DISPARO — ancho y blanco, un fogonazo que se abre y desvanece. Alto fijo (cubre la columna en 16:9 y 9:16).
+const BEAM_H=72;
+function beamMesh(){ const m=new THREE.Mesh(new THREE.PlaneGeometry(1,BEAM_H), scopeMat(0xff2a2a));
+  m.layers.enable(BLOOM); m.renderOrder=6; m.visible=false; m.userData={life:-1}; scene.add(m); return m; }
+const aimBeams=[]; for(let i=0;i<6;i++) aimBeams.push(beamMesh());          // telegrafía (persistente, index-alineado a scopePool)
+const firePool=[]; for(let i=0;i<6;i++) firePool.push(beamMesh()); let fireHead=0;   // disparo (fire-and-fade)
+function beamShoot(x,y){ const m=firePool[fireHead]; fireHead=(fireHead+1)%firePool.length;
+  m.material.color.set(0xffffff); m.position.set(x,y,0.52); m.scale.set(3.2,1,1); m.material.opacity=1; m.visible=true; m.userData={life:0}; }
+
+// FOGONAZO de destrucción (bloom) — POOL fijo (NO crear/destruir meshes por muerte → sin picos de GC cuando
+// explotan varias a la vez, que era lo que "cortaba la imagen").
+const flashPool=[]; for(let i=0;i<28;i++){ const m=new THREE.Mesh(new THREE.CircleGeometry(1,20), new THREE.MeshBasicMaterial({toneMapped:false,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));
+  m.layers.enable(BLOOM); m.visible=false; m.userData={active:false}; scene.add(m); flashPool.push(m); }
+let flashHead=0;
+function flashAt(x,y,col,sz,peak){ const m=flashPool[flashHead]; flashHead=(flashHead+1)%flashPool.length;
+  m.material.color.set(col||0xffffff); m.position.set(x,y,0.55); m.visible=true;
+  m.userData={active:true,life:0,peak:peak||1,r:BALL_R*1.3*(sz||1)}; }
+
+// AURA de PROTECCIÓN del embudo (ESTADO, spec brand-designer 2026-07-18): rim ADITIVO cian↔magenta anclado a la
+// bola. Uno por bola, reciclado en buildSim (mismo patrón que ballObjs). NO es elemento de pantalla; parpadea suave
+// (~2 Hz) para leerse como "lleva la estrella puesta / está en estado de protección". Paleta cian/magenta (huecos
+// sin equipo → no se confunde con color de equipo y aguanta el mood rojo).
+function auraMesh(){ const m=new THREE.Mesh(new THREE.RingGeometry(BALL_R*1.30, BALL_R*1.60, 32),
+  new THREE.MeshBasicMaterial({color:0x9ff8ff,toneMapped:false,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false}));
+  m.renderOrder=7; m.visible=false; return m; }
+let auraM=[];
+
+// ICONO DE ESCUDO sobre la bola PROTEGIDA (spec 2026-07-18): heraldo clasico simple, contorno claro, semitransparente
+// (~50%) → se sigue viendo la bola por debajo y se lee "protegida por un escudo/habilidad". Textura horneada UNA vez
+// y compartida (misma paleta cian/blanco que el aura). Anclado a la bola en UNIDADES DE MUNDO (∝ BALL_R), nunca a
+// pantalla. Aparece/desaparece con la MISMA ventana `b.starF` que el aura. NormalBlending (no aditivo) → se lee como
+// icono translucido, no como fogonazo.
+function shieldTex(){ const S=256; const c=document.createElement('canvas'); c.width=c.height=S; const x=c.getContext('2d'); const cx=S/2;
+  const path=()=>{ x.beginPath();            // silueta de escudo (heraldo): hombros arriba, punta abajo
+    x.moveTo(cx, S*0.06); x.lineTo(S*0.86, S*0.19); x.lineTo(S*0.86, S*0.50);
+    x.quadraticCurveTo(S*0.86, S*0.82, cx, S*0.96);
+    x.quadraticCurveTo(S*0.14, S*0.82, S*0.14, S*0.50);
+    x.lineTo(S*0.14, S*0.19); x.closePath(); };
+  path(); x.lineWidth=S*0.15; x.strokeStyle='rgba(8,16,34,0.92)'; x.lineJoin='round'; x.stroke();   // BORDE OSCURO (contraste sobre fondos claros/bola de color)
+  path(); x.fillStyle='rgba(120,226,255,0.58)'; x.fill();                                           // relleno cian SOLIDO (no tenue)
+  x.lineWidth=S*0.062; x.strokeStyle='#f2feff'; x.stroke();                                         // contorno BLANCO grueso (legible pequeno)
+  x.lineWidth=S*0.078; x.strokeStyle='#ffffff'; x.lineCap='round'; x.lineJoin='round';              // CHECK central = "protegida/OK"
+  x.beginPath(); x.moveTo(S*0.36, S*0.51); x.lineTo(S*0.46, S*0.63); x.lineTo(S*0.66, S*0.37); x.stroke();
+  const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace; return crispen(t); }
+const SHIELD_TEX=shieldTex();
+// material PROPIO por escudo (no compartido) → cada uno hace su pop-in/fade independiente. Base 0.85 (se ve la bola
+// igual porque el escudo FLOTA sobre el borde superior, no la tapa). Tamano 1.6R = mas pequeno pero nitido.
+function shieldMesh(){ const m=new THREE.Mesh(new THREE.PlaneGeometry(BALL_R*2.1, BALL_R*2.1),
+  // depthTest:false → dibuja SIEMPRE encima de la bola (la esfera vinyl llega a z~0.92 y tapaba el escudo a 0.62);
+  // como es un plano CENTRADO sobre la bola (no un anillo por fuera como el aura), sin esto queda oculto.
+  new THREE.MeshBasicMaterial({ map:SHIELD_TEX, transparent:true, opacity:0.6, depthTest:false, depthWrite:false, toneMapped:false }));
+  m.renderOrder=9; m.visible=false; m.userData={}; return m; }
+let shieldM=[];
+
+//+AG ANILLO "TÚ" (identificación persistente del jugador, port del Cazador): anillo BLANCO sobre tu bola, que se
+//   pone ROJO cuando el francotirador te apunta (b.targeted). La etiqueta TÚ es DOM proyectado. Aditivo → aguanta
+//   el mood rojo de la escena. Sale del bloom (toneMapped:false) para no depender de él (este modo va sin bloom).
+const youRing = new THREE.Mesh(new THREE.RingGeometry(BALL_R*1.32, BALL_R*1.56, 40),
+  new THREE.MeshBasicMaterial({color:0xffffff, toneMapped:false, transparent:true, opacity:0.85, side:THREE.DoubleSide, depthWrite:false, blending:THREE.AdditiveBlending}));
+youRing.renderOrder=8; youRing.visible=false; scene.add(youRing);
+const youLbl = document.getElementById('youlbl');
+const _v3 = new THREE.Vector3();
+//+AG estado de la capa de agencia (intro/espectador). runHeld = CORRER pulsado (se vuelca a sim.playerRun cada paso).
+let phase='intro', introT=0, introRingT=-1; const INTRO_DUR=3.4;
+let runHeld=false, prevPlayerRank=null, ended=false;
+//+AG barra del SÚPER NITRO (patrón superVal del Cazador: se llena JUGANDO BIEN, ver stepOnce) + estado del
+//   parón limpio (¿me movía al llegar el rojo?) para premiar frenar apurado dentro del margen.
+let superVal=0, redEntryMoving=false, redEntryF=0;
+//+AG material FANTASMA para TU bola (translúcido ~0.45, render-only): el shader vinilo no tiene canal alpha,
+//   así que mientras dura el fantasma se SWAPEA el material del cuerpo por uno estándar translúcido del color
+//   de la bola y la cara baja a media opacidad; al expirar se restaura o.mat. No hay material fantasma previo
+//   en Cazador/Carrera que copiar (el escudo del Cazador es un anillo), así que se sigue la spec: opacidad ~0.45.
+let ghostMat=null, ghostOn=false;
+function setGhostLook(on){
+  const o=ballObjs && ballObjs[0]; if(!o || on===ghostOn) return; ghostOn=on;
+  if(on){
+    if(!ghostMat) ghostMat=new THREE.MeshStandardMaterial({transparent:true, opacity:0.45, roughness:0.35, metalness:0.0, depthWrite:false});
+    ghostMat.color.setRGB(o.col[0],o.col[1],o.col[2]);
+    ghostMat.emissive.setRGB(o.col[0],o.col[1],o.col[2]); ghostMat.emissiveIntensity=0.55;
+    o.body.material=ghostMat;
+    for(const m of o.face.mats) m.opacity=0.5;
+  } else {
+    o.body.material=o.mat;
+    for(const m of o.face.mats) m.opacity=1;
+  }
+}
+
+function buildArena(){
+  for(const a of [mineM,blockerM,barrierM,boulderM,popPool]) a.forEach(m=>scene.remove(m));
+  mineM=[]; blockerM=[]; barrierM=[]; boulderM=[]; popPool=[];
+  const G=sim.geo;
+  for(const p of G.pads){ const m=mineMesh(); m.position.set(p.x,p.y,0); scene.add(m); mineM.push(m); }
+  // BLOQUEADORES: geo.blockers = [{y, gap:'R'|'L'}]; gap 'R' = hueco a la derecha (bloquea izquierda)
+  for(const bl of G.blockers){ const blockLeft = bl.gap==='R';
+    const x0 = blockLeft ? XL : XL+G.block_gap, x1 = blockLeft ? XR-G.block_gap : XR;
+    const m=blockerMesh((x0+x1)/2, x1-x0, G.block_thick); m.position.y=bl.y; scene.add(m); blockerM.push(m); }
+  // BARRERA
+  for(const bar of G.barriers){ const m=barrierMesh(G.barrier_halfw, G.barrier_thick); m.position.set(bar.xc,bar.y,0); scene.add(m); barrierM.push(m); }
+  for(const b of G.boulders){ const g=new THREE.Group();
+    // sombra proyectada en el suelo (lee como objeto que sobresale, no disco plano) + halo de peligro tenue
+    const sh=new THREE.Mesh(new THREE.CircleGeometry(G.boulder_r*1.15,24),new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:0.32})); sh.position.set(0.5,-0.5,0.05); g.add(sh);
+    const m=new THREE.Mesh(new THREE.SphereGeometry(G.boulder_r,26,18),matStone); m.position.z=G.boulder_r*0.7; g.add(m);
+    // v7 = ROCA VOLCÁNICA: casquete cálido + GRIETAS de lava emissive (unlit → brillan sin bloom, lava ≠ rojo señal)
+    const cap=new THREE.Mesh(new THREE.CircleGeometry(G.boulder_r*0.42,16),new THREE.MeshBasicMaterial({color:ARTV?0xff9a4a:0xc4c0cb,transparent:true,opacity:ARTV?0.4:0.5,toneMapped:false,blending:ARTV?THREE.AdditiveBlending:THREE.NormalBlending})); cap.position.set(-0.35,0.35,G.boulder_r*0.7+0.02); g.add(cap);
+    const seamMat = ARTV ? new THREE.MeshBasicMaterial({color:ART.lava,toneMapped:false,blending:THREE.AdditiveBlending,transparent:true}) : new THREE.MeshStandardMaterial({color:0x5a5661,roughness:0.95});
+    for(let k=0;k<3;k++){ const seam=new THREE.Mesh(new THREE.TorusGeometry(G.boulder_r*(0.55+0.28*k),ARTV?0.075:0.055,6,20),seamMat); seam.position.z=G.boulder_r*0.7; seam.rotation.x=0.5+k; g.add(seam); }
+    g.position.set(0,b.y,0); g.userData={rock:m}; scene.add(g); boulderM.push(g); }
+}
+
+function buildSim(s){
+  sim=new Sim(s, shortOpts || TORNEO_OPTS); emo=new EmoBook(sim.balls.length,s);
+  px=sim.balls.map(b=>b.x); py=sim.balls.map(b=>b.y);
+  prevBoulderX=sim.geo.boulders.map((_,i)=>sim.boulderX(i));
+  if(ballObjs) ballObjs.forEach(o=>scene.remove(o.g));
+  ballObjs=sim.balls.map(b=>attachSquash(makeBallVinyl(scene,b,BALL_RV), { R:BALL_RV, vRef:12, wind, stars }));
+  if(auraM.length) auraM.forEach(a=>scene.remove(a));   // AURA de protección: una por bola, reciclada por ronda
+  auraM=sim.balls.map(()=>{ const a=auraMesh(); scene.add(a); return a; });
+  if(shieldM.length) shieldM.forEach(s=>scene.remove(s));   // ESCUDO: uno por bola, reciclado por ronda (mismo patrón que el aura)
+  shieldM=sim.balls.map(()=>{ const s=shieldMesh(); scene.add(s); return s; });
+  for(const m of flashPool){ m.visible=false; m.userData.active=false; }
+  camY=SPAWN_Y+6; camMargin=CAM_MARGIN_X; camX=0; camW=CAM_FIT.maxW; camWarm=false;   // short: el 1er frame encuadra la parrilla YA (sin zoom-out de entrada)
+  killfeed.reset(); ktags.reset(); census.reset(); cupo.reset();   // feed/tags/franja/cupo limpios al (re)empezar ronda
+  lastMusicColor=null;   // fuerza re-aplicar el ducking en el primer frame
+  buildArena(); buildHud();
+  //+AG reset de la capa de agencia por ronda. La sim NO avanza durante la intro (3-2-1) → la música y el motor del
+  //   jugador se sueltan en el "¡YA!" (loop). startAudio se llama allí, no aquí, para que vaya sincronizado.
+  phase='intro'; introT=0; introRingT=-1; prevPlayerRank=null; ended=false; runHeld=false;
+  superVal=0; redEntryMoving=false; ghostOn=false; setLane('center');   //+AG reset de carril/boosters por ronda (ballObjs nuevos → material fantasma fuera solo)
+  hideSpectator(); updateControls();
+  window.dbg={ get sim(){return sim;}, get boulderM(){return boulderM;}, get audio(){return audio;}, get soundOn(){return musicOn||sfxOn;}, get scene(){return scene;}, get cam(){return cam;},
+    //+AG ganchos de depuración de la capa de agencia (solo preview: fase/barra/bolas/refresco de controles)
+    get phase(){return phase;}, set phase(v){phase=v;}, get superVal(){return superVal;}, set superVal(v){superVal=v;},
+    get ballObjs(){return ballObjs;}, updateControls };   // depuración (preview)
+}
+
+function react(ev){ const f=sim.f;
+  for(const k of ev.kill){ const o=ballObjs[k.id]; if(!o) continue; const c=sat(PAL[sim.balls[k.id].team].color);
+    emo.fire(k.id,'susto',PRIO.susto,8,f); shake=Math.max(shake,0.34);
+    // KILL FEED (canvas, historial atenuado): el "quién" inmediato lo pone el mini-tag EN el punto de la ejecución
+    killfeed.push(sim.balls[k.id].team, sim.balls[k.id].num);
+    ktags.spawn(sim.balls[k.id].team, sim.balls[k.id].num, k.x, k.y, 0, 1);
+    if(k.cause==='semaforo'){   // PILLADA MOVIÉNDOSE EN ROJO: EJECUCIÓN espectacular (v6) — que se lea sin dudas
+      // "se movió en rojo → le disparan". Haz vertical BLANCO desde el cielo + fogonazo que llena el frame +
+      // estallido + shake fuerte + micro-freeze (preview) para que el momento ATERRICE.
+      shake=Math.max(shake, FX_LOUD?0.72:0.5);
+      if(FX_LOUD){ hitstop=Math.max(hitstop,4); exFlash(); beamShoot(k.x,k.y);
+        flashAt(k.x, camY, 0xff1c1c, 78, 0.82);   // fogonazo GRANDE centrado en pantalla (rojo, va en el vídeo)
+        P.ring(k.x,k.y,[1,0.25,0.2],2.0); P.ring(k.x,k.y,[1,0.5,0.4],1.3); }
+      for(let q=0;q<10;q++) P.emit(k.x,k.y+q*0.6, 0.6, 1.0,0.12,0.10, 0,0,0, 0.35);   // columna de luz roja (el "rayo")
+      P.burst(k.x,k.y,0.45,[1.0,0.15,0.12],FX_LOUD?40:26,8.0); P.burst(k.x,k.y,0.4,[1,1,1],14,5.0); P.ring(k.x,k.y,[1,0.2,0.2],1.1);
+      flashAt(k.x,k.y,0xff2020,1.6,0.95);
+    } else if(k.cause==='losa'){   // MINA: DETONACIÓN (culminó el parpadeo) — explosión roja/naranja fuerte que MATA, inconfundible
+      shake=Math.max(shake, FX_LOUD?0.5:0.4);
+      flashAt(k.x,k.y,0xff5a14,2.6,0.95);                                        // fogonazo naranja de detonación
+      P.ring(k.x,k.y,[1,0.45,0.08],1.9); P.ring(k.x,k.y,[1,0.8,0.3],1.15);        // ondas de choque naranja→amarillo
+      P.burst(k.x,k.y,0.55,[1,0.5,0.1],FX_LOUD?36:24,9.0); P.burst(k.x,k.y,0.42,[1,1,0.6],13,5.2);   // metralla ardiente + chispas
+      P.burst(k.x,k.y,0.4,c,10,4.5);                                             // + algo del color de la bola destruida
+    } else {   // trampas/boulder/eliminated: estallido del color de la bola
+      P.burst(k.x,k.y,0.45,c,18,6.0); P.burst(k.x,k.y,0.45,[1,1,1],9,4.0);
+      P.ring(k.x,k.y,c,0.6); flashAt(k.x,k.y,new THREE.Color(c[0],c[1],c[2]),0.6,0.8);
+    }
+  }
+  for(const s of ev.save){ if(s.id==null) continue;
+    if(STAR_ON && s.star){   // RECHAZO de la PROTECCIÓN (spec 2026-07-18): la estrella APARTA el hazard con un destello
+      // PEQUEÑO + fricción — se lee "una protección lo rechaza", NO una explosión blanca gigante. THROTTLE por bola:
+      // el contacto continuo (bola sentada en mina, boulder pasándole por encima varios frames) genera un save POR
+      // FRAME; sin throttle era un estroboscopio blanco (queja del dueño). Así sale UN rechazo por oleada de peligro.
+      const o=ballObjs[s.id];
+      if(!(o && sim.f-(o.lastStarHitF??-999) < 24)){   // 24f ≈ 0.8s entre rechazos de la misma bola
+        if(o){ o.lastStarHitF=sim.f; o.squash=Math.max(o.squash||0,0.5); }   // squash genérico = fricción del rechazo
+        const mag=(s.id%2===0);                                              // alterna la onda cian/magenta por bola
+        flashAt(s.x,s.y,0xffffff,1.3,0.6);                                   // flash blanco LOCAL (~BALL_R*1.7), peak moderado (antes *5, 0.9)
+        P.ring(s.x,s.y, mag?[1,0.35,1]:[0.35,1,1], 0.7);                     // UNA onda pequeña (cian o magenta)
+        starsInv.burst(s.x,s.y,0.5,0.7);                                     // estrellas moderadas
+        P.burst(s.x,s.y,0.5, mag?[1,0.6,1]:[0.6,1,1], 7, 3.6);              // pocas chispas del color de la protección
+        emo.fire(s.id,'chuleria',PRIO.chuleria,12,f); shake=Math.max(shake,0.12);
+      }
+    } else emo.fire(s.id,'susto',PRIO.susto,10,f);   // near-miss normal (frenó a tiempo): susto sutil, NO estrella
+  }
+  // AVISO DE DETECCIÓN (telegrafía JUSTO antes de que baje la mirilla): al PRIMER frame moviéndose en rojo,
+  // anillo rojo que se expande + destello → deja claro POR QUÉ la van a apuntar (se movió en rojo). Exagerado en v6.
+  for(const sc of ev.scan){ P.ring(sc.x,sc.y,[1,0.15,0.15],FX_LOUD?1.9:1.3); P.ring(sc.x,sc.y,[1,0.3,0.3],FX_LOUD?1.25:0.9);
+    flashAt(sc.x,sc.y,0xff3020,FX_LOUD?1.4:0.9,0.7);
+    if(sc.id!=null) emo.fire(sc.id,'susto',PRIO.susto,10,f); }
+  for(const c of ev.cross){ const col=sat(PAL[c.team].color); P.burst(c.x!=null?c.x:0,GATE_Y,0.3,col,14,3.5);
+    emo.fire(c.id,'extasis',PRIO.extasis,16,f); }
+  // BARRERA: chispas/escombros al golpear; estallido grande al reventarse. v7 = HIELO (astillas blanco/cian).
+  const dR=ARTV?0.80:0.62, dG=ARTV?0.94:0.46, dB=ARTV?1.0:0.30;   // color de escombros (hielo vs ladrillo)
+  for(const bz of ev.barrier){
+    if(bz.broken){ shake=Math.max(shake,0.4);
+      for(let k=0;k<4;k++) P.burst(bz.xc+(Math.random()-.5)*18, bz.y, 0.5, dR,dG,dB, 22, 7.0);
+      P.ring(bz.xc,bz.y,ARTV?[0.7,0.9,1.0]:[0.7,0.5,0.3],1.4); flashAt(bz.xc,bz.y,ARTV?0xcdeeff:0xffe0a0,1.6,0.7); }
+    else if(Math.random()<0.5){ const dx=(Math.random()-.5)*20; P.emit(bz.xc+dx, bz.y-0.6, 0.7, dR,dG,dB, (Math.random()-.5)*3, -1-Math.random()*2,0, 0.4); }   // escombros al embestir
+  }
+  // ENTRADA EN ROJO ("¡ALTO!"): destello rojo grande centrado en pantalla (WebGL → va en el vídeo) + tirón de
+  // cámara. Junto al tinte rojo de la escena (sync) hace que "se ponga rojo" se note muchísimo (feedback del dueño).
+  for(const ph of ev.phase){ if(ph.color==='red'){ shake=Math.max(shake,0.30); flashAt(camX,camY,0xff1810,54,0.52); } }   // centrado en la CÁMARA (en short también se mueve en X)
+}
+
+// === PASO DE SIM (30 Hz) con snapshot para INTERPOLAR el render a 60 fps ===
+function stepOnce(){
+  for(let i=0;i<sim.balls.length;i++){ const b=sim.balls[i]; px[i]=b.x; py[i]=b.y; }
+  for(let i=0;i<sim.geo.boulders.length;i++) prevBoulderX[i]=sim.boulderX(i);
+  sim.playerRun(runHeld);   //+AG vuelca CORRER (mantener pulsado) a la sim ANTES del paso: motor ON mientras esté pulsado
+  const wasDecided = sim.decision_frame!==null;   //+AG detectar la resolución en ESTE paso (fanfarria + espectador en vivo)
+  const ev=sim.step(); if(ev) react(ev);
+  //+AG SFX EN VIVO + estado del jugador (espectador). Con un jugador el futuro no se puede precalcular.
+  if(ev){ const p=sim.balls[0];
+    //+AG carga del SÚPER NITRO (patrón superVal del Cazador, atada a INPUTS — se gana jugando bien):
+    //   · PARÓN LIMPIO APURADO: te movías al llegar el rojo y frenaste dentro del margen → +0.08..0.22
+    //     (cuanto más tarde paras dentro de la ventana de gracia+lock, más carga: apurar tiene premio)
+    //   · ADELANTAR corriendo en verde: +0.05 por bola viva que estaba por delante y ya no (px/py = frame previo)
+    //   · goteo por correr en verde: +0.0012/frame (~0.036/s) — llena solo, pero MUY despacio
+    if(phase==='play' && sim.decision_frame===null && p.rank===null && !p.safe){
+      const sp=Math.hypot(p.vx,p.vy);
+      if(sim.color==='green' && runHeld && sp>0.8) superVal=Math.min(1,superVal+0.0012);
+      if(sim.color==='green' && runHeld){ let ov=0;
+        for(const b of sim.balls){ if(b.id===0||b.rank!==null||b.safe) continue;
+          if(py[b.id]>py[0] && b.y<p.y) ov++; }
+        if(ov) superVal=Math.min(1,superVal+0.05*ov); }
+      for(const ph of ev.phase){ if(ph.color==='red'){ redEntryMoving = sp>sim.vThresh; redEntryF=sim.f; } }
+      if(sim.color==='red' && redEntryMoving && sp<=sim.vThresh){
+        const apuro=Math.min(1,(sim.f-redEntryF)/36);   // 36f ≈ gracia(18)+apuntado: parar en el último suspiro = máx
+        superVal=Math.min(1,superVal+0.08+0.14*apuro); redEntryMoving=false; }
+      if(sim.color==='green') redEntryMoving=false;
+    }
+    liveSfx(ev, !wasDecided && sim.decision_frame!==null);
+    if(prevPlayerRank===null){
+      const pwin = sim.winner_team!==null && p.team===sim.winner_team && (p.safe || sim.decision_frame!==null);
+      if(p.rank===-1){ prevPlayerRank=p.rank; showSpectator(false); }        // te eliminaron (semáforo/mina/boulder)
+      else if(pwin){ prevPlayerRank=1; showSpectator(true); }                // cruzaste primero (o sobreviviste la mejor): ¡ganaste!
+    }
+  }
+}
+
+function updateSemaforo(){
+  // al decidirse el punto, el farol se APAGA (docs/44 §12: cierre "oddly satisfying", la maquinaria se detiene)
+  if(sim.decision_frame!==null){ document.getElementById('ring').className='';
+    document.getElementById('lampR').className='lamp'; document.getElementById('lampA').className='lamp'; document.getElementById('lampG').className='lamp';
+    duckMusic('off'); return; }
+  const f=sim.f, framesToEnd=sim.phaseEnd-f, WARN=18;
+  const amber=sim.color==='green' && framesToEnd<=WARN;
+  const state = amber?'amber':(sim.color==='red'?'red':'green');
+  document.getElementById('ring').className = state;
+  // SELLO DEL MODO: la música suena en VERDE (y ámbar) y se APAGA en ROJO (se avanza solo mientras suena, §3).
+  duckMusic(sim.color==='red' ? 'red' : 'green');
+  document.getElementById('lampR').className = 'lamp'+(state==='red'?' on-red':'');
+  document.getElementById('lampA').className = 'lamp'+(state==='amber'?' on-amber':'');
+  document.getElementById('lampG').className = 'lamp'+(state==='green'?' on-green':'');
+}
+
+function sync(dt, a=1){
+  const celebrating = sim.winner_team!==null && sim.decision_frame!==null;
+  const f=sim.f, G=sim.geo, fF=Math.max(0,sim.f-1+a), fr=dt*FPS;
+  // CELEBRACIÓN: coloca a las campeonas (equipo ganador, cruzadas) en FILA centrada bajo el trofeo, para que se
+  // lean como ganadoras y no como "puntos apilados" detrás de la copa (feedback del dueño 2026-07-18). Render-only.
+  let winRow=null, winCX=0, winY=0, winSp=0;
+  if(celebrating){ winRow=sim.byTeam[sim.winner_team].filter(x=>x.safe).sort((p,q)=>p.num-q.num);
+    const cvw=cam.right-cam.left, cvh=cam.top-cam.bottom;
+    winCX=cam.position.x; winY=cam.position.y - cvh*0.06; winSp=Math.min(2.8, cvw*0.11); }
+  updateSemaforo();
+
+  // MOOD v7.1: la escena se TIÑE DE ROJO en ROJO (peligro, se nota muchísimo), cálida en verde. Transición ~0.15s.
+  if(ARTV && ambLight){ const red=sim.color==='red'&&sim.decision_frame===null, kk=Math.min(1,0.22*fr+0.06);
+    ambLight.color.lerp(red?AMB_RED:AMB_WARM, kk); ambLight.intensity += ((red?AMB_I_RED:AMB_I_WARM)-ambLight.intensity)*kk;
+    if(keyLight){ keyLight.color.lerp(red?KEY_RED:KEY_WARM, kk); keyLight.intensity += ((red?KEY_I_RED:KEY_I_WARM)-keyLight.intensity)*kk; } }
+
+  // MINAS: al pararse una bola encima, la mina SE ARMA con un parpadeo ROJO que ACELERA (pi-pi-pi) hasta volverse
+  // constante y DETONAR — la muerte 'losa' dispara la explosión (arriba en react). armF: 0→ARM_F. Render puro.
+  const MINE_ARM_F=15;   // = ARM_F en redlight/sim.js (si cambia allí, cámbialo aquí)
+  for(let i=0;i<mineM.length;i++){ const pad=sim.pads[i], ud=mineM[i].userData;
+    let target=0;
+    if(pad.armed){ const p=Math.min(1,pad.armF/MINE_ARM_F);
+      const blink=0.5+0.5*Math.cos(Math.PI*pad.armF*pad.armF/9);   // fase ∝ armF² → el parpadeo se ACELERA (pi-pi-pi)
+      const solid=p*p*p;                                           // hacia el final se satura: el parpadeo pasa a CONSTANTE
+      target=(0.4+0.6*p)*((1-solid)*blink+solid);                  // intensidad sube y el rojo se vuelve fijo justo antes del boom
+      ud.glow.scale.setScalar(1+0.6*p); }                          // + el halo CRECE al acercarse la detonación
+    else ud.glow.scale.setScalar(1);
+    ud.glow.material.opacity += (target-ud.glow.material.opacity)*Math.min(1,0.8*fr+0.2); }   // poco suavizado: que se LEA el parpadeo
+  // BARRERA: v7.2 = rejilla de ladrillos de hielo que se rompen UNO A UNO por donde tocan; brillan más cuanto
+  // menos vida ("brilla brilla brilla") y estallan al romperse. v5 = losa que se encoge y enrojece.
+  for(let i=0;i<barrierM.length;i++){ const bar=sim.barriers[i], ud=barrierM[i].userData;
+    if(ud.ice){
+      if(bar.broken){ while(ud.aliveCount>0) breakBrick(barrierM[i], bar); continue; }   // reventar los que queden
+      const frac=Math.max(0,bar.hp/bar.hp0), target=Math.ceil(frac*ud.total);
+      while(ud.aliveCount>target) breakBrick(barrierM[i], bar);                            // rompe hasta dejar los que corresponden al HP
+      ud.mat.emissiveIntensity = 0.3 + (1-frac)*(0.55+0.5*Math.abs(Math.sin(fF*0.5)));    // brilla más cuanto menos vida
+      ud.mat.color.setRGB(0.78+0.16*(1-frac),0.93+0.05*(1-frac),1.0);                     // y se blanquea
+    } else {
+      if(bar.broken){ barrierM[i].visible=false; continue; }
+      const frac=Math.max(0.12,bar.hp/bar.hp0); ud.slab.scale.z=frac; ud.slab.position.z=0.95*frac;
+      ud.mat.emissive.setRGB(0.5*(1-frac),0.05,0);
+    } }
+  // BOULDERS: interpolar X (el grupo) + girar solo la ROCA (no la sombra) proporcional al avance = "rueda"
+  for(let i=0;i<boulderM.length;i++){ const grp=boulderM[i], bx=prevBoulderX[i]+(sim.boulderX(i)-prevBoulderX[i])*a;
+    const last=grp.userData.lastX==null?bx:grp.userData.lastX; grp.position.x=bx;
+    if(grp.userData.rock) grp.userData.rock.rotation.y -= (bx-last)*0.9; grp.userData.lastX=bx; }
+
+  // bolas
+  for(let i=0;i<sim.balls.length;i++){ const b=sim.balls[i], o=ballObjs[i];
+    if(b.rank===-1){ o.g.visible=false; continue; } o.g.visible=true;
+    let bx=px[i]+(b.x-px[i])*a, by=py[i]+(b.y-py[i])*a;
+    let jump=0;
+    if(b.safe){ if(o.cf===undefined)o.cf=f; const amp=(celebrating && b.team===sim.winner_team)?1.0:0.5; jump=Math.abs(Math.sin((fF-o.cf)*0.22))*amp; }
+    const champ = celebrating && b.safe && b.team===sim.winner_team;
+    // Fila de campeonas bajo el trofeo: SOLO en torneo, donde son VARIAS y hay que ordenarlas. En el short hay UNA
+    // y ya está en la meta: moverla al centro del encuadre se leía como un teletransporte al medio del mapa
+    // (feedback del dueño 2026-07-20). Se queda donde llegó, saltando, y es la CÁMARA la que va a por ella.
+    if(champ && !sim.individual){ const idx=winRow.indexOf(b); bx=winCX+(idx-(winRow.length-1)/2)*winSp; by=winY; }
+    o.g.position.set(bx, by+jump, 0.5);
+    const lose = celebrating && b.team!==sim.winner_team;
+    o.g.scale.setScalar(b.scale*(lose?0.85:(champ?(sim.individual?1.30:1.15):1)));   // campeona: en short, plano de premio => algo mayor
+    o.sqUpdate(bx, by+jump, dt);
+    // CONTRASTE DE LA INFRACCIÓN (opción C, 2026-07-08): en ROJO, las cumplidoras (paradas) se ATENÚAN a
+    // "estatua" fría y la que SIGUE deslizándose queda ENCENDIDA + deja ESTELA + anillo. Así se aprecia que esa
+    // bola PARÓ TARDE (patinó de más) respecto a las demás, y por eso la marcan/ejecutan (la sim v6 alarga el
+    // patinaje ~1.7→2.7 diámetros justo para que este deslizón se vea).
+    if(o.mat && FX_LOUD){ const inRed = sim.color==='red' && !b.safe && sim.decision_frame===null;
+      const sp=Math.hypot(b.vx,b.vy), moving = inRed && sp>sim.vThresh, statue = inRed && !moving, k=Math.min(1,0.35*fr+0.12);
+      // culpable = ROJO PELIGRO encendido; estatua = apagada (sin tinte, para no enturbiar con la escena roja)
+      const tEI = moving ? (1.10+0.40*Math.abs(Math.sin(fF*1.3))) : (statue ? 0.08 : 0.20);
+      o.mat.emissiveIntensity += (tEI-o.mat.emissiveIntensity)*k;
+      const [cr,cg,cb]=o.col, er=moving?1.0:cr, eg=moving?0.14:cg, eb=moving?0.10:cb;   // moviéndose en rojo → emisivo ROJO
+      const E=o.mat.emissive; E.setRGB(E.r+(er-E.r)*k, E.g+(eg-E.g)*k, E.b+(eb-E.b)*k);
+      if(moving){ const n=sp>1e-4?1/sp:0;                                               // ESTELA roja opuesta a la velocidad = "sigue deslizándose en rojo"
+        if(Math.random()<Math.min(1,1.7*fr)){ P.emit(bx-b.vx*n*0.5, by-b.vy*n*0.5, 0.55, 1.0,0.14,0.10, -b.vx*0.6,-b.vy*0.6,0, 0.32);
+          P.emit(bx+(Math.random()-.5)*0.5, by+(Math.random()-.5)*0.5, 0.5, 1.0,0.5,0.35, (Math.random()-.5)*1.5,(Math.random()-.5)*1.5,0, 0.24); }
+        if(f%5===0) P.ring(bx,by,[1,0.16,0.12],0.9); }                                  // anillo de peligro ROJO bajo la culpable
+    }
+    // AURA de PROTECCIÓN (EVENTO breve — NO estado): solo durante la ventana de rechazo `b.starF` (~0.67s tras
+    // salvarse de un golpe REAL). Antes lo pinté como estado constante (bola en el suelo del embudo) → activo el 66%
+    // del clip y hasta 22 bolas a la vez con círculo = ruido ("se está yendo la olla", Jaime 2026-07-18). Ahora es un
+    // destello de rim cian↔magenta SOLO en la bola recién rechazada, que se desvanece con la ventana → sincronizado
+    // con el rechazo blanco (react, throttled). Standalone: b.starF nunca se pone (no hay embudo) → aura nunca sale.
+    if(auraM[i]){ const au=auraM[i];
+      const rem=(STAR_ON && b.starF) ? (b.starF - sim.f) : 0;      // frames que quedan de la ventana de protección
+      if(rem>0 && !b.safe){ const w=Math.min(1,rem/20); au.visible=true; au.position.set(bx,by,0.52);
+        const ph=fF*0.9+i*1.7;                                     // parpadeo rápido durante el flare
+        au.material.opacity=w*(0.30+0.30*(0.5+0.5*Math.sin(ph)));  // se DESVANECE con la ventana (w→0)
+        const tc=0.5+0.5*Math.sin(ph*0.5);
+        au.material.color.setRGB(1-0.7*tc, 0.4+0.6*tc, 1.0);       // cian↔magenta (huecos sin equipo, aguanta el rojo)
+        au.scale.setScalar(1.05+0.12*(1-w));                       // se expande un pelín al apagarse
+      } else au.visible=false;
+    }
+    // ESCUDO (icono heraldo con check): FLOTA sobre el borde superior de la bola (no la tapa → no compite con el
+    // flash/aura que ocurren ENCIMA de la bola a la vez, que era por lo que "no se veía"). Ligado a la ventana de
+    // protección `b.starF`, pero con POP-IN, HOLD ~0.4s más allá de la ventana y FADE → tiempo de registrarlo. Arranca
+    // ~3f tras el golpe (primero el golpe, luego ves el escudo que lo paró). ?shield=0 lo apaga. Standalone: nunca.
+    if(SHIELD_ON && shieldM[i]){ const sh=shieldM[i], ud=sh.userData;
+      const rem=(STAR_ON && b.starF) ? (b.starF - sim.f) : 0;
+      if(rem>0 && rem<=17 && !b.safe){                              // rem 20→17 = ~3f tras el golpe
+        if(ud.until==null || ud.until < sim.f) ud.born=sim.f;       // (re)nace con pop si estaba apagado
+        ud.until = sim.f + 12;                                      // y AGUANTA 12f (~0.4s) tras el último golpe
+      }
+      if(ud.until!=null && sim.f<=ud.until && b.rank!==-1 && !b.safe){
+        sh.visible=true;
+        const pop=Math.min(1,(sim.f-(ud.born||sim.f))/5);          // pop-in de escala en ~5f
+        const fade=Math.min(1,(ud.until-sim.f)/8);                 // fade-out en los últimos ~8f
+        sh.scale.setScalar((0.6+0.4*pop)*(0.97+0.05*Math.sin(fF*0.35)));   // pop + respiración mínima
+        sh.material.opacity=0.62*pop*fade;                         // semitransparente: se ve la bola por debajo
+        sh.position.set(bx, by, 0.62);                             // CENTRADO sobre la bola (Jaime lo prefiere tapándola)
+      } else sh.visible=false;
+    }
+    // emociones (despiertas): meta=extasis; perder=triste; en ROJO parado=concentrada/tensa (NUNCA dormida);
+    // avanzando en verde=concentrada; detectada moviéndose=susto
+    if(b.safe){ if(celebrating && b.team===sim.winner_team) emo.ambient(i,'extasis',PRIO.extasis);
+      else if(celebrating) emo.ambient(i,'triste',4); else emo.ambient(i,'extasis',PRIO.extasis); }
+    else if(b.detectF>0 || (sim.color==='red' && Math.hypot(b.vx,b.vy)>0.5)) emo.ambient(i,'susto',PRIO.susto);
+    else if(sim.color==='red') emo.ambient(i,'concentrada',PRIO.concentrada);   // parada/vigilante en rojo (NUNCA dormida)
+    else if((b.y-py[i])>0.02) emo.ambient(i,'concentrada',PRIO.concentrada);      // avanzando en verde
+    else emo.ambient(i,'neutral',0);
+    o.setExpr(emo.resolve(i,f));
+  }
+  // MIRILLAS (medidor de peligro ROJO): el disco interior CRECE hasta LLENAR el aro mientras la bola sigue en
+  // rojo; al llenarse (charge→1) es cuando dispara. Palpita cada vez más rápido cerca del tope. Haz rojo la señala.
+  let si=0;
+  for(let i=0;i<sim.balls.length && si<scopePool.length;i++){ const b=sim.balls[i];
+    if(b.rank===null && b.targeted){ const bx=px[i]+(b.x-px[i])*a, by=py[i]+(b.y-py[i])*a; const sc=scopePool[si], abm=aimBeams[si]; si++;
+      sc.visible=true; sc.position.set(bx,by,0.92);
+      const ch=1-Math.max(0,b.targetedF/18);                          // CARGA: 0 recién apuntada → 1 dispara
+      const pulse=1+0.10*Math.sin(fF*(1.0+5*ch));                     // late más rápido cuanto más llena
+      sc.scale.setScalar((FX_LOUD?2.15:1.9)*pulse); sc.rotation.z=fF*0.05;
+      sc.userData.fill.scale.setScalar(0.06+0.98*ch);                // el disco CRECE hasta llenar el aro
+      sc.userData.fill.material.opacity=0.32+0.55*ch;
+      sc.userData.ring.material.opacity=0.55+0.45*ch;
+      abm.visible=true; abm.position.set(bx,by,0.5); abm.material.color.set(0xff2020);
+      abm.scale.set(0.4+0.6*ch,1,1); abm.material.opacity=0.18+0.5*ch; } }
+  for(;si<scopePool.length;si++){ scopePool[si].visible=false; aimBeams[si].visible=false; }
+  // FOGONAZOS (pool)
+  for(const m of flashPool){ if(!m.userData.active) continue; m.userData.life+=dt; const t=m.userData.life/0.5;
+    m.scale.setScalar(m.userData.r*(1+t*3.5)); m.material.opacity=m.userData.peak*Math.max(0,1-t);
+    if(t>=1){ m.visible=false; m.userData.active=false; } }
+  // HAZ DE DISPARO (fire-and-fade): se abre y se desvanece rápido
+  for(const m of firePool){ if(m.userData.life<0) continue; m.userData.life+=dt; const t=m.userData.life/0.26;
+    m.scale.set(3.2*(1+t*1.3),1,1); m.material.opacity=Math.max(0,1-t);
+    if(t>=1){ m.visible=false; m.userData.life=-1; } }
+  //+AG ANILLO TÚ sobre tu bola (interpolado). BLANCO normal, ROJO parpadeante si el francotirador te apunta
+  //   (plb.targeted) = "van a por TI, ¡para!". Se oculta al morir/celebrar. La etiqueta TÚ es DOM proyectado.
+  const plb=sim.balls[0];
+  if(plb.rank!==-1 && !celebrating){
+    const pbx=px[0]+(plb.x-px[0])*a, pby=py[0]+(plb.y-py[0])*a, aimed=plb.targeted;
+    youRing.visible=true; youRing.position.set(pbx,pby,0.9);
+    youRing.material.color.set(aimed?0xff2020:0xffffff);
+    youRing.material.opacity = aimed?(0.72+0.28*Math.abs(Math.sin(fF*1.6))):(0.60+0.22*Math.abs(Math.sin(fF*0.4)));
+    _v3.set(pbx, pby+BALL_R*2.2, 0.9).project(cam);
+    youLbl.style.left=((_v3.x*0.5+0.5)*innerWidth).toFixed(0)+'px';
+    youLbl.style.top=((-_v3.y*0.5+0.5)*innerHeight).toFixed(0)+'px';
+    youLbl.style.opacity = plb.safe?'0':'1';
+  } else { youRing.visible=false; youLbl.style.opacity='0'; }
+  //+AG feedback de boosters sobre TU bola (lenguaje visual del motor, no inventar códigos nuevos):
+  //   Nitro/Súper = la ESTELA CIAN compartida del chasis (= velocidad); Súper además la dobla (más gorda) y
+  //   suelta chispas DORADAS (oro=acción); Fantasma = bola translúcida (swap de material) + jirones pálidos.
+  { const pI=sim.pIn, alive=plb.rank===null && !plb.safe && sim.decision_frame===null;
+    const nOn=alive && f<pI.nitroUntil, sOn=alive && f<pI.superUntil, gOn=alive && f<pI.ghostUntil;
+    const pbx=px[0]+(plb.x-px[0])*a, pby=py[0]+(plb.y-py[0])*a;
+    if((nOn||sOn) && Math.hypot(plb.vx,plb.vy)>1.2){
+      P.trail(pbx,pby,plb.vx,plb.vy);
+      if(sOn){ P.trail(pbx,pby,plb.vx,plb.vy);
+        P.emit(pbx,pby,0.5, 1.0,0.83,0.25, -plb.vx*0.4,-plb.vy*0.4,0, 0.30); }
+    }
+    if(gOn && f%2===0) P.emit(pbx+(Math.random()-.5)*0.3, pby+(Math.random()-.5)*0.3, 0.45, 0.82,0.86,1.0, -plb.vx*0.3,-plb.vy*0.3,0, 0.38);
+    setGhostLook(gOn);
+  }
+  updateHud();
+}
+
+function frameCamera(dt, a=1){ shake=Math.max(0,shake-dt*1.5);
+  if(SHORT_ON && !SHORT_CAM_OLD){ frameCameraShort(dt); return; }
+  // objetivo: la META en celebración; si no, el frente de las bolas vivas. Si el líder muere, el frente BAJA,
+  // pero la cámara NO salta atrás (retrocede muy despacio) → sin "teletransporte".
+  if(sim.decision_frame!==null){ camTargetY = GATE_Y-3; }
+  //+AG POR EQUIPOS (Fase 3): en embed la camara sigue A TU BOLA (torneo enmarca todo el ancho → basta con la Y;
+  //   tu bola nunca sale de plano en X). Sin jugador vivo cae al frente del grupo (broadcast). El eje X ya es el
+  //   campo completo, asi que centrar en tu Y mantiene la "camara de jugador" sin tocar el look standalone.
+  else if(EMBED && sim.balls[0].rank===null && !sim.balls[0].safe){ camTargetY = sim.balls[0].y - CAM_BACK + 5; }
+  else { let frontY=null; for(const b of sim.balls){ if(b.rank===null && !b.safe){ if(frontY===null||b.y>frontY)frontY=b.y; } }
+    if(frontY!==null) camTargetY = frontY - CAM_BACK + 5; }
+  camTargetY = Math.max(SPAWN_Y+6, Math.min(GATE_Y-3, camTargetY));
+  // suavizado INDEPENDIENTE del framerate (a 165fps se comportaba x5 más rápido) + límite de velocidad → nunca salta
+  const k = camTargetY>camY ? 3.2 : 1.1;                 // avanza más rápido que retrocede (al morir el líder, no salta)
+  let step = (camTargetY-camY)*(1-Math.exp(-k*dt));
+  const maxStep = 16*dt;                                  // <=16 u/s → pan siempre suave
+  camY += Math.max(-maxStep, Math.min(maxStep, step));
+  frameOrtho(cam, FIELD_W*camMargin, 0, camY, shake, 'width'); }
+
+// SHORT 9:16: cámara que ENCUADRA AL GRUPO (ver bloque CAM_FIT). Devuelve el frame más cerrado que contiene a
+// todas las bolas en juego con margen, entre minW y maxW.
+function frameCameraShort(dt){
+  const CROWN = sim.decision_frame!==null && sim.winner_team!==null;
+  //+AG PCAM: cámara de JUGADOR activa (embed, tu bola viva y aún sin cruzar). Se usa también abajo para
+  //    SALTARSE el clamp vertical de pista: esa regla era del VIDEO (no enseñar delantal vacío) y aquí
+  //    clavaba la cámara a media pista (y≈14.8) mientras tú salías en y≈2 — el plano se quedaba mirando
+  //    los boulders en vez de a ti (feedback del dueño 2026-07-22).
+  const PCAM = EMBED && !CROWN && sim.balls[0].rank===null && !sim.balls[0].safe;
+  let wantW, cxT, cyT;
+  if(CROWN){
+    // CORONACIÓN: plano corto sobre la CAMPEONA, que está en la meta (medido: y≈44.2 = GATE_Y+0.2, no se mueve
+    // de ahí). Antes se encuadraban también las perdedoras repartidas por la pista → la campeona salía pequeña y
+    // descolgada, y parecía que "se teletransportaba al medio del mapa" (feedback del dueño 2026-07-20). Ahora la
+    // cámara se va con ella y la línea de meta entra en cuadro: se entiende que ha LLEGADO.
+    const w = sim.balls.find(b=>b.team===sim.winner_team) || sim.balls[0];
+    wantW = CAM_FIT.crownW;
+    cxT = w.x;
+    cyT = w.y - 0.02*(wantW*16/9);        // casi centrada: la copa cabe encima sin pisarla y el damero entra justo debajo
+  } else if(PCAM){
+    //+AG cámara de JUGADOR: centrada en TU bola, ancho fijo PCAM_W. El sesgo hacia la meta te deja a ~40% de
+    //    la parte BAJA del cuadro: ves lo que viene, y tú siempre en plano. Si mueres o cruzas la meta, cae al
+    //    encuadre de grupo de abajo (modo espectador). La coronación manda igual.
+    const p=sim.balls[0];
+    wantW = PCAM_W;
+    cxT = p.x;
+    cyT = p.y + CAM_FIT.aheadFrac*(wantW*16/9);
+  } else {
+    // 1) caja de las que siguen en carrera
+    let x0=Infinity, x1=-Infinity, y0=Infinity, y1=-Infinity, n=0;
+    for(const b of sim.balls){ if(b.rank!==null || b.safe) continue; n++;
+      if(b.x<x0)x0=b.x; if(b.x>x1)x1=b.x; if(b.y<y0)y0=b.y; if(b.y>y1)y1=b.y; }
+    if(!n){ x0=x1=camX; y0=y1=camY; }                    // sin nadie en plano: mantener lo último (no dar bandazos)
+    // 2) ancho pedido: el que hace caber la caja por ANCHO y por ALTO (el frame es 9:16 → el alto pesa 16/9)
+    wantW = Math.min(CAM_FIT.maxW, Math.max(CAM_FIT.minW,
+      (x1-x0) + 2*CAM_FIT.padX,
+      ((y1-y0) + 2*CAM_FIT.padY) * 9/16));
+    cxT = (x0+x1)/2;
+    cyT = (y0+y1)/2 + CAM_FIT.aheadFrac*(wantW*16/9);     // sesgo hacia donde se corre
+  }
+  // 3) suavizado del zoom: ABRIR rápido (nadie se queda fuera), CERRAR lento (sin bombeo). En la coronación cierra
+  //    rápido: es el plano de premio y solo dura 1.5 s.
+  const kz = CROWN ? 4.5 : (wantW>camW ? 7.0 : 1.3);
+  if(camWarm) camW += (wantW-camW)*(1-Math.exp(-kz*dt));
+  else camW = wantW;                                     // 1er frame de la ronda: el encuadre ya sale hecho
+  const visW = camW, visH = camW*16/9, halfW = visW/2;
+  // 4) centro, clampado a los muros y al largo de la pista (sin franjas vacías). Si el frame es MÁS alto que la
+  //    pista (zoom mínimo), los dos límites verticales se cruzan → centrar en la pista y ya.
+  if(CROWN){
+    // En la coronación manda la campeona: se la deja centrada aunque haya llegado pegada a un muro. Solo se
+    // limita a que no entre más de ~1 u de delantal (si no, un tercio del plano se va en fondo violeta).
+    const limC = Math.max(0, FIELD_W/2 + 1.0 - halfW);
+    cxT = Math.max(-limC, Math.min(limC, cxT));
+  } else if(PCAM){
+    //+AG jugador: clamp SOLO en X (muros). En Y manda tu bola — sin el clamp de pista del vídeo, que en un
+    //    plano de 27.6 u de alto te dejaba fuera de cuadro en la salida. Enseñar algo de delantal vacío
+    //    por debajo del spawn es aceptable en el juego; perderte a TI, no.
+    const lim = Math.max(0, FIELD_W/2 - halfW);
+    cxT = Math.max(-lim, Math.min(lim, cxT));
+  } else {
+    const lim = Math.max(0, FIELD_W/2 - halfW);
+    cxT = Math.max(-lim, Math.min(lim, cxT));
+    const lo = SPAWN_Y-2.5+visH/2, hi = SAFE_Y+2.5-visH/2;
+    cyT = lo>hi ? (lo+hi)/2 : Math.max(lo, Math.min(hi, cyT)); }
+  if(!camWarm){ camX=cxT; camY=cyT; camWarm=true; }
+  else { camX += Math.max(-14*dt, Math.min(14*dt, (cxT-camX)*(1-Math.exp(-3.0*dt))));
+         camY += Math.max(-20*dt, Math.min(20*dt, (cyT-camY)*(1-Math.exp(-3.4*dt)))); }
+  // 5) el frame 9:16 pedido SIEMPRE cabe: en 1080×1920 sale exacto; en preview apaisado se ve de más a los lados.
+  const A = innerWidth/innerHeight, byH = A >= 9/16;
+  frameOrtho(cam, byH?visH:visW, camX, camY, shake, byH?'height':'width'); }
+
+// ---- HUD (DOM, solo preview): minimapa vertical de posiciones. El MARCADOR de supervivencia va en el CANVAS
+//      (chassis/censusboard.mjs => sale en el video). Fuera los pips-a-3 de "puntos": aqui se SOBREVIVE, no se
+//      puntua (feedback del dueno 2026-07-18). El #top DOM queda vacio a proposito. ----
+let miniDots=[], pipEls=[];
+function buildHud(){ const top=document.getElementById('top'); top.innerHTML='';
+  const mini=document.getElementById('mini'); mini.innerHTML='<div class="fin"></div>'; miniDots=[];
+  for(let i=0;i<sim.balls.length;i++){ const c=sat(PAL[sim.balls[i].team].color), hex=`rgb(${c.map(v=>Math.round(v*255)).join(',')})`;
+    const d=document.createElement('div'); d.className='md'; d.style.background=hex; mini.appendChild(d); miniDots.push(d); }
+  // La fila de pips DOM la SUSTITUYE la franja SURVIVORS del canvas (2026-07-19): dos HUD en la misma esquina
+  // superior se pisaban. Se conserva el código tras ?pips=1 por si hace falta comparar.
+  const pipsEl=document.getElementById('pips'); pipsEl.innerHTML=''; pipEls=[];
+  if(sim.individual && PIPS_DOM){ pipsEl.style.display='flex';
+    for(let i=0;i<sim.balls.length;i++){ const c=sat(PAL[sim.balls[i].team].color), hex=`rgb(${c.map(v=>Math.round(v*255)).join(',')})`;
+      const p=document.createElement('div'); p.className='pip'; p.style.background=hex; pipsEl.appendChild(p); pipEls.push(p); }
+  } else pipsEl.style.display='none';
+}
+function updateHud(){
+  const span=GATE_Y-SPAWN_Y;
+  for(let i=0;i<miniDots.length;i++){ const b=sim.balls[i], d=miniDots[i];
+    d.classList.toggle('dead', b.rank===-1); d.classList.toggle('fin', b.safe);
+    const y = b.safe?GATE_Y:b.y; d.style.bottom=(Math.max(0,Math.min(1,(y-SPAWN_Y)/span))*100)+'%'; }
+  // pips: viva=encendida · cruzada=encendida+glow dorado · muerta=atenuada+gris
+  for(let i=0;i<pipEls.length;i++){ const b=sim.balls[i], p=pipEls[i];
+    if(b.rank===-1){ p.style.opacity='0.16'; p.style.filter='grayscale(1)'; }
+    else { p.style.opacity='1'; p.style.filter = b.safe?'drop-shadow(0 0 6px #ffd34d)':'none'; } }
+  // CTA like/suscríbete (👍🔔) solo al coronar al ganador (SHORT). Animado POR FRAME (determinista en captura, usa sim.f).
+  const cta=document.getElementById('cta');
+  if(cta){ if(sim.individual && sim.winner_team!==null && sim.decision_frame!==null){
+      const k=Math.min((sim.f-sim.decision_frame)/15,1), t=sim.f*0.2;
+      const appear=0.6+0.4*k, pulse=1+0.09*Math.sin(t), bob=Math.sin(t*0.8)*6;
+      cta.style.opacity=k.toFixed(3); cta.style.transform=`translateX(-50%) translateY(${bob.toFixed(1)}px) scale(${(appear*pulse).toFixed(3)})`;
+      const ic=cta.querySelector('.ic'); if(ic){ const g=(8+12*(0.5+0.5*Math.sin(t*1.3)))|0; ic.style.boxShadow=`0 0 ${g}px rgba(255,205,55,.9),0 4px 16px rgba(0,0,0,.5)`; }
+      cta.querySelectorAll('.sp').forEach((s,i)=>{ const ph=t*1.7+i*2.3; s.style.opacity=(0.3+0.7*(0.5+0.5*Math.sin(ph))).toFixed(2); s.style.transform=`scale(${(0.65+0.6*(0.5+0.5*Math.sin(ph))).toFixed(2)})`; });
+      const th=cta.querySelector('.thumb'); if(th){ const tp=Math.max(0,Math.sin(t*1.7)); th.style.transform=`scale(${(1+0.17*tp).toFixed(3)}) rotate(${(-8*tp).toFixed(1)}deg)`; }
+      const be=cta.querySelector('.bell'); if(be) be.style.transform=`rotate(${(17*Math.sin(t*2.7)).toFixed(1)}deg)`;
+    } else cta.style.opacity='0'; }
+}
+
+//+AG INTRO: cuenta atrás 3-2-1-¡YA! con la SIM EN PAUSA (antes arrancaba de golpe). La cámara va de un plano
+//   cerrado sobre TU bola a la vista del grupo, con onda/anillo sobre ti = "este eres tú". El motor del jugador y
+//   la música se sueltan en el "¡YA!". Copia el patrón del Cazador, adaptado a la cámara 9:16 de este modo.
+function introCamera(t){
+  const p=sim.balls[0];
+  const k=Math.min(1, t/(INTRO_DUR*0.72)), e=1-Math.pow(1-k,3);   // easeOutCubic hasta el encuadre del grupo
+  const A=innerWidth/innerHeight, byH=A>=9/16;
+  const w=6.0+(CAM_FIT.maxW-6.0)*e, visH=w*16/9;                  // de cerca de tu bola → grupo
+  const cx=p.x*(1-e), cy=p.y+((SPAWN_Y+4)-p.y)*e;                 // recentra hacia la parrilla
+  const halfW=w/2, lim=Math.max(0,FIELD_W/2-halfW); const ccx=Math.max(-lim,Math.min(lim,cx));
+  const lo=SPAWN_Y-2.5+visH/2, hi=SAFE_Y+2.5-visH/2; const ccy=lo>hi?(lo+hi)/2:Math.max(lo,Math.min(hi,cy));
+  camX=ccx; camY=ccy; camW=w; camWarm=true;                       // deja el encuadre "caliente" para que play no dé un salto
+  frameOrtho(cam, byH?visH:w, ccx, ccy, 0, byH?'height':'width');
+}
+function introUI(t){
+  const c=document.getElementById('count'), n=document.getElementById('countN'), p=sim.balls[0];
+  c.classList.add('show');
+  if(t-introRingT>0.42){ introRingT=t; P.ring(p.x,p.y,[1,1,1],1.3); P.ring(p.x,p.y,[0.33,0.9,0.5],0.95); }   // onda "este eres tú" (verde = correr)
+  if(t<3){ const cur=3-Math.floor(t), frac=t-Math.floor(t);
+    n.textContent=String(cur); n.style.color='#fff';
+    n.style.transform=`scale(${(1+0.45*(1-frac)).toFixed(2)})`; n.style.opacity=(0.5+0.5*(1-frac)).toFixed(2); }
+  else { n.textContent=T().go; n.style.color='#7cff9a'; n.style.transform='scale(1)'; n.style.opacity='1'; }
+}
+
+// PREVIEW loop: sim 30 Hz con acumulador; render interpola a la tasa del monitor
+const clock=new THREE.Clock(); let acc=0;
+let fpsT=0, fpsN=0, fpsSteps=0, fpsMax=0; const fpsEl=document.getElementById('fps');
+function loop(){ const dt=Math.min(clock.getDelta(),0.05);
+  //+AG fase de intro: la sim NO avanza; se ve el estado inicial, la cámara revela quién eres y corre la cuenta atrás.
+  if(phase==='intro'){
+    introT+=dt;
+    sync(dt,1); P.update(dt); stars.update(dt); starsInv.update(dt); wind.update(dt); updateControls();
+    introCamera(introT); introUI(introT);
+    celeb.update(false, cam, dt, null); census.update(dt, cam, sim.balls, rlCensus); ktags.update(dt); renderFrame();
+    if(introT>=INTRO_DUR){ phase='play'; acc=0; clock.getDelta(); document.getElementById('count').classList.remove('show');
+      if(sim) sim.playerEngage();   //+AG desde el "¡YA!" manda el input: no pulsar CORRER = frenar
+      startAudio(); }               //+AG suelta la música (loop) sincronizada con f=0
+    requestAnimationFrame(loop); return;
+  }
+  acc+=dt; const STEP=1/FPS; let steps=0;
+  if(hitstop>0){ hitstop--; acc=0; }   // micro-freeze tras una ejecución: NO avanza la sim (determinista: mismos pasos, solo retrasados) pero SÍ sigue renderizando shake/partículas
+  else while(acc>=STEP && !sim.done && steps<3){ stepOnce(); acc-=STEP; steps++; }   // cap 3: si va MUY lento, no teletransporta más de eso
+  if(steps>=3) acc=0;   // se satura → suelta el atraso (evita bola de nieve de teletransportes)
+  if(sim.done) acc=0;
+  //+AG ronda resuelta: en EMBED emite el resultado al shell tras dejar ver la celebración (~900ms), patrón Cazador.
+  if(sim.done && !ended){ ended=true;
+    if(EMBED) setTimeout(emitEnd, 900); }
+  const a=(sim.done||NO_INTERP)?1:Math.min(1,acc/STEP);
+  sync(dt,a); P.update(dt); stars.update(dt); starsInv.update(dt); wind.update(dt); frameCamera(dt,a); updateControls();
+  celeb.update(sim.winner_team!==null && sim.decision_frame!==null, cam, dt, sim.winner_team!==null?PAL[sim.winner_team].color:null);
+  census.update(dt, cam, sim.balls, rlCensus); if(CUPO_ON) cupo.update(dt, cam, sim.placed, sim.survTarget); if(sim.decision_frame!==null) killfeed.dismiss(); killfeed.update(dt, cam); ktags.update(dt); renderFrame();
+  // contador de FPS + pasos de sim por frame (si "sim/f" sube de 1 = va lento y teletransporta)
+  fpsT+=dt; fpsN++; fpsSteps+=steps; if(steps>fpsMax)fpsMax=steps;
+  if(fpsT>=0.5){ const fps=Math.round(fpsN/fpsT); if(fpsEl) fpsEl.textContent='fps '+fps+'  ·  sim/f '+(fpsSteps/fpsN).toFixed(1)+(fpsMax>1?' ⚠'+fpsMax:''); fpsT=0;fpsN=0;fpsSteps=0;fpsMax=0; }
+  requestAnimationFrame(loop);
+}
+// CAPTURA 60 fps (2 subframes interpolados por paso de sim)
+const CAP_FPS=60, CAP_SUB=CAP_FPS/FPS; let capK=0;
+window.__cap = {
+  step(){ if(!sim.done && capK%CAP_SUB===0) stepOnce(); capK++;
+    const a=(sim.done||NO_INTERP)?1:(capK%CAP_SUB===0?1:(capK%CAP_SUB)/CAP_SUB); const dt=1/CAP_FPS;
+    sync(dt,a); P.update(dt); stars.update(dt); starsInv.update(dt); wind.update(dt); frameCamera(dt,a);
+    celeb.update(sim.winner_team!==null && sim.decision_frame!==null, cam, dt, sim.winner_team!==null?PAL[sim.winner_team].color:null);
+  census.update(dt, cam, sim.balls, rlCensus); if(CUPO_ON) cupo.update(dt, cam, sim.placed, sim.survTarget); if(sim.decision_frame!==null) killfeed.dismiss(); killfeed.update(dt, cam); ktags.update(dt); renderFrame();
+    return sim.done && capK%CAP_SUB===0; },
+  done(){ return sim.done; }, info(){ return { fps:CAP_FPS, frame:sim.f, cap:capK, done:sim.done, seed:sim.seed, winner:sim.winner_team }; },
+};
+addEventListener('resize',()=>{ renderer.setSize(innerWidth,innerHeight); bloom.setSize(innerWidth,innerHeight); });
+
+//+AG PUESTO del jugador al resolverse — UN SOLO criterio, el MISMO con que la sim corona (_finishByProgress): PROGRESO
+//   hacia la meta. Cruzadas primero por orden de cruce; las demas (vivas o muertas) por Y de PROGRESO desc — una
+//   muerta cuenta la Y DONDE MURIO (killed_y), como hace la sim en su sumY. Antes las muertas iban por CUANDO cayeron
+//   (killed_f, tiempo) → la sim podia coronar por sumY a una que murio mas ADELANTE y no salia 1ª (medido 8/200 en
+//   individual). Con Y-de-progreso el coronado (winner_team) es SIEMPRE el 1º. Empate → menor dorsal. Devuelve 1..N.
+function placeOf(id){
+  const score=b=> b.safe ? GATE_Y : (b.rank===-1 ? (b.killed_y ?? b.y) : b.y);
+  const key=b=> b.safe ? [0, b.rank, 0] : [1, -score(b), b.num];
+  const ord=[...sim.balls].sort((a,b)=>{ const A=key(a),B=key(b); return A[0]-B[0]||A[1]-B[1]||A[2]-B[2]; });
+  return ord.findIndex(b=>b.id===id)+1;
+}
+//+AG CLASIFICACION DE EQUIPOS por PROGRESO — replica EXACTA del comparador con que la sim decide winner_team
+//   (_checkDecided/_finishByProgress): 1) mas bolas en meta · 2) empate con cruces → el que cruzo ANTES (menor
+//   lastCrossPlaced) · 3) mayor suma de Y (a salvo=GATE_Y, muerta=Y de muerte, viva=Y) · 4) bola mas adelantada ·
+//   5) menor dorsal. Antes se ordenaba por la MEJOR bola suelta (min placeOf) → un equipo con 1 bola rapida adelantaba
+//   al de mas cruces y NO era el coronado (medido 64/200). Ahora el coronado es SIEMPRE el 1º.
+function teamOrderByProgress(){
+  const cr=t=>sim.crossed[t], lcp=t=>sim.lastCrossPlaced[t];
+  const scy=b=> b.safe ? GATE_Y : (b.rank===-1 ? (b.killed_y ?? b.y) : b.y);
+  const sumY=t=>sim.byTeam[t].reduce((a,b)=>a+scy(b),0);
+  const bestY=t=>Math.max(...sim.byTeam[t].map(b=>b.safe?GATE_Y:b.y));
+  const bestNum=t=>{ let by=-1,num=99; for(const b of sim.byTeam[t]){ const y=b.safe?GATE_Y:b.y; if(y>by||(y===by&&b.num<num)){by=y;num=b.num;} } return num; };
+  return sim.teams.map((_,t)=>t).sort((a,b)=>{
+    if(cr(a)!==cr(b)) return cr(b)-cr(a);
+    if(cr(a)>0 && lcp(a)!==lcp(b)) return lcp(a)-lcp(b);
+    if(sumY(a)!==sumY(b)) return sumY(b)-sumY(a);
+    if(bestY(a)!==bestY(b)) return bestY(b)-bestY(a);
+    return bestNum(a)-bestNum(b);
+  });
+}
+//+AG cartel de ESPECTADOR: al ganar/morir se ocultan los controles y se explica el estado. Reset en buildSim.
+//+AG EMITIR RESULTADO (embed): lo llaman el final natural de la ronda Y el boton SALIR del cartel de espectador
+//   (feedback Jaime 2026-07-23: al eliminarte no habia salida). Mismo calculo -> mismo puesto y mismas copas.
+let emitted=false;
+//+AG CLASIFICACION REAL para el shell (bug: la tabla de Resultados se inventaba los puestos). Reusa placeOf, el
+//   MISMO criterio con el que ya se emitia playerPlace. Solo lee la sim.
+function standingsPayload(){
+  return sim.balls.map(b=>({ b, p:placeOf(b.id) })).sort((x,y)=>x.p-y.p)
+    .map(x=>({ place:x.p, ballId:x.b.id, teamIdx:x.b.team, isPlayer:x.b===sim.balls[0],
+      color:[x.b.color[0],x.b.color[1],x.b.color[2]] }));
+}
+function emitEnd(){
+  if(emitted || !EMBED) return; emitted=true;
+  const pp=placeOf(0);
+  //+AG POR EQUIPOS (Fase 3): puesto del EQUIPO por PROGRESO (teamOrderByProgress = el criterio con que la sim corona);
+  //   en INDIVIDUAL, win->1/else 0. Antes era la MEJOR bola suelta y no coincidia con el coronado (medido 64/200).
+  let teamPlace, tst=null;
+  if(sim.individual===false){ const order=teamOrderByProgress();
+    teamPlace=order.indexOf(sim.balls[0].team)+1;
+    tst=order.map((t,i)=>({ place:i+1, teamIdx:t, isPlayerTeam:t===sim.balls[0].team, color:[...sim.teams[t].color] })); }
+  else teamPlace=(sim.winner_team!==null && sim.balls[0].team===sim.winner_team)?1:0;
+  //+AG standings + color REAL del ganador para el disco de campeon del shell (antes el disco salia siempre rojo).
+  //+AG winnerColor = color de lo que el MOTOR ha coronado (sim.winner_team) = lo que el jugador vio celebrar. La
+  //   tabla puede ordenar por otro criterio (el que paga copas); el shell corona la fila del coronado, no la 1a.
+  const st=standingsPayload(), wt=sim.winner_team;
+  const winnerColor = (wt!=null && sim.teams[wt]) ? [...sim.teams[wt].color] : (st[0] ? st[0].color : null);
+  try{ parent.postMessage({type:'bt:matchEnd', mode:'redlight', seed, playerPlace:pp, teamPlace, winnerTeam:sim.winner_team, winnerColor, standings:st, teamStandings:tst, durationF:sim.f}, '*'); }catch(e){}
+}
+function showSpectator(win){
+  const sp=document.getElementById('spectator'), ti=document.getElementById('specTitle'), su=document.getElementById('specSub');
+  const place=placeOf(0);
+  const t=T();
+  ti.textContent = win ? t.specWin : t.specLose;
+  ti.style.color = win ? '#ffd23f' : '#ff6a5a';
+  su.textContent = win ? t.specWinSub(sim.balls.length) : t.specSub(ord(place), sim.balls.length);
+  sp.classList.add('show'); if(EMBED) sp.classList.add('embed');   //+AG en embed sale el boton SALIR
+  document.getElementById('controls').classList.add('dead'); youLbl.style.opacity='0';
+}
+//+AG SALIR: cobra el puesto ya conseguido y devuelve al shell (mismo camino que el final natural).
+document.getElementById('specExit').onclick=()=>{ ended=true; emitEnd(); };
+function hideSpectator(){ document.getElementById('spectator').classList.remove('show'); document.getElementById('controls').classList.remove('dead'); }
+
+//+AG CONTROLES: CORRER (mantener) domina; FRENAZO (recarga ~3s, tecla F); carriles ←/→ o 1/2/3; boosters
+//   A/S/D = Nitro/Fantasma/Súper (mismo trío de teclas que el Cazador; el frenazo cede la S al Fantasma).
+//   Touch-first (pointer) + teclado (espacio/↑ = correr).
+const bRun=document.getElementById('bRun'), bBrake=document.getElementById('bBrake'), cdBrake=document.getElementById('cdBrake');
+const bLaneL=document.getElementById('bLaneL'), bLaneC=document.getElementById('bLaneC'), bLaneR=document.getElementById('bLaneR');
+const bNitro=document.getElementById('bNitro'), bGhost=document.getElementById('bGhost'), bSup=document.getElementById('bSup');
+const cdNitro=document.getElementById('cdNitro'), cdGhost=document.getElementById('cdGhost'), cdSup=document.getElementById('cdSup');
+const LANES=['left','center','right'];
+function setRun(on){ runHeld=on && phase==='play'; bRun.classList.toggle('hold', runHeld); }
+function doBrake(){ if(sim && phase==='play' && sim.playerBrake()) bBrake.classList.remove('ready'); }
+//+AG carril: la INTENCIÓN cambia al instante (vale hasta en la intro); la bola tarda lo que tarde la física
+function setLane(k){ if(!sim || !sim.playerLane(k)) return;
+  bLaneL.classList.toggle('on', k==='left'); bLaneC.classList.toggle('on', k==='center'); bLaneR.classList.toggle('on', k==='right'); }
+function shiftLane(d){ if(!sim) return; const i=LANES.indexOf(sim.pIn.lane); setLane(LANES[Math.max(0,Math.min(2,i+d))]); }
+function doNitro(){ if(sim && phase==='play') sim.playerNitro(); }
+function doGhost(){ if(sim && phase==='play') sim.playerGhost(); }
+function doSuper(){ if(sim && phase==='play' && superVal>=1 && sim.playerSuper()){ superVal=0;
+  const p=sim.balls[0]; flashAt(p.x,p.y,0xffd34d,1.5,0.85); P.ring(p.x,p.y,[1,0.83,0.3],0.8); } }   // flash DORADO al soltarlo (oro=acción)
+// CORRER: pointer (mantener). pointerdown captura para recibir el up aunque salga del botón.
+bRun.addEventListener('pointerdown',e=>{ e.preventDefault(); bRun.setPointerCapture?.(e.pointerId); setRun(true); });
+bRun.addEventListener('pointerup',  e=>{ e.preventDefault(); setRun(false); });
+bRun.addEventListener('pointercancel',()=>setRun(false));
+bRun.addEventListener('pointerleave',()=>{ if(!bRun.hasPointerCapture) setRun(false); });
+bRun.addEventListener('contextmenu',e=>e.preventDefault());
+bBrake.addEventListener('pointerdown',e=>{ e.preventDefault(); doBrake(); });
+bLaneL.addEventListener('pointerdown',e=>{ e.preventDefault(); setLane('left'); });
+bLaneC.addEventListener('pointerdown',e=>{ e.preventDefault(); setLane('center'); });
+bLaneR.addEventListener('pointerdown',e=>{ e.preventDefault(); setLane('right'); });
+bNitro.addEventListener('pointerdown',e=>{ e.preventDefault(); doNitro(); });
+bGhost.addEventListener('pointerdown',e=>{ e.preventDefault(); doGhost(); });
+bSup.addEventListener('pointerdown',e=>{ e.preventDefault(); doSuper(); });
+function updateControls(){
+  if(!sim){ return; } const p=sim.balls[0], f=sim.f, dead=p.rank!==null||sim.decision_frame!==null||phase!=='play';
+  // CORRER se pinta ROJO en fase roja del semáforo (aviso de "si corres ahora, te delatas")
+  bRun.classList.toggle('red', sim.color==='red' && sim.decision_frame===null && phase==='play');
+  bRun.disabled=dead; if(dead){ runHeld=false; bRun.classList.remove('hold'); }
+  const bd=Math.max(0, sim.pIn.brakeCd - f), ready=!dead && bd<=0;
+  bBrake.disabled=dead; bBrake.classList.toggle('ready', ready);
+  cdBrake.textContent = dead ? '' : (bd>0 ? Math.ceil(bd/30)+'s' : 'F');
+  //+AG boosters (patrón Cazador): recarga en segundos en .cd; activo = .act; cargado = .ready
+  const nd=Math.max(0,sim.pIn.nitroCd-f), gd=Math.max(0,sim.pIn.ghostCd-f);
+  const nAct=f<sim.pIn.nitroUntil, gAct=f<sim.pIn.ghostUntil, sAct=f<sim.pIn.superUntil;
+  bNitro.disabled=dead||(!nAct&&nd>0); bNitro.classList.toggle('act',nAct&&!dead); bNitro.classList.toggle('ready',!dead&&!nAct&&nd<=0);
+  cdNitro.textContent = dead?'':(nAct?T().on:(nd>0?Math.ceil(nd/30)+'s':'A'));
+  bGhost.disabled=dead||(!gAct&&gd>0); bGhost.classList.toggle('act',gAct&&!dead); bGhost.classList.toggle('ready',!dead&&!gAct&&gd<=0);
+  cdGhost.textContent = dead?'':(gAct?T().on:(gd>0?Math.ceil(gd/30)+'s':'S'));
+  const sReady=superVal>=1&&!dead&&!sAct;
+  bSup.disabled=dead||(!sReady&&!sAct); bSup.classList.toggle('ready',sReady); bSup.classList.toggle('act',sAct&&!dead);
+  cdSup.textContent = dead?'':(sAct?T().on:(sReady?T().ready:Math.round(superVal*100)+'%'));
+  for(const b of [bLaneL,bLaneC,bLaneR]) b.disabled=dead;
+}
+addEventListener('keydown',e=>{
+  if(e.repeat){ return; }
+  if(e.key===' '||e.key==='ArrowUp'){ e.preventDefault(); setRun(true); return; }
+  if(e.key==='f'||e.key==='F'){ doBrake(); return; }
+  if(e.key==='a'||e.key==='A'){ doNitro(); return; }
+  if(e.key==='s'||e.key==='S'){ doGhost(); return; }
+  if(e.key==='d'||e.key==='D'){ doSuper(); return; }
+  if(e.key==='1'){ setLane('left'); return; }
+  if(e.key==='2'){ setLane('center'); return; }
+  if(e.key==='3'){ setLane('right'); return; }
+  //+AG ←/→ mueven la intención de carril mientras JUEGAS; de espectador/intro conservan el cambio de semilla (debug)
+  if(e.key==='ArrowLeft'||e.key==='ArrowRight'){
+    const playing = phase==='play' && sim && sim.balls[0].rank===null && sim.decision_frame===null;
+    if(playing){ e.preventDefault(); shiftLane(e.key==='ArrowLeft'?-1:1); return; }
+    if(e.key==='ArrowRight'){ seed++; buildSim(seed); } else { seed=Math.max(1,seed-1); buildSim(seed); } return; }
+  if(e.key==='r'||e.key==='R')buildSim(seed); });
+addEventListener('keyup',e=>{ if(e.key===' '||e.key==='ArrowUp'){ setRun(false); } });
+
+// ---- AUDIO (preview): música del modo por Web Audio. 4 variantes que el dueño generó (Suno) rotadas por
+// semilla. SIN SFX todavía (sfxmap.mjs es el siguiente bloque); solo la música + el sello rojo/verde (§3). ----
+const AUDIO_SR=44100;
+//+AG música del modo VENDORIZADA a mp3 (fuera la rotación RL_TRACKS que dependía del Drive). musicGain 0.42 =
+//   base del ducking (duckMusic baja a 0.10 en rojo → el "sello" Luz Roja/Verde: se avanza solo mientras suena).
+const audio=createWebAudio({ musicUrl:'../_music/redlight.mp3', musicGain:0.42 });
+//+AG doc 38 Fase 1: DOS flags de audio (musica / efectos por separado). En EMBED los manda el shell via
+//   &music=/&sfx= (defecto ON). En standalone arrancan mudos y el boton #snd los enciende (solo fuera del shell).
+let musicOn=false, sfxOn=false, lastMusicColor=null;
+if(EMBED){ musicOn = _q0.get('music')!=='0'; sfxOn = _q0.get('sfx')!=='0'; }
+function startAudio(){
+  if(!musicOn || !audio.unlocked) return;
+  audio.start(null, AUDIO_SR);   //+AG solo la música en loop; los SFX se disparan EN VIVO (liveSfx): con un jugador el futuro no se precalcula
+  lastMusicColor=null;           // el ducking se re-aplica en el 1er updateSemaforo
+}
+//+AG SFX EN VIVO: MISMA síntesis del vídeo (buildSfxBuffer de sfxmap) pero disparada evento a evento al ocurrir,
+//   como en el port del Cazador (el accumulateEvents del vídeo solo valdría sin jugador).
+let liveGain=null;
+function liveSfx(ev, won){
+  if(!sfxOn || !audio.unlocked || !audio.ctx) return;
+  const reb={}; let any=false;
+  for(const k in ev){ if(ev[k] && ev[k].length){ reb[k]=ev[k].map(e=>({...e, f:0})); any=true; } }
+  if(!any && !won) return;
+  const buf=buildSfxBuffer({ events:reb, decision_frame: won?0:null, f:FPS*4, seed:(seed*7919+sim.f)>>>0, SR:AUDIO_SR });
+  if(!liveGain){ liveGain=audio.ctx.createGain(); liveGain.gain.value=0.92; liveGain.connect(audio.ctx.destination); }
+  const ab=audio.ctx.createBuffer(1, buf.length, AUDIO_SR); ab.getChannelData(0).set(buf);
+  const src=audio.ctx.createBufferSource(); src.buffer=ab; src.connect(liveGain); src.start();
+}
+// baja la música en ROJO, la devuelve en VERDE/ÁMBAR, la apaga al decidirse. Solo actúa en transiciones.
+// MUSIC_MODE: 'low' (por defecto: baja MUCHO en rojo pero sigue de fondo bajo la alarma) | 'cont' (no baja) | 'duck' (silencio).
+function duckMusic(mode){
+  if(!musicOn || !audio.hasMusic) return;
+  if(mode===lastMusicColor) return; lastMusicColor=mode;
+  const base=0.42, RED_LOW=0.10;
+  if(mode==='off') audio.setMusicGain(0.0, 0.4);          // fin: se apaga suave
+  else if(mode==='red') audio.setMusicGain(MUSIC_MODE==='duck'?0.0 : MUSIC_MODE==='cont'?base : RED_LOW, 0.16);   // rojo: baja mucho (o silencio/igual según flag)
+  else audio.setMusicGain(base, 0.16);                    // verde/ámbar: vuelve a pleno
+}
+
+const params=new URLSearchParams(location.search);
+//+AG semilla del JUEGO: ?seed la fija (debug/replay); sin ella cada partida es NUEVA (reloj fuera de la Sim) → no
+//   memorizable (regla del proyecto). El shell crea un iframe nuevo por partida → semilla nueva cada vez.
+const seedParam=params.get('seed');
+seed = seedParam ? Math.max(1,+seedParam) : (((Date.now()&0xffffff)>>>0)||1);
+const NO_INTERP = params.get('interp')==='0';
+// Música en ROJO: 'low' (por defecto = baja MUCHO pero sigue de fondo bajo la alarma) · ?music=cont (no baja) ·
+// ?music=duck (silencio total, el "sello" Luz Roja/Verde antiguo). La alarma (sfxmap) suena en cualquier caso.
+//+AG doc 38 Fase 2: el shell reusa &music= para el ON/OFF de audio (1/0). Aqui 'music' era el modo de ducking
+//   ('low'|'cont'|'duck'); coaccionamos a valores validos (embed manda '1'/'0' → cae a 'low', el defecto de siempre).
+const _mm=params.get('music'); const MUSIC_MODE = (_mm==='duck'||_mm==='cont'||_mm==='low')?_mm:'low';
+// El bloom SELECTIVO (chassis) deja MEDIO MAPA NEGRO en este modo (confirmado por el dueño: con nobloom desaparece;
+// bug de tamaño en sus composers que no pude ver desde la pestaña sin tamaño del preview). Como las partículas y
+// zapes van en mezcla ADITIVA (brillan igual sin bloom), este modo va SIN bloom por defecto. ?bloom=1 lo reactiva.
+const NO_BLOOM = params.get('bloom')!=='1';
+function renderFrame(){ if(NO_BLOOM) renderer.render(scene,cam); else bloom.renderScene(); }
+// FRANCOTIRADOR EXAGERADO por defecto (decisión del dueño 2026-07-08: que la muerte por moverse en rojo se lea
+// sin dudas). ?fx=old vuelve a la mirilla sutil anterior, para A/B antes/después.
+const FX_LOUD = params.get('fx')!=='old';
+// destello DOM de ejecución (preview): pincela rojo toda la pantalla un frame y se desvanece. NO sale en el
+// vídeo (la captura es solo del canvas); el fogonazo del vídeo es el flashAt WebGL grande.
+const exEl=document.getElementById('exflash');
+function exFlash(){ exEl.classList.add('hit'); requestAnimationFrame(()=>requestAnimationFrame(()=>exEl.classList.remove('hit'))); }
+
+// ============================================================================
+//+AG i18n DEL MODO (feedback Jaime 2026-07-23: "el juego por defecto tiene que estar en ingles").
+//   El idioma lo MANDA EL SHELL por ?lang= (juego.html lo cuelga de la URL del iframe). Sin ?lang, o con un
+//   idioma no soportado, se queda en INGLES — nunca en espanol, y nunca se mira navigator.language.
+//   Tabla en+es (fallback a en) como el SHELL. Misma terminologia que el shell ("YOU WON!", ordinal 1st/2nd/3rd).
+// ============================================================================
+const I18N={
+  en:{ menu:'← Menu',
+    keys:'HOLD RUN on green &nbsp;·&nbsp; ←/→ or 1/2/3 = lane &nbsp;·&nbsp; F = brake &nbsp;·&nbsp; A/S/D = nitro/ghost/super &nbsp;·&nbsp; R = new round',
+    you:'YOU', youIntro:'This is you', go:'GO!', on:'ON!', ready:'READY',
+    lanes:['◀ LEFT','● CENTER','RIGHT ▶'], run:'RUN', runHold:'HOLD · space/↑',
+    brake:'BRAKE', nitro:'⚡ NITRO', ghost:'👻 GHOST', sup:'⭐ SUPER',
+    specWin:'YOU WON!', specLose:"YOU'RE OUT",
+    specWinSub:n=>`You crossed the finish · 1st of ${n}`,
+    specSub:(p,n)=>`Now spectating · ${p} of ${n}`,
+    specKey:'You keep watching the match &nbsp;·&nbsp; <kbd>R</kbd> = new round',
+    specExit:'▸ SEE RESULTS', sound:'Turn sound on',
+    err:'The 3D modules failed to load from the CDN. Open this with internet access.' },
+  es:{ menu:'← Menú',
+    keys:'MANTÉN CORRER en verde &nbsp;·&nbsp; ←/→ o 1/2/3 = carril &nbsp;·&nbsp; F = frenazo &nbsp;·&nbsp; A/S/D = nitro/fantasma/súper &nbsp;·&nbsp; R = otra ronda',
+    you:'TÚ', youIntro:'Este eres tú', go:'¡YA!', on:'¡ON!', ready:'¡YA!',
+    lanes:['◀ IZQUIERDA','● CENTRO','DERECHA ▶'], run:'CORRER', runHold:'MANTÉN · espacio/↑',
+    brake:'FRENAZO', nitro:'⚡ NITRO', ghost:'👻 FANT.', sup:'⭐ SÚPER',
+    specWin:'¡GANASTE!', specLose:'TE ELIMINARON',
+    specWinSub:n=>`Cruzaste la meta · 1º de ${n}`,
+    specSub:(p,n)=>`Ahora eres espectador · puesto ${p} de ${n}`,
+    specKey:'Sigues viendo la partida &nbsp;·&nbsp; <kbd>R</kbd> = otra ronda',
+    specExit:'▸ VER RESULTADOS', sound:'Activar sonido',
+    err:'No cargaron los módulos 3D del CDN. Ábrelo con internet activo.' },
+};
+let LANG='en';
+const T=()=>I18N[LANG]||I18N.en;
+//+AG ordinal de puesto: igual que el del shell (1st/2nd/3rd · 1º) para no dar dos vocabularios del mismo dato
+function ord(n){ if(LANG==='es') return n+'º'; const s=['th','st','nd','rd'], v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); }
+function applyLang(l){
+  const _id=x=>document.getElementById(x);
+  LANG=I18N[l]?l:'en'; const t=T();
+  document.documentElement.lang=LANG;
+  _id('backMenu').textContent=t.menu; _id('keys').innerHTML=t.keys;
+  _id('youlbl').textContent=t.you; _id('countYou').textContent=t.youIntro;
+  ['bLaneL','bLaneC','bLaneR'].forEach((id,i)=>{ _id(id).querySelector('.t').textContent=t.lanes[i]; });
+  _id('bRun').querySelector('.t').textContent=t.run; _id('bRun').querySelector('.k').textContent=t.runHold;
+  _id('bBrake').querySelector('.t').textContent=t.brake; _id('bNitro').querySelector('.t').textContent=t.nitro;
+  _id('bGhost').querySelector('.t').textContent=t.ghost; _id('bSup').querySelector('.t').textContent=t.sup;
+  _id('specKey').innerHTML=t.specKey; _id('specExit').textContent=t.specExit; _id('err').textContent=t.err;
+  const sb=_id('snd'); if(sb) sb.title=t.sound;
+}
+applyLang(params.get('lang'));
+
+buildSim(seed);
+if(EMBED){ const bm=document.getElementById('backMenu'); if(bm) bm.style.display='none'; }   //+AG en embed el shell gestiona el volver
+if(params.get('capture')==='1'){ document.querySelector('.keys').style.display='none'; const _f=document.getElementById('fps'); if(_f) _f.style.display='none';
+  document.getElementById('controls').style.display='none'; youLbl.style.display='none'; }   //+AG sin controles/etiqueta en captura de vídeo
+else {
+  //+AG doc 38 Fase 1: el boton #snd SOLO en standalone (ni captura ni embed). En el shell no existe.
+  if(!EMBED){
+    const sbtn=document.createElement('button'); sbtn.id='snd'; sbtn.textContent='🔇'; sbtn.title=T().sound;
+    document.body.appendChild(sbtn);
+    const upd=()=>{ const on=musicOn||sfxOn; sbtn.textContent=on?'🔊':'🔇'; sbtn.classList.toggle('on',on); };
+    sbtn.onclick=async()=>{
+      if(!audio.unlocked){ sbtn.classList.add('load'); await audio.unlock(); sbtn.classList.remove('load'); }
+      const on=!(musicOn||sfxOn); musicOn=sfxOn=on; upd();
+      if(on){ if(phase==='play') startAudio(); }   //+AG doc 38: NUNCA buildSim (residuo que REINICIABA la ronda); la musica entra donde este
+      else { audio.stop(); }
+    };
+  } else {
+    //+AG doc 38 Fase 1: DESBLOQUEO SIN BOTON en embed: primer input de juego (pointerdown/tecla) desbloquea WebAudio.
+    //   Silencioso; si music/sfx estan OFF no suena. NUNCA reinicia la ronda.
+    const onFirstGesture=async()=>{
+      document.removeEventListener('pointerdown', onFirstGesture, true);
+      document.removeEventListener('keydown', onFirstGesture, true);
+      await audio.unlock();
+      if(musicOn && phase==='play') startAudio();
+    };
+    document.addEventListener('pointerdown', onFirstGesture, true);
+    document.addEventListener('keydown', onFirstGesture, true);
+  }
+  loop();
+}
+</script>
+</body>
+</html>
