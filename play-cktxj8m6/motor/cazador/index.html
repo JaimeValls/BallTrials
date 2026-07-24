@@ -162,6 +162,7 @@ import { EmoBook, PRIO } from '../chassis/emotions.mjs';
 import { createCelebration } from '../chassis/celebration.mjs';
 import { createWebAudio } from '../chassis/webaudio.mjs';
 import { buildSfxBuffer } from './sfxmap.mjs';
+import { createCoach } from '../chassis/coach.mjs';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
 import { runToEnd } from '../chassis/simrun.mjs';
 
 window.addEventListener('error', e => { document.getElementById('err').style.display='grid'; console.error(e.error||e.message); });
@@ -289,6 +290,9 @@ const _v3 = new THREE.Vector3();
 let sim, emo, ballObjs, orbMeshes, shake=0, seed=1, celCam=null, celScale=10, shortOpts={};
 let superVal=0, prevPlayerRank=null;   //+AG carga del senuelo (se gana jugando, docs/20 T1.6) + deteccion de caida del jugador
 let phase='intro', introT=0, introRingT=-1; const INTRO_DUR=3.6;   //+AG cuenta atras + "este eres tu" (sim en pausa)
+//+AG tutorial v2: el COACH congela el mundo mientras pide una accion y lo suelta en cuanto el jugador toca.
+//   Solo lo activa el coach (?tutorial=1); en partida normal es false y el bucle va exactamente igual.
+let coachPaused=false;
 const dangerEl=document.getElementById('danger');
 let prevLock=-1, invertTint=null, invertTintT=0;   // CZ3/CZ2: lock-on + tinte de retícula tras INVERT
 let flashUntil=-1;                                  // docs/46 §4.2: flash de captura, desvanece por frame de sim
@@ -603,6 +607,7 @@ function loop(){
   }
   acc+=dt;
   const STEP=1/FPS; let steps=0;
+  if(coachPaused) acc=0;   //+AG tutorial v2: mundo congelado; el acumulador se vacía para no soltar una ráfaga al reanudar
   while(acc>=STEP && !sim.done && steps<4){ stepOnce(); acc-=STEP; steps++; }
   if(sim.done) acc=0;
   if(sim.done && !ended){ ended=true;   //+AG ronda resuelta: en embed emite el resultado al shell tras dejar ver la celebracion
@@ -853,9 +858,9 @@ if(params.get('capture')==='1'){ document.getElementById('hud').style.display='n
 else loop();
 
 // ============================================================================
-//+AG COACH "CÓMO JUGAR" (?tutorial=1): pasos guiados sobre los CONTROLES REALES (glow en el botón que toca),
-//   leyendo la Sim (solo escribe la barra del señuelo de regalo, ya escribible). El depredador dormido lo pone la
-//   Sim (opts.tutorial). Termina con bt:tutorialEnd. en+es con fallback a inglés. Sin ?tutorial=1 no existe.
+//+AG COACH "CÓMO JUGAR" (?tutorial=1): la máquina de pasos, el foco, la mano y la pausa viven en chassis/coach.mjs
+//   (compartido por los 3 modos). Aquí solo van los TEXTOS y la LISTA DE PASOS del Cazador. El depredador dormido
+//   lo pone la Sim (opts.tutorial). Sin ?tutorial=1 no se llama.
 // ============================================================================
 if(TUTORIAL)(function(){
   const CI={
@@ -876,23 +881,9 @@ if(TUTORIAL)(function(){
         '¡Barra del SEÑUELO llena de regalo! Pulsa ⭐ SEÑUELO (D): el cazador fija a otro',
         'Ese es el CAZADOR. Hoy está dormido — obsérvalo 10s y recuerda su marca de fijado' ] },
   };
-  const C=()=>CI[LANG]||CI.en;
-  const $=x=>document.getElementById(x);
-  const css=document.createElement('style'); css.textContent=`
-    #coach{ position:fixed; top:56px; left:50%; transform:translateX(-50%); z-index:60; max-width:min(92vw,540px);
-      background:#0b1526ee; border:2px solid #ffd700; border-radius:14px; padding:10px 16px; text-align:center;
-      font-weight:900; font-size:clamp(14px,3.6vw,18px); color:#fff; box-shadow:0 6px 24px #000a; pointer-events:none; }
-    #coach .cnum{ display:block; font-size:11px; font-weight:800; color:#ffd700; letter-spacing:.08em; margin-bottom:2px; }
-    #coachExit{ position:fixed; top:10px; left:10px; z-index:61; border:1px solid #ffffff3a; border-radius:10px;
-      background:#0b1526cc; color:#cfe4ff; font-family:inherit; font-weight:800; font-size:13px; padding:7px 12px; cursor:pointer; }
-    .coach-glow{ animation:coachGlow .9s ease-in-out infinite; }
-    @keyframes coachGlow{ 0%,100%{ box-shadow:0 0 0 2px #ffd700, 0 0 18px 4px #ffd70088; } 50%{ box-shadow:0 0 0 5px #ffd700, 0 0 26px 8px #ffd700cc; } }`;
-  document.head.appendChild(css);
-  const bn=document.createElement('div'); bn.id='coach'; bn.style.display='none'; document.body.appendChild(bn);
-  const ex=document.createElement('button'); ex.id='coachExit'; document.body.appendChild(ex);
-  ex.onclick=()=>{ try{ parent.postMessage({type:'bt:tutorialEnd', mode:'cazador', completed:false},'*'); }catch(e){} };
-  //+AG condiciones leídas de la Sim: intención elegida, orbe recogido (events.pickup del jugador), ventanas de
-  //   dash/escudo/señuelo (dash_until/shield_until/aggro_immune_until) y observación del cazador (tiempo).
+  //+AG condiciones leídas de la Sim: intención elegida, orbe recogido (events.pickup del jugador), uso real de
+  //   dash/escudo/señuelo y observación del cazador (tiempo). pause:true = el mundo se congela mientras lees; el
+  //   único paso que no pausa es el de MIRAR al cazador, que es justo la lección de verlo moverse.
   let acc=0, pickBase=0;
   const pk=()=>sim.events.pickup.filter(e=>e.id===0).length;
   //+AG "uso real del botón": los orbes también ponen dash_until/aggro_immune (autocompletaban la lección sin
@@ -902,33 +893,21 @@ if(TUTORIAL)(function(){
     const pd=sim.playerDash.bind(sim);   sim.playerDash  =()=>{ const r=pd(); if(r) used.dash=true;   return r; };
     const ps=sim.playerShield.bind(sim); sim.playerShield=()=>{ const r=ps(); if(r) used.shield=true; return r; };
     const pc=sim.playerDecoy.bind(sim);  sim.playerDecoy =()=>{ const r=pc(); if(r) used.decoy=true;  return r; }; }
-  const STEPS=[
-    { target:'iTum', check:()=> sim.playerIntent==='tumulto' },
-    { target:'iBoo', enter:()=>{ pickBase=pk(); }, check:()=> sim.playerIntent==='booster' && pk()>pickBase },
-    { target:'iEsc', check:()=> sim.playerIntent==='escapar' },
-    { target:'bDash', enter:()=>{ used.dash=false; },   check:()=> used.dash },
-    { target:'bShd',  enter:()=>{ used.shield=false; }, check:()=> used.shield },
-    { target:'bSup',  enter:()=>{ superVal=1; used.decoy=false; }, check:()=> used.decoy },
-    { target:null,   check:dt=>{ acc+=dt; return acc>=10; } },
-  ];
-  let si=-1, glowEl=null, finished=false;
-  function setGlow(id){ if(glowEl){ glowEl.classList.remove('coach-glow'); glowEl=null; }
-    if(id){ glowEl=$(id); if(glowEl) glowEl.classList.add('coach-glow'); } }
-  function showStep(i){ si=i; acc=0; const s=STEPS[i]; if(s.enter) s.enter();
-    bn.style.display=''; bn.innerHTML='<span class="cnum">'+(i+1)+'/'+STEPS.length+'</span>'+C().steps[i];
-    setGlow(s.target); }
-  function finish(){ finished=true; setGlow(null);
-    bn.innerHTML='<span class="cnum">'+STEPS.length+'/'+STEPS.length+'</span>'+C().done;
-    setTimeout(()=>{ try{ parent.postMessage({type:'bt:tutorialEnd', mode:'cazador', completed:true},'*'); }catch(e){} }, 2000); }
-  let lastT=performance.now();
-  function tick(){ if(finished) return; requestAnimationFrame(tick);
-    const now=performance.now(), dt=Math.min(0.1,(now-lastT)/1000); lastT=now;
-    ex.textContent=C().exit; hook();
-    if(!sim || phase!=='play') return;
-    if(si<0){ showStep(0); return; }
-    if(STEPS[si].check(dt)){ si+1<STEPS.length ? showStep(si+1) : finish(); }
-  }
-  requestAnimationFrame(tick);
+  createCoach({
+    mode:'cazador', i18n:CI, lang:()=>LANG,
+    isPlaying:()=> !!sim && phase==='play',
+    setPaused:v=>{ coachPaused=v; },
+    onTick:hook,   //+AG re-envuelve las acciones si la sim se reconstruye (tecla R)
+    steps:[
+      { target:'iTum', pause:true,  linger:2.0, check:()=> sim.playerIntent==='tumulto' },
+      { target:'iBoo', pause:true,  linger:1.0, enter:()=>{ pickBase=pk(); }, check:()=> sim.playerIntent==='booster' && pk()>pickBase },
+      { target:'iEsc', pause:true,  linger:2.0, check:()=> sim.playerIntent==='escapar' },
+      { target:'bDash', pause:true, linger:1.4, enter:()=>{ used.dash=false; },   check:()=> used.dash },
+      { target:'bShd',  pause:true, linger:1.4, enter:()=>{ used.shield=false; }, check:()=> used.shield },
+      { target:'bSup',  pause:true, linger:1.8, enter:()=>{ superVal=1; used.decoy=false; }, check:()=> used.decoy },
+      { target:null,   pause:false, enter:()=>{ acc=0; }, check:dt=>{ acc+=dt; return acc>=10; } },
+    ],
+  });
 })();
 </script>
 </body>

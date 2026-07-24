@@ -192,6 +192,7 @@ import { itemTexture } from '../chassis/itemgen.mjs';
 import { createWebAudio } from '../chassis/webaudio.mjs';
 import { buildSfxBuffer } from './sfxmap.mjs';
 import { runToEnd } from '../chassis/simrun.mjs';
+import { createCoach } from '../chassis/coach.mjs';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
 
 window.addEventListener('error', e => { document.getElementById('err').style.display='grid'; console.error(e.error||e.message); });
 
@@ -346,6 +347,9 @@ let pegFx=null, quakeUntil=-999;   // look nuevo: flash de peg por impacto + ven
 //   fase de partida (menu/intro/play, patron cazador), jingle de victoria una sola vez, throttle de bump en vivo.
 let aspaMs=[], platMs=[], prevAspaU=[], prevPlatX=[];
 let phase='menu', introT=0, introRingT=-1; const INTRO_DUR=3.6;
+//+AG tutorial v2: el COACH congela el mundo mientras pide una acción (el jugador lee sin que pasen cosas) y lo
+//   suelta en cuanto toca. Solo lo activa el coach (?tutorial=1); en partida normal es false y el bucle va igual.
+let coachPaused=false;
 let jingled=false, lastBumpF=-9, ended=false;
 //+AG lerp de vector unitario (gauntlet/index.html): rotacion del aspa SUAVE a 60fps (atan2 en RENDER = permitido)
 const lerpU=(p,ux,uy,a)=>{ const x=p.ux+(ux-p.ux)*a, y=p.uy+(uy-p.uy)*a, l=Math.sqrt(x*x+y*y)||1; return [x/l,y/l]; };
@@ -737,6 +741,7 @@ function loop(){
     requestAnimationFrame(loop); return;
   }
   acc+=dt; const STEP=1/FPS; let steps=0;
+  if(coachPaused) acc=0;   //+AG tutorial v2: mundo congelado; el acumulador se vacía para no soltar una ráfaga al reanudar
   while(acc>=STEP && !sim.done && steps<4){ stepOnce(); acc-=STEP; steps++; }
   if(sim.done) acc=0;
   const a=(sim.done||NO_INTERP)?1:Math.min(1,acc/STEP);
@@ -1037,10 +1042,10 @@ if(params.get('capture')==='1'){ document.getElementById('hud').style.display='n
 else { el('ov').classList.remove('hide'); loop(); }   //+AG arranca en el overlay de inicio (menu); Play lanza la cuenta atras
 
 // ============================================================================
-//+AG COACH "CÓMO JUGAR" (?tutorial=1): pasos guiados sobre los CONTROLES REALES (glow en el botón que toca),
-//   leyendo el estado de la Sim (nunca escribiéndola, salvo regalar la barra de súper, que ya era escribible).
-//   El nivel sin peligro lo pone la Sim (opts.tutorial: sin aspas ni sacudidas). Termina con bt:tutorialEnd.
-//   en+es con fallback a inglés (patrón AUX). Sin ?tutorial=1 este bloque no existe.
+//+AG COACH "CÓMO JUGAR" (?tutorial=1): la máquina de pasos, el foco, la mano y la pausa viven en chassis/coach.mjs
+//   (compartido por los 3 modos). Aquí solo van los TEXTOS y la LISTA DE PASOS de la Carrera: qué control se
+//   enseña, si el paso congela el mundo, y cómo se comprueba en la Sim que el jugador lo ha hecho de verdad.
+//   El nivel sin peligro lo pone la Sim (opts.tutorial: sin aspas ni sacudidas). Sin ?tutorial=1 no se llama.
 // ============================================================================
 if(TUTORIAL)(function(){
   const CI={
@@ -1064,52 +1069,27 @@ if(TUTORIAL)(function(){
         '¡Ya está! Baja hasta la META para terminar' ] },
   };
   const C=()=>CI[LANG]||CI.en;
-  const css=document.createElement('style'); css.textContent=`
-    #coach{ position:fixed; top:60px; left:50%; transform:translateX(-50%); z-index:60; max-width:min(92vw,540px);
-      background:#0b1526ee; border:2px solid #ffd700; border-radius:14px; padding:10px 16px; text-align:center;
-      font-weight:900; font-size:clamp(14px,3.6vw,18px); color:#fff; box-shadow:0 6px 24px #000a; pointer-events:none; }
-    #coach .cnum{ display:block; font-size:11px; font-weight:800; color:#ffd700; letter-spacing:.08em; margin-bottom:2px; }
-    #coachExit{ position:fixed; top:10px; left:10px; z-index:61; border:1px solid #ffffff3a; border-radius:10px;
-      background:#0b1526cc; color:#cfe4ff; font-family:inherit; font-weight:800; font-size:13px; padding:7px 12px; cursor:pointer; }
-    .coach-glow{ animation:coachGlow .9s ease-in-out infinite; }
-    @keyframes coachGlow{ 0%,100%{ box-shadow:0 0 0 2px #ffd700, 0 0 18px 4px #ffd70088; } 50%{ box-shadow:0 0 0 5px #ffd700, 0 0 26px 8px #ffd700cc; } }`;
-  document.head.appendChild(css);
-  const bn=document.createElement('div'); bn.id='coach'; bn.style.display='none'; document.body.appendChild(bn);
-  const ex=document.createElement('button'); ex.id='coachExit'; document.body.appendChild(ex);
-  ex.onclick=()=>{ try{ parent.postMessage({type:'bt:tutorialEnd', mode:'race', completed:false},'*'); }catch(e){} };
-  //+AG los pasos leen la Sim: dirección mantenida ~1s, boost pad (in_boost), nitro/escudo/súper activos, meta (rank)
+  //+AG los pasos solo LEEN la Sim: dirección mantenida ~1s, pad de impulso (in_boost), nitro/escudo/súper activos,
+  //   meta (rank). pause:true = el mundo se congela mientras lo lees (los pasos de MIRAR el juego no pausan).
   const HOLD=1.0; let acc=0;
-  const held=d=>{ return sim.player.dir===d; };
-  const STEPS=[
-    { target:'bL',   check:dt=>{ acc = held(DIR.LEFT)  ? acc+dt : 0; return acc>=HOLD; } },
-    { target:'bR',   check:dt=>{ acc = held(DIR.RIGHT) ? acc+dt : 0; return acc>=HOLD; } },
-    { target:'bC',   check:dt=>{ acc = held(DIR.CENTER)? acc+dt : 0; return acc>=HOLD; } },
-    { target:null,   check:()=> sim.player.in_boost },
-    { target:'bNit', check:()=> sim.player.turbo>0 },
-    { target:'bShd', check:()=> sim.player.shield>0 },
-    { target:'bSup', enter:()=>{ sim.super=1; }, check:()=> sim.player.star>0 },
-    { target:null,   check:()=> sim.player.rank!==null },
-  ];
-  let si=-1, doneAt=0, glowEl=null, finished=false;
-  function setGlow(id){ if(glowEl){ glowEl.classList.remove('coach-glow'); glowEl=null; }
-    if(id){ glowEl=el(id); if(glowEl) glowEl.classList.add('coach-glow'); } }
-  function showStep(i){ si=i; acc=0; const s=STEPS[i]; if(s.enter) s.enter();
-    bn.style.display=''; bn.innerHTML='<span class="cnum">'+(i+1)+'/'+STEPS.length+'</span>'+C().steps[i];
-    setGlow(s.target); }
-  function finish(){ finished=true; setGlow(null);
-    bn.innerHTML='<span class="cnum">'+STEPS.length+'/'+STEPS.length+'</span>'+C().done;
-    setTimeout(()=>{ try{ parent.postMessage({type:'bt:tutorialEnd', mode:'race', completed:true},'*'); }catch(e){} }, 2000); }
-  let lastT=performance.now();
-  function tick(){ if(finished) return; requestAnimationFrame(tick);
-    const now=performance.now(), dt=Math.min(0.1,(now-lastT)/1000); lastT=now;
-    ex.textContent=C().exit;
-    if(!sim || phase!=='play'){ return; }
-    if(si<0){ showStep(0); return; }
+  const held=d=> sim.player.dir===d;
+  createCoach({
+    mode:'race', i18n:CI, lang:()=>LANG,
+    isPlaying:()=> !!sim && phase==='play',
+    setPaused:v=>{ coachPaused=v; },
     //+AG si llega a meta ANTES del último paso, nueva bajada (misma seed → misma pista) y sigue donde iba
-    if(sim.player.rank!==null && si<STEPS.length-1){ startRound(); showStep(si); return; }
-    if(STEPS[si].check(dt)){ si+1<STEPS.length ? showStep(si+1) : finish(); }
-  }
-  requestAnimationFrame(tick);
+    beforeCheck:si=>{ if(sim.player.rank!==null && si<7){ startRound(); acc=0; return true; } return false; },
+    steps:[
+      { target:'bL',   pause:true,  check:dt=>{ acc = held(DIR.LEFT)  ? acc+dt : 0; return acc>=HOLD; } },
+      { target:'bR',   pause:true,  check:dt=>{ acc = held(DIR.RIGHT) ? acc+dt : 0; return acc>=HOLD; } },
+      { target:'bC',   pause:true,  check:dt=>{ acc = held(DIR.CENTER)? acc+dt : 0; return acc>=HOLD; } },
+      { target:null,   pause:false, linger:0.9, check:()=> sim.player.in_boost },
+      { target:'bNit', pause:true,  linger:1.4, check:()=> sim.player.turbo>0 },
+      { target:'bShd', pause:true,  linger:1.4, check:()=> sim.player.shield>0 },
+      { target:'bSup', pause:true,  linger:1.8, enter:()=>{ sim.super=1; }, check:()=> sim.player.star>0 },
+      { target:null,   pause:false, check:()=> sim.player.rank!==null },
+    ],
+  });
   //+AG portada del tutorial: mismo overlay de intro del modo, con título/objetivo del coach encima
   const _rov=renderOverlay;
   renderOverlay=function(){ _rov(); if(ovState==='intro'){ el('ovTitle').textContent=C().title; el('ovSub').innerHTML=C().sub; } };
