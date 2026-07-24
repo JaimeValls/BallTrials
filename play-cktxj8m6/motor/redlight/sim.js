@@ -254,6 +254,9 @@ export class Sim {
     // --- PERFIL: torneo (default, 4 equipos×3) o SHORT individual (docs/35). El default queda BYTE-IDÉNTICO:
     //     con opts vacío this.teams===TEAMS, nTeams===4, ballsPerTeam===3 → mismos arrays y misma secuencia RNG. ---
     this.individual = !!opts.individual;
+    //+AG CÓMO JUGAR (tutorial): nivel sin peligro (sin minas/boulders, francotirador desarmado, bots sin meta).
+    //   Flag ausente → todo idéntico a la fuente (no consume RNG).
+    this.tutorial = !!opts.tutorial;
     //+AG doc 39 #1: modificador de física por atributos, SOLO individual y SOLO balls[0]. No consume RNG (constantes).
     const _S = (this.individual && Array.isArray(opts.stats) && opts.stats.length === 6) ? opts.stats : null;
     this.pmul = _S ? { vel:statMul(_S[0]), ace:statMul(_S[1]), pes:statMul(_S[2]), aga:statMul(_S[3]), res:statMul(_S[4]), bst:statMul(_S[5]) } : NEUTRAL_MUL;
@@ -322,10 +325,14 @@ export class Sim {
     // barreras mantienen su Y estructural (para no romper el balance progresivo).
     const lrng = mulberry32((seed * 0x9e3779b1) >>> 0);
     const jitX = (x, a) => { const v = x + (lrng() * 2 - 1) * a; return v < XL + 1.3 ? XL + 1.3 : (v > XR - 1.3 ? XR - 1.3 : v); };
-    this.pads = PADS_BASE.map(p => ({ ...p, x: jitX(p.x, 1.6), y: p.y + (lrng() * 2 - 1) * 0.7, armed: false, armF: 0 }));
-    this.boulders = BOULDERS_BASE.map(b => ({ ...b }));
+    //+AG tutorial: SIN minas ni boulders (vaciar aquí quita física Y render a la vez; bloqueadores y barreras se
+    //   quedan: no matan y son la lección de carril/embestida). lrng es local → no toca la secuencia del juego.
+    this.pads = this.tutorial ? [] : PADS_BASE.map(p => ({ ...p, x: jitX(p.x, 1.6), y: p.y + (lrng() * 2 - 1) * 0.7, armed: false, armF: 0 }));
+    this.boulders = this.tutorial ? [] : BOULDERS_BASE.map(b => ({ ...b }));
     this.blockers = BLOCKERS_BASE.map(b => ({ ...b }));
     this.barriers = BARRIERS_BASE.map(b => ({ ...b, hp: TUNE.BARRIER_HP, hp0: TUNE.BARRIER_HP, broken: false }));
+    //+AG tutorial: barrera BLANDA (150 HP está pensada para el pelotón; aquí embiste el jugador solo → ~1.3s en verde)
+    if (this.tutorial) for (const bar of this.barriers){ bar.hp = bar.hp0 = 40; }
     this.lastCrossPlaced = new Array(this.nTeams).fill(0);   // placed-order del último cruce de cada equipo (desempate: cruzar antes gana)
 
     this.winner_team = null; this.decision_frame = null; this.resolved_by = null;
@@ -440,6 +447,9 @@ export class Sim {
     return Math.round(this.survTarget + (this.balls.length - this.survTarget) * (1 - progress));
   }
   _kill(b, x, y, cause, extra){
+    //+AG tutorial: FRANCOTIRADOR DESARMADO (y ningún hazard mata). La mirilla/luz siguen (se aprende la regla),
+    //   la ejecución no. Fuera del tutorial esta rama no existe.
+    if (this.tutorial) return false;
     // EMBUDO: si esta muerte dejaría menos vivas (corriendo + a salvo) que el SUELO PROGRESIVO de ahora mismo,
     // "falla por poco" y sale como SAVE con estrella de invencibilidad (ver _funnelFloorNow arriba).
     if (this.survTarget !== null && this.balls.filter(x2 => x2.rank !== -1).length <= this._funnelFloorNow()){
@@ -542,7 +552,9 @@ export class Sim {
       }
       let ax = 0, ay = 0;
       // 1) atracción a meta (+Y) — se omite mientras frena (ver arriba)
-      if (!b.braking) ay += GOAL * goalBoost;
+      //+AG tutorial: los BOTS no tiran a meta (figurantes cerca de la salida: nadie te gana la carrera mientras
+      //   aprendes); el resto de su steering (wander, separación) sigue → mismo consumo de RNG por frame.
+      if (!b.braking && !(this.tutorial && !b.isPlayer)) ay += GOAL * goalBoost;
       // 2) muros laterales
       if (XR - b.x < WALL_NEAR) ax -= WALLAV;
       if (b.x - XL < WALL_NEAR) ax += WALLAV;

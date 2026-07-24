@@ -153,6 +153,10 @@ export class Sim {
     this.huntAcc = this.individual ? SHORT_HUNT_ACC : HUNT_ACC;
     this.frenzyThr = this.individual ? SHORT_FRENZY_THR : [6, 3];
     this.hardCap = this.individual ? Math.round(this.gameF * 1.4) : 3000;
+    //+AG CÓMO JUGAR (tutorial): DEPREDADOR DORMIDO (no fija ni captura) y sin reloj de fin — el coach del index
+    //   decide cuándo acaba. Flag ausente → todo idéntico a la fuente (no consume RNG).
+    this.tutorial = !!opts.tutorial;
+    if (this.tutorial){ this.gameF = 1e9; this.hardCap = 1e9; }
 
     this.balls = [];
     const cq = [[1, 1], [-1, 1], [-1, -1], [1, -1]]; // NE NO SO SE
@@ -259,7 +263,7 @@ export class Sim {
 
     // objetivo fijado
     let tgt = null; let lock_id = -1;
-    const tb = (f > this.startDelay && this.decision_frame === null) ? this.pickTarget(f) : null;
+    const tb = (!this.tutorial && f > this.startDelay && this.decision_frame === null) ? this.pickTarget(f) : null;   //+AG tutorial: nunca fija
     if (tb){ tgt = [tb.x, tb.y]; lock_id = tb.id; }
     this.lock = lock_id;
 
@@ -398,7 +402,7 @@ export class Sim {
     this._touch = cur;
 
     // CAPTURA (solo activo, 1/frame)
-    if (this.decision_frame === null && f >= H.digest_until && f >= H.stun_until){
+    if (!this.tutorial && this.decision_frame === null && f >= H.digest_until && f >= H.stun_until){   //+AG tutorial: no caza
       let cand = null, cd = 1e9;
       for (const b of this.aliveBalls()){
         const d = hyp(b.x - H.x, b.y - H.y);

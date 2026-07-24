@@ -45,8 +45,15 @@
   #iTum.on{background:linear-gradient(#48c78e,#2ba06a);box-shadow:0 3px 0 #1c6844, inset 0 1px 0 #fff5}
   #iBoo.on{background:linear-gradient(#9b8cff,#6f5be6);box-shadow:0 3px 0 #4133a0, inset 0 1px 0 #fff5}
   #iEsc.on{background:linear-gradient(#ff6b5a,#ec4433);box-shadow:0 3px 0 #a12a1e, inset 0 1px 0 #fff5}
-  #bSup.ready{background:linear-gradient(#ffe27a,#ff9a3d);color:#3a2400;box-shadow:0 3px 0 #a85a12,0 0 18px #ffb03daa;animation:supPulse 1.1s ease-in-out infinite}
-  @keyframes supPulse{0%,100%{box-shadow:0 3px 0 #a85a12,0 0 12px #ffb03d88}50%{box-shadow:0 3px 0 #a85a12,0 0 22px #ffd23fdd}}
+  /*+AG doc 40: mismo lenguaje de "listo para pulsar" que el resto del juego (glow que late + barrido de brillo) */
+  #bSup.ready{background:linear-gradient(#ffe27a,#ff9a3d);color:#3a2400;box-shadow:0 3px 0 #a85a12,0 0 18px #ffb03daa;
+    position:relative;overflow:hidden;animation:readyGlow 1.9s ease-in-out infinite}
+  #bSup.ready::after{content:'';position:absolute;top:0;height:100%;width:32%;left:-45%;
+    background:linear-gradient(100deg,#fff0,#ffffff66 46%,#fff0);transform:skewX(-18deg);
+    animation:readySweep 3.2s ease-in-out infinite;pointer-events:none}
+  @keyframes readySweep{0%{left:-45%}26%,100%{left:132%}}
+  @keyframes readyGlow{0%,100%{filter:drop-shadow(0 0 0 #ffd23f00)}50%{filter:drop-shadow(0 0 10px #ffd23fcc)}}
+  @media (prefers-reduced-motion:reduce){#bSup.ready,#bSup.ready::after{animation:none}}
   #youlbl{position:fixed;z-index:5;transform:translate(-50%,-100%);font-weight:900;font-size:13px;color:#fff;
     text-shadow:0 2px 6px #000,0 0 10px #0008;letter-spacing:.06em;pointer-events:none;opacity:0}
   /*+AG estado ESPECTADOR: al morir se ocultan los controles y sale este cartel (feedback de "te cazaron") */
@@ -662,6 +669,7 @@ function standingsPayload(){
     color:[b.color[0],b.color[1],b.color[2]] }));
 }
 function emitEnd(){
+  if(typeof TUTORIAL!=='undefined' && TUTORIAL) return;   //+AG tutorial: sin matchEnd ni economía; el COACH cierra con bt:tutorialEnd
   if(emitted || !EMBED) return; emitted=true;
   const p=sim.balls[0], survived=p.rank===null;
   const playerPlace = survived ? 1 : (sim.balls.length-p.rank+1);   // superviviente -> 1; cazado -> puesto por orden de caza
@@ -732,6 +740,10 @@ if(params.get('short')==='1' || _shN===6 || _shN===8){ shortOpts={ individual:tr
 //+AG doc 39 abierto #1: ?stats=v,a,p,g,r,b (6 atributos EFECTIVOS de la bola equipada) → modificador SUTIL de física
 //   del jugador (balls[0]). Solo en INDIVIDUAL; ausente/mal formado = neutro. El torneo no es individual → no lo lee.
 if(shortOpts.individual){ const _s=(params.get('stats')||'').split(',').map(Number); if(_s.length===6 && _s.every(v=>isFinite(v))) shortOpts.stats=_s; }
+//+AG CÓMO JUGAR (tutorial): ?tutorial=1 → depredador dormido y sin reloj (opts.tutorial en la Sim) + COACH de
+//   pasos al final del script. Fuerza el perfil individual (el embed pelado de cazador es el torneo 4×3).
+const TUTORIAL = params.get('tutorial')==='1';
+if(TUTORIAL){ shortOpts.individual=true; shortOpts.n=shortOpts.n||8; shortOpts.tutorial=true; }
 
 // ============================================================================
 //+AG i18n DEL MODO (feedback Jaime 2026-07-23: "el juego por defecto tiene que estar en ingles").
@@ -839,6 +851,85 @@ buildSim(seed); buildHud();
 if(EMBED){ const bm=document.getElementById('backMenu'); if(bm) bm.style.display='none'; }   //+AG en embed el shell gestiona el volver
 if(params.get('capture')==='1'){ document.getElementById('hud').style.display='none'; document.querySelector('.keys').style.display='none'; document.getElementById('controls').style.display='none'; youLbl.style.display='none'; }   //+AG ocultar controles en captura
 else loop();
+
+// ============================================================================
+//+AG COACH "CÓMO JUGAR" (?tutorial=1): pasos guiados sobre los CONTROLES REALES (glow en el botón que toca),
+//   leyendo la Sim (solo escribe la barra del señuelo de regalo, ya escribible). El depredador dormido lo pone la
+//   Sim (opts.tutorial). Termina con bt:tutorialEnd. en+es con fallback a inglés. Sin ?tutorial=1 no existe.
+// ============================================================================
+if(TUTORIAL)(function(){
+  const CI={
+    en:{ done:'Tutorial complete! 🎓', exit:'✕ Exit',
+      steps:[ 'Press 1 — INTO THE PACK: in the crowd you\'re harder to pick',
+        'Press 2 — GRAB A BOOSTER: your ball goes for the nearest orb. Catch one!',
+        'Press 3 — ESCAPE: get away from danger',
+        'Press ⚡ DASH (A): a burst to shake the hunter off',
+        'Press 🛡 SHIELD (S): survive one grab',
+        'DECOY bar full, on the house! Press ⭐ DECOY (D): the hunter picks someone else',
+        'That\'s the HUNTER. Today it\'s asleep — watch it 10s and remember its lock mark' ] },
+    es:{ done:'¡Tutorial completado! 🎓', exit:'✕ Salir',
+      steps:[ 'Pulsa 1 — AL TUMULTO: en el montón es más difícil que te fijen',
+        'Pulsa 2 — A POR UN BOOSTER: tu bola va al orbe más cercano. ¡Coge uno!',
+        'Pulsa 3 — ESCAPAR: aléjate del peligro',
+        'Pulsa ⚡ DASH (A): un acelerón para zafarte del cazador',
+        'Pulsa 🛡 ESCUDO (S): aguantas un zarpazo',
+        '¡Barra del SEÑUELO llena de regalo! Pulsa ⭐ SEÑUELO (D): el cazador fija a otro',
+        'Ese es el CAZADOR. Hoy está dormido — obsérvalo 10s y recuerda su marca de fijado' ] },
+  };
+  const C=()=>CI[LANG]||CI.en;
+  const $=x=>document.getElementById(x);
+  const css=document.createElement('style'); css.textContent=`
+    #coach{ position:fixed; top:56px; left:50%; transform:translateX(-50%); z-index:60; max-width:min(92vw,540px);
+      background:#0b1526ee; border:2px solid #ffd700; border-radius:14px; padding:10px 16px; text-align:center;
+      font-weight:900; font-size:clamp(14px,3.6vw,18px); color:#fff; box-shadow:0 6px 24px #000a; pointer-events:none; }
+    #coach .cnum{ display:block; font-size:11px; font-weight:800; color:#ffd700; letter-spacing:.08em; margin-bottom:2px; }
+    #coachExit{ position:fixed; top:10px; left:10px; z-index:61; border:1px solid #ffffff3a; border-radius:10px;
+      background:#0b1526cc; color:#cfe4ff; font-family:inherit; font-weight:800; font-size:13px; padding:7px 12px; cursor:pointer; }
+    .coach-glow{ animation:coachGlow .9s ease-in-out infinite; }
+    @keyframes coachGlow{ 0%,100%{ box-shadow:0 0 0 2px #ffd700, 0 0 18px 4px #ffd70088; } 50%{ box-shadow:0 0 0 5px #ffd700, 0 0 26px 8px #ffd700cc; } }`;
+  document.head.appendChild(css);
+  const bn=document.createElement('div'); bn.id='coach'; bn.style.display='none'; document.body.appendChild(bn);
+  const ex=document.createElement('button'); ex.id='coachExit'; document.body.appendChild(ex);
+  ex.onclick=()=>{ try{ parent.postMessage({type:'bt:tutorialEnd', mode:'cazador', completed:false},'*'); }catch(e){} };
+  //+AG condiciones leídas de la Sim: intención elegida, orbe recogido (events.pickup del jugador), ventanas de
+  //   dash/escudo/señuelo (dash_until/shield_until/aggro_immune_until) y observación del cazador (tiempo).
+  let acc=0, pickBase=0;
+  const pk=()=>sim.events.pickup.filter(e=>e.id===0).length;
+  //+AG "uso real del botón": los orbes también ponen dash_until/aggro_immune (autocompletaban la lección sin
+  //   pulsar nada) → se envuelven las acciones del jugador de la sim viva y se cuenta solo el booster PULSADO.
+  const used={dash:false,shield:false,decoy:false}; let hookedSim=null;
+  function hook(){ if(!sim || sim===hookedSim) return; hookedSim=sim;
+    const pd=sim.playerDash.bind(sim);   sim.playerDash  =()=>{ const r=pd(); if(r) used.dash=true;   return r; };
+    const ps=sim.playerShield.bind(sim); sim.playerShield=()=>{ const r=ps(); if(r) used.shield=true; return r; };
+    const pc=sim.playerDecoy.bind(sim);  sim.playerDecoy =()=>{ const r=pc(); if(r) used.decoy=true;  return r; }; }
+  const STEPS=[
+    { target:'iTum', check:()=> sim.playerIntent==='tumulto' },
+    { target:'iBoo', enter:()=>{ pickBase=pk(); }, check:()=> sim.playerIntent==='booster' && pk()>pickBase },
+    { target:'iEsc', check:()=> sim.playerIntent==='escapar' },
+    { target:'bDash', enter:()=>{ used.dash=false; },   check:()=> used.dash },
+    { target:'bShd',  enter:()=>{ used.shield=false; }, check:()=> used.shield },
+    { target:'bSup',  enter:()=>{ superVal=1; used.decoy=false; }, check:()=> used.decoy },
+    { target:null,   check:dt=>{ acc+=dt; return acc>=10; } },
+  ];
+  let si=-1, glowEl=null, finished=false;
+  function setGlow(id){ if(glowEl){ glowEl.classList.remove('coach-glow'); glowEl=null; }
+    if(id){ glowEl=$(id); if(glowEl) glowEl.classList.add('coach-glow'); } }
+  function showStep(i){ si=i; acc=0; const s=STEPS[i]; if(s.enter) s.enter();
+    bn.style.display=''; bn.innerHTML='<span class="cnum">'+(i+1)+'/'+STEPS.length+'</span>'+C().steps[i];
+    setGlow(s.target); }
+  function finish(){ finished=true; setGlow(null);
+    bn.innerHTML='<span class="cnum">'+STEPS.length+'/'+STEPS.length+'</span>'+C().done;
+    setTimeout(()=>{ try{ parent.postMessage({type:'bt:tutorialEnd', mode:'cazador', completed:true},'*'); }catch(e){} }, 2000); }
+  let lastT=performance.now();
+  function tick(){ if(finished) return; requestAnimationFrame(tick);
+    const now=performance.now(), dt=Math.min(0.1,(now-lastT)/1000); lastT=now;
+    ex.textContent=C().exit; hook();
+    if(!sim || phase!=='play') return;
+    if(si<0){ showStep(0); return; }
+    if(STEPS[si].check(dt)){ si+1<STEPS.length ? showStep(si+1) : finish(); }
+  }
+  requestAnimationFrame(tick);
+})();
 </script>
 </body>
 </html>

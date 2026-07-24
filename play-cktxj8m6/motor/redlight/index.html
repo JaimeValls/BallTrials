@@ -90,9 +90,19 @@
   #bNitro.act{background:linear-gradient(#a8f2ff,#3fc2ea);color:#032230;box-shadow:0 2px 0 #0f5e7c,0 0 20px #59e0ffcc, inset 0 1px 0 #ffffff50}
   #bGhost.ready{background:linear-gradient(#cfc6ea,#8f82c2);box-shadow:0 4px 0 #4d4275, inset 0 1px 0 #ffffff30}
   #bGhost.act{background:linear-gradient(#efeaff88,#b9ace688);color:#f4f0ff;box-shadow:0 2px 0 #4d4275,0 0 18px #cfc6ea99, inset 0 1px 0 #ffffff50}
-  #bSup.ready{background:linear-gradient(#ffe27a,#ff9a3d);color:#3a2400;box-shadow:0 3px 0 #a85a12,0 0 18px #ffb03daa;animation:supPulse 1.1s ease-in-out infinite}
+  /*+AG doc 40: mismo lenguaje de "listo para pulsar" que el resto del juego (glow que late + barrido de brillo).
+     Aqui SOLO el super lo lleva: freno/nitro/fantasma tambien usan .ready para decir "disponible", y si los
+     cuatro barrieran a la vez el aviso dejaria de significar nada (regla Supercell: uno por pantalla). */
+  #bSup.ready{background:linear-gradient(#ffe27a,#ff9a3d);color:#3a2400;box-shadow:0 3px 0 #a85a12,0 0 18px #ffb03daa;
+    position:relative;overflow:hidden;animation:readyGlow 1.9s ease-in-out infinite}
+  #bSup.ready::after{content:'';position:absolute;top:0;height:100%;width:32%;left:-45%;
+    background:linear-gradient(100deg,#fff0,#ffffff66 46%,#fff0);transform:skewX(-18deg);
+    animation:readySweep 3.2s ease-in-out infinite;pointer-events:none}
   #bSup.act{background:linear-gradient(#fff3b8,#ffc44d);color:#3a2400;box-shadow:0 2px 0 #a85a12,0 0 26px #ffd34dee, inset 0 1px 0 #ffffff60}
-  @keyframes supPulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.25)}}
+  #bSup.act::after{display:none}
+  @keyframes readySweep{0%{left:-45%}26%,100%{left:132%}}
+  @keyframes readyGlow{0%,100%{filter:drop-shadow(0 0 0 #ffd23f00)}50%{filter:drop-shadow(0 0 10px #ffd23fcc)}}
+  @media (prefers-reduced-motion:reduce){#bSup.ready,#bSup.ready::after{animation:none}}
   #controls button:disabled{opacity:.4;cursor:default}
   #controls button.act:disabled{opacity:1}
   #youlbl{position:fixed;z-index:5;transform:translate(-50%,-100%);font-weight:900;font-size:13px;color:#fff;
@@ -228,6 +238,10 @@ const shortOpts = SHORT_ON ? { individual: true, n: (_shN === 6 ? 6 : 8) } : nul
 //+AG doc 39 abierto #1: ?stats=v,a,p,g,r,b (6 atributos EFECTIVOS de la bola equipada) → modificador SUTIL de física
 //   del jugador (balls[0]). Solo en INDIVIDUAL; ausente/mal formado = neutro. El torneo (fmt=team) no lo lee.
 if(shortOpts){ const _s=(_q0.get('stats')||'').split(',').map(Number); if(_s.length===6 && _s.every(v=>isFinite(v))) shortOpts.stats=_s; }
+//+AG CÓMO JUGAR (tutorial): ?tutorial=1 → nivel sin peligro (la Sim vacía minas/boulders, desarma al francotirador
+//   y deja a los bots de figurantes con opts.tutorial) + COACH de pasos al final del script. Solo perfil individual.
+const TUTORIAL = _q0.get('tutorial')==='1';
+if(TUTORIAL && shortOpts) shortOpts.tutorial=true;
 const PAL = shortOpts ? (shortOpts.n === 6 ? SHORT_COLORS_6 : SHORT_COLORS) : TEAMS;
 
 const celeb = createCelebration(scene, PAL);
@@ -1135,6 +1149,7 @@ function standingsPayload(){
       color:[x.b.color[0],x.b.color[1],x.b.color[2]] }));
 }
 function emitEnd(){
+  if(TUTORIAL) return;   //+AG tutorial: sin matchEnd ni economía; el COACH cierra con bt:tutorialEnd
   if(emitted || !EMBED) return; emitted=true;
   const pp=placeOf(0);
   //+AG POR EQUIPOS (Fase 3): puesto del EQUIPO por PROGRESO (teamOrderByProgress = el criterio con que la sim corona);
@@ -1376,6 +1391,85 @@ else {
   }
   loop();
 }
+
+// ============================================================================
+//+AG COACH "CÓMO JUGAR" (?tutorial=1): pasos guiados sobre los CONTROLES REALES (glow en el botón que toca),
+//   leyendo la Sim (solo escribe la barra de súper de regalo, ya escribible). El nivel sin peligro lo pone la Sim
+//   (opts.tutorial). Termina con bt:tutorialEnd. en+es con fallback a inglés. Sin ?tutorial=1 este bloque no existe.
+// ============================================================================
+if(TUTORIAL)(function(){
+  const CI={
+    en:{ done:'Tutorial complete! 🎓', exit:'✕ Exit',
+      steps:[ 'HOLD RUN while the light is GREEN',
+        'Ram the BARRIER on green until it breaks, then cross it',
+        'RED! Let go and stop (today nobody shoots… in a real match, they do)',
+        'Coming in hot? Press BRAKE (F) for an emergency stop',
+        'Change LANE twice: ◀ ▶ or 1/2/3',
+        'Press ⚡ NITRO on green: a sprint',
+        'Press 👻 GHOST: you pass through walls for a moment',
+        'SUPER bar full, on the house! Press ⭐ SUPER',
+        'Cross the FINISH line!' ] },
+    es:{ done:'¡Tutorial completado! 🎓', exit:'✕ Salir',
+      steps:[ 'MANTÉN CORRER mientras la luz esté en VERDE',
+        'Embiste la BARRERA en verde hasta romperla y crúzala',
+        '¡ROJO! Suelta y quédate quieto (hoy nadie dispara… en la partida real, sí)',
+        '¿Vas lanzado? Pulsa FRENAZO (F) para clavarte',
+        'Cambia de CARRIL dos veces: ◀ ▶ o 1/2/3',
+        'Pulsa ⚡ NITRO en verde: un sprint',
+        'Pulsa 👻 FANTASMA: atraviesas muros un instante',
+        '¡Barra de SÚPER llena de regalo! Pulsa ⭐ SÚPER',
+        '¡Cruza la META!' ] },
+  };
+  const C=()=>CI[LANG]||CI.en;
+  const $=x=>document.getElementById(x);
+  const css=document.createElement('style'); css.textContent=`
+    #coach{ position:fixed; top:56px; left:50%; transform:translateX(-50%); z-index:60; max-width:min(92vw,540px);
+      background:#0b1526ee; border:2px solid #ffd700; border-radius:14px; padding:10px 16px; text-align:center;
+      font-weight:900; font-size:clamp(14px,3.6vw,18px); color:#fff; box-shadow:0 6px 24px #000a; pointer-events:none; }
+    #coach .cnum{ display:block; font-size:11px; font-weight:800; color:#ffd700; letter-spacing:.08em; margin-bottom:2px; }
+    #coachExit{ position:fixed; top:10px; left:10px; z-index:61; border:1px solid #ffffff3a; border-radius:10px;
+      background:#0b1526cc; color:#cfe4ff; font-family:inherit; font-weight:800; font-size:13px; padding:7px 12px; cursor:pointer; }
+    .coach-glow{ animation:coachGlow .9s ease-in-out infinite; }
+    @keyframes coachGlow{ 0%,100%{ box-shadow:0 0 0 2px #ffd700, 0 0 18px 4px #ffd70088; } 50%{ box-shadow:0 0 0 5px #ffd700, 0 0 26px 8px #ffd700cc; } }`;
+  document.head.appendChild(css);
+  const bn=document.createElement('div'); bn.id='coach'; bn.style.display='none'; document.body.appendChild(bn);
+  const ex=document.createElement('button'); ex.id='coachExit'; document.body.appendChild(ex);
+  ex.onclick=()=>{ try{ parent.postMessage({type:'bt:tutorialEnd', mode:'redlight', completed:false},'*'); }catch(e){} };
+  //+AG condiciones leídas de la Sim: correr en verde (runHeld), quieto en rojo (velocidad ~0), frenazo/boosters
+  //   (ventanas pIn.*Until), carriles (pIn.lane), barrera (Y del jugador), meta (safe).
+  let acc=0, laneChanges=0, lastLane=null;
+  const spd=()=>{ const p=sim.balls[0]; return Math.hypot(p.vx,p.vy); };
+  const STEPS=[
+    { target:'bRun',   check:dt=>{ acc = (runHeld && sim.color==='green') ? acc+dt : acc; return acc>=2.0; } },
+    { target:'bRun',   check:()=> sim.balls[0].y>7.5 },
+    { target:null,     check:dt=>{ acc = (sim.color==='red' && !runHeld && spd()<0.3) ? acc+dt : 0; return acc>=1.2; } },
+    { target:'bBrake', check:()=> sim.f<sim.pIn.brakeUntil },
+    { target:'bLaneL', enter:()=>{ laneChanges=0; lastLane=sim.pIn.lane; },
+      check:()=>{ if(sim.pIn.lane!==lastLane){ laneChanges++; lastLane=sim.pIn.lane; } return laneChanges>=2; } },
+    { target:'bNitro', check:()=> sim.f<sim.pIn.nitroUntil },
+    { target:'bGhost', check:()=> sim.f<sim.pIn.ghostUntil },
+    { target:'bSup',   enter:()=>{ superVal=1; }, check:()=> sim.f<sim.pIn.superUntil },
+    { target:'bRun',   check:()=>{ const p=sim.balls[0]; return p.safe===true || (p.rank!==null && p.rank>0); } },
+  ];
+  let si=-1, glowEl=null, finished=false;
+  function setGlow(id){ if(glowEl){ glowEl.classList.remove('coach-glow'); glowEl=null; }
+    if(id){ glowEl=$(id); if(glowEl) glowEl.classList.add('coach-glow'); } }
+  function showStep(i){ si=i; acc=0; const s=STEPS[i]; if(s.enter) s.enter();
+    bn.style.display=''; bn.innerHTML='<span class="cnum">'+(i+1)+'/'+STEPS.length+'</span>'+C().steps[i];
+    setGlow(s.target); }
+  function finish(){ finished=true; setGlow(null);
+    bn.innerHTML='<span class="cnum">'+STEPS.length+'/'+STEPS.length+'</span>'+C().done;
+    setTimeout(()=>{ try{ parent.postMessage({type:'bt:tutorialEnd', mode:'redlight', completed:true},'*'); }catch(e){} }, 2000); }
+  let lastT=performance.now();
+  function tick(){ if(finished) return; requestAnimationFrame(tick);
+    const now=performance.now(), dt=Math.min(0.1,(now-lastT)/1000); lastT=now;
+    ex.textContent=C().exit;
+    if(!sim || phase!=='play') return;
+    if(si<0){ showStep(0); return; }
+    if(STEPS[si].check(dt)){ si+1<STEPS.length ? showStep(si+1) : finish(); }
+  }
+  requestAnimationFrame(tick);
+})();
 </script>
 </body>
 </html>

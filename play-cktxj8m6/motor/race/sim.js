@@ -243,6 +243,8 @@ class Sim{
     //   y la MISMA secuencia de draws de RNG (buildMap primero, luego el shuffle, luego 4 draws por bola). El cálculo
     //   de estos escalares NO consume RNG → buildMap sigue siendo el primer consumidor (identidad intacta).
     this.individual=!!opts.individual;
+    //+AG CÓMO JUGAR (tutorial): nivel sin peligro. Flag ausente → todo idéntico a la fuente (no consume RNG).
+    this.tutorial=!!opts.tutorial;
     //+AG doc 39 #1: modificador de física por atributos, SOLO individual y SOLO balls[0] (el jugador). Se calcula
     //   ANTES de buildMap pero NO consume RNG (constantes) → el primer consumidor sigue siendo buildMap (identidad ok).
     const _S=(this.individual&&Array.isArray(opts.stats)&&opts.stats.length===6)?opts.stats:null;
@@ -275,7 +277,8 @@ class Sim{
     //+AG v0.14 (feedback Jaime) sentido de giro ALEATORIO por carrera, de un hash APARTE del seed (mulberry32 propio) →
     //   NO consume el rng del mapa (spawns idénticos, V1 estable) y cada partida gira distinto → hay que MIRAR y elegir lado.
     const _ad=mulberry32((seed*2654435761+2246822519)>>>0);
-    this.aspas=this.map.aspas.map(a=>({x:a.x,y:a.y,dir:_ad()<0.5?1:-1,ux:1,uy:0}));
+    //+AG tutorial: SIN aspas (vaciar sim.aspas quita colisión Y render a la vez; el hash _ad no toca el rng del mapa)
+    this.aspas=this.tutorial?[]:this.map.aspas.map(a=>({x:a.x,y:a.y,dir:_ad()<0.5?1:-1,ux:1,uy:0}));
     //+AG v0.13 estado vivo de las plataformas: x (posición del vaivén) y vx (u/s, para el arrastre). Se recalcula por frame.
     this.plats=this.map.plats.map(p=>({y:p.y,cx:p.cx,amp:p.amp,period:p.period,off:p.off,hw:p.hw,x:p.cx,vx:0}));
     this.cam=TOP-CAM_SCALE/2; this.cam_scale=CAM_SCALE;
@@ -523,7 +526,7 @@ class Sim{
     }
     // Sacudidas
     const liveYs=this.aliveBalls().map(b=>b.y);
-    if(liveYs.length){ const leadY=Math.min(...liveYs);
+    if(liveYs.length && !this.tutorial){ const leadY=Math.min(...liveYs);   //+AG tutorial: sin Sacudidas (nivel sin sustos)
       for(let qi=0;qi<M.yQuakes.length;qi++){ if(this.twists[qi]===null&&leadY<=M.yQuakes[qi]){
         for(const b of this.aliveBalls()){ b.vx+=rng.uniform(-Q_QUAKE,Q_QUAKE); b.vy-=rng.uniform(0.5,2.0); this._clamp(b,QUAKE_CLAMP); this.fireEmo(b,'susto',5,16); }  //+AG sacudida→susto a todas
         this.twists[qi]={f,y:M.yQuakes[qi]}; this.quakeFlash=8; ev.quake=qi; } } }   //+AG evento

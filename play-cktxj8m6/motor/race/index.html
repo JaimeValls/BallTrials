@@ -49,8 +49,17 @@
   #ctr button:disabled{opacity:.35;cursor:default}
   #bL.on,#bR.on{background:linear-gradient(#4d95ff,#2f6ff0);box-shadow:0 3px 0 #17427d, inset 0 1px 0 #fff5}
   #bC.on{background:linear-gradient(#5b6b9e,#3a486f);box-shadow:0 3px 0 #232c47, inset 0 1px 0 #fff5}
-  #bSup.ready{background:linear-gradient(#ffe27a,#ff9a3d);color:#3a2400;box-shadow:0 3px 0 #a85a12,0 0 18px #ffb03daa;animation:supPulse 1.1s ease-in-out infinite}
-  @keyframes supPulse{0%,100%{box-shadow:0 3px 0 #a85a12,0 0 12px #ffb03d88}50%{box-shadow:0 3px 0 #a85a12,0 0 22px #ffd23fdd}}
+  /*+AG doc 40: el SUPER cargado usa el lenguaje unico de "listo para pulsar" del juego (shell juego.html):
+     glow exterior que late + BARRIDO de brillo diagonal cada ~3s (el efecto canonico de Clash Royale para
+     "hay una accion disponible ya"). Solo el super lo lleva: si brillan los tres botones, no avisa ninguno. */
+  #bSup.ready{background:linear-gradient(#ffe27a,#ff9a3d);color:#3a2400;box-shadow:0 3px 0 #a85a12,0 0 18px #ffb03daa;
+    position:relative;overflow:hidden;animation:readyGlow 1.9s ease-in-out infinite}
+  #bSup.ready::after{content:'';position:absolute;top:0;height:100%;width:32%;left:-45%;
+    background:linear-gradient(100deg,#fff0,#ffffff66 46%,#fff0);transform:skewX(-18deg);
+    animation:readySweep 3.2s ease-in-out infinite;pointer-events:none}
+  @keyframes readySweep{0%{left:-45%}26%,100%{left:132%}}
+  @keyframes readyGlow{0%,100%{filter:drop-shadow(0 0 0 #ffd23f00)}50%{filter:drop-shadow(0 0 10px #ffd23fcc)}}
+  @media (prefers-reduced-motion:reduce){#bSup.ready,#bSup.ready::after{animation:none}}
   #superwrap{display:flex;align-items:center;gap:8px}
   #superbar{flex:1;height:11px;border-radius:8px;background:#ffffff1c;overflow:hidden;box-shadow:inset 0 0 0 2px #ffffff26}
   #superfill{height:100%;width:0%;background:linear-gradient(90deg,#ffd23f,#ff7a3d);box-shadow:0 0 12px #ffb03d88;transition:width .1s}
@@ -784,6 +793,10 @@ const EMBED = params.get('embed')==='1';
 const TEAMFMT = params.get('fmt')==='team';
 const INDIVIDUAL = (EMBED && !TEAMFMT) || params.get('mode')==='individual';
 const indOpts = INDIVIDUAL ? { individual:true, n:8 } : null;
+//+AG CÓMO JUGAR (tutorial): ?tutorial=1 → nivel sin peligro (la Sim vacía aspas/sacudidas con opts.tutorial) y
+//   COACH de pasos en esta capa. Sin el flag, todo byte-idéntico. El shell lo lanza con seed fija y sin &stats.
+const TUTORIAL = params.get('tutorial')==='1';
+if(TUTORIAL && indOpts) indOpts.tutorial=true;
 //+AG doc 39 abierto #1: ?stats=v,a,p,g,r,b (6 atributos EFECTIVOS de la bola equipada) → el modificador SUTIL de
 //   física del jugador (balls[0]) en la Sim. Solo se aplica en INDIVIDUAL; ausente o mal formado = neutro (no-op).
 //   El torneo (fmt=team) no es INDIVIDUAL → aunque llegara ?stats no se lee (byte-idéntico garantizado en la Sim).
@@ -993,6 +1006,7 @@ function updateHUD(){ if(!sim) return; const t=T(), place=sim.playerPlace(), p=s
 function startRound(){ seed=newSeed(); buildSim(seed); el('ov').classList.add('hide');
   phase='intro'; introT=0; introRingT=-1; el('count').classList.add('show'); }
 function showEnd(){
+  if(TUTORIAL) return;   //+AG tutorial: ni matchEnd ni cartel de fin; el COACH cierra con bt:tutorialEnd
   lastPlace=sim.player.rank||sim.playerPlace();
   myTeam=sim.player.team; winnerTeam=sim.winner_team!==null?sim.winner_team:myTeam;
   if(EMBED){   //+AG el shell manda: emite el resultado y NO pinta cartel propio (evita el flash antes de que el shell cierre el iframe)
@@ -1021,6 +1035,86 @@ if(params.get('capture')==='1'){ document.getElementById('hud').style.display='n
   for(const id of ['ctr','pos','backMenu','youlbl','ov','count']) el(id).style.display='none';
   phase='play'; }
 else { el('ov').classList.remove('hide'); loop(); }   //+AG arranca en el overlay de inicio (menu); Play lanza la cuenta atras
+
+// ============================================================================
+//+AG COACH "CÓMO JUGAR" (?tutorial=1): pasos guiados sobre los CONTROLES REALES (glow en el botón que toca),
+//   leyendo el estado de la Sim (nunca escribiéndola, salvo regalar la barra de súper, que ya era escribible).
+//   El nivel sin peligro lo pone la Sim (opts.tutorial: sin aspas ni sacudidas). Termina con bt:tutorialEnd.
+//   en+es con fallback a inglés (patrón AUX). Sin ?tutorial=1 este bloque no existe.
+// ============================================================================
+if(TUTORIAL)(function(){
+  const CI={
+    en:{ title:'HOW TO PLAY', sub:'Safe track: no blades, no quakes. Follow the steps and learn the controls.', exit:'✕ Exit', done:'Tutorial complete! 🎓',
+      steps:[ 'Press ◀ LEFT: your ball drifts to that side',
+        'Now press RIGHT ▶',
+        'Press ● CENTER to fall free between the pegs',
+        'Roll over a floor ARROW: it launches you down',
+        'Press ⚡ NITRO: an instant burst of speed',
+        'Press 🛡 SHIELD: bounce without losing your rhythm',
+        'SUPER bar full, on the house! Press ⭐ SUPER',
+        'That\'s it! Drop all the way to the FINISH line' ] },
+    es:{ title:'CÓMO JUGAR', sub:'Pista segura: sin aspas ni sacudidas. Sigue los pasos y aprende los controles.', exit:'✕ Salir', done:'¡Tutorial completado! 🎓',
+      steps:[ 'Pulsa ◀ IZQUIERDA: tu bola deriva hacia ese lado',
+        'Ahora pulsa DERECHA ▶',
+        'Pulsa ● CENTRO para caer libre entre los clavos',
+        'Pasa por una FLECHA del suelo: te dispara hacia abajo',
+        'Pulsa ⚡ NITRO: un acelerón al instante',
+        'Pulsa 🛡 ESCUDO: rebotas sin perder el ritmo',
+        '¡Barra de SÚPER llena de regalo! Pulsa ⭐ SÚPER',
+        '¡Ya está! Baja hasta la META para terminar' ] },
+  };
+  const C=()=>CI[LANG]||CI.en;
+  const css=document.createElement('style'); css.textContent=`
+    #coach{ position:fixed; top:60px; left:50%; transform:translateX(-50%); z-index:60; max-width:min(92vw,540px);
+      background:#0b1526ee; border:2px solid #ffd700; border-radius:14px; padding:10px 16px; text-align:center;
+      font-weight:900; font-size:clamp(14px,3.6vw,18px); color:#fff; box-shadow:0 6px 24px #000a; pointer-events:none; }
+    #coach .cnum{ display:block; font-size:11px; font-weight:800; color:#ffd700; letter-spacing:.08em; margin-bottom:2px; }
+    #coachExit{ position:fixed; top:10px; left:10px; z-index:61; border:1px solid #ffffff3a; border-radius:10px;
+      background:#0b1526cc; color:#cfe4ff; font-family:inherit; font-weight:800; font-size:13px; padding:7px 12px; cursor:pointer; }
+    .coach-glow{ animation:coachGlow .9s ease-in-out infinite; }
+    @keyframes coachGlow{ 0%,100%{ box-shadow:0 0 0 2px #ffd700, 0 0 18px 4px #ffd70088; } 50%{ box-shadow:0 0 0 5px #ffd700, 0 0 26px 8px #ffd700cc; } }`;
+  document.head.appendChild(css);
+  const bn=document.createElement('div'); bn.id='coach'; bn.style.display='none'; document.body.appendChild(bn);
+  const ex=document.createElement('button'); ex.id='coachExit'; document.body.appendChild(ex);
+  ex.onclick=()=>{ try{ parent.postMessage({type:'bt:tutorialEnd', mode:'race', completed:false},'*'); }catch(e){} };
+  //+AG los pasos leen la Sim: dirección mantenida ~1s, boost pad (in_boost), nitro/escudo/súper activos, meta (rank)
+  const HOLD=1.0; let acc=0;
+  const held=d=>{ return sim.player.dir===d; };
+  const STEPS=[
+    { target:'bL',   check:dt=>{ acc = held(DIR.LEFT)  ? acc+dt : 0; return acc>=HOLD; } },
+    { target:'bR',   check:dt=>{ acc = held(DIR.RIGHT) ? acc+dt : 0; return acc>=HOLD; } },
+    { target:'bC',   check:dt=>{ acc = held(DIR.CENTER)? acc+dt : 0; return acc>=HOLD; } },
+    { target:null,   check:()=> sim.player.in_boost },
+    { target:'bNit', check:()=> sim.player.turbo>0 },
+    { target:'bShd', check:()=> sim.player.shield>0 },
+    { target:'bSup', enter:()=>{ sim.super=1; }, check:()=> sim.player.star>0 },
+    { target:null,   check:()=> sim.player.rank!==null },
+  ];
+  let si=-1, doneAt=0, glowEl=null, finished=false;
+  function setGlow(id){ if(glowEl){ glowEl.classList.remove('coach-glow'); glowEl=null; }
+    if(id){ glowEl=el(id); if(glowEl) glowEl.classList.add('coach-glow'); } }
+  function showStep(i){ si=i; acc=0; const s=STEPS[i]; if(s.enter) s.enter();
+    bn.style.display=''; bn.innerHTML='<span class="cnum">'+(i+1)+'/'+STEPS.length+'</span>'+C().steps[i];
+    setGlow(s.target); }
+  function finish(){ finished=true; setGlow(null);
+    bn.innerHTML='<span class="cnum">'+STEPS.length+'/'+STEPS.length+'</span>'+C().done;
+    setTimeout(()=>{ try{ parent.postMessage({type:'bt:tutorialEnd', mode:'race', completed:true},'*'); }catch(e){} }, 2000); }
+  let lastT=performance.now();
+  function tick(){ if(finished) return; requestAnimationFrame(tick);
+    const now=performance.now(), dt=Math.min(0.1,(now-lastT)/1000); lastT=now;
+    ex.textContent=C().exit;
+    if(!sim || phase!=='play'){ return; }
+    if(si<0){ showStep(0); return; }
+    //+AG si llega a meta ANTES del último paso, nueva bajada (misma seed → misma pista) y sigue donde iba
+    if(sim.player.rank!==null && si<STEPS.length-1){ startRound(); showStep(si); return; }
+    if(STEPS[si].check(dt)){ si+1<STEPS.length ? showStep(si+1) : finish(); }
+  }
+  requestAnimationFrame(tick);
+  //+AG portada del tutorial: mismo overlay de intro del modo, con título/objetivo del coach encima
+  const _rov=renderOverlay;
+  renderOverlay=function(){ _rov(); if(ovState==='intro'){ el('ovTitle').textContent=C().title; el('ovSub').innerHTML=C().sub; } };
+  renderOverlay();
+})();
 </script>
 </body>
 </html>

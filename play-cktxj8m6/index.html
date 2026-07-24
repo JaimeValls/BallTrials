@@ -61,8 +61,9 @@
   #bC.on{ background:linear-gradient(#5b6b9e,#3a486f); box-shadow:0 3px 0 #232c47, inset 0 1px 0 #fff5; }
   #bR.on{ background:linear-gradient(#4d95ff,#2f6ff0); box-shadow:0 3px 0 #17427d, inset 0 1px 0 #fff5; }
   button.boost.sup{ background:#241a3a; }
-  button.boost.ready{ background:linear-gradient(#ffe27a,#ff9a3d); color:#3a2400; box-shadow:0 3px 0 #a85a12, 0 0 18px #ffb03daa; animation:supPulse 1.1s ease-in-out infinite; }
-  @keyframes supPulse{ 0%,100%{ box-shadow:0 3px 0 #a85a12, 0 0 12px #ffb03d88; } 50%{ box-shadow:0 3px 0 #a85a12, 0 0 22px #ffd23fdd; } }
+  /*+AG el PULSO del súper ya no vive aquí: lo pone el sistema unico ".ready" (mas abajo), que es el mismo
+     lenguaje de "listo para pulsar" en toda la app. Aqui solo queda el CAMBIO DE COLOR (apagado -> dorado). */
+  button.boost.ready{ background:linear-gradient(#ffe27a,#ff9a3d); color:#3a2400; box-shadow:0 3px 0 #a85a12, 0 0 18px #ffb03daa; }
   button.boost:disabled{ opacity:.34; }
   button.boost .cd{ display:block; font-size:11px; opacity:.72; font-weight:700; }
   #ov{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
@@ -244,6 +245,17 @@
   #temporada{ background:radial-gradient(130% 90% at 50% 8%, #3a2140 0%, #201436 45%, #0b0820 100%); }
   #perfil{ background:radial-gradient(130% 90% at 50% 8%, #16234f 0%, #121634 45%, #0a0a1e 100%); }
   .sc-body{ flex:1; min-height:0; overflow-y:auto; padding:6px 13px 16px; display:flex; flex-direction:column; gap:12px; }
+  /*+AG doc 40: SUB-PESTAÑAS. Temporada y Perfil eran dos rollos de ~950px en 550 utiles: habia que deslizar
+     siempre. Regla de Clash Royale (Muhtar: navegacion "horizontal swipe-based", Gornicki: la profundidad
+     "almost never goes more than one level"): se parte en secciones hermanas que se cambian con un tap, en
+     vez de apilarlas. Nada se esconde de verdad: sigue todo a un toque, y cada seccion cabe en pantalla. */
+  .subtabs{ display:flex; gap:6px; padding:2px 13px 4px; flex:0 0 auto; }
+  .subtab{ flex:1; font-family:inherit; font-size:12px; font-weight:900; letter-spacing:.02em; color:#c4cbe6;
+    background:#ffffff10; border:1px solid #ffffff2a; border-radius:12px; padding:8px 4px; cursor:pointer; transition:transform .08s; }
+  .subtab.on{ color:#3a2400; background:linear-gradient(#ffe27a,#ffb43d); border-color:transparent; box-shadow:0 3px 10px #ffb03d3d; }
+  .subtab:active{ transform:scale(.96); }
+  .sc-body [data-sub]{ display:none; } .sc-body [data-sub].on{ display:block; }
+  .sc-body .subtabs{ padding:0; }
   .sc-block{ background:#ffffff0a; border:1px solid var(--line); border-radius:18px; padding:14px; }
   .sc-h{ font-size:11px; letter-spacing:.13em; text-transform:uppercase; color:var(--gold2); font-weight:800; margin-bottom:11px; display:flex; align-items:center; gap:7px; }
   .sc-note{ font-size:11.5px; color:#aeb6d8; line-height:1.5; margin-top:9px; }
@@ -328,7 +340,31 @@
   .h-play{ animation:breathe 2.6s ease-in-out infinite; } .h-play:active{ animation:none; }
   .h-ball{ animation:breathe 3.1s ease-in-out infinite; }
   /* la bola equipada/preview y la campeona con un leve bob desfasado */
-  @media (prefers-reduced-motion: reduce){ .scr.on,.h-play,.h-ball{ animation:none; } }
+  /*+AG ===== SISTEMA "LISTO PARA PULSAR" (doc 40) =================================================
+     Investigacion de Clash Royale/Brawl Stars (Gornicki "UX in Clash Royale", GameAnalytics):
+       · el MOVIMIENTO llama mas que el contraste -> se reserva a lo que se puede pulsar AHORA;
+       · el efecto canonico es el BARRIDO DE BRILLO diagonal cada ~3s + un GLOW exterior que late
+         ("la barra de elixir llena brilla"); las particulas solo en el INSTANTE de reclamar;
+       · si todo brilla, no brilla nada -> UN solo elemento con .ready por pantalla (el primario).
+     Una sola clase para toda la app: .ready. Cuando algo pasa de bloqueado a disponible, .justready
+     da un unico destello (para nitro/escudo, que son tres botones juntos y no deben latir a la vez). */
+  .ready{ position:relative; overflow:hidden; animation:readyGlow 1.9s ease-in-out infinite; }
+  /*+AG JUGAR ya respiraba: las dos animaciones se SUMAN en vez de pisarse (una sola declaracion, dos capas) */
+  .playbig.ready{ animation:breathe 2.6s ease-in-out infinite, readyGlow 1.9s ease-in-out infinite; }
+  .playbig.ready:active{ animation:none; }
+  /*+AG la banda del barrido se queda DENTRO de la caja (top:0/height:100%): si sobresale, infla el scrollHeight
+     del boton y el guardia de encaje (__fitCheck) lo lee como "esto se sale de pantalla". El sesgo del skew ya
+     da el aire diagonal sin necesidad de desbordar. */
+  .ready::after{ content:''; position:absolute; top:0; height:100%; width:32%; left:-45%;
+    background:linear-gradient(100deg,#fff0,#ffffff5e 46%,#fff0); transform:skewX(-18deg);
+    animation:readySweep 3.2s ease-in-out infinite; pointer-events:none; z-index:2; }
+  @keyframes readySweep{ 0%{ left:-45%; } 26%,100%{ left:132%; } }
+  @keyframes readyGlow{ 0%,100%{ filter:drop-shadow(0 0 0 #ffd23f00); } 50%{ filter:drop-shadow(0 0 10px var(--rglow,#ffd23fcc)); } }
+  .justready{ animation:justFlash .55s ease-out 1; }
+  @keyframes justFlash{ 0%{ filter:brightness(2.1) drop-shadow(0 0 14px #ffd23f); transform:scale(1.09); } 100%{ filter:none; transform:none; } }
+  /*+AG el BADGE rojo (.tab.badge, ya existente) es la OTRA capa del sistema y no se toca: el badge dice "hay
+     algo nuevo ahi dentro" y no se anima; el brillo dice "pulsame a mi". En CR son cosas distintas a proposito. */
+  @media (prefers-reduced-motion: reduce){ .scr.on,.h-play,.h-ball,.ready,.ready::after,.justready{ animation:none; } }
   /*+AG HOME v3 (mockups/flow.html validado por Jaime · docs/35 v2.2 + 37): anatomia Brawl en vertical.
      Total de copas arriba, BOLA PROTAGONISTA al centro, rieles laterales de iconos, tarjeta compacta del
      modo + JUGAR dominante abajo, banda del Pase. La barra de 5 pestañas SE QUEDA (decision: la app real ya
@@ -425,6 +461,17 @@
   .sfmt:disabled:active{ transform:none; }
   .sfmt .soontag{ font-size:10px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; color:#3a2400aa;
     border:1px solid #3a240055; border-radius:999px; padding:2px 8px; }
+  /*+AG CÓMO JUGAR: botón secundario de la hoja (tutorial del modo). El "!" pulsa hasta completar el tutorial */
+  .showbtn{ position:relative; border:1px solid #ffffff2e; border-radius:14px; padding:11px 12px; font-family:inherit;
+    font-weight:900; font-size:14px; letter-spacing:.02em; color:#cfe4ff; background:#ffffff10; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:8px; }
+  .showbtn:active{ transform:scale(.97); }
+  .showbtn .qi{ width:20px; height:20px; border-radius:50%; background:#3aa0ff; color:#04122a; font-size:13px;
+    font-style:italic; font-weight:900; display:grid; place-items:center; flex:none; }
+  .showbtn .hbadge{ position:absolute; top:-7px; right:-5px; min-width:20px; height:20px; padding:0 5px; border-radius:999px;
+    background:#ff4a4a; color:#fff; font-size:13px; font-weight:900; display:grid; place-items:center;
+    box-shadow:0 2px 6px #000a; animation:howpulse 1.1s ease-in-out infinite; }
+  @keyframes howpulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.22); } }
   /*+AG REJILLA de modos (selector, tiles 2 columnas estilo eventos de Brawl) */
   #selector{ background:radial-gradient(130% 90% at 50% 8%, #241a52 0%, #14113a 45%, #0a0920 100%); }
   #selector .selhead{ display:flex; align-items:center; gap:10px; padding:14px 16px 8px; }
@@ -454,6 +501,23 @@
   /*+AG COPAS POR BOLA (doc 37): tarjeta de copas de la bola + tabla de 8 puestos en Resultados */
   #results{ overflow-y:auto; justify-content:flex-start; padding-top:calc(20px + env(safe-area-inset-top)); }
   #results .r-card{ margin-top:auto; }
+  /*+AG doc 40: los DOS PASOS. Cada bloque declara a que paso pertenece y el contenedor decide con data-step.
+     El primer bloque de cada paso lleva margin-top:auto para que el contenido quede junto al pulgar (regla
+     Gornicki: "todo lo accionable en el 50% inferior"), con las acciones sticky justo debajo. */
+  #results[data-step="1"] .rs2{ display:none!important; }
+  #results[data-step="2"] .rs1{ display:none!important; }
+  #results[data-step="2"] .r-rewards{ margin-top:auto; }
+  #results .r-arow{ display:flex; gap:9px; align-items:stretch; }
+  #results .r-arow .r-again{ flex:1; min-width:0; }
+  /*+AG el secundario pasa a ICONO cuadrado al lado del primario (patron Supercell) en vez de una segunda fila:
+     ahorra ~55px de alto, que es justo lo que hacia falta para que la clasificacion entera quepa. */
+  .r-home.ico{ flex:0 0 auto; width:58px; font-size:22px; padding:0; display:grid; place-items:center; }
+  /*+AG "ver todos": solo aparece cuando la clasificacion NO cabe entera (mas de RTBL_MAX filas) */
+  .r-more{ width:100%; max-width:430px; border:1px dashed #ffffff2e; background:#ffffff08; color:#c9cff0;
+    font-family:inherit; font-weight:800; font-size:12px; border-radius:12px; padding:8px; cursor:pointer; margin-top:6px; }
+  .r-more:active{ transform:scale(.98); }
+  /*+AG separador "…" entre el podio y tu fila cuando la tabla va recortada */
+  .rgap{ text-align:center; color:var(--muted); font-weight:900; font-size:13px; line-height:.8; letter-spacing:.2em; }
   /*+AG feedback Jaime 2026-07-24 ("se pierde parte de abajo"): en una pantalla corta el resumen es mas alto
      que el movil y los botones quedaban BAJO EL PLIEGUE; solo se llegaba haciendo scroll a ciegas. Ahora la
      fila de acciones va PEGADA abajo (sticky), siempre visible, y lo que se desplaza es el resumen. Sticky y
@@ -474,11 +538,13 @@
   /*+AG cabecera de la tabla: deja claro que lo de abajo es la CLASIFICACION de la partida que acabas de jugar */
   .rtbl-h{ width:100%; max-width:430px; font-size:10px; letter-spacing:.16em; text-transform:uppercase;
     color:var(--muted); font-weight:800; margin-top:14px; }
-  .rtable{ width:100%; max-width:430px; display:flex; flex-direction:column; gap:4px; margin-top:6px; }
+  /*+AG doc 40: filas mas finas (28px en vez de 33). Con 8 corredores son 40px menos, y la tabla entera
+     cabe sin deslizar en un movil de 600px utiles. */
+  .rtable{ width:100%; max-width:430px; display:flex; flex-direction:column; gap:3px; margin-top:5px; }
   .rrow .rcrown{ flex:0 0 auto; font-size:12px; line-height:1; }
-  .rrow{ display:flex; align-items:center; gap:9px; background:#ffffff08; border:1px solid var(--line); border-radius:11px; padding:6px 11px; font-size:12.5px; font-weight:800; }
-  .rrow .rp{ width:32px; text-align:center; color:var(--muted); font-variant-numeric:tabular-nums; flex:0 0 auto; }
-  .rrow .rdisc{ width:20px; height:20px; border-radius:50%; flex:0 0 auto; box-shadow:inset 0 2px 4px #ffffff33, 0 1px 3px #0006; }
+  .rrow{ display:flex; align-items:center; gap:8px; background:#ffffff08; border:1px solid var(--line); border-radius:10px; padding:4px 10px; font-size:12.5px; font-weight:800; }
+  .rrow .rp{ width:29px; text-align:center; color:var(--muted); font-variant-numeric:tabular-nums; flex:0 0 auto; }
+  .rrow .rdisc{ width:18px; height:18px; border-radius:50%; flex:0 0 auto; box-shadow:inset 0 2px 4px #ffffff33, 0 1px 3px #0006; }
   .rrow .rn{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .rrow .rd{ font-variant-numeric:tabular-nums; color:var(--muted); flex:0 0 auto; }
   .rrow .rd.up{ color:#6fe08f; } .rrow .rd.dn{ color:#ff8b9a; }
@@ -579,7 +645,7 @@
           <span class="mday" id="mcDay" data-t="dayBadge">⭐ DÍA · +50%</span>
           <button class="mchange" id="mcChange" type="button"><span data-t="change">CAMBIAR</span> <span>▸</span></button>
         </div>
-        <button class="playbig" id="hPlay"><span class="tri">▶</span><span data-t="playWord">JUGAR</span></button>
+        <button class="playbig ready" id="hPlay"><span class="tri">▶</span><span data-t="playWord">JUGAR</span></button>
       </div>
     </div>
   </div>
@@ -753,6 +819,8 @@
     <div class="sball" id="sBall"></div>
     <button class="sfmt" id="sSolo"><span class="tri">▶</span> <span data-t="playSolo">JUGAR INDIVIDUAL</span> <span>👤</span></button>
     <button class="sfmt" id="sTeam"><span class="tri">▶</span> <span data-t="playTeam">JUGAR POR EQUIPOS</span> <span>👥</span><span class="soontag" id="sTeamSoon" data-t="soonTag" style="display:none">pronto</span></button>
+    <!--+AG CÓMO JUGAR (tutorial por modo): botón secundario estilo ficha (i) de evento de Brawl; badge "!" hasta completarlo -->
+    <button class="showbtn" id="sHow"><span class="qi">i</span> <span data-t="howTo">CÓMO JUGAR</span><span class="hbadge" id="sHowBadge" style="display:none">!</span></button>
   </div>
 </div>
 
@@ -791,8 +859,15 @@
 </div>
 
 <!-- ===== RESULTADOS (post-partida, doc 09: celebra a todos, corona a uno, gana siempre algo) ===== -->
-<div id="results" class="scr">
-  <div class="r-card">
+<!--+AG doc 40 (feedback Jaime 2026-07-24, "el ranking se corta"): Resultados era UNA SABANA de 965px en un
+     movil de ~660 visibles. Investigacion de Clash Royale (Game UI Database: "Level Complete" -> "Results" ->
+     "Rewards and Experience" son PANTALLAS SEPARADAS): Supercell comprime EN EL TIEMPO, no en el espacio.
+     Ahora son DOS PASOS taponables, cada uno holgado en pantalla:
+       paso 1 = VEREDICTO (quien gano + tu puesto + copas de tu bola)   -> boton Continuar
+       paso 2 = BOTIN     (Chispas + nivel + clasificacion de la partida) -> Jugar otra / Inicio
+     data-step en el contenedor manda; .rs1/.rs2 marcan a que paso pertenece cada bloque. -->
+<div id="results" class="scr" data-step="1">
+  <div class="r-card rs1">
     <!--+AG DOS INFORMACIONES SEPARADAS (feedback Jaime: "no queda claro quien gana y por que gana"):
          (a) arriba, la BANDA DE GANADOR = quien gano la carrera (disco con SU color real + su nombre);
          (b) debajo, TU PUESTO en grande. Antes el disco (color del ganador) volaba encima del numerote
@@ -805,18 +880,26 @@
     <div class="r-youlbl" id="rYouLbl">Tu puesto</div>
     <div class="r-place" id="rPlace">1º</div>
     <div class="r-sub" id="rSub"></div>
-    <div class="r-rewards">
-      <div class="r-reward" id="rRewChispa"><div class="ic chispa">✦</div><div><div class="lbl2" data-t="chispasWord">Chispas</div><div class="lbl2" id="rChispaWhy" style="text-transform:none;color:#8fe0a8;margin-top:2px"></div></div><div class="val" id="rChispaVal">+0</div></div>
-      <div class="r-reward" id="rRewXp"><div class="ic xp">⭐</div><div style="flex:1"><div class="lbl2"><span data-t="lvl">Nivel</span> <span id="rLvlNum">1</span></div><div class="r-xpbar"><div class="r-xpfill" id="rXpFill"></div></div></div></div>
-    </div>
   </div>
-  <!--+AG COPAS de LA BOLA jugada (doc 37) + tabla de puestos REALES de la partida (viene del motor) -->
-  <div class="r-cups" id="rCups"><div class="ic">🏆</div><div><div class="cn" id="rCupsName">Cohete</div><div class="cw" id="rCupsWhy">Copas</div></div><div class="cv" id="rCupsVal">0<span class="cd" id="rCupsDelta"></span></div></div>
-  <div class="rtbl-h" id="rTableH">Clasificación</div>
-  <div class="rtable" id="rTable"></div>
-  <div class="r-actions">
-    <button class="r-again" id="rAgain" data-t="again">▶ Jugar otra</button>
-    <button class="r-home" id="rHome" data-t="home">Inicio</button>
+  <!--+AG COPAS de LA BOLA jugada (doc 37): van en el PASO 1 porque son parte del veredicto (subes o bajas) -->
+  <div class="r-cups rs1" id="rCups"><div class="ic">🏆</div><div><div class="cn" id="rCupsName">Cohete</div><div class="cw" id="rCupsWhy">Copas</div></div><div class="cv" id="rCupsVal">0<span class="cd" id="rCupsDelta"></span></div></div>
+  <div class="r-rewards rs2">
+    <div class="r-reward" id="rRewChispa"><div class="ic chispa">✦</div><div><div class="lbl2" data-t="chispasWord">Chispas</div><div class="lbl2" id="rChispaWhy" style="text-transform:none;color:#8fe0a8;margin-top:2px"></div></div><div class="val" id="rChispaVal">+0</div></div>
+    <div class="r-reward" id="rRewXp"><div class="ic xp">⭐</div><div style="flex:1"><div class="lbl2"><span data-t="lvl">Nivel</span> <span id="rLvlNum">1</span></div><div class="r-xpbar"><div class="r-xpfill" id="rXpFill"></div></div></div></div>
+  </div>
+  <!--+AG tabla de puestos REALES de la partida (viene del motor). Si no cabe entera, se muestra el podio +
+       TU fila y el resto queda tras un tap (regla Supercell: reducir la info, no obligar a deslizar). -->
+  <div class="rtbl-h rs2" id="rTableH">Clasificación</div>
+  <div class="rtable rs2" id="rTable"></div>
+  <button class="r-more rs2" id="rMore" hidden></button>
+  <div class="r-actions rs1">
+    <button class="r-again ready" id="rNext" data-t="rNext">Continuar ▸</button>
+  </div>
+  <div class="r-actions rs2">
+    <div class="r-arow">
+      <button class="r-again" id="rAgain" data-t="again">▶ Jugar otra</button>
+      <button class="r-home ico" id="rHome" data-tt="home" title="Inicio">🏠</button>
+    </div>
   </div>
 </div>
 <!-- ===== GARAJE (colección + calidad + hexágono + alineación, doc 05) ===== -->
@@ -888,8 +971,14 @@
       <div class="tl"><div class="fl" data-t="seSeason">Temporada 1</div><h3 data-t="seTheme">Verano en la Cima</h3><div class="dd" data-th="seChampLine"></div></div>
       <canvas class="se-champ" id="seChamp" width="112" height="112"></canvas>
     </div>
+    <!--+AG doc 40: las tres secciones de Temporada ya no se apilan, se cambian con un tap -->
+    <div class="subtabs" data-subgroup="temporada">
+      <button class="subtab on" data-subtab="liga" data-t="seTabLiga">Liga</button>
+      <button class="subtab" data-subtab="pase" data-t="seTabPase">Pase</button>
+      <button class="subtab" data-subtab="rk" data-t="seTabRk">Ranking</button>
+    </div>
 
-    <div class="sc-block">
+    <div class="sc-block on" data-sub="liga">
       <div class="sc-h" data-t="seLeague">Liga</div>
       <div class="se-league-top">
         <div class="se-badge">🥇</div>
@@ -905,7 +994,7 @@
       <div class="sc-note" data-th="seFloor"></div>
     </div>
 
-    <div class="sc-block">
+    <div class="sc-block" data-sub="pase">
       <div class="sc-h"><span data-t="sePassH">Pase de Batalla</span> <span class="sc-soon" data-t="sePassSoon">pronto</span></div>
       <div class="se-pase-hd"><div class="pg"><span data-t="seRung">Peldaño 12</span> <small>/ 50</small></div></div>
       <div class="se-vias"><span class="g" data-t="seFree">Vía gratis</span><span class="p" data-t="sePrem">Vía premium</span></div>
@@ -914,7 +1003,7 @@
       <div class="sc-note" data-th="sePassNote"></div>
     </div>
 
-    <div class="sc-block">
+    <div class="sc-block" data-sub="rk">
       <div class="sc-h" data-t="seRkH">Rankings</div>
       <div class="se-rk-tabs"><button class="se-rk-tab on" data-ti="seRkTabs:0">Diario</button><button class="se-rk-tab" data-ti="seRkTabs:1">Semanal</button><button class="se-rk-tab" data-ti="seRkTabs:2">General</button></div>
       <div class="se-row"><div class="pos">1</div><div class="who">🔵 Estela</div><div class="pts">3 420</div></div>
@@ -942,7 +1031,13 @@
     </div>
   </div>
   <div class="sc-body">
-    <div class="sc-block">
+    <!--+AG doc 40: Perfil en tres secciones hermanas (antes: 962px de rollo en 550 utiles) -->
+    <div class="subtabs" data-subgroup="perfil">
+      <button class="subtab on" data-subtab="tu" data-t="prTabYou">Tú</button>
+      <button class="subtab" data-subtab="amigos" data-t="prTabFriends">Amigos</button>
+      <button class="subtab" data-subtab="mas" data-t="prTabMore">Más</button>
+    </div>
+    <div class="sc-block on" data-sub="tu">
       <div class="pr-id">
         <canvas class="pr-av" id="prAv" width="132" height="132"></canvas>
         <div class="who"><div class="al" data-t="prPlayer">Jugador</div><div class="lv"><span data-t="lvl">Nivel</span> <span id="prLvl">1</span> · <span data-t="prAlias">alias</span></div><div class="pr-priv" data-t="prPriv">Perfil privado</div></div>
@@ -955,14 +1050,14 @@
       <div class="sc-note" data-th="prShowNote"></div>
     </div>
 
-    <div class="sc-block">
+    <div class="sc-block" data-sub="amigos">
       <div class="sc-h"><span data-t="prFriendsH">Amigos</span> <span class="sc-soon" data-t="prFriendsSoon">pronto</span></div>
       <div class="pr-code"><span data-t="prYourCode">Tu código:</span><span class="cd">BT-7Q4K2</span><button data-soonk="sSoonCopy" data-t="prCopy">Copiar</button></div>
       <div class="pr-slots"><div class="s" data-soonk="sSoonInvite">+</div><div class="s" data-soonk="sSoonInvite">+</div><div class="s" data-soonk="sSoonInvite">+</div><button class="pr-inv" data-soonk="sSoonAddCode" data-t="prAddCode">Añadir por código</button></div>
       <div class="sc-note" data-th="prFriendsNote"></div>
     </div>
 
-    <div class="sc-block">
+    <div class="sc-block" data-sub="amigos">
       <div class="sc-h" data-t="prRefH">Invita y gana</div>
       <div class="pr-ref">
         <div class="gift">🎁</div>
@@ -971,12 +1066,12 @@
       <button class="se-cta" style="background:linear-gradient(#ffe27a,#ff9a3d);color:#3a2400;box-shadow:0 3px 0 #b45a10;margin-top:11px" data-soonk="sSoonInviteGame" data-t="prRefCta">Invitar al juego</button>
     </div>
 
-    <div class="sc-block">
+    <div class="sc-block" data-sub="mas">
       <div class="sc-h"><span data-t="prEmotesH">Emotes</span> <span class="sc-soon" data-t="prEmotesSoon">lista cerrada</span></div>
       <div class="pr-emotes"><span class="pr-emote" data-ti="prEmotes:0"></span><span class="pr-emote" data-ti="prEmotes:1"></span><span class="pr-emote" data-ti="prEmotes:2"></span><span class="pr-emote" data-ti="prEmotes:3"></span><span class="pr-emote" data-ti="prEmotes:4"></span></div>
     </div>
 
-    <div class="sc-block">
+    <div class="sc-block" data-sub="mas">
       <div class="sc-h" data-t="prChanH">Salir en el canal</div>
       <div class="pr-toggle">
         <div class="pr-sw" id="prConsent" role="switch" aria-checked="false"></div>
@@ -1830,6 +1925,9 @@ const LANGS={en:'English',es:'Español',pt:'Português',fr:'Français',de:'Deuts
 //   CARRERA sí está en los 9 (I18N). Mezcla evitada: en un idioma sin shell, todo el shell sale en inglés (consistente).
 const SHELL={
   es:{ featured:'Modo destacado', play:'▶ JUGAR', you:'TÚ', lvl:'Nivel', again:'▶ Jugar otra', home:'Inicio',
+    rNext:'Continuar ▸', rSeeAll:n=>'Ver los '+n+' ▾',   //+AG doc 40: paso 1 (veredicto) → paso 2 (botín)
+    seTabLiga:'Liga', seTabPase:'Pase', seTabRk:'Ranking',   //+AG doc 40: sub-pestañas (etiquetas cortas)
+    prTabYou:'Tú', prTabFriends:'Amigos', prTabMore:'Más',
     tJugar:'Jugar', tGaraje:'Garaje', tTienda:'Tienda', tTemp:'Temporada', tPerfil:'Perfil',
     won:'¡GANASTE!', champ:'Campeón', wonSub:'¡Primer puesto!', podium:'¡Podio!', againSub:'¡Otra! Cada carrera suma.',
     firstWin:'+15 primera victoria del día', chal:'🎯 Reto de hoy: <b>Llega en top 3</b> &nbsp;·&nbsp; +25 ✦',
@@ -1841,6 +1939,7 @@ const SHELL={
     heroTag:'Tu bola equipada · toca para ver la colección', passTitle:'PASE DE TEMPORADA',
     passSub:(lv,xp)=>'Nivel '+lv+' · '+xp+' XP', sheetTitle:'Vas a jugar', with:'Con',
     playSolo:'JUGAR INDIVIDUAL', playTeam:'JUGAR POR EQUIPOS', soonTag:'pronto',
+    howTo:'CÓMO JUGAR', howToDone:m=>'¡Tutorial de '+m+' completado! 🎓',
     teamSoonToast:m=>'POR EQUIPOS en '+m+' llegará pronto',
     selTitle:'MODOS', selSub:'Todos a la vista · toca uno y vuelves al inicio con él',
     gridNote:'Tocar un modo lo deja elegido en el inicio · JUGAR lo arranca desde allí',
@@ -1856,6 +1955,9 @@ const SHELL={
     //+AG Fase 3 · resultados POR EQUIPOS
     teamWon:'¡Tu equipo ganó!', teamPlaceMsg:p=>'Tu equipo: '+p+'º', teamAgainSub:'¡Otra! Cada partida suma para tu equipo.' },
   en:{ featured:'Featured mode', play:'▶ PLAY', you:'YOU', lvl:'Level', again:'▶ Play again', home:'Home',
+    rNext:'Continue ▸', rSeeAll:n=>'See all '+n+' ▾',
+    seTabLiga:'League', seTabPase:'Pass', seTabRk:'Ranking',
+    prTabYou:'You', prTabFriends:'Friends', prTabMore:'More',
     tJugar:'Play', tGaraje:'Garage', tTienda:'Shop', tTemp:'Season', tPerfil:'Profile',
     won:'YOU WON!', champ:'Champion', wonSub:'First place!', podium:'Podium!', againSub:'Again! Every race counts.',
     firstWin:'+15 first win of the day', chal:'🎯 Today: <b>Finish top 3</b> &nbsp;·&nbsp; +25 ✦',
@@ -1867,6 +1969,7 @@ const SHELL={
     heroTag:'Your equipped ball · tap to see the collection', passTitle:'SEASON PASS',
     passSub:(lv,xp)=>'Level '+lv+' · '+xp+' XP', sheetTitle:'You\'re going to play', with:'With',
     playSolo:'PLAY SOLO', playTeam:'PLAY IN TEAMS', soonTag:'soon',
+    howTo:'HOW TO PLAY', howToDone:m=>m+' tutorial complete! 🎓',
     teamSoonToast:m=>'TEAMS in '+m+' is coming soon',
     selTitle:'MODES', selSub:'All in view · tap one and go back home with it',
     gridNote:'Tapping a mode selects it on home · PLAY starts it from there',
@@ -2223,12 +2326,24 @@ addEventListener('keydown',e=>{ if(e.repeat) return; const k=e.key.toLowerCase()
   if(k==='1'||k==='arrowleft')setDir(DIR.LEFT); else if(k==='2'||k==='arrowdown')setDir(DIR.CENTER); else if(k==='3'||k==='arrowright')setDir(DIR.RIGHT);
   else if(k==='a')useNitro(); else if(k==='s')useShield(); else if(k==='d'||k===' ')useSuper(); });
 
+//+AG doc 40: un unico destello al pasar de NO-disponible a disponible. Recuerda el estado anterior por boton,
+//   asi que se dispara en el flanco, no en cada frame (updateHUD corre a 60fps).
+const flashPrev=new WeakMap();
+function flashOnReady(btn, avail){
+  if(flashPrev.get(btn)===avail) return;
+  flashPrev.set(btn, avail);
+  if(!avail) return;
+  btn.classList.remove('justready'); void btn.offsetWidth; btn.classList.add('justready');   // reinicia la animacion
+}
 function updateHUD(){ if(!sim) return; const t=T(), place=sim.playerPlace(), p=sim.player, o=ord(place,LANG);
   el('pos').innerHTML = p.rank? t.fin(o) : t.pos(o,N_BALLS);
   el('superfill').style.width=(sim.super*100)+'%';
   const nb=el('bNit'), sb=el('bShd'), su=el('bSup'), ready=sim.super>=1&&p.rank===null;
   nb.disabled=p.nitroCd>0||p.rank!==null; sb.disabled=p.shieldCd>0||p.rank!==null; su.disabled=!ready;
   su.classList.toggle('ready',ready);
+  //+AG doc 40: nitro y escudo NO laten (tres botones latiendo a la vez es ruido y mata el aviso del súper);
+  //   dan UN destello en el instante en que salen del enfriamiento, que es cuando hay algo nuevo que decir.
+  flashOnReady(nb, !nb.disabled); flashOnReady(sb, !sb.disabled);
   el('cdNit').textContent=p.nitroCd>0?Math.ceil(p.nitroCd/FPS)+'s':t.ready;
   el('cdShd').textContent=p.shieldCd>0?Math.ceil(p.shieldCd/FPS)+'s':t.ready;
   el('cdSup').textContent=ready?'¡'+t.superLbl+'!':Math.round(sim.super*100)+'%';
@@ -2248,7 +2363,7 @@ const FRESH = !localStorage.getItem(SAVE_KEY);   //+AG Fase D: primera sesion (s
 let SAVE=Object.assign({chispas:0,gemas:20,xp:0,level:1,played:0,lastWinDay:'',
     balls:[{arch:'cohete',q:0,attrs:[8,7,3,4,4,5],xp:0,pts:0,copas:0}], equipped:0, cosmetics:[], pase:false,
     onboarded:false, codes:[], settings:{audio:true, music:true, sfx:true, reducedFx:false, quality:'auto', colorblind:'off'},
-    mode:'race', fmt:'individual', dayBonusDay:'', cupsToday:null},   //+AG colección inicial: Cohete Común (bola de arranque, doc 05 §3.3) + estado Fase D + Home v3 (modo/formato elegidos, bonus del día) + copas (doc 37)
+    mode:'race', fmt:'individual', dayBonusDay:'', cupsToday:null, tutorialDone:{}}, //+AG colección inicial: Cohete Común (bola de arranque, doc 05 §3.3) + estado Fase D + Home v3 (modo/formato elegidos, bonus del día) + copas (doc 37)
   (()=>{ try{ return JSON.parse(localStorage.getItem(SAVE_KEY))||{}; }catch(e){ return {}; } })());
 if(!SAVE.settings) SAVE.settings={audio:true, music:true, sfx:true, reducedFx:false, quality:'auto', colorblind:'off'};   //+AG saves viejos sin settings
 //+AG doc 38 Fase 1: el audio se separa en dos flags (musica/efectos, patron Supercell). Saves viejos con el flag
@@ -2281,6 +2396,7 @@ if(Array.isArray(SAVE.balls)) SAVE.balls.forEach(b=>{ if(typeof b.copas!=='numbe
 if(!SAVE.mode || !['race','cazador','redlight'].includes(SAVE.mode)) SAVE.mode='race';
 if(SAVE.fmt!=='individual' && SAVE.fmt!=='equipos') SAVE.fmt='individual';
 if(typeof SAVE.dayBonusDay!=='string') SAVE.dayBonusDay='';
+if(!SAVE.tutorialDone || typeof SAVE.tutorialDone!=='object' || Array.isArray(SAVE.tutorialDone)) SAVE.tutorialDone={};   //+AG CÓMO JUGAR: {race:true,...} por modo completado
 function persist(){ try{ localStorage.setItem(SAVE_KEY,JSON.stringify(SAVE)); }catch(e){} }
 function xpForLevel(lv){ return 80+lv*40; }
 //+AG MODOS jugables (Home v3, docs/35): icono + gradiente de la tarjeta/hoja; el nombre sale de i18n (modeTitle)
@@ -2398,7 +2514,8 @@ function buildTeamStandings(rows, winnerTeam){
 }
 
 // ===== PANTALLAS =====
-function showScreen(n){ ['home','results','garaje','tienda','temporada','perfil','selector','ranking'].forEach(s=>{ const e=el(s); if(e) e.classList.toggle('on',s===n); }); document.body.classList.toggle('race',n==='race'); }
+function showScreen(n){ ['home','results','garaje','tienda','temporada','perfil','selector','ranking'].forEach(s=>{ const e=el(s); if(e) e.classList.toggle('on',s===n); }); document.body.classList.toggle('race',n==='race');
+  if(typeof refreshTabBadges==='function') refreshTabBadges(); }   //+AG doc 40: el badge del Garaje se refresca al cambiar de pantalla
 function drawPreviewBall(cv,col){ const x=cv.getContext('2d'), S=cv.width, r=S*0.4, cx=S/2, cy=S/2; x.clearRect(0,0,S,S);
   const grd=x.createRadialGradient(cx-r*0.35,cy-r*0.4,r*0.1,cx,cy,r*1.1); grd.addColorStop(0,rgb(col,1.55)); grd.addColorStop(0.5,rgb(col,1.05)); grd.addColorStop(1,rgb(col,0.55));
   x.beginPath(); x.arc(cx,cy,r,0,7); x.fillStyle=grd; x.fill();
@@ -2426,7 +2543,7 @@ function renderHome(){ applyShell();
   el('mcDay').style.display = SAVE.mode===dayMode() ? '' : 'none';
   el('hPassSub').textContent=S().passSub(SAVE.level, SAVE.xp+'/'+xpForLevel(SAVE.level));
   el('hPassBar').style.width=Math.round(100*SAVE.xp/xpForLevel(SAVE.level))+'%';
-  const gt=el('homeGarTab'); if(gt) gt.classList.toggle('badge', totalUps()>0);   //+AG doc 39: badge = bolas listas para SUBIR DE NIVEL
+  refreshTabBadges();   //+AG doc 39: badge = bolas listas para SUBIR DE NIVEL
   const gr=el('rlGaraje'); if(gr){ let bd=gr.querySelector('.badge'); const ups=totalUps();
     if(ups>0){ if(!bd){ bd=document.createElement('span'); bd.className='badge'; gr.appendChild(bd); } bd.textContent=ups; }
     else if(bd) bd.remove(); } }
@@ -2436,7 +2553,7 @@ function goHome(){ closeGameFrame(); showScreen('home'); renderHome(); }
 //   como iframe a pantalla completa (embed=1). El modo emite bt:matchEnd al terminar y el shell paga economia
 //   y muestra Resultados. Iframe nuevo por partida = contexto WebGL/audio limpio, sin fugas entre rondas.
 const MODE_SRC={ race:'motor/race/index.html', cazador:'motor/cazador/index.html', redlight:'motor/redlight/index.html' };
-let gameFrameEl=null, curMode='race', curFmt='individual';
+let gameFrameEl=null, curMode='race', curFmt='individual', curTutorial=false;
 //+AG URL del iframe por modo y FORMATO (docs/35): INDIVIDUAL = perfil de 8 bolas sueltas; EQUIPOS = perfil de
 //   torneo 4×3 del motor (Fase 3). cazador individual va con short=1 (su embed pelado arranca el torneo).
 function modeEmbedUrl(mode, fmt){
@@ -2466,20 +2583,47 @@ function modeEmbedUrl(mode, fmt){
 }
 function startRace(mode, fmt){
   mode = MODE_SRC[mode] ? mode : 'race';   // sin modo valido -> Carrera
-  curMode=mode; curFmt = fmt==='equipos' ? 'equipos' : 'individual';
+  curMode=mode; curFmt = fmt==='equipos' ? 'equipos' : 'individual'; curTutorial=false;
+  openFrame(modeEmbedUrl(mode, curFmt));
+}
+//+AG CÓMO JUGAR (tutorial por modo): mismo iframe que una partida pero con &tutorial=1, seed FIJA (el nivel de
+//   aprendizaje es siempre el mismo), SIN &stats (bola neutra: se enseña el modo, no la bola) y perfil individual
+//   forzado (cazador necesita short=1: su embed pelado es el torneo 4×3). Termina con bt:tutorialEnd, sin economia.
+function startTutorial(mode){
+  mode = MODE_SRC[mode] ? mode : 'race';
+  curMode=mode; curFmt='individual'; curTutorial=true;
+  let u = MODE_SRC[mode]+'?embed=1&tutorial=1&seed=7' + (mode==='cazador'?'&short=1':'');
+  if(new URLSearchParams(location.search).get('drive')==='1') u+='&drive=1';
+  u += '&lang=' + encodeURIComponent(LANG);
+  const st=SAVE.settings||{};
+  u += '&music=' + (st.music===false?'0':'1') + '&sfx=' + (st.sfx===false?'0':'1');
+  u += '&gfx=' + encodeURIComponent(st.quality||'auto') + (st.reducedFx?'&redfx=1':'');
+  openFrame(u);
+}
+function openFrame(src){
   closeGameFrame();
   const f=document.createElement('iframe'); f.id='gameFrame';
-  f.src=modeEmbedUrl(mode, curFmt);
+  f.src=src;
   f.setAttribute('allow','autoplay; fullscreen');
   f.style.cssText='position:absolute;inset:0;width:100%;height:100%;border:0;z-index:1000;background:#0b0f1e';   //+AG absolute: vive DENTRO de #app (columna portrait)
   gameFrameEl=f; (document.getElementById('app')||document.body).appendChild(f);
 }
 function closeGameFrame(){ if(gameFrameEl){ gameFrameEl.remove(); gameFrameEl=null; } }
 window.addEventListener('message', e=>{
-  const d=e.data; if(!d || d.type!=='bt:matchEnd') return;
+  const d=e.data; if(!d || (d.type!=='bt:matchEnd' && d.type!=='bt:tutorialEnd')) return;
   if(!gameFrameEl || e.source!==gameFrameEl.contentWindow) return;   //+AG solo el iframe del juego, ignora mensajes espurios
+  if(d.type==='bt:tutorialEnd'){ onTutorialEnd(d); return; }
+  if(curTutorial) return;   //+AG cinturon y tirantes: un matchEnd durante el tutorial NO paga economia
   onMatchEnd(d);
 });
+//+AG fin del tutorial: sin computeRewards/copas. Si lo completo, se marca por modo (quita el "!" de la hoja)
+//   y se vuelve a la HOJA (el jugador aterriza donde estaba, a un tap de jugar de verdad).
+function onTutorialEnd(d){
+  closeGameFrame(); curTutorial=false;
+  if(d.completed){ SAVE.tutorialDone[curMode]=true; persist(); }
+  goHome(); openSheet();
+  if(d.completed) toast(S().howToDone(modeTitle(curMode)));
+}
 function onMatchEnd(d){
   closeGameFrame();
   //+AG doc 07: los 3 modos son INDIVIDUALES → el resultado que cuenta es el PUESTO del jugador (playerPlace)
@@ -2532,7 +2676,7 @@ function finishRace(){
   persist(); checkHitos(); showResults(place, rew, leveled, st2d[0]?st2d[0].color:null, 0, {standings:st2d});
 }
 function showResults(place, rew, leveled, colArg, teamP, d){
-  showScreen('results'); applyShell();   //+AG los rotulos fijos de Resultados (Chispas/Nivel) tambien por idioma
+  showScreen('results'); setResultsStep(1); applyShell();   //+AG los rotulos fijos de Resultados (Chispas/Nivel) tambien por idioma
   const s=S();
   //+AG DISCO DE CAMPEON = color REAL del ganador (viene del motor). Si no llega, se cae al 1o de la clasificacion.
   const w = lastStandings && (lastStandings.find(r=>r.win) || lastStandings[0]);
@@ -2570,13 +2714,18 @@ function showResults(place, rew, leveled, colArg, teamP, d){
   el('rLvlNum').textContent=SAVE.level;
   const XPFROM=leveled?0:Math.max(0,SAVE.xp-rew.xp)/xpForLevel(SAVE.level), XPTO=SAVE.xp/xpForLevel(SAVE.level);
   el('rXpFill').style.transition='none'; el('rXpFill').style.width=(XPFROM*100)+'%';
-  cancelAnimationFrame(animRAF); let t0=null;
-  function anim(ts){ if(!t0)t0=ts; const e=ts-t0;
-    if(e>150){ rewChispa.classList.add('in'); el('rChispaVal').textContent='+'+Math.round(rew.chispas*Math.min(1,(e-150)/700)); }
-    if(e>650){ rewXp.classList.add('in'); el('rXpFill').style.transition=''; el('rXpFill').style.width=(XPTO*100)+'%'; }
-    if(e<1500) animRAF=requestAnimationFrame(anim); else el('rChispaVal').textContent='+'+rew.chispas;
-  }
-  requestAnimationFrame(()=>{ animRAF=requestAnimationFrame(anim); });
+  cancelAnimationFrame(animRAF);
+  //+AG doc 40: el conteo de Chispas y el llenado de XP viven en el PASO 2, asi que la animacion NO se lanza
+  //   aqui (correria a puerta cerrada y el jugador se la perderia): se guarda y se dispara al entrar al paso.
+  rewFinal={chispas:rew.chispas, xp:XPTO};   //+AG doc 40: valores FINALES, para que saltar la animacion no deje un numero a medias
+  rewardAnim=()=>{ let t0=null;
+    function anim(ts){ if(!t0)t0=ts; const e=ts-t0;
+      if(e>150){ rewChispa.classList.add('in'); el('rChispaVal').textContent='+'+Math.round(rew.chispas*Math.min(1,(e-150)/700)); }
+      if(e>650){ rewXp.classList.add('in'); el('rXpFill').style.transition=''; el('rXpFill').style.width=(XPTO*100)+'%'; }
+      if(e<1500) animRAF=requestAnimationFrame(anim); else el('rChispaVal').textContent='+'+rew.chispas;
+    }
+    cancelAnimationFrame(animRAF); animRAF=requestAnimationFrame(anim);
+  };
   if(leveled) toast(S().levelUp(SAVE.level));
   //+AG COPAS de la bola (doc 37): tarjeta animada (before→after) + clasificacion REAL de la partida
   const cupsEl=el('rCups'), tblEl=el('rTable');
@@ -2594,24 +2743,86 @@ function showResults(place, rew, leveled, colArg, teamP, d){
   //+AG CLASIFICACION: una fila por BOLA que corrio (individual) o por EQUIPO (equipos), con su color y puesto
   //   REALES de la sim. La corona marca al ganador para que case con el disco de arriba. El ordinal va localizado
   //   (antes era '1º' fijo, español colado con el juego en ingles).
-  tblEl.innerHTML=''; el('rTableH').style.display = lastStandings ? '' : 'none';
+  el('rTableH').style.display = lastStandings ? '' : 'none';
+  tblExpanded=false; tblTeamP=teamP||0; renderStandingsTable(tblTeamP,0);
+}
+//+AG doc 40: la clasificacion se pinta RECORTADA si no cabe entera. Regla Supercell (Gornicki: la tienda
+//   enseña "up to 6 items"; Muhtar: el layout se diseña para "reduce the amount of scroll"): mejor enseñar
+//   el podio + TU fila que obligar a deslizar a ciegas. El resto sigue ahi, a un tap de "ver todos".
+const RTBL_TOP=4;      // cuando hay recorte: podio + 1, luego "…" y tu fila
+let tblExpanded=false, tblTeamP=0;
+//+AG el recorte NO es un numero fijo de filas: se MIDE. En un movil normal caben las 8 y se enseñan las 8;
+//   en uno pequeño (o con las barras del navegador comiendo alto) se recorta solo lo justo. Asi la regla
+//   "no hay que deslizar" se cumple en TODOS los telefonos sin castigar a los que si tienen sitio.
+function fitStandings(){
+  const r=el('results'); if(r.dataset.step!=='2' || tblExpanded) return;
+  //+AG se mide la posicion FINAL, no la de la animacion de entrada: las tarjetas llegan con un translateY de
+  //   8px que cuenta como desbordamiento y hacia recortar la tabla en moviles donde si cabia entera.
+  const anim=[...document.querySelectorAll('.r-reward:not(.in)')];
+  anim.forEach(x=>x.classList.add('in'));
+  //+AG se prueba de mas a menos: primero la tabla entera; si no cabe, se van quitando puestos de la cabeza
+  //   hasta que quepa. En un movil normal no recorta nada; en uno muy pequeño deja el podio y tu fila.
+  for(const top of [0, RTBL_TOP, 3, 2, 1]){
+    renderStandingsTable(tblTeamP, top);
+    if(r.scrollHeight<=r.clientHeight+2) break;
+  }
+  anim.forEach(x=>x.classList.remove('in'));
+}
+function renderStandingsTable(teamP, topN){
+  const tblEl=el('rTable'), more=el('rMore'); tblEl.innerHTML='';
+  if(!lastStandings){ more.hidden=true; return; }
   const DELTAS = teamP ? TEAM_DELTA : PLACE_DELTA;
-  if(lastStandings){ lastStandings.forEach((e,i)=>{ const dl=DELTAS[Math.min(DELTAS.length-1, e.place-1)];
+  const cut = !!topN && !tblExpanded && lastStandings.length>topN+1;
+  let shown = lastStandings;
+  if(cut){ const top=lastStandings.slice(0,topN);
+    //+AG TU fila nunca se recorta: si no estas en la cabeza, apareces igual detras del separador
+    const mine=lastStandings.find(e=>e.me);
+    shown = mine && !top.includes(mine) ? top.concat([null, mine]) : top.concat([null]);
+  }
+  shown.forEach(e=>{
+    if(!e){ const g=document.createElement('div'); g.className='rgap'; g.textContent='···'; tblEl.appendChild(g); return; }
+    const dl=DELTAS[Math.min(DELTAS.length-1, e.place-1)];
     const row=document.createElement('div'); row.className='rrow'+(e.me?' meRow':'');
     row.innerHTML='<span class="rp">'+ord(e.place,LANG)+'</span><span class="rdisc" style="background:'+e.color+'"></span>'+
       (e.win?'<span class="rcrown">👑</span>':'')+
       '<span class="rn">'+esc(e.name)+'</span><span class="rd '+deltaCls(dl)+'">🏆 '+deltaTxt(dl)+'</span>';
-    tblEl.appendChild(row); }); }
+    tblEl.appendChild(row); });
+  more.hidden = !cut;
+  more.textContent = S().rSeeAll(lastStandings.length);
+}
+//+AG PASOS de Resultados: 1 = veredicto, 2 = botin. Volver atras no se ofrece a proposito (el botin ya esta
+//   cobrado y el paso 1 no tiene nada que decidir); el camino es siempre hacia delante, como en CR.
+let rewardAnim=null, rewFinal=null;
+function setResultsStep(n){
+  el('results').dataset.step=String(n);
+  el('results').scrollTop=0;
+  if(n===2){ fitStandings();   //+AG el recorte de la tabla se mide con el paso 2 YA visible (antes no tiene alto)
+    if(rewardAnim){ const f=rewardAnim; rewardAnim=null; requestAnimationFrame(()=>f()); } }
 }
 //+AG los nombres de bot son de un roster cerrado, pero la tabla se pinta con innerHTML: escapamos por higiene
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 //+AG animador de nodo de texto (la tarjeta de copas usa un textNode, no un elemento con id) — robusto sin frames
-function animBetweenNode(node, from, to, ms){ const start=Date.now(), iv=setInterval(()=>{
-  const p=Math.min(1,(Date.now()-start)/ms);
-  node.textContent=nfmt(Math.round(from+(to-from)*(1-Math.pow(1-p,3))));
-  if(p>=1){ node.textContent=nfmt(to); clearInterval(iv); } }, 40); }
-function skipResults(){ cancelAnimationFrame(animRAF); document.querySelectorAll('.r-reward').forEach(r=>r.classList.add('in')); }
-el('results').addEventListener('click', e=>{ if(!e.target.closest('.r-actions')) skipResults(); });
+let cupsIV=0;   //+AG doc 40: el intervalo vivo, para poder cortarlo si el jugador salta la animacion
+function animBetweenNode(node, from, to, ms){ const start=Date.now(); clearInterval(cupsIV);
+  cupsIV=setInterval(()=>{
+    const p=Math.min(1,(Date.now()-start)/ms);
+    node.textContent=nfmt(Math.round(from+(to-from)*(1-Math.pow(1-p,3))));
+    if(p>=1){ node.textContent=nfmt(to); clearInterval(cupsIV); } }, 40); }
+//+AG doc 40: saltar la animacion enseña el RESULTADO YA, no lo congela a medias. Antes cancelaba el bucle y
+//   el contador se quedaba donde iba ("+13" cuando habias ganado 26); en un navegador que no compone frames
+//   (pestaña en segundo plano) se quedaba directamente en "+0".
+function skipResults(){ cancelAnimationFrame(animRAF);
+  document.querySelectorAll('.r-reward,.r-cups').forEach(r=>r.classList.add('in'));
+  if(rewFinal){ el('rChispaVal').textContent='+'+rewFinal.chispas;
+    el('rXpFill').style.transition=''; el('rXpFill').style.width=(rewFinal.xp*100)+'%'; }
+  if(lastCups){ clearInterval(cupsIV); el('rCupsVal').firstChild.textContent=nfmt(lastCups.after);
+    el('rCupsDelta').textContent=deltaTxt(lastCups.delta); }
+}
+el('results').addEventListener('click', e=>{ if(!e.target.closest('.r-actions') && !e.target.closest('.r-more')) skipResults(); });
+el('rNext').addEventListener('click', ()=>setResultsStep(2));
+//+AG "ver todos": despliega la clasificacion completa. Es una accion EXPLICITA del jugador, asi que aqui si
+//   vale que la pantalla se desplace: nadie se pierde nada por no deslizar.
+el('rMore').addEventListener('click', ()=>{ tblExpanded=true; renderStandingsTable(tblTeamP,0); });
 
 // ===== toast "próximamente" (stubs de secciones aún no construidas) =====
 let toastT=0;
@@ -2681,6 +2892,10 @@ const gemaPrice=p=>Math.max(1,Math.round(p/60));
 const owned=k=>SAVE.balls.find(b=>b.arch===k);
 //+AG doc 39: el badge del Garaje ya no cuenta puntos sueltos, cuenta BOLAS LISTAS para subir de nivel
 const totalUps=()=>SAVE.balls.reduce((s,b)=>s+(canLvlUp(b)?1:0),0);
+//+AG doc 40: el punto rojo del Garaje sale en la barra de pestañas de TODAS las pantallas, no solo en el Home
+//   (regla Supercell: el badge te dice donde mirar; antes solo lo veias si ya estabas en la portada).
+function refreshTabBadges(){ const on=totalUps()>0;
+  document.querySelectorAll('#homeGarTab,#shTabGaraje,[data-nav="garaje"]').forEach(t=>t.classList.toggle('badge',on)); }
 
 function openGaraje(){ checkHitos(); showScreen('garaje'); applyShell(); renderGaraje(); }
 function renderGaraje(){ el('gChispas').textContent=SAVE.chispas; el('gGemas').textContent=SAVE.gemas;
@@ -2707,6 +2922,7 @@ function openDetail(k){ applyShell(); const A=ARCHS[k], b=owned(k), q=QUAL[A.q],
   const cap=Math.max.apply(null, attrsOf({arch:k,lvl:maxLvl(k)}));   //+AG anillo punteado = a dónde llega su MEJOR atributo al nivel máximo
   drawHex(el('gdHex'), attrs, cap, q.c, !b);
   const assign=el('gdAssign'); assign.innerHTML='';
+  let lvlUpReady=false;   //+AG doc 40: regla Supercell "un solo elemento brillando por pantalla"
   if(b){ const next=lvl+1, maxed=next>maxLvl(k);
     el('gdXpWrap').style.display='';
     el('gdXpNum').textContent = maxed ? s.lvlShort(lvl)+' · MÁX' : s.lvlShort(lvl)+' · '+Math.round(b.xp||0)+'/'+xpNeed(next)+' XP';
@@ -2714,6 +2930,7 @@ function openDetail(k){ applyShell(); const A=ARCHS[k], b=owned(k), q=QUAL[A.q],
     if(!maxed){ const cost=LVL_COST[next], haveXp=(b.xp||0)>=xpNeed(next);
       const bt=document.createElement('button'); bt.className='gd-chip'; bt.style.cssText='flex:1;font-weight:800';
       bt.textContent=s.lvlUpBtn(next,cost); bt.disabled=!haveXp||SAVE.chispas<cost;
+      lvlUpReady=!bt.disabled; bt.classList.toggle('ready', lvlUpReady);   //+AG doc 40: brilla solo si HOY puedes subirla (XP + Chispas)
       bt.onclick=()=>{ if(canLvlUp(b)){ SAVE.chispas-=cost; b.lvl=(b.lvl||1)+1; persist();
         toast(s.tBallLvl(archName(k),b.lvl)); openDetail(k); renderGaraje(); } };
       assign.appendChild(bt);
@@ -2731,6 +2948,9 @@ function openDetail(k){ applyShell(); const A=ARCHS[k], b=owned(k), q=QUAL[A.q],
   } else { const idx=SAVE.balls.indexOf(b), isEq=SAVE.equipped===idx;
     prim.textContent=isEq?S().equippedBtn:S().equipBtn; prim.disabled=isEq;
     prim.onclick=()=>{ SAVE.equipped=idx; persist(); openDetail(k); renderGaraje(); toast(S().tEquipped); }; ghost.style.display='none'; }
+  //+AG doc 40: el boton grande brilla solo si se puede pulsar Y no hay ya otra cosa brillando en la ficha
+  //   (si la bola esta lista para subir de nivel, ESA es la accion del momento).
+  prim.classList.toggle('ready', !prim.disabled && !lvlUpReady);
   el('gDetail').classList.add('on');
 }
 function unlock(k,withGems){ const A=ARCHS[k];   // transacción compartida por Garaje y Tienda; el que llama re-renderiza
@@ -2775,7 +2995,9 @@ function featEl(){ const d=document.createElement('div');
   d.innerHTML=`<div class="sh-feat"><div class="fl">${s.bundleFl}</div><h3>${s.bundleNm}</h3><ul>${s.bundleItems.map(i=>`<li>${i}</li>`).join('')}</ul>
     <button class="sh-buy gem" id="buyBundle">${s.buyBtn(BUNDLE.g)} <span class="was">${BUNDLE.was} ◆</span></button></div>
     <div class="sh-note">${s.shNoteFeat}</div>`;
-  const b=d.querySelector('#buyBundle'); b.disabled=SAVE.gemas<BUNDLE.g; b.onclick=buyBundle; return d;
+  const b=d.querySelector('#buyBundle'); b.disabled=SAVE.gemas<BUNDLE.g; b.onclick=buyBundle;
+  b.classList.toggle('ready', !b.disabled);   //+AG doc 40: la oferta destacada es LA accion de la Tienda; el resto de botones de compra NO brillan
+  return d;
 }
 function bolasEl(){ const s=S(), d=document.createElement('div'); d.innerHTML='<div class="sh-note">'+s.shNoteBalls+'</div>';
   const g=document.createElement('div'); g.className='sh-grid';
@@ -3051,6 +3273,7 @@ function openSheet(){ applyShell(); const m=MODOS[SAVE.mode]||MODOS.race, b=equi
   //+AG el ultimo formato usado destacado con borde dorado (mockup); si equipos no esta cableado, destaca individual
   el('sSolo').classList.toggle('last', SAVE.fmt==='individual'||!teamOk);
   el('sTeam').classList.toggle('last', SAVE.fmt==='equipos'&&teamOk);
+  el('sHowBadge').style.display = SAVE.tutorialDone[SAVE.mode] ? 'none' : '';   //+AG "!" hasta completar el tutorial del modo
   el('fmtSheet').classList.add('on'); el('fmtSheet').setAttribute('aria-hidden','false');
 }
 function closeSheet(){ el('fmtSheet').classList.remove('on'); el('fmtSheet').setAttribute('aria-hidden','true'); }
@@ -3058,6 +3281,7 @@ el('sheetBack').onclick=closeSheet; el('sheetClose').onclick=closeSheet;
 el('sSolo').onclick=()=>{ SAVE.fmt='individual'; persist(); closeSheet(); startRace(SAVE.mode,'individual'); };
 el('sTeam').onclick=()=>{ if(el('sTeam').disabled){ toast(S().teamSoonToast(modeTitle(SAVE.mode))); return; }
   SAVE.fmt='equipos'; persist(); closeSheet(); startRace(SAVE.mode,'equipos'); };
+el('sHow').onclick=()=>{ closeSheet(); startTutorial(SAVE.mode); };   //+AG CÓMO JUGAR: tutorial del modo elegido
 function openSelector(){ showScreen('selector'); paintSelector(); }
 function paintSelector(){ applyShell();
   document.querySelectorAll('.tile[data-mode]').forEach(t=>{
@@ -3085,6 +3309,15 @@ el('rAgain').onclick=()=>startRace(curMode,curFmt); el('rHome').onclick=goHome;
 //+AG doc 34 Fase C: navegacion de pestañas por data-nav (incluye Temporada/Perfil, antes eran toast)
 const NAV={ jugar:goHome, garaje:openGaraje, tienda:openTienda, temporada:openTemporada, perfil:openPerfil, ranking:openRanking };
 document.querySelectorAll('[data-nav]').forEach(b=>b.addEventListener('click',()=>{ const f=NAV[b.getAttribute('data-nav')]; if(f) f(); }));
+//+AG doc 40: SUB-PESTAÑAS de Temporada/Perfil. Cada grupo vive dentro de su pantalla y solo enseña un bloque.
+document.querySelectorAll('.subtabs').forEach(grp=>{
+  const body=grp.closest('.sc-body');
+  grp.querySelectorAll('.subtab').forEach(b=>b.addEventListener('click',()=>{
+    grp.querySelectorAll('.subtab').forEach(x=>x.classList.toggle('on',x===b));
+    body.querySelectorAll('[data-sub]').forEach(s=>s.classList.toggle('on', s.dataset.sub===b.dataset.subtab));
+    body.scrollTop=0;
+  }));
+});
 el('homeGarTab').onclick=openGaraje; el('garTabJugar').onclick=goHome; el('gBack').onclick=goHome;
 el('gdClose').onclick=()=>el('gDetail').classList.remove('on');
 el('gDetail').addEventListener('click',e=>{ if(e.target.id==='gDetail') el('gDetail').classList.remove('on'); });
@@ -3100,6 +3333,38 @@ el('onbGo').onclick=onbFinish; el('onbSkip').onclick=onbSkipFn;
 el('setClose').onclick=()=>el('settings').classList.remove('on');
 el('codeOk').onclick=redeemCode; el('codeNo').onclick=closeCode;
 el('codeIn').addEventListener('keydown',e=>{ if(e.key==='Enter') redeemCode(); });
+//+AG doc 40: GUARDIA DE ENCAJE. Regla de producto (Jaime 2026-07-24): "todas las user interface deben cuadrar
+//   en el aspect ratio del movil... casi nunca hay que deslizar". Esto lo hace comprobable en vez de opinable:
+//   desde la consola (o con ?fit=1) recorre TODAS las pantallas al viewport actual y devuelve las que se salen.
+//   Uso:  __fitCheck()            -> [] si todo cabe
+//         __fitCheck(375,600)     -> avisa si algo se sale suponiendo ese alto util
+//   Lo secundario (modales, hojas) no entra: se abren sobre la pantalla y se cierran solos.
+window.__fitCheck=function(w,h){
+  const H=h||innerHeight, out=[], was=[...document.querySelectorAll('.scr.on')].map(e=>e.id);
+  tblExpanded=false;   // se mide el estado POR DEFECTO; que la clasificacion desplegada a mano se desplace es lo esperado
+  const SCREENS=['home','results','garaje','tienda','temporada','perfil','selector','ranking'];
+  for(const n of SCREENS){
+    showScreen(n);
+    const e=el(n); if(!e) continue;
+    const steps = n==='results' ? ['1','2'] : [null];
+    for(const st of steps){
+      if(st) setResultsStep(+st);   // por la puerta de siempre: asi tambien se mide el recorte adaptativo real
+      // solo cuentan las cajas que RECORTAN de verdad (overflow != visible): son las unicas donde el jugador
+      // pierde contenido si no desliza. Una caja con overflow visible "sobresale" en el papel pero se ve
+      // entera — p.ej. una tarjeta que entra animandose con un translateY de 8px.
+      [e, ...e.querySelectorAll('*')].forEach(d=>{
+        if(d.clientHeight<60) return;
+        if(d!==e && getComputedStyle(d).overflowY==='visible') return;
+        const extra=d.scrollHeight-d.clientHeight;
+        if(extra>4) out.push({screen:n+(st?(' · paso '+st):''), box:(d.id||d.className||d.tagName).toString().slice(0,32), extra});
+      });
+    }
+    if(n==='results') e.dataset.step='1';
+  }
+  SCREENS.forEach(s=>{ const x=el(s); if(x) x.classList.toggle('on', was.includes(s)); });
+  if(out.length) console.warn('[fit] se salen de pantalla ('+H+'px):', out); else console.log('[fit] ✓ todo cabe en '+H+'px');
+  return out;
+};
 const _onbParam=new URLSearchParams(location.search).get('onb');   // ?onb=1 fuerza, ?onb=0 salta (debug)
 resize(); requestAnimationFrame(frame); goHome();
 if(_onbParam==='1' || (FRESH && !SAVE.onboarded && _onbParam!=='0')) startOnboarding();   //+AG primera sesion
