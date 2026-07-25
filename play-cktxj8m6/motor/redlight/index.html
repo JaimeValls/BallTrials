@@ -83,13 +83,20 @@
   #bRun.red{background:linear-gradient(#ff6b5a,#e23a2a);box-shadow:0 4px 0 #8a2016, inset 0 1px 0 #ffffff30}
   #bRun.red.hold{background:linear-gradient(#ff8a78,#ff4a34);box-shadow:0 2px 0 #8a2016,0 0 26px #ff4a34ee, inset 0 1px 0 #ffffff40}
   #bBrake,#bNitro,#bGhost,#bSup{flex:1;padding:12px 3px;font-size:clamp(10px,2.7vw,14px);background:rgba(30,24,42,.82)}
-  #bBrake.ready{background:linear-gradient(#8ea6ff,#5b6fe6);box-shadow:0 4px 0 #33409e, inset 0 1px 0 #ffffff30}
-  /*+AG boosters: cargado = color propio (nitro CIAN=velocidad · fantasma pálido translúcido · súper ORO=acción,
-     convención del juego); activo (.act) = encendido con glow. El súper cargado pulsa como el del Cazador. */
+  /*+AG CADA BOTÓN DEL COLOR DE SU SIGNIFICADO (VB Jaime 2026-07-25). En este modo el color YA es la mecánica
+     (semáforo), así que los controles hablan el mismo idioma: CORRER verde y rojo cuando el semáforo se pone rojo
+     (arriba), FRENAZO rojo de luz de freno = "párate", NITRO cian = la estela de velocidad del motor, FANTASMA
+     blanco = intangible (en pista la bola se vuelve translúcida), SÚPER oro = acción, la convención del juego.
+     El rojo del FRENAZO es más profundo que el rojo-naranja del aviso de CORRER: significan lo mismo ("para"),
+     pero el aviso tiene que seguir cantando por encima de un botón pequeño que está rojo siempre. */
+  #bBrake.ready{background:linear-gradient(#ef4a58,#9e0f22);box-shadow:0 4px 0 #66091a, inset 0 1px 0 #ffffff2a}
   #bNitro.ready{background:linear-gradient(#59e0ff,#1f9ec8);box-shadow:0 4px 0 #0f5e7c, inset 0 1px 0 #ffffff30}
   #bNitro.act{background:linear-gradient(#a8f2ff,#3fc2ea);color:#032230;box-shadow:0 2px 0 #0f5e7c,0 0 20px #59e0ffcc, inset 0 1px 0 #ffffff50}
-  #bGhost.ready{background:linear-gradient(#cfc6ea,#8f82c2);box-shadow:0 4px 0 #4d4275, inset 0 1px 0 #ffffff30}
-  #bGhost.act{background:linear-gradient(#efeaff88,#b9ace688);color:#f4f0ff;box-shadow:0 2px 0 #4d4275,0 0 18px #cfc6ea99, inset 0 1px 0 #ffffff50}
+  /*+AG el FANTASMA era lila y el CARRIL activo también (#laneRow button.on): dos violetas para cosas que no tienen
+     nada que ver. En blanco deja de confundirse y además dice lo que hace: atravesar. Texto oscuro: el color base
+     de los controles es blanco y sobre fondo claro no se leería. */
+  #bGhost.ready{background:linear-gradient(#ffffff,#dbe1f0);color:#141b2e;box-shadow:0 4px 0 #878ea6, inset 0 1px 0 #ffffff80}
+  #bGhost.act{background:linear-gradient(#ffffffdd,#dfe6f5b0);color:#141b2e;box-shadow:0 2px 0 #878ea6,0 0 22px #ffffffcc, inset 0 1px 0 #ffffff70}
   /*+AG doc 40: mismo lenguaje de "listo para pulsar" que el resto del juego (glow que late + barrido de brillo).
      Aqui SOLO el super lo lleva: freno/nitro/fantasma tambien usan .ready para decir "disponible", y si los
      cuatro barrieran a la vez el aviso dejaria de significar nada (regla Supercell: uno por pantalla). */

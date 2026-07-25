@@ -97,6 +97,16 @@ export const MODE_ICONS = {
       <path fill="none" d="M18 18 L46 18 L54 30 L32 56 L10 30 Z"/>
       <path fill="${HI}" stroke="none" d="M52 7.5 L53.4 10.6 L56.5 12 L53.4 13.4 L52 16.5 L50.6 13.4 L47.5 12 L50.6 10.6 Z"/>
     </g>` },
+
+  // "El semáforo": carcasa vertical y gorda con la luz superior encendida; silueta distinta de los siete modos previos (encargo 05)
+  redlight: { name: 'Red Light', emoji: '🚦', vb: '0 0 64 64', markup:
+    `<g stroke="${INK}" stroke-width="1.6" stroke-linejoin="round">
+      <rect fill="${GOLD}" x="13" y="6" width="38" height="52" rx="12"/>
+      <path fill="${HI}" stroke="none" opacity=".72" d="M20 11 Q17 15 17 23 L20 23 Q21 16 25 12 Z"/>
+      <circle fill="${GLIGHT}" cx="32" cy="18" r="8"/>
+      <circle fill="${GDARK}" cx="32" cy="32" r="8"/>
+      <circle fill="${GDARK}" cx="32" cy="46" r="8"/>
+    </g>` },
 };
 
 // <svg> listo para insertar inline (web): mismo dibujo a cualquier tamaño

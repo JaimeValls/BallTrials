@@ -569,6 +569,7 @@
   .tile .tscrim{ position:absolute; inset:0; z-index:1; background:linear-gradient(180deg, transparent 30%, #06050e26 55%, #06050ee6 100%); }
   .tile .tbody{ position:relative; z-index:2; margin-top:auto; padding:10px 10px 11px; display:flex; flex-direction:column; align-items:center; gap:3px; text-align:center; }
   .tile .ticon{ font-size:32px; line-height:1; filter:drop-shadow(0 3px 6px #0009); }
+  .tile .ticon .msvg{ width:32px; height:32px; }
   .tile .tname{ font-size:14px; font-weight:900; letter-spacing:-.01em; line-height:1.1; text-shadow:0 2px 10px #000b; }
   .tile .tday{ position:absolute; top:8px; left:8px; z-index:3; font-size:10px; font-weight:900; color:#3a2400;
     background:linear-gradient(#ffe27a,#ffb43d); border-radius:999px; padding:4px 9px; box-shadow:0 3px 10px #ffb03d77, inset 0 1px 0 #fff8; }
@@ -577,6 +578,7 @@
   .tile.locked .ticon{ font-size:36px; filter:grayscale(1) brightness(.85); }
   .tile.locked .tname{ color:#c3c8e0; }
   .tile .tlk{ font-size:18px; }
+  .tile img.tlk{ width:20px; height:20px; object-fit:contain; }   /*+AG doc 41: candado de arte */
   .tile .tcond{ font-size:10.5px; font-weight:800; color:#8b93b8; background:#ffffff0d; border:1px solid var(--line); border-radius:999px; padding:4px 9px; }
   .gridnote{ grid-column:1 / -1; font-size:11px; color:#6f79a0; font-weight:700; text-align:center; padding:2px 0 0; }
   /*+AG COPAS POR BOLA (doc 37): tarjeta de copas de la bola + tabla de 8 puestos en Resultados */
@@ -847,13 +849,13 @@
     <div class="tile locked" data-locklvl="5">
       <div class="tart"><svg viewBox="0 0 320 500" preserveAspectRatio="xMidYMid slice"><rect width="320" height="500" fill="#141230"/></svg></div>
       <div class="tscrim"></div>
-      <div class="tbody"><div class="ticon">🧲</div><div class="tlk">🔒</div><div class="tname" data-t="mRecolecta">RECOLECTA</div><div class="tcond" data-lvln="5">Nivel 5</div></div>
+      <div class="tbody"><div class="ticon" data-mico="recolecta"></div><img class="tlk" src="arte/ui/ui-candado.webp" alt=""><div class="tname" data-t="mRecolecta">RECOLECTA</div><div class="tcond" data-lvln="5">Nivel 5</div></div>
     </div>
     <!-- SUELO MENGUANTE (bloqueado decorativo) -->
     <div class="tile locked" data-locklvl="8">
       <div class="tart"><svg viewBox="0 0 320 500" preserveAspectRatio="xMidYMid slice"><rect width="320" height="500" fill="#141230"/></svg></div>
       <div class="tscrim"></div>
-      <div class="tbody"><div class="ticon">🕳️</div><div class="tlk">🔒</div><div class="tname" data-t="mSuelo">SUELO MENGUANTE</div><div class="tcond" data-lvln="8">Nivel 8</div></div>
+      <div class="tbody"><div class="ticon" data-mico="suelo"></div><img class="tlk" src="arte/ui/ui-candado.webp" alt=""><div class="tname" data-t="mSuelo">SUELO MENGUANTE</div><div class="tcond" data-lvln="8">Nivel 8</div></div>
     </div>
     <div class="gridnote" data-t="gridNote">Tocar un modo lo deja elegido en el inicio · JUGAR lo arranca desde allí</div>
   </div>
@@ -2505,10 +2507,17 @@ const MODOS={
   redlight:{ icon:'🚦', grad:'linear-gradient(140deg,#123d1e,#3a0f14)' },
 };
 //+AG doc 41 bloque C: el icono de modo sale del SVG CANONICO del canal (el mismo dibujo que usa
-//   balltrials.com y la tarjeta de ronda del torneo). Luz Roja todavia no tiene icono canonico:
-//   cae al emoji hasta que el canal lo dibuje. Antes que inventarme uno, se nota que falta.
+//   balltrials.com y la tarjeta de ronda del torneo). El shell clasico lo recibe vendorizado antes
+//   de este script, asi que nunca convierte una pieza de UI en emoji del sistema.
 function modeIco(k){ const v=(window.VENDORED_MODE_ICONS||{})[k];
   return v ? `<svg class="msvg" viewBox="${v.vb}" aria-hidden="true">${v.markup}</svg>` : ((MODOS[k]||{}).icon||''); }
+//+AG los 3 modos ABIERTOS se identifican por el data-mode de su tarjeta. Los 2 bloqueados
+//   decorativos (Recolecta, Suelo) llevan data-mico en el propio icono: no se les puede poner
+//   data-mode porque eso los haria seleccionables. El canal tiene icono canonico para los dos.
+document.querySelectorAll('.tile[data-mode] .ticon, .ticon[data-mico]').forEach(icon=>{
+  const key=icon.dataset.mico || icon.closest('[data-mode]').dataset.mode;
+  const svg=modeIco(key); if(svg) icon.innerHTML=svg;
+});
 const OPEN_MODES=['race','cazador','redlight'];
 function modeTitle(m){ return m==='race' ? T().name.toUpperCase() : (m==='cazador' ? S().mCazador : S().mRedlight); }
 //+AG dia local como entero + clave (mockups/flow.html): rotacion determinista del MODO DEL DIA entre los abiertos.
