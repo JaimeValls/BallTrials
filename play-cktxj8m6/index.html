@@ -594,7 +594,11 @@
   #results .r-arow .r-again{ flex:1; min-width:0; }
   /*+AG el secundario pasa a ICONO cuadrado al lado del primario (patron Supercell) en vez de una segunda fila:
      ahorra ~55px de alto, que es justo lo que hacia falta para que la clasificacion entera quepa. */
-  .r-home.ico{ flex:0 0 auto; width:58px; font-size:22px; padding:0; display:grid; place-items:center; }
+  /*+AG doc 41: el boton de volver de Resultados era un emoji de casita. Ahora es una FLECHA
+     ATRAS dibujada (Supercell no pone casitas: pone volver). currentColor = hereda el color del
+     boton, asi que sigue el mismo estado/hover que el resto sin retintar nada a mano. */
+  .r-home.ico{ flex:0 0 auto; width:58px; padding:0; display:grid; place-items:center; }
+  .r-home.ico svg{ width:24px; height:24px; display:block; }
   /*+AG "ver todos": solo aparece cuando la clasificacion NO cabe entera (mas de RTBL_MAX filas) */
   .r-more{ width:100%; max-width:430px; border:1px dashed #ffffff2e; background:#ffffff08; color:#c9cff0;
     font-family:inherit; font-weight:800; font-size:12px; border-radius:12px; padding:8px; cursor:pointer; margin-top:6px; }
@@ -993,7 +997,7 @@
   <div class="r-actions rs2">
     <div class="r-arow">
       <button class="r-again" id="rAgain" data-t="again">▶ Jugar otra</button>
-      <button class="r-home ico" id="rHome" data-tt="home" title="Inicio">🏠</button>
+      <button class="r-home ico" id="rHome" data-tt="back" title="Atrás" aria-label="Atrás"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5 L8 12 L14.5 18.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     </div>
   </div>
 </div>
@@ -2025,7 +2029,7 @@ const LANGS={en:'English',es:'Español',pt:'Português',fr:'Français',de:'Deuts
 //+AG v0.1 shell i18n (es/en; el resto cae a en, pendiente traducir el shell a los 9 como la carrera). El texto de la
 //   CARRERA sí está en los 9 (I18N). Mezcla evitada: en un idioma sin shell, todo el shell sale en inglés (consistente).
 const SHELL={
-  es:{ featured:'Modo destacado', play:'▶ JUGAR', you:'TÚ', lvl:'Nivel', again:'▶ Jugar otra', home:'Inicio',
+  es:{ featured:'Modo destacado', play:'▶ JUGAR', you:'TÚ', lvl:'Nivel', again:'▶ Jugar otra', back:'Atrás', home:'Inicio',
     rNext:'Continuar ▸', rSeeAll:n=>'Ver los '+n+' ▾',   //+AG doc 40: paso 1 (veredicto) → paso 2 (botín)
     seTabLiga:'Liga', seTabPase:'Pase', seTabRk:'Ranking',   //+AG doc 40: sub-pestañas (etiquetas cortas)
     prTabYou:'Tú', prTabFriends:'Amigos', prTabMore:'Más',
@@ -2055,7 +2059,7 @@ const SHELL={
     rkTodayTail:' · deriva de hoy', you:'TÚ',
     //+AG Fase 3 · resultados POR EQUIPOS
     teamWon:'¡Tu equipo ganó!', teamPlaceMsg:p=>'Tu equipo: '+p+'º', teamAgainSub:'¡Otra! Cada partida suma para tu equipo.' },
-  en:{ featured:'Featured mode', play:'▶ PLAY', you:'YOU', lvl:'Level', again:'▶ Play again', home:'Home',
+  en:{ featured:'Featured mode', play:'▶ PLAY', you:'YOU', lvl:'Level', again:'▶ Play again', back:'Back', home:'Home',
     rNext:'Continue ▸', rSeeAll:n=>'See all '+n+' ▾',
     seTabLiga:'League', seTabPase:'Pass', seTabRk:'Ranking',
     prTabYou:'You', prTabFriends:'Friends', prTabMore:'More',
