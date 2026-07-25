@@ -32,7 +32,7 @@
     font-family:'Fredoka','Segoe UI Rounded','Nunito',system-ui,-apple-system,Arial,sans-serif; overflow:hidden; user-select:none; }
   /*+AG doc 34 Fase B: COLUMNA PORTRAIT. En movil llena la pantalla; en escritorio se centra como un telefono
      (max-width de columna, alto por dvh). Todas las pantallas son absolutas DENTRO de #app (antes fixed). */
-  body{ display:grid; place-items:center; background:radial-gradient(120% 80% at 50% 0%, #14122e, #050509 70%); }
+  body{ display:grid; place-items:center; background:radial-gradient(120% 80% at 50% 0%, var(--bg-mid), var(--bg-lo) 70%); }
   /* el 'height:100vh' suelto es la red de seguridad para navegadores sin min()/var(): si la linea de
      abajo no la entienden, se quedan con esta y la app sigue midiendo una pantalla, no el contenido. */
   #app{ position:relative; width:100%; max-width:460px; height:100vh; height:min(var(--vh),var(--vhjs)); overflow:hidden; background:#06070f; }
@@ -67,7 +67,7 @@
   button.boost:disabled{ opacity:.34; }
   button.boost .cd{ display:block; font-size:11px; opacity:.72; font-weight:700; }
   #ov{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
-    background:radial-gradient(120% 80% at 50% 30%,#101833cc,#05060edd); text-align:center; padding:24px; gap:14px; backdrop-filter:blur(2px); }
+    background:radial-gradient(120% 80% at 50% 30%,#241159dd,#160a38ee); text-align:center; padding:24px; gap:14px; backdrop-filter:blur(2px); }
   #ov.hide{ display:none; }
   #ovTitle{ font-size:clamp(36px,12vw,68px); font-weight:900; letter-spacing:-.03em; text-shadow:0 4px 24px #000a; }
   #ovSub{ font-size:clamp(15px,4.5vw,20px); color:#c4cbe6; max-width:540px; line-height:1.45; }
@@ -79,12 +79,27 @@
   kbd{ background:#ffffff1c; border-radius:5px; padding:1px 6px; font-family:inherit; font-size:.9em; }
 
   /* ===== SHELL v0.1 · bucle home → carrera → resultados. Marca BallTrials, feel Supercell-kids, tema único oscuro. ===== */
-  :root{ --gold:#fbb915; --gold2:#ffd23f; --cyan:#18c7d6; --line:#ffffff1a; }
+  /*+AG doc 41 bloque A: FONDOS DE MARCA. El oro y el cian ya coincidian con la web; lo que hacia que
+     el juego y balltrials.com parecieran dos productos distintos era el FONDO. La web es purpura
+     caramelo (#6d3ae0 -> #5024B5 -> #241159) y el juego se iba a casi negro (#0b0a1e, #050509).
+     Regla nueva: el indigo de marca es el SUELO. Ninguna pantalla baja de ahi.
+     Copiado de C:\AI\BallTrials\prototipo-webgl\web\style.css (:root) — la web manda, no se bifurca. */
+  :root{ --gold:#fbb915; --gold2:#ffd23f; --cyan:#18c7d6; --line:#ffffff1a;
+    --bg-hi:#6d3ae0; --bg:#5024b5; --bg-mid:#3a1a8f; --bg-lo:#241159; }
+  /*+AG las texturas de la web (el mismo PNG, pasado a webp): la tribuna hace de horizonte en la Home y
+     los doodles dan grano a las pantallas de contenido. Reutilizar el asset es lo que garantiza que
+     peguen. La OPACIDAD va horneada en el alfa del propio archivo (40% y 5,5%): asi son capas de
+     'background' normales y no hace falta ni un pseudo-elemento ni tocar el apilado de nadie. */
   .scr{ position:absolute; inset:0; display:none; flex-direction:column; }
   .scr.on{ display:flex; }
   body:not(.race) #wrap{ display:none; }
   /* --- HOME --- */
-  #home{ background:radial-gradient(130% 90% at 50% 10%, #2a1c5e 0%, #16123a 45%, #0b0a1e 100%); overflow:hidden; }
+  /*+AG doc 41 bloque E: el lienzo del fondo vivo. Detras de todo y sin robar toques: los hijos de
+     #home ya se pintan encima por orden de documento, y pointer-events:none deja pasar el dedo
+     (el propio ambient escucha en #home, no en el canvas, para poder ignorar la UI). */
+  #home > #ambient{ position:absolute; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; opacity:.5; }   /* va DETRAS: no compite con tu bola */
+  #home > *:not(#ambient){ position:relative; z-index:1; }
+  #home{ background:url(arte/fondo/tribuna.webp) repeat-x bottom center/auto min(24vh,210px), radial-gradient(130% 90% at 50% 10%, var(--bg-hi) 0%, var(--bg) 38%, var(--bg-mid) 68%, var(--bg-lo) 100%); overflow:hidden; }
   .h-top{ display:flex; align-items:center; gap:9px; padding:calc(10px + env(safe-area-inset-top)) 13px 6px; }
   .h-lvl{ display:flex; align-items:center; gap:8px; background:#0006; border:1px solid var(--line); border-radius:999px; padding:4px 13px 4px 5px; }
   .h-lvlnum{ width:30px; height:30px; border-radius:50%; display:grid; place-items:center;
@@ -128,12 +143,30 @@
   .h-modes .m .lk{ position:absolute; bottom:-14px; left:50%; transform:translateX(-50%); font-size:9px; font-weight:800; color:var(--muted); white-space:nowrap; }
   .h-chal{ display:inline-flex; align-items:center; gap:7px; background:#0007; border:1px solid var(--line); border-radius:14px; padding:8px 14px; font-size:13px; font-weight:700; color:#d3d8f4; }
   .h-chal b{ color:var(--gold2); }
-  .h-tabs{ display:flex; background:#0c0a20; border-top:1px solid var(--line); padding:5px 5px calc(5px + env(safe-area-inset-bottom)); }
+  .h-tabs{ display:flex; background:#1a0d45; border-top:1px solid var(--line); padding:5px 5px calc(5px + env(safe-area-inset-bottom)); }
   .tab{ flex:1; background:none; border:0; color:var(--muted); font-family:inherit; font-weight:800; font-size:10px; letter-spacing:.03em; text-transform:uppercase; display:flex; flex-direction:column; align-items:center; gap:2px; padding:6px 2px; cursor:pointer; border-radius:12px; }
   .tab i{ font-style:normal; font-size:20px; filter:grayscale(.4); }
   .tab.on{ color:var(--gold2); } .tab.on i{ filter:none; }
+  /*+AG doc 41: los 5 de la barra son ARTE (antes: 🏁🚗🛒🏆🙂 — un coche rojo y una carita amarilla
+     en un juego de bolas, y ademas con dibujo distinto en cada sistema operativo). La pestaña apagada
+     va en gris y a media opacidad; la encendida, a todo color: el estado se lee sin leer la etiqueta. */
+  /* OJO: aqui van propiedades LARGAS, no el atajo 'background'. Con el atajo, esta regla (mas
+     especifica que .tico.t-*) reseteaba background-image a none y la barra salia sin iconos. */
+  .tab i.tico{ width:27px; height:27px; font-size:0; background-position:center; background-size:contain; background-repeat:no-repeat;
+    filter:grayscale(1) opacity(.45); transition:filter .15s, transform .1s; }
+  .tab.on i.tico{ filter:drop-shadow(0 2px 4px #0007); transform:translateY(-1px); }
+  .tico.t-jugar{ background-image:url(arte/ui/nav-jugar.webp); }
+  .tico.t-garaje{ background-image:url(arte/ui/nav-garaje.webp); }
+  .tico.t-tienda{ background-image:url(arte/ui/nav-tienda.webp); }
+  .tico.t-temp{ background-image:url(arte/ui/nav-temporada.webp); }
+  .tico.t-perfil{ background-image:url(arte/ui/nav-perfil.webp); }
+  /*+AG doc 41: la moneda dentro de su pildora. Sustituye al circulo con degradado + glifo. */
+  .cico{ width:19px; height:19px; object-fit:contain; display:block; flex:0 0 auto; filter:drop-shadow(0 1px 2px #0007); }
+  .cico.sm{ width:15px; height:15px; }            /* chips de precio, junto al numero */
+  .cico.big{ width:22px; height:22px; filter:drop-shadow(0 0 6px #fbb91566); }   /* banda de copas */
+  .rico{ width:26px; height:26px; object-fit:contain; display:block; filter:drop-shadow(0 2px 4px #0008); }   /* rieles de la Home */
   /* --- RESULTADOS --- */
-  #results{ background:radial-gradient(120% 80% at 50% 20%, #1b1a44ee, #08071a), #06050e; align-items:center; justify-content:center; padding:22px; gap:14px; }
+  #results{ background:radial-gradient(120% 80% at 50% 20%, #4a26a8ee, var(--bg-lo)), var(--bg-lo); align-items:center; justify-content:center; padding:22px; gap:14px; }
   .r-card{ width:100%; max-width:430px; display:flex; flex-direction:column; align-items:center; gap:6px; }
   /*+AG banda de GANADOR: pastilla horizontal (corona + disco del color REAL del ganador + su nombre). Se lee
       "quien gano" de un vistazo y ya no se confunde con el numerote de TU puesto. Dorada si el ganador eres tú. */
@@ -166,15 +199,21 @@
   .toast{ position:absolute; left:50%; bottom:86px; transform:translateX(-50%) translateY(18px); background:#0d0b22f2; border:1px solid var(--line); color:#e7ebff; padding:11px 18px; border-radius:14px; font-weight:700; font-size:14px; opacity:0; transition:opacity .25s,transform .25s; pointer-events:none; z-index:60; }
   .toast.on{ opacity:1; transform:translateX(-50%); }
   /* --- GARAJE (doc 05: arquetipo + calidad, colección, hexágono, alineación) --- */
-  #garaje{ background:radial-gradient(130% 90% at 50% 8%, #241a52 0%, #14113a 45%, #0a0920 100%); }
+  #garaje{ background:url(arte/fondo/doodles.webp) repeat top left/340px 340px, radial-gradient(130% 90% at 50% 8%, #5a2ec2 0%, var(--bg-mid) 45%, var(--bg-lo) 100%); }
   .g-top{ display:flex; align-items:center; gap:10px; padding:calc(10px + env(safe-area-inset-top)) 13px 6px; }
   .g-title{ font-size:20px; font-weight:900; letter-spacing:.02em; }
   .g-back{ border:1px solid var(--line); background:#ffffff10; color:#c9cff0; font-family:inherit; font-weight:800; font-size:14px; border-radius:12px; padding:7px 13px; cursor:pointer; }
   .g-grid{ flex:1; min-height:0; overflow-y:auto; display:grid; grid-template-columns:1fr 1fr; gap:11px; padding:8px 13px 14px; align-content:start; }
-  .g-card{ border-radius:18px; padding:13px 11px 12px; background:#ffffff0d; border:2px solid var(--qc,#ffffff26); position:relative; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:5px; transition:transform .07s; }
+  .g-card{ border-radius:18px; padding:13px 11px 12px; background:linear-gradient(180deg,#331b74,#2b1666); border:2px solid var(--qc,#ffffff26); position:relative; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:5px; transition:transform .07s; }
   .g-card:active{ transform:scale(.97); }
-  .g-card .gi{ font-size:34px; filter:drop-shadow(0 3px 5px #0007); line-height:1.1; }
-  .g-card.locked .gi{ filter:grayscale(1) brightness(.55); }
+  /*+AG doc 41: la bola-heroe es ARTE de marca (Codex), no un emoji del sistema. Idle de flotacion
+     suave: es lo que hace que la rejilla parezca viva sin costar nada (una sola imagen, cero sprites).
+     El desfase por tarjeta (--d) evita que las 12 respiren a la vez, que canta a bucle. */
+  .g-card .gi{ width:62px; height:62px; object-fit:contain; display:block;
+    filter:drop-shadow(0 4px 7px #0009); animation:bobIdle 2.6s ease-in-out infinite; animation-delay:var(--d,0s); }
+  .g-card.locked .gi{ filter:grayscale(.5) brightness(.78) saturate(.8) drop-shadow(0 4px 7px #0009); }
+  @keyframes bobIdle{ 0%,100%{ transform:translateY(0) rotate(-1.2deg); } 50%{ transform:translateY(-5px) rotate(1.2deg); } }
+  @media (prefers-reduced-motion:reduce){ .g-card .gi{ animation:none; } }
   .g-cname{ font-weight:800; font-size:14px; }
   .g-qtag{ font-size:9.5px; font-weight:800; letter-spacing:.09em; text-transform:uppercase; color:var(--qc,#9aa4b8); }
   .g-eq{ position:absolute; top:8px; right:8px; background:var(--gold2); color:#3a2400; font-size:9px; font-weight:900; padding:2px 8px; border-radius:999px; letter-spacing:.05em; }
@@ -185,6 +224,13 @@
   #gDetail{ position:absolute; inset:0; background:#06050eea; backdrop-filter:blur(3px); display:none; flex-direction:column; align-items:center; justify-content:center; padding:22px; gap:12px; z-index:45; }
   #gDetail.on{ display:flex; }
   .gd-close{ position:absolute; top:calc(12px + env(safe-area-inset-top)); right:15px; width:38px; height:38px; border-radius:50%; background:#ffffff14; border:1px solid var(--line); color:#fff; font-size:19px; cursor:pointer; }
+  /*+AG doc 41: el retrato del heroe. Entra cayendo y rebotando una vez (400 ms) y luego respira:
+     convierte "abrir una ficha" en un momento, que es justo lo que hace Brawl Stars. */
+  .gd-art{ width:150px; height:150px; display:grid; place-items:center; margin:2px 0 -6px; }
+  .gd-art img{ width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 10px 16px #000a);
+    animation:gdDrop .42s cubic-bezier(.34,1.56,.64,1), bobIdle 2.8s ease-in-out .42s infinite; }
+  @keyframes gdDrop{ 0%{ transform:translateY(-38px) scale(.86); opacity:0; } 60%{ transform:translateY(0) scale(1.06,.94); opacity:1; } 100%{ transform:none; } }
+  @media (prefers-reduced-motion:reduce){ .gd-art img{ animation:none; } }
   .gd-card{ width:100%; max-width:370px; background:linear-gradient(165deg,#241d52,#171338); border:2px solid var(--qc,#fff3); border-radius:22px; padding:16px 18px; display:flex; flex-direction:column; align-items:center; gap:6px; box-shadow:0 20px 50px #000a, inset 0 0 30px var(--qglow,transparent); }
   .gd-q{ font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--qc); }
   .gd-name{ font-size:23px; font-weight:900; }
@@ -205,7 +251,7 @@
   .gd-btn.prim:disabled{ filter:grayscale(.55) brightness(.82); box-shadow:none; cursor:default; }
   .gd-btn.ghost{ border:1px solid var(--line); background:#ffffff10; color:#c9cff0; font-size:15px; }
   /* --- TIENDA (doc 12: secciones + escaparate, cero azar, puerta parental) --- */
-  #tienda{ background:radial-gradient(130% 90% at 50% 8%, #1e2358 0%, #131535 45%, #0a0a1e 100%); }
+  #tienda{ background:url(arte/fondo/doodles.webp) repeat top left/340px 340px, radial-gradient(130% 90% at 50% 8%, #3f3ad0 0%, #2a1c86 45%, var(--bg-lo) 100%); }
   .sh-secs{ display:flex; gap:7px; overflow-x:auto; padding:2px 13px 8px; -webkit-overflow-scrolling:touch; }
   .sh-sec{ flex:0 0 auto; border:1px solid var(--line); background:#ffffff0d; color:#c9cff0; font-family:inherit; font-weight:800; font-size:13px; border-radius:999px; padding:8px 15px; cursor:pointer; }
   .sh-sec.on{ background:linear-gradient(#ffe27a,#ff9a3d); color:#3a2400; border-color:transparent; }
@@ -213,6 +259,7 @@
   .sh-grid{ display:grid; grid-template-columns:1fr 1fr; gap:11px; }
   .sh-item{ border-radius:16px; padding:13px 12px; background:#ffffff0d; border:2px solid var(--qc,#ffffff22); display:flex; flex-direction:column; align-items:center; gap:5px; text-align:center; }
   .sh-ic{ font-size:31px; filter:drop-shadow(0 3px 5px #0007); }
+  img.sh-ic{ width:46px; height:46px; object-fit:contain; }   /*+AG doc 41: la bola de la Tienda, con su arte */
   .sh-nm{ font-weight:800; font-size:13.5px; }
   .sh-cat{ font-size:9px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--qc,#96a0c2); }
   .sh-buy{ margin-top:3px; border:0; border-radius:12px; padding:9px 8px; font-family:inherit; font-weight:900; font-size:13px; cursor:pointer; width:100%; color:#3a2400; background:linear-gradient(#ffe27a,#ff9a3d); box-shadow:0 3px 0 #b45a10; display:flex; gap:4px; align-items:center; justify-content:center; }
@@ -242,8 +289,8 @@
   .pg-ok{ color:#052a30; background:linear-gradient(#8fe9f4,#18c7d6); } .pg-ok:disabled{ filter:grayscale(.6) brightness(.8); cursor:default; }
   .pg-no{ background:#ffffff12; color:#c9cff0; }
   /* --- TEMPORADA (doc 10: Liga + Pase + Rankings + tema) y PERFIL (doc 13: identidad/amigos/referidos/emotes/consentimiento) · placeholders fieles --- */
-  #temporada{ background:radial-gradient(130% 90% at 50% 8%, #3a2140 0%, #201436 45%, #0b0820 100%); }
-  #perfil{ background:radial-gradient(130% 90% at 50% 8%, #16234f 0%, #121634 45%, #0a0a1e 100%); }
+  #temporada{ background:url(arte/fondo/doodles.webp) repeat top left/340px 340px, radial-gradient(130% 90% at 50% 8%, #7a2fb8 0%, #3f1a86 45%, var(--bg-lo) 100%); }
+  #perfil{ background:url(arte/fondo/doodles.webp) repeat top left/340px 340px, radial-gradient(130% 90% at 50% 8%, #3a44c8 0%, #26208a 45%, var(--bg-lo) 100%); }
   .sc-body{ flex:1; min-height:0; overflow-y:auto; padding:6px 13px 16px; display:flex; flex-direction:column; gap:12px; }
   /*+AG doc 40: SUB-PESTAÑAS. Temporada y Perfil eran dos rollos de ~950px en 550 utiles: habia que deslizar
      siempre. Regla de Clash Royale (Muhtar: navegacion "horizontal swipe-based", Gornicki: la profundidad
@@ -301,7 +348,7 @@
   /* --- Fase D: botones de barra (⚙ 🎬), modo jugable, Onboarding (doc 05 §3), Settings (doc 26), canje de codigo (doc 16) --- */
   .h-ic{ width:34px; height:34px; border-radius:12px; background:#0007; border:1px solid var(--line); color:#e7ebff; font-size:16px; cursor:pointer; display:grid; place-items:center; padding:0; } .h-ic:active{ transform:translateY(1px); }
   .h-modes .m.open{ filter:none; opacity:1; border-color:var(--gold2); background:#ffffff16; cursor:pointer; box-shadow:0 4px 14px #fbb91533; } .h-modes .m.open .lk{ color:var(--gold2); }
-  #onb{ position:absolute; inset:0; z-index:70; background:radial-gradient(120% 80% at 50% 18%,#2a1c5e,#0a0820); display:none; flex-direction:column; align-items:center; justify-content:center; padding:24px; }
+  #onb{ position:absolute; inset:0; z-index:70; background:radial-gradient(120% 80% at 50% 18%,var(--bg),var(--bg-lo)); display:none; flex-direction:column; align-items:center; justify-content:center; padding:24px; }
   #onb.on{ display:flex; }
   .onb-card{ width:100%; max-width:420px; }
   .onb-h{ font-size:12.5px; color:var(--gold2); font-weight:800; text-align:center; letter-spacing:.03em; text-transform:uppercase; }
@@ -313,10 +360,10 @@
   .onb-b{ border:2px solid var(--line); background:#ffffff0d; border-radius:16px; padding:13px 8px; text-align:center; cursor:pointer; font-family:inherit; color:#eef2ff; position:relative; }
   .onb-b:active{ transform:scale(.97); } .onb-b.sel{ border-color:var(--gold2); box-shadow:0 0 0 2px #ffd23f55, 0 8px 20px #0006; background:#ffffff16; }
   .onb-b.rec::after{ content:'✨ para ti'; position:absolute; top:-9px; left:50%; transform:translateX(-50%); background:var(--gold2); color:#3a2400; font-size:9px; font-weight:900; padding:2px 8px; border-radius:999px; white-space:nowrap; }
-  .onb-b .gi{ font-size:29px; } .onb-b .nm{ font-weight:800; font-size:13px; margin-top:3px; } .onb-b .ds{ font-size:9.5px; color:var(--muted); margin-top:2px; line-height:1.3; }
+  .onb-b .gi{ font-size:29px; } .onb-b img.gi{ width:52px; height:52px; object-fit:contain; margin:0 auto; animation:none; } .onb-b .nm{ font-weight:800; font-size:13px; margin-top:3px; } .onb-b .ds{ font-size:9.5px; color:var(--muted); margin-top:2px; line-height:1.3; }
   .onb-go{ width:100%; border:0; border-radius:18px; padding:16px; font-family:inherit; font-weight:900; font-size:18px; color:#3a2400; background:linear-gradient(#ffe27a,#ff9a3d); box-shadow:0 5px 0 #b45a10; cursor:pointer; } .onb-go:active{ transform:translateY(2px); box-shadow:0 3px 0 #b45a10; }
   .onb-skip{ display:block; margin:13px auto 0; background:none; border:0; color:var(--muted); font-family:inherit; font-weight:700; font-size:12px; cursor:pointer; text-decoration:underline; }
-  #settings{ position:absolute; inset:0; z-index:65; background:radial-gradient(130% 90% at 50% 6%, #1a1740, #0a0918); display:none; flex-direction:column; }
+  #settings{ position:absolute; inset:0; z-index:65; background:radial-gradient(130% 90% at 50% 6%, var(--bg-mid), var(--bg-lo)); display:none; flex-direction:column; }
   #settings.on{ display:flex; }
   .set-top{ display:flex; align-items:center; gap:10px; padding:calc(12px + env(safe-area-inset-top)) 15px 8px; }
   .set-body{ flex:1; min-height:0; overflow-y:auto; padding:6px 14px 20px; display:flex; flex-direction:column; gap:11px; }
@@ -387,6 +434,11 @@
   .ricon .rl{ font-size:8px; font-weight:800; color:var(--muted); letter-spacing:.02em; }
   .ricon.lock{ opacity:.62; } .ricon.lock i{ filter:grayscale(1); }
   .ricon .lk{ position:absolute; bottom:-4px; right:-4px; font-size:11px; }
+  /*+AG doc 41: candado y entrada como arte. El candado del riel es diminuto (14 px): por eso
+     se pidio a Codex un candado GORDO y redondo, que a ese tamaño un icono fino se borra. */
+  .ricon img.lk{ width:16px; height:16px; object-fit:contain; bottom:-3px; right:-3px; filter:drop-shadow(0 1px 2px #000a); }
+  .passband img.pi{ width:20px; height:20px; object-fit:contain; flex:0 0 auto; }
+  .ico-in{ width:15px; height:15px; object-fit:contain; vertical-align:-2px; display:inline-block; }
   .ricon .badge{ position:absolute; top:-5px; right:-5px; min-width:18px; height:18px; padding:0 4px; border-radius:999px;
     background:linear-gradient(#ff5b6e,#e0293d); color:#fff; font-size:11px; font-weight:900; display:grid; place-items:center;
     box-shadow:0 2px 6px #e0293d99; border:1.5px solid #16123a; }
@@ -396,9 +448,11 @@
   .hero .platform{ position:relative; display:grid; place-items:center; }
   .hero .shadow{ position:absolute; bottom:-4px; left:50%; transform:translateX(-50%);
     width:140px; height:24px; border-radius:50%; background:radial-gradient(closest-side,#000a,transparent); }
+  /*+AG doc 41: la protagonista de la Home ya es un <img> con su arte (antes: canvas generico). */
+  .hero #hBall{ width:188px; height:188px; object-fit:contain; filter:drop-shadow(0 16px 24px #0009); animation:breathe 3.1s ease-in-out infinite; }
   .hero canvas{ width:164px; height:164px; filter:drop-shadow(0 16px 24px #0009); animation:breathe 3.1s ease-in-out infinite; }
   .hero .ballname{ display:flex; align-items:center; gap:7px; font-size:24px; font-weight:900; letter-spacing:-.01em; margin-top:4px; text-shadow:0 3px 14px #000a; }
-  .hero .ballcups{ font-size:14px; font-weight:900; color:var(--gold2); font-variant-numeric:tabular-nums; text-shadow:0 2px 8px #fbb91544; }
+  .hero .ballcups{ display:flex; align-items:center; justify-content:center; gap:5px; font-size:14px; font-weight:900; color:var(--gold2); font-variant-numeric:tabular-nums; text-shadow:0 2px 8px #fbb91544; }
   .hero .balltag{ font-size:10px; letter-spacing:.14em; font-weight:800; color:var(--gold2); text-transform:uppercase; text-align:center; }
   .homebottom{ padding:4px 12px 10px; display:flex; flex-direction:column; gap:8px; z-index:5; }
   .passband{ display:flex; align-items:center; gap:9px; width:max-content; max-width:100%;
@@ -432,6 +486,10 @@
   .mchow.done .mcht, .mchow.done .hbadge{ display:none; }
   .modecompact .mn{ min-width:0; display:flex; align-items:center; gap:7px; font-weight:900; letter-spacing:-.01em; text-shadow:0 2px 8px #000a; }
   .modecompact .micon{ font-size:22px; line-height:1; flex:0 0 auto; }
+  /*+AG doc 41 bloque C: el SVG canonico de modo. Va TODO ORO por spec del canal (los colores de
+     equipo estan reservados) y la diferenciacion la da la silueta, no el color: no se retinta. */
+  .msvg{ width:26px; height:26px; display:block; filter:drop-shadow(0 2px 4px #0008); }
+  .modecompact .micon .msvg{ width:24px; height:24px; }
   .modecompact .mn b{ min-width:0; font-size:clamp(13px,4vw,16px); line-height:1.08; overflow-wrap:break-word; }
   .modecompact .mday{ align-self:flex-start; font-size:9px; font-weight:900; color:#3a2400; background:linear-gradient(#ffe27a,#ffb43d); border-radius:999px; padding:3px 8px; box-shadow:0 2px 8px #ffb03d55; }
   .modecompact .mchange{ margin-top:auto; width:100%; justify-content:center; font-family:inherit; font-size:12px; font-weight:900; letter-spacing:.04em;
@@ -462,19 +520,29 @@
   .sheet .smicon{ font-size:28px; line-height:1; }
   .sheet .sball{ display:flex; align-items:center; justify-content:center; gap:6px; margin-top:-3px;
     font-size:12.5px; font-weight:800; color:#ffd9a0; font-variant-numeric:tabular-nums; }
-  .sfmt{ border:0; border-radius:18px; padding:16px 12px; font-family:inherit; font-weight:900; font-size:17px; letter-spacing:.02em;
-    color:#3a2400; background:linear-gradient(#ffe27a,#ff9a3d); box-shadow:0 6px 0 #b45a10, 0 10px 24px #ff9a3d44; cursor:pointer;
+  /*+AG el CTA de la hoja es VERDE = "a jugar" (VB Jaime 2026-07-25; antes era dorado, el mismo color que el resto
+     de la app, y no se leía como "esto es lo que quieres pulsar"). Grande, con el brillo del sistema .ready
+     (--rglow tiñe su glow de verde). Es el ÚNICO .ready de la hoja: si todo brilla, no brilla nada. */
+  .sfmt{ --rglow:#3ddc6bcc;
+    border:0; border-radius:18px; padding:19px 12px; font-family:inherit; font-weight:900; font-size:19px; letter-spacing:.02em;
+    color:#04240f; background:linear-gradient(#86f2a4,#22a94c); box-shadow:0 6px 0 #157c34, 0 10px 26px #22a94c55; cursor:pointer;
     display:flex; align-items:center; justify-content:center; gap:8px; }
   .sfmt .tri{ font-size:.72em; }
-  .sfmt:active{ transform:translateY(4px); box-shadow:0 2px 0 #b45a10; }
-  .sfmt.last{ outline:3px solid var(--gold2); outline-offset:3px; }
-  .sfmt:disabled, .sfmt.soon{ filter:grayscale(.7) brightness(.75); box-shadow:none; cursor:default; }
+  .sfmt:active{ transform:translateY(4px); box-shadow:0 2px 0 #157c34; }
+  /*+AG SECUNDARIO (por equipos): gris de verdad y más pequeño, no un verde apagado — tiene que quedar claro de un
+     vistazo que el de arriba es el bueno. Cuando EQUIPOS se abra seguirá siendo secundario (el primario es JUGAR). */
+  .sfmt.sec{ padding:13px 12px; font-size:15px; color:#e8ecf7;
+    background:linear-gradient(#7c85a1,#4d5470); box-shadow:0 5px 0 #333a52, 0 6px 16px #0006; }
+  .sfmt.sec:active{ transform:translateY(3px); box-shadow:0 2px 0 #333a52; }
+  .sfmt:disabled, .sfmt.soon{ filter:grayscale(.55) brightness(.78); box-shadow:none; cursor:default; }
   .sfmt:disabled:active, .sfmt.soon:active{ transform:none; }
   .sfmt .soontag{ font-size:10px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; color:#3a2400aa;
     border:1px solid #3a240055; border-radius:999px; padding:2px 8px; }
-  /*+AG CÓMO JUGAR: botón secundario de la hoja (tutorial del modo). El "!" pulsa hasta completar el tutorial */
-  .showbtn{ position:relative; border:1px solid #ffffff2e; border-radius:14px; padding:11px 12px; font-family:inherit;
-    font-weight:900; font-size:14px; letter-spacing:.02em; color:#cfe4ff; background:#ffffff10; cursor:pointer;
+  .sfmt.sec .soontag{ color:#ffffffb0; border-color:#ffffff4d; }
+  /*+AG CÓMO JUGAR: va PRIMERO en la hoja (es el tutorial: lo primero que se lee la primera vez). Estilo de ficha
+     (i) de evento de Brawl, azul informativo: presente pero sin pelearse con el verde. "!" hasta completarlo. */
+  .showbtn{ position:relative; border:1px solid #3aa0ff66; border-radius:14px; padding:12px; font-family:inherit;
+    font-weight:900; font-size:14.5px; letter-spacing:.02em; color:#d8ecff; background:#3aa0ff1f; cursor:pointer;
     display:flex; align-items:center; justify-content:center; gap:8px; }
   .showbtn:active{ transform:scale(.97); }
   .showbtn .qi, .mchow .qi{ width:20px; height:20px; border-radius:50%; background:#3aa0ff; color:#04122a; font-size:13px;
@@ -486,7 +554,7 @@
   .mchow .hbadge{ top:-8px; right:-6px; min-width:16px; height:16px; font-size:11px; }
   @keyframes howpulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.22); } }
   /*+AG REJILLA de modos (selector, tiles 2 columnas estilo eventos de Brawl) */
-  #selector{ background:radial-gradient(130% 90% at 50% 8%, #241a52 0%, #14113a 45%, #0a0920 100%); }
+  #selector{ background:radial-gradient(130% 90% at 50% 8%, #5a2ec2 0%, var(--bg-mid) 45%, var(--bg-lo) 100%); }
   #selector .selhead{ display:flex; align-items:center; gap:10px; padding:14px 16px 8px; }
   #selector .selhead h1{ margin:0; font-size:21px; font-weight:900; letter-spacing:.02em; }
   #selector .selhead .sub{ font-size:11px; color:var(--muted); font-weight:700; margin-top:1px; }
@@ -563,7 +631,7 @@
   .rrow .rd.up{ color:#6fe08f; } .rrow .rd.dn{ color:#ff8b9a; }
   .rrow.meRow{ background:#fbb9151c; border-color:var(--gold2); }
   /*+AG RANKING (doc 37 §5): Global / Por bola / Diario · leaderboard con bots-persona (doc 36) */
-  #ranking{ background:radial-gradient(130% 90% at 50% 8%, #241a52 0%, #14113a 45%, #0a0920 100%); }
+  #ranking{ background:radial-gradient(130% 90% at 50% 8%, #5a2ec2 0%, var(--bg-mid) 45%, var(--bg-lo) 100%); }
   .rk-top{ display:flex; align-items:center; gap:10px; padding:calc(10px + env(safe-area-inset-top)) 13px 6px; }
   .rktabs{ display:flex; gap:8px; padding:2px 13px 8px; }
   .rktab{ flex:1; text-align:center; font-family:inherit; font-size:12.5px; font-weight:900; letter-spacing:.03em; color:#c4cbe6;
@@ -614,30 +682,33 @@
     <button class="h-ic" id="hSet" data-tt="settings" title="Ajustes">⚙</button>
     <select id="lang" class="h-lang" data-tp="langWord" aria-label="Idioma"></select>
     <div class="h-coins">
-      <div class="coin chispa" id="cChispa"><i>✦</i><span id="hChispas">0</span><span class="pl">+</span></div>
-      <div class="coin gema" id="cGema"><i>◆</i><span id="hGemas">0</span><span class="pl">+</span></div>
+      <div class="coin chispa" id="cChispa"><img class="cico" src="arte/ui/moneda-chispa.webp" alt=""><span id="hChispas">0</span><span class="pl">+</span></div>
+      <div class="coin gema" id="cGema"><img class="cico" src="arte/ui/moneda-gema.webp" alt=""><span id="hGemas">0</span><span class="pl">+</span></div>
     </div>
   </div>
   <!--+AG HOME v3 (mockups/flow.html, docs/35 v2.2 + 37): total de copas + bola protagonista + rieles + modo/JUGAR -->
+  <!--+AG doc 41 bloque E: FONDO VIVO. Bolas REALES del motor cayendo detras de la Home, el mismo
+       codigo que la web (arte/ambient.mjs). No es arte nuevo: es el motor. -->
+  <canvas id="ambient"></canvas>
   <div class="cupsband">
-    <div class="cups" id="hCupsBand" title="Ranking"><i>🏆</i><b id="hCups">0</b><small data-t="cupsTotal">Total</small></div>
+    <div class="cups" id="hCupsBand" title="Ranking"><img class="cico big" src="arte/ui/moneda-copa.webp" alt=""><b id="hCups">0</b><small data-t="cupsTotal">Total</small></div>
   </div>
   <div class="stage">
     <div class="siderail left">
-      <div class="ricon" id="rlTienda"><i>🛍️</i><span class="rl" data-t="tTienda">Tienda</span></div>
-      <div class="ricon" id="rlGaraje"><i>🚗</i><span class="rl" data-t="tGaraje">Garaje</span></div>
-      <div class="ricon" id="rlNoticias"><i>📰</i><span class="rl" data-t="rNoticias">Noticias</span></div>
+      <div class="ricon" id="rlTienda"><img class="rico" src="arte/ui/nav-tienda.webp" alt=""><span class="rl" data-t="tTienda">Tienda</span></div>
+      <div class="ricon" id="rlGaraje"><img class="rico" src="arte/ui/nav-garaje.webp" alt=""><span class="rl" data-t="tGaraje">Garaje</span></div>
+      <div class="ricon" id="rlNoticias"><img class="rico" src="arte/ui/ui-news.webp" alt=""><span class="rl" data-t="rNoticias">Noticias</span></div>
     </div>
     <div class="siderail right">
-      <div class="ricon" id="rrRanking"><i>🏆</i><span class="rl" data-t="rRanking">Ranking</span></div>
-      <div class="ricon lock" id="rrAmigos"><i>👥</i><span class="rl" data-t="rAmigos">Amigos</span><span class="lk">🔒</span></div>
-      <div class="ricon lock" id="rrClub"><i>🏰</i><span class="rl" data-t="rClub">Club</span><span class="lk">🔒</span></div>
+      <div class="ricon" id="rrRanking"><img class="rico" src="arte/ui/moneda-copa.webp" alt=""><span class="rl" data-t="rRanking">Ranking</span></div>
+      <div class="ricon lock" id="rrAmigos"><img class="rico" src="arte/ui/ui-friends.webp" alt=""><span class="rl" data-t="rAmigos">Amigos</span><img class="lk" src="arte/ui/ui-candado.webp" alt=""></div>
+      <div class="ricon lock" id="rrClub"><img class="rico" src="arte/ui/ui-club.webp" alt=""><span class="rl" data-t="rClub">Club</span><img class="lk" src="arte/ui/ui-candado.webp" alt=""></div>
     </div>
     <div class="hero">
       <div class="herotap" id="heroTap" role="button" tabindex="0">
         <div class="platform">
           <div class="shadow"></div>
-          <canvas id="hBall" width="200" height="200"></canvas>
+          <img id="hBall" alt="">
         </div>
         <div class="ballname" id="hBallName">🚀 Cohete</div>
         <div class="ballcups" id="hBallCups">🏆 0</div>
@@ -646,7 +717,7 @@
     </div>
     <div class="homebottom">
       <div class="passband" id="hPass">
-        <span class="pi">🎟️</span>
+        <img class="pi" src="arte/ui/ui-entrada.webp" alt="">
         <div class="pt"><b data-t="passTitle">PASE DE TEMPORADA</b><small id="hPassSub"></small></div>
         <div class="pbar"><i id="hPassBar" style="width:24%"></i></div>
       </div>
@@ -669,11 +740,11 @@
     </div>
   </div>
   <div class="h-tabs">
-    <button class="tab on"><i>🏁</i><span data-t="tJugar">Jugar</span></button>
-    <button class="tab" id="homeGarTab"><i>🚗</i><span data-t="tGaraje">Garaje</span></button>
-    <button class="tab" id="homeShopTab"><i>🛒</i><span data-t="tTienda">Tienda</span></button>
-    <button class="tab" data-nav="temporada"><i>🏆</i><span data-t="tTemp">Temporada</span></button>
-    <button class="tab" data-nav="perfil"><i>🙂</i><span data-t="tPerfil">Perfil</span></button>
+    <button class="tab on"><i class="tico t-jugar"></i><span data-t="tJugar">Jugar</span></button>
+    <button class="tab" id="homeGarTab"><i class="tico t-garaje"></i><span data-t="tGaraje">Garaje</span></button>
+    <button class="tab" id="homeShopTab"><i class="tico t-tienda"></i><span data-t="tTienda">Tienda</span></button>
+    <button class="tab" data-nav="temporada"><i class="tico t-temp"></i><span data-t="tTemp">Temporada</span></button>
+    <button class="tab" data-nav="perfil"><i class="tico t-perfil"></i><span data-t="tPerfil">Perfil</span></button>
   </div>
 </div>
 
@@ -807,11 +878,11 @@
   <div class="rkme" id="rkMe"></div>
   <div class="rklist" id="rkList"></div>
   <div class="h-tabs">
-    <button class="tab" data-nav="jugar"><i>🏁</i><span data-t="tJugar">Jugar</span></button>
-    <button class="tab" data-nav="garaje"><i>🚗</i><span data-t="tGaraje">Garaje</span></button>
-    <button class="tab" data-nav="tienda"><i>🛒</i><span data-t="tTienda">Tienda</span></button>
-    <button class="tab" data-nav="temporada"><i>🏆</i><span data-t="tTemp">Temporada</span></button>
-    <button class="tab" data-nav="perfil"><i>🙂</i><span data-t="tPerfil">Perfil</span></button>
+    <button class="tab" data-nav="jugar"><i class="tico t-jugar"></i><span data-t="tJugar">Jugar</span></button>
+    <button class="tab" data-nav="garaje"><i class="tico t-garaje"></i><span data-t="tGaraje">Garaje</span></button>
+    <button class="tab" data-nav="tienda"><i class="tico t-tienda"></i><span data-t="tTienda">Tienda</span></button>
+    <button class="tab" data-nav="temporada"><i class="tico t-temp"></i><span data-t="tTemp">Temporada</span></button>
+    <button class="tab" data-nav="perfil"><i class="tico t-perfil"></i><span data-t="tPerfil">Perfil</span></button>
   </div>
 </div>
 <!-- bola-criatura de los tiles (simbolo compartido, del mockup) -->
@@ -836,10 +907,13 @@
     </div>
     <div class="smode"><span class="smicon" id="sIcon">🏁</span><span id="sMode">LA GRAN CARRERA</span></div>
     <div class="sball" id="sBall"></div>
-    <button class="sfmt" id="sSolo"><span class="tri">▶</span> <span data-t="playSolo">JUGAR INDIVIDUAL</span> <span>👤</span></button>
-    <button class="sfmt" id="sTeam"><span class="tri">▶</span> <span data-t="playTeam">JUGAR POR EQUIPOS</span> <span>👥</span><span class="soontag" id="sTeamSoon" data-t="soonTag" style="display:none">pronto</span></button>
-    <!--+AG CÓMO JUGAR (tutorial por modo): botón secundario estilo ficha (i) de evento de Brawl; badge "!" hasta completarlo -->
+    <!--+AG ORDEN Y JERARQUÍA de la hoja (VB Jaime 2026-07-25). Dos cosas distintas guían al jugador:
+         · el ORDEN resuelve la PRIMERA vez → CÓMO JUGAR va ARRIBA, es lo primero que se lee y se toca.
+         · el COLOR resuelve el largo plazo → JUGAR (verde, grande, con el brillo .ready) es lo que apetece pulsar
+           siempre; POR EQUIPOS baja a gris porque todavía no funciona y no debe competir por la vista. -->
     <button class="showbtn" id="sHow"><span class="qi">i</span> <span data-t="howTo">CÓMO JUGAR</span><span class="hbadge" id="sHowBadge" style="display:none">!</span></button>
+    <button class="sfmt ready" id="sSolo"><span class="tri">▶</span> <span data-t="playSolo">JUGAR INDIVIDUAL</span> <span>👤</span></button>
+    <button class="sfmt sec" id="sTeam"><span class="tri">▶</span> <span data-t="playTeam">JUGAR POR EQUIPOS</span> <span>👥</span><span class="soontag" id="sTeamSoon" data-t="soonTag" style="display:none">pronto</span></button>
   </div>
 </div>
 
@@ -927,17 +1001,17 @@
     <button class="g-back" id="gBack">‹ <span data-t="home">Inicio</span></button>
     <div class="g-title" data-t="tGaraje">Garaje</div>
     <div class="h-coins" style="margin-left:auto">
-      <div class="coin chispa"><i>✦</i><span id="gChispas">0</span></div>
-      <div class="coin gema"><i>◆</i><span id="gGemas">0</span></div>
+      <div class="coin chispa"><img class="cico" src="arte/ui/moneda-chispa.webp" alt=""><span id="gChispas">0</span></div>
+      <div class="coin gema"><img class="cico" src="arte/ui/moneda-gema.webp" alt=""><span id="gGemas">0</span></div>
     </div>
   </div>
   <div class="g-grid" id="gGrid"></div>
   <div class="h-tabs">
-    <button class="tab" id="garTabJugar"><i>🏁</i><span data-t="tJugar">Jugar</span></button>
-    <button class="tab on"><i>🚗</i><span data-t="tGaraje">Garaje</span></button>
-    <button class="tab" id="garShopTab"><i>🛒</i><span data-t="tTienda">Tienda</span></button>
-    <button class="tab" data-nav="temporada"><i>🏆</i><span data-t="tTemp">Temporada</span></button>
-    <button class="tab" data-nav="perfil"><i>🙂</i><span data-t="tPerfil">Perfil</span></button>
+    <button class="tab" id="garTabJugar"><i class="tico t-jugar"></i><span data-t="tJugar">Jugar</span></button>
+    <button class="tab on"><i class="tico t-garaje"></i><span data-t="tGaraje">Garaje</span></button>
+    <button class="tab" id="garShopTab"><i class="tico t-tienda"></i><span data-t="tTienda">Tienda</span></button>
+    <button class="tab" data-nav="temporada"><i class="tico t-temp"></i><span data-t="tTemp">Temporada</span></button>
+    <button class="tab" data-nav="perfil"><i class="tico t-perfil"></i><span data-t="tPerfil">Perfil</span></button>
   </div>
 </div>
 <div id="gDetail">
@@ -945,6 +1019,9 @@
   <div class="gd-card" id="gdCard">
     <div class="gd-q" id="gdQ"></div>
     <div class="gd-name" id="gdName"></div>
+    <!--+AG doc 41: la pantalla del heroe ENSEÑA al heroe. Antes solo habia un hexagono de stats:
+         en Brawl Stars el personaje ocupa la mitad de su ficha, y era el hueco mas gordo del Garaje. -->
+    <div class="gd-art"><img id="gdBall" alt=""></div>
     <canvas class="gd-hex" id="gdHex" width="266" height="238"></canvas>
     <div class="gd-tags" id="gdTags"></div>
     <div class="gd-xp" id="gdXpWrap"><div class="gd-xplbl"><span id="gdXpCap" data-t="ballLvl">Nivel de bola</span><span id="gdXpNum"></span></div><div class="gd-xpbar"><div class="gd-xpfill" id="gdXpFill"></div></div></div>
@@ -962,18 +1039,18 @@
     <button class="g-back" id="shBack">‹ <span data-t="home">Inicio</span></button>
     <div class="g-title" data-t="tTienda">Tienda</div>
     <div class="h-coins" style="margin-left:auto">
-      <div class="coin chispa"><i>✦</i><span id="shChispas">0</span></div>
-      <div class="coin gema"><i>◆</i><span id="shGemas">0</span></div>
+      <div class="coin chispa"><img class="cico" src="arte/ui/moneda-chispa.webp" alt=""><span id="shChispas">0</span></div>
+      <div class="coin gema"><img class="cico" src="arte/ui/moneda-gema.webp" alt=""><span id="shGemas">0</span></div>
     </div>
   </div>
   <div class="sh-secs" id="shSecs"></div>
   <div class="sh-body" id="shBody"></div>
   <div class="h-tabs">
-    <button class="tab" id="shTabJugar"><i>🏁</i><span data-t="tJugar">Jugar</span></button>
-    <button class="tab" id="shTabGaraje"><i>🚗</i><span data-t="tGaraje">Garaje</span></button>
-    <button class="tab on"><i>🛒</i><span data-t="tTienda">Tienda</span></button>
-    <button class="tab" data-nav="temporada"><i>🏆</i><span data-t="tTemp">Temporada</span></button>
-    <button class="tab" data-nav="perfil"><i>🙂</i><span data-t="tPerfil">Perfil</span></button>
+    <button class="tab" id="shTabJugar"><i class="tico t-jugar"></i><span data-t="tJugar">Jugar</span></button>
+    <button class="tab" id="shTabGaraje"><i class="tico t-garaje"></i><span data-t="tGaraje">Garaje</span></button>
+    <button class="tab on"><i class="tico t-tienda"></i><span data-t="tTienda">Tienda</span></button>
+    <button class="tab" data-nav="temporada"><i class="tico t-temp"></i><span data-t="tTemp">Temporada</span></button>
+    <button class="tab" data-nav="perfil"><i class="tico t-perfil"></i><span data-t="tPerfil">Perfil</span></button>
   </div>
 </div>
 <!-- ===== TEMPORADA (Liga + Pase + Rankings + tema, doc 10) · placeholder fiel ===== -->
@@ -981,8 +1058,8 @@
   <div class="g-top">
     <div class="g-title" data-t="tTemp">Temporada</div>
     <div class="h-coins" style="margin-left:auto">
-      <div class="coin chispa"><i>✦</i><span id="seChispas">0</span></div>
-      <div class="coin gema"><i>◆</i><span id="seGemas">0</span></div>
+      <div class="coin chispa"><img class="cico" src="arte/ui/moneda-chispa.webp" alt=""><span id="seChispas">0</span></div>
+      <div class="coin gema"><img class="cico" src="arte/ui/moneda-gema.webp" alt=""><span id="seGemas">0</span></div>
     </div>
   </div>
   <div class="sc-body">
@@ -1033,11 +1110,11 @@
     </div>
   </div>
   <div class="h-tabs">
-    <button class="tab" data-nav="jugar"><i>🏁</i><span data-t="tJugar">Jugar</span></button>
-    <button class="tab" data-nav="garaje"><i>🚗</i><span data-t="tGaraje">Garaje</span></button>
-    <button class="tab" data-nav="tienda"><i>🛒</i><span data-t="tTienda">Tienda</span></button>
-    <button class="tab on" data-nav="temporada"><i>🏆</i><span data-t="tTemp">Temporada</span></button>
-    <button class="tab" data-nav="perfil"><i>🙂</i><span data-t="tPerfil">Perfil</span></button>
+    <button class="tab" data-nav="jugar"><i class="tico t-jugar"></i><span data-t="tJugar">Jugar</span></button>
+    <button class="tab" data-nav="garaje"><i class="tico t-garaje"></i><span data-t="tGaraje">Garaje</span></button>
+    <button class="tab" data-nav="tienda"><i class="tico t-tienda"></i><span data-t="tTienda">Tienda</span></button>
+    <button class="tab on" data-nav="temporada"><i class="tico t-temp"></i><span data-t="tTemp">Temporada</span></button>
+    <button class="tab" data-nav="perfil"><i class="tico t-perfil"></i><span data-t="tPerfil">Perfil</span></button>
   </div>
 </div>
 <!-- ===== PERFIL (identidad, amigos, referidos, emotes, consentimiento, doc 13) · placeholder fiel ===== -->
@@ -1045,8 +1122,8 @@
   <div class="g-top">
     <div class="g-title" data-t="tPerfil">Perfil</div>
     <div class="h-coins" style="margin-left:auto">
-      <div class="coin chispa"><i>✦</i><span id="prChispas">0</span></div>
-      <div class="coin gema"><i>◆</i><span id="prGemas">0</span></div>
+      <div class="coin chispa"><img class="cico" src="arte/ui/moneda-chispa.webp" alt=""><span id="prChispas">0</span></div>
+      <div class="coin gema"><img class="cico" src="arte/ui/moneda-gema.webp" alt=""><span id="prGemas">0</span></div>
     </div>
   </div>
   <div class="sc-body">
@@ -1100,11 +1177,11 @@
     </div>
   </div>
   <div class="h-tabs">
-    <button class="tab" data-nav="jugar"><i>🏁</i><span data-t="tJugar">Jugar</span></button>
-    <button class="tab" data-nav="garaje"><i>🚗</i><span data-t="tGaraje">Garaje</span></button>
-    <button class="tab" data-nav="tienda"><i>🛒</i><span data-t="tTienda">Tienda</span></button>
-    <button class="tab" data-nav="temporada"><i>🏆</i><span data-t="tTemp">Temporada</span></button>
-    <button class="tab on" data-nav="perfil"><i>🙂</i><span data-t="tPerfil">Perfil</span></button>
+    <button class="tab" data-nav="jugar"><i class="tico t-jugar"></i><span data-t="tJugar">Jugar</span></button>
+    <button class="tab" data-nav="garaje"><i class="tico t-garaje"></i><span data-t="tGaraje">Garaje</span></button>
+    <button class="tab" data-nav="tienda"><i class="tico t-tienda"></i><span data-t="tTienda">Tienda</span></button>
+    <button class="tab" data-nav="temporada"><i class="tico t-temp"></i><span data-t="tTemp">Temporada</span></button>
+    <button class="tab on" data-nav="perfil"><i class="tico t-perfil"></i><span data-t="tPerfil">Perfil</span></button>
   </div>
 </div>
 <div id="parent">
@@ -1151,6 +1228,9 @@
 <div class="toast" id="toast"></div>
 </div><!--+AG fin #app (columna telefono) -->
 
+<!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
+     antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
+<script src="arte/modeicons-vendored.js"></script>
 <script>
 'use strict';
 //+AG AJUSTE AL VIEWPORT VISIBLE (feedback Jaime 2026-07-24: "se pierde parte de abajo").
@@ -1949,7 +2029,7 @@ const SHELL={
     prTabYou:'Tú', prTabFriends:'Amigos', prTabMore:'Más',
     tJugar:'Jugar', tGaraje:'Garaje', tTienda:'Tienda', tTemp:'Temporada', tPerfil:'Perfil',
     won:'¡GANASTE!', champ:'Campeón', wonSub:'¡Primer puesto!', podium:'¡Podio!', againSub:'¡Otra! Cada carrera suma.',
-    firstWin:'+15 primera victoria del día', chal:'🎯 Reto de hoy: <b>Llega en top 3</b> &nbsp;·&nbsp; +25 ✦',
+    firstWin:'+15 primera victoria del día', chal:'<img class="ico-in" src="arte/ui/ui-reto.webp" alt=""> Reto de hoy: <b>Llega en top 3</b> &nbsp;·&nbsp; +25 ✦',
     teamPlay:'Jugar en equipo', teamSoon:'Próximamente', teamToast:'El juego en equipo llegará con las cuentas online',
     soon:' · próximamente', levelUp:n=>'¡Subiste al nivel '+n+'! 🎉',
     //+AG Home v3 (docs/35 v2.2 + 37): rejilla, hoja de formato, rieles, copas
@@ -1979,7 +2059,7 @@ const SHELL={
     prTabYou:'You', prTabFriends:'Friends', prTabMore:'More',
     tJugar:'Play', tGaraje:'Garage', tTienda:'Shop', tTemp:'Season', tPerfil:'Profile',
     won:'YOU WON!', champ:'Champion', wonSub:'First place!', podium:'Podium!', againSub:'Again! Every race counts.',
-    firstWin:'+15 first win of the day', chal:'🎯 Today: <b>Finish top 3</b> &nbsp;·&nbsp; +25 ✦',
+    firstWin:'+15 first win of the day', chal:'<img class="ico-in" src="arte/ui/ui-reto.webp" alt=""> Today: <b>Finish top 3</b> &nbsp;·&nbsp; +25 ✦',
     teamPlay:'Play with your team', teamSoon:'Coming soon', teamToast:'Team play arrives with online accounts',
     soon:' · coming soon', levelUp:n=>'Level '+n+' reached! 🎉',
     //+AG Home v3 (docs/35 v2.2 + 37)
@@ -2424,6 +2504,11 @@ const MODOS={
   cazador: { icon:'🎯', grad:'linear-gradient(140deg,#3a0d16,#12060f)' },
   redlight:{ icon:'🚦', grad:'linear-gradient(140deg,#123d1e,#3a0f14)' },
 };
+//+AG doc 41 bloque C: el icono de modo sale del SVG CANONICO del canal (el mismo dibujo que usa
+//   balltrials.com y la tarjeta de ronda del torneo). Luz Roja todavia no tiene icono canonico:
+//   cae al emoji hasta que el canal lo dibuje. Antes que inventarme uno, se nota que falta.
+function modeIco(k){ const v=(window.VENDORED_MODE_ICONS||{})[k];
+  return v ? `<svg class="msvg" viewBox="${v.vb}" aria-hidden="true">${v.markup}</svg>` : ((MODOS[k]||{}).icon||''); }
 const OPEN_MODES=['race','cazador','redlight'];
 function modeTitle(m){ return m==='race' ? T().name.toUpperCase() : (m==='cazador' ? S().mCazador : S().mRedlight); }
 //+AG dia local como entero + clave (mockups/flow.html): rotacion determinista del MODO DEL DIA entre los abiertos.
@@ -2534,6 +2619,10 @@ function buildTeamStandings(rows, winnerTeam){
 
 // ===== PANTALLAS =====
 function showScreen(n){ ['home','results','garaje','tienda','temporada','perfil','selector','ranking'].forEach(s=>{ const e=el(s); if(e) e.classList.toggle('on',s===n); }); document.body.classList.toggle('race',n==='race');
+  //+AG doc 41 bloque E: el fondo vivo SOLO existe en la Home. Fuera de ella se para de verdad
+  //   (rAF, listeners y contexto WebGL): dos contextos vivos a la vez -fondo + motor- es lo que
+  //   tumba un movil, y ademas la partida se merece toda la GPU.
+  if(window.BT_AMBIENT) n==='home' ? BT_AMBIENT.on() : BT_AMBIENT.off();
   if(typeof refreshTabBadges==='function') refreshTabBadges(); }   //+AG doc 40: el badge del Garaje se refresca al cambiar de pantalla
 function drawPreviewBall(cv,col){ const x=cv.getContext('2d'), S=cv.width, r=S*0.4, cx=S/2, cy=S/2; x.clearRect(0,0,S,S);
   const grd=x.createRadialGradient(cx-r*0.35,cy-r*0.4,r*0.1,cx,cy,r*1.1); grd.addColorStop(0,rgb(col,1.55)); grd.addColorStop(0.5,rgb(col,1.05)); grd.addColorStop(1,rgb(col,0.55));
@@ -2553,11 +2642,13 @@ function renderHome(){ applyShell();
   //+AG Home v3: total de copas (suma de la coleccion, doc 37) + bola PROTAGONISTA equipada + tarjeta compacta del modo
   el('hCups').textContent=nfmt(totalCopas());
   const b=equippedBall(), A=b?ARCHS[b.arch]:null;
-  if(A){ drawPreviewBall(el('hBall'), ARCH_COLOR[b.arch]||TEAMS[0].color);
-    el('hBallName').textContent=A.icon+' '+archName(b.arch);
-    el('hBallCups').textContent='🏆 '+nfmt(b.copas||0); }
+  //+AG doc 41: la protagonista de la Home ya es su ARTE, no la bola generica de canvas (que salia
+  //   igual para las 12, solo cambiaba de color). El emoji sale del nombre: ya no hace falta, la bola SE VE.
+  if(A){ el('hBall').src=ballArt(b.arch,'hero');
+    el('hBallName').textContent=archName(b.arch);
+    el('hBallCups').innerHTML=coinIco('copa')+nfmt(b.copas||0); }
   const m=MODOS[SAVE.mode]||MODOS.race;
-  el('mcIcon').textContent=m.icon; el('mcName').textContent=modeTitle(SAVE.mode);
+  el('mcIcon').innerHTML=modeIco(SAVE.mode); el('mcName').textContent=modeTitle(SAVE.mode);
   el('mcScrim').style.background=m.grad;
   el('mcDay').style.display = SAVE.mode===dayMode() ? '' : 'none';
   el('mcHow').classList.toggle('done', !!SAVE.tutorialDone[SAVE.mode]);   //+AG hecho -> se encoge a la (i) sola
@@ -2627,6 +2718,10 @@ function openFrame(src){
   f.setAttribute('allow','autoplay; fullscreen');
   f.style.cssText='position:absolute;inset:0;width:100%;height:100%;border:0;z-index:1000;background:#0b0f1e';   //+AG absolute: vive DENTRO de #app (columna portrait)
   gameFrameEl=f; (document.getElementById('app')||document.body).appendChild(f);
+  //+AG doc 41 bloque E: el iframe se monta ENCIMA de la Home sin cambiar de pantalla, asi que
+  //   showScreen no se entera: el fondo vivo se quedaria corriendo detras de la partida con su
+  //   propio contexto WebGL. Se apaga aqui. Al volver, goHome() -> showScreen('home') lo reenciende.
+  if(window.BT_AMBIENT) BT_AMBIENT.off();
 }
 function closeGameFrame(){ if(gameFrameEl){ gameFrameEl.remove(); gameFrameEl=null; } }
 window.addEventListener('message', e=>{
@@ -2861,20 +2956,31 @@ const QMAX=[9,10,11,12,13];   // techo de NIVEL por rareza (doc 39: "una verde n
 //   con ◆), hito=copas TOTALES (Épicas, no comprables), fichas=⬡ (Legendaria, pronto). Los 7 nombres nuevos ya
 //   existían en BALL_NAMES como bolas decorativas de bots (continuidad, cero lore nuevo). Datos = bolas-balltrials.html.
 const ARCHS={
-  cohete:  {name:'Cohete',  icon:'🚀', q:0, base:[8,7,3,4,4,5],  firma:0, sec:[1,5], price:0},
-  tanque:  {name:'Tanque',  icon:'🛡️', q:0, base:[3,3,9,6,7,5],  firma:2, sec:[4,3], price:150},
-  chispa:  {name:'Chispa',  icon:'⚡', q:1, base:[7,9,2,4,3,6],  firma:1, sec:[0,5], price:350},
-  pinball: {name:'Pinball', icon:'🎱', q:1, base:[6,8,4,3,5,7],  firma:5, sec:[1,0], price:350},
-  lapa:    {name:'Lapa',    icon:'🧲', q:1, base:[4,4,5,9,7,4],  firma:3, sec:[4,1], price:350},
-  burbuja: {name:'Burbuja', icon:'🫧', q:2, base:[5,6,1,8,5,6],  firma:3, sec:[5,1], price:900},
-  meteoro: {name:'Meteoro', icon:'☄️', q:2, base:[7,5,8,2,4,6],  firma:0, sec:[2,5], price:900},
-  bunker:  {name:'Búnker',  icon:'🏰', q:2, base:[2,3,8,6,9,4],  firma:4, sec:[2,3], price:900},
-  volcan:  {name:'Volcán',  icon:'🌋', q:3, base:[5,7,5,3,4,9],  firma:5, sec:[1,2], hito:1500},
-  yunque:  {name:'Yunque',  icon:'🔨', q:3, base:[2,2,10,6,8,4], firma:2, sec:[4,3], hito:3500},
-  fantasma:{name:'Fantasma',icon:'👻', q:3, base:[4,5,3,8,9,4],  firma:4, sec:[3,0], hito:6000},
-  estrella:{name:'Estrella',icon:'⭐', q:4, base:[7,6,4,5,4,7],  firma:0, sec:[5,3], fichas:2000},
+  cohete:  {name:'Cohete',  q:0, base:[8,7,3,4,4,5],  firma:0, sec:[1,5], price:0},
+  tanque:  {name:'Tanque',  q:0, base:[3,3,9,6,7,5],  firma:2, sec:[4,3], price:150},
+  chispa:  {name:'Chispa',  q:1, base:[7,9,2,4,3,6],  firma:1, sec:[0,5], price:350},
+  pinball: {name:'Pinball', q:1, base:[6,8,4,3,5,7],  firma:5, sec:[1,0], price:350},
+  lapa:    {name:'Lapa',    q:1, base:[4,4,5,9,7,4],  firma:3, sec:[4,1], price:350},
+  burbuja: {name:'Burbuja', q:2, base:[5,6,1,8,5,6],  firma:3, sec:[5,1], price:900},
+  meteoro: {name:'Meteoro', q:2, base:[7,5,8,2,4,6],  firma:0, sec:[2,5], price:900},
+  bunker:  {name:'Búnker',  q:2, base:[2,3,8,6,9,4],  firma:4, sec:[2,3], price:900},
+  volcan:  {name:'Volcán',  q:3, base:[5,7,5,3,4,9],  firma:5, sec:[1,2], hito:1500},
+  yunque:  {name:'Yunque',  q:3, base:[2,2,10,6,8,4], firma:2, sec:[4,3], hito:3500},
+  fantasma:{name:'Fantasma',q:3, base:[4,5,3,8,9,4],  firma:4, sec:[3,0], hito:6000},
+  estrella:{name:'Estrella',q:4, base:[7,6,4,5,4,7],  firma:0, sec:[5,3], fichas:2000},
 };
 const ARCH_KEYS=Object.keys(ARCHS);
+//+AG doc 41: ARTE de las bolas-heroe (Codex, entregado 2026-07-25). 'icon' = rejilla/listas (512),
+//   'hero' = retrato de pantalla (768). WebP: el pack entero pesa 1,5 MB en vez de los 14,6 MB del
+//   PNG original, y el juego se sirve por web, no por store. Con esto muere el campo 'icon' de ARCHS:
+//   las 12 bolas ya no son emojis del sistema (que ademas se dibujaban distinto en cada movil).
+const ballArt=(k,kind)=>`arte/bolas/bola-${k}-${kind||'icon'}.webp`;
+//+AG doc 41: iconos de sistema. Las monedas eran ✦ ◆ ⬡ 🏆 — dos de ellas ni siquiera eran iconos,
+//   eran CARACTERES tipograficos, y la copa era un emoji distinto en cada movil. Las cuatro nuevas se
+//   distinguen por SILUETA en escala de grises (estrella / diamante / hexagono / copa): eso resuelve
+//   daltonismo sin depender del color, que es como lo pide docs/17.
+const uiArt=n=>`arte/ui/${n}.webp`;
+const coinIco=(n,cls)=>`<img class="cico${cls?' '+cls:''}" src="${uiArt('moneda-'+n)}" alt="">`;
 //+AG doc 39 NIVELES (cierra doc 37 §7): doble candado = XP de bola ACUMULADA (b.xp ya no se resetea; jugar CON
 //   ella, ~30 XP/partida) + Chispas. Coste de ENTRAR al nivel n:
 const LVL_COST={2:40,3:70,4:120,5:200,6:320,7:500,8:750,9:1100,10:1550,11:2100,12:2800,13:3600};
@@ -2922,18 +3028,25 @@ function renderGaraje(){ el('gChispas').textContent=SAVE.chispas; el('gGemas').t
   const g=el('gGrid'); g.innerHTML='';
   ARCH_KEYS.forEach(k=>{ const A=ARCHS[k], b=owned(k), q=QUAL[A.q];   //+AG doc 39: el marco es la rareza FIJA de la bola (tenida o no)
     const c=document.createElement('div'); c.className='g-card'+(b?'':' locked'); c.style.setProperty('--qc',q.c);
-    let h=`<div class="gi">${A.icon}</div><div class="g-cname">${archName(k)}</div>`;
+    c.style.setProperty('--d', (ARCH_KEYS.indexOf(k)*0.21).toFixed(2)+'s');   //+AG desfase del idle por tarjeta
+    let h=`<img class="gi" src="${ballArt(k)}" alt="" loading="lazy"><div class="g-cname">${archName(k)}</div>`;
     if(b){ h+=`<div class="g-qtag">${S().lvlShort(b.lvl||1)} · ${qualName(A.q)}</div><div class="gc">🏆 ${nfmt(b.copas||0)}</div>`;   //+AG doc 37: cada bola muestra SUS copas
       if(SAVE.equipped===SAVE.balls.indexOf(b)) h+=`<div class="g-eq">${S().equippedTag}</div>`;
       if(canLvlUp(b)) h+=`<div class="g-dot">↑</div>`;   //+AG doc 39: lista para subir (XP + Chispas suficientes)
-    } else if(A.price!=null) h+=`<div class="g-price"><span class="pc"><i>✦</i>${A.price}</span><span class="pc gm">◆ ${gemaPrice(A.price)}</span></div>`;
-    else if(A.hito) h+=`<div class="g-price"><span class="pc">🏆 ${nfmt(A.hito)}</span></div>`;
-    else h+=`<div class="g-price"><span class="pc">⬡ ${nfmt(A.fichas)}</span></div>`;
+    } else if(A.price!=null) h+=`<div class="g-price"><span class="pc"><img class="cico sm" src="arte/ui/moneda-chispa.webp" alt="">${A.price}</span><span class="pc gm"><img class="cico sm" src="arte/ui/moneda-gema.webp" alt="">${gemaPrice(A.price)}</span></div>`;
+    else if(A.hito) h+=`<div class="g-price"><span class="pc"><img class="cico sm" src="arte/ui/moneda-copa.webp" alt="">${nfmt(A.hito)}</span></div>`;
+    else h+=`<div class="g-price"><span class="pc"><img class="cico sm" src="arte/ui/moneda-ficha.webp" alt="">${nfmt(A.fichas)}</span></div>`;
     c.innerHTML=h; c.onclick=()=>openDetail(k); g.appendChild(c); });
 }
 function openDetail(k){ applyShell(); const A=ARCHS[k], b=owned(k), q=QUAL[A.q], s=S();
   el('gdCard').style.setProperty('--qc',q.c); el('gdCard').style.setProperty('--qglow',q.c+'22');
   el('gdQ').textContent=qualName(A.q)+' · '+s.lvlMaxTag(maxLvl(k)); el('gdName').textContent=archName(k);
+  //+AG doc 41: el retrato. Reasignar el mismo src NO relanza la animacion (el navegador no considera
+  //   que el elemento haya cambiado), asi que la reinicio a mano: quitar la clase + forzar reflow + volver
+  //   a ponerla. Si no, abrir la misma ficha dos veces seguidas se sentia muerto la segunda.
+  const gb=el('gdBall'); gb.src=ballArt(k,'hero');
+  gb.style.filter = b ? '' : 'grayscale(1) brightness(.6) drop-shadow(0 10px 16px #000a)';
+  gb.style.animation='none'; void gb.offsetWidth; gb.style.animation='';
   //+AG doc 39: rasgo de Épicas/Legendaria = SOLO texto de intención (se cableará con la física por bola)
   let tags=s.gdTags(archBest(k), archWorst(k));
   const tr=(s.traits||{})[k]; if(tr) tags+='<br><b>'+s.traitWord+'</b>: '+tr+' <small>'+s.traitSoon+'</small>';
@@ -3022,7 +3135,7 @@ function featEl(){ const d=document.createElement('div');
 function bolasEl(){ const s=S(), d=document.createElement('div'); d.innerHTML='<div class="sh-note">'+s.shNoteBalls+'</div>';
   const g=document.createElement('div'); g.className='sh-grid';
   ARCH_KEYS.forEach(k=>{ const A=ARCHS[k], have=owned(k); const it=document.createElement('div'); it.className='sh-item'; it.style.setProperty('--qc',QUAL[A.q].c);   //+AG doc 39: marco = rareza de la bola
-    it.innerHTML=`<div class="sh-ic">${A.icon}</div><div class="sh-nm">${archName(k)}</div><div class="sh-cat">${s.shBallCat(qualName(A.q), archBest(k))}</div>`;
+    it.innerHTML=`<img class="sh-ic" src="${ballArt(k)}" alt="" loading="lazy"><div class="sh-nm">${archName(k)}</div><div class="sh-cat">${s.shBallCat(qualName(A.q), archBest(k))}</div>`;
     const btn=document.createElement('button');
     if(have){ btn.className='sh-buy owned'; btn.textContent=s.ownedGar; btn.disabled=true; }
     else if(A.price!=null){ btn.className='sh-buy'; btn.innerHTML=`${A.price} ✦ / ${gemaPrice(A.price)} ◆`; btn.disabled=SAVE.chispas<A.price&&SAVE.gemas<gemaPrice(A.price);
@@ -3095,7 +3208,7 @@ function onbPickStep(){ el('onbQuiz').style.display='none'; el('onbPick').style.
   //   roster de 12 se descubre en Garaje/Tienda. Pendiente de balance: pinball/lapa/bunker gratis aquí vs su precio.
   ['cohete','tanque','pinball','lapa','bunker'].forEach(k=>{ const A=ARCHS[k]; const b=document.createElement('button');
     b.className='onb-b'+(k===onbRec?' rec':'')+(k===onbSel?' sel':'');
-    b.innerHTML=`<div class="gi">${A.icon}</div><div class="nm">${archName(k)}</div><div class="ds">${archBest(k)}</div>`;
+    b.innerHTML=`<img class="gi" src="${ballArt(k)}" alt=""><div class="nm">${archName(k)}</div><div class="ds">${archBest(k)}</div>`;
     b.onclick=()=>{ onbSel=k; onbPickStep(); }; box.appendChild(b); }); }
 function onbFinish(){ SAVE.balls=[{arch:onbSel,lvl:1,xp:0,copas:0}]; SAVE.equipped=0; SAVE.onboarded=true; persist();
   el('onb').classList.remove('on'); toast(S().tFirstBall(archName(onbSel))); openGaraje(); }
@@ -3229,8 +3342,8 @@ function redeemCode(){ const v=el('codeIn').value.trim().toUpperCase(); const m=
 let rkTab='global', rkBallFilt='cohete';   // Por bola SIEMPRE filtra a un tipo (el total ya vive en Global, como en BS: Players vs charts por brawler)
 function rankRows(){ const dn=todayNum(), rows=[], s=S();
   if(rkTab==='bola'){
-    BOTS.forEach(b=>b.balls.forEach((bb,i)=>{ const k=botBallArch(b,i), A=ARCHS[k]; rows.push({name:A.icon+' '+bb.name+' · '+b.name, color:bb.color, v:effBall(b,i,dn), me:false, arch:k}); }));
-    SAVE.balls.forEach(b=>{ const A=ARCHS[b.arch], an=A?archName(b.arch):b.arch; rows.push({name:(A?A.icon+' ':'')+an+' · '+s.you, color:rgb(ARCH_COLOR[b.arch]||[0.16,0.42,1.0]), v:b.copas||0, me:true, ball:an, arch:b.arch}); });
+    BOTS.forEach(b=>b.balls.forEach((bb,i)=>{ const k=botBallArch(b,i), A=ARCHS[k]; rows.push({name:bb.name+' · '+b.name, color:bb.color, v:effBall(b,i,dn), me:false, arch:k}); }));
+    SAVE.balls.forEach(b=>{ const A=ARCHS[b.arch], an=A?archName(b.arch):b.arch; rows.push({name:an+' · '+s.you, color:rgb(ARCH_COLOR[b.arch]||[0.16,0.42,1.0]), v:b.copas||0, me:true, ball:an, arch:b.arch}); });
     for(let i=rows.length-1;i>=0;i--) if(rows[i].arch!==rkBallFilt) rows.splice(i,1);
   } else {
     BOTS.forEach(b=>{ let v=0; if(rkTab==='global') v=effTotal(b,dn); else b.balls.forEach((bb,i)=>v+=effBall(b,i,dn)-effBall(b,i,dn-1)); rows.push({name:b.name, color:b.color, v, me:false}); });
@@ -3287,20 +3400,23 @@ el('rkBack').onclick=goHome;
 //   aqui y volver a verificarlo de punta a punta (boot, agencia sobre balls[0], camara de jugador, teamPlace 1..4).
 const TEAM_READY={race:false, cazador:false, redlight:false};
 function openSheet(){ applyShell(); const m=MODOS[SAVE.mode]||MODOS.race, b=equippedBall(), A=b?ARCHS[b.arch]:null, s=S();
-  el('sIcon').textContent=m.icon; el('sMode').textContent=modeTitle(SAVE.mode);
-  el('sBall').textContent=A ? (s.with+' '+A.icon+' '+archName(b.arch)+' · 🏆 '+nfmt(b.copas||0)) : '';
+  el('sIcon').innerHTML=modeIco(SAVE.mode); el('sMode').textContent=modeTitle(SAVE.mode);
+  el('sBall').textContent=A ? (s.with+' '+archName(b.arch)+' · '+nfmt(b.copas||0)+' •') : '';
   const teamOk=!!TEAM_READY[SAVE.mode];
   //+AG gris pero PULSABLE: un <button disabled> no dispara click y el jugador se queda sin saber por que no pasa
   //   nada. Con .soon + aria-disabled se ve igual de apagado y al tocarlo explica que llega pronto.
   el('sTeam').classList.toggle('soon',!teamOk); el('sTeam').setAttribute('aria-disabled',String(!teamOk));
   el('sTeamSoon').style.display=teamOk?'none':'';
-  //+AG el ultimo formato usado destacado con borde dorado (mockup); si equipos no esta cableado, destaca individual
-  el('sSolo').classList.toggle('last', SAVE.fmt==='individual'||!teamOk);
-  el('sTeam').classList.toggle('last', SAVE.fmt==='equipos'&&teamOk);
+  //+AG el borde dorado de "ultimo formato usado" MUERE aqui (VB Jaime 2026-07-25): con la jerarquia nueva el verde
+  //   ya dice cual es el bueno, y marcar el gris bloqueado como "tu ultimo" era ruido contradictorio.
   el('sHowBadge').style.display = SAVE.tutorialDone[SAVE.mode] ? 'none' : '';   //+AG "!" hasta completar el tutorial del modo
+  //+AG regla del sistema .ready: UN solo elemento latiendo por pantalla. Con la hoja abierta, el JUGAR del Home
+  //   seguia barriendo brillo detras del velo y le robaba protagonismo al verde de la hoja. Se apaga y vuelve al cerrar.
+  el('hPlay').classList.remove('ready');
   el('fmtSheet').classList.add('on'); el('fmtSheet').setAttribute('aria-hidden','false');
 }
-function closeSheet(){ el('fmtSheet').classList.remove('on'); el('fmtSheet').setAttribute('aria-hidden','true'); }
+function closeSheet(){ el('fmtSheet').classList.remove('on'); el('fmtSheet').setAttribute('aria-hidden','true');
+  el('hPlay').classList.add('ready'); }
 el('sheetBack').onclick=closeSheet; el('sheetClose').onclick=closeSheet;
 el('sSolo').onclick=()=>{ SAVE.fmt='individual'; persist(); closeSheet(); startRace(SAVE.mode,'individual'); };
 el('sTeam').onclick=()=>{ if(el('sTeam').classList.contains('soon')){ toast(S().teamSoonToast(modeTitle(SAVE.mode))); return; }
@@ -3394,4 +3510,22 @@ window.__fitCheck=function(w,h){
 const _onbParam=new URLSearchParams(location.search).get('onb');   // ?onb=1 fuerza, ?onb=0 salta (debug)
 resize(); requestAnimationFrame(frame); goHome();
 if(_onbParam==='1' || (FRESH && !SAVE.onboarded && _onbParam!=='0')) startOnboarding();   //+AG primera sesion
+</script>
+
+<!--+AG doc 41 bloque E: three solo para el fondo de la Home. Mismo CDN y misma version que usan
+     los modos en motor/*/index.html, para no traerse dos copias distintas de la libreria. -->
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+               "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }
+</script>
+<script type="module">
+  import { startAmbient } from './arte/ambient.mjs';
+  //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
+  //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
+  window.BT_AMBIENT = { h:null,
+    on(){ if(this.h) return;
+      try{ if(SAVE.settings && SAVE.settings.reducedFx) return; }catch(e){}   // "efectos reducidos" tambien apaga esto
+      this.h = startAmbient(document.getElementById('ambient')); },
+    off(){ if(this.h){ this.h.stop(); this.h=null; } } };
+  if(document.getElementById('home').classList.contains('on')) BT_AMBIENT.on();
 </script>
