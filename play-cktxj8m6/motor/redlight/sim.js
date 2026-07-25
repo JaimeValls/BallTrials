@@ -257,6 +257,12 @@ export class Sim {
     //+AG CÓMO JUGAR (tutorial): nivel sin peligro (sin minas/boulders, francotirador desarmado, bots sin meta).
     //   Flag ausente → todo idéntico a la fuente (no consume RNG).
     this.tutorial = !!opts.tutorial;
+    //+AG tutorial (feedback Jaime 2026-07-25): el COACH manda sobre el SEMÁFORO mientras enseña. Sin esto la
+    //   lección y la luz se contradicen: "pulsa ⚡ NITRO" cayendo justo en ROJO, que es cuando NO puedes moverte.
+    //   'green' = verde sostenido (correr, embestir, carril, boosters) · 'red' = rojo YA (la lección de quedarse
+    //   quieto, que así ocurre cuando el cartel lo dice y no cuando toque) · null = horario normal.
+    //   Solo existe con this.tutorial: en partida real la rama ni se evalúa (cero cambio de determinismo).
+    this.tutLight = null;
     //+AG doc 39 #1: modificador de física por atributos, SOLO individual y SOLO balls[0]. No consume RNG (constantes).
     const _S = (this.individual && Array.isArray(opts.stats) && opts.stats.length === 6) ? opts.stats : null;
     this.pmul = _S ? { vel:statMul(_S[0]), ace:statMul(_S[1]), pes:statMul(_S[2]), aga:statMul(_S[3]), res:statMul(_S[4]), bst:statMul(_S[5]) } : NEUTRAL_MUL;
@@ -362,6 +368,13 @@ export class Sim {
   playerLane(k){                                    //+AG CARRIL: cambiar la intención es instantáneo; la bola
     if (k !== 'left' && k !== 'center' && k !== 'right') return false;   //   tarda lo que tarde la física
     this.pIn.lane = k; return true; }
+  //+AG tutorial: el COACH pide el color con el que tiene sentido la lección ('green'|'red') o lo suelta (null).
+  //   Fuera del tutorial no hace nada: la luz del juego real nunca se toca desde arriba.
+  tutorialLight(c){
+    if (!this.tutorial) return false;
+    this.tutLight = (c === 'green' || c === 'red') ? c : null;
+    if (!this.tutLight) this.phaseEnd = this.f + 90;   // al soltar, la fase en curso se acaba pronto (no 10s de inercia)
+    return true; }
   //+AG doc 39 #1: BST → duración de los boosters del jugador (nitro/fantasma/súper); el cooldown NO cambia. pmul.bst=1
   //   fuera de individual-con-stats → duraciones idénticas a la fuente.
   playerNitro(){ const p = this.balls[0];           //+AG NITRO: sobreempuje x1.6 ~1.5s, recarga ~8s
@@ -492,6 +505,19 @@ export class Sim {
     }
 
     // ---- SEMÁFORO: avanzar la máquina de estados por frame entero ----
+    //+AG tutorial: si el COACH ha pedido un color, se ADELANTA la máquina hasta la siguiente fase de ese color y se
+    //   estira mientras dure la lección. No se inventa un color fuera de la secuencia: se salta a una fase real, así
+    //   el HUD/el audio siguen leyendo ev.phase como en cualquier partida.
+    if (this.tutorial && this.tutLight){
+      if (this.color !== this.tutLight){
+        while (this.phases[this.phaseIdx].color !== this.tutLight) this.phaseIdx++;
+        const prevColor = this.color; this.color = this.tutLight;
+        if (this.color === 'red') this.redStartF = f; else this.redStartF = null;
+        for (const b of this.balls) b.brakeLead = Math.round(this.rng.uniform(ANTICIP_MIN, ANTICIP_MAX));
+        ev.phase.push({ f, color: this.color, from: prevColor });
+      }
+      this.phaseStart = f; this.phaseEnd = f + 600;   // se renueva cada frame: la luz no cambia hasta soltar la lección
+    }
     while (f >= this.phaseEnd){
       this.phaseIdx++; this.phaseStart = this.phaseEnd; this.phaseEnd += this.phases[this.phaseIdx].dur;
       const prevColor = this.color; this.color = this.phases[this.phaseIdx].color;

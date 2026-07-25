@@ -1409,7 +1409,7 @@ if(TUTORIAL)(function(){
         'Ram the BARRIER on green until it breaks, then cross it',
         'RED! Let go and stop (today nobody shoots… in a real match, they do)',
         'Coming in hot? Press BRAKE (F) for an emergency stop',
-        'Change LANE twice: ◀ ▶ or 1/2/3',
+        'The WALL has a GAP: switch LANE to the open side',
         'Press ⚡ NITRO on green: a sprint',
         'Press 👻 GHOST: you pass through walls for a moment',
         'SUPER bar full, on the house! Press ⭐ SUPER',
@@ -1419,7 +1419,7 @@ if(TUTORIAL)(function(){
         'Embiste la BARRERA en verde hasta romperla y crúzala',
         '¡ROJO! Suelta y quédate quieto (hoy nadie dispara… en la partida real, sí)',
         '¿Vas lanzado? Pulsa FRENAZO (F) para clavarte',
-        'Cambia de CARRIL dos veces: ◀ ▶ o 1/2/3',
+        'El MURO tiene un HUECO: cambia de CARRIL al lado abierto',
         'Pulsa ⚡ NITRO en verde: un sprint',
         'Pulsa 👻 FANTASMA: atraviesas muros un instante',
         '¡Barra de SÚPER llena de regalo! Pulsa ⭐ SÚPER',
@@ -1429,23 +1429,39 @@ if(TUTORIAL)(function(){
   //   (ventanas pIn.*Until), carriles (pIn.lane), barrera (Y del jugador), meta (safe).
   //+AG pause:true = el mundo se congela mientras lees, y se suelta en cuanto tocas. Los pasos de MIRAR el juego
   //   (romper la barrera, aguantar el rojo, cruzar la meta) NO pausan ni tapan la pantalla: ahí la lección es ver.
-  let acc=0, laneChanges=0, lastLane=null;
+  let acc=0, laneStart=null, laneMoved=false;
   const spd=()=>{ const p=sim.balls[0]; return Math.hypot(p.vx,p.vy); };
+  //+AG el HUECO del muro ALTERNA de lado por nivel (BLOCKERS_BASE: y12 hueco a la derecha, y27 a la izquierda).
+  //   El paso de carril señalaba ◀ fijo, o sea que la lección te mandaba justo contra el muro (feedback Jaime
+  //   2026-07-25). Ahora se lee el muro que tienes DELANTE y la mano apunta al lado por el que se pasa.
+  const gapSide=()=>{ const p=sim.balls[0], bl=(sim.blockers||[]).find(b=>b.y>p.y+0.8);
+    return bl ? (bl.gap==='R'?'right':'left') : 'right'; };
+  //+AG la luz la manda el COACH mientras enseña: verde para todo lo que se hace en movimiento y rojo SOLO en la
+  //   lección de quedarse quieto. Antes te pedía nitro/fantasma/súper con la luz en rojo, que es cuando el juego
+  //   te prohíbe moverte: la lección y la regla se contradecían (feedback Jaime 2026-07-25).
+  const light=c=>()=>{ if(sim) sim.tutorialLight(c); };
+  const andThen=(c,fn)=>()=>{ if(sim) sim.tutorialLight(c); fn(); };
   createCoach({
     mode:'redlight', i18n:CI, lang:()=>LANG,
     isPlaying:()=> !!sim && phase==='play',
     setPaused:v=>{ coachPaused=v; },
     steps:[
-      { target:'bRun',   pause:true,  check:dt=>{ acc = (runHeld && sim.color==='green') ? acc+dt : acc; return acc>=2.0; } },
-      { target:null,     pause:false, check:()=> sim.balls[0].y>7.5 },
-      { target:null,     pause:false, check:dt=>{ acc = (sim.color==='red' && !runHeld && spd()<0.3) ? acc+dt : 0; return acc>=1.2; } },
-      { target:'bBrake', pause:true,  linger:1.4, check:()=> sim.f<sim.pIn.brakeUntil },
-      { target:'bLaneL', pause:true,  linger:1.0, enter:()=>{ laneChanges=0; lastLane=sim.pIn.lane; },
-        check:()=>{ if(sim.pIn.lane!==lastLane){ laneChanges++; lastLane=sim.pIn.lane; } return laneChanges>=2; } },
-      { target:'bNitro', pause:true,  linger:1.6, check:()=> sim.f<sim.pIn.nitroUntil },
-      { target:'bGhost', pause:true,  linger:1.6, check:()=> sim.f<sim.pIn.ghostUntil },
-      { target:'bSup',   pause:true,  linger:1.8, enter:()=>{ superVal=1; }, check:()=> sim.f<sim.pIn.superUntil },
-      { target:null,     pause:false, check:()=>{ const p=sim.balls[0]; return p.safe===true || (p.rank!==null && p.rank>0); } },
+      { target:'bRun',   pause:true,  enter:light('green'),
+        check:dt=>{ acc = (runHeld && sim.color==='green') ? acc+dt : acc; return acc>=2.0; } },
+      { target:null,     pause:false, enter:light('green'), check:()=> sim.balls[0].y>7.5 },
+      //+AG el ROJO llega CUANDO LO DICE EL CARTEL (no cuando toque el horario): la lección se ve en el momento
+      { target:null,     pause:false, enter:light('red'),
+        check:dt=>{ acc = (sim.color==='red' && !runHeld && spd()<0.3) ? acc+dt : 0; return acc>=1.2; } },
+      { target:'bBrake', pause:true,  linger:1.4, enter:light('green'), check:()=> sim.f<sim.pIn.brakeUntil },
+      { target:()=> gapSide()==='right' ? 'bLaneR' : 'bLaneL', pause:true, linger:1.0,
+        enter:andThen('green', ()=>{ laneStart=sim.pIn.lane; laneMoved=false; }),
+        check:()=>{ if(sim.pIn.lane!==laneStart) laneMoved=true; return laneMoved && sim.pIn.lane===gapSide(); } },
+      { target:'bNitro', pause:true,  linger:1.6, enter:light('green'), check:()=> sim.f<sim.pIn.nitroUntil },
+      { target:'bGhost', pause:true,  linger:1.6, enter:light('green'), check:()=> sim.f<sim.pIn.ghostUntil },
+      { target:'bSup',   pause:true,  linger:1.8, enter:andThen('green', ()=>{ superVal=1; }), check:()=> sim.f<sim.pIn.superUntil },
+      //+AG último paso: se SUELTA la luz. El horario normal vuelve y el examen final es el juego de verdad
+      { target:null,     pause:false, enter:light(null),
+        check:()=>{ const p=sim.balls[0]; return p.safe===true || (p.rank!==null && p.rank>0); } },
     ],
   });
 })();

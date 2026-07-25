@@ -45,7 +45,8 @@ const CSS = `
 
 // cfg:
 //   mode        'race' | 'redlight' | 'cazador' — viaja en el bt:tutorialEnd que recibe el shell
-//   steps       [{ target:'idDelBoton'|null, pause:true|false, linger?:segundos, enter?:fn, check:(dt)=>bool }]
+//   steps       [{ target:'idDelBoton'|()=>'idDelBoton'|null, pause:true|false, linger?:segundos, enter?:fn, check:(dt)=>bool }]
+//               target como función = se reevalúa cada frame (el botón correcto puede depender del estado del nivel)
 //               linger = segundos que el mundo sigue CORRIENDO (sin velo ni mano) tras acertar, antes de pasar al
 //               siguiente paso. Imprescindible en los pasos de un toque: sin él, pulsas → acierta al instante →
 //               el paso siguiente vuelve a congelar, y no llegas a VER lo que hace el nitro/el dash/el frenazo.
@@ -67,7 +68,11 @@ export function createCoach(cfg){
   const end = completed => { try{ parent.postMessage({ type:'bt:tutorialEnd', mode, completed }, '*'); }catch(e){} };
   exit.onclick = () => { setPaused(false); end(false); };
 
-  let si = -1, finished = false, paused = false, target = null, cueHidden = false, lingerT = 0;
+  let si = -1, finished = false, paused = false, targetSrc = null, target = null, cueHidden = false, lingerT = 0;
+  //+AG target puede ser una FUNCIÓN: hay lecciones cuyo botón correcto depende del nivel (en Luz Roja, el hueco del
+  //   muro alterna de lado, así que señalar ◀ siempre te mandaba contra el muro). Se reevalúa cada frame y, si el
+  //   botón bueno cambia, la mano vuelve a salir (aunque ya hubieras tocado el anterior).
+  const resolveTarget = () => { const t = typeof targetSrc === 'function' ? targetSrc() : targetSrc; return t || null; };
 
   // DOS cosas distintas, a propósito:
   //   · el mundo se descongela con CUALQUIER interacción (tap donde sea o tecla). Es la red de seguridad: nunca
@@ -83,6 +88,8 @@ export function createCoach(cfg){
   addEventListener('keydown', acted, true);
 
   function place(){
+    const nt = resolveTarget();
+    if(nt !== target){ target = nt; cueHidden = false; }
     const t = target && document.getElementById(target);
     const r = t ? t.getBoundingClientRect() : null;
     if(r && r.width > 0){
@@ -105,8 +112,9 @@ export function createCoach(cfg){
   }
 
   function showStep(i){
-    si = i; const s = steps[i]; target = s.target || null; cueHidden = false; lingerT = 0;
-    if(s.enter) s.enter();
+    si = i; const s = steps[i]; cueHidden = false; lingerT = 0;
+    if(s.enter) s.enter();                     // primero enter() (puede fijar el estado que decide el botón), luego el target
+    targetSrc = s.target || null; target = resolveTarget();
     bn.style.display = 'block';
     bn.innerHTML = '<span class="cnum">' + (i+1) + '/' + steps.length + '</span>' + L().steps[i];
     paused = !!s.pause && !!target;
