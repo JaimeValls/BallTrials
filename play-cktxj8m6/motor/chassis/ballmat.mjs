@@ -116,6 +116,31 @@ export function ballMaterial(col, look = LOOK){
 }
 
 // Pisa los ajustes de look de UN material ya creado (lo usa el lab _look.html en vivo).
+//+AG doc 41 bloque G: MATERIAL POR BOLA-HEROE. Que tu Volcan se reconozca EN PISTA, no solo en el menu.
+//  Por que el material y no el color: en carrera el color lo manda tu EQUIPO/slot, no el heroe. Si la
+//  identidad dependiera del color, en pista dejarias de ser Volcan. El material sobrevive al recoloreado
+//  (es la palanca fuerte de la formula del doc 41: material > cara > prop > efecto > color).
+//  Cada entrada es un DELTA sobre LOOK, no un look entero: si mañana se recalibra el look de marca en
+//  _look.html, estas heredan la mejora en vez de quedarse congeladas en los valores de hoy.
+//  satFloor NO se toca en ninguna: es la salvaguarda anti-lavado y bajarla es justo el fallo que el
+//  shader existe para evitar. La translucidez de Burbuja/Fantasma sale de shade/rim/edge, no de desaturar.
+export const ARCH_LOOK = {
+  cohete:  { spec: 0.92, specHard: 0.95, edge: 0.30 },                                            // vinilo pulido, aeronautico
+  tanque:  { spec: 0.62, specHard: 0.80, specSize: 0.34, rim: 0.92, shade: 0.58 },                // placa de vinilo: brillo ancho y contorno fuerte
+  chispa:  { spec: 0.90, specSize: 0.24, spec2: 0.85, glow: 0.42 },                               // cargada: chispa nitida y brillo propio
+  pinball: { spec: 1.00, specHard: 1.00, specSize: 0.20, spec2: 0.95, edge: 0.42 },               // laca espejo: highlight diminuto y durisimo
+  lapa:    { spec: 0.22, specHard: 0.35, specSize: 0.50, spec2: 0.10, edge: 0.10, shade: 0.62 },  // goma MATE: practicamente sin brillo
+  burbuja: { shade: 0.30, rim: 0.45, edge: 0.55, spec: 0.95, specHard: 0.55, specSize: 0.45, glow: 0.34 },   // jabon: cuerpo tenue, borde luminoso
+  meteoro: { spec: 0.26, specHard: 0.45, shade: 0.90, rim: 0.98, glow: 0.08 },                    // roca APAGADA y oscura. El poco glow es deliberado: separa a Meteoro de Volcan, que es el fundido
+  bunker:  { spec: 0.18, specHard: 0.30, spec2: 0.08, edge: 0.08, shade: 0.70, rim: 0.98 },       // hormigon: cero brillo, contorno duro
+  volcan:  { glow: 0.70, shade: 0.60, rim: 0.86, spec: 0.45, specHard: 0.65 },                    // FUNDIDO: brilla desde dentro. Es lo que lo separa de Meteoro (misma idea, distinta temperatura)
+  yunque:  { spec: 0.60, specHard: 0.92, specSize: 0.18, edge: 0.50, shade: 0.72, rim: 0.95, bounce: 0.22 }, // hierro forjado
+  fantasma:{ shade: 0.25, rim: 0.35, edge: 0.60, spec: 0.70, specHard: 0.40, specSize: 0.55, glow: 0.40 },   // eterea: casi sin cuerpo, borde que la dibuja
+  estrella:{ spec: 1.00, specHard: 0.94, specSize: 0.26, spec2: 1.00, edge: 0.45, glow: 0.38, bounce: 0.20 },// oro pulido de marca
+};
+// Devuelve el LOOK completo de un arquetipo, o null si no lo conoce (=> el llamante usa el de siempre).
+export const archLook = (k) => (k && ARCH_LOOK[k]) ? Object.assign({}, LOOK, ARCH_LOOK[k]) : null;
+
 export function applyLook(mat, look){
   const u = mat.uniforms; if (!u || !u.uShade) return;
   u.uShade.value = look.shade; u.uRim.value = look.rim; u.uRimW.value = look.rimW;

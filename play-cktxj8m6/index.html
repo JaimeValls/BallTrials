@@ -2702,7 +2702,11 @@ function modeEmbedUrl(mode, fmt){
   //+AG doc 39 abierto #1 (VB Jaime 2026-07-24): los ATRIBUTOS EFECTIVOS de la bola equipada modulan la física del
   //   jugador (efecto SUTIL). Solo en INDIVIDUAL: el perfil de EQUIPOS = torneo/vídeo del motor y queda byte-idéntico
   //   (no se le manda &stats). El motor lee ?stats SOLO en su perfil individual y SOLO para balls[0] (doble candado).
-  if(fmt!=='equipos'){ const eb=equippedBall(); if(eb) u += '&stats=' + attrsOf(eb).join(','); }
+  //+AG doc 41 bloque G: y su MATERIAL. Misma puerta y mismo doble candado que &stats — el torneo/vídeo
+  //   no lo recibe, y el motor solo lo aplica a balls[0] en individual. Diferencia clave: &stats toca la
+  //   física (por eso hubo que medir su presupuesto de justicia); &arch es 100% cosmético y no puede
+  //   mover el balance, así que no necesita presupuesto ninguno.
+  if(fmt!=='equipos'){ const eb=equippedBall(); if(eb) u += '&stats=' + attrsOf(eb).join(',') + '&arch=' + encodeURIComponent(eb.arch); }
   return u;
 }
 function startRace(mode, fmt){

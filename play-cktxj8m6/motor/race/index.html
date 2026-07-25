@@ -184,6 +184,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <script type="module">
 import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createItemPops, createBloom, frameOrtho, buildHud, updateHud } from '../chassis/gfx.mjs';
+import { archLook } from '../chassis/ballmat.mjs';   //+AG doc 41 bloque G: material de la bola-heroe
 import { attachSquash } from '../chassis/squash.mjs';
 import { Sim, RNG, TEAMS, SHORT_COLORS, BALL_R, WIDTH, GATE_Y, GATE_H, TOP, FPS,
          DIR, N_BALLS, CAM_SCALE, ASPA_R, ASPA_THICK, PLAT_HW, PLAT_HH } from './sim.js';   //+AG extras de la capa de agencia
@@ -452,7 +453,7 @@ function buildSim(s){
   quakeUntil=-999; if(bgEl) bgEl.classList.remove('quake');
   if(ballObjs) ballObjs.forEach(o=>scene.remove(o.g));
   // VINILO v2: vRef = VTERM (16 u/s, cap de caida): el estirado llega a tope en caida terminal
-  ballObjs=sim.balls.map(b=>attachSquash(makeBallVinyl(scene,b,BALL_R), { R:BALL_R, vRef:16, wind, stars }));
+  ballObjs=sim.balls.map((b,i)=>attachSquash(makeBallVinyl(scene,b,BALL_R, i===0?ARCH_LOOK_P:null), { R:BALL_R, vRef:16, wind, stars }));
   buildMapMeshes();
   document.getElementById('meta').textContent=A().meta(s, TOP|0);   //+AG texto por idioma (AUX)
   document.getElementById('status').textContent='';
@@ -806,6 +807,10 @@ if(TUTORIAL && indOpts) indOpts.tutorial=true;
 //   física del jugador (balls[0]) en la Sim. Solo se aplica en INDIVIDUAL; ausente o mal formado = neutro (no-op).
 //   El torneo (fmt=team) no es INDIVIDUAL → aunque llegara ?stats no se lee (byte-idéntico garantizado en la Sim).
 if(indOpts){ const _s=(params.get('stats')||'').split(',').map(Number); if(_s.length===6 && _s.every(v=>isFinite(v))) indOpts.stats=_s; }
+//+AG doc 41 bloque G: ?arch=<clave> (la bola-heroe equipada) -> su MATERIAL solo para balls[0].
+//   Misma regla que ?stats: solo INDIVIDUAL, y ausente o desconocido = null = el look de siempre.
+//   Es 100% cosmetico: no toca la Sim, asi que no puede mover el balance ni un milimetro.
+const ARCH_LOOK_P = INDIVIDUAL ? archLook(params.get('arch')) : null;
 const PAL = INDIVIDUAL ? SHORT_COLORS : TEAMS;   // paleta ACTIVA (color por índice de "equipo": 4 torneo · 8 individual)
 const NT  = INDIVIDUAL ? 8 : 4;                  // nº de "equipos"/colores
 const NB  = INDIVIDUAL ? 8 : N_BALLS;            // nº de bolas (8 individual · 12 torneo)

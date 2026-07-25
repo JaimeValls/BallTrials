@@ -203,10 +203,12 @@ export function makeBall(scene, b, BALL_R){
 // MISMO contrato de retorno que makeBall (drop-in). La usan los modos migrados; makeBall (gominola
 // MeshStandard + cara sprite) queda para los modos aun sin migrar. Fase de FX por dorsal: caras
 // desincronizadas entre bolas y DETERMINISTAS (nada de Math.random aqui).
-export function makeBallVinyl(scene, b, BALL_R){
+//+AG doc 41 bloque G: 4o parametro OPCIONAL 'look' = material de la bola-heroe (ballmat.ARCH_LOOK).
+//   Sin el, ballMaterial usa LOOK y todo queda byte-identico: el torneo y el video no cambian ni un pixel.
+export function makeBallVinyl(scene, b, BALL_R, look){
   const g = new THREE.Group();
   const col = sat(b.color);
-  const mat = ballMaterial(col);
+  const mat = ballMaterial(col, look || undefined);
   const body = new THREE.Mesh(new THREE.SphereGeometry(BALL_R, 40, 28), mat); g.add(body);
   const face = makeFaceRig(BALL_R, (b.id || 0) * 1.7); g.add(face.plane);
   scene.add(g);

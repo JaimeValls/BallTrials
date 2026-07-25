@@ -205,6 +205,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <script type="module">
 import { THREE, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createBloom, frameOrtho, BLOOM } from '../chassis/gfx.mjs';
+import { archLook } from '../chassis/ballmat.mjs';   //+AG doc 41 bloque G: material de la bola-heroe
 import { attachSquash } from '../chassis/squash.mjs';
 import { createCelebration } from '../chassis/celebration.mjs';
 import { createKillfeed } from '../chassis/killfeed.mjs';
@@ -246,6 +247,10 @@ const shortOpts = SHORT_ON ? { individual: true, n: (_shN === 6 ? 6 : 8) } : nul
 //+AG doc 39 abierto #1: ?stats=v,a,p,g,r,b (6 atributos EFECTIVOS de la bola equipada) → modificador SUTIL de física
 //   del jugador (balls[0]). Solo en INDIVIDUAL; ausente/mal formado = neutro. El torneo (fmt=team) no lo lee.
 if(shortOpts){ const _s=(_q0.get('stats')||'').split(',').map(Number); if(_s.length===6 && _s.every(v=>isFinite(v))) shortOpts.stats=_s; }
+//+AG doc 41 bloque G: ?arch=<clave> (la bola-heroe equipada) -> su MATERIAL solo para balls[0].
+//   Misma regla que ?stats: solo en INDIVIDUAL, y ausente o desconocido = null = el look de siempre.
+//   Es 100% cosmetico: no toca la Sim, asi que no puede mover el balance ni un milimetro.
+const ARCH_LOOK_P = shortOpts ? archLook(_q0.get('arch')) : null;
 //+AG CÓMO JUGAR (tutorial): ?tutorial=1 → nivel sin peligro (la Sim vacía minas/boulders, desarma al francotirador
 //   y deja a los bots de figurantes con opts.tutorial) + COACH de pasos al final del script. Solo perfil individual.
 const TUTORIAL = _q0.get('tutorial')==='1';
@@ -609,7 +614,7 @@ function buildSim(s){
   px=sim.balls.map(b=>b.x); py=sim.balls.map(b=>b.y);
   prevBoulderX=sim.geo.boulders.map((_,i)=>sim.boulderX(i));
   if(ballObjs) ballObjs.forEach(o=>scene.remove(o.g));
-  ballObjs=sim.balls.map(b=>attachSquash(makeBallVinyl(scene,b,BALL_RV), { R:BALL_RV, vRef:12, wind, stars }));
+  ballObjs=sim.balls.map((b,i)=>attachSquash(makeBallVinyl(scene,b,BALL_RV, i===0?ARCH_LOOK_P:null), { R:BALL_RV, vRef:12, wind, stars }));
   if(auraM.length) auraM.forEach(a=>scene.remove(a));   // AURA de protección: una por bola, reciclada por ronda
   auraM=sim.balls.map(()=>{ const a=auraMesh(); scene.add(a); return a; });
   if(shieldM.length) shieldM.forEach(s=>scene.remove(s));   // ESCUDO: uno por bola, reciclado por ronda (mismo patrón que el aura)

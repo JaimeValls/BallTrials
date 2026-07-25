@@ -156,6 +156,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <script type="module">
 import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, makeFacePlane, createItemPool, createItemPops, createStarBurst, createWindTrail, createBloom, frameOrtho } from '../chassis/gfx.mjs';
+import { archLook } from '../chassis/ballmat.mjs';   //+AG doc 41 bloque G: material de la bola-heroe
 import { attachSquash } from '../chassis/squash.mjs';
 import { Sim, RNG, TEAMS, BALL_R, ARENA_W, ARENA_H, FPS } from './sim.js';
 import { EmoBook, PRIO } from '../chassis/emotions.mjs';
@@ -313,7 +314,7 @@ function buildSim(s){
   emo=new EmoBook(sim.balls.length, s);
   if(ballObjs) ballObjs.forEach(o=>scene.remove(o.g));
   if(orbMeshes) orbMeshes.forEach(m=>itemPool.release(m));
-  ballObjs=sim.balls.map(b=>attachSquash(makeBallVinyl(scene,b,BALL_R), { R:BALL_R, vRef:12, wind, stars }));   // VINILO v2; el CAZADOR conserva su cara de depredador (makeFacePlane)
+  ballObjs=sim.balls.map((b,i)=>attachSquash(makeBallVinyl(scene,b,BALL_R, i===0?ARCH_LOOK_P:null), { R:BALL_R, vRef:12, wind, stars }));   // VINILO v2; el CAZADOR conserva su cara de depredador (makeFacePlane)
   orbMeshes=new Map(); celCam=null;
   if(stains.length){ stains.forEach(m=>{ scene.remove(m); m.material.dispose(); }); stains=[]; }   // limpiar manchas de la ronda anterior
   flashUntil=-1; if(flashEl) flashEl.style.opacity='0';
@@ -745,6 +746,10 @@ if(params.get('short')==='1' || _shN===6 || _shN===8){ shortOpts={ individual:tr
 //+AG doc 39 abierto #1: ?stats=v,a,p,g,r,b (6 atributos EFECTIVOS de la bola equipada) → modificador SUTIL de física
 //   del jugador (balls[0]). Solo en INDIVIDUAL; ausente/mal formado = neutro. El torneo no es individual → no lo lee.
 if(shortOpts.individual){ const _s=(params.get('stats')||'').split(',').map(Number); if(_s.length===6 && _s.every(v=>isFinite(v))) shortOpts.stats=_s; }
+//+AG doc 41 bloque G: ?arch=<clave> (la bola-heroe equipada) -> su MATERIAL solo para balls[0].
+//   Misma regla que ?stats: solo en INDIVIDUAL, y ausente o desconocido = null = el look de siempre.
+//   Es 100% cosmetico: no toca la Sim, asi que no puede mover el balance ni un milimetro.
+const ARCH_LOOK_P = shortOpts.individual ? archLook(params.get('arch')) : null;
 //+AG CÓMO JUGAR (tutorial): ?tutorial=1 → depredador dormido y sin reloj (opts.tutorial en la Sim) + COACH de
 //   pasos al final del script. Fuerza el perfil individual (el embed pelado de cazador es el torneo 4×3).
 const TUTORIAL = params.get('tutorial')==='1';

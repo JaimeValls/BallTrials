@@ -1,0 +1,65 @@
+<!doctype html><meta charset="utf-8">
+<title>BallTrials · banco de materiales por bola-héroe (doc 41 bloque G)</title>
+<!--
+  Para JUZGAR si el material por bola se distingue DE VERDAD, y a los dos tamaños que importan:
+  el de partida (~56 px, que es como se ve en el móvil) y grande (para ver qué está pasando).
+  Regla de la casa: esto no se decide a ojo desde una captura de la carrera, donde la bola es
+  minúscula y está en movimiento. Aquí están las 12 quietas, con el MISMO color de equipo, que
+  es justo la condición real: en pista el color lo manda tu slot, no el héroe.
+  Uso: abrir con el server (node prototipo/serve.mjs) en /motor/_lookcheck.html
+-->
+<style>
+  body{margin:0;background:#241159;color:#eef2ff;font:14px/1.4 "Segoe UI",system-ui,sans-serif;padding:16px}
+  h2{font-size:15px;margin:18px 0 8px;font-weight:700;color:#ffd23f}
+  .row{display:flex;flex-wrap:wrap;gap:10px}
+  .c{text-align:center}
+  .c small{display:block;margin-top:4px;opacity:.75;font-size:11px}
+  canvas{display:block;border-radius:8px;background:#1a0d45}
+</style>
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+               "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }
+</script>
+<h2 id="t1"></h2><div class="row" id="big"></div>
+<h2 id="t2"></h2><div class="row" id="small"></div>
+<script type="module">
+import * as THREE from 'three';
+import { ballMaterial, LOOK, ARCH_LOOK, archLook } from './chassis/ballmat.mjs';
+
+const KEYS = ['(base)', ...Object.keys(ARCH_LOOK)];
+// color de EQUIPO fijo para todas: es la condición real de pista, y prueba que la identidad
+// no depende del color (docs/28 delta nº2).
+const TEAM = [0.910, 0.212, 0.184];
+
+// UN SOLO renderer para las 26 celdas y se copia a <img>. Con un WebGLRenderer por celda, Chromium
+// pasa de ~16 contextos vivos, tira los mas viejos y la mitad de la tabla sale EN BLANCO — que es
+// justo el fallo que hace que un banco de pruebas mienta.
+const R = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+R.setPixelRatio(2); R.setClearColor(0x1a0d45, 1);
+const SC = new THREE.Scene();
+const CAM = new THREE.OrthographicCamera(-1.15, 1.15, 1.15, -1.15, 0.1, 100); CAM.position.set(0, 0, 10);
+const GEO = new THREE.SphereGeometry(1, 48, 32);
+let mesh = null;
+function render(key, px){
+  R.setSize(px, px, false);
+  if (mesh){ SC.remove(mesh); mesh.material.dispose(); }
+  const look = key === '(base)' ? LOOK : archLook(key);
+  mesh = new THREE.Mesh(GEO, ballMaterial(TEAM, look));
+  SC.add(mesh); R.render(SC, CAM);
+  const img = new Image(); img.width = px; img.height = px;
+  img.style.cssText = 'display:block;border-radius:8px';
+  img.src = R.domElement.toDataURL();
+  return img;
+}
+for (const [host, px, title] of [['big', 190, 'GRANDE — para ver qué hace cada material'],
+                                 ['small', 56, 'TAMAÑO DE PARTIDA (~56 px) — el que decide']]){
+  document.getElementById(host === 'big' ? 't1' : 't2').textContent = title;
+  const box = document.getElementById(host);
+  for (const k of KEYS){
+    const d = document.createElement('div'); d.className = 'c';
+    d.appendChild(render(k, px));
+    const s = document.createElement('small'); s.textContent = k; d.appendChild(s);
+    box.appendChild(d);
+  }
+}
+</script>
