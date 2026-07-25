@@ -453,7 +453,7 @@ function buildSim(s){
   quakeUntil=-999; if(bgEl) bgEl.classList.remove('quake');
   if(ballObjs) ballObjs.forEach(o=>scene.remove(o.g));
   // VINILO v2: vRef = VTERM (16 u/s, cap de caida): el estirado llega a tope en caida terminal
-  ballObjs=sim.balls.map((b,i)=>attachSquash(makeBallVinyl(scene,b,BALL_R, i===0?ARCH_LOOK_P:null), { R:BALL_R, vRef:16, wind, stars }));
+  ballObjs=sim.balls.map((b,i)=>attachSquash(makeBallVinyl(scene,b,BALL_R, i===0?ARCH_LOOK_P:null, i===0?ARCH_KEY_P:null), { R:BALL_R, vRef:16, wind, stars }));
   buildMapMeshes();
   document.getElementById('meta').textContent=A().meta(s, TOP|0);   //+AG texto por idioma (AUX)
   document.getElementById('status').textContent='';
@@ -811,6 +811,7 @@ if(indOpts){ const _s=(params.get('stats')||'').split(',').map(Number); if(_s.le
 //   Misma regla que ?stats: solo INDIVIDUAL, y ausente o desconocido = null = el look de siempre.
 //   Es 100% cosmetico: no toca la Sim, asi que no puede mover el balance ni un milimetro.
 const ARCH_LOOK_P = INDIVIDUAL ? archLook(params.get('arch')) : null;
+const ARCH_KEY_P  = ARCH_LOOK_P ? params.get('arch') : null;   //+AG el prop pasa por la MISMA puerta que el material
 const PAL = INDIVIDUAL ? SHORT_COLORS : TEAMS;   // paleta ACTIVA (color por índice de "equipo": 4 torneo · 8 individual)
 const NT  = INDIVIDUAL ? 8 : 4;                  // nº de "equipos"/colores
 const NB  = INDIVIDUAL ? 8 : N_BALLS;            // nº de bolas (8 individual · 12 torneo)

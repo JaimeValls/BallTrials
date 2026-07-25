@@ -251,6 +251,7 @@ if(shortOpts){ const _s=(_q0.get('stats')||'').split(',').map(Number); if(_s.len
 //   Misma regla que ?stats: solo en INDIVIDUAL, y ausente o desconocido = null = el look de siempre.
 //   Es 100% cosmetico: no toca la Sim, asi que no puede mover el balance ni un milimetro.
 const ARCH_LOOK_P = shortOpts ? archLook(_q0.get('arch')) : null;
+const ARCH_KEY_P  = ARCH_LOOK_P ? _q0.get('arch') : null;   //+AG el prop pasa por la MISMA puerta que el material
 //+AG CÓMO JUGAR (tutorial): ?tutorial=1 → nivel sin peligro (la Sim vacía minas/boulders, desarma al francotirador
 //   y deja a los bots de figurantes con opts.tutorial) + COACH de pasos al final del script. Solo perfil individual.
 const TUTORIAL = _q0.get('tutorial')==='1';
@@ -614,7 +615,7 @@ function buildSim(s){
   px=sim.balls.map(b=>b.x); py=sim.balls.map(b=>b.y);
   prevBoulderX=sim.geo.boulders.map((_,i)=>sim.boulderX(i));
   if(ballObjs) ballObjs.forEach(o=>scene.remove(o.g));
-  ballObjs=sim.balls.map((b,i)=>attachSquash(makeBallVinyl(scene,b,BALL_RV, i===0?ARCH_LOOK_P:null), { R:BALL_RV, vRef:12, wind, stars }));
+  ballObjs=sim.balls.map((b,i)=>attachSquash(makeBallVinyl(scene,b,BALL_RV, i===0?ARCH_LOOK_P:null, i===0?ARCH_KEY_P:null), { R:BALL_RV, vRef:12, wind, stars }));
   if(auraM.length) auraM.forEach(a=>scene.remove(a));   // AURA de protección: una por bola, reciclada por ronda
   auraM=sim.balls.map(()=>{ const a=auraMesh(); scene.add(a); return a; });
   if(shieldM.length) shieldM.forEach(s=>scene.remove(s));   // ESCUDO: uno por bola, reciclado por ronda (mismo patrón que el aura)

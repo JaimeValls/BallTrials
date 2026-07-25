@@ -12,6 +12,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { faceTexture, hunterTexture, faceLayers, PRESETS as FACE_PRESETS } from './facegen.mjs';
 import { itemTexture } from './itemgen.mjs';
 import { ballMaterial } from './ballmat.mjs';
+import { makeProp } from './propgen.mjs';   //+AG doc 41 bloque G: prop de la bola-heroe
 
 export { THREE };
 export const BLOOM = 1; // capa de bloom: SOLO partículas/orbes/ondas/retícula la activan
@@ -205,11 +206,15 @@ export function makeBall(scene, b, BALL_R){
 // desincronizadas entre bolas y DETERMINISTAS (nada de Math.random aqui).
 //+AG doc 41 bloque G: 4o parametro OPCIONAL 'look' = material de la bola-heroe (ballmat.ARCH_LOOK).
 //   Sin el, ballMaterial usa LOOK y todo queda byte-identico: el torneo y el video no cambian ni un pixel.
-export function makeBallVinyl(scene, b, BALL_R, look){
+export function makeBallVinyl(scene, b, BALL_R, look, arch){
   const g = new THREE.Group();
   const col = sat(b.color);
   const mat = ballMaterial(col, look || undefined);
   const body = new THREE.Mesh(new THREE.SphereGeometry(BALL_R, 40, 28), mat); g.add(body);
+  //+AG doc 41 bloque G (2a tajada): el PROP cuelga del GRUPO, no del cuerpo. attachSquash escala
+  //   body y le gira body.rotation.z con el rumbo; al grupo solo le toca el tilt. Asi el prop se
+  //   ladea con la bola como un personaje pero ni se deforma ni RUEDA (un casco rodando canta).
+  if (arch){ const p = makeProp(arch, BALL_R, col); if (p) g.add(p); }
   const face = makeFaceRig(BALL_R, (b.id || 0) * 1.7); g.add(face.plane);
   scene.add(g);
   const noop = { set(){} };
