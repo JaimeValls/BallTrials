@@ -31,12 +31,32 @@ export function createWebAudio({ musicUrl = null, musicGain = 0.30, sfxGain = 0.
     } catch (e){ console.warn('música no disponible:', e?.message || e); return null; }
   }
 
-  // gesto del usuario: crea/reanuda el AudioContext y carga la música (espera al decode → el 1er play ya la lleva).
-  async function unlock(){
+  //+AG PREFETCH sin gesto: crear el AudioContext y DECODIFICAR la música no requieren interacción (el contexto
+  //   nace 'suspended' y ahí se queda). Se llama al cargar la página para que en el "¡YA!" la música ya esté
+  //   decodificada: son pistas de 1,5–3 MB y en móvil el decode no cabe en los ~4 s de la cuenta atrás.
+  function prefetch(){
     ensureCtx();
-    if (ctx.state === 'suspended'){ try { await ctx.resume(); } catch {} }
+    if (musicUrl && !musicBuf && !loadingMusic) loadingMusic = loadMusic(musicUrl);
+    return loadingMusic;
+  }
+
+  //+AG CAMINO CORTO del gesto: solo reanuda el AudioContext, sin esperar al decode de la música. Lo usa el cartel
+  //   de "¡LISTO!" (chassis/arranque.mjs) porque su beep de confirmación tiene que sonar EN EL MISMO TAP: si
+  //   esperase a la música (megas de mp3) el jugador tocaría y no oiría nada, que es justo lo que veníamos a arreglar.
+  async function resume(){
+    ensureCtx();
+    //+AG unlocked se marca ANTES del await, a propósito: el cartel de "¡LISTO!" no espera esta promesa (hay
+    //   navegadores donde ctx.resume() se queda pendiente para siempre si no le gusta el gesto, y el juego JAMÁS
+    //   puede quedarse sin arrancar por el audio). Lo que se programe mientras siga 'suspended' suena al reanudar.
     unlocked = true;
     if (musicUrl && !musicBuf && !loadingMusic) loadingMusic = loadMusic(musicUrl);
+    if (ctx.state === 'suspended'){ try { await ctx.resume(); } catch {} }
+    return unlocked;
+  }
+
+  // gesto del usuario: crea/reanuda el AudioContext y carga la música (espera al decode → el 1er play ya la lleva).
+  async function unlock(){
+    await resume();
     if (loadingMusic) await loadingMusic;
     return unlocked;
   }
@@ -75,7 +95,7 @@ export function createWebAudio({ musicUrl = null, musicGain = 0.30, sfxGain = 0.
   }
 
   return {
-    unlock, start, stop, loadMusic, setMusicGain, musicGain,
+    unlock, resume, prefetch, start, stop, loadMusic, setMusicGain, musicGain,
     get unlocked(){ return unlocked; },
     get hasMusic(){ return !!musicBuf; },
     get ctx(){ return ctx; },

@@ -175,6 +175,10 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 </div>
 <div id="err">The 3D modules failed to load from the CDN. Open this with internet access.</div>
 
+<!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
+     juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
+<script src="../../arte/modeicons-vendored.js"></script>
+
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -194,6 +198,7 @@ import { createWebAudio } from '../chassis/webaudio.mjs';
 import { buildSfxBuffer } from './sfxmap.mjs';
 import { runToEnd } from '../chassis/simrun.mjs';
 import { createCoach } from '../chassis/coach.mjs';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
 
 window.addEventListener('error', e => { document.getElementById('err').style.display='grid'; console.error(e.error||e.message); });
 
@@ -347,7 +352,11 @@ let pegFx=null, quakeUntil=-999;   // look nuevo: flash de peg por impacto + ven
 //+AG estado de la capa de agencia: meshes vivos de aspas/plataformas + snapshots para interpolar (patron px/py),
 //   fase de partida (menu/intro/play, patron cazador), jingle de victoria una sola vez, throttle de bump en vivo.
 let aspaMs=[], platMs=[], prevAspaU=[], prevPlatX=[];
-let phase='menu', introT=0, introRingT=-1; const INTRO_DUR=3.6;
+//+AG CUENTA ATRÁS (feedback Jaime 2026-07-26: "la intro tiene que ser un poquito más lenta"): 3 cifras a 1,15 s
+//   (antes 1,00) = 3,45 s, y el "¡YA!" ya NO congela la sim: se pinta encima de la partida en marcha (patrón Brawl
+//   Stars) durante GO_HOLD. DIGITS/DIGIT los comparten los números y los beeps de chassis/arranque.mjs: una sola cuenta.
+const DIGITS=3, DIGIT=1.15, GO_HOLD=550;
+let phase='menu', introT=0, introRingT=-1; const INTRO_DUR=DIGITS*DIGIT;
 //+AG tutorial v2: el COACH congela el mundo mientras pide una acción (el jugador lee sin que pasen cosas) y lo
 //   suelta en cuanto toca. Solo lo activa el coach (?tutorial=1); en partida normal es false y el bucle va igual.
 let coachPaused=false;
@@ -725,11 +734,17 @@ function introUI(t){
   const c=document.getElementById('count'), n=document.getElementById('countN'), p=sim.balls[0];
   c.classList.add('show'); document.getElementById('countYou').textContent=T().youIntro;
   if(t-introRingT>0.42){ introRingT=t; P.ring(p.x,p.y,[1,1,1],1.3); P.ring(p.x,p.y,[0.33,0.85,1.0],0.95); }   // onda "este eres tu"
-  if(t<3){ const cur=3-Math.floor(t), frac=t-Math.floor(t);
+  if(t<DIGITS*DIGIT){ const cur=DIGITS-Math.floor(t/DIGIT), frac=(t%DIGIT)/DIGIT;
     n.textContent=String(cur); n.style.color='#fff';
     n.style.transform=`scale(${(1+0.45*(1-frac)).toFixed(2)})`; n.style.opacity=(0.5+0.5*(1-frac)).toFixed(2); }
-  else { n.textContent=T().go; n.style.color='#7cff9a'; n.style.transform='scale(1)'; n.style.opacity='1'; }
+  else goFlash();
 }
+//+AG el "¡YA!" se pinta y la ronda arranca EN EL MISMO FRAME: el cartel se queda GO_HOLD ms encima del juego ya
+//   en marcha, en vez de robarle ese tiempo a la partida con la sim congelada.
+function goFlash(){ const n=document.getElementById('countN');
+  n.textContent=T().go; n.style.color='#7cff9a'; n.style.transform='scale(1)'; n.style.opacity='1';
+  clearTimeout(goT); goT=setTimeout(()=>document.getElementById('count').classList.remove('show'), GO_HOLD); }
+let goT=0;
 function loop(){
   const dt=Math.min(clock.getDelta(),0.05);
   //+AG fases de agencia: menu (overlay encima, escena viva detras) e intro (cuenta atras, sim EN PAUSA)
@@ -738,7 +753,7 @@ function loop(){
     if(phase==='intro'){ introT+=dt; introCamera(introT); introUI(introT); }
     else frameCamera(dt,1);
     bloom.renderScene(); updateHUD();
-    if(phase==='intro' && introT>=INTRO_DUR){ phase='play'; acc=0; clock.getDelta(); document.getElementById('count').classList.remove('show'); startAudio(); }
+    if(phase==='intro' && introT>=INTRO_DUR){ phase='play'; acc=0; clock.getDelta(); goFlash(); startAudio(); }
     requestAnimationFrame(loop); return;
   }
   acc+=dt; const STEP=1/FPS; let steps=0;
@@ -928,6 +943,9 @@ const AUX={
 };
 const A=()=>AUX[LANG]||AUX.en;
 let LANG='en', ovState='intro', lastPlace=0, teamPlace=0, winnerTeam=0, myTeam=0;
+//+AG se declaran AQUÍ (y se construyen más abajo, cuando ya existe startRound) porque applyLang los repinta y
+//   applyLang se llama durante el arranque del módulo: con const/let declarado después daría ReferenceError.
+let arranque=null, banner=null;
 const T=()=>I18N[LANG]||I18N.en;
 //+AG clasificación de EQUIPOS al terminar: done (nº de bolas en meta) manda; empate → el que completó antes; luego progreso.
 function teamStandings(){
@@ -984,6 +1002,7 @@ function applyLang(l){ LANG=I18N[l]?l:'en'; const t=T(); el('lang').value=LANG;
   el('hudName').textContent=a.hud(t.name); el('keys').innerHTML=a.keys; el('err').textContent=a.err;
   const sb=el('snd'); if(sb) sb.title=a.sound;
   if(sim) el('meta').textContent=a.meta(seed, TOP|0);
+  if(arranque) arranque.refresh(); if(banner) banner.refresh();   //+AG el cartel de arranque y la banda del modo también viven en el idioma del shell
   renderOverlay(); if(sim) updateHUD();
 }
 (function(){ const sel=el('lang'); for(const k in LANGS){ const o=document.createElement('option'); o.value=k; o.textContent=LANGS[k]; sel.appendChild(o); }
@@ -1015,7 +1034,10 @@ function updateHUD(){ if(!sim) return; const t=T(), place=sim.playerPlace(), p=s
   for(const k in dirBtns) dirBtns[k].classList.toggle('on',+k===p.dir);
 }
 function startRound(){ seed=newSeed(); buildSim(seed); el('ov').classList.add('hide');
-  phase='intro'; introT=0; introRingT=-1; el('count').classList.add('show'); }
+  phase='intro'; introT=0; introRingT=-1; clearTimeout(goT); el('count').classList.add('show');
+  //+AG los beeps se programan DE UNA VEZ con la misma cuenta que pintan los números (DIGITS/DIGIT), así caen
+  //   clavados aunque un frame se retrase. Si el audio no está desbloqueado (nadie tocó "¡LISTO!") no suena nada.
+  if(sfxOn && audio.unlocked) sfxCountdown(audio, { digits:DIGITS, digitDur:DIGIT, goAt:INTRO_DUR }); }
 function showEnd(){
   if(TUTORIAL) return;   //+AG tutorial: ni matchEnd ni cartel de fin; el COACH cierra con bt:tutorialEnd
   lastPlace=sim.player.rank||sim.playerPlace();
@@ -1037,15 +1059,33 @@ function showEnd(){
   ovState='end'; renderOverlay(); el('ov').classList.remove('hide'); }
 el('ovBtn').onclick=startRound;
 
+//+AG ARRANQUE (chassis/arranque.mjs) — SOLO EN EMBED, o sea en el juego de verdad:
+//   · sustituye a la portada #ov, que en el juego era una pantalla MUERTA (un segundo "Jugar" y un selector de
+//     idioma que el shell ya había resuelto en Ajustes; feedback Jaime 2026-07-26).
+//   · pone el tap que desbloquea el audio ANTES de la cuenta atrás (que hasta hoy era muda siempre).
+//   En standalone la portada se queda tal cual: es la herramienta de vídeo/preview y ahí sí se elige idioma.
+if(EMBED){
+  arranque = createArranque({
+    mode:'race', lang:()=>LANG, audio, sfxOn:()=>sfxOn,
+    title:()=>T().name,                     // la Carrera ya tiene su nombre en los 9 idiomas
+    autoSec: TUTORIAL ? 0 : 5,              // CÓMO JUGAR: sin reloj, se entra cuando el jugador quiere
+    onStart: ()=> startRound(),
+  });
+  banner = modeBanner({ mode:'race', lang:()=>LANG, title:()=>T().name });
+  audio.prefetch();                         // la música se decodifica desde ya: en el "¡YA!" tiene que estar lista
+}
+
 buildPanels(); layout(); buildSim(seed);
 if(EMBED){ const bm=el('backMenu'); if(bm) bm.style.display='none'; }   //+AG en embed el shell gestiona el volver; se oculta el "← Menu" de esquina
+if(EMBED){ const ls=el('lang'); if(ls) ls.style.display='none'; }       //+AG el idioma lo manda Ajustes del shell: el selector del motor no vuelve a aparecer nunca en el juego
 //+AG en un pane/iframe embebido el viewport puede medir 0 en el load inicial → re-layout al primer frame real
 requestAnimationFrame(()=>{ if(innerWidth>0 && renderer.domElement.width===0) layout(); });
 if(params.get('capture')==='1'){ document.getElementById('hud').style.display='none'; document.querySelector('.keys').style.display='none';
   //+AG en captura no hay jugador: se ocultan los controles/HUD de agencia y la sim corre sola (como el video)
   for(const id of ['ctr','pos','backMenu','youlbl','ov','count']) el(id).style.display='none';
   phase='play'; }
-else { el('ov').classList.remove('hide'); loop(); }   //+AG arranca en el overlay de inicio (menu); Play lanza la cuenta atras
+else if(arranque){ loop(); arranque.show(); }         //+AG el juego (embed): cartel del modo -> ¡LISTO! (o 5 s) -> cuenta atras
+else { el('ov').classList.remove('hide'); loop(); }   //+AG standalone: portada de siempre (herramienta de video/preview)
 
 // ============================================================================
 //+AG COACH "CÓMO JUGAR" (?tutorial=1): la máquina de pasos, el foco, la mano y la pausa viven en chassis/coach.mjs

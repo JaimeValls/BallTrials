@@ -1178,7 +1178,7 @@
     <div class="sc-block" data-sub="mas">
       <div class="sc-h" data-t="prMoveH">Llevar mi partida a otro móvil</div>
       <div class="sc-note" data-th="prMoveNote"></div>
-      <div class="pr-code"><span class="cd" id="prMoveCode">BT-••••-••••</span><button id="prMoveGen" data-t="prMoveGen">Generar código</button></div>
+      <div class="pr-code"><span class="cd" id="prMoveCode">BT-••••-••••</span><button id="prMoveCopy" data-t="prCopy" hidden>Copiar</button><button id="prMoveGen" data-t="prMoveGen">Generar código</button></div>
       <div class="pr-slots" style="gap:7px">
         <input id="prMoveIn" maxlength="14" autocomplete="off" spellcheck="false" placeholder="BT-XXXX-XXXX"
                style="flex:1;min-width:0;background:#101a2c;border:2px solid #2b3d5c;border-radius:11px;color:#eaf1ff;font:700 15px/1 inherit;padding:9px 10px;text-align:center;letter-spacing:1px">
@@ -2186,6 +2186,7 @@ const MORE={
     prMoveOk:'¡Partida traída! Reiniciando…', prMoveGenOk:'Código listo. Apúntalo antes de cerrar.',
     prMoveBad:'Ese código no vale o ya se usó.', prMoveSame:'Ese código es de esta misma partida.',
     prMoveOff:'Sin conexión: inténtalo cuando vuelva la red.', prMoveEmpty:'Escribe el código primero.',
+    prMoveCopied:'✓ Código copiado. Pégalo en el otro móvil.', prMoveCopyManual:'Código seleccionado: mantén pulsado y elige Copiar.',
     prFriendsNote:'Amigos solo por <b>contactos + código</b> (nada de búsqueda abierta ni desconocidos). Rankings entre amigos y piques sanos, <b>sin chat libre</b>.',
     prRefH:'🎁 Invita y gana',
     prRefTx:'<b>Tú y tu amigo</b> ganáis <b>100 ✦</b> + un cosmético de bienvenida cuando se una y juegue. Fijo y con tope anti-granja.',
@@ -2322,6 +2323,7 @@ const MORE={
     prMoveOk:'Game moved! Restarting…', prMoveGenOk:'Code ready. Write it down before closing.',
     prMoveBad:'That code is not valid or was already used.', prMoveSame:'That code belongs to this same game.',
     prMoveOff:'No connection: try again when you are back online.', prMoveEmpty:'Type the code first.',
+    prMoveCopied:'✓ Code copied. Paste it on the other phone.', prMoveCopyManual:'Code selected: long-press and choose Copy.',
     prFriendsNote:'Friends only via <b>contacts + code</b> (no open search, no strangers). Rankings among friends and friendly rivalry, <b>no free chat</b>.',
     prRefH:'🎁 Invite and earn',
     prRefTx:'<b>You and your friend</b> each get <b>100 ✦</b> + a welcome cosmetic when they join and play. Fixed, with an anti-farming cap.',
@@ -3234,18 +3236,57 @@ function openPerfil(){ showScreen('perfil'); applyShell(); el('prChispas').textC
 //   La nube vive en un modulo que carga despues (window.BT_NUBE); si aun no esta o no hay red,
 //   se dice y no pasa nada mas: el juego local sigue igual (Regla 2 de sincro.mjs).
 function wireTraspaso(){
-  const gen=el('prMoveGen'), usa=el('prMoveUse'), inp=el('prMoveIn'), out=el('prMoveCode'), msg=el('prMoveMsg');
+  const gen=el('prMoveGen'), usa=el('prMoveUse'), inp=el('prMoveIn'), out=el('prMoveCode'), msg=el('prMoveMsg'), cop=el('prMoveCopy');
   if(!gen || gen._wired) return; gen._wired=true;
   const di=(t,bien)=>{ msg.innerHTML=t; msg.style.color = bien===undefined ? '' : (bien?'#8fe0a8':'#eb6b6b'); };
   const nube=()=>window.BT_NUBE && window.BT_NUBE.nube;
 
+  //+AG copiar al portapapeles, con las tres vias que hacen falta en moviles de verdad:
+  //   1) navigator.clipboard, que necesita https (lo tenemos) y un gesto reciente;
+  //   2) execCommand sobre una seleccion, para WebViews viejas donde el 1 no existe;
+  //   3) si las dos fallan, se SELECCIONA el codigo para que el "copiar" del sistema
+  //      (mantener pulsado) lo pille, y se avisa al jugador.
+  //   Devuelve true solo si de verdad se copio.
+  async function copiar(t){
+    try{ if(navigator.clipboard && window.isSecureContext){ await navigator.clipboard.writeText(t); return true; } }catch(e){}
+    try{
+      const ta=document.createElement('textarea');
+      ta.value=t; ta.setAttribute('readonly',''); ta.style.cssText='position:fixed;top:-1000px;opacity:0';
+      document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0,t.length);
+      const ok=document.execCommand('copy'); ta.remove();
+      if(ok) return true;
+    }catch(e){}
+    try{ const r=document.createRange(); r.selectNodeContents(out);
+      const s=getSelection(); s.removeAllRanges(); s.addRange(r); }catch(e){}
+    return false;
+  }
+
   gen.onclick=async()=>{
     if(!nube()) return di(S().prMoveOff,false);
     gen.disabled=true; di('…');
-    try{ const c=await nube().crearCodigoTransferencia(); out.textContent=c; di(S().prMoveGenOk,true); }
+    try{
+      const c=await nube().crearCodigoTransferencia();
+      out.textContent=c; cop.hidden=false;
+      //+AG se auto-copia al generarlo: el jugador va a pegarlo en el otro aparato, y teclear
+      //   8 caracteres a mano en un movil es justo donde se abandona. Si el navegador no deja
+      //   copiar sin un toque propio (pasa en algunos iOS al venir de una espera de red), el
+      //   boton Copiar de al lado si funciona, porque ese toque es su propio gesto.
+      di(await copiar(c) ? S().prMoveCopied : S().prMoveGenOk, true);
+    }
     catch(e){ di(S().prMoveOff,false); console.warn('[traspaso] generar', e); }
     finally{ gen.disabled=false; }
   };
+
+  cop.onclick=async()=>{ const c=out.textContent.trim();
+    di(await copiar(c) ? S().prMoveCopied : S().prMoveCopyManual, true); };
+
+  //+AG pegar en el otro movil: se limpia lo que venga (espacios, saltos) y se formatea igual
+  //   que al teclearlo, asi da igual como llegue el codigo.
+  inp.addEventListener('paste', ev=>{
+    const t=(ev.clipboardData||window.clipboardData)?.getData('text')||'';
+    if(!t) return; ev.preventDefault();
+    inp.value=t; inp.dispatchEvent(new Event('input'));
+  });
 
   //+AG teclear BT-XXXX-XXXX en un movil es incomodo: se pone en mayusculas y se mete el guion solo.
   inp.oninput=()=>{ let v=inp.value.toUpperCase().replace(/[^A-Z0-9]/g,'');
