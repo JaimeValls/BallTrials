@@ -3574,3 +3574,52 @@ if(_onbParam==='1' || (FRESH && !SAVE.onboarded && _onbParam!=='0')) startOnboar
     off(){ if(this.h){ this.h.stop(); this.h=null; } } };
   if(document.getElementById('home').classList.contains('on')) BT_AMBIENT.on();
 </script>
+
+<!--+AG docs/42 Fase 1: el progreso deja de vivir solo en este movil.
+     Va en un modulo al final, igual que el ambient, para que al llegar aqui el juego YA este
+     pintado y jugable: la nube nunca retrasa el arranque ni lo puede tumbar (todo va en try).
+     Si no hay red, o si Supabase no contesta, esto no hace nada y el juego se queda como
+     estaba, con su localStorage. Es la Regla 2 de motor/chassis/sincro.mjs. -->
+<script type="module">
+  (async ()=>{
+    try{
+      const [{crearNube},{crearSincro}] = await Promise.all([
+        import('./motor/chassis/nube.mjs'), import('./motor/chassis/sincro.mjs')]);
+      const nube   = crearNube();
+      const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
+      window.BT_NUBE = { nube, sincro };
+
+      const r = await sincro.arrancar({
+        get save(){ return SAVE; },
+        //+AG "fresco" = este dispositivo no tenia NADA. Solo entonces se acepta traer el
+        //   estado de la nube sin preguntar; con progreso local manda la regla de "mas
+        //   partidas gana" que vive en sincro.mjs.
+        fresco: FRESH && !SAVE.played,
+        escribir(v){
+          //+AG traer estado a mitad de sesion obligaria a re-pintar 8 pantallas ya montadas.
+          //   Se escribe y se recarga: pasa una sola vez, en el primer segundo, antes de que
+          //   el jugador haya tocado nada, y al volver el arranque normal lo pinta todo bien
+          //   (y ya no es FRESH, asi que tampoco relanza el onboarding).
+          try{ localStorage.setItem(SAVE_KEY, JSON.stringify(v)); }catch(e){}
+          location.reload();
+        }
+      });
+      console.log('[nube] '+r.estado+(r.motivo?' ('+r.motivo+')':''), r.usuario||'');
+
+      //+AG un solo punto de engancle: persist() es funcion declarada en el script clasico, o sea
+      //   propiedad del global, asi que se puede envolver y TODAS las llamadas del juego (las 40
+      //   y pico) pasan por aqui sin tocar ni una. El empuje va agrupado (ver Regla 3).
+      const persistLocal = window.persist;
+      window.persist = function(){ const out = persistLocal.apply(this, arguments); try{ sincro.programar(); }catch(e){} return out; };
+
+      //+AG al irse a segundo plano en el movil no hay tiempo de esperar el agrupado. Es el mejor
+      //   esfuerzo posible: si el sistema mata la pestana antes, el progreso sigue en local y
+      //   sube en el siguiente arranque (nunca se pierde, solo se retrasa).
+      const alSalir = ()=>{ try{ sincro.empujarAlSalir(); }catch(e){} };
+      document.addEventListener('visibilitychange', ()=>{ if(document.hidden) alSalir(); });
+      addEventListener('pagehide', alSalir);
+    }catch(e){
+      console.warn('[nube] desactivada, el juego sigue en local:', e);
+    }
+  })();
+</script>
