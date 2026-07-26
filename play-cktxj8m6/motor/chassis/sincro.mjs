@@ -27,12 +27,20 @@ export function crearSincro({ nube, ahora = () => Date.now(), aviso = null }) {
 
   const decir = (q, d) => { try { aviso && aviso(q, d); } catch (e) { /* el aviso no puede tumbar la sincronizacion */ } };
 
+  //+AG legacy_local_id es una columna uuid. Un save viejo o manoseado a mano puede
+  //   traer ahi cualquier cosa, y entonces el PATCH entero se cae con 22P02: la nube
+  //   dejaria de guardar el progreso PARA SIEMPRE y en silencio, porque el error se
+  //   traga y se reintenta. Si no parece un uuid, se manda null y se sigue: el dato
+  //   solo sirve para reclamar el save viejo, no vale perder la sincronizacion por el.
+  const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const uuidOnada = v => (typeof v === 'string' && UUID.test(v.trim())) ? v.trim() : null;
+
   // Lo que se sube. El grueso va en save_blob; fuera salen solo los pocos campos
   // que la nube necesita poder consultar sin abrir el blob.
   function aFilas(save) {
     return {
       alias: String(save?.profile?.name || '').slice(0, 40),
-      legacy_local_id: save?.profile?.playerId || null,
+      legacy_local_id: uuidOnada(save?.profile?.playerId),
       level: Math.max(1, Math.round(save?.level || 1)),
       xp: Math.max(0, Math.round(save?.xp || 0)),
       chispas: Math.max(0, Math.round(save?.chispas || 0)),
@@ -112,7 +120,10 @@ export function crearSincro({ nube, ahora = () => Date.now(), aviso = null }) {
       ultimoError = e;
       decir('fallo-empuje', { error: String(e?.message || e) });
       // Regla 2: reintento en silencio, sin molestar al jugador.
-      if (!temporizador) temporizador = setTimeout(() => { temporizador = null; empujarYa(); }, REINTENTO_MS);
+      if (!temporizador) { temporizador = setTimeout(() => { temporizador = null; empujarYa(); }, REINTENTO_MS);
+        //+AG en Node (los verificadores) un temporizador vivo impide que el proceso termine.
+        //   unref no existe en el navegador, donde el reintento debe seguir vivo.
+        if (temporizador && typeof temporizador.unref === 'function') temporizador.unref(); }
       return false;
     } finally {
       empujando = false;

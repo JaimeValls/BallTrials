@@ -44,9 +44,13 @@ const CSS = `
      JUGAR, así que comparte tipografía. Ya está en la caché del navegador (el shell la pidió antes), y si no
      carga cae al mismo stack redondo que el resto del motor. */
   @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap');
+  /*+AG el velo va teñido de INDIGO (--indigo #241159 de la biblia, docs/27), no a casi-negro: con
+     rgba(4,6,14,.88) el cartel se leía como "otro juego móvil oscuro cualquiera" al lado de la portada
+     de balltrials.com (auditoría de arte 2026-07-26). El centro es más transparente para que se siga
+     viendo la pista viva detrás — el cartel presenta el modo, no lo esconde. */
   #btRdy{ position:fixed; inset:0; z-index:12; display:none; flex-direction:column; align-items:center;
     justify-content:center; gap:0; text-align:center; padding:3vh 5vw; box-sizing:border-box; cursor:pointer;
-    background:radial-gradient(120% 80% at 50% 42%, rgba(12,16,32,.62) 0%, rgba(4,6,14,.88) 72%);
+    background:radial-gradient(120% 80% at 50% 42%, rgba(28,16,72,.55) 0%, rgba(36,17,89,.82) 72%);
     backdrop-filter:blur(5px); -webkit-backdrop-filter:blur(5px);
     font-family:'Fredoka','Segoe UI Rounded','Nunito',system-ui,sans-serif; -webkit-tap-highlight-color:transparent; }
   #btRdy.show{ display:flex; animation:btRdyIn .22s ease-out both; }
@@ -58,33 +62,55 @@ const CSS = `
   #btRdy .ico{ width:min(21vh,120px); height:min(21vh,120px); margin-bottom:1.4vh;
     filter:drop-shadow(0 4px 14px rgba(0,0,0,.55)); }
   #btRdy .ico:empty{ display:none }
-  #btRdy .kick{ font-size:clamp(10px,1.5vh,13px); font-weight:600; letter-spacing:.22em; color:#8f9ac4; }
+  /*+AG los grises-lavanda son LOS DEL MOTOR, no unos nuevos: #a9a3c2 es el de los rótulos de los controles
+     (#ctr .lbl), #c9cff0 el del subtítulo de la portada (#ovSub) y #8a92b8 el de su pista (#hint). Mismo rol,
+     mismo color: tres lavandas más habrían sido tres decisiones que nadie recuerda. */
+  #btRdy .kick{ font-size:clamp(10px,1.5vh,13px); font-weight:600; letter-spacing:.22em; color:#a9a3c2; }
   #btRdy .name{ font-size:clamp(26px,5.4vh,50px); font-weight:700; line-height:1.06; color:#fff;
     letter-spacing:-.01em; text-shadow:0 3px 18px rgba(0,0,0,.7); margin:.4vh 0 1.2vh; }
   #btRdy .goal{ max-width:min(90vw,430px); font-size:clamp(13px,2.1vh,17px); font-weight:400; line-height:1.42;
-    color:#cbd2ee; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+    color:#c9cff0; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
   #btRdy .goal b{ color:#ffd23f; font-weight:600 }
-  /* CTA: el oro del motor (#ovBtn / #bSup.ready), sin inventar un brillo nuevo. Dentro lleva la BARRA DE TIEMPO
-     que se vacía: el auto-arranque tiene que ser VISIBLE, si no parece que el juego se ha lanzado solo. */
+  /* CTA: el oro del motor (#ovBtn / #bSup.ready) + el SISTEMA "listo para pulsar" del juego, tal cual.
+     Este es el CTA primario y solitario de su pantalla, o sea el caso exacto de .playbig.ready del shell:
+     breathe (bob de 2 px) + readyGlow (halo dorado que late) + readySweep (barrido diagonal cada 3,2 s).
+     Los @keyframes van COPIADOS LITERALES de prototipo/juego.html porque el módulo no comparte hoja de
+     estilos con el shell (otro documento: esto vive dentro del iframe de la partida). Mismos nombres a
+     propósito: si algún día se toca el sistema, un grep por readyGlow encuentra las dos copias.
+     Y NO se inventa nada encima: un brillo nuevo aquí sería un tercer lenguaje de "púlsame" (docs/40). */
   #btRdy .cta{ position:relative; overflow:hidden; margin-top:3vh; border:0; border-radius:18px;
     padding:clamp(12px,2.1vh,17px) clamp(34px,9vw,54px); font-family:inherit; font-weight:700;
     font-size:clamp(18px,3vh,24px); letter-spacing:.02em; color:#3a2400; cursor:pointer;
     background:linear-gradient(#ffe27a,#ff9a3d); box-shadow:0 6px 0 #b45a10, 0 10px 24px rgba(255,154,61,.32);
-    animation:btRdyPulse 1.5s ease-in-out infinite; }
+    animation:breathe 2.6s ease-in-out infinite, readyGlow 1.9s ease-in-out infinite; }
   #btRdy .cta:active{ transform:translateY(3px); box-shadow:0 3px 0 #b45a10; animation:none }
-  @keyframes btRdyPulse{ 0%,100%{ transform:scale(1) } 50%{ transform:scale(1.045) } }
+  @keyframes breathe{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-2px); } }
+  @keyframes readyGlow{ 0%,100%{ filter:drop-shadow(0 0 0 #ffd23f00); } 50%{ filter:drop-shadow(0 0 10px #ffd23fcc); } }
+  /* el barrido se queda DENTRO de la caja (top:0/height:100%): igual que en el shell, si sobresale infla el
+     scrollHeight del botón y cualquier guardia de encaje lo lee como "esto se sale de pantalla". */
+  #btRdy .cta::after{ content:''; position:absolute; top:0; height:100%; width:32%; left:-45%;
+    background:linear-gradient(100deg,#fff0,#ffffff5e 46%,#fff0); transform:skewX(-18deg);
+    animation:readySweep 3.2s ease-in-out infinite; pointer-events:none; z-index:2; }
+  @keyframes readySweep{ 0%{ left:-45%; } 26%,100%{ left:132%; } }
   #btRdy .cta .w{ position:relative; z-index:1 }
   #btRdy .cta .drain{ position:absolute; inset:0; right:auto; width:100%; background:rgba(255,255,255,.42);
     pointer-events:none; }
-  #btRdy .sub{ margin-top:1.6vh; font-size:clamp(10px,1.6vh,13px); font-weight:400; color:#7f89b4; min-height:1.4em }
+  #btRdy .sub{ margin-top:1.6vh; font-size:clamp(10px,1.6vh,13px); font-weight:400; color:#8a92b8; min-height:1.4em }
   /*+AG BANDA DEL MODO durante la cuenta atrás: el nombre sigue en pantalla mientras corre el 3-2-1, así que
      "¿qué estoy jugando?" tiene respuesta hasta el ¡YA!. Vive DENTRO de #count (los 3 motores lo tienen), así
-     que aparece y desaparece con la cuenta atrás sin lógica extra. */
-  #btBanner{ position:fixed; left:0; right:0; top:12vh; text-align:center; pointer-events:none;
+     que aparece y desaparece con la cuenta atrás sin lógica extra.
+     VA SOBRE PLACA, no sobre text-shadow: aquí detrás hay PISTA VIVA — el aro de "este eres tú" pasa por
+     encima y las bolas de la parrilla caen justo ahí, así que el rótulo suelto se volvía ilegible (auditoría
+     de arte 2026-07-26, medido en capturas a 360×540). La placa es el indigo de marca con blur, la misma
+     familia que el velo del cartel: se lee sobre cualquier cosa y sigue dejando ver la pista. */
+  #btBanner{ position:fixed; left:0; right:0; top:10.5vh; text-align:center; pointer-events:none;
     font-family:'Fredoka','Segoe UI Rounded','Nunito',system-ui,sans-serif; }
-  #btBanner .k{ display:block; font-size:clamp(9px,1.4vh,12px); font-weight:600; letter-spacing:.2em; color:#98a2cc }
+  #btBanner .plate{ display:inline-block; padding:.6vh clamp(14px,4vw,26px); border-radius:999px;
+    background:rgba(36,17,89,.74); border:1px solid #ffffff1f; box-shadow:0 3px 16px rgba(0,0,0,.45);
+    backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); }
+  #btBanner .k{ display:block; font-size:clamp(9px,1.4vh,12px); font-weight:600; letter-spacing:.2em; color:#a9a3c2 }
   #btBanner .n{ display:block; font-size:clamp(17px,3vh,26px); font-weight:700; color:#fff;
-    text-shadow:0 2px 12px #000, 0 0 26px rgba(120,80,255,.45) }
+    text-shadow:0 2px 10px rgba(0,0,0,.6) }
 `;
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────
@@ -168,16 +194,19 @@ export function createArranque(cfg){
   let visible = false, left = 0, started = false, rafId = 0;
 
   function refresh(){
-    const t = L();
+    const t = L(); subTxt = '';                                  // el idioma pudo cambiar: fuerza repintar el pie
     $('.kick').textContent = t.kicker;
     $('.name').textContent = (cfg.title && cfg.title()) || t.name[mode] || mode;
     $('.goal').innerHTML  = (cfg.goal && cfg.goal()) || t.goal[mode] || '';
     $('.w').textContent   = t.ready;
     paintSub();
   }
+  //+AG solo se escribe el DOM cuando el texto CAMBIA (una vez por segundo, no 60): esto corre en el bucle de rAF
+  //   mientras el cartel está delante, y el motor ya está renderizando WebGL por debajo.
+  let subTxt = '';
   function paintSub(){
-    const t = L();
-    $('.sub').textContent = autoSec > 0 ? t.auto(Math.max(1, Math.ceil(left))) : t.tapHint;
+    const t = L(), s = autoSec > 0 ? t.auto(Math.max(1, Math.ceil(left))) : t.tapHint;
+    if(s !== subTxt){ subTxt = s; $('.sub').textContent = s; }
   }
 
   // GO: un único camino de salida, venga del tap o del reloj. byUser decide si hay sonido (y si hay blip).
@@ -233,7 +262,7 @@ export function modeBanner({ mode, lang, title }){
   const host = document.getElementById('count'); if(!host) return { refresh(){} };
   let b = document.getElementById('btBanner');
   if(!b){ b = document.createElement('div'); b.id = 'btBanner';
-    b.innerHTML = '<span class="k"></span><span class="n"></span>'; host.appendChild(b); }
+    b.innerHTML = '<span class="plate"><span class="k"></span><span class="n"></span></span>'; host.appendChild(b); }
   const refresh = () => { const t = TXT[lang()] || TXT.en;
     b.querySelector('.k').textContent = t.kicker;
     b.querySelector('.n').textContent = (title && title()) || t.name[mode] || mode; };

@@ -183,6 +183,57 @@ export function crearNube(opts = {}) {
     return true;
   }
 
+  // ------------------------------------------------------------------- cuenta
+  //
+  // docs/23: cuenta unica en la nube, y el invitado se convierte SIN perder nada.
+  // Email es el unico metodo que no depende de terceros: Google y Meta necesitan
+  // sus credenciales y sus tramites (docs/43), asi que llegan despues por el mismo
+  // sitio (el modulo ya esta preparado con entrarConProveedor).
+
+  function estadoCuenta() {
+    if (!ses) return { entrado: false, anonimo: true, email: null };
+    return { entrado: true, anonimo: !!ses.es_anonimo, email: ses.email || null };
+  }
+
+  // Convierte la cuenta anonima que ya esta jugando en una permanente. NO crea otra
+  // cuenta: es la MISMA (mismo user_id), asi que el progreso no se toca ni se migra.
+  async function crearCuentaEmail({ email, password }) {
+    await asegurarSesion();
+    const u = await pedir('/auth/v1/user', { metodo: 'PUT', cuerpo: { email, password } });
+    if (ses) { ses.email = u?.email || email; ses.es_anonimo = false;
+      try { store.setItem(SES_KEY, JSON.stringify(ses)); } catch (e) {} }
+    return u;
+  }
+
+  // Entrar en un aparato nuevo. Sustituye la sesion anonima de ESTE aparato por la
+  // del dueno del email; el estado se trae luego por sincro.mjs.
+  async function entrarConEmail({ email, password }) {
+    const s = await pedir('/auth/v1/token?grant_type=password',
+      { metodo: 'POST', cuerpo: { email, password }, conSesion: false });
+    guardarSesion(s);
+    if (ses) { ses.email = s?.user?.email || email; ses.es_anonimo = false;
+      try { store.setItem(SES_KEY, JSON.stringify(ses)); } catch (e) {} }
+    return ses;
+  }
+
+  async function cambiarPassword(password) {
+    await asegurarSesion();
+    return await pedir('/auth/v1/user', { metodo: 'PUT', cuerpo: { password } });
+  }
+
+  // Recuperar por correo. OJO: hoy el proyecto no tiene servidor de correo propio,
+  // asi que esto solo llega de verdad cuando se configure uno (docs/42).
+  async function pedirCorreoDeRecuperacion(email) {
+    return await pedir('/auth/v1/recover', { metodo: 'POST', cuerpo: { email }, conSesion: false });
+  }
+
+  // Google/Meta: el navegador se va a la pantalla del proveedor y vuelve aqui. Queda
+  // listo para cuando existan las credenciales; hasta entonces el juego no lo ofrece.
+  function urlDeProveedor(proveedor, volverA) {
+    const v = encodeURIComponent(volverA || (typeof location !== 'undefined' ? location.href : ''));
+    return `${url}/auth/v1/authorize?provider=${encodeURIComponent(proveedor)}&redirect_to=${v}`;
+  }
+
   // ------------------------------------------------------- llevarse la partida
   //
   // El unico camino de recuperar cuenta que no depende de Google ni de Meta
@@ -206,6 +257,7 @@ export function crearNube(opts = {}) {
     asegurarSesion, entrarAnonimo, renovar,
     perfil, guardarPerfil, bolas, crearBola, guardarBola, saldos, reportarPartida, gastar,
     crearCodigoTransferencia, canjearCodigoTransferencia,
+    estadoCuenta, crearCuentaEmail, entrarConEmail, cambiarPassword, pedirCorreoDeRecuperacion, urlDeProveedor,
     // Solo para pruebas: tirar la sesion local sin tocar la cuenta del servidor.
     olvidarSesion: () => guardarSesion(null)
   };

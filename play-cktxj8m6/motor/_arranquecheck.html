@@ -1,0 +1,87 @@
+<!doctype html><meta charset="utf-8">
+<title>BallTrials · banco del ARRANQUE de partida (doc 44)</title>
+<!--
+  El cartel de "¿LISTO?" y la cuenta atrás sonora, sin tener que jugar una partida entera.
+  Por qué existe: lo que hay que juzgar aquí es cómo SE VE el cartel en los 3 modos y cómo SUENAN
+  los beeps — y para eso, dentro de una partida, hay que esperar a que cargue el motor y jugar.
+  Aquí el mismo chassis/arranque.mjs se monta suelto, en cualquier modo e idioma, en un toque.
+
+  Uso: node prototipo/serve.mjs → /motor/_arranquecheck.html
+  OJO: el sonido necesita un TOQUE REAL (política del navegador). El botón de abajo lo da.
+-->
+<style>
+  html,body{height:100%}
+  body{margin:0;background:radial-gradient(120% 90% at 50% 30%,#1a2230 0%,#10141c 62%,#060910 100%);
+    color:#eef2ff;font:14px/1.45 "Segoe UI",system-ui,sans-serif;overflow:hidden}
+  #panel{position:fixed;left:0;right:0;bottom:0;z-index:40;background:#0b1020ee;border-top:1px solid #ffffff1c;
+    padding:10px 12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  #panel b{color:#ffd23f;font-size:12px;letter-spacing:.06em}
+  button,select{font-family:inherit;font-size:13px;font-weight:700;border-radius:9px;border:1px solid #ffffff24;
+    background:#ffffff12;color:#dfe6ff;padding:7px 11px;cursor:pointer}
+  button.on{background:linear-gradient(#ffe27a,#ff9a3d);color:#3a2400;border-color:transparent}
+  #log{position:fixed;left:10px;top:10px;z-index:40;font-size:12px;color:#9fb0d8;max-width:60vw}
+</style>
+<div id="log">Elige modo e idioma y pulsa <b>MOSTRAR CARTEL</b>. El tap en el cartel desbloquea el audio y suena la cuenta atrás.</div>
+<div id="panel">
+  <b>MODO</b>
+  <button data-m="race" class="on">Carrera</button>
+  <button data-m="cazador">Cazador</button>
+  <button data-m="redlight">Luz Roja</button>
+  <b>IDIOMA</b>
+  <select id="lang"><option value="es">Español</option><option value="en">English</option></select>
+  <b>AUTO</b>
+  <select id="auto"><option value="5">5 s (partida)</option><option value="0">sin reloj (tutorial)</option></select>
+  <button id="go">MOSTRAR CARTEL</button>
+  <button id="beeps">solo los BEEPS</button>
+</div>
+<script src="../arte/modeicons-vendored.js"></script>
+<script type="module">
+import { createArranque, modeBanner, sfxCountdown } from './chassis/arranque.mjs';
+import { createWebAudio } from './chassis/webaudio.mjs';
+
+// la cuenta atrás real del juego (doc 44): 3 cifras a 1,15 s
+const DIGITS=3, DIGIT=1.15, INTRO_DUR=DIGITS*DIGIT;
+
+// #count no existe aquí: se finge el mínimo que la banda del modo necesita para colgarse de algo
+const count = document.createElement('div'); count.id='count';
+count.style.cssText='position:fixed;inset:0;z-index:8;display:none;align-items:center;justify-content:center;font-family:"Segoe UI Rounded",Nunito,system-ui,sans-serif';
+count.innerHTML='<div class="n" id="countN" style="font-size:clamp(64px,22vh,190px);font-weight:900;color:#fff;text-shadow:0 6px 34px #000,0 0 46px rgba(120,80,255,.5)"></div>';
+document.body.appendChild(count);
+
+const audio = createWebAudio({});          // sin música: aquí se juzgan los beeps, no la pista
+let mode='race', lang='es', autoSec=5, arranque=null, banner=null;
+const log = m => document.getElementById('log').innerHTML = m;
+
+function build(){
+  const old=document.getElementById('btRdy'); if(old) old.remove();
+  const ob=document.getElementById('btBanner'); if(ob) ob.remove();
+  arranque = createArranque({ mode, lang:()=>lang, audio, sfxOn:()=>true, autoSec,
+    onStart: byUser => {
+      log('cuenta atrás '+(byUser?'CON sonido (tap dado)':'MUDA (arrancó el reloj, sin tap)'));
+      count.style.display='flex'; let t=0;
+      if(byUser) sfxCountdown(audio, { digits:DIGITS, digitDur:DIGIT, goAt:INTRO_DUR });
+      const n=document.getElementById('countN'), t0=performance.now();
+      (function tick(){
+        t=(performance.now()-t0)/1000;
+        if(t<INTRO_DUR){ const cur=DIGITS-Math.floor(t/DIGIT), frac=(t%DIGIT)/DIGIT;
+          n.textContent=String(cur); n.style.color='#fff';
+          n.style.transform='scale('+(1+0.45*(1-frac)).toFixed(2)+')'; n.style.opacity=(0.5+0.5*(1-frac)).toFixed(2);
+          requestAnimationFrame(tick); }
+        else { n.textContent = lang==='es'?'¡YA!':'GO!'; n.style.color='#7cff9a'; n.style.transform='scale(1)'; n.style.opacity='1';
+          setTimeout(()=>{ count.style.display='none'; log('fin del ritual · pulsa MOSTRAR CARTEL para repetir'); }, 550); }
+      })();
+    } });
+  banner = modeBanner({ mode, lang:()=>lang });
+}
+document.querySelectorAll('#panel [data-m]').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#panel [data-m]').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); mode=b.dataset.m; });
+document.getElementById('lang').onchange = e => lang=e.target.value;
+document.getElementById('auto').onchange = e => autoSec=+e.target.value;
+document.getElementById('go').onclick = () => { build(); arranque.show(); log('cartel arriba · toca en cualquier sitio del cartel'); };
+document.getElementById('beeps').onclick = async () => {
+  await audio.resume();                    // este click ES el gesto que desbloquea WebAudio
+  sfxCountdown(audio, { digits:DIGITS, digitDur:DIGIT, goAt:INTRO_DUR });
+  log('sonando la cuenta atrás entera (3 ticks + el golpe del ¡YA!)');
+};
+</script>

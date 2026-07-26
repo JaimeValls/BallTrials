@@ -845,6 +845,11 @@ if(EMBED){ musicOn = params.get('music')!=='0'; sfxOn = params.get('sfx')!=='0';
 //   solo para el pipeline de captura). MISMA sintesis del video (buildSfxBuffer de sfxmap) disparada evento a evento.
 function startAudio(){
   if(!musicOn || !audio.unlocked) return;
+  //+AG LA MUSICA ENTRA EN EL "¡YA!", NUNCA ANTES (doc 38: va sincronizada con f=0). Hace falta decirlo aqui desde
+  //   que existe el cartel de "¡LISTO!": el tap desbloquea el audio ANTES de construir la ronda, asi que el
+  //   startAudio() de buildSim (que hasta ahora era siempre un no-op, porque nada estaba desbloqueado todavia)
+  //   soltaba la musica encima de la cuenta atras y pisaba sus beeps.
+  if(phase!=='play') return;
   audio.start(null, AUDIO_SR);   // solo la musica en loop; los SFX se disparan en vivo (liveSfx)
 }
 let liveGain=null;
@@ -1033,8 +1038,10 @@ function updateHUD(){ if(!sim) return; const t=T(), place=sim.playerPlace(), p=s
   el('cdSup').textContent=ready?(LANG==='es'?'¡'+t.superLbl+'!':t.superLbl+'!'):Math.round(sim.super*100)+'%';   //+AG solo el espanol lleva el ¡ de apertura
   for(const k in dirBtns) dirBtns[k].classList.toggle('on',+k===p.dir);
 }
-function startRound(){ seed=newSeed(); buildSim(seed); el('ov').classList.add('hide');
-  phase='intro'; introT=0; introRingT=-1; clearTimeout(goT); el('count').classList.add('show');
+//+AG la FASE se pone ANTES de buildSim, no después: buildSim llama a startAudio() y con la fase vieja ('play', al
+//   pulsar "Jugar otra") soltaba la música encima de la cuenta atrás en vez de en el "¡YA!".
+function startRound(){ phase='intro'; introT=0; introRingT=-1; clearTimeout(goT);
+  seed=newSeed(); buildSim(seed); el('ov').classList.add('hide'); el('count').classList.add('show');
   //+AG los beeps se programan DE UNA VEZ con la misma cuenta que pintan los números (DIGITS/DIGIT), así caen
   //   clavados aunque un frame se retrase. Si el audio no está desbloqueado (nadie tocó "¡LISTO!") no suena nada.
   if(sfxOn && audio.unlocked) sfxCountdown(audio, { digits:DIGITS, digitDur:DIGIT, goAt:INTRO_DUR }); }

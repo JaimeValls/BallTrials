@@ -196,6 +196,10 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 <div id="err">The 3D modules failed to load from the CDN. Open this with internet access.</div>
 <div id="fps">fps —</div>
 
+<!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
+     juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
+<script src="../../arte/modeicons-vendored.js"></script>
+
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -217,6 +221,7 @@ import { Sim, TEAMS, SHORT_COLORS, SHORT_COLORS_6, BALL_R, FPS, FIELD_W, FIELD_L
 import { createWebAudio } from '../chassis/webaudio.mjs';
 import { buildSfxBuffer } from './sfxmap.mjs';
 import { createCoach } from '../chassis/coach.mjs';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
 
 window.addEventListener('error', e => { document.getElementById('err').style.display='grid'; console.error(e.error||e.message); });
 
@@ -561,7 +566,11 @@ youRing.renderOrder=8; youRing.visible=false; scene.add(youRing);
 const youLbl = document.getElementById('youlbl');
 const _v3 = new THREE.Vector3();
 //+AG estado de la capa de agencia (intro/espectador). runHeld = CORRER pulsado (se vuelca a sim.playerRun cada paso).
-let phase='intro', introT=0, introRingT=-1; const INTRO_DUR=3.4;
+//+AG ARRANQUE (feedback Jaime 2026-07-26): la partida ya no abre de golpe en 3-2-1. Antes va la fase 'ready' (el
+//   cartel del modo de chassis/arranque.mjs, que es donde se desbloquea el audio) y luego la cuenta atrás, más
+//   lenta por cifra (1,15 s) y CON sonido. El "¡YA!" no congela la sim: se pinta encima de la partida ya en marcha.
+const DIGITS=3, DIGIT=1.15, GO_HOLD=550;
+let phase='intro', introT=0, introRingT=-1; const INTRO_DUR=DIGITS*DIGIT;
 let runHeld=false, prevPlayerRank=null, ended=false;
 //+AG tutorial v2: el COACH congela el mundo mientras pide una acción y lo suelta en cuanto el jugador toca.
 //   Solo lo activa el coach (?tutorial=1); en partida normal es false y el bucle va exactamente igual.
@@ -1073,23 +1082,31 @@ function introUI(t){
   const c=document.getElementById('count'), n=document.getElementById('countN'), p=sim.balls[0];
   c.classList.add('show');
   if(t-introRingT>0.42){ introRingT=t; P.ring(p.x,p.y,[1,1,1],1.3); P.ring(p.x,p.y,[0.33,0.9,0.5],0.95); }   // onda "este eres tú" (verde = correr)
-  if(t<3){ const cur=3-Math.floor(t), frac=t-Math.floor(t);
+  if(t<DIGITS*DIGIT){ const cur=DIGITS-Math.floor(t/DIGIT), frac=(t%DIGIT)/DIGIT;
     n.textContent=String(cur); n.style.color='#fff';
     n.style.transform=`scale(${(1+0.45*(1-frac)).toFixed(2)})`; n.style.opacity=(0.5+0.5*(1-frac)).toFixed(2); }
-  else { n.textContent=T().go; n.style.color='#7cff9a'; n.style.transform='scale(1)'; n.style.opacity='1'; }
+  else goFlash();
 }
+//+AG el "¡YA!" se pinta y la ronda arranca EN EL MISMO FRAME: el cartel se queda GO_HOLD ms encima del juego ya
+//   en marcha, en vez de robarle ese tiempo a la partida con la sim congelada.
+let goT=0;
+function goFlash(){ const n=document.getElementById('countN');
+  n.textContent=T().go; n.style.color='#7cff9a'; n.style.transform='scale(1)'; n.style.opacity='1';
+  clearTimeout(goT); goT=setTimeout(()=>document.getElementById('count').classList.remove('show'), GO_HOLD); }
 
 // PREVIEW loop: sim 30 Hz con acumulador; render interpola a la tasa del monitor
 const clock=new THREE.Clock(); let acc=0;
 let fpsT=0, fpsN=0, fpsSteps=0, fpsMax=0; const fpsEl=document.getElementById('fps');
 function loop(){ const dt=Math.min(clock.getDelta(),0.05);
-  //+AG fase de intro: la sim NO avanza; se ve el estado inicial, la cámara revela quién eres y corre la cuenta atrás.
-  if(phase==='intro'){
-    introT+=dt;
+  //+AG fases previas a jugar, las dos con la sim EN PAUSA:
+  //   'ready' = el cartel del modo está delante; el mundo se ve vivo detrás, en el encuadre cerrado de tu bola.
+  //   'intro' = cuenta atrás: la cámara revela quién eres y corren los números.
+  if(phase==='ready' || phase==='intro'){
+    if(phase==='intro') introT+=dt;
     sync(dt,1); P.update(dt); stars.update(dt); starsInv.update(dt); wind.update(dt); updateControls();
-    introCamera(introT); introUI(introT);
+    introCamera(introT); if(phase==='intro') introUI(introT);
     celeb.update(false, cam, dt, null); census.update(dt, cam, sim.balls, rlCensus); ktags.update(dt); renderFrame();
-    if(introT>=INTRO_DUR){ phase='play'; acc=0; clock.getDelta(); document.getElementById('count').classList.remove('show');
+    if(phase==='intro' && introT>=INTRO_DUR){ phase='play'; acc=0; clock.getDelta(); goFlash();
       if(sim) sim.playerEngage();   //+AG desde el "¡YA!" manda el input: no pulsar CORRER = frenar
       startAudio(); }               //+AG suelta la música (loop) sincronizada con f=0
     requestAnimationFrame(loop); return;
@@ -1279,6 +1296,7 @@ let musicOn=false, sfxOn=false, lastMusicColor=null;
 if(EMBED){ musicOn = _q0.get('music')!=='0'; sfxOn = _q0.get('sfx')!=='0'; }
 function startAudio(){
   if(!musicOn || !audio.unlocked) return;
+  if(phase!=='play') return;     //+AG la música entra en el "¡YA!", nunca antes (doc 38: va sincronizada con f=0): desde que el cartel de "¡LISTO!" desbloquea el audio ANTES de la ronda, esta guarda es la que evita que se cuele encima de la cuenta atrás
   audio.start(null, AUDIO_SR);   //+AG solo la música en loop; los SFX se disparan EN VIVO (liveSfx): con un jugador el futuro no se precalcula
   lastMusicColor=null;           // el ducking se re-aplica en el 1er updateSemaforo
 }
@@ -1361,6 +1379,9 @@ const I18N={
     err:'No cargaron los módulos 3D del CDN. Ábrelo con internet activo.' },
 };
 let LANG='en';
+//+AG se declaran AQUÍ (y se construyen en el arranque, más abajo) porque applyLang los repinta y applyLang se
+//   llama durante la carga del módulo: con const/let declarado después daría ReferenceError.
+let arranque=null, banner=null;
 const T=()=>I18N[LANG]||I18N.en;
 //+AG ordinal de puesto: igual que el del shell (1st/2nd/3rd · 1º) para no dar dos vocabularios del mismo dato
 function ord(n){ if(LANG==='es') return n+'º'; const s=['th','st','nd','rd'], v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); }
@@ -1376,8 +1397,18 @@ function applyLang(l){
   _id('bGhost').querySelector('.t').textContent=t.ghost; _id('bSup').querySelector('.t').textContent=t.sup;
   _id('specKey').innerHTML=t.specKey; _id('specExit').textContent=t.specExit; _id('err').textContent=t.err;
   const sb=_id('snd'); if(sb) sb.title=t.sound;
+  if(arranque) arranque.refresh(); if(banner) banner.refresh();   //+AG el cartel de arranque y la banda del modo también viven en el idioma del shell
 }
 applyLang(params.get('lang'));
+
+//+AG un solo camino para soltar la cuenta atrás (y con ella los beeps), lo pulse el jugador en "¡LISTO!" o lo
+//   suelte el reloj del auto-arranque. Los beeps se programan de una vez con la MISMA cuenta que pintan los
+//   números (DIGITS/DIGIT), así caen clavados aunque un frame se retrase.
+function startCountdown(){
+  phase='intro'; introT=0; introRingT=-1; clearTimeout(goT);
+  document.getElementById('count').classList.add('show');
+  if(sfxOn && audio.unlocked) sfxCountdown(audio, { digits:DIGITS, digitDur:DIGIT, goAt:INTRO_DUR });
+}
 
 buildSim(seed);
 if(EMBED){ const bm=document.getElementById('backMenu'); if(bm) bm.style.display='none'; }   //+AG en embed el shell gestiona el volver
@@ -1407,7 +1438,21 @@ else {
     document.addEventListener('pointerdown', onFirstGesture, true);
     document.addEventListener('keydown', onFirstGesture, true);
   }
+  //+AG ARRANQUE (chassis/arranque.mjs) — SOLO EN EMBED, o sea en el juego de verdad: Luz Roja abría de golpe en
+  //   3-2-1, sin decir qué modo era y sin que el sonido hubiera podido desbloquearse todavía (feedback Jaime
+  //   2026-07-26). En standalone se entra directo a la cuenta atrás, como siempre: es la herramienta de vídeo.
+  if(EMBED){
+    arranque = createArranque({
+      mode:'redlight', lang:()=>LANG, audio, sfxOn:()=>sfxOn,
+      autoSec: TUTORIAL ? 0 : 5,              // CÓMO JUGAR: sin reloj, se entra cuando el jugador quiere
+      onStart: ()=> startCountdown(),
+    });
+    banner = modeBanner({ mode:'redlight', lang:()=>LANG });
+    audio.prefetch();                         // la música se decodifica desde ya: en el "¡YA!" tiene que estar lista
+    phase='ready';
+  }
   loop();
+  if(arranque) arranque.show();
 }
 
 // ============================================================================
