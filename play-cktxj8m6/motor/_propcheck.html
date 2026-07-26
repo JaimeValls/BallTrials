@@ -43,7 +43,9 @@ function cell(key, px, silueta){
   g.add(new THREE.Mesh(GEO, mat));
   const p = makeProp(key, R, TEAM);
   if (p){
-    if (silueta) p.traverse(o => { if (o.material) o.material = mat; });   // todo negro: solo cuenta el contorno
+    // en modo silueta el prop se tiñe de negro pero CONSERVA su mapa: si se le cambia el material
+    // entero, el sprite pierde el alfa y sale un cuadrado negro (y el banco miente).
+    if (silueta) p.traverse(o => { if (o.material && o.material.map) o.material.color.setHex(0x000000); });
     g.add(p);
   }
   sc.add(g); REN.render(sc, CAM);
