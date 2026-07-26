@@ -250,6 +250,27 @@
   .gd-btn.prim{ color:#3a2400; background:linear-gradient(#ffe27a,#ff9a3d); box-shadow:0 4px 0 #b45a10; }
   .gd-btn.prim:disabled{ filter:grayscale(.55) brightness(.82); box-shadow:none; cursor:default; }
   .gd-btn.ghost{ border:1px solid var(--line); background:#ffffff10; color:#c9cff0; font-size:15px; }
+  /*+AG SALIDA ABAJO, AL ALCANCE DEL PULGAR (VB Jaime 26-jul). La ✕ de arriba a la derecha existe y se queda,
+     pero nadie la mira: la vista y el dedo estan en el boton grande de abajo. En Brawl Stars la ficha del
+     personaje nunca deja al jugador sin salida en la zona baja, y la accion de "elegir" te devuelve sola.
+     Aqui: 1) equipar CIERRA la ficha (el jugador ya esperaba que se cerrara), 2) para todo lo demas
+     (bloqueada, o ya equipada) hay este VOLVER debajo. Compacto a proposito: es la salida, no la accion,
+     y cada pixel de alto cuenta porque la ficha no hace scroll. */
+  .gd-btn.back{ border:0; background:none; color:#9aa3cd; font-size:14px; font-weight:800; padding:9px; letter-spacing:.02em; }
+  .gd-btn.back:active{ color:#fff; }
+  /*+AG MOVIL CORTO. Medido, no estimado: en 375x640 la ficha de una bola BLOQUEADA (la mas alta: lleva
+     "Desbloquear" + "o pagar" + "Volver") se salia 28 px por arriba y por abajo — y 7 px ya se salia ANTES
+     de anadir el Volver, o sea que el bug estaba y nadie lo habia medido porque __fitCheck no entra en los
+     modales. Se recorta donde sobra aire y no se pierde informacion: el retrato y el hexagono. El canvas del
+     hexagono se dibuja a 266x238 reales, asi que encogerlo por CSS lo deja MAS nitido, no borroso.
+     Ganancia ~60 px de alto; el peor caso pasa a caber con margen. El overflow:auto es la red de seguridad
+     por si algun dia crece el contenido: preferible deslizar a perder el boton por debajo del borde. */
+  @media (max-height:700px){
+    #gDetail{ padding:14px; gap:8px; overflow-y:auto; }
+    .gd-art{ width:112px; height:112px; }
+    .gd-hex{ width:180px; height:161px; }
+    .gd-btn{ padding:12px; }
+  }
   /* --- TIENDA (doc 12: secciones + escaparate, cero azar, puerta parental) --- */
   #tienda{ background:url(arte/fondo/doodles.webp) repeat top left/340px 340px, radial-gradient(130% 90% at 50% 8%, #3f3ad0 0%, #2a1c86 45%, var(--bg-lo) 100%); }
   .sh-secs{ display:flex; gap:7px; overflow-x:auto; padding:2px 13px 8px; -webkit-overflow-scrolling:touch; }
@@ -305,6 +326,10 @@
   .sc-body .subtabs{ padding:0; }
   .sc-block{ background:#ffffff0a; border:1px solid var(--line); border-radius:18px; padding:14px; }
   .sc-h{ font-size:11px; letter-spacing:.13em; text-transform:uppercase; color:var(--gold2); font-weight:800; margin-bottom:11px; display:flex; align-items:center; gap:7px; }
+  /*+AG doc 41 §1: el icono de una cabecera de seccion se DIBUJA, no es un emoji del sistema (un
+     emoji cambia de dibujo en cada movil, asi que el juego no se ve igual en dos telefonos).
+     currentColor = hereda el oro de .sc-h, igual que la flecha atras de Resultados. */
+  .sc-ico{ width:15px; height:15px; flex:0 0 auto; display:block; }
   .sc-note{ font-size:11.5px; color:#aeb6d8; line-height:1.5; margin-top:9px; }
   .sc-soon{ font-size:9.5px; font-weight:800; color:var(--muted); background:#ffffff10; border:1px solid var(--line); border-radius:999px; padding:2px 8px; margin-left:auto; letter-spacing:.04em; text-transform:uppercase; }
   .se-hero{ border-radius:20px; padding:15px 16px; background:linear-gradient(150deg,#5a2c86,#2a1a58); border:1px solid #ffffff22; box-shadow:0 12px 30px #0007; display:flex; align-items:center; gap:13px; }
@@ -1099,6 +1124,7 @@
   <div class="gd-actions">
     <button class="gd-btn prim" id="gdPrim"></button>
     <button class="gd-btn ghost" id="gdGhost" style="display:none"></button>
+    <button class="gd-btn back" id="gdBack" data-t="gdBack">← Volver</button>
   </div>
 </div>
 <!-- ===== TIENDA (secciones, cero azar, puerta parental, doc 12) ===== -->
@@ -1241,7 +1267,7 @@
          cuenta cuando ya tienes algo que perder. Google y Meta estan puestos y apagados
          hasta que existan sus credenciales y las paginas legales (docs/43). -->
     <div class="sc-block" data-sub="cuenta">
-      <div class="sc-h" data-t="prAccH">Tu cuenta</div>
+      <div class="sc-h"><svg class="sc-ico" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="7.2" r="3.7"/><path d="M12 10.9 V19.6"/><path d="M12 14.6 H15.7"/><path d="M12 17.3 H15"/></g></svg><span data-t="prAccH">Tu cuenta</span></div>
       <div class="pr-toggle" style="align-items:center">
         <div id="prAccDot" style="width:11px;height:11px;border-radius:50%;background:#eb9b4b;flex:0 0 auto"></div>
         <div class="tx" id="prAccState" data-t="prAccGuest">Estás jugando como invitado</div>
@@ -1273,7 +1299,7 @@
     <!--+AG docs/42 Fase 2: llevarse la partida a otro movil. Es la unica via de recuperar
          cuenta que no depende de Google ni de Meta, asi que es la que existe hoy. -->
     <div class="sc-block" data-sub="cuenta">
-      <div class="sc-h" data-t="prMoveH">Llevar mi partida a otro móvil</div>
+      <div class="sc-h"><svg class="sc-ico" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="6.7" y="2.9" width="10.6" height="18.2" rx="2.6"/><path d="M10.4 18.2 H13.6"/></g></svg><span data-t="prMoveH">Llevar mi partida a otro móvil</span></div>
       <div class="sc-note" data-th="prMoveNote"></div>
       <div class="pr-code"><span class="cd" id="prMoveCode">BT-••••-••••</span><button id="prMoveCopy" data-t="prCopy" hidden>Copiar</button><button id="prMoveGen" data-t="prMoveGen">Generar código</button></div>
       <div class="pr-slots" style="gap:7px">
@@ -2249,6 +2275,7 @@ const MORE={
     gdMoney:'El dinero solo compra VARIEDAD (bolas hasta Rara), nunca poder.',
     unlockBtn:p=>'Desbloquear · '+p+' ✦', orPay:g=>'o pagar '+g+' ◆',
     equipBtn:'Equipar', equippedBtn:'✓ Equipada', tEquipped:'¡Equipada!', tUnlocked:n=>'¡'+n+' desbloqueado!',
+    gdBack:'← Volver',
     // — Tienda —
     shSecs:['Destacados','Bolas','Cosméticos','Gemas','Pase'],
     shNoteFeat:'Escaparate que rota cada semana con el tema de temporada. Todo con precio y contenido a la vista, <b>nunca cajas sorpresa</b>.',
@@ -2287,13 +2314,13 @@ const MORE={
     prShowNote:'En cuentas de menores el escaparate (stats, colección, récords) es <b>privado</b> salvo que lo abra un adulto verificado.',
     prFriendsH:'👥 Amigos', prFriendsSoon:'acciones · pronto', prYourCode:'Tu código:', prCopy:'Copiar',
     prAddCode:'Añadir por código',
-    prMoveH:'📱 Llevar mi partida a otro móvil', prMoveGen:'Generar código', prMoveUse:'Traer mi partida',
+    prMoveH:'Llevar mi partida a otro móvil', prMoveGen:'Generar código', prMoveUse:'Traer mi partida',
     prMoveNote:'Genera un código en el móvil donde juegas y escríbelo en el nuevo. <b>Sirve una sola vez</b> y caduca al generar otro. Guárdalo: es la llave de tu partida.',
     prMoveOk:'¡Partida traída! Reiniciando…', prMoveGenOk:'Código listo. Apúntalo antes de cerrar.',
     prMoveBad:'Ese código no vale o ya se usó.', prMoveSame:'Ese código es de esta misma partida.',
     prMoveOff:'Sin conexión: inténtalo cuando vuelva la red.', prMoveEmpty:'Escribe el código primero.',
     prMoveCopied:'✓ Código copiado. Pégalo en el otro móvil.', prMoveCopyManual:'Código seleccionado: mantén pulsado y elige Copiar.',
-    prAccH:'🔑 Tu cuenta', prAccGuest:'Estás jugando <b>como invitado</b>', prAccSaved:'Cuenta guardada:',
+    prAccH:'Tu cuenta', prAccGuest:'Estás jugando <b>como invitado</b>', prAccSaved:'Cuenta guardada:',
     prAccNote:'Tu partida ya se guarda en el servidor, pero <b>solo este móvil sabe que es tuya</b>. Guarda tu cuenta y podrás entrar desde cualquier sitio.',
     prAccCreate:'Guardar mi cuenta', prAccLogin:'Ya tengo cuenta', prAccGoogle:'Google · pronto', prAccMeta:'Facebook · pronto',
     prAccOkNew:'✓ Cuenta guardada. Ya puedes entrar desde otro móvil.', prAccOkIn:'✓ ¡Hola de nuevo! Trayendo tu partida…',
@@ -2394,6 +2421,7 @@ const MORE={
     gdMoney:'Money only buys VARIETY (balls up to Rare), never power.',
     unlockBtn:p=>'Unlock · '+p+' ✦', orPay:g=>'or pay '+g+' ◆',
     equipBtn:'Equip', equippedBtn:'✓ Equipped', tEquipped:'Equipped!', tUnlocked:n=>n+' unlocked!',
+    gdBack:'← Back',
     // — Shop —
     shSecs:['Featured','Balls','Cosmetics','Gems','Pass'],
     shNoteFeat:'A storefront that rotates every week with the season theme. Price and contents always in plain sight, <b>never loot boxes</b>.',
@@ -2432,13 +2460,13 @@ const MORE={
     prShowNote:'On kids’ accounts the showcase (stats, collection, records) is <b>private</b> unless a verified adult opens it.',
     prFriendsH:'👥 Friends', prFriendsSoon:'actions · soon', prYourCode:'Your code:', prCopy:'Copy',
     prAddCode:'Add by code',
-    prMoveH:'📱 Move my game to another phone', prMoveGen:'Get a code', prMoveUse:'Bring my game here',
+    prMoveH:'Move my game to another phone', prMoveGen:'Get a code', prMoveUse:'Bring my game here',
     prMoveNote:'Get a code on the phone you play on and type it on the new one. <b>It works once</b> and expires when you get a new one. Keep it safe: it is the key to your game.',
     prMoveOk:'Game moved! Restarting…', prMoveGenOk:'Code ready. Write it down before closing.',
     prMoveBad:'That code is not valid or was already used.', prMoveSame:'That code belongs to this same game.',
     prMoveOff:'No connection: try again when you are back online.', prMoveEmpty:'Type the code first.',
     prMoveCopied:'✓ Code copied. Paste it on the other phone.', prMoveCopyManual:'Code selected: long-press and choose Copy.',
-    prAccH:'🔑 Your account', prAccGuest:'You are playing <b>as a guest</b>', prAccSaved:'Account saved:',
+    prAccH:'Your account', prAccGuest:'You are playing <b>as a guest</b>', prAccSaved:'Account saved:',
     prAccNote:'Your game is already saved on the server, but <b>only this phone knows it is yours</b>. Save your account and you can log in from anywhere.',
     prAccCreate:'Save my account', prAccLogin:'I already have one', prAccGoogle:'Google · soon', prAccMeta:'Facebook · soon',
     prAccOkNew:'✓ Account saved. You can now log in from another phone.', prAccOkIn:'✓ Welcome back! Bringing your game…',
@@ -3261,12 +3289,18 @@ function openDetail(k){ applyShell(); const A=ARCHS[k], b=owned(k), q=QUAL[A.q],
       prim.textContent = A.hito ? s.hitoBtn(A.hito) : s.fichasBtn(A.fichas); prim.disabled=true; prim.onclick=null; ghost.style.display='none'; }
   } else { const idx=SAVE.balls.indexOf(b), isEq=SAVE.equipped===idx;
     prim.textContent=isEq?S().equippedBtn:S().equipBtn; prim.disabled=isEq;
-    prim.onclick=()=>{ SAVE.equipped=idx; persist(); openDetail(k); renderGaraje(); toast(S().tEquipped); }; ghost.style.display='none'; }
+    //+AG EQUIPAR CIERRA LA FICHA (VB Jaime 26-jul). Antes se re-abria la ficha con el boton ya apagado
+    //   ("✓ Equipada") y el jugador se quedaba parado: habia hecho lo que venia a hacer y la pantalla no
+    //   se movia, con la unica salida en la ✕ de arriba a la derecha, que no mira nadie. Ahora se comporta
+    //   como elegir personaje en Brawl Stars: eliges y te devuelve al Garaje, donde YA VES tu bola puesta.
+    //   El toast confirma; renderGaraje() antes de cerrar para que al aterrizar la marca ya este pintada.
+    prim.onclick=()=>{ SAVE.equipped=idx; persist(); renderGaraje(); closeDetail(); toast(S().tEquipped); }; ghost.style.display='none'; }
   //+AG doc 40: el boton grande brilla solo si se puede pulsar Y no hay ya otra cosa brillando en la ficha
   //   (si la bola esta lista para subir de nivel, ESA es la accion del momento).
   prim.classList.toggle('ready', !prim.disabled && !lvlUpReady);
   el('gDetail').classList.add('on');
 }
+function closeDetail(){ el('gDetail').classList.remove('on'); }   //+AG una sola puerta de salida: ✕, VOLVER, tocar fuera y equipar pasan por aqui
 function unlock(k,withGems){ const A=ARCHS[k];   // transacción compartida por Garaje y Tienda; el que llama re-renderiza
   if(A.price==null) return false;   //+AG doc 39: hitos/Fichas no pasan por aquí
   if(withGems){ const p=gemaPrice(A.price); if(SAVE.gemas<p) return false; SAVE.gemas-=p; } else { if(SAVE.chispas<A.price) return false; SAVE.chispas-=A.price; }
@@ -3824,8 +3858,8 @@ document.querySelectorAll('.subtabs').forEach(grp=>{
   }));
 });
 el('homeGarTab').onclick=openGaraje; el('garTabJugar').onclick=goHome; el('gBack').onclick=goHome;
-el('gdClose').onclick=()=>el('gDetail').classList.remove('on');
-el('gDetail').addEventListener('click',e=>{ if(e.target.id==='gDetail') el('gDetail').classList.remove('on'); });
+el('gdClose').onclick=closeDetail; el('gdBack').onclick=closeDetail;
+el('gDetail').addEventListener('click',e=>{ if(e.target.id==='gDetail') closeDetail(); });
 el('homeShopTab').onclick=openTienda; el('garShopTab').onclick=openTienda;
 el('shBack').onclick=goHome; el('shTabJugar').onclick=goHome; el('shTabGaraje').onclick=openGaraje;
 el('pgOk').onclick=parentalOk; el('pgNo').onclick=()=>el('parent').classList.remove('on');
