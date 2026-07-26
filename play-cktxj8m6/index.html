@@ -246,24 +246,31 @@
   .gd-chip:disabled{ opacity:.35; border-color:var(--line); color:var(--muted); cursor:default; background:#ffffff08; }
   .gd-hint{ font-size:12.5px; color:#8fe0a8; font-weight:700; text-align:center; min-height:15px; }
   .gd-actions{ width:100%; max-width:370px; display:flex; flex-direction:column; gap:8px; }
+  .gd-row{ display:flex; gap:8px; align-items:stretch; }
+  .gd-row .gd-btn.prim{ flex:1; min-width:0; }
   .gd-btn{ border:0; border-radius:16px; padding:15px; font-family:inherit; font-weight:900; font-size:17px; cursor:pointer; }
   .gd-btn.prim{ color:#3a2400; background:linear-gradient(#ffe27a,#ff9a3d); box-shadow:0 4px 0 #b45a10; }
   .gd-btn.prim:disabled{ filter:grayscale(.55) brightness(.82); box-shadow:none; cursor:default; }
   .gd-btn.ghost{ border:1px solid var(--line); background:#ffffff10; color:#c9cff0; font-size:15px; }
-  /*+AG SALIDA ABAJO, AL ALCANCE DEL PULGAR (VB Jaime 26-jul). La ✕ de arriba a la derecha existe y se queda,
-     pero nadie la mira: la vista y el dedo estan en el boton grande de abajo. En Brawl Stars la ficha del
-     personaje nunca deja al jugador sin salida en la zona baja, y la accion de "elegir" te devuelve sola.
-     Aqui: 1) equipar CIERRA la ficha (el jugador ya esperaba que se cerrara), 2) para todo lo demas
-     (bloqueada, o ya equipada) hay este VOLVER debajo. Compacto a proposito: es la salida, no la accion,
-     y cada pixel de alto cuenta porque la ficha no hace scroll. */
-  /*+AG salio primero SIN cuerpo (border:0; background:none) y Jaime lo canto: "se ve demasiado poco".
-     El auditor de arte midio el contraste — 6.6:1, se lee de sobra — o sea que NO era el color: era que
-     resultaba el unico elemento pulsable de la ficha sin silueta, y el ojo lo leia como leyenda o como
-     texto apagado. Supercell no deja nunca un control tocable como texto desnudo. Se le da cuerpo con el
-     MISMO idioma que ya usan los otros secundarios de este juego (.g-back, .gd-btn.ghost, .r-home.ico:
-     borde var(--line) + velo blanco), un punto mas flojo que ghost para que la jerarquia se lea
-     dorado > ghost > volver. Sin sombra dura abajo: ese bisel es del boton primario y de nadie mas. */
-  .gd-btn.back{ border:1px solid var(--line); background:#ffffff0d; color:#c9cff0; font-size:14px; font-weight:800; padding:9px; letter-spacing:.02em; }
+  /*+AG LA SALIDA DE LA FICHA: UNA SOLA, ICONO, PEGADA AL CTA (26-jul). Tres pasadas hicieron falta.
+     1) Jaime: "tras equipar la gente se queda pillada, la ✕ de arriba a la derecha no la mira nadie" →
+        se anadio un "← Volver" ancho abajo. 2) Jaime: "no sigue el rollo de Supercell, se ve poco" → el
+        auditor de arte midio el contraste (6.6:1, se lee de sobra): el fallo no era el color, era que
+        era el unico control de la ficha SIN silueta, y el ojo lo leia como leyenda. 3) El auditor de UX,
+        ya con capturas reales delante, tumbo las dos opciones que se barajaban:
+        · La ficha de Brawler de Brawl Stars pone la salida arriba-izquierda, pero ESA es una pantalla
+          NAVEGADA a pantalla completa. La nuestra es un MODAL (inset:0 con el Garaje difuminado detras).
+          Mover la ✕ de una esquina a la otra no arregla "las esquinas no se miran": cambia cual falla.
+        · La que SI aplica es la ficha de carta de Clash Royale, misma arquitectura de modal: salida
+          UNICA, pequena, y el pie entero para la accion — nunca una barra ancha de texto para salir.
+     Sintesis, y por eso el marcado tiene ahora una .gd-row: UNA sola salida (la ✕ de arriba SE FUE, no
+     la usaba nadie), en forma de ICONO (se reconoce sin leer y no compite en peso con "Desbloquear"),
+     y abajo, junto al CTA, que es donde Jaime midio que la gente SI mira. Es el mismo boton que ya
+     existe en Resultados (.r-home.ico): misma anchura de 58, mismo path de flecha, mismo velo.
+     Y de propina QUITA alto en vez de sumarlo: la fila del volver desaparece (-47 px), que en movil
+     corto es justo lo que iba apretado. */
+  .gd-btn.back{ flex:0 0 58px; width:58px; padding:0; display:grid; place-items:center; border:1px solid var(--line); background:#ffffff10; color:#c9cff0; }
+  .gd-btn.back svg{ width:22px; height:22px; display:block; }
   .gd-btn.back:active{ background:#ffffff1c; color:#fff; }
   /*+AG MOVIL CORTO. Medido, no estimado: en 375x640 la ficha de una bola BLOQUEADA (la mas alta: lleva
      "Desbloquear" + "o pagar" + "Volver") se salia 28 px por arriba y por abajo — y 7 px ya se salia ANTES
@@ -1115,7 +1122,6 @@
   </div>
 </div>
 <div id="gDetail">
-  <button class="gd-close" id="gdClose">✕</button>
   <div class="gd-card" id="gdCard">
     <div class="gd-q" id="gdQ"></div>
     <div class="gd-name" id="gdName"></div>
@@ -1129,9 +1135,11 @@
     <div class="gd-hint" id="gdHint"></div>
   </div>
   <div class="gd-actions">
-    <button class="gd-btn prim" id="gdPrim"></button>
+    <div class="gd-row">
+      <button class="gd-btn prim" id="gdPrim"></button>
+      <button class="gd-btn back" id="gdBack" data-tt="back" data-tp="back" title="Atrás" aria-label="Atrás"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5 L8 12 L14.5 18.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
     <button class="gd-btn ghost" id="gdGhost" style="display:none"></button>
-    <button class="gd-btn back" id="gdBack" data-t="gdBack">← Volver</button>
   </div>
 </div>
 <!-- ===== TIENDA (secciones, cero azar, puerta parental, doc 12) ===== -->
@@ -2286,7 +2294,6 @@ const MORE={
     gdMoney:'El dinero solo compra VARIEDAD (bolas hasta Rara), nunca poder.',
     unlockBtn:p=>'Desbloquear · '+p+' ✦', orPay:g=>'o pagar '+g+' ◆',
     equipBtn:'Equipar', equippedBtn:'✓ Equipada', tEquipped:'¡Equipada!', tUnlocked:n=>'¡'+n+' desbloqueado!',
-    gdBack:'← Volver',
     // — Tienda —
     shSecs:['Destacados','Bolas','Cosméticos','Gemas','Pase'],
     shNoteFeat:'Escaparate que rota cada semana con el tema de temporada. Todo con precio y contenido a la vista, <b>nunca cajas sorpresa</b>.',
@@ -2433,7 +2440,6 @@ const MORE={
     gdMoney:'Money only buys VARIETY (balls up to Rare), never power.',
     unlockBtn:p=>'Unlock · '+p+' ✦', orPay:g=>'or pay '+g+' ◆',
     equipBtn:'Equip', equippedBtn:'✓ Equipped', tEquipped:'Equipped!', tUnlocked:n=>n+' unlocked!',
-    gdBack:'← Back',
     // — Shop —
     shSecs:['Featured','Balls','Cosmetics','Gems','Pass'],
     shNoteFeat:'A storefront that rotates every week with the season theme. Price and contents always in plain sight, <b>never loot boxes</b>.',
@@ -3906,7 +3912,7 @@ document.querySelectorAll('.subtabs').forEach(grp=>{
   }));
 });
 el('homeGarTab').onclick=openGaraje; el('garTabJugar').onclick=goHome; el('gBack').onclick=goHome;
-el('gdClose').onclick=closeDetail; el('gdBack').onclick=closeDetail;
+el('gdBack').onclick=closeDetail;
 el('gDetail').addEventListener('click',e=>{ if(e.target.id==='gDetail') closeDetail(); });
 el('homeShopTab').onclick=openTienda; el('garShopTab').onclick=openTienda;
 el('shBack').onclick=goHome; el('shTabJugar').onclick=goHome; el('shTabGaraje').onclick=openGaraje;
