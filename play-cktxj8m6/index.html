@@ -1294,9 +1294,9 @@
       <div class="sc-note" data-th="prAccNote"></div>
       <div id="prAccForm" style="margin-top:9px">
         <div class="pr-slots" style="gap:7px;flex-wrap:wrap">
-          <input id="prAccMail" type="email" autocomplete="email" spellcheck="false" placeholder="correo@ejemplo.com"
+          <input id="prAccMail" type="email" autocomplete="email" spellcheck="false" placeholder="correo@ejemplo.com" data-tph="prAccMailPh"
                  style="flex:1 1 100%;min-width:0;background:#101a2c;border:2px solid #2b3d5c;border-radius:11px;color:#eaf1ff;font:700 15px/1 inherit;padding:9px 10px">
-          <input id="prAccPass" type="password" autocomplete="new-password" placeholder="contraseña (6 o más)"
+          <input id="prAccPass" type="password" autocomplete="new-password" placeholder="contraseña (6 o más)" data-tph="prAccPassPh"
                  style="flex:1 1 100%;min-width:0;background:#101a2c;border:2px solid #2b3d5c;border-radius:11px;color:#eaf1ff;font:700 15px/1 inherit;padding:9px 10px">
         </div>
         <div class="pr-slots" style="gap:7px;margin-top:7px">
@@ -2345,6 +2345,7 @@ const MORE={
     prAccH:'Tu cuenta', prAccGuest:'Estás jugando <b>como invitado</b>', prAccSaved:'Cuenta guardada:',
     prAccNote:'Tu partida ya se guarda en el servidor, pero <b>solo este móvil sabe que es tuya</b>. Guarda tu cuenta y podrás entrar desde cualquier sitio.',
     prAccCreate:'Guardar mi cuenta', prAccLogin:'Ya tengo cuenta', prAccGoogle:'Continuar con Google', prAccMeta:'Facebook · pronto',
+    prAccMailPh:'correo@ejemplo.com', prAccPassPh:'contraseña (6 o más)',
     prAccOut:'Cerrar sesión', prAccOutAsk:'¿Cerrar sesión? Este móvil volverá a empezar como invitado. Tu partida queda guardada en tu cuenta y vuelve al entrar.', prAccOutOk:'✓ Sesión cerrada. Volviendo a empezar…',
     prAccOkNew:'✓ Cuenta guardada. Ya puedes entrar desde otro móvil.', prAccOkIn:'✓ ¡Hola de nuevo! Trayendo tu partida…',
     prAccBadMail:'Ese correo no parece válido.', prAccBadPass:'La contraseña necesita 6 caracteres o más.',
@@ -2491,6 +2492,7 @@ const MORE={
     prAccH:'Your account', prAccGuest:'You are playing <b>as a guest</b>', prAccSaved:'Account saved:',
     prAccNote:'Your game is already saved on the server, but <b>only this phone knows it is yours</b>. Save your account and you can log in from anywhere.',
     prAccCreate:'Save my account', prAccLogin:'I already have one', prAccGoogle:'Continue with Google', prAccMeta:'Facebook · soon',
+    prAccMailPh:'email@example.com', prAccPassPh:'password (6 or more)',
     prAccOut:'Log out', prAccOutAsk:'Log out? This phone starts again as a guest. Your game stays in your account and comes back when you log in.', prAccOutOk:'✓ Logged out. Starting over…',
     prAccOkNew:'✓ Account saved. You can now log in from another phone.', prAccOkIn:'✓ Welcome back! Bringing your game…',
     prAccBadMail:'That email does not look valid.', prAccBadPass:'The password needs 6 characters or more.',
@@ -2564,10 +2566,12 @@ const NLOC={es:'es-ES',en:'en-US',pt:'pt-BR',fr:'fr-FR',de:'de-DE',it:'it-IT',ja
 const nfmt=n=>Number(n||0).toLocaleString(NLOC[LANG]||'en-US');
 function applyShell(){ const s=S();
   document.querySelectorAll('[data-t]').forEach(e=>{ const v=s[e.dataset.t]; if(typeof v==='string') e.textContent=v; });
-  //+AG data-th = el texto lleva <b>/<small> (notas legales, hero de Temporada…); data-tt = title; data-tp = placeholder
+  //+AG data-th = el texto lleva <b>/<small> (notas legales, hero de Temporada…); data-tt = title; data-tp = aria-label
   document.querySelectorAll('[data-th]').forEach(e=>{ const v=s[e.dataset.th]; if(typeof v==='string') e.innerHTML=v; });
   document.querySelectorAll('[data-tt]').forEach(e=>{ const v=s[e.dataset.tt]; if(typeof v==='string') e.title=v; });
   document.querySelectorAll('[data-tp]').forEach(e=>{ const v=s[e.dataset.tp]; if(typeof v==='string') e.setAttribute('aria-label',v); });
+  //+AG data-tph = el PLACEHOLDER del input (data-tp solo ponia el aria-label: los campos de Cuenta se quedaban en español)
+  document.querySelectorAll('[data-tph]').forEach(e=>{ const v=s[e.dataset.tph]; if(typeof v==='string') e.placeholder=v; });
   //+AG data-ti = elemento cuyo texto sale de un ARRAY del diccionario (pestañas, escalones de liga, emotes)
   document.querySelectorAll('[data-ti]').forEach(e=>{ const [k,i]=e.dataset.ti.split(':'), v=s[k]; if(Array.isArray(v)&&v[+i]!=null) e.textContent=v[+i]; });
   //+AG data-soon: el toast de "próximamente" tambien localizado (la etiqueta viene del diccionario, no del atributo)
