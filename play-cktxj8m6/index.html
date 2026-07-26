@@ -576,7 +576,6 @@
   #selector{ background:radial-gradient(130% 90% at 50% 8%, #5a2ec2 0%, var(--bg-mid) 45%, var(--bg-lo) 100%); }
   #selector .selhead{ display:flex; align-items:center; gap:10px; padding:14px 16px 8px; }
   #selector .selhead h1{ margin:0; font-size:21px; font-weight:900; letter-spacing:.02em; }
-  #selector .selhead .sub{ font-size:11px; color:var(--muted); font-weight:700; margin-top:1px; }
   .modegrid{ flex:1; min-height:0; overflow-y:auto; padding:8px 14px 18px;
     display:grid; grid-template-columns:1fr 1fr; gap:12px; align-content:start; }
   /* con las cartas a 4/3 sobran ~600 px por debajo y la pantalla parecia rota. Centrada, el aire se
@@ -584,11 +583,19 @@
      vuelve a comportarse como start y no se pierde la primera fila por arriba; los navegadores que no
      entiendan la palabra clave se saltan la linea entera y se quedan en el start de arriba. */
   .modegrid{ align-content:safe center; }
-  /* en un movil normal (>=700 px de alto) sobraban ~250 px por arriba y por abajo con las cartas a
-     7/6, y una rejilla flotando en medio de la nada no se lee como una pantalla acabada. Ahi la carta
-     se pone cuadrada y la imagen gana 40 px. En los cortos (640) se queda en 7/6, que es lo unico
-     que cabe: 3 filas cuadradas piden 644 px y no entran. Medido en los dos, no estimado. */
-  @media (min-height:700px){ .modegrid .tile{ aspect-ratio:1/1; } }   /* .modegrid delante a proposito: el bloque .tile va MAS ABAJO y con la misma especificidad ganaba el */
+  /* CUANTO OCUPA LA CARTA. Al quitar la nota al pie se liberaron ~16 px mas, y seguian sobrando ~100
+     px por debajo de la rejilla en un movil normal: la carta estaba pequena por decision, no porque no
+     cupiera. Ahora se queda el hueco:
+       · movil normal (>=700 de alto): 6/7, carta ~167x193. La imagen pasa de 125 a ~147 px de alto.
+         5/6 (~201) se pasaba 6 px y la rejilla arrancaba a hacer scroll: __fitCheck lo canto. 6/7 es
+         lo mas grande que cabe sin scroll con la banda de letra legible.
+       · movil corto (640): cuadrada, carta ~167x167. La imagen queda en ~114, mas que los 125 de antes
+         menos la banda, que ahora es mas alta porque la letra es legible.
+     En 2 columnas la carta NO puede crecer mas sin volverse un rectangulo vertical raro: el ancho lo
+     fija la rejilla en 167 px. Si algun dia se decide pasar a banner de una columna (pendiente de
+     contrastar con la captura real de Brawl Stars), esta es la linea que cambia. Medido en los dos
+     altos con __fitCheck(), no estimado. */
+  @media (min-height:700px){ .modegrid .tile{ aspect-ratio:6/7; } }   /* .modegrid delante a proposito: el bloque .tile va MAS ABAJO y con la misma especificidad ganaba el */
   /*+AG CARTA DE MODO v3 (26-jul), copiando la CARTA DE EVENTO DE BRAWL STARS con la referencia delante
        (pantalla "CHOOSE EVENT", vista en capturas reales; antes se dictaminó de memoria y salió un
        wireframe: rectángulo de color con un icono flotando en medio, que es justo lo que ellos NO hacen).
@@ -599,22 +606,47 @@
          · Estado (su temporizador / nuestro badge del día) arriba a la derecha.
          · Lo bloqueado mantiene la misma banda y enseña la condición en el cuerpo, sin imagen.
        El icono grande centrado se va: en Brawl el icono es un sello de 26 px, no el protagonista. */
-  .tile{ position:relative; aspect-ratio:7/6; border-radius:18px; overflow:hidden; cursor:pointer;
+  .tile{ position:relative; aspect-ratio:1/1; border-radius:18px; overflow:hidden; cursor:pointer;
     border:1px solid #ffffff26; box-shadow:0 10px 26px #0009, inset 0 1px 0 #ffffff22; display:flex; flex-direction:column; transition:transform .1s; }
   .tile:active{ transform:scale(.95); }
   /* la seleccion va en BLANCO, el mismo lenguaje que .rktile.on. El dorado se reserva a la accion
      primaria (JUGAR) y al badge del dia: repartido en tres sitios no marcaba ninguno. */
-  .tile.sel{ border-color:#fff; box-shadow:0 0 0 2px #ffffffcc, 0 10px 26px #0009; }
+  /*+AG 26-jul (tarde): el anillo era de 2 px sobre una carta con foto de fondo y banda oscura, y a un
+     jugador nuevo se le pasaba. Sube a 3 px. No se le anade brillo ni pulso: .ready sigue siendo
+     exclusivo de JUGAR en el inicio, esta pantalla no inventa un segundo lenguaje de "pulsame". */
+  .tile.sel{ border-color:#fff; box-shadow:0 0 0 3px #ffffffcc, 0 10px 26px #0009; }
+  /*+AG 26-jul (tarde) · COLOR PROPIO DE CADA MODO — copiado de la captura real de CHOOSE EVENT, con
+     la referencia delante esta vez. En Brawl Stars la banda del nombre NO es del mismo color en todas
+     las cartas: Gem Grab la lleva morada, Showdown verde, Brawl Ball lavanda. Es lo que hace que la
+     rejilla no parezca una plantilla repetida cinco veces — y era el defecto gordo de esta pantalla:
+     cinco bandas azul marino identicas. En el lobby, ademas, la segunda linea va EN EL COLOR del modo
+     (magenta en "Division cellulaire"), no en gris; aqui igual.
+     Los colores salen de las 8 bolas canonicas (docs/16 §9), que es la paleta que audita lint-arte:
+     no se inventa ni uno. Van con alfa sobre el azul oscuro solido, asi el blanco del nombre sigue
+     leyendose en las cinco (medido el contraste, no supuesto). Las BLOQUEADAS no reciben color: se
+     quedan en gris por el fallback de var(), que es lo que significa estar apagado. */
+  .tile[data-mode="redlight"]{ --mc:#FF8C1F; --mcb:#FF8C1F5c; }   /* la pista es salmon y la franja ambar */
+  .tile[data-mode="race"]    { --mc:#2E85FF; --mcb:#2E85FF5c; }   /* campo azul noche con carriles cian */
+  .tile[data-mode="cazador"] { --mc:#F22E33; --mcb:#F22E335c; }   /* el depredador y el liston de peligro */
   .tile .thead{ position:relative; z-index:2; flex:0 0 auto; display:flex; align-items:center; gap:7px;
-    padding:6px 9px; background:linear-gradient(180deg,#1b1547,#161139); border-bottom:1px solid #ffffff14; }
+    padding:6px 9px; background-color:#161139; border-bottom:1px solid #ffffff14;
+    background-image:linear-gradient(180deg, var(--mcb,#1b1547), #16113900); }
   .tile .ticon{ font-size:24px; line-height:1; flex:0 0 auto; filter:drop-shadow(0 2px 4px #0009); }
   .tile .ticon .msvg{ width:26px; height:26px; }
   .tile .ttxt{ min-width:0; display:flex; flex-direction:column; gap:1px; }
-  .tile .tname{ min-width:0; font-size:11.5px; font-weight:900; letter-spacing:-.01em; line-height:1.08; }
+  .tile .tname{ min-width:0; font-size:15px; font-weight:900; letter-spacing:-.01em; line-height:1.08; }
   /* la linea de "que se hace aqui": es la que convierte el rotulo en una carta que se entiende sin
      haber jugado. Una sola linea SIEMPRE: si no cabe, se corta con puntos suspensivos, nunca envuelve
      (dos lineas descuadrarian la banda y comerian imagen). */
-  .tile .tsub{ min-width:0; font-size:8.5px; font-weight:800; color:#9aa3c7; letter-spacing:.01em;
+  /*+AG 26-jul (tarde): estaba a 8.5px, que no es un tamano, es una excusa. El nombre a 11.5 y la linea
+     de apoyo a 8.5 salieron de apretar la carta en 165 px de alto cuando sobraban ~100 px de pantalla
+     por debajo: se encogio la letra para no tocar la rejilla. Ahora la carta crece (abajo) y la letra
+     vuelve a tamano de dedo: nombre 15px, apoyo 12px. */
+  /* el color puro del modo sobre la banda daba 4.44:1 en el rojo del Cazador (medido), justo por
+     debajo del minimo legible. Se aclara mezclando con blanco: sigue siendo SU color y no se inventa
+     ninguno nuevo. Los bloqueados caen al gris de siempre por el fallback. */
+  .tile .tsub{ min-width:0; font-size:12px; font-weight:800; letter-spacing:.01em;
+    color:color-mix(in srgb, var(--mc,#9aa3c7) 80%, #FFFFFF);
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .tile .tart{ position:relative; z-index:0; flex:1 1 auto; min-height:0; overflow:hidden; background:#0b0a1e; }
   .tile .tart img{ width:100%; height:100%; object-fit:cover; display:block; }
@@ -625,8 +657,12 @@
   .tile .tscrim{ position:absolute; left:0; right:0; bottom:0; height:38%; z-index:1; pointer-events:none;
     background:linear-gradient(180deg, transparent, #06050e73); }
   /* el badge va DENTRO de la imagen, nunca sobre la banda: puesto arriba del todo tapaba el nombre
-     ("EL CAZAD…"). En Brawl el estado tampoco pisa el rótulo, vive fuera de él. */
-  .tile .tday{ position:absolute; top:47px; right:6px; z-index:3; font-size:9.5px; font-weight:900; color:#3a2400;
+     ("EL CAZAD…"). En Brawl el estado tampoco pisa el rótulo, vive fuera de él.
+     +AG 26-jul (tarde): estaba en top:47px, un numero magico atado a que la banda midiera 45. Al subir
+     la letra a 15/12 la banda crecio y el badge se salvo por 2 px de churro. Ahora el badge VIVE DENTRO
+     de .tart (movido en el marcado de los tres modos abiertos) y se ancla a la imagen con top:6px: la
+     banda puede crecer lo que quiera y esto no se rompe nunca mas. */
+  .tile .tart .tday{ position:absolute; top:6px; right:6px; z-index:3; font-size:11px; font-weight:900; color:#3a2400;
     background:linear-gradient(#ffe27a,#ffb43d); border-radius:999px; padding:3px 8px; box-shadow:0 3px 10px #ffb03d77, inset 0 1px 0 #fff8; }
   .tile.locked{ border-color:#ffffff14; }
   .tile.locked .thead{ background:linear-gradient(180deg,#171536,#12102c); }
@@ -642,7 +678,6 @@
   .tile .tlk{ font-size:18px; }
   .tile img.tlk{ width:22px; height:22px; object-fit:contain; }   /*+AG doc 41: candado de arte */
   .tile .tcond{ font-size:10px; font-weight:800; color:#8b93b8; background:#ffffff0d; border:1px solid var(--line); border-radius:999px; padding:3px 8px; }
-  .gridnote{ grid-column:1 / -1; font-size:11px; color:#6f79a0; font-weight:700; text-align:center; padding:2px 0 0; }
   /*+AG COPAS POR BOLA (doc 37): tarjeta de copas de la bola + tabla de 8 puestos en Resultados */
   #results{ overflow-y:auto; justify-content:flex-start; padding-top:calc(20px + env(safe-area-inset-top)); }
   #results .r-card{ margin-top:auto; }
@@ -825,11 +860,13 @@
 
 <!-- ===== SELECTOR (rejilla de modos 2 columnas, mockups/flow.html · regla de oro: tocar un tile SELECCIONA, no arranca) ===== -->
 <div id="selector" class="scr">
+  <!--+AG el subtitulo en prosa ("Todos a la vista · toca uno y vuelves al inicio con el") y la nota al
+       pie ("Tocar un modo lo deja elegido...") SE FUERON: explicaban con una frase la misma regla que
+       la pantalla ya cuenta con la forma. Supercell no rotula su propio menu; la regla se comunica con
+       el ESTADO (la carta elegida se marca) y con el flujo (JUGAR vive en el inicio, no aqui). Si algun
+       dia hay que ensenarla, va como coach-mark de un solo uso reusando el patron de COMO JUGAR. -->
   <div class="selhead">
-    <div>
-      <h1 data-t="selTitle">MODOS</h1>
-      <div class="sub" data-t="selSub">Todos a la vista · toca uno y vuelves al inicio con él</div>
-    </div>
+    <h1 data-t="selTitle">MODOS</h1>
     <button class="sclose" id="selClose" data-tt="backHome" title="Volver al inicio">✕</button>
   </div>
   <div class="modegrid" id="modegrid">
@@ -838,24 +875,24 @@
          lo que promete la carta es exactamente lo que sale al jugar. -->
     <!-- LUZ ROJA -->
     <div class="tile" data-mode="redlight">
-      <div class="thead"><div class="ticon">🚦</div><div class="ttxt"><div class="tname" data-mname="redlight">LUZ ROJA</div><div class="tsub" data-t="subRedlight">Corre y frena a tiempo</div></div></div>
-      <div class="tart"><img src="arte/modos/redlight.webp" alt="" loading="lazy"></div>
+      <div class="thead"><div class="ticon">🚦</div><div class="ttxt"><div class="tname" data-mname="redlight">LUZ ROJA</div><div class="tsub" data-t="subRedlight">Corre y frena</div></div></div>
+      <div class="tart"><img src="arte/modos/redlight.webp" alt="" loading="lazy">
+        <div class="tday" data-t="dayBadge" style="display:none">⭐ DÍA · +50%</div></div>
       <div class="tscrim"></div>
-      <div class="tday" data-t="dayBadge" style="display:none">⭐ DÍA · +50%</div>
     </div>
     <!-- LA GRAN CARRERA -->
     <div class="tile" data-mode="race">
       <div class="thead"><div class="ticon">🏁</div><div class="ttxt"><div class="tname" data-mname="race">LA GRAN CARRERA</div><div class="tsub" data-t="subRace">Llega el primero</div></div></div>
-      <div class="tart"><img src="arte/modos/race.webp" alt="" loading="lazy"></div>
+      <div class="tart"><img src="arte/modos/race.webp" alt="" loading="lazy">
+        <div class="tday" data-t="dayBadge" style="display:none">⭐ DÍA · +50%</div></div>
       <div class="tscrim"></div>
-      <div class="tday" data-t="dayBadge" style="display:none">⭐ DÍA · +50%</div>
     </div>
     <!-- EL CAZADOR -->
     <div class="tile" data-mode="cazador">
       <div class="thead"><div class="ticon">🎯</div><div class="ttxt"><div class="tname" data-mname="cazador">EL CAZADOR</div><div class="tsub" data-t="subCazador">Huye del monstruo</div></div></div>
-      <div class="tart"><img src="arte/modos/cazador.webp" alt="" loading="lazy"></div>
+      <div class="tart"><img src="arte/modos/cazador.webp" alt="" loading="lazy">
+        <div class="tday" data-t="dayBadge" style="display:none">⭐ DÍA · +50%</div></div>
       <div class="tscrim"></div>
-      <div class="tday" data-t="dayBadge" style="display:none">⭐ DÍA · +50%</div>
     </div>
     <!-- RECOLECTA (bloqueado decorativo) -->
     <div class="tile locked" data-locklvl="5">
@@ -869,7 +906,6 @@
       <div class="tart"><img src="arte/modos/suelo.webp" alt="" loading="lazy">
         <div class="tlockbox"><img class="tlk" src="arte/ui/ui-candado.webp" alt=""><div class="tcond" data-lvln="8">Nivel 8</div></div></div>
     </div>
-    <div class="gridnote" data-t="gridNote">Tocar un modo lo deja elegido en el inicio · JUGAR lo arranca desde allí</div>
   </div>
 </div>
 <!-- ===== RANKING (doc 37 §5 + doc 36): Global / Por bola / Diario · bots-persona ===== -->
@@ -2088,7 +2124,7 @@ const SHELL={
     //+AG segunda linea de la carta de modo. En la carta de evento de Brawl bajo el nombre del modo va
     //   siempre el del mapa; aqui no hay mapas, asi que la linea dice QUE SE HACE. Corta a proposito:
     //   a 175 px de carta no cabe una frase.
-    subRace:'Llega el primero', subCazador:'Huye del monstruo', subRedlight:'Corre y frena a tiempo',
+    subRace:'Llega el primero', subCazador:'Huye del monstruo', subRedlight:'Corre y frena',
     subRecolecta:'Recoge más gemas', subSuelo:'Sobrevive al suelo',
     dayBadge:'⭐ DÍA · +50%', dayBonusWhy:'+50% modo del día', cupsTotal:'Total',
     heroTag:'Tu bola equipada · toca para ver la colección', passTitle:'PASE DE TEMPORADA',
@@ -2096,8 +2132,7 @@ const SHELL={
     playSolo:'JUGAR INDIVIDUAL', playTeam:'JUGAR POR EQUIPOS', soonTag:'pronto',
     howTo:'CÓMO JUGAR', howToDone:m=>'¡Tutorial de '+m+' completado! 🎓',
     teamSoonToast:m=>'POR EQUIPOS en '+m+' llegará pronto',
-    selTitle:'MODOS', selSub:'Todos a la vista · toca uno y vuelves al inicio con él',
-    gridNote:'Tocar un modo lo deja elegido en el inicio · JUGAR lo arranca desde allí',
+    selTitle:'MODOS',
     lockLvl:n=>'Se desbloquea en el Nivel '+n,
     rNoticias:'Noticias', rRanking:'Ranking', rAmigos:'Amigos', rClub:'Club',
     noticiasToast:'Noticias: próximamente', amigosToast:'Amigos llegará con las cuentas online', clubToast:'El Club llegará con las cuentas online',
@@ -2120,7 +2155,7 @@ const SHELL={
     soon:' · coming soon', levelUp:n=>'Level '+n+' reached! 🎉',
     //+AG Home v3 (docs/35 v2.2 + 37)
     mCazador:'THE HUNTER', mRedlight:'RED LIGHT', modeLbl:'Mode', change:'CHANGE', playWord:'PLAY',
-    subRace:'Get there first', subCazador:'Escape the monster', subRedlight:'Run and brake in time',
+    subRace:'Get there first', subCazador:'Escape the monster', subRedlight:'Run and brake',
     subRecolecta:'Grab the most gems', subSuelo:'Outlast the floor',
     dayBadge:'⭐ TODAY · +50%', dayBonusWhy:'+50% mode of the day', cupsTotal:'Total',
     heroTag:'Your equipped ball · tap to see the collection', passTitle:'SEASON PASS',
@@ -2128,8 +2163,7 @@ const SHELL={
     playSolo:'PLAY SOLO', playTeam:'PLAY IN TEAMS', soonTag:'soon',
     howTo:'HOW TO PLAY', howToDone:m=>m+' tutorial complete! 🎓',
     teamSoonToast:m=>'TEAMS in '+m+' is coming soon',
-    selTitle:'MODES', selSub:'All in view · tap one and go back home with it',
-    gridNote:'Tapping a mode selects it on home · PLAY starts it from there',
+    selTitle:'MODES',
     lockLvl:n=>'Unlocks at Level '+n,
     rNoticias:'News', rRanking:'Ranking', rAmigos:'Friends', rClub:'Club',
     noticiasToast:'News: coming soon', amigosToast:'Friends arrive with online accounts', clubToast:'The Club arrives with online accounts',
