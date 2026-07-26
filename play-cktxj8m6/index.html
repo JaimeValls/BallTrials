@@ -1173,6 +1173,20 @@
       <div class="pr-emotes"><span class="pr-emote" data-ti="prEmotes:0"></span><span class="pr-emote" data-ti="prEmotes:1"></span><span class="pr-emote" data-ti="prEmotes:2"></span><span class="pr-emote" data-ti="prEmotes:3"></span><span class="pr-emote" data-ti="prEmotes:4"></span></div>
     </div>
 
+    <!--+AG docs/42 Fase 2: llevarse la partida a otro movil. Es la unica via de recuperar
+         cuenta que no depende de Google ni de Meta, asi que es la que existe hoy. -->
+    <div class="sc-block" data-sub="mas">
+      <div class="sc-h" data-t="prMoveH">Llevar mi partida a otro móvil</div>
+      <div class="sc-note" data-th="prMoveNote"></div>
+      <div class="pr-code"><span class="cd" id="prMoveCode">BT-••••-••••</span><button id="prMoveGen" data-t="prMoveGen">Generar código</button></div>
+      <div class="pr-slots" style="gap:7px">
+        <input id="prMoveIn" maxlength="14" autocomplete="off" spellcheck="false" placeholder="BT-XXXX-XXXX"
+               style="flex:1;min-width:0;background:#101a2c;border:2px solid #2b3d5c;border-radius:11px;color:#eaf1ff;font:700 15px/1 inherit;padding:9px 10px;text-align:center;letter-spacing:1px">
+        <button class="pr-inv" id="prMoveUse" data-t="prMoveUse">Traer mi partida</button>
+      </div>
+      <div class="sc-note" id="prMoveMsg" style="min-height:1.2em"></div>
+    </div>
+
     <div class="sc-block" data-sub="mas">
       <div class="sc-h" data-t="prChanH">Salir en el canal</div>
       <div class="pr-toggle">
@@ -2167,6 +2181,11 @@ const MORE={
     prShowNote:'En cuentas de menores el escaparate (stats, colección, récords) es <b>privado</b> salvo que lo abra un adulto verificado.',
     prFriendsH:'👥 Amigos', prFriendsSoon:'acciones · pronto', prYourCode:'Tu código:', prCopy:'Copiar',
     prAddCode:'Añadir por código',
+    prMoveH:'📱 Llevar mi partida a otro móvil', prMoveGen:'Generar código', prMoveUse:'Traer mi partida',
+    prMoveNote:'Genera un código en el móvil donde juegas y escríbelo en el nuevo. <b>Sirve una sola vez</b> y caduca al generar otro. Guárdalo: es la llave de tu partida.',
+    prMoveOk:'¡Partida traída! Reiniciando…', prMoveGenOk:'Código listo. Apúntalo antes de cerrar.',
+    prMoveBad:'Ese código no vale o ya se usó.', prMoveSame:'Ese código es de esta misma partida.',
+    prMoveOff:'Sin conexión: inténtalo cuando vuelva la red.', prMoveEmpty:'Escribe el código primero.',
     prFriendsNote:'Amigos solo por <b>contactos + código</b> (nada de búsqueda abierta ni desconocidos). Rankings entre amigos y piques sanos, <b>sin chat libre</b>.',
     prRefH:'🎁 Invita y gana',
     prRefTx:'<b>Tú y tu amigo</b> ganáis <b>100 ✦</b> + un cosmético de bienvenida cuando se una y juegue. Fijo y con tope anti-granja.',
@@ -2298,6 +2317,11 @@ const MORE={
     prShowNote:'On kids’ accounts the showcase (stats, collection, records) is <b>private</b> unless a verified adult opens it.',
     prFriendsH:'👥 Friends', prFriendsSoon:'actions · soon', prYourCode:'Your code:', prCopy:'Copy',
     prAddCode:'Add by code',
+    prMoveH:'📱 Move my game to another phone', prMoveGen:'Get a code', prMoveUse:'Bring my game here',
+    prMoveNote:'Get a code on the phone you play on and type it on the new one. <b>It works once</b> and expires when you get a new one. Keep it safe: it is the key to your game.',
+    prMoveOk:'Game moved! Restarting…', prMoveGenOk:'Code ready. Write it down before closing.',
+    prMoveBad:'That code is not valid or was already used.', prMoveSame:'That code belongs to this same game.',
+    prMoveOff:'No connection: try again when you are back online.', prMoveEmpty:'Type the code first.',
     prFriendsNote:'Friends only via <b>contacts + code</b> (no open search, no strangers). Rankings among friends and friendly rivalry, <b>no free chat</b>.',
     prRefH:'🎁 Invite and earn',
     prRefTx:'<b>You and your friend</b> each get <b>100 ✦</b> + a welcome cosmetic when they join and play. Fixed, with an anti-farming cap.',
@@ -3203,7 +3227,50 @@ function buildPaseTrack(){ const t=el('seTrack'); if(!t) return; t.innerHTML='';
     t.appendChild(r); } }
 function openTemporada(){ showScreen('temporada'); applyShell(); el('seChispas').textContent=SAVE.chispas; el('seGemas').textContent=SAVE.gemas; drawPreviewBall(el('seChamp'), TEAMS[3].color); buildPaseTrack(); }
 function openPerfil(){ showScreen('perfil'); applyShell(); el('prChispas').textContent=SAVE.chispas; el('prGemas').textContent=SAVE.gemas; el('prLvl').textContent=SAVE.level; el('prColl').textContent=SAVE.balls.length; drawPreviewBall(el('prAv'), TEAMS[0].color);
-  const sw=el('prConsent'); sw.onclick=()=>{ const on=sw.classList.toggle('on'); sw.setAttribute('aria-checked',on?'true':'false'); toast(on?S().tChanOn:S().tChanOff); }; }
+  const sw=el('prConsent'); sw.onclick=()=>{ const on=sw.classList.toggle('on'); sw.setAttribute('aria-checked',on?'true':'false'); toast(on?S().tChanOn:S().tChanOff); };
+  wireTraspaso(); }
+
+//+AG docs/42 Fase 2: LLEVARSE LA PARTIDA. Dos botones, ningun concepto nuevo que explicar.
+//   La nube vive en un modulo que carga despues (window.BT_NUBE); si aun no esta o no hay red,
+//   se dice y no pasa nada mas: el juego local sigue igual (Regla 2 de sincro.mjs).
+function wireTraspaso(){
+  const gen=el('prMoveGen'), usa=el('prMoveUse'), inp=el('prMoveIn'), out=el('prMoveCode'), msg=el('prMoveMsg');
+  if(!gen || gen._wired) return; gen._wired=true;
+  const di=(t,bien)=>{ msg.innerHTML=t; msg.style.color = bien===undefined ? '' : (bien?'#8fe0a8':'#eb6b6b'); };
+  const nube=()=>window.BT_NUBE && window.BT_NUBE.nube;
+
+  gen.onclick=async()=>{
+    if(!nube()) return di(S().prMoveOff,false);
+    gen.disabled=true; di('…');
+    try{ const c=await nube().crearCodigoTransferencia(); out.textContent=c; di(S().prMoveGenOk,true); }
+    catch(e){ di(S().prMoveOff,false); console.warn('[traspaso] generar', e); }
+    finally{ gen.disabled=false; }
+  };
+
+  //+AG teclear BT-XXXX-XXXX en un movil es incomodo: se pone en mayusculas y se mete el guion solo.
+  inp.oninput=()=>{ let v=inp.value.toUpperCase().replace(/[^A-Z0-9]/g,'');
+    if(v.startsWith('BT')) v=v.slice(2);
+    inp.value='BT-'+v.slice(0,4)+(v.length>4?'-'+v.slice(4,8):''); };
+
+  usa.onclick=async()=>{
+    const v=inp.value.trim();
+    if(!/^BT-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(v)) return di(S().prMoveEmpty,false);
+    if(!nube()) return di(S().prMoveOff,false);
+    usa.disabled=true; di('…');
+    try{
+      const traido=await nube().canjearCodigoTransferencia(v);
+      di(S().prMoveOk,true);
+      //+AG igual que al traer estado en el arranque: se escribe y se recarga, que es lo unico
+      //   que re-pinta las 8 pantallas sin inventarse un camino nuevo.
+      try{ localStorage.setItem(SAVE_KEY, JSON.stringify({...traido, syncTs:Date.now()})); }catch(e){}
+      setTimeout(()=>location.reload(), 900);
+    }catch(e){
+      const m=String(e && e.cuerpo && e.cuerpo.message || '');
+      di(m.includes('misma partida') ? S().prMoveSame : (m.includes('no valido') ? S().prMoveBad : S().prMoveOff), false);
+      console.warn('[traspaso] canjear', e);
+      usa.disabled=false;
+    }
+  }; }
 
 // ===== ONBOARDING (doc 05 §3): quiz de 2 preguntas (arbol) -> arquetipo recomendado -> confirmar -> primera bola Comun -> Garaje =====
 //+AG el quiz guarda CLAVES; la pregunta y las opciones salen del diccionario (antes iba a pelo en español)
@@ -3471,7 +3538,14 @@ el('hPass').onclick=openTemporada;
 //  COMO SE MATA: borrar este bloque entero (esta autocontenido, no hay nada mas que tocar).
 //  Deliberadamente NO va detras de un ?dev=1: Jaime lo quiere a mano en el movil. A cambio, avisa
 //  con un toast cada vez, para que sea imposible olvidarse de que esta puesto.
-const CHEAT_MONEDAS = true;
+//+AG 2026-07-26: el truco YA NO viene encendido de serie. Motivo: el juego esta vivo en
+//   produccion y cualquiera que llegue a la URL se regalaba monedas infinitas de un toque.
+//   Se conserva entero y a un toque para Jaime, que era el objetivo: abre el juego UNA vez
+//   con ?trucos=1 y queda guardado en ESE movil (sobrevive recargas y navegacion); ?trucos=0
+//   lo apaga. Quien entre por la URL normal no lo tiene.
+const _trucoParam = new URLSearchParams(location.search).get('trucos');
+if(_trucoParam==='1' || _trucoParam==='0'){ SAVE.trucos = (_trucoParam==='1'); persist(); }
+const CHEAT_MONEDAS = !!SAVE.trucos;
 if(CHEAT_MONEDAS){
   const IDS={ chispa:['hChispas','gChispas','shChispas','seChispas','prChispas'],
               gema:  ['hGemas','gGemas','shGemas','seGemas','prGemas'] };

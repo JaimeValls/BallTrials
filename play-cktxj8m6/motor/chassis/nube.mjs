@@ -183,10 +183,29 @@ export function crearNube(opts = {}) {
     return true;
   }
 
+  // ------------------------------------------------------- llevarse la partida
+  //
+  // El unico camino de recuperar cuenta que no depende de Google ni de Meta
+  // (docs/42 Fase 2). El servidor hace el trabajo en supabase/migrations/0005.
+
+  async function crearCodigoTransferencia() {
+    await asegurarSesion();
+    // Un RPC que devuelve texto llega como cadena JSON, no como objeto.
+    return await pedir('/rest/v1/rpc/crear_codigo_transferencia', { metodo: 'POST', cuerpo: {} });
+  }
+
+  async function canjearCodigoTransferencia(codigo) {
+    await asegurarSesion();
+    // Devuelve el estado de juego del origen, ya copiado a esta cuenta.
+    return await pedir('/rest/v1/rpc/canjear_codigo_transferencia',
+      { metodo: 'POST', cuerpo: { p_code: String(codigo || '').trim().toUpperCase() } });
+  }
+
   return {
     get sesion() { return ses ? { user_id: ses.user_id, es_anonimo: ses.es_anonimo, caduca_en: ses.caduca_en } : null; },
     asegurarSesion, entrarAnonimo, renovar,
     perfil, guardarPerfil, bolas, crearBola, guardarBola, saldos, reportarPartida, gastar,
+    crearCodigoTransferencia, canjearCodigoTransferencia,
     // Solo para pruebas: tirar la sesion local sin tocar la cuenta del servidor.
     olvidarSesion: () => guardarSesion(null)
   };
