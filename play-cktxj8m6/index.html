@@ -245,9 +245,15 @@
   .gd-chip{ border:1px solid var(--cyan); background:#18c7d61c; color:#bff4fb; font-family:inherit; font-weight:800; font-size:12px; border-radius:10px; padding:6px 9px; cursor:pointer; }
   .gd-chip:disabled{ opacity:.35; border-color:var(--line); color:var(--muted); cursor:default; background:#ffffff08; }
   .gd-hint{ font-size:12.5px; color:#8fe0a8; font-weight:700; text-align:center; min-height:15px; }
-  .gd-actions{ width:100%; max-width:370px; display:flex; flex-direction:column; gap:8px; }
-  .gd-row{ display:flex; gap:8px; align-items:stretch; }
-  .gd-row .gd-btn.prim{ flex:1; min-width:0; }
+  /*+AG REJILLA, NO DOS FILAS SUELTAS. Salio primero con la flecha metida en un div de fila junto al
+     boton dorado y el "o pagar" suelto debajo: la flecha le robaba 66 px de ancho a la fila de arriba
+     y a la de abajo no, asi que el SECUNDARIO acababa mas ancho que el PRIMARIO — la jerarquia al
+     reves, lo barato pareciendo lo grande. Se vio en una captura del movil de Jaime, no en el papel.
+     Con dos columnas (accion | 58) los dos botones de accion miden EXACTAMENTE lo mismo y la flecha
+     se queda en su columna. El "o pagar" cae solo en la fila 2 columna 1 por el auto-flow, sin
+     tener que decirselo, y cuando esta oculto (display:none) sale de la rejilla y no deja hueco. */
+  .gd-actions{ width:100%; max-width:370px; display:grid; grid-template-columns:1fr 58px; gap:8px; align-items:stretch; }
+  .gd-actions .gd-btn.prim, .gd-actions .gd-btn.ghost{ grid-column:1; min-width:0; }
   .gd-btn{ border:0; border-radius:16px; padding:15px; font-family:inherit; font-weight:900; font-size:17px; cursor:pointer; }
   .gd-btn.prim{ color:#3a2400; background:linear-gradient(#ffe27a,#ff9a3d); box-shadow:0 4px 0 #b45a10; }
   .gd-btn.prim:disabled{ filter:grayscale(.55) brightness(.82); box-shadow:none; cursor:default; }
@@ -269,7 +275,7 @@
      existe en Resultados (.r-home.ico): misma anchura de 58, mismo path de flecha, mismo velo.
      Y de propina QUITA alto en vez de sumarlo: la fila del volver desaparece (-47 px), que en movil
      corto es justo lo que iba apretado. */
-  .gd-btn.back{ flex:0 0 58px; width:58px; padding:0; display:grid; place-items:center; border:1px solid var(--line); background:#ffffff10; color:#c9cff0; }
+  .gd-btn.back{ grid-column:2; grid-row:1; padding:0; display:grid; place-items:center; border:1px solid var(--line); background:#ffffff10; color:#c9cff0; }
   .gd-btn.back svg{ width:22px; height:22px; display:block; }
   .gd-btn.back:active{ background:#ffffff1c; color:#fff; }
   /*+AG MOVIL CORTO. Medido, no estimado: en 375x640 la ficha de una bola BLOQUEADA (la mas alta: lleva
@@ -1135,10 +1141,8 @@
     <div class="gd-hint" id="gdHint"></div>
   </div>
   <div class="gd-actions">
-    <div class="gd-row">
-      <button class="gd-btn prim" id="gdPrim"></button>
-      <button class="gd-btn back" id="gdBack" data-tt="back" data-tp="back" title="Atrás" aria-label="Atrás"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5 L8 12 L14.5 18.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-    </div>
+    <button class="gd-btn prim" id="gdPrim"></button>
+    <button class="gd-btn back" id="gdBack" data-tt="back" data-tp="back" title="Atrás" aria-label="Atrás"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5 L8 12 L14.5 18.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     <button class="gd-btn ghost" id="gdGhost" style="display:none"></button>
   </div>
 </div>
