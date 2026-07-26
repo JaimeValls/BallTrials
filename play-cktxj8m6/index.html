@@ -400,7 +400,11 @@
   .pr-code{ display:flex; align-items:center; gap:9px; background:#0006; border:1px solid var(--line); border-radius:12px; padding:10px 13px; } .pr-code .cd{ font-weight:900; letter-spacing:.13em; font-size:16px; color:var(--gold2); }
   .pr-code button, .pr-inv{ border:1px solid var(--line); background:#ffffff10; color:#c9cff0; font-family:inherit; font-weight:800; font-size:12px; border-radius:10px; padding:7px 11px; cursor:pointer; } .pr-code button{ margin-left:auto; }
   .pr-slots{ display:flex; gap:9px; margin-top:11px; align-items:center; } .pr-slots .s{ width:44px; height:44px; border-radius:50%; border:2px dashed #ffffff2e; color:var(--muted); display:grid; place-items:center; font-size:20px; background:#ffffff08; cursor:pointer; }
-  .pr-ref{ display:flex; align-items:center; gap:12px; } .pr-ref .gift{ width:46px; height:46px; border-radius:13px; display:grid; place-items:center; font-size:23px; background:radial-gradient(circle at 40% 30%,#ffe680,var(--gold)); box-shadow:0 4px 12px #fbb91566; } .pr-ref .tx{ flex:1; font-size:13px; color:#d6dbf4; line-height:1.4; } .pr-ref .tx b{ color:var(--gold2); }
+  /*+AG doc 41 §1: el regalo era un emoji del sistema sobre un azulejo dorado. Ahora es arte propio
+     (ui-regalo.webp, morado con lazo dorado) y va DESNUDO, sin plato: el plato dorado le peleaba el
+     color al lazo, y en este archivo el azulejo se reserva a lo que se pulsa (.ricon), no a lo
+     decorativo (.pi, .tlk tambien van sueltos). */
+  .pr-ref{ display:flex; align-items:center; gap:12px; } .pr-ref img.gift{ width:46px; height:46px; flex:0 0 auto; object-fit:contain; display:block; filter:drop-shadow(0 3px 7px #0009); } .pr-ref .tx{ flex:1; font-size:13px; color:#d6dbf4; line-height:1.4; } .pr-ref .tx b{ color:var(--gold2); }
   .pr-emotes{ display:flex; gap:8px; flex-wrap:wrap; } .pr-emote{ background:#ffffff0d; border:1px solid var(--line); border-radius:12px; padding:8px 12px; font-size:13px; font-weight:700; color:#e7ebff; cursor:pointer; }
   .pr-toggle{ display:flex; align-items:center; gap:11px; } .pr-toggle .tx{ flex:1; font-size:13px; color:#d6dbf4; line-height:1.4; }
   .pr-sw{ width:46px; height:27px; border-radius:999px; background:#ffffff1c; border:1px solid var(--line); position:relative; cursor:pointer; flex:0 0 auto; transition:background .2s; } .pr-sw::after{ content:''; position:absolute; top:2px; left:2px; width:21px; height:21px; border-radius:50%; background:#fff; transition:left .2s; } .pr-sw.on{ background:linear-gradient(#5bc46a,#2fa049); } .pr-sw.on::after{ left:21px; }
@@ -1279,14 +1283,14 @@
     <div class="sc-block" data-sub="amigos">
       <div class="sc-h"><span data-t="prFriendsH">Amigos</span> <span class="sc-soon" data-t="prFriendsSoon">pronto</span></div>
       <div class="pr-code"><span data-t="prYourCode">Tu código:</span><span class="cd">BT-7Q4K2</span><button data-soonk="sSoonCopy" data-t="prCopy">Copiar</button></div>
-      <div class="pr-slots"><div class="s" data-soonk="sSoonInvite">+</div><div class="s" data-soonk="sSoonInvite">+</div><div class="s" data-soonk="sSoonInvite">+</div><button class="pr-inv" data-soonk="sSoonAddCode" data-t="prAddCode">Añadir por código</button></div>
+      <div class="pr-slots"><div class="s" data-soonk="sSoonInvite" data-tp="sSoonInvite">+</div><div class="s" data-soonk="sSoonInvite" data-tp="sSoonInvite">+</div><div class="s" data-soonk="sSoonInvite" data-tp="sSoonInvite">+</div><button class="pr-inv" data-soonk="sSoonAddCode" data-t="prAddCode">Añadir por código</button></div>
       <div class="sc-note" data-th="prFriendsNote"></div>
     </div>
 
     <div class="sc-block" data-sub="amigos">
       <div class="sc-h" data-t="prRefH">Invita y gana</div>
       <div class="pr-ref">
-        <div class="gift">🎁</div>
+        <img class="gift" src="arte/ui/ui-regalo.webp" alt="">
         <div class="tx" data-th="prRefTx"></div>
       </div>
       <button class="se-cta" style="background:linear-gradient(#ffe27a,#ff9a3d);color:#3a2400;box-shadow:0 3px 0 #b45a10;margin-top:11px" data-soonk="sSoonInviteGame" data-t="prRefCta">Invitar al juego</button>
@@ -2591,7 +2595,10 @@ function applyShell(){ const s=S();
   //+AG data-ti = elemento cuyo texto sale de un ARRAY del diccionario (pestañas, escalones de liga, emotes)
   document.querySelectorAll('[data-ti]').forEach(e=>{ const [k,i]=e.dataset.ti.split(':'), v=s[k]; if(Array.isArray(v)&&v[+i]!=null) e.textContent=v[+i]; });
   //+AG data-soon: el toast de "próximamente" tambien localizado (la etiqueta viene del diccionario, no del atributo)
-  document.querySelectorAll('[data-soonk]').forEach(e=>{ const v=s[e.dataset.soonk]; if(typeof v==='string') e.textContent=v; });
+  //+AG 2026-07-26: SOLO a los que declaran etiqueta propia (data-t). Antes entraba a saco y se comia el
+  //   contenido de los que son ICONO, no texto: los 3 circulos de invitar amigo (44 px) perdian su "+" y
+  //   se llenaban con "Invitar amigo", que se salia y se solapaba. Su etiqueta va por data-tp (aria-label).
+  document.querySelectorAll('[data-soonk][data-t]').forEach(e=>{ const v=s[e.dataset.soonk]; if(typeof v==='string') e.textContent=v; });
   //+AG Home v3: nombres de modo en tiles/tarjeta (race sale del i18n de la carrera; el resto del SHELL) y niveles de los bloqueados
   document.querySelectorAll('[data-mname]').forEach(e=>{ e.textContent=modeTitle(e.dataset.mname); });
   document.querySelectorAll('[data-lvln]').forEach(e=>{ e.textContent=s.lvl+' '+e.dataset.lvln; }); }
