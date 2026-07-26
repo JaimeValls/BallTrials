@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-26 a282b3f"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-07-26 058d1ba"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -679,7 +679,14 @@
      a secas tambien casa con la carta, la imagen se quedaba en 0 px de ancho. Se llama `.tancha`,
      con el prefijo t- de las demas piezas de la carta (thead/ticon/tart/tscrim/tday). */
   .tile.tancha{ grid-column:1 / -1; order:-1; aspect-ratio:5/3; }
-  @media (min-height:700px){ .modegrid .tile.tancha{ aspect-ratio:6/5; } }
+  @media (min-height:700px){ .modegrid .tile.tancha{ aspect-ratio:3/2; } }
+  /*+AG 26-jul, MIRANDO LA CAPTURA (tools/captura-pantalla.mjs modos) y no midiendo: se habia calculado
+     el alto para que la imagen cayera a 3:2 exacto y el still se viera SIN recortar... y el resultado
+     era peor. Los stills tienen parte muerta abajo (Luz Roja: casi media carta de naranja vacio), que
+     en la carta pequena se la come el recorte y en la ancha se veia entera. Se acorta el hueco para
+     que vuelva a recortar, y se ancla ARRIBA para que lo que se tire sea el vacio de abajo y no la
+     accion. Leccion: "sin recortar" no es un objetivo, es una consecuencia de que la foto sea buena. */
+  .tile.tancha .tart img{ object-position:top; }
   .tile.tancha .thead{ min-height:56px; padding:8px 12px; gap:10px; }
   .tile.tancha .ticon .msvg{ width:34px; height:34px; }
   .tile.tancha .tname{ font-size:18px; }
