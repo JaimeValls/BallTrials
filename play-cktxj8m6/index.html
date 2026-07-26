@@ -596,6 +596,36 @@
      contrastar con la captura real de Brawl Stars), esta es la linea que cambia. Medido en los dos
      altos con __fitCheck(), no estimado. */
   @media (min-height:700px){ .modegrid .tile{ aspect-ratio:6/7; } }   /* .modegrid delante a proposito: el bloque .tile va MAS ABAJO y con la misma especificidad ganaba el */
+  /*+AG CARTA ANCHA DEL MODO DEL DIA (26-jul, tarde) — la forma sale de la captura real del LOBBY de
+     Brawl Stars: alli el evento activo NO es una carta igual a las demas, es una carta ANCHA con el
+     icono grande, el nombre grande y la segunda linea en el color del modo. Aqui hace dos trabajos:
+       1) le da al modo del dia (el que paga +50%) el tamano que merece, que era el gancho para rotar;
+       2) cierra la rejilla. Con 5 cartas iguales en 2 columnas quedaba un 2+2+1 con una huerfana
+          suelta; con una a todo lo ancho son 3 filas completas: 1 + 2 + 2.
+     LLEVA order:-1 Y NO ES COSMETICO. Sin el, la carta ancha se coloca donde le toque por orden del
+     marcado, y si el modo del dia es el SEGUNDO (La Gran Carrera) no cabe en la 2a columna, salta de
+     fila, deja un hueco en la primera y la rejilla se va a 4 filas con scroll (medido: se salia 24
+     px y __fitCheck lo canto). Puesta siempre primera, las otras cuatro caen en dos parejas limpias
+     sea cual sea el modo del dia. Comprobados los TRES casos, no solo el de hoy.
+     El alto NO es decorativo: esta calculado para que la imagen se acerque a su 3:2 nativo y el still
+     se recorte lo menos posible. En movil normal la carta va a 6/5 y en movil corto se aprieta a 5/3,
+     que es lo unico que cabe. Medido con __fitCheck() en los dos, no estimado.
+     OJO CON EL NOMBRE DE LA CLASE: se llamo `.hero` y salio mal. Ya existe un `.hero` en esta hoja
+     (la bola grande del inicio, linea ~449) con align-items:center y padding:0 70px, y como `.hero`
+     a secas tambien casa con la carta, la imagen se quedaba en 0 px de ancho. Se llama `.tancha`,
+     con el prefijo t- de las demas piezas de la carta (thead/ticon/tart/tscrim/tday). */
+  .tile.tancha{ grid-column:1 / -1; order:-1; aspect-ratio:5/3; }
+  @media (min-height:700px){ .modegrid .tile.tancha{ aspect-ratio:6/5; } }
+  .tile.tancha .thead{ min-height:56px; padding:8px 12px; gap:10px; }
+  .tile.tancha .ticon .msvg{ width:34px; height:34px; }
+  .tile.tancha .tname{ font-size:18px; }
+  .tile.tancha .tsub{ font-size:13px; }
+  /* BANDAS TODAS IGUALES. A 15 px "LA GRAN CARRERA" y "SUELO MENGUANTE" parten en DOS lineas y las
+     otras no, asi que las bandas median 45 y 60 y las imagenes 146 y 130: la rejilla salia desigual
+     sin que nada lo justificara. Se fija el alto al de dos lineas y todas miden lo mismo. No se
+     recorta el nombre con puntos suspensivos a proposito: el nombre del modo es lo que mas importa
+     de la carta, antes se parte que se corta. */
+  .tile .thead{ min-height:60px; }
   /*+AG CARTA DE MODO v3 (26-jul), copiando la CARTA DE EVENTO DE BRAWL STARS con la referencia delante
        (pantalla "CHOOSE EVENT", vista en capturas reales; antes se dictaminó de memoria y salió un
        wireframe: rectángulo de color con un icono flotando en medio, que es justo lo que ellos NO hacen).
@@ -3711,6 +3741,9 @@ function openSelector(){ showScreen('selector'); paintSelector(); }
 function paintSelector(){ applyShell();
   document.querySelectorAll('.tile[data-mode]').forEach(t=>{
     t.classList.toggle('sel', t.dataset.mode===SAVE.mode);
+    //+AG el modo del dia se lleva la carta ANCHA (.hero): es el que paga +50%, y de paso cierra la
+    //   rejilla de 5 en 3 filas completas. Va aqui y no en el marcado porque el modo del dia rota.
+    t.classList.toggle('tancha', t.dataset.mode===dayMode());
     const d=t.querySelector('.tday'); if(d) d.style.display = t.dataset.mode===dayMode() ? '' : 'none'; });
 }
 document.querySelectorAll('.tile[data-mode]').forEach(t=>{ t.onclick=()=>{   // tocar un tile = SELECCIONA y vuelve (no arranca; regla de oro)
