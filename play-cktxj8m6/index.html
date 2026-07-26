@@ -1,5 +1,6 @@
 <meta charset="utf-8">
-<meta name="robots" content="noindex, nofollow"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="robots" content="noindex, nofollow">
+<meta name="bt-build" content="2026-07-26 a282b3f"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -1206,7 +1207,7 @@
     </div>
 
     <div class="sc-block on" data-sub="liga">
-      <div class="sc-h" data-t="seLeague">Liga</div>
+      <div class="sc-h"><svg class="sc-ico" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.2 3.6 H15.8 V9.2 A3.8 3.8 0 0 1 8.2 9.2 Z"/><path d="M8.2 5.6 H5.6 V7.1 a2.9 2.9 0 0 0 2.9 2.9"/><path d="M15.8 5.6 H18.4 V7.1 a2.9 2.9 0 0 1-2.9 2.9"/><path d="M12 13 V16.8"/><path d="M9.2 20.4 H14.8"/></g></svg><span data-t="seLeague">Liga</span></div>
       <div class="se-league-top">
         <!--+AG la insignia grande NO se fija aqui: la copia syncLigaBadge() del escalon que lleve
              .cur, para que no puedan contradecirse (antes era un 🥇 clavado). -->
@@ -1224,7 +1225,7 @@
     </div>
 
     <div class="sc-block" data-sub="pase">
-      <div class="sc-h"><span data-t="sePassH">Pase de Batalla</span> <span class="sc-soon" data-t="sePassSoon">pronto</span></div>
+      <div class="sc-h"><svg class="sc-ico" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.2 7.4 H19.8 A1.4 1.4 0 0 1 21.2 8.8 V10.4 a1.8 1.8 0 0 0 0 3.6 V15.6 A1.4 1.4 0 0 1 19.8 17 H4.2 A1.4 1.4 0 0 1 2.8 15.6 V14 a1.8 1.8 0 0 0 0-3.6 V8.8 A1.4 1.4 0 0 1 4.2 7.4 Z"/></g></svg><span data-t="sePassH">Pase de Batalla</span><span class="sc-soon" data-t="sePassSoon">pronto</span></div>
       <div class="se-pase-hd"><div class="pg"><span data-t="seRung">Peldaño 12</span> <small>/ 50</small></div></div>
       <div class="se-vias"><span class="g" data-t="seFree">Vía gratis</span><span class="p" data-t="sePrem">Vía premium</span></div>
       <div class="se-track" id="seTrack"></div>
@@ -1233,7 +1234,7 @@
     </div>
 
     <div class="sc-block" data-sub="rk">
-      <div class="sc-h" data-t="seRkH">Rankings</div>
+      <div class="sc-h"><svg class="sc-ico" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.4 20.2 H19.6"/><path d="M7.8 20.2 V13.4"/><path d="M12 20.2 V7.6"/><path d="M16.2 20.2 V11"/></g></svg><span data-t="seRkH">Rankings</span></div>
       <div class="se-rk-tabs"><button class="se-rk-tab on" data-ti="seRkTabs:0">Diario</button><button class="se-rk-tab" data-ti="seRkTabs:1">Semanal</button><button class="se-rk-tab" data-ti="seRkTabs:2">General</button></div>
       <div class="se-row"><div class="pos">1</div><div class="who">🔵 Estela</div><div class="pts">3 420</div></div>
       <div class="se-row"><div class="pos">2</div><div class="who">🔴 Trompo</div><div class="pts">3 180</div></div>
@@ -1281,14 +1282,14 @@
     </div>
 
     <div class="sc-block" data-sub="amigos">
-      <div class="sc-h"><span data-t="prFriendsH">Amigos</span> <span class="sc-soon" data-t="prFriendsSoon">pronto</span></div>
+      <div class="sc-h"><svg class="sc-ico" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9.2" cy="8" r="3.4"/><path d="M3.4 19.8 a5.8 5.8 0 0 1 11.6 0"/><path d="M16.2 5 a3.4 3.4 0 0 1 0 6"/><path d="M17.6 14.4 a5.8 5.8 0 0 1 3 5.4"/></g></svg><span data-t="prFriendsH">Amigos</span><span class="sc-soon" data-t="prFriendsSoon">pronto</span></div>
       <div class="pr-code"><span data-t="prYourCode">Tu código:</span><span class="cd">BT-7Q4K2</span><button data-soonk="sSoonCopy" data-t="prCopy">Copiar</button></div>
       <div class="pr-slots"><div class="s" data-soonk="sSoonInvite" data-tp="sSoonInvite">+</div><div class="s" data-soonk="sSoonInvite" data-tp="sSoonInvite">+</div><div class="s" data-soonk="sSoonInvite" data-tp="sSoonInvite">+</div><button class="pr-inv" data-soonk="sSoonAddCode" data-t="prAddCode">Añadir por código</button></div>
       <div class="sc-note" data-th="prFriendsNote"></div>
     </div>
 
     <div class="sc-block" data-sub="amigos">
-      <div class="sc-h" data-t="prRefH">Invita y gana</div>
+      <div class="sc-h"><svg class="sc-ico" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4.6" y="10.8" width="14.8" height="9.2" rx="1.3"/><rect x="3" y="7" width="18" height="3.8" rx="1.3"/><path d="M12 7.4 V20"/><path d="M12 7 C10.6 3.4 6.8 4.2 8.2 7"/><path d="M12 7 C13.4 3.4 17.2 4.2 15.8 7"/></g></svg><span data-t="prRefH">Invita y gana</span></div>
       <div class="pr-ref">
         <img class="gift" src="arte/ui/ui-regalo.webp" alt="">
         <div class="tx" data-th="prRefTx"></div>
@@ -1297,7 +1298,7 @@
     </div>
 
     <div class="sc-block" data-sub="mas">
-      <div class="sc-h"><span data-t="prEmotesH">Emotes</span> <span class="sc-soon" data-t="prEmotesSoon">lista cerrada</span></div>
+      <div class="sc-h"><svg class="sc-ico" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.4 4 H17.6 A2.4 2.4 0 0 1 20 6.4 V13.6 A2.4 2.4 0 0 1 17.6 16 H11.2 L7 19.8 L7.6 16 H6.4 A2.4 2.4 0 0 1 4 13.6 V6.4 A2.4 2.4 0 0 1 6.4 4 Z"/></g></svg><span data-t="prEmotesH">Emotes</span><span class="sc-soon" data-t="prEmotesSoon">lista cerrada</span></div>
       <div class="pr-emotes"><span class="pr-emote" data-ti="prEmotes:0"></span><span class="pr-emote" data-ti="prEmotes:1"></span><span class="pr-emote" data-ti="prEmotes:2"></span><span class="pr-emote" data-ti="prEmotes:3"></span><span class="pr-emote" data-ti="prEmotes:4"></span></div>
     </div>
 
@@ -1354,7 +1355,7 @@
     </div>
 
     <div class="sc-block" data-sub="mas">
-      <div class="sc-h" data-t="prChanH">Salir en el canal</div>
+      <div class="sc-h"><svg class="sc-ico" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.9" y="7.6" width="18.2" height="12.4" rx="2.6"/><path d="M8.4 3.6 L12 7.6"/><path d="M15.6 3.6 L12 7.6"/></g></svg><span data-t="prChanH">Salir en el canal</span></div>
       <div class="pr-toggle">
         <div class="pr-sw" id="prConsent" role="switch" aria-checked="false"></div>
         <div class="tx" data-th="prChanTx"></div>
@@ -2340,21 +2341,21 @@ const MORE={
     tGems:g=>'¡+'+g+' Gemas! (compra simulada)', pgAnswer:'Respuesta',
     // — Temporada —
     seSeason:'Temporada 1 · termina en 18 días', seTheme:'🏖️ Verano en la Cima',
-    seChampLine:'Campeona de la temporada: <b>bola dorada</b>', seLeague:'🏆 Liga', seTier:'Oro III',
+    seChampLine:'Campeona de la temporada: <b>bola dorada</b>', seLeague:'Liga', seTier:'Oro III',
     seToNext:'620 / 1000 pts para <b>Diamante</b>',
     seTiers:['Bronce','Plata','Oro','Diamante','Élite'],
     seFloor:'🛡️ <b>Suelo protegido:</b> esta temporada ya no bajas de Oro, aunque pierdas. Al cierre, el cofre de Liga de Oro da <b>Gemas + skin de Oro</b> (listado desde el día 1, sin sorteo).',
-    sePassH:'🎟️ Pase de Batalla', sePassSoon:'saltos con Gemas · pronto', seRung:'Peldaño 12',
+    sePassH:'Pase de Batalla', sePassSoon:'saltos con Gemas · pronto', seRung:'Peldaño 12',
     seFree:'● Vía gratis', sePrem:'◆ Vía premium (tema)', sePassCta:'Activar Pase premium · 800 ◆',
     sePassNote:'Ves los <b>50 peldaños y sus premios antes de comprar</b>: compras el camino, no la suerte. El Pase da cosméticos, monedas y prestigio, <b>nunca poder</b>.',
-    seRkH:'📊 Rankings', seRkTabs:['Diario','Semanal','General'],
+    seRkH:'Rankings', seRkTabs:['Diario','Semanal','General'],
     seRkNote:'Top 10 % = Fichas · Top 1 % = título + skin. Las <b>Fichas</b> se ganan compitiendo (cosméticos de prestigio y calidad de bola por mérito), no se compran.',
     rungFree:'gratis', rungPrem:'premium',
     // — Perfil —
     prPlayer:'Jugador', prAlias:'alias, nunca datos reales', prPriv:'🔒 Perfil privado por defecto',
     prBalls:'Bolas', prTrophies:'Trofeos', prBest:'Mejor puesto',
     prShowNote:'En cuentas de menores el escaparate (stats, colección, récords) es <b>privado</b> salvo que lo abra un adulto verificado.',
-    prFriendsH:'👥 Amigos', prFriendsSoon:'acciones · pronto', prYourCode:'Tu código:', prCopy:'Copiar',
+    prFriendsH:'Amigos', prFriendsSoon:'acciones · pronto', prYourCode:'Tu código:', prCopy:'Copiar',
     prAddCode:'Añadir por código',
     prMoveH:'Llevar mi partida a otro móvil', prMoveGen:'Generar código', prMoveUse:'Traer mi partida',
     prMoveNote:'Genera un código en el móvil donde juegas y escríbelo en el nuevo. <b>Sirve una sola vez</b> y caduca al generar otro. Guárdalo: es la llave de tu partida.',
@@ -2372,11 +2373,11 @@ const MORE={
     prAccTaken:'Ese correo ya tiene cuenta. Usa "Ya tengo cuenta".', prAccBadLogin:'Correo o contraseña incorrectos.',
     prAccOff:'Sin conexión: inténtalo cuando vuelva la red.', prAccOther:'Entrar con otra cuenta',
     prFriendsNote:'Amigos solo por <b>contactos + código</b> (nada de búsqueda abierta ni desconocidos). Rankings entre amigos y piques sanos, <b>sin chat libre</b>.',
-    prRefH:'🎁 Invita y gana',
+    prRefH:'Invita y gana',
     prRefTx:'<b>Tú y tu amigo</b> ganáis <b>100 ✦</b> + un cosmético de bienvenida cuando se una y juegue. Fijo y con tope anti-granja.',
-    prRefCta:'Invitar al juego', prEmotesH:'💬 Emotes', prEmotesSoon:'lista cerrada, sin texto libre',
+    prRefCta:'Invitar al juego', prEmotesH:'Emotes', prEmotesSoon:'lista cerrada, sin texto libre',
     prEmotes:['👍 ¡gg!','🔥 ¡buena!','😅 ¡casi!','🎉 ¡toma!','🤝 ¡otra!'],
-    prChanH:'📺 Salir en el canal',
+    prChanH:'Salir en el canal',
     prChanTx:'Permitir que mis partidas se re-rendericen y salgan en el canal. <b>Desactivado por defecto.</b>',
     prChanNote:'🕶️ <b>Anonimización activada por defecto</b> en menores (sales como "un jugador anónimo", sin alias). Publicar partidas de menores requiere <b>consentimiento parental verificado</b>.',
     tChanOn:'Aviso de canal activado (simulado)', tChanOff:'Aviso de canal desactivado',
@@ -2487,21 +2488,21 @@ const MORE={
     tGems:g=>'+'+g+' Gems! (simulated purchase)', pgAnswer:'Answer',
     // — Season —
     seSeason:'Season 1 · ends in 18 days', seTheme:'🏖️ Summit Summer',
-    seChampLine:'Season champion: <b>golden ball</b>', seLeague:'🏆 League', seTier:'Gold III',
+    seChampLine:'Season champion: <b>golden ball</b>', seLeague:'League', seTier:'Gold III',
     seToNext:'620 / 1000 pts to <b>Diamond</b>',
     seTiers:['Bronze','Silver','Gold','Diamond','Elite'],
     seFloor:'🛡️ <b>Protected floor:</b> this season you can no longer drop below Gold, even if you lose. At the close, the Gold League chest gives <b>Gems + a Gold skin</b> (listed from day 1, no lottery).',
-    sePassH:'🎟️ Battle Pass', sePassSoon:'skips with Gems · soon', seRung:'Rung 12',
+    sePassH:'Battle Pass', sePassSoon:'skips with Gems · soon', seRung:'Rung 12',
     seFree:'● Free track', sePrem:'◆ Premium track (theme)', sePassCta:'Activate premium Pass · 800 ◆',
     sePassNote:'You see the <b>50 rungs and their rewards before buying</b>: you buy the path, not the luck. The Pass gives cosmetics, currency and prestige, <b>never power</b>.',
-    seRkH:'📊 Rankings', seRkTabs:['Daily','Weekly','All-time'],
+    seRkH:'Rankings', seRkTabs:['Daily','Weekly','All-time'],
     seRkNote:'Top 10 % = Tickets · Top 1 % = title + skin. <b>Tickets</b> are earned by competing (prestige cosmetics and ball quality on merit), never bought.',
     rungFree:'free', rungPrem:'premium',
     // — Profile —
     prPlayer:'Player', prAlias:'a nickname, never real data', prPriv:'🔒 Private profile by default',
     prBalls:'Balls', prTrophies:'Trophies', prBest:'Best place',
     prShowNote:'On kids’ accounts the showcase (stats, collection, records) is <b>private</b> unless a verified adult opens it.',
-    prFriendsH:'👥 Friends', prFriendsSoon:'actions · soon', prYourCode:'Your code:', prCopy:'Copy',
+    prFriendsH:'Friends', prFriendsSoon:'actions · soon', prYourCode:'Your code:', prCopy:'Copy',
     prAddCode:'Add by code',
     prMoveH:'Move my game to another phone', prMoveGen:'Get a code', prMoveUse:'Bring my game here',
     prMoveNote:'Get a code on the phone you play on and type it on the new one. <b>It works once</b> and expires when you get a new one. Keep it safe: it is the key to your game.',
@@ -2519,11 +2520,11 @@ const MORE={
     prAccTaken:'That email already has an account. Use "I already have one".', prAccBadLogin:'Wrong email or password.',
     prAccOff:'No connection: try again when you are back online.', prAccOther:'Log in with another account',
     prFriendsNote:'Friends only via <b>contacts + code</b> (no open search, no strangers). Rankings among friends and friendly rivalry, <b>no free chat</b>.',
-    prRefH:'🎁 Invite and earn',
+    prRefH:'Invite and earn',
     prRefTx:'<b>You and your friend</b> each get <b>100 ✦</b> + a welcome cosmetic when they join and play. Fixed, with an anti-farming cap.',
-    prRefCta:'Invite to the game', prEmotesH:'💬 Emotes', prEmotesSoon:'closed list, no free text',
+    prRefCta:'Invite to the game', prEmotesH:'Emotes', prEmotesSoon:'closed list, no free text',
     prEmotes:['👍 gg!','🔥 nice!','😅 so close!','🎉 yes!','🤝 again!'],
-    prChanH:'📺 Appear on the channel',
+    prChanH:'Appear on the channel',
     prChanTx:'Let my matches be re-rendered and shown on the channel. <b>Off by default.</b>',
     prChanNote:'🕶️ <b>Anonymisation on by default</b> for kids (you appear as "an anonymous player", no nickname). Publishing kids’ matches requires <b>verified parental consent</b>.',
     tChanOn:'Channel notice on (simulated)', tChanOff:'Channel notice off',
