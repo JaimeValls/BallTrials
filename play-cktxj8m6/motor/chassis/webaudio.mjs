@@ -12,6 +12,19 @@ export function createWebAudio({ musicUrl = null, musicGain = 0.30, sfxGain = 0.
   let sfxSrc = null, musicSrc = null, musicBuf = null;
   let unlocked = false, loadingMusic = null;
 
+  //+AG plataforma-y-cuentas: al volver de segundo plano (cambiar de app, bloquear
+  //   pantalla, una llamada) iOS/Android SUSPENDEN el AudioContext por su cuenta y
+  //   NO lo reanudan solos. Sin esto el juego se queda mudo el resto de la partida
+  //   aunque music/sfx sigan en ON. Solo actua si ya hubo un gesto (unlocked): no
+  //   tiene sentido reanudar un contexto que el jugador nunca desbloqueo.
+  if (typeof document !== 'undefined' && document.addEventListener){
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && unlocked && ctx && ctx.state === 'suspended'){
+        try { ctx.resume(); } catch {}
+      }
+    });
+  }
+
   function ensureCtx(){
     if (!ctx){
       ctx = new (window.AudioContext || window.webkitAudioContext)();

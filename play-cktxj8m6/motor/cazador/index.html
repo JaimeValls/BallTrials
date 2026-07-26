@@ -763,6 +763,9 @@ if(params.get('short')==='1' || _shN===6 || _shN===8){ shortOpts={ individual:tr
 //+AG doc 39 abierto #1: ?stats=v,a,p,g,r,b (6 atributos EFECTIVOS de la bola equipada) → modificador SUTIL de física
 //   del jugador (balls[0]). Solo en INDIVIDUAL; ausente/mal formado = neutro. El torneo no es individual → no lo lee.
 if(shortOpts.individual){ const _s=(params.get('stats')||'').split(',').map(Number); if(_s.length===6 && _s.every(v=>isFinite(v))) shortOpts.stats=_s; }
+//+AG doc 39: ?trait=<clave> → el RASGO de la bola equipada (aquí vive FANTASMA). La Sim valida la clave y solo
+//   reconoce los suyos: un rasgo de otro modo llega y no hace nada. Mismo candado que ?stats: solo INDIVIDUAL.
+if(shortOpts.individual){ const _t=params.get('trait'); if(_t) shortOpts.trait=_t; }
 //+AG doc 41 bloque G: ?arch=<clave> (la bola-heroe equipada) -> su MATERIAL solo para balls[0].
 //   Misma regla que ?stats: solo en INDIVIDUAL, y ausente o desconocido = null = el look de siempre.
 //   Es 100% cosmetico: no toca la Sim, asi que no puede mover el balance ni un milimetro.

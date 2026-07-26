@@ -252,6 +252,9 @@ const shortOpts = SHORT_ON ? { individual: true, n: (_shN === 6 ? 6 : 8) } : nul
 //+AG doc 39 abierto #1: ?stats=v,a,p,g,r,b (6 atributos EFECTIVOS de la bola equipada) → modificador SUTIL de física
 //   del jugador (balls[0]). Solo en INDIVIDUAL; ausente/mal formado = neutro. El torneo (fmt=team) no lo lee.
 if(shortOpts){ const _s=(_q0.get('stats')||'').split(',').map(Number); if(_s.length===6 && _s.every(v=>isFinite(v))) shortOpts.stats=_s; }
+//+AG doc 39: ?trait=<clave> → el RASGO de la bola equipada. La Sim valida la clave y solo reconoce los suyos (aquí
+//   no vive Fantasma: este modo no tiene Cazador). Mismo candado que ?stats: solo INDIVIDUAL.
+if(shortOpts){ const _t=_q0.get('trait'); if(_t) shortOpts.trait=_t; }
 //+AG doc 41 bloque G: ?arch=<clave> (la bola-heroe equipada) -> su MATERIAL solo para balls[0].
 //   Misma regla que ?stats: solo en INDIVIDUAL, y ausente o desconocido = null = el look de siempre.
 //   Es 100% cosmetico: no toca la Sim, asi que no puede mover el balance ni un milimetro.

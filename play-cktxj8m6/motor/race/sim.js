@@ -105,6 +105,15 @@ const STAT_K=0.12;
 //   NO rebasa el ±12% → el "sutil, ±10-15% máximo" es una garantía dura, no solo el valor en attr=13).
 const statMul=a=>{ const m=1+(a-6.5)/6.5*STAT_K; return m<1-STAT_K?1-STAT_K:(m>1+STAT_K?1+STAT_K:m); };
 const NEUTRAL_MUL={vel:1,ace:1,pes:1,aga:1,res:1,bst:1};
+//+AG doc 39: RASGOS de Épicas/Legendaria. A diferencia de los stats (que modulan TODO un poco), un rasgo es UNA
+//   regla concreta que la ficha de la Tienda promete con palabras. Mismo doble candado que ?stats: solo INDIVIDUAL
+//   y solo balls[0]. Un rasgo que no es de este modo, o ausente, deja todos los factores a 1 → byte-idéntico.
+//   Los rasgos de este modo: VOLCÁN (boost +20%) · ESTRELLA (súper +1 s) · YUNQUE (medio impulso de las ligeras).
+//   FANTASMA no vive aquí (es del Cazador): llega, no hace nada, y no mueve ni un bit.
+const TRAITS_RACE=new Set(['volcan','estrella','yunque']);
+const VOLCAN_BST=1.20;      // la ficha dice "su boost dura un 20% más"
+const ESTRELLA_SUPER_F=30;  // la ficha dice "su súper dura +1 segundo" · 30 FPS
+const YUNQUE_IMP=0.5;       // la ficha dice "les roban la MITAD del impulso"
 
 function buildMap(rng){
   const pegs=[], bumpers=[], boosts=[], powerups=[];
@@ -249,6 +258,8 @@ class Sim{
     //   ANTES de buildMap pero NO consume RNG (constantes) → el primer consumidor sigue siendo buildMap (identidad ok).
     const _S=(this.individual&&Array.isArray(opts.stats)&&opts.stats.length===6)?opts.stats:null;
     this.pmul=_S?{vel:statMul(_S[0]),ace:statMul(_S[1]),pes:statMul(_S[2]),aga:statMul(_S[3]),res:statMul(_S[4]),bst:statMul(_S[5])}:NEUTRAL_MUL;
+    //+AG doc 39: el RASGO de la bola equipada. Mismo doble candado y misma regla de no consumir RNG que los stats.
+    this.trait=(this.individual&&TRAITS_RACE.has(opts.trait))?opts.trait:null;
     this.teams=this.individual?SHORT_COLORS:TEAMS;
     this.nTeams=this.teams.length;                         // 4 torneo · 8 individual
     this.ballsPerTeam=this.individual?1:BALLS_PER_TEAM;    // 3 torneo · 1 individual (cada color = equipo de 1)
@@ -316,11 +327,16 @@ class Sim{
   }
   //+AG doc 39 #1: BST → duración de los boosters del JUGADOR (nitro/escudo/súper); el cooldown NO cambia (no rompe
   //   el ritmo). _bst() = 1 salvo balls[0] en individual-con-stats. Redondeo → duración entera, determinista.
-  _bst(b){ return b.isPlayer?this.pmul.bst:1; }
+  //+AG doc 39 RASGO Volcán: se apila SOBRE el bst de los stats (son cosas distintas: el stat es la bola, el rasgo
+  //   es su identidad de Épica). Sin rasgo el factor es 1 → la línea vale exactamente lo que valía.
+  _bst(b){ return b.isPlayer?this.pmul.bst*(this.trait==='volcan'?VOLCAN_BST:1):1; }
   fireNitro(b){ if(b.nitroCd>0||b.rank!==null) return false; b.turbo=Math.round(TURBO_DUR*this._bst(b)); b.nitroCd=NITRO_CD; this._pev.push({t:'nitro',id:b.id}); return true; }   //+AG evento
   fireShield(b){ if(b.shieldCd>0||b.rank!==null) return false; b.shield=Math.round(SHIELD_DUR*this._bst(b)); b.shieldCd=SHIELD_CD; this._pev.push({t:'shieldup',id:b.id}); return true; }   //+AG evento
   // SÚPER = Estrella (efecto del motor): dorada, grande, PESADA e invencible → arrolla a las demás. Se gana con la barra.
-  fireSuper(b){ if(b.rank!==null) return false; b.star=Math.round(STAR_DUR*this._bst(b)); b.m=STAR_MASS; b.scale=1.2; this.fireEmo(b,'chuleria',6,STAR_DUR); this._pev.push({t:'super',id:b.id}); return true; }   //+AG evento
+  //+AG doc 39 RASGO Estrella: +1 s de SÚPER (solo el súper; nitro y escudo no cambian). Va DESPUÉS del redondeo
+  //   del bst para que sea exactamente "+30 frames" y no un porcentaje disfrazado — la ficha dice un segundo.
+  _superF(b){ return Math.round(STAR_DUR*this._bst(b))+((b.isPlayer&&this.trait==='estrella')?ESTRELLA_SUPER_F:0); }
+  fireSuper(b){ if(b.rank!==null) return false; b.star=this._superF(b); b.m=STAR_MASS; b.scale=1.2; this.fireEmo(b,'chuleria',6,STAR_DUR); this._pev.push({t:'super',id:b.id}); return true; }   //+AG evento
 
   //+AG v0.12 colisión bola vs UN brazo de aspa (cápsula segmento): empuja fuera + rebota relativo a la velocidad de
   //   superficie del aspa (ω×r con centro a.x,a.y y sentido a.dir) → el giro LANZA. Port EXACTO de gauntlet._arm.
@@ -505,10 +521,16 @@ class Sim{
           //+AG doc 39 #1: PES → masa del jugador en colisiones (dividir la masa inversa = pesar más: empuja más, lo
           //   desvían menos). Se apila sobre giant/star (m temporal) sin romperlos. pmul.pes=1 fuera de con-stats.
           if(a.isPlayer)ima/=this.pmul.pes; if(c.isPlayer)imb/=this.pmul.pes;
+          //+AG doc 39 RASGO Yunque: un choque de una bola que NO pesa más que él le roba la MITAD del impulso.
+          //   Se amortigua el impulso que RECIBE (no su masa inversa): tocando la masa el reparto tope en −33% y la
+          //   ficha promete la mitad. La otra bola sale empujada igual — Yunque hace de yunque, no de muro elástico.
+          //   El "<=" importa: una bola en SÚPER (STAR_MASS) sí lo arrolla → hay contra-juego, no es inmunidad.
+          let _ya=1,_yc=1;
+          if(this.trait==='yunque'){ if(a.isPlayer&&c.m<=a.m)_ya=YUNQUE_IMP; if(c.isPlayer&&a.m<=c.m)_yc=YUNQUE_IMP; }
           const ims=ima+imb;
           a.x-=nx*ov*(ima/ims); a.y-=ny*ov*(ima/ims); c.x+=nx*ov*(imb/ims); c.y+=ny*ov*(imb/ims);
           const vn=(c.vx-a.vx)*nx+(c.vy-a.vy)*ny;
-          if(vn<0){ const j=-(1+BALL_REST)*vn/ims; a.vx-=j*nx*ima; a.vy-=j*ny*ima; c.vx+=j*nx*imb; c.vy+=j*ny*imb;
+          if(vn<0){ const j=-(1+BALL_REST)*vn/ims; a.vx-=j*nx*ima*_ya; a.vy-=j*ny*ima*_ya; c.vx+=j*nx*imb*_yc; c.vy+=j*ny*imb*_yc;
             const imp=Math.abs(vn); if(imp>4){ for(const x of [a,c]){ if(x.shield<=0){ x.hurt=9; x.sq=Math.min(1,imp/16); if(x.isPlayer) this.super=Math.min(1,this.super+0.05); } } } }
         }
       }

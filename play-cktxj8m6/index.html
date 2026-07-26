@@ -584,40 +584,63 @@
      vuelve a comportarse como start y no se pierde la primera fila por arriba; los navegadores que no
      entiendan la palabra clave se saltan la linea entera y se quedan en el start de arriba. */
   .modegrid{ align-content:safe center; }
-  /*+AG AUDITORIA SUPERCELL 26-jul (Jaime: "las imagenes de los modos son muy grandes, quizas deberian ser
-       mas pequeñas y mas visuales"). Los dos auditores midieron lo mismo: la carta ocupaba 175x186 px
-       (22-26% del alto de pantalla) y lo que identificaba el modo era una franja de 50 px. Las escenas SVG
-       dibujadas a mano no ganaban ese tamaño — el depredador del Cazador daba 1.05:1 de contraste (en gris
-       desaparecia), Luz Roja tenia DOS semaforos compitiendo y los sujetos caian justo debajo del rotulo.
-       Patron de carta de evento de Brawl: la carta baja a 4/3 y el ICONO CANONICO pasa a protagonista
-       sobre el color plano del modo. Sin arte nuevo: los iconos oro ya existen (modeicons-vendored.js). */
-  .tile{ position:relative; aspect-ratio:4/3; border-radius:20px; overflow:hidden; cursor:pointer;
+  /* en un movil normal (>=700 px de alto) sobraban ~250 px por arriba y por abajo con las cartas a
+     7/6, y una rejilla flotando en medio de la nada no se lee como una pantalla acabada. Ahi la carta
+     se pone cuadrada y la imagen gana 40 px. En los cortos (640) se queda en 7/6, que es lo unico
+     que cabe: 3 filas cuadradas piden 644 px y no entran. Medido en los dos, no estimado. */
+  @media (min-height:700px){ .modegrid .tile{ aspect-ratio:1/1; } }   /* .modegrid delante a proposito: el bloque .tile va MAS ABAJO y con la misma especificidad ganaba el */
+  /*+AG CARTA DE MODO v3 (26-jul), copiando la CARTA DE EVENTO DE BRAWL STARS con la referencia delante
+       (pantalla "CHOOSE EVENT", vista en capturas reales; antes se dictaminó de memoria y salió un
+       wireframe: rectángulo de color con un icono flotando en medio, que es justo lo que ellos NO hacen).
+       Anatomía real de su carta, copiada pieza a pieza:
+         · BANDA superior oscura DENTRO de la carta: icono del modo PEQUEÑO a la izquierda + nombre.
+         · El resto de la carta es una IMAGEN REAL del contenido (ellos: el mapa a vista de pájaro;
+           nosotros: un still del motor de ese modo, capturado del juego de verdad).
+         · Estado (su temporizador / nuestro badge del día) arriba a la derecha.
+         · Lo bloqueado mantiene la misma banda y enseña la condición en el cuerpo, sin imagen.
+       El icono grande centrado se va: en Brawl el icono es un sello de 26 px, no el protagonista. */
+  .tile{ position:relative; aspect-ratio:7/6; border-radius:18px; overflow:hidden; cursor:pointer;
     border:1px solid #ffffff26; box-shadow:0 10px 26px #0009, inset 0 1px 0 #ffffff22; display:flex; flex-direction:column; transition:transform .1s; }
   .tile:active{ transform:scale(.95); }
   /* la seleccion va en BLANCO, el mismo lenguaje que .rktile.on. El dorado se reserva a la accion
      primaria (JUGAR) y al badge del dia: repartido en tres sitios no marcaba ninguno. */
   .tile.sel{ border-color:#fff; box-shadow:0 0 0 2px #ffffffcc, 0 10px 26px #0009; }
-  .tile .tart{ position:absolute; inset:0; z-index:0; }
-  .tile[data-mode="race"]    .tart{ background:radial-gradient(120% 85% at 50% 0%, #4aa8ff5c, #4aa8ff00 62%), linear-gradient(180deg,#1a4f9e,#0c2f5a); }
-  .tile[data-mode="cazador"] .tart{ background:radial-gradient(120% 85% at 50% 0%, #ff4d5e5c, #ff4d5e00 62%), linear-gradient(180deg,#7a1626,#2a0a12); }
-  .tile[data-mode="redlight"] .tart{ background:radial-gradient(120% 85% at 50% 0%, #5bd06a5c, #5bd06a00 62%), linear-gradient(180deg,#1c6b34,#0f2e1a); }
-  .tile .tscrim{ position:absolute; inset:0; z-index:1; background:linear-gradient(180deg, transparent 45%, #06050e66 100%); }
-  .tile .tbody{ position:relative; z-index:2; margin:auto; padding:8px 9px; display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center; }
-  .tile .ticon{ font-size:56px; line-height:1; filter:drop-shadow(0 4px 10px #000a); }
-  .tile .ticon .msvg{ width:56px; height:56px; }
-  .tile .tname{ font-size:13.5px; font-weight:900; letter-spacing:-.01em; line-height:1.1; text-shadow:0 2px 10px #000b; }
-  .tile .tday{ position:absolute; top:8px; left:8px; z-index:3; font-size:10px; font-weight:900; color:#3a2400;
-    background:linear-gradient(#ffe27a,#ffb43d); border-radius:999px; padding:4px 9px; box-shadow:0 3px 10px #ffb03d77, inset 0 1px 0 #fff8; }
-  .tile.locked{ background:#0e0d22; border-color:#ffffff14; }
+  .tile .thead{ position:relative; z-index:2; flex:0 0 auto; display:flex; align-items:center; gap:7px;
+    padding:6px 9px; background:linear-gradient(180deg,#1b1547,#161139); border-bottom:1px solid #ffffff14; }
+  .tile .ticon{ font-size:24px; line-height:1; flex:0 0 auto; filter:drop-shadow(0 2px 4px #0009); }
+  .tile .ticon .msvg{ width:26px; height:26px; }
+  .tile .ttxt{ min-width:0; display:flex; flex-direction:column; gap:1px; }
+  .tile .tname{ min-width:0; font-size:11.5px; font-weight:900; letter-spacing:-.01em; line-height:1.08; }
+  /* la linea de "que se hace aqui": es la que convierte el rotulo en una carta que se entiende sin
+     haber jugado. Una sola linea SIEMPRE: si no cabe, se corta con puntos suspensivos, nunca envuelve
+     (dos lineas descuadrarian la banda y comerian imagen). */
+  .tile .tsub{ min-width:0; font-size:8.5px; font-weight:800; color:#9aa3c7; letter-spacing:.01em;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tile .tart{ position:relative; z-index:0; flex:1 1 auto; min-height:0; overflow:hidden; background:#0b0a1e; }
+  .tile .tart img{ width:100%; height:100%; object-fit:cover; display:block; }
+  /* la arena del Cazador es negra POR DISEÑO y a 175 px se volvia un rectangulo muerto. Se realza
+     lo justo para que se lean el depredador y las bolas; sigue siendo la escena real, no otra. */
+  .tile[data-mode="cazador"] .tart img{ filter:brightness(1.15) saturate(1.08); }
+  /* velo inferior: las pistas son escenas vivas y sin esto el borde de abajo queda sucio */
+  .tile .tscrim{ position:absolute; left:0; right:0; bottom:0; height:38%; z-index:1; pointer-events:none;
+    background:linear-gradient(180deg, transparent, #06050e73); }
+  /* el badge va DENTRO de la imagen, nunca sobre la banda: puesto arriba del todo tapaba el nombre
+     ("EL CAZAD…"). En Brawl el estado tampoco pisa el rótulo, vive fuera de él. */
+  .tile .tday{ position:absolute; top:47px; right:6px; z-index:3; font-size:9.5px; font-weight:900; color:#3a2400;
+    background:linear-gradient(#ffe27a,#ffb43d); border-radius:999px; padding:3px 8px; box-shadow:0 3px 10px #ffb03d77, inset 0 1px 0 #fff8; }
+  .tile.locked{ border-color:#ffffff14; }
+  .tile.locked .thead{ background:linear-gradient(180deg,#171536,#12102c); }
+  .tile.locked .ticon{ filter:grayscale(1) brightness(.85); }
+  .tile.locked .tname{ color:#c3c8e0; }
+  /* BLOQUEADO no es VACIO: los dos modos sin motor ya tienen su carta (encargo 10, hecha a juego con
+     las capturas reales) y se ENSEÑA, apagada en gris con el candado encima. Es el patron de la casa
+     — lo que no tienes se ve, atenuado, para que apetezca — y de paso mata los dos agujeros negros
+     que dejaban una rejilla de cinco con solo tres cartas de verdad. */
   .tile.locked .tart{ background:linear-gradient(180deg,#191742,#0e0d22); }
-  .tile.locked .tbody{ gap:4px; }
-  .tile.locked .ticon{ font-size:32px; filter:grayscale(1) brightness(.85); }
-  .tile.locked .ticon .msvg{ width:32px; height:32px; }
-  .tile.locked .tname{ color:#c3c8e0; font-size:12px; }
-  /* el candado va de BADGE en la esquina y no apilado en la columna: en la carta 4/3 no caben
-     cuatro filas (icono + candado + nombre + condicion) sin desbordar a 360x640. */
+  .tile.locked .tart > img{ filter:grayscale(.42) brightness(.66); }   /* apagado, pero se tiene que intuir el rojo del suelo y el cian de las gemas: si no, no apetece */
+  .tile .tlockbox{ position:absolute; inset:0; z-index:2; display:grid; place-items:center; align-content:center; gap:6px; }
   .tile .tlk{ font-size:18px; }
-  .tile img.tlk{ position:absolute; top:7px; right:7px; z-index:3; width:20px; height:20px; object-fit:contain; }   /*+AG doc 41: candado de arte */
+  .tile img.tlk{ width:22px; height:22px; object-fit:contain; }   /*+AG doc 41: candado de arte */
   .tile .tcond{ font-size:10px; font-weight:800; color:#8b93b8; background:#ffffff0d; border:1px solid var(--line); border-radius:999px; padding:3px 8px; }
   .gridnote{ grid-column:1 / -1; font-size:11px; color:#6f79a0; font-weight:700; text-align:center; padding:2px 0 0; }
   /*+AG COPAS POR BOLA (doc 37): tarjeta de copas de la bola + tabla de 8 puestos en Resultados */
@@ -810,40 +833,41 @@
     <button class="sclose" id="selClose" data-tt="backHome" title="Volver al inicio">✕</button>
   </div>
   <div class="modegrid" id="modegrid">
+    <!--+AG carta v3: BANDA (icono pequeño + nombre) + IMAGEN REAL de la pista de ese modo. Los stills
+         salen del motor de verdad (captura headless del canvas con el HUD oculto), no son ilustración:
+         lo que promete la carta es exactamente lo que sale al jugar. -->
     <!-- LUZ ROJA -->
     <div class="tile" data-mode="redlight">
-      <div class="tart"></div>
+      <div class="thead"><div class="ticon">🚦</div><div class="ttxt"><div class="tname" data-mname="redlight">LUZ ROJA</div><div class="tsub" data-t="subRedlight">Corre y frena a tiempo</div></div></div>
+      <div class="tart"><img src="arte/modos/redlight.webp" alt="" loading="lazy"></div>
       <div class="tscrim"></div>
       <div class="tday" data-t="dayBadge" style="display:none">⭐ DÍA · +50%</div>
-      <div class="tbody"><div class="ticon">🚦</div><div class="tname" data-mname="redlight">LUZ ROJA</div></div>
     </div>
     <!-- LA GRAN CARRERA -->
     <div class="tile" data-mode="race">
-      <div class="tart"></div>
+      <div class="thead"><div class="ticon">🏁</div><div class="ttxt"><div class="tname" data-mname="race">LA GRAN CARRERA</div><div class="tsub" data-t="subRace">Llega el primero</div></div></div>
+      <div class="tart"><img src="arte/modos/race.webp" alt="" loading="lazy"></div>
       <div class="tscrim"></div>
       <div class="tday" data-t="dayBadge" style="display:none">⭐ DÍA · +50%</div>
-      <div class="tbody"><div class="ticon">🏁</div><div class="tname" data-mname="race">LA GRAN CARRERA</div></div>
     </div>
     <!-- EL CAZADOR -->
     <div class="tile" data-mode="cazador">
-      <div class="tart"></div>
+      <div class="thead"><div class="ticon">🎯</div><div class="ttxt"><div class="tname" data-mname="cazador">EL CAZADOR</div><div class="tsub" data-t="subCazador">Huye del monstruo</div></div></div>
+      <div class="tart"><img src="arte/modos/cazador.webp" alt="" loading="lazy"></div>
       <div class="tscrim"></div>
       <div class="tday" data-t="dayBadge" style="display:none">⭐ DÍA · +50%</div>
-      <div class="tbody"><div class="ticon">🎯</div><div class="tname" data-mname="cazador">EL CAZADOR</div></div>
     </div>
     <!-- RECOLECTA (bloqueado decorativo) -->
     <div class="tile locked" data-locklvl="5">
-      <div class="tart"></div>
-      <div class="tscrim"></div>
-      <img class="tlk" src="arte/ui/ui-candado.webp" alt="">
-      <div class="tbody"><div class="ticon" data-mico="recolecta"></div><div class="tname" data-t="mRecolecta">RECOLECTA</div><div class="tcond" data-lvln="5">Nivel 5</div></div>
+      <div class="thead"><div class="ticon" data-mico="recolecta"></div><div class="ttxt"><div class="tname" data-t="mRecolecta">RECOLECTA</div><div class="tsub" data-t="subRecolecta">Recoge más gemas</div></div></div>
+      <div class="tart"><img src="arte/modos/recolecta.webp" alt="" loading="lazy">
+        <div class="tlockbox"><img class="tlk" src="arte/ui/ui-candado.webp" alt=""><div class="tcond" data-lvln="5">Nivel 5</div></div></div>
     </div>
     <!-- SUELO MENGUANTE (bloqueado decorativo) -->
     <div class="tile locked" data-locklvl="8">
-      <div class="tart"></div>
-      <div class="tscrim"></div>
-      <img class="tlk" src="arte/ui/ui-candado.webp" alt="">
-      <div class="tbody"><div class="ticon" data-mico="suelo"></div><div class="tname" data-t="mSuelo">SUELO MENGUANTE</div><div class="tcond" data-lvln="8">Nivel 8</div></div>
+      <div class="thead"><div class="ticon" data-mico="suelo"></div><div class="ttxt"><div class="tname" data-t="mSuelo">SUELO MENGUANTE</div><div class="tsub" data-t="subSuelo">Sobrevive al suelo</div></div></div>
+      <div class="tart"><img src="arte/modos/suelo.webp" alt="" loading="lazy">
+        <div class="tlockbox"><img class="tlk" src="arte/ui/ui-candado.webp" alt=""><div class="tcond" data-lvln="8">Nivel 8</div></div></div>
     </div>
     <div class="gridnote" data-t="gridNote">Tocar un modo lo deja elegido en el inicio · JUGAR lo arranca desde allí</div>
   </div>
@@ -2061,6 +2085,11 @@ const SHELL={
     soon:' · próximamente', levelUp:n=>'¡Subiste al nivel '+n+'! 🎉',
     //+AG Home v3 (docs/35 v2.2 + 37): rejilla, hoja de formato, rieles, copas
     mCazador:'EL CAZADOR', mRedlight:'LUZ ROJA', modeLbl:'Modo', change:'CAMBIAR', playWord:'JUGAR',
+    //+AG segunda linea de la carta de modo. En la carta de evento de Brawl bajo el nombre del modo va
+    //   siempre el del mapa; aqui no hay mapas, asi que la linea dice QUE SE HACE. Corta a proposito:
+    //   a 175 px de carta no cabe una frase.
+    subRace:'Llega el primero', subCazador:'Huye del monstruo', subRedlight:'Corre y frena a tiempo',
+    subRecolecta:'Recoge más gemas', subSuelo:'Sobrevive al suelo',
     dayBadge:'⭐ DÍA · +50%', dayBonusWhy:'+50% modo del día', cupsTotal:'Total',
     heroTag:'Tu bola equipada · toca para ver la colección', passTitle:'PASE DE TEMPORADA',
     passSub:(lv,xp)=>'Nivel '+lv+' · '+xp+' XP', sheetTitle:'Vas a jugar', with:'Con',
@@ -2091,6 +2120,8 @@ const SHELL={
     soon:' · coming soon', levelUp:n=>'Level '+n+' reached! 🎉',
     //+AG Home v3 (docs/35 v2.2 + 37)
     mCazador:'THE HUNTER', mRedlight:'RED LIGHT', modeLbl:'Mode', change:'CHANGE', playWord:'PLAY',
+    subRace:'Get there first', subCazador:'Escape the monster', subRedlight:'Run and brake in time',
+    subRecolecta:'Grab the most gems', subSuelo:'Outlast the floor',
     dayBadge:'⭐ TODAY · +50%', dayBonusWhy:'+50% mode of the day', cupsTotal:'Total',
     heroTag:'Your equipped ball · tap to see the collection', passTitle:'SEASON PASS',
     passSub:(lv,xp)=>'Level '+lv+' · '+xp+' XP', sheetTitle:'You\'re going to play', with:'With',
@@ -2142,8 +2173,12 @@ const MORE={
     gdLvlReady:'¡Lista para subir de nivel!',
     gdMaxed:'Nivel máximo de su rareza. ¡A por las copas!',
     tBallLvl:(n,l)=>'¡'+n+' sube al Nv. '+l+'! 🎉',
-    traitWord:'Rasgo', traitSoon:'(llegará con la física por bola)',
-    traits:{volcan:'su boost dura un 20% más',yunque:'los choques de bolas más ligeras le roban la mitad del impulso',fantasma:'el Cazador tarda un 15% más en fijarla',estrella:'su súper dura +1 segundo'},
+    traitWord:'Rasgo',
+    //+AG doc 39: estos textos son PROMESAS medidas (prototipo/motor/_traits_check.mjs), no intenciones. Si se toca
+    //   una constante del motor hay que tocar la frase, y al revés. El de Yunque decía "bolas más ligeras", que en
+    //   la práctica no pasaba nunca (todas pesan igual): dice lo que hace de verdad, y su contra-juego (el súper).
+    traits:{volcan:'su boost dura un 20% más',yunque:'los choques de otras bolas le empujan la mitad (el súper sí la arrolla)',fantasma:'el Cazador tarda un 15% más en fijarla',estrella:'su súper dura +1 segundo'},
+    traitWhere:{volcan:'en los tres modos',yunque:'en los tres modos',fantasma:'solo en Cazador',estrella:'en los tres modos'},
     hitoBtn:n=>'Hito: '+n+' 🏆 totales', hitoProg:(h,n)=>'Se gana jugando: llevas '+h+' de '+n+' 🏆 totales',
     fichasBtn:n=>n+' ⬡ Fichas de Torneo', fichasSoon:'Se gana compitiendo (Fichas de Torneo) · pronto',
     tHito:n=>'¡Hito de copas alcanzado! '+n+' se une a tu Garaje 🎉',
@@ -2286,8 +2321,9 @@ const MORE={
     gdLvlReady:'Ready to level up!',
     gdMaxed:'Max level for its rarity. Go get those cups!',
     tBallLvl:(n,l)=>n+' reaches Lv. '+l+'! 🎉',
-    traitWord:'Trait', traitSoon:'(arrives with per-ball physics)',
-    traits:{volcan:'its boost lasts 20% longer',yunque:'hits from lighter balls lose half their punch',fantasma:'the Hunter takes 15% longer to lock on',estrella:'its super lasts +1 second'},
+    traitWord:'Trait',
+    traits:{volcan:'its boost lasts 20% longer',yunque:'other balls shove it half as much (a super still bowls it over)',fantasma:'the Hunter takes 15% longer to lock on',estrella:'its super lasts +1 second'},
+    traitWhere:{volcan:'all three modes',yunque:'all three modes',fantasma:'Hunter only',estrella:'all three modes'},
     hitoBtn:n=>'Milestone: '+n+' 🏆 total', hitoProg:(h,n)=>'Earned by playing: you have '+h+' of '+n+' 🏆 total',
     fichasBtn:n=>n+' ⬡ Tournament Tickets', fichasSoon:'Earned by competing (Tournament Tickets) · soon',
     tHito:n=>'Cup milestone reached! '+n+' joins your Garage 🎉',
@@ -2760,7 +2796,12 @@ function modeEmbedUrl(mode, fmt){
   //   no lo recibe, y el motor solo lo aplica a balls[0] en individual. Diferencia clave: &stats toca la
   //   física (por eso hubo que medir su presupuesto de justicia); &arch es 100% cosmético y no puede
   //   mover el balance, así que no necesita presupuesto ninguno.
-  if(fmt!=='equipos'){ const eb=equippedBall(); if(eb) u += '&stats=' + attrsOf(eb).join(',') + '&arch=' + encodeURIComponent(eb.arch); }
+  //+AG doc 39: y su RASGO, si la bola tiene uno (solo Épicas y la Legendaria). Mismo doble candado que &stats: el
+  //   torneo/vídeo no lo recibe y el motor solo lo aplica a balls[0]. A diferencia de &arch, el rasgo SÍ toca la
+  //   física, así que tiene presupuesto de justicia medido (prototipo/motor/_traits_check.mjs). Un rasgo que no es
+  //   de ese modo llega y no hace nada: cada motor solo reconoce los suyos.
+  if(fmt!=='equipos'){ const eb=equippedBall(); if(eb){ u += '&stats=' + attrsOf(eb).join(',') + '&arch=' + encodeURIComponent(eb.arch);
+    if(traitOf(eb.arch)) u += '&trait=' + encodeURIComponent(eb.arch); } }
   return u;
 }
 function startRace(mode, fmt){
@@ -3077,6 +3118,10 @@ if(Array.isArray(SAVE.balls)){
 function botBallArch(bot,i){ return ARCH_KEYS[(((bot.seed^Math.imul(i+1,2654435761))>>>0))%ARCH_KEYS.length]; }
 //+AG NOMBRES LOCALIZADOS de arquetipo/calidad/atributos: los literales de ARCHS/QUAL/ATTRS son la CLAVE (es), el
 //   texto visible sale del diccionario. Antes el Garaje/Tienda/Onboarding salian en español con el juego en ingles.
+//+AG doc 39: el RASGO de una bola (solo Épicas y la Legendaria lo tienen). La tabla de textos es la ÚNICA fuente
+//   de verdad de "esta bola tiene rasgo": si aparece ahí, el shell manda &trait al motor. Es function (no const)
+//   a propósito: la usa el constructor de la URL de partida, que está más arriba en el archivo.
+function traitOf(k){ return (S().traits||{})[k]||null; }
 const archName =k=>((S().archName ||{})[k])||(ARCHS[k]&&ARCHS[k].name)||k;
 const archBest =k=>((S().archBest ||{})[k])||(ARCHS[k]&&ARCHS[k].best)||'';
 const archWorst=k=>((S().archWorst||{})[k])||(ARCHS[k]&&ARCHS[k].worst)||'';
@@ -3118,9 +3163,10 @@ function openDetail(k){ applyShell(); const A=ARCHS[k], b=owned(k), q=QUAL[A.q],
   const gb=el('gdBall'); gb.src=ballArt(k,'hero');
   gb.style.filter = b ? '' : 'grayscale(1) brightness(.6) drop-shadow(0 10px 16px #000a)';
   gb.style.animation='none'; void gb.offsetWidth; gb.style.animation='';
-  //+AG doc 39: rasgo de Épicas/Legendaria = SOLO texto de intención (se cableará con la física por bola)
+  //+AG doc 39: el rasgo de Épicas/Legendaria YA ESTÁ CABLEADO a la física (2026-07-26) — se le quita el "llegará".
+  //   Cada rasgo dice en qué modo actúa, porque no todos actúan en los tres y prometer de más es peor que no prometer.
   let tags=s.gdTags(archBest(k), archWorst(k));
-  const tr=(s.traits||{})[k]; if(tr) tags+='<br><b>'+s.traitWord+'</b>: '+tr+' <small>'+s.traitSoon+'</small>';
+  const tr=traitOf(k); if(tr) tags+='<br><b>'+s.traitWord+'</b>: '+tr+' <small>· '+(s.traitWhere||{})[k]+'</small>';
   el('gdTags').innerHTML=tags;
   const lvl=b?(b.lvl||1):1, attrs=b?attrsOf(b):A.base;
   const cap=Math.max.apply(null, attrsOf({arch:k,lvl:maxLvl(k)}));   //+AG anillo punteado = a dónde llega su MEJOR atributo al nivel máximo

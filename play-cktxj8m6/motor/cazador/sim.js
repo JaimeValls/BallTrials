@@ -100,7 +100,9 @@ function wall(o, r){
   if (o.y > YH - r){ o.y = YH - r; if (o.vy > 0) o.vy = -o.vy * 0.45; }
   if (o.y < -YH + r){ o.y = -YH + r; if (o.vy < 0) o.vy = -o.vy * 0.45; }
 }
-function resolve(a, b, ra, rb, e){
+//+AG doc 39 RASGO Yunque: `yq` (1 por defecto) es el factor de masa inversa del JUGADOR cuando el otro cuerpo NO
+//   pesa más que él. Con yq=1 la función es exactamente la de antes, línea por línea.
+function resolve(a, b, ra, rb, e, yq = 1){
   let dx = b.x - a.x, dy = b.y - a.y, d = hyp(dx, dy), mind = ra + rb;
   if (d <= 0 || d >= mind) return;
   const nx = dx / d, ny = dy / d, overlap = mind - d;
@@ -110,8 +112,11 @@ function resolve(a, b, ra, rb, e){
   const vn = (b.vx - a.vx) * nx + (b.vy - a.vy) * ny;
   if (vn < 0){
     const jimp = -(1 + e) * vn / ims;
-    a.vx -= jimp * nx * ima; a.vy -= jimp * ny * ima;
-    b.vx += jimp * nx * imb; b.vy += jimp * ny * imb;
+    // amortiguación del impulso RECIBIDO por el jugador (rasgo Yunque). Con yq=1 son las líneas de siempre.
+    let ya = 1, yb2 = 1;
+    if (yq !== 1){ if (a.isPlayer && b.m <= a.m) ya = yq; if (b.isPlayer && a.m <= b.m) yb2 = yq; }
+    a.vx -= jimp * nx * ima * ya; a.vy -= jimp * ny * ima * ya;
+    b.vx += jimp * nx * imb * yb2; b.vy += jimp * ny * imb * yb2;
   }
 }
 function clampv(o, vmax){ const sp = hyp(o.vx, o.vy); if (sp > vmax){ o.vx = o.vx * vmax / sp; o.vy = o.vy * vmax / sp; } }
@@ -124,6 +129,21 @@ const STAT_K = 0.12;
 //+AG multiplicador CAPADO a ±STAT_K (attr 0→0.88, 6.5→1.0, 13→1.12; firma que pase de 13 a nivel alto no rebasa ±12%).
 const statMul = a => { const m = 1 + (a - 6.5) / 6.5 * STAT_K; return m < 1 - STAT_K ? 1 - STAT_K : (m > 1 + STAT_K ? 1 + STAT_K : m); };
 const NEUTRAL_MUL = { vel:1, ace:1, pes:1, aga:1, res:1, bst:1 };
+//+AG doc 39: RASGOS de Épicas/Legendaria (una regla concreta que la ficha de la Tienda promete con palabras).
+//   Mismo doble candado que ?stats: solo INDIVIDUAL y solo balls[0]. Sin rasgo, o con uno de otro modo, todos los
+//   factores valen 1 → byte-idéntico. Los de este modo: FANTASMA (el Cazador tarda más en fijarte) · VOLCÁN
+//   (boost +20%) · ESTRELLA (súper +1 s). YUNQUE también, porque aquí las bolas se empujan.
+const TRAITS_CAZA = new Set(['fantasma','volcan','estrella','yunque']);
+const VOLCAN_BST = 1.20;        // "su boost dura un 20% más"
+const ESTRELLA_SUPER_F = 30;    // "su súper dura +1 segundo" · 30 FPS
+const YUNQUE_IMP = 0.5;         // "les roban la MITAD del impulso"
+//+AG FANTASMA no es inmunidad: sube su COSTE como presa en el score de pickTarget (que es una distancia, así que
+//   el número está en unidades de mundo). Se calibró MIDIENDO: ver prototipo/motor/_traits_check.mjs.
+//+AG calibrado MIDIENDO, no a ojo: barrido de 1.5→5.5 contra el retardo real de fijado (frames hasta el primer
+//   lock sobre el jugador, 120 semillas) → 1.5:+9.6% · 2.5:+14.0% · 3.0:+14.0% · 3.5:+14.6% · 5.5:+18.4%. La curva
+//   es plana entre 2.5 y 3.5 y se dispara luego; 3.5 es lo más cerca del +15% que promete la ficha sin pasarse.
+//   Rehacer el barrido con _traits_check.mjs si se toca el scoring del Cazador.
+const FANTASMA_APPEAL = 3.5;
 
 export class Sim {
   constructor(seed = 1, opts = {}){
@@ -136,6 +156,8 @@ export class Sim {
     //+AG doc 39 #1: modificador de física por atributos, SOLO individual y SOLO balls[0]. No consume RNG (constantes).
     const _S = (this.individual && Array.isArray(opts.stats) && opts.stats.length === 6) ? opts.stats : null;
     this.pmul = _S ? { vel:statMul(_S[0]), ace:statMul(_S[1]), pes:statMul(_S[2]), aga:statMul(_S[3]), res:statMul(_S[4]), bst:statMul(_S[5]) } : NEUTRAL_MUL;
+    //+AG doc 39: el RASGO de la bola equipada. Mismo doble candado y sin consumir RNG, como los stats.
+    this.trait = (this.individual && TRAITS_CAZA.has(opts.trait)) ? opts.trait : null;
     const n6 = this.individual && opts.n === 6;
     this.teams = this.individual ? (n6 ? SHORT_COLORS_6 : SHORT_COLORS) : TEAMS;
     this.ballsPerTeam = this.individual ? 1 : BALLS_PER_TEAM;
@@ -207,15 +229,20 @@ export class Sim {
   _pushEv(k, e){ (this._pev ??= {}); (this._pev[k] ??= []).push(e); }
   //+AG doc 39 #1: BST → duración de los boosters del jugador (dash/escudo/señuelo); el cooldown NO cambia. pmul.bst=1
   //   fuera de individual-con-stats → duraciones idénticas a la fuente.
+  //+AG doc 39 RASGO Volcán: se apila SOBRE el bst de los stats (el stat es la bola, el rasgo es su identidad de
+  //   Épica). Sin rasgo el factor es 1 → estas líneas valen exactamente lo que valían.
+  _bstT(){ return this.pmul.bst * (this.trait === 'volcan' ? VOLCAN_BST : 1); }
   playerDash(){ const p = this.balls[0]; if (!p || p.rank !== null || this.f < p.dash_cd) return false;
-    p.dash_until = this.f + Math.round(P_DASH_DUR * this.pmul.bst); p.dash_cd = this.f + P_DASH_CD; this._pushEv('dash', { f: this.f, id: 0 }); return true; }
+    p.dash_until = this.f + Math.round(P_DASH_DUR * this._bstT()); p.dash_cd = this.f + P_DASH_CD; this._pushEv('dash', { f: this.f, id: 0 }); return true; }
   playerShield(){ const p = this.balls[0]; if (!p || p.rank !== null || this.f < p.shield_cd) return false;
-    p.shield_until = this.f + Math.round(P_SHIELD_DUR * this.pmul.bst); p.shield_cd = this.f + P_SHIELD_CD; this._pushEv('save', { f: this.f, id: 0 }); return true; }
+    p.shield_until = this.f + Math.round(P_SHIELD_DUR * this._bstT()); p.shield_cd = this.f + P_SHIELD_CD; this._pushEv('save', { f: this.f, id: 0 }); return true; }
   playerDecoy(){ const p = this.balls[0]; if (!p || p.rank !== null) return false;   // SENUELO: el cazador te suelta y fija a otra presa
     const cands = this.aliveBalls().filter(x => x.id !== p.id);
     if (cands.length){ const nt = cands.reduce((a, x) => ((x.x - this.H.x) ** 2 + (x.y - this.H.y) ** 2) < ((a.x - this.H.x) ** 2 + (a.y - this.H.y) ** 2) ? x : a, cands[0]);
       this.H.target = nt.id; this.H.lost = 0; this._pushEv('swap', { f: this.f, id: 0, to: nt.id }); }
-    p.aggro_immune_until = this.f + Math.round(P_SUPER_IMMUNE * this.pmul.bst); return true; }
+    //+AG doc 39 RASGO Estrella: +1 s de SÚPER. Va DESPUÉS del redondeo del bst para que sean exactamente +30
+    //   frames y no un porcentaje disfrazado: la ficha promete un segundo.
+    p.aggro_immune_until = this.f + Math.round(P_SUPER_IMMUNE * this._bstT()) + (this.trait === 'estrella' ? ESTRELLA_SUPER_F : 0); return true; }
 
   aliveBalls(){ return this.balls.filter(b => b.rank === null); }
   aliveTeams(){ const s = []; for (let t = 0; t < this.teams.length; t++) if (this.byTeam[t].some(b => b.rank === null)) s.push(t); return s; }
@@ -243,7 +270,11 @@ export class Sim {
       let iso = Infinity;
       for (const o of ab) if (o !== b) iso = Math.min(iso, hyp(b.x - o.x, b.y - o.y));
       if (iso === Infinity) iso = 0;
-      return d - ISO_W * iso - TEAM_W * this.teamAlive(b.team) + b.appeal;
+      //+AG doc 39 RASGO Fantasma: "el Cazador tarda un 15% más en fijarla". No es inmunidad ni cambia el radio de
+      //   captura (regla dura del modo): sube su COSTE como presa, así que el Cazador va antes a por otras y de
+      //   media tarda más en fijarte. El score es una distancia → el número está en unidades de mundo.
+      return d - ISO_W * iso - TEAM_W * this.teamAlive(b.team) + b.appeal
+             + ((b.isPlayer && this.trait === 'fantasma') ? FANTASMA_APPEAL : 0);
     };
     let free = ab.filter(b => !this.wouldEndEarly(b, f) && f >= b.aggro_immune_until);
     const pool = free.length ? free : ab;
@@ -335,8 +366,11 @@ export class Sim {
     for (let s = 0; s < SUBSTEPS; s++){
       for (const b of ab_mv){ b.x += b.vx * DT; b.y += b.vy * DT; wall(b, BALL_R); }
       H.x += H.vx * DT; H.y += H.vy * DT; wall(H, H.r);
+      //+AG doc 39 RASGO Yunque: solo entre BOLAS. Contra el Cazador NO se aplica — es un depredador, no una bola
+      //   "más ligera", y aguantar sus empujones sí sería tocar la regla del modo.
+      const _yq = this.trait === 'yunque' ? YUNQUE_IMP : 1;
       for (let i = 0; i < ab_mv.length; i++){
-        for (let j = i + 1; j < ab_mv.length; j++) resolve(ab_mv[i], ab_mv[j], BALL_R, BALL_R, 0.4);
+        for (let j = i + 1; j < ab_mv.length; j++) resolve(ab_mv[i], ab_mv[j], BALL_R, BALL_R, 0.4, _yq);
         resolve(ab_mv[i], H, BALL_R, H.r, 0.3);
       }
     }

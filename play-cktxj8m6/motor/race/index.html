@@ -822,6 +822,9 @@ if(TUTORIAL && indOpts) indOpts.tutorial=true;
 //   física del jugador (balls[0]) en la Sim. Solo se aplica en INDIVIDUAL; ausente o mal formado = neutro (no-op).
 //   El torneo (fmt=team) no es INDIVIDUAL → aunque llegara ?stats no se lee (byte-idéntico garantizado en la Sim).
 if(indOpts){ const _s=(params.get('stats')||'').split(',').map(Number); if(_s.length===6 && _s.every(v=>isFinite(v))) indOpts.stats=_s; }
+//+AG doc 39: ?trait=<clave> → el RASGO de la bola equipada. La Sim solo reconoce los suyos y valida la clave, así
+//   que un rasgo de otro modo (o basura) llega y no hace nada. Mismo candado que ?stats: solo INDIVIDUAL.
+if(indOpts){ const _t=params.get('trait'); if(_t) indOpts.trait=_t; }
 //+AG doc 41 bloque G: ?arch=<clave> (la bola-heroe equipada) -> su MATERIAL solo para balls[0].
 //   Misma regla que ?stats: solo INDIVIDUAL, y ausente o desconocido = null = el look de siempre.
 //   Es 100% cosmetico: no toca la Sim, asi que no puede mover el balance ni un milimetro.

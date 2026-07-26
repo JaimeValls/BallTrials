@@ -239,6 +239,14 @@ const STAT_K = 0.12;
 //+AG multiplicador CAPADO a ±STAT_K (attr 0→0.88, 6.5→1.0, 13→1.12; firma que pase de 13 a nivel alto no rebasa ±12%).
 const statMul = a => { const m = 1 + (a - 6.5) / 6.5 * STAT_K; return m < 1 - STAT_K ? 1 - STAT_K : (m > 1 + STAT_K ? 1 + STAT_K : m); };
 const NEUTRAL_MUL = { vel:1, ace:1, pes:1, aga:1, res:1, bst:1 };
+//+AG doc 39: RASGOS de Épicas/Legendaria. Mismo doble candado que ?stats (solo INDIVIDUAL, solo balls[0]); sin
+//   rasgo, o con uno de otro modo, todos los factores valen 1 → byte-idéntico. Los de este modo: VOLCÁN (boost
+//   +20%) · ESTRELLA (súper +1 s) · YUNQUE (medio impulso de las que no pesan más). FANTASMA es del Cazador: aquí
+//   llega y no hace nada — su rasgo habla del Cazador, y este modo no tiene Cazador.
+const TRAITS_RED = new Set(['volcan','estrella','yunque']);
+const VOLCAN_BST = 1.20;        // "su boost dura un 20% más"
+const ESTRELLA_SUPER_F = 30;    // "su súper dura +1 segundo" · 30 FPS
+const YUNQUE_IMP = 0.5;         // "les roban la MITAD del impulso"
 
 export class Sim {
   // opts (MODO EMBUDO del torneo, docs/52 §2.2/§2.3; sin opts = standalone byte-idéntico):
@@ -266,6 +274,8 @@ export class Sim {
     //+AG doc 39 #1: modificador de física por atributos, SOLO individual y SOLO balls[0]. No consume RNG (constantes).
     const _S = (this.individual && Array.isArray(opts.stats) && opts.stats.length === 6) ? opts.stats : null;
     this.pmul = _S ? { vel:statMul(_S[0]), ace:statMul(_S[1]), pes:statMul(_S[2]), aga:statMul(_S[3]), res:statMul(_S[4]), bst:statMul(_S[5]) } : NEUTRAL_MUL;
+    //+AG doc 39: el RASGO de la bola equipada. Mismo doble candado y sin consumir RNG, como los stats.
+    this.trait = (this.individual && TRAITS_RED.has(opts.trait)) ? opts.trait : null;
     const nInd6 = this.individual && opts.n === 6;
     this.teams = this.individual ? (nInd6 ? SHORT_COLORS_6 : SHORT_COLORS) : TEAMS;
     this.nTeams = this.teams.length;                                   // 4 torneo · 8/6 individual
@@ -377,15 +387,18 @@ export class Sim {
     return true; }
   //+AG doc 39 #1: BST → duración de los boosters del jugador (nitro/fantasma/súper); el cooldown NO cambia. pmul.bst=1
   //   fuera de individual-con-stats → duraciones idénticas a la fuente.
+  //+AG doc 39 RASGO Volcán: se apila SOBRE el bst de los stats. Sin rasgo el factor es 1 → líneas idénticas.
+  _bstT(){ return this.pmul.bst * (this.trait === 'volcan' ? VOLCAN_BST : 1); }
   playerNitro(){ const p = this.balls[0];           //+AG NITRO: sobreempuje x1.6 ~1.5s, recarga ~8s
     if (!p || p.rank !== null || this.f < this.pIn.nitroCd) return false;
-    this.pIn.nitroUntil = this.f + Math.round(P_NITRO_DUR * this.pmul.bst); this.pIn.nitroCd = this.f + P_NITRO_CD; return true; }
+    this.pIn.nitroUntil = this.f + Math.round(P_NITRO_DUR * this._bstT()); this.pIn.nitroCd = this.f + P_NITRO_CD; return true; }
   playerGhost(){ const p = this.balls[0];           //+AG FANTASMA: intangible a trampas/obstáculos ~2s, recarga ~10s
     if (!p || p.rank !== null || this.f < this.pIn.ghostCd) return false;
-    this.pIn.ghostUntil = this.f + Math.round(P_GHOST_DUR * this.pmul.bst); this.pIn.ghostCd = this.f + P_GHOST_CD; return true; }
+    this.pIn.ghostUntil = this.f + Math.round(P_GHOST_DUR * this._bstT()); this.pIn.ghostCd = this.f + P_GHOST_CD; return true; }
   playerSuper(){ const p = this.balls[0];           //+AG SÚPER NITRO: x2.0 ~2.5s; lo raciona la barra del embed
     if (!p || p.rank !== null || this.f < this.pIn.superUntil) return false;
-    this.pIn.superUntil = this.f + Math.round(P_SUPER_DUR * this.pmul.bst); return true; }
+    //+AG doc 39 RASGO Estrella: +1 s de SÚPER, después del redondeo (la ficha promete un segundo, no un %).
+    this.pIn.superUntil = this.f + Math.round(P_SUPER_DUR * this._bstT()) + (this.trait === 'estrella' ? ESTRELLA_SUPER_F : 0); return true; }
   //+AG multiplicador de empuje vigente (Nitro/Súper; si coinciden manda el mayor) y tirón lateral de carril.
   //   Solo se consultan dentro de ramas isPlayer&&engaged → jamás tocan a la IA ni al modo sin jugador.
   _pBoost(){ let m = 1;
@@ -693,7 +706,10 @@ export class Sim {
             if (b.y < bar.y){ b.y = bar.y - BARRIER_THICK / 2 - BALL_R; if (b.vy > 0) b.vy = 0; }
             else { b.y = bar.y + BARRIER_THICK / 2 + BALL_R; if (b.vy < 0) b.vy = 0; } } }
       }
-      for (let i = 0; i < ab.length; i++) for (let j = i + 1; j < ab.length; j++) resolve(ab[i], ab[j], BALL_R, BALL_R, 0.2);
+      //+AG doc 39 RASGO Yunque: medio impulso de las bolas que no pesan más que él. En este modo importa de verdad,
+      //   porque un empujón en rojo te delata; el rasgo NO te salva del semáforo, solo te mueve menos.
+      const _yq = this.trait === 'yunque' ? YUNQUE_IMP : 1;
+      for (let i = 0; i < ab.length; i++) for (let j = i + 1; j < ab.length; j++) resolve(ab[i], ab[j], BALL_R, BALL_R, 0.2, _yq);
     }
 
     // ---- BARRERA: daño por embestida (1×/frame): cada bola en contacto Y EN VERDE le resta vida; al llegar a 0
@@ -871,7 +887,9 @@ export class Sim {
   get scale(){ return FIELD_L; }   // compat
 }
 
-function resolve(a, b, ra, rb, e){
+//+AG doc 39 RASGO Yunque: `yq` (1 por defecto) es el factor de masa inversa del JUGADOR cuando el otro cuerpo no
+//   pesa más que él. Con yq=1 la función es exactamente la de antes.
+function resolve(a, b, ra, rb, e, yq = 1){
   let dx = b.x - a.x, dy = b.y - a.y, d = hyp(dx, dy), mind = ra + rb + 0.06;
   if (d <= 0 || d >= mind) return;
   const nx = dx / d, ny = dy / d, overlap = mind - d;
@@ -879,6 +897,10 @@ function resolve(a, b, ra, rb, e){
   a.x -= nx * overlap * (ima / ims); a.y -= ny * overlap * (ima / ims);
   b.x += nx * overlap * (imb / ims); b.y += ny * overlap * (imb / ims);
   const vn = (b.vx - a.vx) * nx + (b.vy - a.vy) * ny;
-  if (vn < 0){ const j = -(1 + e) * vn / ims; a.vx -= j * nx * ima; a.vy -= j * ny * ima; b.vx += j * nx * imb; b.vy += j * ny * imb; }
+  if (vn < 0){ const j = -(1 + e) * vn / ims;
+    // amortiguación del impulso RECIBIDO por el jugador (rasgo Yunque). Con yq=1 son las líneas de siempre.
+    let ya = 1, yb2 = 1;
+    if (yq !== 1){ if (a.isPlayer && b.m <= a.m) ya = yq; if (b.isPlayer && a.m <= b.m) yb2 = yq; }
+    a.vx -= j * nx * ima * ya; a.vy -= j * ny * ima * ya; b.vx += j * nx * imb * yb2; b.vy += j * ny * imb * yb2; }
 }
 function clampv(o, vmax){ const sp = hyp(o.vx, o.vy); if (sp > vmax){ o.vx = o.vx * vmax / sp; o.vy = o.vy * vmax / sp; } }

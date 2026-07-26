@@ -24,6 +24,15 @@ export function crearSincro({ nube, ahora = () => Date.now(), aviso = null }) {
   let ultimoError = null;
   let estado = 'sin-arrancar';
   let leerSave = null;        // lo fija arrancar(): de donde sacar el estado vivo
+  let fuenteActual = null;    // misma fuente, para poder reintentar la reconciliacion
+  //+AG plataforma-y-cuentas: SOLO se puede empujar a ciegas cuando ya hubo una
+  //   comparacion local-vs-remoto que salio bien al menos una vez en esta sesion.
+  //   Sin esto, un parpadeo de red justo en el arranque (el unico momento en que se
+  //   mira quienGana) dejaba el resto de la sesion empujando el estado local sin
+  //   comparar nunca con la nube: en un movil nuevo con cuenta ya vieja, el primer
+  //   persist() (coger una moneda) sobreescribia partidas y chispas de verdad por
+  //   las de un save recien nacido. Reproducido y arreglado 26-07-2026.
+  let reconciliado = false;
 
   const decir = (q, d) => { try { aviso && aviso(q, d); } catch (e) { /* el aviso no puede tumbar la sincronizacion */ } };
 
@@ -72,30 +81,42 @@ export function crearSincro({ nube, ahora = () => Date.now(), aviso = null }) {
   //   save     = el SAVE vivo del juego
   //   fresco   = true si este dispositivo no tenia partida guardada
   //   escribir = como aplicar un estado traido de la nube
+  // Lee la nube, decide quien gana y aplica esa decision. Solo se llama con la
+  // sesion ya asegurada. Si termina sin lanzar, deja reconciliado=true: a partir
+  // de ahi ya es seguro empujar a ciegas, porque sabemos que el local no va por
+  // detras del remoto.
+  async function reconciliar(fuente) {
+    const p = await nube.perfil();
+    const remoto = (p && p.save_ts > 0 && p.save_blob && Object.keys(p.save_blob).length) ? p.save_blob : null;
+    const local = fuente.fresco ? null : leerSave();
+    const v = quienGana(local, remoto, Number(leerSave()?.syncTs || 0), Number(p?.save_ts || 0));
+
+    if (v.gana === 'remoto') {
+      const traido = { ...remoto, syncTs: Number(p.save_ts) };
+      fuente.escribir(traido);
+      estado = 'traido';
+      decir('traido', { motivo: v.motivo, partidas: partidas(remoto) });
+    } else {
+      await empujarSinComprobar();
+      estado = remoto ? 'empujado' : 'reclamado';
+      decir(estado, { motivo: v.motivo, conflicto: !!v.conflicto });
+    }
+    reconciliado = true;
+    return { estado, conflicto: !!v.conflicto, motivo: v.motivo };
+  }
+
   async function arrancar(fuente) {
+    fuenteActual = fuente;
     leerSave = () => fuente.save ?? (fuente.leer ? fuente.leer() : null);
     try {
       await nube.asegurarSesion();
-      const p = await nube.perfil();
-      const remoto = (p && p.save_ts > 0 && p.save_blob && Object.keys(p.save_blob).length) ? p.save_blob : null;
-      const local = fuente.fresco ? null : leerSave();
-      const v = quienGana(local, remoto, Number(leerSave()?.syncTs || 0), Number(p?.save_ts || 0));
-
-      if (v.gana === 'remoto') {
-        const traido = { ...remoto, syncTs: Number(p.save_ts) };
-        fuente.escribir(traido);
-        estado = 'traido';
-        decir('traido', { motivo: v.motivo, partidas: partidas(remoto) });
-      } else {
-        await empujarYa();
-        estado = remoto ? 'empujado' : 'reclamado';
-        decir(estado, { motivo: v.motivo, conflicto: !!v.conflicto });
-      }
-      return { estado, conflicto: !!v.conflicto, motivo: v.motivo, usuario: nube.sesion?.user_id || null };
+      const r = await reconciliar(fuente);
+      return { ...r, usuario: nube.sesion?.user_id || null };
     } catch (e) {
       // Regla 2: un fallo de red no cambia nada de lo que el jugador tiene delante.
       ultimoError = e;
       estado = 'sin-red';
+      reconciliado = false;
       decir('sin-red', { error: String(e?.message || e) });
       return { estado, error: String(e?.message || e) };
     }
@@ -103,7 +124,10 @@ export function crearSincro({ nube, ahora = () => Date.now(), aviso = null }) {
 
   // ------------------------------------------------------------------ empujar
 
-  async function empujarYa() {
+  // Empuje "a ciegas": sube el local tal cual, SIN volver a comparar con la nube.
+  // Solo se debe llamar cuando reconciliado===true (ver empujarYa). Nombre distinto
+  // a proposito para que no se pueda invocar por error saltandose la comprobacion.
+  async function empujarSinComprobar() {
     const save = leerSave ? leerSave() : null;
     if (!save) return false;
     if (empujando) { pendiente = true; return false; }
@@ -129,6 +153,28 @@ export function crearSincro({ nube, ahora = () => Date.now(), aviso = null }) {
       empujando = false;
       if (pendiente) { pendiente = false; programar(); }
     }
+  }
+
+  async function empujarYa() {
+    if (!reconciliado) {
+      // Todavia no hemos comparado con la nube con exito en esta sesion (el
+      // arranque fallo por red). Antes de subir nada, reintentar la
+      // reconciliacion completa: si la nube tiene mas progreso, se trae en vez
+      // de pisarlo.
+      if (!fuenteActual) return false;
+      try {
+        await nube.asegurarSesion();
+        await reconciliar(fuenteActual);
+        return true;
+      } catch (e) {
+        ultimoError = e;
+        decir('sin-red', { error: String(e?.message || e) });
+        if (!temporizador) { temporizador = setTimeout(() => { temporizador = null; empujarYa(); }, REINTENTO_MS);
+          if (temporizador && typeof temporizador.unref === 'function') temporizador.unref(); }
+        return false;
+      }
+    }
+    return await empujarSinComprobar();
   }
 
   // Regla 3: agrupa la rafaga de persist() en un solo empuje.

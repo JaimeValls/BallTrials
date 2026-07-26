@@ -83,13 +83,56 @@ export function crearNube(opts = {}) {
     return datos;
   }
 
+  // --------------------------------------------------------------- captcha
+  //
+  // Freno de altas anonimas (docs/42 s17). Va aqui dentro y no en juego.html para
+  // que TODO el que use esta capa lo herede sin cambiar su codigo, incluidas las
+  // baterias de prueba. Apagado por defecto: con la sitekey vacia, captcha.mjs
+  // devuelve null siempre y el cuerpo de la peticion sale identico a como salia
+  // antes de que esto existiera.
+  //
+  // opts.captcha admite: una funcion async que devuelve la ficha, un objeto con
+  // .token(), o null/false para apagarlo del todo (lo que hacen las pruebas que
+  // quieren el camino sin captcha).
+  const captchaOpt = opts.captcha;
+  let captchaPorDefecto;
+
+  async function fichaCaptcha() {
+    try {
+      if (captchaOpt === null || captchaOpt === false) return null;
+      if (typeof captchaOpt === 'function') return (await captchaOpt()) || null;
+      if (captchaOpt && typeof captchaOpt.token === 'function') return (await captchaOpt.token()) || null;
+      if (captchaPorDefecto === undefined) {
+        const m = await import('./captcha.mjs');
+        captchaPorDefecto = m.crearCaptcha();
+      }
+      return (await captchaPorDefecto.token()) || null;
+    } catch (e) {
+      // Nunca reventar el arranque por el captcha: sin ficha, que el servidor
+      // decida. Si esta exigido, el alta falla y el juego sigue en local.
+      return null;
+    }
+  }
+
+  // GoTrue espera la ficha aqui dentro; es el mismo sitio donde la mete el SDK
+  // oficial (auth-js: gotrue_meta_security.captcha_token).
+  async function conCaptcha(cuerpo) {
+    const ficha = await fichaCaptcha();
+    return ficha ? { ...cuerpo, gotrue_meta_security: { captcha_token: ficha } } : cuerpo;
+  }
+
   // ---------------------------------------------------------------- sesion
 
   async function entrarAnonimo() {
     // El equivalente de signInAnonymously() del SDK: un signup sin credenciales.
-    return guardarSesion(await pedir('/auth/v1/signup', { metodo: 'POST', cuerpo: { data: {} }, conSesion: false }));
+    return guardarSesion(await pedir('/auth/v1/signup',
+      { metodo: 'POST', cuerpo: await conCaptcha({ data: {} }), conSesion: false }));
   }
 
+  // Sin captcha a proposito, y no es un olvido: refresh_token no es un endpoint
+  // protegido (el SDK oficial tampoco le manda ficha). Gracias a eso el captcha
+  // solo puede aparecer en la PRIMERA carga de un aparato nuevo; quien ya jugo
+  // vuelve por aqui y no ve nada ni carga el script de Cloudflare.
   async function renovar() {
     if (!ses?.refresh_token) return null;
     try {
@@ -209,7 +252,7 @@ export function crearNube(opts = {}) {
   // del dueno del email; el estado se trae luego por sincro.mjs.
   async function entrarConEmail({ email, password }) {
     const s = await pedir('/auth/v1/token?grant_type=password',
-      { metodo: 'POST', cuerpo: { email, password }, conSesion: false });
+      { metodo: 'POST', cuerpo: await conCaptcha({ email, password }), conSesion: false });
     guardarSesion(s);
     if (ses) { ses.email = s?.user?.email || email; ses.es_anonimo = false;
       try { store.setItem(SES_KEY, JSON.stringify(ses)); } catch (e) {} }
@@ -224,7 +267,8 @@ export function crearNube(opts = {}) {
   // Recuperar por correo. OJO: hoy el proyecto no tiene servidor de correo propio,
   // asi que esto solo llega de verdad cuando se configure uno (docs/42).
   async function pedirCorreoDeRecuperacion(email) {
-    return await pedir('/auth/v1/recover', { metodo: 'POST', cuerpo: { email }, conSesion: false });
+    return await pedir('/auth/v1/recover',
+      { metodo: 'POST', cuerpo: await conCaptcha({ email }), conSesion: false });
   }
 
   // Google/Meta: el navegador se va a la pantalla del proveedor y vuelve aqui. Queda
