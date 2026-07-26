@@ -271,11 +271,59 @@ export function crearNube(opts = {}) {
       { metodo: 'POST', cuerpo: await conCaptcha({ email }), conSesion: false });
   }
 
-  // Google/Meta: el navegador se va a la pantalla del proveedor y vuelve aqui. Queda
-  // listo para cuando existan las credenciales; hasta entonces el juego no lo ofrece.
+  // Google/Meta: el navegador se va a la pantalla del proveedor y vuelve aqui. ENTRAR
+  // por aqui es entrar en la cuenta de ESE Google, que puede no ser la que esta jugando.
   function urlDeProveedor(proveedor, volverA) {
     const v = encodeURIComponent(volverA || (typeof location !== 'undefined' ? location.href : ''));
     return `${url}/auth/v1/authorize?provider=${encodeURIComponent(proveedor)}&redirect_to=${v}`;
+  }
+
+  // ENLAZAR es lo que pide docs/23: el invitado que ya esta jugando se ELEVA a cuenta
+  // permanente, mismo user_id, cero migracion, imposible perder progreso. El navegador
+  // no puede mandar la cabecera de sesion en una redireccion, asi que se pide la URL
+  // por fetch (skip_http_redirect) y se navega a mano. Necesita "Allow manual linking"
+  // encendido en el proyecto; si no lo esta, esto lanza y quien llama cae a urlDeProveedor.
+  async function urlDeEnlace(proveedor, volverA) {
+    await asegurarSesion();
+    const v = encodeURIComponent(volverA || (typeof location !== 'undefined' ? location.href : ''));
+    const r = await pedir(`/auth/v1/user/identities/authorize?provider=${encodeURIComponent(proveedor)}&redirect_to=${v}&skip_http_redirect=true`);
+    return (r && r.url) || null;
+  }
+
+  // La vuelta del proveedor: GoTrue deja los tokens en el FRAGMENTO (#access_token=...),
+  // o el fallo en #error_description. Se adopta como sesion y se limpia la barra de
+  // direcciones, para no dejar tokens a la vista ni en el historial. Devuelve null si
+  // no hay nada que adoptar, que es el caso de todos los arranques normales.
+  async function adoptarSesionDeUrl(loc) {
+    const l = loc || (typeof location !== 'undefined' ? location : null);
+    if (!l || !l.hash || l.hash.length < 2) return null;
+    const p = new URLSearchParams(l.hash.slice(1));
+    const err = p.get('error_description') || p.get('error');
+    const at = p.get('access_token');
+    if (!at && !err) return null;   // un ancla cualquiera, no una vuelta de login
+    limpiarFragmento(l);
+    if (err) return { error: err };
+    const antes = ses && ses.user_id ? ses.user_id : null;
+    guardarSesion({ access_token: at, refresh_token: p.get('refresh_token'), expires_in: +p.get('expires_in') || 3600 });
+    // Quien es de verdad lo dice el servidor, no el fragmento.
+    try {
+      const u = await pedir('/auth/v1/user');
+      if (ses) {
+        ses.user_id = (u && u.id) || ses.user_id;
+        ses.email = (u && u.email) || null;
+        ses.es_anonimo = !!(u && u.is_anonymous);
+        try { store.setItem(SES_KEY, JSON.stringify(ses)); } catch (e) { /* sin persistencia */ }
+      }
+    } catch (e) { /* la sesion sirve igual; el correo se pinta en el siguiente arranque */ }
+    const ahora = ses && ses.user_id ? ses.user_id : null;
+    return { antes, user_id: ahora, email: (ses && ses.email) || null, mismo: !!antes && antes === ahora };
+  }
+
+  function limpiarFragmento(l) {
+    try {
+      if (typeof history !== 'undefined' && history.replaceState) history.replaceState(null, '', l.pathname + l.search);
+      else l.hash = '';
+    } catch (e) { /* si no se puede, el token queda en la barra: feo, no roto */ }
   }
 
   // ------------------------------------------------------- llevarse la partida
@@ -301,7 +349,8 @@ export function crearNube(opts = {}) {
     asegurarSesion, entrarAnonimo, renovar,
     perfil, guardarPerfil, bolas, crearBola, guardarBola, saldos, reportarPartida, gastar,
     crearCodigoTransferencia, canjearCodigoTransferencia,
-    estadoCuenta, crearCuentaEmail, entrarConEmail, cambiarPassword, pedirCorreoDeRecuperacion, urlDeProveedor,
+    estadoCuenta, crearCuentaEmail, entrarConEmail, cambiarPassword, pedirCorreoDeRecuperacion,
+    urlDeProveedor, urlDeEnlace, adoptarSesionDeUrl,
     // Solo para pruebas: tirar la sesion local sin tocar la cuenta del servidor.
     olvidarSesion: () => guardarSesion(null)
   };

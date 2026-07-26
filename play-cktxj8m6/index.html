@@ -256,8 +256,15 @@
      Aqui: 1) equipar CIERRA la ficha (el jugador ya esperaba que se cerrara), 2) para todo lo demas
      (bloqueada, o ya equipada) hay este VOLVER debajo. Compacto a proposito: es la salida, no la accion,
      y cada pixel de alto cuenta porque la ficha no hace scroll. */
-  .gd-btn.back{ border:0; background:none; color:#9aa3cd; font-size:14px; font-weight:800; padding:9px; letter-spacing:.02em; }
-  .gd-btn.back:active{ color:#fff; }
+  /*+AG salio primero SIN cuerpo (border:0; background:none) y Jaime lo canto: "se ve demasiado poco".
+     El auditor de arte midio el contraste — 6.6:1, se lee de sobra — o sea que NO era el color: era que
+     resultaba el unico elemento pulsable de la ficha sin silueta, y el ojo lo leia como leyenda o como
+     texto apagado. Supercell no deja nunca un control tocable como texto desnudo. Se le da cuerpo con el
+     MISMO idioma que ya usan los otros secundarios de este juego (.g-back, .gd-btn.ghost, .r-home.ico:
+     borde var(--line) + velo blanco), un punto mas flojo que ghost para que la jerarquia se lea
+     dorado > ghost > volver. Sin sombra dura abajo: ese bisel es del boton primario y de nadie mas. */
+  .gd-btn.back{ border:1px solid var(--line); background:#ffffff0d; color:#c9cff0; font-size:14px; font-weight:800; padding:9px; letter-spacing:.02em; }
+  .gd-btn.back:active{ background:#ffffff1c; color:#fff; }
   /*+AG MOVIL CORTO. Medido, no estimado: en 375x640 la ficha de una bola BLOQUEADA (la mas alta: lleva
      "Desbloquear" + "o pagar" + "Volver") se salia 28 px por arriba y por abajo — y 7 px ya se salia ANTES
      de anadir el Volver, o sea que el bug estaba y nadie lo habia medido porque __fitCheck no entra en los
@@ -1285,7 +1292,7 @@
           <button class="pr-inv" id="prAccLogin" style="flex:1" data-t="prAccLogin">Ya tengo cuenta</button>
         </div>
         <div class="pr-slots" style="gap:7px;margin-top:7px">
-          <button class="pr-inv" id="prAccGoogle" style="flex:1;opacity:.45" disabled data-t="prAccGoogle">Google · pronto</button>
+          <button class="pr-inv" id="prAccGoogle" style="flex:1" data-t="prAccGoogle">Continuar con Google</button>
           <button class="pr-inv" id="prAccMeta" style="flex:1;opacity:.45" disabled data-t="prAccMeta">Facebook · pronto</button>
         </div>
       </div>
@@ -2322,7 +2329,7 @@ const MORE={
     prMoveCopied:'✓ Código copiado. Pégalo en el otro móvil.', prMoveCopyManual:'Código seleccionado: mantén pulsado y elige Copiar.',
     prAccH:'Tu cuenta', prAccGuest:'Estás jugando <b>como invitado</b>', prAccSaved:'Cuenta guardada:',
     prAccNote:'Tu partida ya se guarda en el servidor, pero <b>solo este móvil sabe que es tuya</b>. Guarda tu cuenta y podrás entrar desde cualquier sitio.',
-    prAccCreate:'Guardar mi cuenta', prAccLogin:'Ya tengo cuenta', prAccGoogle:'Google · pronto', prAccMeta:'Facebook · pronto',
+    prAccCreate:'Guardar mi cuenta', prAccLogin:'Ya tengo cuenta', prAccGoogle:'Continuar con Google', prAccMeta:'Facebook · pronto',
     prAccOkNew:'✓ Cuenta guardada. Ya puedes entrar desde otro móvil.', prAccOkIn:'✓ ¡Hola de nuevo! Trayendo tu partida…',
     prAccBadMail:'Ese correo no parece válido.', prAccBadPass:'La contraseña necesita 6 caracteres o más.',
     prAccTaken:'Ese correo ya tiene cuenta. Usa "Ya tengo cuenta".', prAccBadLogin:'Correo o contraseña incorrectos.',
@@ -2468,7 +2475,7 @@ const MORE={
     prMoveCopied:'✓ Code copied. Paste it on the other phone.', prMoveCopyManual:'Code selected: long-press and choose Copy.',
     prAccH:'Your account', prAccGuest:'You are playing <b>as a guest</b>', prAccSaved:'Account saved:',
     prAccNote:'Your game is already saved on the server, but <b>only this phone knows it is yours</b>. Save your account and you can log in from anywhere.',
-    prAccCreate:'Save my account', prAccLogin:'I already have one', prAccGoogle:'Google · soon', prAccMeta:'Facebook · soon',
+    prAccCreate:'Save my account', prAccLogin:'I already have one', prAccGoogle:'Continue with Google', prAccMeta:'Facebook · soon',
     prAccOkNew:'✓ Account saved. You can now log in from another phone.', prAccOkIn:'✓ Welcome back! Bringing your game…',
     prAccBadMail:'That email does not look valid.', prAccBadPass:'The password needs 6 characters or more.',
     prAccTaken:'That email already has an account. Use "I already have one".', prAccBadLogin:'Wrong email or password.',
@@ -3454,6 +3461,23 @@ function wireCuenta(){
         setTimeout(()=>location.reload(), 900);
       }catch(e){ di(S().prAccBadLogin,false); console.warn('[cuenta] entrar', e); entrar.disabled=false; }
     };
+
+    //+AG docs/23 §2-§3: Google NO crea otra cuenta, ELEVA la que ya esta jugando (mismo
+    //   user_id, cero migracion, imposible perder progreso). Por eso se pide primero la
+    //   URL de ENLACE, que es la que conserva la identidad; solo si el proyecto no deja
+    //   enlazar se cae al login normal, que entra en la cuenta de ese Google. El caso de
+    //   "ese Google ya tenia cuenta" lo resuelve la vuelta, abajo en el modulo de la nube.
+    const goog=el('prAccGoogle');
+    if(goog){ goog.onclick=async()=>{
+      if(!nube()) return di(S().prAccOff,false);
+      goog.disabled=true; di('…');
+      let destino=null;
+      try{ destino=await nube().urlDeEnlace('google', location.href); }
+      catch(e){ console.warn('[cuenta] enlazar google', e); }
+      if(!destino){ try{ destino=nube().urlDeProveedor('google', location.href); }catch(e){} }
+      if(!destino){ goog.disabled=false; return di(S().prAccOff,false); }
+      location.href=destino;
+    }; }
   } }
 
 //+AG docs/42 Fase 2: LLEVARSE LA PARTIDA. Dos botones, ningun concepto nuevo que explicar.
@@ -3956,6 +3980,33 @@ if(_onbParam==='1' || (FRESH && !SAVE.onboarded && _onbParam!=='0')) startOnboar
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
+
+      //+AG docs/42 Fase 2: la VUELTA de Google. Se adopta antes de arrancar la sincro, para
+      //   que todo lo que venga despues hable con la identidad correcta. En un arranque
+      //   normal (sin fragmento) esto devuelve null y no cuesta nada.
+      let vuelta=null;
+      try{ vuelta = await nube.adoptarSesionDeUrl(); }catch(e){ console.warn('[nube] vuelta', e); }
+      if(vuelta && vuelta.error){
+        //+AG ese Google ya era de OTRA cuenta de BallTrials: enlazar es imposible, asi que se
+        //   ENTRA en ella. Un solo reintento, con bandera de pestana, para que un fallo raro
+        //   no pueda dejar al jugador en un bucle de redirecciones.
+        let yaVa=null; try{ yaVa=sessionStorage.getItem('bt_google_entrar'); }catch(e){}
+        if(!yaVa && /already|linked|identity|exists/i.test(vuelta.error)){
+          try{ sessionStorage.setItem('bt_google_entrar','1'); }catch(e){}
+          location.href = nube.urlDeProveedor('google', location.href);
+          return;
+        }
+        console.warn('[nube] google:', vuelta.error);
+      }
+      try{ sessionStorage.removeItem('bt_google_entrar'); }catch(e){}
+      if(vuelta && vuelta.user_id && vuelta.antes && !vuelta.mismo){
+        //+AG se ha entrado en OTRA cuenta: el save de este movil ya no es el que toca. Mismo
+        //   camino ya probado que "Ya tengo cuenta" (docs/42 §13): borrar local y recargar,
+        //   que el arranque se trae de la nube el progreso del dueno.
+        try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
+        location.reload();
+        return;
+      }
 
       const r = await sincro.arrancar({
         get save(){ return SAVE; },
