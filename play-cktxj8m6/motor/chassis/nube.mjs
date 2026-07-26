@@ -259,6 +259,15 @@ export function crearNube(opts = {}) {
     return ses;
   }
 
+  // Cerrar sesion. Invalida el token en el servidor y borra la sesion local. Quien llama
+  // se encarga del save del aparato: este modulo no sabe nada del juego. OJO: solo tiene
+  // sentido con la cuenta guardada; cerrar la de un invitado seria tirar su partida.
+  async function salir() {
+    try { await pedir('/auth/v1/logout', { metodo: 'POST', cuerpo: {} }); }
+    catch (e) { /* si el token ya no vale, da igual: lo que manda es soltarlo aqui */ }
+    return guardarSesion(null);
+  }
+
   async function cambiarPassword(password) {
     await asegurarSesion();
     return await pedir('/auth/v1/user', { metodo: 'PUT', cuerpo: { password } });
@@ -349,7 +358,7 @@ export function crearNube(opts = {}) {
     asegurarSesion, entrarAnonimo, renovar,
     perfil, guardarPerfil, bolas, crearBola, guardarBola, saldos, reportarPartida, gastar,
     crearCodigoTransferencia, canjearCodigoTransferencia,
-    estadoCuenta, crearCuentaEmail, entrarConEmail, cambiarPassword, pedirCorreoDeRecuperacion,
+    estadoCuenta, crearCuentaEmail, entrarConEmail, salir, cambiarPassword, pedirCorreoDeRecuperacion,
     urlDeProveedor, urlDeEnlace, adoptarSesionDeUrl,
     // Solo para pruebas: tirar la sesion local sin tocar la cuenta del servidor.
     olvidarSesion: () => guardarSesion(null)

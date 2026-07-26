@@ -1300,6 +1300,10 @@
            movil de un hermano o de la madre. Este enlace lo vuelve a abrir para entrar con otra. -->
       <button id="prAccOther" class="sc-soon" hidden data-t="prAccOther"
               style="background:none;border:0;font-family:inherit;text-decoration:underline;cursor:pointer;padding:6px 0">Entrar con otra cuenta</button>
+      <!--+AG salir SOLO existe con la cuenta guardada: cerrar la sesion de un invitado seria
+           tirar su partida sin vuelta atras (no hay correo con el que volver a entrar). Por eso
+           comparte el mismo hidden que el enlace de arriba y no se pinta nunca en invitado. -->
+      <button id="prAccOut" class="pr-inv" hidden data-t="prAccOut" style="width:100%;margin-top:4px">Cerrar sesión</button>
       <div class="sc-note" id="prAccMsg" style="min-height:1.2em"></div>
     </div>
 
@@ -2330,6 +2334,7 @@ const MORE={
     prAccH:'Tu cuenta', prAccGuest:'Estás jugando <b>como invitado</b>', prAccSaved:'Cuenta guardada:',
     prAccNote:'Tu partida ya se guarda en el servidor, pero <b>solo este móvil sabe que es tuya</b>. Guarda tu cuenta y podrás entrar desde cualquier sitio.',
     prAccCreate:'Guardar mi cuenta', prAccLogin:'Ya tengo cuenta', prAccGoogle:'Continuar con Google', prAccMeta:'Facebook · pronto',
+    prAccOut:'Cerrar sesión', prAccOutAsk:'¿Cerrar sesión? Este móvil volverá a empezar como invitado. Tu partida queda guardada en tu cuenta y vuelve al entrar.', prAccOutOk:'✓ Sesión cerrada. Volviendo a empezar…',
     prAccOkNew:'✓ Cuenta guardada. Ya puedes entrar desde otro móvil.', prAccOkIn:'✓ ¡Hola de nuevo! Trayendo tu partida…',
     prAccBadMail:'Ese correo no parece válido.', prAccBadPass:'La contraseña necesita 6 caracteres o más.',
     prAccTaken:'Ese correo ya tiene cuenta. Usa "Ya tengo cuenta".', prAccBadLogin:'Correo o contraseña incorrectos.',
@@ -2476,6 +2481,7 @@ const MORE={
     prAccH:'Your account', prAccGuest:'You are playing <b>as a guest</b>', prAccSaved:'Account saved:',
     prAccNote:'Your game is already saved on the server, but <b>only this phone knows it is yours</b>. Save your account and you can log in from anywhere.',
     prAccCreate:'Save my account', prAccLogin:'I already have one', prAccGoogle:'Continue with Google', prAccMeta:'Facebook · soon',
+    prAccOut:'Log out', prAccOutAsk:'Log out? This phone starts again as a guest. Your game stays in your account and comes back when you log in.', prAccOutOk:'✓ Logged out. Starting over…',
     prAccOkNew:'✓ Account saved. You can now log in from another phone.', prAccOkIn:'✓ Welcome back! Bringing your game…',
     prAccBadMail:'That email does not look valid.', prAccBadPass:'The password needs 6 characters or more.',
     prAccTaken:'That email already has an account. Use "I already have one".', prAccBadLogin:'Wrong email or password.',
@@ -3422,12 +3428,30 @@ function wireCuenta(){
 
   //+AG pinta el estado real, no uno recordado: si la sesion se renovo o se entro desde otro
   //   sitio, la verdad la tiene la nube.
-  const otra=el('prAccOther');
+  const otra=el('prAccOther'), salir=el('prAccOut');
   const pinta=()=>{ const e=nube()?nube().estadoCuenta():null;
-    if(e && !e.anonimo && e.email){ dot.style.background='#8fe0a8'; est.innerHTML=S().prAccSaved+' <b>'+e.email+'</b>'; form.style.display='none'; otra.hidden=false; }
-    else { dot.style.background='#eb9b4b'; est.innerHTML=S().prAccGuest; form.style.display=''; otra.hidden=true; } };
+    const guardada = !!(e && !e.anonimo && e.email);
+    if(guardada){ dot.style.background='#8fe0a8'; est.innerHTML=S().prAccSaved+' <b>'+e.email+'</b>'; form.style.display='none'; otra.hidden=false; }
+    else { dot.style.background='#eb9b4b'; est.innerHTML=S().prAccGuest; form.style.display=''; otra.hidden=true; }
+    //+AG salir solo con la cuenta guardada: el invitado no tiene por donde volver.
+    if(salir) salir.hidden=!guardada; };
   pinta();
   if(otra && !otra._wired){ otra._wired=true; otra.onclick=()=>{ form.style.display=''; otra.hidden=true; mail.value=''; pass.value=''; mail.focus(); }; }
+
+  //+AG cerrar sesion: tira la sesion del servidor Y el save de este aparato, porque ese save
+  //   es de la cuenta que se va. Al recargar, el arranque crea un invitado nuevo y limpio; la
+  //   partida no se pierde, vive en la cuenta y vuelve al entrar. Mismo camino ya probado en
+  //   "Ya tengo cuenta" (docs/42 §13).
+  if(salir && !salir._wired){ salir._wired=true;
+    salir.onclick=async()=>{
+      if(!confirm(S().prAccOutAsk)) return;
+      salir.disabled=true;
+      try{ if(nube()) await nube().salir(); }catch(e){ console.warn('[cuenta] salir', e); }
+      di(S().prAccOutOk,true);
+      try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
+      setTimeout(()=>location.reload(), 700);
+    };
+  }
   if(!crear._wired){ crear._wired=true;
 
     const validar=()=>{ const m=mail.value.trim(), p=pass.value;
