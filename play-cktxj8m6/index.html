@@ -358,10 +358,24 @@
   .se-champ{ width:56px; height:56px; }
   .se-ladder{ display:flex; gap:5px; }
   .se-tier{ flex:1; text-align:center; font-size:8.5px; font-weight:800; text-transform:uppercase; color:var(--muted); letter-spacing:.02em; padding:8px 2px; border-radius:11px; background:#ffffff08; border:1px solid var(--line); }
-  .se-tier .em{ font-size:18px; display:block; filter:grayscale(.5) brightness(.8); margin-bottom:2px; }
-  .se-tier.cur{ color:#3a2400; background:linear-gradient(#ffe27a,#ffb43d); border-color:transparent; box-shadow:0 3px 10px #ffb43d55; } .se-tier.cur .em{ filter:none; }
+  /*+AG doc 41 §1: los cinco escalones eran 🥉🥈🥇💎👑 del sistema. Ahora son arte propio
+     (arte/ui/liga-*.webp, encargo arte/codex/11). Se ven a 22 px y LOS CINCO A LA VEZ, y los que no
+     has alcanzado van atenuados, o sea que el color no distingue: por eso son cinco siluetas
+     distintas (disco, escudo, estrella, rombo, corona) y no la misma medalla en cinco metales.
+     El filter de atenuado se queda igual: funciona sobre una imagen como funcionaba sobre el emoji. */
+  .se-tier img.em{ width:22px; height:22px; display:block; margin:0 auto 2px; object-fit:contain; filter:grayscale(.5) brightness(.8); }
+  .se-tier.cur{ color:#3a2400; background:linear-gradient(#ffe27a,#ffb43d); border-color:transparent; box-shadow:0 3px 10px #ffb43d55; }
+  /*+AG el plato dorado del escalon ACTUAL se comia las piezas doradas: oro (estrella) y elite
+     (corona) perdian la silueta contra el amarillo, medido recomponiendo la escalera a tamano real.
+     No se le quita el oro al plato —es el "estas aqui" de la pantalla— sino que se le devuelve el
+     filo a la pieza con una sombra oscura pegada. Las otras tres no lo necesitan pero no les molesta. */
+  .se-tier.cur img.em{ filter:drop-shadow(0 0 1px #00000099) drop-shadow(0 1px 1px #0000006b); }
   .se-league-top{ display:flex; align-items:center; gap:11px; margin-bottom:11px; }
-  .se-badge{ width:46px; height:46px; border-radius:13px; display:grid; place-items:center; font-size:23px; background:radial-gradient(circle at 40% 30%,#ffe9a8,#f0a52e); box-shadow:0 4px 12px #f0a52e66; }
+  /*+AG doc 41 §1: la insignia grande era un 🥇 sobre azulejo dorado. Ahora es la misma pieza de arte
+     que el escalon actual de la escalera, y va DESNUDA, sin plato (igual que .pr-ref .gift): el plato
+     dorado le peleaba el color al oro y al bronce de la propia insignia, y en este archivo el azulejo
+     se reserva a lo que se pulsa (.ricon), no a lo decorativo. */
+  img.se-badge{ width:46px; height:46px; flex:0 0 auto; object-fit:contain; display:block; filter:drop-shadow(0 3px 7px #0009); }
   .se-lp{ flex:1; } .se-lp .nm{ font-weight:900; font-size:17px; } .se-lp .sub{ font-size:10.5px; color:var(--muted); font-weight:700; margin-top:4px; }
   .se-bar{ height:9px; border-radius:6px; background:#ffffff16; overflow:hidden; margin-top:5px; } .se-bar .fill{ height:100%; background:linear-gradient(90deg,var(--gold2),var(--gold)); }
   .se-pase-hd{ display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
@@ -1190,15 +1204,17 @@
     <div class="sc-block on" data-sub="liga">
       <div class="sc-h" data-t="seLeague">Liga</div>
       <div class="se-league-top">
-        <div class="se-badge">🥇</div>
+        <!--+AG la insignia grande NO se fija aqui: la copia syncLigaBadge() del escalon que lleve
+             .cur, para que no puedan contradecirse (antes era un 🥇 clavado). -->
+        <img class="se-badge" id="seBadge" src="arte/ui/liga-oro.webp" alt="">
         <div class="se-lp"><div class="nm" data-t="seTier">Oro III</div><div class="se-bar"><div class="fill" style="width:62%"></div></div><div class="sub" data-th="seToNext"></div></div>
       </div>
       <div class="se-ladder">
-        <div class="se-tier"><span class="em">🥉</span><span data-ti="seTiers:0">Bronce</span></div>
-        <div class="se-tier"><span class="em">🥈</span><span data-ti="seTiers:1">Plata</span></div>
-        <div class="se-tier cur"><span class="em">🥇</span><span data-ti="seTiers:2">Oro</span></div>
-        <div class="se-tier"><span class="em">💎</span><span data-ti="seTiers:3">Diamante</span></div>
-        <div class="se-tier"><span class="em">👑</span><span data-ti="seTiers:4">Élite</span></div>
+        <div class="se-tier" data-liga="bronce"><img class="em" src="arte/ui/liga-bronce.webp" alt=""><span data-ti="seTiers:0">Bronce</span></div>
+        <div class="se-tier" data-liga="plata"><img class="em" src="arte/ui/liga-plata.webp" alt=""><span data-ti="seTiers:1">Plata</span></div>
+        <div class="se-tier cur" data-liga="oro"><img class="em" src="arte/ui/liga-oro.webp" alt=""><span data-ti="seTiers:2">Oro</span></div>
+        <div class="se-tier" data-liga="diamante"><img class="em" src="arte/ui/liga-diamante.webp" alt=""><span data-ti="seTiers:3">Diamante</span></div>
+        <div class="se-tier" data-liga="elite"><img class="em" src="arte/ui/liga-elite.webp" alt=""><span data-ti="seTiers:4">Élite</span></div>
       </div>
       <div class="sc-note" data-th="seFloor"></div>
     </div>
@@ -3426,7 +3442,12 @@ function buildPaseTrack(){ const t=el('seTrack'); if(!t) return; t.innerHTML='';
     const r=document.createElement('div'); r.className='se-rung'+(done?' done':'');
     r.innerHTML=`<div class="n">${i}</div><div class="cell ${prem?'prem':'free'}">${REW[(i-1)%REW.length]}</div><div class="lb">${prem?S().rungPrem:S().rungFree}</div>`;
     t.appendChild(r); } }
-function openTemporada(){ showScreen('temporada'); applyShell(); el('seChispas').textContent=SAVE.chispas; el('seGemas').textContent=SAVE.gemas; drawPreviewBall(el('seChamp'), TEAMS[3].color); buildPaseTrack(); }
+//+AG la insignia grande de Liga COPIA la del escalon marcado con .cur. Antes era un 🥇 fijo en el
+//    HTML: si algun dia la escalera se mueve de sitio, el 🥇 se habria quedado contradiciendo a la
+//    propia escalera. Una sola fuente de verdad = la clase .cur.
+function syncLigaBadge(){ const cur=document.querySelector('.se-tier.cur img.em'), b=el('seBadge');
+  if(cur && b) b.src=cur.getAttribute('src'); }
+function openTemporada(){ showScreen('temporada'); applyShell(); el('seChispas').textContent=SAVE.chispas; el('seGemas').textContent=SAVE.gemas; drawPreviewBall(el('seChamp'), TEAMS[3].color); buildPaseTrack(); syncLigaBadge(); }
 function openPerfil(){ showScreen('perfil'); applyShell(); el('prChispas').textContent=SAVE.chispas; el('prGemas').textContent=SAVE.gemas; el('prLvl').textContent=SAVE.level; el('prColl').textContent=SAVE.balls.length; drawPreviewBall(el('prAv'), TEAMS[0].color);
   const sw=el('prConsent'); sw.onclick=()=>{ const on=sw.classList.toggle('on'); sw.setAttribute('aria-checked',on?'true':'false'); toast(on?S().tChanOn:S().tChanOff); };
   wireCuenta(); wireTraspaso(); }
