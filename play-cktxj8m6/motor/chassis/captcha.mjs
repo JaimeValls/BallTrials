@@ -27,10 +27,17 @@
 //
 // Sin acentos a proposito, igual que nube.mjs.
 
-// Vacio = captcha apagado. Se rellena con la sitekey PUBLICA de Turnstile (la que
-// empieza por 0x...). La clave SECRETA no entra aqui jamas: esa se pega en el panel
-// de Supabase y no la ve el navegador.
-export const TURNSTILE_SITEKEY = '';
+// Sitekey PUBLICA de Turnstile (widget "BallTrials juego", hostnames balltrials.com
+// y www.balltrials.com, modo Managed). Es publica por diseno, igual que NUBE_KEY:
+// viaja en el cliente y cualquiera puede leerla. Lo que valida de verdad es la
+// clave SECRETA, que vive solo en el panel de Supabase y no entra aqui jamas.
+//
+// Vacia = captcha apagado del todo. Con clave, el navegador empieza a mandar fichas,
+// que es INOFENSIVO mientras el interruptor de Supabase siga apagado: comprobado el
+// 26-07-2026 mandando una ficha de mentira a /auth/v1/signup con la proteccion
+// desactivada, y contesta 200 ignorandola. Por eso este orden es seguro: primero
+// desplegar esto y ver que las fichas viajan, y solo despues encender el panel.
+export const TURNSTILE_SITEKEY = '0x4AAAAAAD-Wy0gh4sTjZE0g';
 
 const SCRIPT_URL = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
 
