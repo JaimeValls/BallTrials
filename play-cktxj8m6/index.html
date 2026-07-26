@@ -3463,6 +3463,34 @@ el('heroTap').addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ 
 el('hPass').onclick=openTemporada;
 
 // ===== wiring + arranque en el HOME =====
+
+// ============================================================================
+//  ⚠ TRUCO DE PRUEBAS · QUITAR ANTES DE ABRIR EL JUEGO AL PUBLICO ⚠
+//  Peticion de Jaime (2026-07-26): tocar cualquier pildora de moneda regala +100 de ESA moneda,
+//  para poder probar Tienda/Garaje sin farmear partidas. Es un CHEAT: rompe la economia a proposito.
+//  COMO SE MATA: borrar este bloque entero (esta autocontenido, no hay nada mas que tocar).
+//  Deliberadamente NO va detras de un ?dev=1: Jaime lo quiere a mano en el movil. A cambio, avisa
+//  con un toast cada vez, para que sea imposible olvidarse de que esta puesto.
+const CHEAT_MONEDAS = true;
+if(CHEAT_MONEDAS){
+  const IDS={ chispa:['hChispas','gChispas','shChispas','seChispas','prChispas'],
+              gema:  ['hGemas','gGemas','shGemas','seGemas','prGemas'] };
+  const pinta=()=>{ for(const k in IDS) IDS[k].forEach(id=>{ const e=el(id); if(e) e.textContent = k==='chispa'?SAVE.chispas:SAVE.gemas; }); };
+  document.addEventListener('click', ev=>{
+    const c=ev.target.closest('.coin'); if(!c) return;
+    const gema=c.classList.contains('gema');
+    if(!gema && !c.classList.contains('chispa')) return;
+    if(gema) SAVE.gemas+=100; else SAVE.chispas+=100;
+    persist(); pinta();
+    //+AG re-render de la pantalla abierta: si no, los precios y los botones de comprar siguen
+    //   deshabilitados con el saldo viejo y parece que el truco no ha hecho nada.
+    if(el('garaje').classList.contains('on')) renderGaraje();
+    else if(el('tienda').classList.contains('on')) renderTienda();
+    else if(el('home').classList.contains('on')) renderHome();
+    toast('TRUCO DE PRUEBAS · +100 ' + (gema?'Gemas':'Chispas'));
+  }, true);
+}
+// ============================================================================
 el('hPlay').onclick=openSheet;   //+AG regla de oro del copy: JUGAR abre la HOJA DE FORMATO (alli los botones que si arrancan)
 el('rAgain').onclick=()=>startRace(curMode,curFmt); el('rHome').onclick=goHome;
 //+AG doc 34 Fase C: navegacion de pestañas por data-nav (incluye Temporada/Perfil, antes eran toast)
