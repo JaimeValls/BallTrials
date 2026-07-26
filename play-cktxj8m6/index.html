@@ -346,7 +346,12 @@
   .pr-toggle{ display:flex; align-items:center; gap:11px; } .pr-toggle .tx{ flex:1; font-size:13px; color:#d6dbf4; line-height:1.4; }
   .pr-sw{ width:46px; height:27px; border-radius:999px; background:#ffffff1c; border:1px solid var(--line); position:relative; cursor:pointer; flex:0 0 auto; transition:background .2s; } .pr-sw::after{ content:''; position:absolute; top:2px; left:2px; width:21px; height:21px; border-radius:50%; background:#fff; transition:left .2s; } .pr-sw.on{ background:linear-gradient(#5bc46a,#2fa049); } .pr-sw.on::after{ left:21px; }
   /* --- Fase D: botones de barra (⚙ 🎬), modo jugable, Onboarding (doc 05 §3), Settings (doc 26), canje de codigo (doc 16) --- */
-  .h-ic{ width:34px; height:34px; border-radius:12px; background:#0007; border:1px solid var(--line); color:#e7ebff; font-size:16px; cursor:pointer; display:grid; place-items:center; padding:0; } .h-ic:active{ transform:translateY(1px); }
+  /*+AG auditoria Supercell 26-jul: median 34 px de lado y ademas el flex los encogia a 15-24 px REALES
+     (sintoma del desbordamiento de la fila) — muy por debajo del minimo tactil de 44 px. Se arregla en
+     dos pasos: flex:0 0 auto para que no vuelvan a encogerse nunca, y un halo transparente que sube el
+     area de toque a 44 sin engordar el dibujo (la fila iba justa de ancho: crecer la habria desbordado). */
+  .h-ic{ position:relative; flex:0 0 auto; width:36px; height:36px; border-radius:12px; background:#0007; border:1px solid var(--line); color:#e7ebff; font-size:16px; cursor:pointer; display:grid; place-items:center; padding:0; } .h-ic:active{ transform:translateY(1px); }
+  .h-ic::before{ content:''; position:absolute; inset:-5px; border-radius:16px; }   /* inset mide desde la caja de PADDING: con borde de 1px, -4 daba 42 y no 44 */
   .h-modes .m.open{ filter:none; opacity:1; border-color:var(--gold2); background:#ffffff16; cursor:pointer; box-shadow:0 4px 14px #fbb91533; } .h-modes .m.open .lk{ color:var(--gold2); }
   #onb{ position:absolute; inset:0; z-index:70; background:radial-gradient(120% 80% at 50% 18%,var(--bg),var(--bg-lo)); display:none; flex-direction:column; align-items:center; justify-content:center; padding:24px; }
   #onb.on{ display:flex; }
@@ -453,7 +458,9 @@
   .hero canvas{ width:164px; height:164px; filter:drop-shadow(0 16px 24px #0009); animation:breathe 3.1s ease-in-out infinite; }
   .hero .ballname{ display:flex; align-items:center; gap:7px; font-size:24px; font-weight:900; letter-spacing:-.01em; margin-top:4px; text-shadow:0 3px 14px #000a; }
   .hero .ballcups{ display:flex; align-items:center; justify-content:center; gap:5px; font-size:14px; font-weight:900; color:var(--gold2); font-variant-numeric:tabular-nums; text-shadow:0 2px 8px #fbb91544; }
-  .hero .balltag{ font-size:10px; letter-spacing:.14em; font-weight:800; color:var(--gold2); text-transform:uppercase; text-align:center; }
+  /*+AG 26-jul: iba en ORO y en mayusculas, compitiendo con el lenguaje de recompensa (que es el que tiene
+     que destacar). Es una pista, no un premio: gris apagado y sin gritar. */
+  .hero .balltag{ font-size:9.5px; letter-spacing:.06em; font-weight:700; color:var(--muted); text-align:center; }
   .homebottom{ padding:4px 12px 10px; display:flex; flex-direction:column; gap:8px; z-index:5; }
   .passband{ display:flex; align-items:center; gap:9px; width:max-content; max-width:100%;
     background:linear-gradient(90deg,#2b1d5e,#3a2470); border:1px solid #ffffff26; border-radius:13px; padding:7px 13px 7px 9px; cursor:pointer;
@@ -467,7 +474,7 @@
   .passband .pbar > i{ display:block; height:100%; border-radius:999px; background:linear-gradient(90deg,var(--gold2),var(--gold)); }
   .bottomrow{ display:flex; gap:10px; align-items:stretch; }
   .modecompact{ flex:1 1 0; min-width:0; position:relative; border-radius:18px; overflow:hidden; cursor:pointer;
-    border:1px solid #ffffff26; box-shadow:0 10px 24px #0009, inset 0 1px 0 #ffffff22; padding:10px 11px; display:flex; flex-direction:column; gap:5px;
+    border:1px solid #ffffff26; box-shadow:0 10px 24px #0009, inset 0 1px 0 #ffffff22; padding:13px 11px 10px; display:flex; flex-direction:column; gap:5px;
     transition:transform .1s; }
   .modecompact:active{ transform:scale(.98); }
   .modecompact .mcscrim{ position:absolute; inset:0; z-index:0; }
@@ -475,25 +482,36 @@
   .modecompact .mk{ font-size:9px; letter-spacing:.18em; font-weight:800; color:#ffe9a8; text-transform:uppercase; }
   /*+AG CÓMO JUGAR en el HOME: pastilla en la fila del rótulo "Modo" (no roba alto a la tarjeta).
        Sin tutorial hecho -> texto + "!"; hecho -> .done, solo la (i) redonda. */
-  .modecompact .mkrow{ display:flex; align-items:center; gap:8px; min-height:20px; }
+  /* z-index por encima del nombre del modo: el halo de la (i) baja hasta el, y el que se pinta despues
+     se queda los toques. Sin esto, los ultimos 8 px del area de la (i) abrian el selector. */
+  .modecompact .mkrow{ position:relative; z-index:2; display:flex; align-items:center; gap:8px; min-height:20px; }
   .mchow{ position:relative; margin-left:auto; flex:none; border:1px solid #ffffff40; border-radius:999px;
-    padding:2px 8px 2px 3px; font-family:inherit; font-size:9.5px; font-weight:900; letter-spacing:.04em;
+    padding:7px 10px 7px 5px; font-family:inherit; font-size:9.5px; font-weight:900; letter-spacing:.04em;
     color:#cfe4ff; background:#0b1c33cc; cursor:pointer; display:flex; align-items:center; gap:5px; }
   .mchow:active{ transform:scale(.95); }
-  /* area de toque mayor que el dibujo (la pastilla es pequeña, el dedo no): sin coste de layout */
-  .mchow::before{ content:''; position:absolute; inset:-5px; border-radius:999px; }
-  .mchow.done{ padding:3px; gap:0; }
+  /* area de toque mayor que el dibujo (la pastilla es pequeña, el dedo no): sin coste de layout.
+     26-jul: -5px daba 33 px de alto y el minimo es 44. Dos trampas medidas: el inset cuenta desde la caja
+     de PADDING (con borde de 1px se queda 2 px corto) y la tarjeta RECORTA, asi que lo que asome por
+     encima de su borde deja de recibir toques. Por eso la pastilla engorda un poco y el halo se queda
+     en -8 (44 px reales, dentro de la tarjeta). */
+  .mchow::before{ content:''; position:absolute; inset:-8px; border-radius:999px; }
+  .mchow.done{ padding:5px; gap:0; }
+  .mchow.done::before{ inset:-10px; }
   .mchow.done .mcht, .mchow.done .hbadge{ display:none; }
   .modecompact .mn{ min-width:0; display:flex; align-items:center; gap:7px; font-weight:900; letter-spacing:-.01em; text-shadow:0 2px 8px #000a; }
   .modecompact .micon{ font-size:22px; line-height:1; flex:0 0 auto; }
   /*+AG doc 41 bloque C: el SVG canonico de modo. Va TODO ORO por spec del canal (los colores de
      equipo estan reservados) y la diferenciacion la da la silueta, no el color: no se retinta. */
   .msvg{ width:26px; height:26px; display:block; filter:drop-shadow(0 2px 4px #0008); }
-  .modecompact .micon .msvg{ width:24px; height:24px; }
+  .modecompact .micon .msvg{ width:32px; height:32px; }   /*+AG 26-jul: 24 px era timido; en la carta de modo de Brawl el icono es protagonista, no pie de foto */
   .modecompact .mn b{ min-width:0; font-size:clamp(13px,4vw,16px); line-height:1.08; overflow-wrap:break-word; }
-  .modecompact .mday{ align-self:flex-start; font-size:9px; font-weight:900; color:#3a2400; background:linear-gradient(#ffe27a,#ffb43d); border-radius:999px; padding:3px 8px; box-shadow:0 2px 8px #ffb03d55; }
-  .modecompact .mchange{ margin-top:auto; width:100%; justify-content:center; font-family:inherit; font-size:12px; font-weight:900; letter-spacing:.04em;
+  .modecompact .mday{ align-self:flex-start; max-width:100%; font-size:9px; font-weight:900; color:#3a2400; background:linear-gradient(#ffe27a,#ffb43d); border-radius:999px; padding:3px 8px; box-shadow:0 2px 8px #ffb03d55; }
+  /* version "el bonus esta en OTRO modo": contorno en vez de oro solido, para no prometer un premio que
+     esta tarjeta no da. El oro solido se reserva a "tu modo lo tiene". */
+  .modecompact .mday.elsewhere{ color:#ffe9a8; background:#ffffff14; border:1px solid #ffe9a866; box-shadow:none; }
+  .modecompact .mchange{ position:relative; margin-top:auto; width:100%; justify-content:center; font-family:inherit; font-size:12px; font-weight:900; letter-spacing:.04em;
     color:#fff; background:#ffffff1f; border:1px solid #ffffff59; border-radius:12px; padding:8px 10px; cursor:pointer; display:flex; align-items:center; gap:5px; }
+  .modecompact .mchange::before{ content:''; position:absolute; inset:-6px; border-radius:16px; }   /*+AG 34 px de dibujo -> 44 de toque */
   .modecompact .mchange:active{ transform:scale(.96); }
   .playbig{ flex:0 0 42%; border:0; border-radius:18px; padding:14px 10px; font-family:inherit; font-weight:900; font-size:22px; letter-spacing:.03em;
     color:#3a2400; background:linear-gradient(#ffe27a,#ff9a3d); box-shadow:0 8px 0 #b45a10, 0 12px 30px #ff9a3d55; cursor:pointer;
@@ -513,7 +531,8 @@
   @keyframes sheetin{ 0%{ transform:translateY(100%) scaleY(1.08); } 70%{ transform:translateY(-6px) scaleY(.96); } 100%{ transform:translateY(0) scaleY(1); } }
   .sheet .shead{ display:flex; align-items:center; }
   .sheet .stit{ font-size:12px; font-weight:900; letter-spacing:.18em; color:var(--gold2); text-transform:uppercase; }
-  .sclose{ margin-left:auto; width:36px; height:36px; border-radius:50%; background:#ffffff12; border:1px solid #ffffff2e; color:#fff; font-size:17px; cursor:pointer; display:grid; place-items:center; }
+  .sclose{ position:relative; margin-left:auto; width:36px; height:36px; border-radius:50%; background:#ffffff12; border:1px solid #ffffff2e; color:#fff; font-size:17px; cursor:pointer; display:grid; place-items:center; }
+  .sclose::before{ content:''; position:absolute; inset:-5px; border-radius:50%; }   /*+AG toque de 44 px sin engordar el dibujo */
   .sclose:active{ transform:scale(.94); }
   .sheet .smode{ display:flex; align-items:center; justify-content:center; gap:10px; padding:2px 0 0;
     font-size:clamp(22px,7vw,30px); font-weight:900; letter-spacing:-.01em; text-shadow:0 3px 14px #000a; }
@@ -560,26 +579,46 @@
   #selector .selhead .sub{ font-size:11px; color:var(--muted); font-weight:700; margin-top:1px; }
   .modegrid{ flex:1; min-height:0; overflow-y:auto; padding:8px 14px 18px;
     display:grid; grid-template-columns:1fr 1fr; gap:12px; align-content:start; }
-  .tile{ position:relative; aspect-ratio:1/1.06; border-radius:20px; overflow:hidden; cursor:pointer;
+  /* con las cartas a 4/3 sobran ~600 px por debajo y la pantalla parecia rota. Centrada, el aire se
+     reparte y se lee como una rejilla completa. "safe" = si algun dia hay tantos modos que no caben,
+     vuelve a comportarse como start y no se pierde la primera fila por arriba; los navegadores que no
+     entiendan la palabra clave se saltan la linea entera y se quedan en el start de arriba. */
+  .modegrid{ align-content:safe center; }
+  /*+AG AUDITORIA SUPERCELL 26-jul (Jaime: "las imagenes de los modos son muy grandes, quizas deberian ser
+       mas pequeñas y mas visuales"). Los dos auditores midieron lo mismo: la carta ocupaba 175x186 px
+       (22-26% del alto de pantalla) y lo que identificaba el modo era una franja de 50 px. Las escenas SVG
+       dibujadas a mano no ganaban ese tamaño — el depredador del Cazador daba 1.05:1 de contraste (en gris
+       desaparecia), Luz Roja tenia DOS semaforos compitiendo y los sujetos caian justo debajo del rotulo.
+       Patron de carta de evento de Brawl: la carta baja a 4/3 y el ICONO CANONICO pasa a protagonista
+       sobre el color plano del modo. Sin arte nuevo: los iconos oro ya existen (modeicons-vendored.js). */
+  .tile{ position:relative; aspect-ratio:4/3; border-radius:20px; overflow:hidden; cursor:pointer;
     border:1px solid #ffffff26; box-shadow:0 10px 26px #0009, inset 0 1px 0 #ffffff22; display:flex; flex-direction:column; transition:transform .1s; }
   .tile:active{ transform:scale(.95); }
-  .tile.sel{ border-color:var(--gold2); box-shadow:0 0 0 2px var(--gold2), 0 10px 26px #0009; }
+  /* la seleccion va en BLANCO, el mismo lenguaje que .rktile.on. El dorado se reserva a la accion
+     primaria (JUGAR) y al badge del dia: repartido en tres sitios no marcaba ninguno. */
+  .tile.sel{ border-color:#fff; box-shadow:0 0 0 2px #ffffffcc, 0 10px 26px #0009; }
   .tile .tart{ position:absolute; inset:0; z-index:0; }
-  .tile .tart svg{ width:100%; height:100%; display:block; }
-  .tile .tscrim{ position:absolute; inset:0; z-index:1; background:linear-gradient(180deg, transparent 30%, #06050e26 55%, #06050ee6 100%); }
-  .tile .tbody{ position:relative; z-index:2; margin-top:auto; padding:10px 10px 11px; display:flex; flex-direction:column; align-items:center; gap:3px; text-align:center; }
-  .tile .ticon{ font-size:32px; line-height:1; filter:drop-shadow(0 3px 6px #0009); }
-  .tile .ticon .msvg{ width:32px; height:32px; }
-  .tile .tname{ font-size:14px; font-weight:900; letter-spacing:-.01em; line-height:1.1; text-shadow:0 2px 10px #000b; }
+  .tile[data-mode="race"]    .tart{ background:radial-gradient(120% 85% at 50% 0%, #4aa8ff5c, #4aa8ff00 62%), linear-gradient(180deg,#1a4f9e,#0c2f5a); }
+  .tile[data-mode="cazador"] .tart{ background:radial-gradient(120% 85% at 50% 0%, #ff4d5e5c, #ff4d5e00 62%), linear-gradient(180deg,#7a1626,#2a0a12); }
+  .tile[data-mode="redlight"] .tart{ background:radial-gradient(120% 85% at 50% 0%, #5bd06a5c, #5bd06a00 62%), linear-gradient(180deg,#1c6b34,#0f2e1a); }
+  .tile .tscrim{ position:absolute; inset:0; z-index:1; background:linear-gradient(180deg, transparent 45%, #06050e66 100%); }
+  .tile .tbody{ position:relative; z-index:2; margin:auto; padding:8px 9px; display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center; }
+  .tile .ticon{ font-size:56px; line-height:1; filter:drop-shadow(0 4px 10px #000a); }
+  .tile .ticon .msvg{ width:56px; height:56px; }
+  .tile .tname{ font-size:13.5px; font-weight:900; letter-spacing:-.01em; line-height:1.1; text-shadow:0 2px 10px #000b; }
   .tile .tday{ position:absolute; top:8px; left:8px; z-index:3; font-size:10px; font-weight:900; color:#3a2400;
     background:linear-gradient(#ffe27a,#ffb43d); border-radius:999px; padding:4px 9px; box-shadow:0 3px 10px #ffb03d77, inset 0 1px 0 #fff8; }
   .tile.locked{ background:#0e0d22; border-color:#ffffff14; }
-  .tile.locked .tbody{ margin:auto; gap:6px; }
-  .tile.locked .ticon{ font-size:36px; filter:grayscale(1) brightness(.85); }
-  .tile.locked .tname{ color:#c3c8e0; }
+  .tile.locked .tart{ background:linear-gradient(180deg,#191742,#0e0d22); }
+  .tile.locked .tbody{ gap:4px; }
+  .tile.locked .ticon{ font-size:32px; filter:grayscale(1) brightness(.85); }
+  .tile.locked .ticon .msvg{ width:32px; height:32px; }
+  .tile.locked .tname{ color:#c3c8e0; font-size:12px; }
+  /* el candado va de BADGE en la esquina y no apilado en la columna: en la carta 4/3 no caben
+     cuatro filas (icono + candado + nombre + condicion) sin desbordar a 360x640. */
   .tile .tlk{ font-size:18px; }
-  .tile img.tlk{ width:20px; height:20px; object-fit:contain; }   /*+AG doc 41: candado de arte */
-  .tile .tcond{ font-size:10.5px; font-weight:800; color:#8b93b8; background:#ffffff0d; border:1px solid var(--line); border-radius:999px; padding:4px 9px; }
+  .tile img.tlk{ position:absolute; top:7px; right:7px; z-index:3; width:20px; height:20px; object-fit:contain; }   /*+AG doc 41: candado de arte */
+  .tile .tcond{ font-size:10px; font-weight:800; color:#8b93b8; background:#ffffff0d; border:1px solid var(--line); border-radius:999px; padding:3px 8px; }
   .gridnote{ grid-column:1 / -1; font-size:11px; color:#6f79a0; font-weight:700; text-align:center; padding:2px 0 0; }
   /*+AG COPAS POR BOLA (doc 37): tarjeta de copas de la bola + tabla de 8 puestos en Resultados */
   #results{ overflow-y:auto; justify-content:flex-start; padding-top:calc(20px + env(safe-area-inset-top)); }
@@ -686,7 +725,12 @@
     <div class="h-lvl"><div class="h-lvlnum"><b id="hLvl">1</b></div><div class="cap" data-t="lvl">NIVEL</div></div>
     <button class="h-ic" id="hCode" data-tt="redeemTitle" title="Canjear código">🎬</button>
     <button class="h-ic" id="hSet" data-tt="settings" title="Ajustes">⚙</button>
-    <select id="lang" class="h-lang" data-tp="langWord" aria-label="Idioma"></select>
+    <!--+AG auditoria Supercell 26-jul: este selector (112 px, el elemento mas ancho de la fila) hacia que
+         .h-top pidiera 473 px. A 360 px de ancho las pildoras de moneda se salian de pantalla y la de gemas
+         quedaba INVISIBLE. Supercell no pone idioma en la portada: vive en Ajustes, donde ya habia un
+         selector real (buildSettings). Se queda aqui OCULTO porque es el <select> que ese clon lee y
+         gobierna; quitarlo del DOM romperia el cambio de idioma. -->
+    <select id="lang" class="h-lang" data-tp="langWord" aria-label="Idioma" hidden style="display:none"></select>
     <div class="h-coins">
       <div class="coin chispa" id="cChispa"><img class="cico" src="arte/ui/moneda-chispa.webp" alt=""><span id="hChispas">0</span><span class="pl">+</span></div>
       <div class="coin gema" id="cGema"><img class="cico" src="arte/ui/moneda-gema.webp" alt=""><span id="hGemas">0</span><span class="pl">+</span></div>
@@ -738,7 +782,9 @@
             <button class="mchow" id="mcHow" type="button" data-tt="howTo"><span class="qi">i</span><span class="mcht" data-t="howTo">CÓMO JUGAR</span><span class="hbadge" id="mcHowBadge">!</span></button>
           </div>
           <div class="mn"><span class="micon" id="mcIcon">🏁</span><b id="mcName">LA GRAN CARRERA</b></div>
-          <span class="mday" id="mcDay" data-t="dayBadge">⭐ DÍA · +50%</span>
+          <!-- sin data-t a proposito: el texto lo compone renderHome (dayBadge + nombre del modo del dia) y
+               applyShell lo pisaria al abrir la hoja o el selector -->
+          <span class="mday" id="mcDay">⭐ DÍA · +50%</span>
           <button class="mchange" id="mcChange" type="button"><span data-t="change">CAMBIAR</span> <span>▸</span></button>
         </div>
         <button class="playbig ready" id="hPlay"><span class="tri">▶</span><span data-t="playWord">JUGAR</span></button>
@@ -766,100 +812,38 @@
   <div class="modegrid" id="modegrid">
     <!-- LUZ ROJA -->
     <div class="tile" data-mode="redlight">
-      <div class="tart">
-        <svg viewBox="0 0 320 500" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-          <defs>
-            <linearGradient id="tlr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#123d1e"/><stop offset=".5" stop-color="#0f2e24"/><stop offset="1" stop-color="#3a0f14"/></linearGradient>
-            <radialGradient id="tlrg" cx="50%" cy="30%" r="55%"><stop offset="0" stop-color="#5bd06a" stop-opacity=".5"/><stop offset="1" stop-color="#5bd06a" stop-opacity="0"/></radialGradient>
-          </defs>
-          <rect width="320" height="500" fill="url(#tlr)"/>
-          <ellipse cx="160" cy="150" rx="160" ry="140" fill="url(#tlrg)"/>
-          <path d="M-20 360 L120 250 L200 250 L360 360 L360 520 L-20 520 Z" fill="#0c2417" opacity=".85"/>
-          <path d="M150 254 L86 360 M170 254 L234 360" stroke="#2e7d46" stroke-width="3" opacity=".5"/>
-          <g transform="translate(160,86)">
-            <rect x="-3" y="66" width="6" height="86" fill="#233" opacity=".8"/>
-            <rect x="-24" y="-8" width="48" height="86" rx="13" fill="#10201a" stroke="#2a3a30" stroke-width="2"/>
-            <circle cx="0" cy="14" r="13" fill="#ff4d4d" opacity=".33"/>
-            <circle cx="0" cy="45" r="13" fill="#ffd23f" opacity=".26"/>
-            <circle cx="0" cy="76" r="13" fill="#5bd06a"/><circle cx="0" cy="76" r="20" fill="#5bd06a" opacity=".3"/>
-          </g>
-          <use href="#tball" x="96" y="300" width="44" height="44" style="color:#4aa8ff"/>
-          <use href="#tball" x="152" y="314" width="36" height="36" style="color:#ffb43d"/>
-          <use href="#tball" x="198" y="302" width="32" height="32" style="color:#e05a6a"/>
-        </svg>
-      </div>
+      <div class="tart"></div>
       <div class="tscrim"></div>
       <div class="tday" data-t="dayBadge" style="display:none">⭐ DÍA · +50%</div>
       <div class="tbody"><div class="ticon">🚦</div><div class="tname" data-mname="redlight">LUZ ROJA</div></div>
     </div>
     <!-- LA GRAN CARRERA -->
     <div class="tile" data-mode="race">
-      <div class="tart">
-        <svg viewBox="0 0 320 500" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-          <defs>
-            <linearGradient id="tgc" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0c2f5a"/><stop offset=".55" stop-color="#0e2140"/><stop offset="1" stop-color="#0a1428"/></linearGradient>
-            <radialGradient id="tgcg" cx="50%" cy="26%" r="55%"><stop offset="0" stop-color="#4aa8ff" stop-opacity=".45"/><stop offset="1" stop-color="#4aa8ff" stop-opacity="0"/></radialGradient>
-          </defs>
-          <rect width="320" height="500" fill="url(#tgc)"/>
-          <ellipse cx="160" cy="140" rx="170" ry="140" fill="url(#tgcg)"/>
-          <rect x="30" y="330" width="90" height="16" rx="8" fill="#173a63"/>
-          <rect x="200" y="290" width="90" height="16" rx="8" fill="#173a63"/>
-          <rect x="120" y="380" width="90" height="16" rx="8" fill="#173a63"/>
-          <g transform="translate(160,150)" opacity=".92">
-            <circle r="10" fill="#2a5687"/>
-            <g fill="#3d6fa8" stroke="#5b8fc8" stroke-width="2">
-              <path d="M0 0 L64 -14 L64 14 Z"/><path d="M0 0 L-64 14 L-64 -14 Z"/><path d="M0 0 L14 -64 L-14 -64 Z"/><path d="M0 0 L-14 64 L14 64 Z"/>
-            </g>
-            <circle r="7" fill="#8fd0ff"/>
-          </g>
-          <line x1="60" y1="300" x2="110" y2="300" stroke="#18c7d6" stroke-width="4" stroke-linecap="round" opacity=".6"/>
-          <line x1="52" y1="310" x2="96" y2="310" stroke="#18c7d6" stroke-width="4" stroke-linecap="round" opacity=".4"/>
-          <use href="#tball" x="104" y="286" width="46" height="46" style="color:#4aa8ff"/>
-          <use href="#tball" x="214" y="252" width="34" height="34" style="color:#ff7a3d"/>
-          <use href="#tball" x="138" y="344" width="32" height="32" style="color:#46d17f"/>
-        </svg>
-      </div>
+      <div class="tart"></div>
       <div class="tscrim"></div>
       <div class="tday" data-t="dayBadge" style="display:none">⭐ DÍA · +50%</div>
       <div class="tbody"><div class="ticon">🏁</div><div class="tname" data-mname="race">LA GRAN CARRERA</div></div>
     </div>
     <!-- EL CAZADOR -->
     <div class="tile" data-mode="cazador">
-      <div class="tart">
-        <svg viewBox="0 0 320 500" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-          <defs>
-            <linearGradient id="tcz" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a0d16"/><stop offset=".55" stop-color="#24091a"/><stop offset="1" stop-color="#12060f"/></linearGradient>
-            <radialGradient id="tczg" cx="50%" cy="30%" r="52%"><stop offset="0" stop-color="#ff4d5e" stop-opacity=".4"/><stop offset="1" stop-color="#ff4d5e" stop-opacity="0"/></radialGradient>
-          </defs>
-          <rect width="320" height="500" fill="url(#tcz)"/>
-          <ellipse cx="160" cy="150" rx="160" ry="140" fill="url(#tczg)"/>
-          <g transform="translate(160,168)">
-            <path d="M-70 40 Q-78 -60 0 -66 Q78 -60 70 40 Q40 58 0 54 Q-40 58 -70 40 Z" fill="#2b0a14" stroke="#5a1220" stroke-width="3"/>
-            <path d="M-52 -30 L-38 -58 L-26 -32 Z M52 -30 L38 -58 L26 -32 Z" fill="#3a0d16" stroke="#5a1220" stroke-width="2"/>
-            <circle cx="-26" cy="-2" r="13" fill="#ff3b3b"/><circle cx="-26" cy="-2" r="19" fill="#ff3b3b" opacity=".3"/>
-            <circle cx="26" cy="-2" r="13" fill="#ff3b3b"/><circle cx="26" cy="-2" r="19" fill="#ff3b3b" opacity=".3"/>
-            <circle cx="-24" cy="0" r="5" fill="#2b0a14"/><circle cx="28" cy="0" r="5" fill="#2b0a14"/>
-            <path d="M-30 30 L-20 24 L-10 30 L0 24 L10 30 L20 24 L30 30 L26 40 L-26 40 Z" fill="#fff" opacity=".9"/>
-          </g>
-          <use href="#tball" x="60" y="360" width="40" height="40" style="color:#4aa8ff"/>
-          <use href="#tball" x="210" y="352" width="36" height="36" style="color:#ffd23f"/>
-        </svg>
-      </div>
+      <div class="tart"></div>
       <div class="tscrim"></div>
       <div class="tday" data-t="dayBadge" style="display:none">⭐ DÍA · +50%</div>
       <div class="tbody"><div class="ticon">🎯</div><div class="tname" data-mname="cazador">EL CAZADOR</div></div>
     </div>
     <!-- RECOLECTA (bloqueado decorativo) -->
     <div class="tile locked" data-locklvl="5">
-      <div class="tart"><svg viewBox="0 0 320 500" preserveAspectRatio="xMidYMid slice"><rect width="320" height="500" fill="#141230"/></svg></div>
+      <div class="tart"></div>
       <div class="tscrim"></div>
-      <div class="tbody"><div class="ticon" data-mico="recolecta"></div><img class="tlk" src="arte/ui/ui-candado.webp" alt=""><div class="tname" data-t="mRecolecta">RECOLECTA</div><div class="tcond" data-lvln="5">Nivel 5</div></div>
+      <img class="tlk" src="arte/ui/ui-candado.webp" alt="">
+      <div class="tbody"><div class="ticon" data-mico="recolecta"></div><div class="tname" data-t="mRecolecta">RECOLECTA</div><div class="tcond" data-lvln="5">Nivel 5</div></div>
     </div>
     <!-- SUELO MENGUANTE (bloqueado decorativo) -->
     <div class="tile locked" data-locklvl="8">
-      <div class="tart"><svg viewBox="0 0 320 500" preserveAspectRatio="xMidYMid slice"><rect width="320" height="500" fill="#141230"/></svg></div>
+      <div class="tart"></div>
       <div class="tscrim"></div>
-      <div class="tbody"><div class="ticon" data-mico="suelo"></div><img class="tlk" src="arte/ui/ui-candado.webp" alt=""><div class="tname" data-t="mSuelo">SUELO MENGUANTE</div><div class="tcond" data-lvln="8">Nivel 8</div></div>
+      <img class="tlk" src="arte/ui/ui-candado.webp" alt="">
+      <div class="tbody"><div class="ticon" data-mico="suelo"></div><div class="tname" data-t="mSuelo">SUELO MENGUANTE</div><div class="tcond" data-lvln="8">Nivel 8</div></div>
     </div>
     <div class="gridnote" data-t="gridNote">Tocar un modo lo deja elegido en el inicio · JUGAR lo arranca desde allí</div>
   </div>
@@ -891,18 +875,6 @@
     <button class="tab" data-nav="perfil"><i class="tico t-perfil"></i><span data-t="tPerfil">Perfil</span></button>
   </div>
 </div>
-<!-- bola-criatura de los tiles (simbolo compartido, del mockup) -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <symbol id="tball" viewBox="0 0 64 64">
-    <circle cx="32" cy="35" r="25" fill="currentColor"/>
-    <ellipse cx="24" cy="24" rx="9" ry="6" fill="#fff" opacity=".26"/>
-    <circle cx="26" cy="33" r="5.4" fill="#fff"/>
-    <circle cx="40" cy="33" r="5.4" fill="#fff"/>
-    <circle cx="27.2" cy="34" r="2.5" fill="#10202f"/>
-    <circle cx="41.2" cy="34" r="2.5" fill="#10202f"/>
-    <path d="M25 43 Q32 49 39 43" stroke="#10202f" stroke-width="3" fill="none" stroke-linecap="round"/>
-  </symbol>
-</svg>
 <!-- ===== HOJA DE FORMATO (bottom sheet: "Vas a jugar" -> individual / por equipos; regla de oro del copy) ===== -->
 <div class="sheetwrap" id="fmtSheet" aria-hidden="true">
   <div class="sheetback" id="sheetBack"></div>
@@ -2738,7 +2710,14 @@ function renderHome(){ applyShell();
   const m=MODOS[SAVE.mode]||MODOS.race;
   el('mcIcon').innerHTML=modeIco(SAVE.mode); el('mcName').textContent=modeTitle(SAVE.mode);
   el('mcScrim').style.background=m.grad;
-  el('mcDay').style.display = SAVE.mode===dayMode() ? '' : 'none';
+  //+AG auditoria Supercell 26-jul: el bonus del dia era INVISIBLE desde la Home cuando el modo elegido no
+  //   era el del dia (solo se descubria entrando al selector), y es justo el gancho para rotar de modo.
+  //   Ahora la pildora esta siempre: dorada solida = lo tiene TU modo; fantasma con chevron = esta en otro
+  //   y dice cual (tocar la tarjeta ya abre el selector). Se compone de piezas ya traducidas a los 9
+  //   idiomas (dayBadge + modeTitle), asi que no hace falta cadena nueva.
+  const _md=el('mcDay'), _isDay=SAVE.mode===dayMode();
+  _md.style.display=''; _md.classList.toggle('elsewhere', !_isDay);
+  _md.textContent = _isDay ? S().dayBadge : (S().dayBadge+' · '+modeTitle(dayMode())+' ▸');
   el('mcHow').classList.toggle('done', !!SAVE.tutorialDone[SAVE.mode]);   //+AG hecho -> se encoge a la (i) sola
   el('hPassSub').textContent=S().passSub(SAVE.level, SAVE.xp+'/'+xpForLevel(SAVE.level));
   el('hPassBar').style.width=Math.round(100*SAVE.xp/xpForLevel(SAVE.level))+'%';
@@ -3707,7 +3686,17 @@ if(CHEAT_MONEDAS){
   }, true);
 }
 // ============================================================================
-el('hPlay').onclick=openSheet;   //+AG regla de oro del copy: JUGAR abre la HOJA DE FORMATO (alli los botones que si arrancan)
+//+AG auditoria Supercell 26-jul: JUGAR abria SIEMPRE la hoja de formato (docs/35 v2.2), pero con
+//   TEAM_READY todo a false la hoja ofrece UNA sola opcion jugable: era un toque de mas en cada partida,
+//   y en Brawl/Clash el boton de batalla arranca en uno. Ahora la hoja solo se interpone cuando aporta:
+//     · el modo tiene POR EQUIPOS vivo (hay algo que elegir), o
+//     · aun no has hecho el tutorial de ese modo (la hoja es una de las dos puertas de CÓMO JUGAR; la
+//       otra, la (i) de la tarjeta, sigue estando siempre). Hecho el tutorial, JUGAR arranca directo.
+//   El dia que un modo encienda equipos, la hoja vuelve sola: no hay que tocar nada aqui.
+el('hPlay').onclick=()=>{
+  if(TEAM_READY[SAVE.mode] || !SAVE.tutorialDone[SAVE.mode]) return openSheet();
+  SAVE.fmt='individual'; persist(); startRace(SAVE.mode,'individual');
+};
 el('rAgain').onclick=()=>startRace(curMode,curFmt); el('rHome').onclick=goHome;
 //+AG doc 34 Fase C: navegacion de pestañas por data-nav (incluye Temporada/Perfil, antes eran toast)
 const NAV={ jugar:goHome, garaje:openGaraje, tienda:openTienda, temporada:openTemporada, perfil:openPerfil, ranking:openRanking };
@@ -3755,11 +3744,27 @@ window.__fitCheck=function(w,h){
       // solo cuentan las cajas que RECORTAN de verdad (overflow != visible): son las unicas donde el jugador
       // pierde contenido si no desliza. Una caja con overflow visible "sobresale" en el papel pero se ve
       // entera — p.ej. una tarjeta que entra animandose con un translateY de 8px.
+      const nom=d=>(d.id||d.className||d.tagName).toString().slice(0,32), scr=n+(st?(' · paso '+st):'');
       [e, ...e.querySelectorAll('*')].forEach(d=>{
         if(d.clientHeight<60) return;
         if(d!==e && getComputedStyle(d).overflowY==='visible') return;
         const extra=d.scrollHeight-d.clientHeight;
-        if(extra>4) out.push({screen:n+(st?(' · paso '+st):''), box:(d.id||d.className||d.tagName).toString().slice(0,32), extra});
+        if(extra>4) out.push({screen:scr, box:nom(d), eje:'alto', extra});
+      });
+      //+AG PUNTO CIEGO CAZADO EL 26-jul: esto solo miraba el ALTO. La fila de arriba de la Home pedia 473 px
+      //   de ancho y a 360 px la pildora de gemas quedaba ENTERA fuera de pantalla, recortada por el overflow
+      //   de #home — y __fitCheck devolvia [] tan tranquilo. "Cabe" es en los DOS ejes.
+      //   El ancho NO se mide con scrollWidth: el barrido decorativo de .ready (::after de 32% asomando por
+      //   la izquierda) lo infla 120 px y ahi no se pierde nada, seria un falso positivo cada vez. Se mide
+      //   sobre lo que el jugador LEE — cajas con texto propio e imagenes — que acabe fuera de la columna.
+      const col=e.getBoundingClientRect();
+      e.querySelectorAll('*').forEach(d=>{
+        if(!d.offsetParent && getComputedStyle(d).position!=='fixed') return;
+        const propio = d.tagName==='IMG' || [...d.childNodes].some(x=>x.nodeType===3 && x.textContent.trim());
+        if(!propio) return;
+        const r=d.getBoundingClientRect(); if(r.width<6 || r.height<6) return;
+        const fuera=Math.round(Math.max(r.right-col.right, col.left-r.left));
+        if(fuera>1) out.push({screen:scr, box:nom(d), eje:'ancho', extra:fuera});
       });
     }
     if(n==='results') e.dataset.step='1';
