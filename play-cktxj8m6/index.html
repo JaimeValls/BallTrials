@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-27 ccccffb"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-07-27 3c38ade"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -144,6 +144,14 @@
     background:conic-gradient(var(--gold2) var(--lvlpct,30%), #ffffff22 0); box-shadow:inset 0 0 0 3px #14103a; }
   .h-lvlnum b{ background:#14103a; width:23px; height:23px; border-radius:50%; display:grid; place-items:center; color:var(--gold2); font-size:13px; font-weight:900; }
   .h-lvl .cap{ font-size:10px; color:var(--muted); font-weight:800; letter-spacing:.12em; text-transform:uppercase; }   /*+AG el texto viene del i18n ("Nivel"/"Level"), el CSS pone las mayusculas */
+  /*+AG doc 49: en el movil pequeño la PALABRA se va y se queda el numero. La fila de arriba es la mas
+     apretada de la pantalla (ya perdio el selector de idioma por esto mismo, auditoria del 26-jul) y la
+     palabra mide distinto en cada lengua: "Level" 5 letras, "Niveau" 6, "Livello" 7, "Уровень" 7. A 320 px
+     eso empujaba las pildoras de moneda hasta comerse el "+", que es el boton que abre la tienda — o sea
+     que ya no era un texto feo, era una funcion perdida. Medido: es/en/de entraban, fr/it/pl/ru/tr no.
+     Se quita la palabra en vez de acortarla idioma a idioma porque el numero dentro del circulo YA dice
+     que es un nivel (asi lo hace Brawl Stars), y asi entra cualquier idioma, tambien los que no existen. */
+  @media (max-width:340px){ .h-lvl .cap{ display:none; } .h-lvl{ padding:4px 5px; } }
   .h-coins{ margin-left:auto; display:flex; gap:6px; }
   .coin{ display:flex; align-items:center; gap:6px; background:#0007; border:1px solid var(--line); border-radius:999px; padding:5px 6px 5px 6px; font-weight:800; font-size:14px; font-variant-numeric:tabular-nums; }
   .coin i{ width:19px; height:19px; border-radius:50%; display:grid; place-items:center; font-style:normal; font-size:12px; color:#1a1330; }
@@ -228,7 +236,14 @@
   .cico.big{ width:22px; height:22px; filter:drop-shadow(0 0 6px #fbb91566); }   /* banda de copas */
   .rico{ width:26px; height:26px; object-fit:contain; display:block; filter:drop-shadow(0 2px 4px #0008); }   /* rieles de la Home */
   /* --- RESULTADOS --- */
-  #results{ background:radial-gradient(120% 80% at 50% 20%, #4a26a8ee, var(--bg-lo)), var(--bg-lo); align-items:center; justify-content:center; padding:22px; gap:14px; }
+  #results{ background:radial-gradient(120% 80% at 50% 20%, #4a26a8ee, var(--bg-lo)), var(--bg-lo); align-items:center; justify-content:center; padding:22px; gap:14px; overflow:hidden; }
+  /*+AG feedback Jaime 2026-07-27: "el fondo monocolor queda cutre" → el FONDO VIVO de la Home (bolas reales
+     del motor cayendo, arte/ambient.mjs) tambien en Resultados. Mismo patron que #home > #ambient, con una
+     diferencia: .r-actions se queda FUERA del *:not() porque es sticky y position:relative se lo cargaria
+     (ya es positioned con su z-index:2, asi que pinta encima del lienzo igual). El motor no compite por la
+     GPU: el iframe de la partida se cierra ANTES de pintar Resultados (onMatchEnd → closeGameFrame). */
+  #results > #ambientR{ position:absolute; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; opacity:.5; }
+  #results > *:not(#ambientR):not(.r-actions){ position:relative; z-index:1; }
   .r-card{ width:100%; max-width:430px; display:flex; flex-direction:column; align-items:center; gap:6px; }
   /*+AG banda de GANADOR: pastilla horizontal (corona + disco del color REAL del ganador + su nombre). Se lee
       "quien gano" de un vistazo y ya no se confunde con el numerote de TU puesto. Dorada si el ganador eres tú. */
@@ -883,7 +898,15 @@
      ninguno nuevo. Los bloqueados caen al gris de siempre por el fallback. */
   .tile .tsub{ min-width:0; font-size:12px; font-weight:800; letter-spacing:.01em;
     color:color-mix(in srgb, var(--mc,#9aa3c7) 80%, #FFFFFF);
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    /*+AG doc 49: DOS LINEAS, no "…". Esta linea nacio de una sola con recorte ("a 175 px de carta no
+       cabe una frase"), y con 20 idiomas se vio que la premisa era falsa al reves: no cabia ni en
+       INGLES a 360 px. Cortar con "…" le quita al jugador justo la palabra que dice de que va el
+       modo ("Grab the most…"), asi que se deja bajar a una segunda linea, igual que ya hacia el
+       NOMBRE del modo encima ("SUELO MENGUANTE" siempre ha ido en dos). El tope de 2 evita que un
+       idioma raro empuje la carta; a partir de ahi si recorta. En español e ingles no cambia nada:
+       su frase sigue entrando en una linea. */
+    display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2;
+    white-space:normal; overflow:hidden; }
   /*+AG doc 49: la linea NO cabia ni en su propio idioma. Medido con tools/prueba-encaje-idiomas.mjs:
      a 360 px de pantalla el INGLES ya se cortaba ("Escape the monster", "Grab the most gems", 3 px
      cada uno), o sea que la caja iba justa para la referencia y los otros 19 idiomas pagaban una
@@ -1280,6 +1303,8 @@
      quedado EN META, que es la otra mitad del mismo feedback ("cuando yo llego no me sale en qué posición
      he quedado"). Esta pantalla es ya solo el BOTÍN, y con todo junto está llena. -->
 <div id="results" class="scr">
+  <!--+AG feedback Jaime 2026-07-27: el fondo vivo de la Home tambien aqui (lo enciende showScreen) -->
+  <canvas id="ambientR"></canvas>
   <div class="r-card">
     <!--+AG DOS INFORMACIONES SEPARADAS (feedback Jaime: "no queda claro quien gana y por que gana"):
          (a) arriba, la BANDA DE GANADOR = quien gano la carrera (disco con SU color real + su nombre);
@@ -3157,7 +3182,10 @@ function showScreen(n){ ['home','results','garaje','tienda','temporada','perfil'
   //+AG doc 41 bloque E: el fondo vivo SOLO existe en la Home. Fuera de ella se para de verdad
   //   (rAF, listeners y contexto WebGL): dos contextos vivos a la vez -fondo + motor- es lo que
   //   tumba un movil, y ademas la partida se merece toda la GPU.
-  if(window.BT_AMBIENT) n==='home' ? BT_AMBIENT.on() : BT_AMBIENT.off();
+  //+AG feedback Jaime 2026-07-27: Resultados tambien lo lleva (lienzo #ambientR propio). Fuera de Home y
+  //   Resultados se sigue parando de verdad, y sigue habiendo UN solo contexto de fondo vivo a la vez.
+  if(window.BT_AMBIENT){ const amb = n==='home' ? 'ambient' : (n==='results' ? 'ambientR' : null);
+    amb ? BT_AMBIENT.on(amb) : BT_AMBIENT.off(); }
   //+AG el TEMA DE RESULTADOS vuelve a la pista de menu en cuanto se sale de Resultados, sea por donde sea
   //   ("Jugar otra", el Garaje, la pestana de abajo...). Va aqui, en la unica puerta de cambio de pantalla, y
   //   no en cada boton de salida: un camino nuevo se olvidaria de devolverla y la victoria se quedaria sonando
@@ -4533,11 +4561,14 @@ else if((FRESH || _pend) && !SAVE.onboarded && _onbParam!=='0'){
   import { startAmbient } from './arte/ambient.mjs';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
-  window.BT_AMBIENT = { h:null,
-    on(){ if(this.h) return;
+  //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
+  //   on(id) recuerda en cual esta encendido y, si le piden el otro, apaga el primero antes (un solo
+  //   contexto WebGL de fondo vivo a la vez, la misma regla de siempre).
+  window.BT_AMBIENT = { h:null, cv:null,
+    on(id='ambient'){ if(this.h && this.cv===id) return; this.off();
       try{ if(SAVE.settings && SAVE.settings.reducedFx) return; }catch(e){}   // "efectos reducidos" tambien apaga esto
-      this.h = startAmbient(document.getElementById('ambient')); },
-    off(){ if(this.h){ this.h.stop(); this.h=null; } } };
+      this.h = startAmbient(document.getElementById(id)); this.cv=id; },
+    off(){ if(this.h){ this.h.stop(); this.h=null; } this.cv=null; } };
   if(document.getElementById('home').classList.contains('on')) BT_AMBIENT.on();
 </script>
 
