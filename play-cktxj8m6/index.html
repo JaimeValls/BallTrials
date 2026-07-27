@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-27 75cb7dd"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-07-27 c315c63"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -1715,7 +1715,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=75cb7dd"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=c315c63"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -2702,7 +2702,7 @@ const MORE={
     welFail:'Google no se ha podido abrir. Sigues como invitado y tu partida se guarda igual; podrás hacerlo luego desde Perfil.',
     tGoogleIn:'Estás dentro con tu cuenta de Google ✓',
     tGoogleNew:'¡Listo! Tu partida ya viaja contigo con Google',
-    tGoogleNo:'No se ha podido entrar con Google. Sigues como invitado.',
+    tProvNo:p=>'No se ha podido entrar con '+p+'. Sigues como invitado.',
     quizStart:'¿Qué te gusta más?', quizRun:'Al correr, ¿cómo?', quizPush:'Al empujar, ¿cómo?',
     quizOpts:{run:'Correr',push:'Empujar',survive:'Sobrevivir a todo',straight:'En línea recta, a tope',
       chaos:'Rebotando en el caos',plant:'Me planto y no me muevo',stick:'Me pego a todo sin soltarme'},
@@ -2862,7 +2862,7 @@ const MORE={
     welFail:'Google could not be opened. You carry on as a guest and your game is still saved; you can do this later from Profile.',
     tGoogleIn:'You are signed in with your Google account ✓',
     tGoogleNew:'Done! Your game now travels with you via Google',
-    tGoogleNo:'Could not sign in with Google. You carry on as a guest.',
+    tProvNo:p=>'Could not sign in with '+p+'. You carry on as a guest.',
     quizStart:'What do you like most?', quizRun:'When running, how?', quizPush:'When pushing, how?',
     quizOpts:{run:'Running',push:'Pushing',survive:'Surviving anything',straight:'Straight line, full throttle',
       chaos:'Bouncing through the chaos',plant:'I stand my ground',stick:'I stick to everything'},
@@ -4015,6 +4015,10 @@ function wireCuenta(){
       //   Al login normal solo se cae si el servidor ha CONTESTADO que no deja enlazar (e.estado).
       if(!destino && hayRed){ try{ destino=nube().urlDeProveedor(prov, location.href); }catch(e){} }
       if(!destino){ goog.disabled=false; return di(S().prAccOff,false); }
+      //+AG se apunta POR DONDE se ha salido: la vuelta puede traer un fallo y el reintento
+      //   tiene que ir al MISMO proveedor. Antes estaba clavado a Google y quien pulsaba
+      //   Facebook acababa en la pantalla de Google sin haberla pedido.
+      try{ sessionStorage.setItem('bt_prov', prov); }catch(e){}
       location.href=destino;
     }; }
     });
@@ -4842,22 +4846,25 @@ else if((FRESH || _pend) && !SAVE.onboarded && _onbParam!=='0'){
       let vuelta=null;
       try{ vuelta = await nube.adoptarSesionDeUrl(); }catch(e){ console.warn('[nube] vuelta', e); }
       if(vuelta && vuelta.error){
-        //+AG ese Google ya era de OTRA cuenta de BallTrials: enlazar es imposible, asi que se
-        //   ENTRA en ella. Un solo reintento, con bandera de pestana, para que un fallo raro
-        //   no pueda dejar al jugador en un bucle de redirecciones.
-        let yaVa=null; try{ yaVa=sessionStorage.getItem('bt_google_entrar'); }catch(e){}
+        //+AG el proveedor por el que se salio; 'google' de respaldo porque es el unico que
+        //   existia cuando se escribio esto y una pestana vieja puede no tener la marca.
+        let prov='google'; try{ prov=sessionStorage.getItem('bt_prov')||'google'; }catch(e){}
+        //+AG esa cuenta de Google/Facebook ya era de OTRA cuenta de BallTrials: enlazar es
+        //   imposible, asi que se ENTRA en ella. Un solo reintento, con bandera de pestana,
+        //   para que un fallo raro no pueda dejar al jugador en un bucle de redirecciones.
+        let yaVa=null; try{ yaVa=sessionStorage.getItem('bt_prov_entrar'); }catch(e){}
         if(!yaVa && /already|linked|identity|exists/i.test(vuelta.error)){
-          try{ sessionStorage.setItem('bt_google_entrar','1'); }catch(e){}
-          location.href = nube.urlDeProveedor('google', location.href);
+          try{ sessionStorage.setItem('bt_prov_entrar','1'); }catch(e){}
+          location.href = nube.urlDeProveedor(prov, location.href);
           return;
         }
-        //+AG cancelar en la pantalla de Google, o cualquier fallo que no sea "esa identidad ya
-        //   existe", NO puede dejar al jugador mirando una pantalla muerta: se le dice y sigue
+        //+AG cancelar en la pantalla del proveedor, o cualquier fallo que no sea "esa identidad
+        //   ya existe", NO puede dejar al jugador mirando una pantalla muerta: se le dice y sigue
         //   de invitado. El quiz de la primera bola ya esta puesto por la marca bt_onb_pendiente.
-        console.warn('[nube] google:', vuelta.error);
-        try{ toast(S().tGoogleNo); }catch(e){}
+        console.warn('[nube] '+prov+':', vuelta.error);
+        try{ toast(S().tProvNo(prov==='facebook'?'Facebook':'Google')); }catch(e){}
       }
-      try{ sessionStorage.removeItem('bt_google_entrar'); }catch(e){}
+      try{ sessionStorage.removeItem('bt_prov_entrar'); sessionStorage.removeItem('bt_prov'); }catch(e){}
       if(vuelta && vuelta.user_id && vuelta.antes && !vuelta.mismo){
         //+AG se ha entrado en OTRA cuenta: el save de este movil ya no es el que toca. Mismo
         //   camino ya probado que "Ya tengo cuenta" (docs/42 §13): borrar local y recargar,

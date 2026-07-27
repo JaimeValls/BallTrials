@@ -32,15 +32,23 @@ export const LOOK = {
 
 const VS = /* glsl */`
 varying vec3 vN;
+varying vec2 vUv;                        //+AG piel: la esfera ya trae UV, solo habia que pasarlas
 void main(){
   vN = normalMatrix * normal;            // view-space; normalMatrix ya corrige el squash no uniforme
+  vUv = uv;
   gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }`;
 
 const FS = /* glsl */`
 uniform vec3 uColor; uniform vec3 uEmissive; uniform float uEmissiveI;
 uniform float uShade, uRim, uRimW, uSpec, uSpecHard, uSpecSize, uSpec2, uEdge, uBounce, uGlow, uSatFloor;
+//+AG PIEL DEL CUERPO (encargo 14): mapa equirectangular en gris donde 0.5 = "no toques nada",
+//  mas oscuro hunde y mas claro levanta. Se aplica MULTIPLICANDO sobre el cuerpo, DESPUES de la
+//  salvaguarda de saturacion y ANTES del gloss: asi la piel puede tallar la superficie sin lavar
+//  el color del equipo (que es lo que dice de quien es la bola) ni apagar los reflejos.
+uniform sampler2D uSkin; uniform float uSkinK;   // uSkinK = 0 -> el shader queda como antes
 varying vec3 vN;
+varying vec2 vUv;
 // SALVAGUARDA DE COLOR: sube la saturacion HSV de c hasta al menos 'floor' sin tocar su brillo (mx) ni su
 // tono. Es lo que garantiza que rojo=rojo aunque el sombreado haya aclarado el cuerpo. Solo actua si hace
 // falta (s < floor) y matematicamente mantiene cada canal en [0, mx] (no rompe nada, no genera negativos).
@@ -71,6 +79,23 @@ void main(){
   body += vec3(0.36, 0.22, 0.65) * (uBounce * bb * bb);
   body += uEmissive * (uEmissiveI * uGlow);       // compat: destello de estrella, apagado en stun...
   body = keepSat(body, uSatFloor);                // <<< AQUI se respeta el color pase lo que pase
+  // PIEL: 0.5 es el neutro. Se convierte a un factor alrededor de 1 y se multiplica. El tope de
+  // 1.25 evita que un mapa con blancos se coma el color por arriba; keepSat ya paso, asi que lo
+  // que la piel hace es TALLAR, no recolorear.
+  if (uSkinK > 0.0){
+    // Se muestrea con las coords tipo matcap (d), NO con las UV de la esfera. Es decir: la piel
+    // es un disco pegado a la CARA FRONTAL, igual que los props, y no un mapamundi envuelto.
+    // Motivo (decision de Jaime, 27-jul): pedirle a Codex un mapa equirectangular fallo dos veces
+    // —es un formato raro y devolvia patrones de rayas—, mientras que pedirle una imagen normal
+    // pintada sale excelente. Se le pide lo que sabe hacer. El precio es el mismo que ya pagan
+    // los props: la piel no rueda con la bola. En este motor la bola no rueda en 3D, solo gira en
+    // el plano y se aplasta, asi que se nota poco.
+    // El borde se difumina para que la piel no dibuje un circulo duro contra la silueta.
+    vec2 suv = d * 0.5 + 0.5;
+    float sk = texture2D(uSkin, suv).r;
+    float borde = 1.0 - smoothstep(0.86, 0.99, L);
+    body *= clamp(1.0 + (sk - 0.5) * 2.0 * uSkinK * borde, 0.55, 1.25);
+  }
   // ============ GLOSS (reflejos BLANCOS: se permite que laven porque son PEQUENOS y van ENCIMA) ======
   // en bolas OSCURAS un reflejo blanco puro canta como pegatina: se atenua (hiK) y se tinta al propio
   // color aclarado (hiCol). En claras no cambia nada (hiT=1 -> blanco puro) para no tocar su calibracion.
@@ -94,7 +119,36 @@ void main(){
 
 // Crea el material de UNA bola. col = [r,g,b] 0..1 (ya saturado por sat() del chasis).
 // El programa GLSL se comparte entre instancias (Three cachea por shader identico).
-export function ballMaterial(col, look = LOOK){
+//+AG piel: textura del arquetipo, cacheada. La ruta se resuelve contra import.meta.url (los tres
+//  modos cuelgan de motor/<modo>/ pero la pagina de previsualizacion no). Devuelve null si no hay.
+const skinCache = new Map();
+const BLANCO = (() => {                    // 1 px neutro: el sampler SIEMPRE tiene que estar atado,
+  const c = document.createElement('canvas'); c.width = c.height = 1;   // aunque la bola no lleve piel
+  const x = c.getContext('2d'); x.fillStyle = '#808080'; x.fillRect(0, 0, 1, 1);
+  return new THREE.CanvasTexture(c);
+})();
+export function skinTexture(arch){
+  if (!arch) return null;
+  let t = skinCache.get(arch);
+  if (t === undefined){
+    // Si el mapa no carga, la textura se queda SIN imagen y el sampler devuelve NEGRO: la bola
+    // se pondria oscura del todo. Se le mete el gris neutro, que es "no toques nada", y asi la
+    // bola se queda simplemente sin piel en vez de estropearse.
+    t = new THREE.TextureLoader().load(
+      new URL(`../../arte/piel/piel-${arch}.webp`, import.meta.url).href,
+      undefined, undefined, () => {
+        console.warn(`[ballmat] no cargo la piel de ${arch}; la bola se queda lisa`);
+        t.image = BLANCO.image; t.needsUpdate = true;
+      });
+    t.wrapS = THREE.RepeatWrapping;        // el mapa da la vuelta a la bola: la costura se une aqui
+    t.colorSpace = THREE.NoColorSpace;     // es un mapa de RELIEVE, no un color: nada de sRGB
+    t.anisotropy = 4;
+    skinCache.set(arch, t);
+  }
+  return t;
+}
+
+export function ballMaterial(col, look = LOOK, skin = null){
   const u = {
     uColor:     { value: new THREE.Color(col[0], col[1], col[2]) },
     uEmissive:  { value: new THREE.Color(col[0], col[1], col[2]) },
@@ -104,6 +158,8 @@ export function ballMaterial(col, look = LOOK){
     uSpec2: { value: look.spec2 }, uEdge: { value: look.edge },
     uBounce: { value: look.bounce }, uGlow: { value: look.glow },
     uSatFloor: { value: look.satFloor ?? 0.62 },
+    uSkin:  { value: skin || BLANCO },
+    uSkinK: { value: skin ? (look.skinK ?? 1.0) : 0.0 },
   };
   const m = new THREE.ShaderMaterial({ uniforms: u, vertexShader: VS, fragmentShader: FS });
   // fachada compatible con el material viejo: los modos hacen mat.color.setRGB(...), mat.emissive.copy(...)

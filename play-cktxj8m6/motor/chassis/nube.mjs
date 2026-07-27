@@ -343,14 +343,23 @@ export function crearNube(opts = {}) {
   // o el fallo en #error_description. Se adopta como sesion y se limpia la barra de
   // direcciones, para no dejar tokens a la vista ni en el historial. Devuelve null si
   // no hay nada que adoptar, que es el caso de todos los arranques normales.
+  //
+  //+AG EL FALLO VUELVE POR DOS SITIOS, Y MIRAR SOLO UNO SALE CARO (visto el 2026-07-27 con
+  //   Facebook): cuando GoTrue revienta DENTRO de /callback -- secreto mal pegado, identidad
+  //   ya enlazada a otra cuenta -- no llega a montar fragmento y redirige con ?error=... en la
+  //   QUERY. Se miraba solo el fragmento, asi que la vuelta se leia como un arranque normal:
+  //   el jugador volvia al juego como invitado y NADIE le decia que su login habia fallado.
   async function adoptarSesionDeUrl(loc) {
     const l = loc || (typeof location !== 'undefined' ? location : null);
-    if (!l || !l.hash || l.hash.length < 2) return null;
-    const p = new URLSearchParams(l.hash.slice(1));
-    const err = p.get('error_description') || p.get('error');
-    const at = p.get('access_token');
+    if (!l) return null;
+    const frag  = (l.hash   && l.hash.length   > 1) ? new URLSearchParams(l.hash.slice(1))   : null;
+    const query = (l.search && l.search.length > 1) ? new URLSearchParams(l.search.slice(1)) : null;
+    const errF = frag  && (frag.get('error_description')  || frag.get('error'));
+    const errQ = query && (query.get('error_description') || query.get('error'));
+    const err = errF || errQ || null;
+    const at = frag && frag.get('access_token');
     if (!at && !err) return null;   // un ancla cualquiera, no una vuelta de login
-    limpiarFragmento(l);
+    limpiarUrl(l, !!errQ);
     if (err) return { error: err };
     const antes = ses && ses.user_id ? ses.user_id : null;
     guardarSesion({ access_token: at, refresh_token: p.get('refresh_token'), expires_in: +p.get('expires_in') || 3600 });
@@ -369,9 +378,12 @@ export function crearNube(opts = {}) {
     return { antes, user_id: ahora, email: (ses && ses.email) || null, mismo: !!antes && antes === ahora };
   }
 
-  function limpiarFragmento(l) {
+  //+AG tambienQuery: el fallo venia en ?error=..., asi que la query se va con el. Si no, queda
+  //   en la barra y en el historial, y una recarga vuelve a disparar el mismo aviso de fallo.
+  function limpiarUrl(l, tambienQuery) {
     try {
-      if (typeof history !== 'undefined' && history.replaceState) history.replaceState(null, '', l.pathname + l.search);
+      const destino = l.pathname + (tambienQuery ? '' : l.search);
+      if (typeof history !== 'undefined' && history.replaceState) history.replaceState(null, '', destino);
       else l.hash = '';
     } catch (e) { /* si no se puede, el token queda en la barra: feo, no roto */ }
   }
