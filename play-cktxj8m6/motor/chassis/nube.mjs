@@ -58,14 +58,34 @@ export function crearNube(opts = {}) {
   let ses = null;
   try { ses = JSON.parse(store.getItem(SES_KEY) || 'null'); } catch (e) { ses = null; }
 
+  // Con que ha entrado este usuario: ['google'], ['email'], ['anonymous']... GoTrue lo dice en
+  // app_metadata (provider = el primero, providers = todos) y, si no, en la lista de identidades.
+  function proveedoresDe(u) {
+    if (!u) return null;
+    const am = u.app_metadata || {};
+    let ps = Array.isArray(am.providers) ? am.providers : (am.provider ? [am.provider] : null);
+    if (!ps && Array.isArray(u.identities)) ps = u.identities.map(i => i && i.provider);
+    return Array.isArray(ps) ? ps.filter(Boolean) : null;
+  }
+
   function guardarSesion(s) {
     // expires_in viene en segundos; lo pasamos a instante absoluto para poder
     // decidir si hay que renovar sin volver a preguntar al servidor.
+    //
+    // OJO con email/proveedores: se HEREDAN de la sesion anterior cuando la respuesta no
+    // trae usuario (la vuelta de OAuth solo trae tokens) o cuando trae el MISMO usuario (un
+    // refresco). Antes no se heredaban y un simple renovar() borraba el correo: el jugador
+    // con cuenta guardada volvia al dia siguiente y Perfil le decia "estas jugando como
+    // invitado". Si el usuario es OTRO no se hereda nada, que seria contarle una mentira.
+    const mismoUsuario = !s?.user?.id || !ses?.user_id || s.user.id === ses.user_id;
+    const heredado = k => (mismoUsuario && ses ? ses[k] : null);
     ses = s ? {
       access_token: s.access_token,
       refresh_token: s.refresh_token,
       user_id: s.user?.id || ses?.user_id || null,
       es_anonimo: s.user?.is_anonymous ?? ses?.es_anonimo ?? true,
+      email: (s.user && s.user.email) || heredado('email') || null,
+      proveedores: proveedoresDe(s.user) || heredado('proveedores') || null,
       caduca_en: Date.now() + (s.expires_in ? s.expires_in * 1000 : 3600000)
     } : null;
     try { ses ? store.setItem(SES_KEY, JSON.stringify(ses)) : store.removeItem(SES_KEY); } catch (e) { /* sin persistencia, la sesion vive solo en memoria */ }
@@ -233,9 +253,29 @@ export function crearNube(opts = {}) {
   // sus credenciales y sus tramites (docs/43), asi que llegan despues por el mismo
   // sitio (el modulo ya esta preparado con entrarConProveedor).
 
+  // google/facebook salen aparte del email porque el juego los ANUNCIA distinto: "estas dentro
+  // con tu cuenta de Google" no es lo mismo que "cuenta guardada con este correo".
   function estadoCuenta() {
-    if (!ses) return { entrado: false, anonimo: true, email: null };
-    return { entrado: true, anonimo: !!ses.es_anonimo, email: ses.email || null };
+    if (!ses) return { entrado: false, anonimo: true, email: null, proveedores: [], google: false };
+    const ps = Array.isArray(ses.proveedores) ? ses.proveedores : [];
+    return { entrado: true, anonimo: !!ses.es_anonimo, email: ses.email || null,
+             proveedores: ps, google: ps.indexOf('google') >= 0 };
+  }
+
+  // Quien soy SEGUN EL SERVIDOR, y de paso se pone al dia la sesion guardada. Hace falta para
+  // una sesion escrita antes de que existieran email/proveedores, o cuando se enlazo un
+  // proveedor desde otra pestana. Una peticion, y solo la pide quien la necesita.
+  async function refrescarUsuario() {
+    await asegurarSesion();
+    const u = await pedir('/auth/v1/user');
+    if (ses && u) {
+      ses.user_id = u.id || ses.user_id;
+      ses.email = u.email || null;
+      ses.es_anonimo = !!u.is_anonymous;
+      ses.proveedores = proveedoresDe(u) || [];
+      try { store.setItem(SES_KEY, JSON.stringify(ses)); } catch (e) { /* sin persistencia */ }
+    }
+    return estadoCuenta();
   }
 
   // Convierte la cuenta anonima que ya esta jugando en una permanente. NO crea otra
@@ -321,6 +361,7 @@ export function crearNube(opts = {}) {
         ses.user_id = (u && u.id) || ses.user_id;
         ses.email = (u && u.email) || null;
         ses.es_anonimo = !!(u && u.is_anonymous);
+        ses.proveedores = proveedoresDe(u) || [];
         try { store.setItem(SES_KEY, JSON.stringify(ses)); } catch (e) { /* sin persistencia */ }
       }
     } catch (e) { /* la sesion sirve igual; el correo se pinta en el siguiente arranque */ }
@@ -358,7 +399,7 @@ export function crearNube(opts = {}) {
     asegurarSesion, entrarAnonimo, renovar,
     perfil, guardarPerfil, bolas, crearBola, guardarBola, saldos, reportarPartida, gastar,
     crearCodigoTransferencia, canjearCodigoTransferencia,
-    estadoCuenta, crearCuentaEmail, entrarConEmail, salir, cambiarPassword, pedirCorreoDeRecuperacion,
+    estadoCuenta, refrescarUsuario, crearCuentaEmail, entrarConEmail, salir, cambiarPassword, pedirCorreoDeRecuperacion,
     urlDeProveedor, urlDeEnlace, adoptarSesionDeUrl,
     // Solo para pruebas: tirar la sesion local sin tocar la cuenta del servidor.
     olvidarSesion: () => guardarSesion(null)
