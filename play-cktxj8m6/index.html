@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-27 3c38ade"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-07-27 ed5a514"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -242,7 +242,7 @@
      diferencia: .r-actions se queda FUERA del *:not() porque es sticky y position:relative se lo cargaria
      (ya es positioned con su z-index:2, asi que pinta encima del lienzo igual). El motor no compite por la
      GPU: el iframe de la partida se cierra ANTES de pintar Resultados (onMatchEnd → closeGameFrame). */
-  #results > #ambientR{ position:absolute; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; opacity:.5; }
+  #results > #ambientR{ position:absolute; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; opacity:.35; }   /* mas tenue que la Home (.5): esta pantalla es densa en cifras (director-de-arte 2026-07-27) */
   #results > *:not(#ambientR):not(.r-actions){ position:relative; z-index:1; }
   .r-card{ width:100%; max-width:430px; display:flex; flex-direction:column; align-items:center; gap:6px; }
   /*+AG banda de GANADOR: pastilla horizontal (corona + disco del color REAL del ganador + su nombre). Se lee
@@ -1310,13 +1310,15 @@
          (a) arriba, la BANDA DE GANADOR = quien gano la carrera (disco con SU color real + su nombre);
          (b) debajo, TU PUESTO en grande. Antes el disco (color del ganador) volaba encima del numerote
          (tu puesto) y parecian la misma cosa. -->
-    <div class="r-winner" id="rWinner">
+    <!--+AG data-solid: el fondo vivo REBOTA en estos dos bloques (banda de campeon y numerote) en vez de
+         aparcarse encima del dato mas importante de la pantalla (director-de-arte 2026-07-27) -->
+    <div class="r-winner" id="rWinner" data-solid>
       <div class="r-crown" id="rCrown">👑</div>
       <div class="r-disc" id="rDisc"></div>
       <div class="r-wtxt"><div class="r-champlbl" id="rChampLbl">Campeón</div><div class="r-wname" id="rWinName">—</div></div>
     </div>
     <div class="r-youlbl" id="rYouLbl">Tu puesto</div>
-    <div class="r-place" id="rPlace">1º</div>
+    <div class="r-place" id="rPlace" data-solid>1º</div>
     <div class="r-sub" id="rSub"></div>
   </div>
   <!--+AG COPAS de LA BOLA jugada (doc 37): son botín igual que las Chispas, solo que se pueden perder -->

@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-27 3c38ade">
+<meta name="bt-build" content="2026-07-27 ed5a514">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>YouBall · La Gran Carrera (WebGL)</title>
 <style>
@@ -364,6 +364,13 @@ let phase='menu', introT=0, introRingT=-1; const INTRO_DUR=DIGITS*DIGIT;
 //   suelta en cuanto toca. Solo lo activa el coach (?tutorial=1); en partida normal es false y el bucle va igual.
 let coachPaused=false;
 let jingled=false, lastBumpF=-9, ended=false;
+//+AG PUESTO INSTANTANEO EN META (feedback Jaime 2026-07-27, 2a vuelta: "cuando cruzas la meta debe decirte
+//   instantaneamente tu posicion, no se por que espera un rato"). El cartel de veredicto.mjs salia en showEnd(),
+//   o sea cuando la carrera ENTERA se resolvia (+900ms de propina): si cruzabas con bolas aun cayendo, tu meta
+//   volvia a quedarse muda. Estado de la pareja cantarEnMeta()/showEnd(): sung=ya se canto en el cruce ·
+//   vivo=el cartel sigue en pantalla · finPend=matchEnd aplazado hasta que el cartel cierre (la regla
+//   cartel→resultado NO se invierte: el shell no puede cerrar el iframe con el cartel puesto).
+let metaSung=false, metaCartelVivo=false, metaFinPend=null;
 //+AG lerp de vector unitario (gauntlet/index.html): rotacion del aspa SUAVE a 60fps (atan2 en RENDER = permitido)
 const lerpU=(p,ux,uy,a)=>{ const x=p.ux+(ux-p.ux)*a, y=p.uy+(uy-p.uy)*a, l=Math.sqrt(x*x+y*y)||1; return [x/l,y/l]; };
 //+AG material de acero del gauntlet (matSteel) para aspas y plataformas
@@ -462,6 +469,7 @@ function buildSim(s){
   //+AG snapshots de aspas/plats para interpolar + reset de estado de agencia por ronda
   prevAspaU=sim.aspas.map(a=>({ux:a.ux,uy:a.uy})); prevPlatX=sim.plats.map(p=>p.x);
   jingled=false; lastBumpF=-9; ended=false; introRingT=-1;
+  metaSung=false; metaCartelVivo=false; metaFinPend=null;   //+AG el cartel de meta es por ronda
   quakeUntil=-999; if(bgEl) bgEl.classList.remove('quake');
   if(ballObjs) ballObjs.forEach(o=>scene.remove(o.g));
   // VINILO v2: vRef = VTERM (16 u/s, cap de caida): el estirado llega a tope en caida terminal
@@ -767,6 +775,7 @@ function loop(){
   const a=(sim.done||NO_INTERP)?1:Math.min(1,acc/STEP);
   sync(dt,a); P.update(dt); itemPops.update(dt); stars.update(dt); wind.update(dt); updatePanels(); frameCamera(dt,a); bloom.renderScene();
   updateHUD();   //+AG
+  cantarEnMeta();   //+AG tu puesto se canta EN EL CRUCE, no al resolverse la carrera entera (ver la funcion)
   if(sim.done && !ended){ ended=true; setTimeout(showEnd, 900); }   //+AG cartel de fin (la celebracion ya corrio dentro de la sim)
   requestAnimationFrame(loop);
 }
@@ -1083,6 +1092,20 @@ function startRound(){ phase='intro'; introT=0; introRingT=-1; clearTimeout(goT)
   //+AG los beeps se programan DE UNA VEZ con la misma cuenta que pintan los números (DIGITS/DIGIT), así caen
   //   clavados aunque un frame se retrase. Si el audio no está desbloqueado (nadie tocó "¡LISTO!") no suena nada.
   if(sfxOn && audio.unlocked) sfxCountdown(audio, { digits:DIGITS, digitDur:DIGIT, goAt:INTRO_DUR }); }
+//+AG tu puesto de CRUCE es definitivo (nadie por detras te lo puede quitar), asi que se canta en el frame en
+//   que la sim te lo pone. Solo cruce REAL (rank<=sim.placed): el rank SINTETICO que la sim asigna al acabar a
+//   quien no cruzo no es un cruce — ese lo canta showEnd() como siempre. Solo INDIVIDUAL: en POR EQUIPOS lo que
+//   se canta es el puesto del EQUIPO, que no se sabe hasta que el equipo completa (sigue en showEnd).
+function cantarEnMeta(){
+  if(metaSung || !EMBED || TUTORIAL || !INDIVIDUAL || !sim) return;
+  const r=sim.player.rank;
+  if(r===null || r>sim.placed) return;
+  metaSung=true; metaCartelVivo=true;
+  cantarPuesto({ place:r, total:sim.balls.length, lang:LANG }, ()=>{
+    metaCartelVivo=false;
+    if(metaFinPend){ const f=metaFinPend; metaFinPend=null; f(); }
+  });
+}
 function showEnd(){
   if(TUTORIAL) return;   //+AG tutorial: ni matchEnd ni cartel de fin; el COACH cierra con bt:tutorialEnd
   lastPlace=sim.player.rank||sim.playerPlace();
@@ -1101,7 +1124,10 @@ function showEnd(){
     //   el shell no puede cerrar el iframe, que era justo el "flash" que se queria evitar no pintando nada.
     //   En POR EQUIPOS lo que cuenta es el puesto del EQUIPO, que es el que el jugador ha visto coronar.
     const _fin=()=>{ try{ parent.postMessage({type:'bt:matchEnd', mode:'race', seed, playerPlace:lastPlace, teamPlace:tPlace, winnerTeam, winnerColor, standings:st, teamStandings:tst, durationF:sim.f}, '*'); }catch(e){} };
-    cantarPuesto({ place: INDIVIDUAL?lastPlace:tPlace, total: st.length, lang:LANG }, _fin);
+    //+AG si el cartel ya se canto EN EL CRUCE (cantarEnMeta) no se repite: se suelta el resultado ya,
+    //   o se aplaza a que ese cartel cierre si aun esta en pantalla (la regla cartel→resultado se mantiene).
+    if(metaSung){ if(metaCartelVivo) metaFinPend=_fin; else _fin(); }
+    else cantarPuesto({ place: INDIVIDUAL?lastPlace:tPlace, total: st.length, lang:LANG }, _fin);
     return; }
   if(!INDIVIDUAL){   //+AG torneo standalone 16:9: el resultado que cuenta es el del EQUIPO
     const st=teamStandings(); teamPlace=st.findIndex(s=>s.t===myTeam)+1; winnerTeam=sim.winner_team!==null?sim.winner_team:st[0].t; }

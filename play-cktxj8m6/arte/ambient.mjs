@@ -117,7 +117,10 @@ export function startAmbient(canvas){
   // ── colliders del DOM: las bolas rebotan en las tarjetas ([data-solid]) ─────
   let rects = [];                                       // AABBs en unidades de mundo
   let rectsDirty = true;
-  const solids = MOBILE ? [] : [...host.querySelectorAll('[data-solid]')];
+  //+AG 2026-07-27: los [data-solid] cuentan TAMBIEN en movil. El juego es movil-primero y en Resultados el
+  //   numerote del puesto lleva data-solid para que ninguna bola se aparque encima (director-de-arte); son
+  //   2-3 rects x <=5 bolas, coste ridiculo. La Home no tiene ningun data-solid, asi que alli no cambia nada.
+  const solids = [...host.querySelectorAll('[data-solid]')];
   function refreshRects(){
     rects = [];
     for (const el of solids){
