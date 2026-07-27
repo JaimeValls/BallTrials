@@ -143,16 +143,26 @@ const DRAW = {
       blob(x, cx, cy, r, '#cbb9ff', 5);
     x.globalAlpha = 1;
   },
-  // ESTRELLA: cinco puntas doradas + destellos. La unica silueta radial de 5.
+  // ESTRELLA: la estrella EN RELIEVE sobre la bola. NO es una silueta de estrella.
+  //
+  //+AG 27-jul, arreglo de paridad ficha/pista. La version anterior sacaba las cinco puntas a
+  //  1.78R —casi el doble del radio— y eso no decoraba la bola: la SUSTITUIA. En pista dejabas
+  //  de tener una bola y pasabas a tener una estrella, mientras la Tienda te habia vendido una
+  //  esfera de oro. Y no era una interpretacion discutible: el encargo 06 (arte/codex) cierra
+  //  por escrito "Estrella ES una esfera con la estrella en relieve, se descarta el hero de
+  //  cinco puntas". El motor se escribio 23 minutos ANTES que esa decision y nadie lo reconcilio.
+  //  Ahora la estrella vive DENTRO del circulo (puntas a 0.90R) -> la silueta se lee redonda a
+  //  56 px, que es la prueba que importa, y el detalle de estrella se ve al mirar el cuerpo.
+  //  Va en oro canonico sobre el color de equipo, como el resto de props.
   estrella(x){
-    for (let i = 0; i < 5; i++){
-      const a = 90 * D + i * 72 * D;
-      // puntas FINAS (±20°, no ±36°): con la base ancha la estrella se comia la bola y se perdia
-      // el color de equipo, que es lo que dice de quien es la bola.
-      const px = Math.cos(a + 20 * D), py = Math.sin(a + 20 * D), qx = Math.cos(a - 20 * D), qy = Math.sin(a - 20 * D);
-      poly(x, [[Math.cos(a) * 1.78, Math.sin(a) * 1.78], [px * 0.96, py * 0.96], [qx * 0.96, qy * 0.96]], i % 2 ? '#f5a90f' : '#fbb915', 5);
+    const pts = [];
+    for (let i = 0; i < 10; i++){
+      const a = 90 * D + i * 36 * D, r = i % 2 === 0 ? 0.90 : 0.40;   // 5 puntas + 5 valles
+      pts.push([Math.cos(a) * r, Math.sin(a) * r]);
     }
-    blob(x, -1.30, 1.20, 0.10, '#fff2b0', 0); blob(x, 1.24, -1.24, 0.08, '#fff2b0', 0);
+    poly(x, pts, '#ffd23f', 6);
+    // destellos FUERA pero CORTOS (<=1.32R): fuera de la banda prohibida 1.35-1.55R del anillo YOU
+    blob(x, -1.14, 1.04, 0.11, '#fff2b0', 0); blob(x, 1.08, -1.16, 0.08, '#fff2b0', 0);
   },
 };
 

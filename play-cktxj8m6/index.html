@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-27 faf7957+SUCIO"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-07-27 748dc84"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -344,9 +344,16 @@
   }
   /* --- TIENDA (doc 12: secciones + escaparate, cero azar, puerta parental) --- */
   #tienda{ background:url(arte/fondo/doodles.webp) repeat top left/340px 340px, radial-gradient(130% 90% at 50% 8%, #3f3ad0 0%, #2a1c86 45%, var(--bg-lo) 100%); }
-  .sh-secs{ display:flex; gap:7px; overflow-x:auto; padding:2px 13px 8px; -webkit-overflow-scrolling:touch; }
-  .sh-sec{ flex:0 0 auto; border:1px solid var(--line); background:#ffffff0d; color:#c9cff0; font-family:inherit; font-weight:800; font-size:13px; border-radius:999px; padding:8px 15px; cursor:pointer; }
-  .sh-sec.on{ background:linear-gradient(#ffe27a,#ff9a3d); color:#3a2400; border-color:transparent; }
+  /*+AG La fila de secciones era una tira con scroll lateral: las 5 pastillas sumaban 449px en 369
+     utiles y "Pase" se quedaba 60px fuera, invisible y sin nada que dijera que estaba ahi. Se rige
+     ya por la MISMA ley que las .subtabs de Temporada y Perfil (doc 40): son secciones hermanas,
+     caben las 5 de una vez y se cambian con un tap. Mismo aspecto que alli para que el juego hable
+     un solo idioma de pestanas; unica diferencia, el ancho es proporcional a la etiqueta
+     (flex:1 1 auto) porque "Destacados" y "Pase" no piden lo mismo. */
+  .sh-secs{ display:flex; gap:6px; padding:2px 13px 8px; }
+  .sh-sec{ flex:1 1 auto; min-width:0; white-space:nowrap; border:1px solid #ffffff2a; background:#ffffff10; color:#c4cbe6; font-family:inherit; font-weight:900; font-size:11px; letter-spacing:.02em; border-radius:12px; padding:8px 6px; cursor:pointer; }
+  .sh-sec.on{ background:linear-gradient(#ffe27a,#ffb43d); color:#3a2400; border-color:transparent; box-shadow:0 3px 10px #ffb03d3d; }
+  @media (max-width:359px){ .sh-sec{ font-size:10px; padding:8px 4px; letter-spacing:0; } }
   .sh-body{ flex:1; min-height:0; overflow-y:auto; padding:4px 13px 16px; }
   .sh-grid{ display:grid; grid-template-columns:1fr 1fr; gap:11px; }
   .sh-item{ border-radius:16px; padding:13px 12px; background:#ffffff0d; border:2px solid var(--qc,#ffffff22); display:flex; flex-direction:column; align-items:center; gap:5px; text-align:center; }
@@ -1567,6 +1574,7 @@
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
 <script src="arte/modeicons-vendored.js"></script>
+<script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
 'use strict';
 //+AG AJUSTE AL VIEWPORT VISIBLE (feedback Jaime 2026-07-24: "se pierde parte de abajo").
@@ -3056,10 +3064,13 @@ function drawPreviewBall(cv,col){ const x=cv.getContext('2d'), S=cv.width, r=S*0
   x.beginPath(); x.ellipse(cx-r*0.32,cy-r*0.38,r*0.34,r*0.22,-0.5,0,7); x.fillStyle='rgba(255,255,255,0.5)'; x.fill();
   const fc=faceCanvas('feliz'), fsz=r*2.15; x.drawImage(fc,cx-fsz/2,cy-fsz*0.5-r*0.12,fsz,fsz); }
 //+AG color propio por arquetipo (identidad de la bola protagonista y del Garaje; antes todo salia Rojo)
-const ARCH_COLOR={ cohete:[0.16,0.42,1.0], tanque:[0.20,0.85,0.32], pinball:[1.0,0.82,0.15], lapa:[0.95,0.20,0.22], bunker:[0.62,0.35,1.0],
-  //+AG doc 39: colores de las 7 bolas nuevas del roster de 12
-  chispa:[0.20,0.90,1.0], meteoro:[1.0,0.55,0.15], burbuja:[0.55,0.85,1.0], volcan:[1.0,0.35,0.10],
-  yunque:[0.55,0.60,0.68], fantasma:[0.80,0.75,1.0], estrella:[1.0,0.85,0.30] };
+//+AG 27-jul: la tabla A MANO que habia aqui era ANTERIOR al arte (doc 41) y nunca se reconcilio: SEIS
+//   de las doce mentian respecto a la ficha que compras (Chispa se vendia amarilla y salia cian, Pinball
+//   violeta y salia amarilla, Bunker gris y salia violeta, Lapa/Meteoro/Volcan igual). Ahora sale de
+//   arte/bolas-canon.js, que es la MISMA tabla con la que se valida el arte de Codex: si vuelven a
+//   divergir es imposible, porque ya solo hay una. canonUI = el color del heroe con suelo de luminosidad
+//   (Volcan es casi negro y su punto en el Ranking no se veia).
+const ARCH_COLOR=Object.fromEntries(Object.entries(window.BOLAS_CANON).map(([k,h])=>[k,canonUI(h)]));
 const equippedBall=()=>SAVE.balls[SAVE.equipped]||SAVE.balls[0];
 const totalCopas=()=>SAVE.balls.reduce((s,b)=>s+(b.copas||0),0);
 function renderHome(){ applyShell();
