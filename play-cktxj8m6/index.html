@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-27 20d0490"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-07-27 4a0de74"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -740,9 +740,22 @@
     padding:2px 2px 4px; -webkit-overflow-scrolling:touch; }
   .lgrow{ display:flex; align-items:center; gap:6px; min-height:44px; padding:8px 11px; cursor:pointer;
     border:1px solid var(--line); border-radius:14px; background:#ffffff0d; color:#dfe4ff;
-    font-family:inherit; font-size:13px; font-weight:800; text-align:left; transition:transform .08s; }
+    /*+AG text-align:START y no LEFT. Con "left", en la fila del arabe (que va dir=rtl) el nombre se
+       pegaba al borde izquierdo y la bandera quedaba suelta en el otro extremo, con un agujero en
+       medio. "start" sigue la direccion de la fila, asi que bandera y nombre van siempre juntos. */
+    font-family:inherit; font-size:13px; font-weight:800; text-align:start; transition:transform .08s; }
   .lgrow:active{ transform:scale(.96); }
   .lgrow .lgn{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  /*+AG la bandera va con ancho FIJO y centrada: los emoji de bandera no miden todos igual y sin el
+     ancho fijo los nombres de la columna quedaban a distinta sangria, que a 20 filas canta mucho.
+     El dir:ltr es para que en arabe la bandera no salte al otro lado DENTRO de su pastilla: la fila
+     entera ya se espeja por la rejilla, y volver a darle la vuelta al par bandera+nombre lo desharia. */
+  /*+AG 'Noto Color Emoji' PRIMERO y el emoji del sistema detras: en Windows la fuente subseteada (la
+     carga i18n/idiomas.js al abrir la hoja) es la unica que dibuja banderas; en iPhone y Android manda
+     la del sistema y no se descarga nada. Fredoka NO entra en la pila: le pondria las letras. */
+  .lgrow .lgf, .set-go .lgf{ flex:0 0 auto; width:21px; text-align:center; font-size:15px;
+    line-height:1; direction:ltr; unicode-bidi:isolate;
+    font-family:'Noto Color Emoji','Apple Color Emoji','Segoe UI Emoji',sans-serif; }
   /*+AG el activo va en ORO, que es el color de "esto es lo tuyo" en toda la app, y con la misma marca
      de comprobado (✓) que usa "Equipada" en el Garaje. No se inventa brillo: el .ready es solo del CTA. */
   .lgrow.on{ background:#ffbf4a1f; border-color:#ffbf4a5c; color:#ffe7b8; }
@@ -4235,7 +4248,8 @@ function buildSettings(){ const S2=SAVE.settings, b=el('setBody'); b.innerHTML='
   const langRow=document.createElement('div'); langRow.className='set-row';
   langRow.innerHTML='<div class="lb">'+s.langWord+'<small>'+s.setLangSub+'</small></div>';
   const lb=document.createElement('button'); lb.type='button'; lb.className='set-go';
-  lb.innerHTML='<span class="sgv"></span><span class="sgc">›</span>';
+  lb.innerHTML='<span class="lgf"></span><span class="sgv"></span><span class="sgc">›</span>';
+  lb.querySelector('.lgf').textContent=(LANGS[LANG]||LANGS.en).flag||'';
   lb.querySelector('.sgv').textContent=(LANGS[LANG]||LANGS.en).name;
   lb.onclick=openLangSheet; langRow.appendChild(lb);
   b.appendChild(grp(s.setLangGrp, [langRow]));
@@ -4405,11 +4419,13 @@ el('sheetBack').onclick=closeSheet; el('sheetClose').onclick=closeSheet;
 //   nombres esten al dia si el catalogo crece. El nombre de cada idioma va EN SU PROPIA LENGUA, que es
 //   como lo encuentra quien no entiende la de la app; por eso no pasa por el diccionario.
 function openLangSheet(){ const w=el('langSheet'), list=el('langList');
+  BTI18N.cargaFuenteBanderas();   //+AG las banderas en Windows: solo se descarga al llegar aqui
   list.innerHTML='';
   for(const k in LANGS){
     const btn=document.createElement('button'); btn.type='button';
     btn.className='lgrow'+(k===LANG?' on':'');
-    btn.innerHTML='<span class="lgn"></span><span class="lgc">✓</span>';
+    btn.innerHTML='<span class="lgf"></span><span class="lgn"></span><span class="lgc">✓</span>';
+    btn.querySelector('.lgf').textContent=LANGS[k].flag||'';
     btn.querySelector('.lgn').textContent=LANGS[k].name;
     //+AG el arabe se escribe al reves DENTRO de su fila aunque la app este en español: si no, el nombre
     //   sale con la puntuacion descolocada. Es la etiqueta BCP-47 del propio catalogo.

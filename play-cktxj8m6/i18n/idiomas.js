@@ -73,6 +73,42 @@
             sys: '"PingFang TC","Microsoft JhengHei","Noto Sans TC","Source Han Sans TC"' },
   };
 
+  // ── BANDERAS (VB Jaime 2026-07-27: "añadiría las banderas") ───────────────────────────────
+  //  Van en su propia tabla y no en las 20 lineas de arriba para no reflowearlas, y sobre todo para
+  //  que este comentario quede AL LADO de la decision, porque una bandera NO es un idioma y aqui hay
+  //  cuatro casos que son una eleccion, no un dato:
+  //    en   -> 🇬🇧 y no 🇺🇸. El idioma se llama "English"; ninguna de las dos es correcta para el otro.
+  //    es   -> 🇪🇸, la convencion para "Español", aunque deja fuera a 400 millones de hispanohablantes
+  //            de America. Si el juego crece mas por alli, esta es la primera que hay que revisar.
+  //    pt   -> 🇧🇷 y no 🇵🇹, porque la traduccion ES de Brasil (nloc pt-BR): la bandera dice la verdad.
+  //    ar   -> 🇸🇦 es el apaño de siempre y es el que menos me gusta: el arabe es de 22 paises y no de
+  //            uno. Se pone por no dejar un hueco en la rejilla (mezclar bandera y no-bandera se lee
+  //            como que falta algo), pero es la candidata a cambiar por un glifo si chirria.
+  //    zh/zhTW -> 🇨🇳 / 🇹🇼 es lo que hacen los juegos; tambien es lo mas delicado de la lista.
+  //  hi -> 🇮🇳 con la misma pega que el arabe en pequeño (India tiene 22 lenguas oficiales).
+  const FLAGS = {
+    en:'🇬🇧', es:'🇪🇸', pt:'🇧🇷', fr:'🇫🇷', de:'🇩🇪', it:'🇮🇹', nl:'🇳🇱', pl:'🇵🇱', ru:'🇷🇺', tr:'🇹🇷',
+    ar:'🇸🇦', hi:'🇮🇳', th:'🇹🇭', vi:'🇻🇳', id:'🇮🇩', ms:'🇲🇾', ja:'🇯🇵', ko:'🇰🇷', zh:'🇨🇳', zhTW:'🇹🇼',
+  };
+  for (const k in LANGS) LANGS[k].flag = FLAGS[k] || '';
+
+  //  WINDOWS NO DIBUJA BANDERAS. No es un fallo del juego: Windows no trae los glifos, asi que
+  //  Chrome pinta el par de letras del codigo de pais ("GB", "ES", "BR") en vez de la bandera.
+  //  En iPhone y Android salen nativas y no hay que descargar nada. Para que el escritorio las vea
+  //  igual se pide a Google la fuente de emoji SUBSETEADA a estos 20 glifos y nada mas (&text=).
+  //  Pesa 668 KB, asi que se carga PEREZOSA: solo al abrir la hoja de idioma, que es una pantalla a
+  //  la que casi nadie entra. Quien no la abre no paga nada, y la portada no se retrasa un ms.
+  let fuenteBanderas = false;
+  function cargaFuenteBanderas() {
+    if (fuenteBanderas) return;
+    fuenteBanderas = true;
+    const glifos = Object.keys(LANGS).map(k => LANGS[k].flag).join('');
+    const lk = document.createElement('link');
+    lk.rel = 'stylesheet';
+    lk.href = 'https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&text=' + encodeURIComponent(glifos);
+    document.head.appendChild(lk);
+  }
+
   // ── ELEGIR IDIOMA AL ENTRAR ───────────────────────────────────────────────────────────────
   //  Regla de la casa (feedback Jaime 2026-07-23): por defecto INGLES, nunca español. Solo se
   //  cambia si el navegador pide EXPLICITAMENTE otra cosa que sepamos hablar.
@@ -166,7 +202,7 @@
   }
 
   root.BTI18N = {
-    tabla: tabla,
+    tabla: tabla, cargaFuenteBanderas: cargaFuenteBanderas,
     LANGS: LANGS, packs: packs, load: load, pick: pick, applyDoc: applyDoc, applyFont: applyFont,
     ord: (n, l) => ((LANGS[l] || LANGS.en).ord)(n),
     nloc: l => (LANGS[l] || LANGS.en).nloc,
