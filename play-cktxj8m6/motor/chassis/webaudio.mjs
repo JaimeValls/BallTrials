@@ -7,7 +7,25 @@
 //   // al (re)arrancar la partida en f=0:  audio.start(sfxFloat32, SR);
 import { peakGain } from './synth.mjs';
 
-export function createWebAudio({ musicUrl = null, musicGain = 0.30, sfxGain = 0.92 } = {}){
+//+AG PLAYLIST POR MODO (doc 14 §1: varias canciones por contexto, elegidas al azar). Se tira el dado UNA vez, al
+//   cargar la página, no por ronda: cada partida abre un iframe nuevo → página nueva → tirada nueva, así que "una
+//   canción distinta cada vez que juegas" sale solo. Y como se elige ANTES del prefetch, solo se descarga la pista
+//   que toca: la playlist engorda el deploy, nunca los megas que baja el jugador.
+//   Esto vive en el navegador y no toca la física ni el camino de render del vídeo (ver cabecera de arriba).
+//   ?track=N fuerza una pista concreta (0 = la primera): sirve para escucharlas a mano sin jugar a la ruleta.
+export function pickTrack(tracks){
+  if (!tracks || !tracks.length) return null;
+  let forced = null;
+  try { forced = new URLSearchParams(location.search).get('track'); } catch {}
+  if (forced !== null && forced !== '' && Number.isFinite(+forced)) return tracks[((+forced % tracks.length) + tracks.length) % tracks.length];
+  return tracks[Math.floor(Math.random() * tracks.length)];
+}
+
+//+AG musicLoopTrim (segundos, 0 = apagado): un mp3 trae PADDING de codificación al principio y al final, así que
+//   un loop crudo mete un hueco audible en cada vuelta. Con trim>0 el bucle se cierra por dentro del padding y no
+//   se oye la costura. Por defecto 0: los 3 modos siguen byte-idénticos, esto lo pide quien lo necesita (el shell,
+//   cuya pista de lobby da vueltas sin parar mientras navegas por los menús).
+export function createWebAudio({ musicUrl = null, musicGain = 0.30, sfxGain = 0.92, musicLoopTrim = 0 } = {}){
   let ctx = null, masterSfx = null, masterMusic = null;
   let sfxSrc = null, musicSrc = null, musicBuf = null;
   let unlocked = false, loadingMusic = null;
@@ -94,6 +112,12 @@ export function createWebAudio({ musicUrl = null, musicGain = 0.30, sfxGain = 0.
     }
     if (musicBuf){
       musicSrc = ctx.createBufferSource(); musicSrc.buffer = musicBuf; musicSrc.loop = true;
+      //+AG loop sin costura (ver musicLoopTrim arriba). Se protege de una pista más corta que el propio recorte:
+      //   con loopEnd <= loopStart el navegador ignora el bucle y la música se pararía a la primera vuelta.
+      if (musicLoopTrim > 0 && musicBuf.duration > musicLoopTrim * 3){
+        musicSrc.loopStart = musicLoopTrim * 0.4;
+        musicSrc.loopEnd   = musicBuf.duration - musicLoopTrim;
+      }
       musicSrc.connect(masterMusic); musicSrc.start(t0);
     }
   }

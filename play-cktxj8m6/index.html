@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-27 5174ef1"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-07-27 45dc14e"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -213,9 +213,12 @@
   .r-champlbl{ font-size:9.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); font-weight:800; }
   .r-wname{ font-size:17px; font-weight:900; line-height:1.15; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .r-winner.mine .r-wname{ color:var(--gold2); }
-  .r-youlbl{ font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); font-weight:800; margin-top:12px; }
-  .r-place{ font-size:clamp(48px,15vw,72px); font-weight:900; letter-spacing:-.03em; line-height:1; margin-top:2px; text-shadow:0 4px 22px #000a; }
-  .r-sub{ font-size:16px; color:#c9cff0; font-weight:700; }
+  /*+AG el puesto ENCOGE (2026-07-27). Era el numerote protagonista porque esta pantalla era el VEREDICTO;
+     desde que el motor te lo canta en meta, aqui es un resumen. Los ~110 px que suelta se los queda la
+     clasificacion, que es lo que de verdad se venia recortando. */
+  .r-youlbl{ font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); font-weight:800; margin-top:8px; }
+  .r-place{ font-size:clamp(34px,10vw,48px); font-weight:900; letter-spacing:-.03em; line-height:1; margin-top:1px; text-shadow:0 4px 22px #000a; }
+  .r-sub{ font-size:14px; color:#c9cff0; font-weight:700; }
   .r-rewards{ width:100%; max-width:430px; display:flex; flex-direction:column; gap:10px; margin-top:14px; }
   .r-reward{ display:flex; align-items:center; gap:12px; background:#ffffff0d; border:1px solid var(--line); border-radius:16px; padding:12px 15px; opacity:0; transform:translateY(8px); transition:opacity .32s, transform .32s; }
   .r-reward.in{ opacity:1; transform:none; }
@@ -361,7 +364,9 @@
   .sh-feat ul{ margin:9px 0 12px; padding-left:20px; color:#d6dbf4; font-size:13.5px; line-height:1.65; }
   .sh-price{ display:flex; align-items:center; gap:9px; justify-content:center; font-weight:900; font-size:16px; }
   .sh-price .was{ color:#96a0c2; text-decoration:line-through; font-size:13px; font-weight:700; }
-  .sh-pack{ display:flex; align-items:center; gap:12px; background:#ffffff0d; border:1px solid var(--line); border-radius:16px; padding:12px 14px; margin-bottom:10px; }
+  /*+AG doc 45 §5: con la escalera de 6 packs de Clash Royale + la oferta del dia son 7 filas y
+     la seccion se salia 13px. El aire entre filas baja de 10 a 8: cabe sin deslizar y no se nota. */
+  .sh-pack{ display:flex; align-items:center; gap:12px; background:#ffffff0d; border:1px solid var(--line); border-radius:16px; padding:12px 14px; margin-bottom:8px; }
   .sh-pack .pg{ width:44px; height:44px; border-radius:50%; display:grid; place-items:center; font-size:22px; background:radial-gradient(circle at 35% 30%,#aef4ff,var(--cyan)); box-shadow:0 0 12px #18c7d655; color:#052a30; }
   .sh-pack .amt{ font-weight:900; font-size:18px; } .sh-pack .amt small{ color:var(--green); font-size:12px; font-weight:800; }
   .sh-pack .money{ margin-left:auto; border:0; border-radius:12px; padding:11px 15px; font-family:inherit; font-weight:900; font-size:14px; color:#fff; background:linear-gradient(#5bc46a,#2fa049); box-shadow:0 3px 0 #1d7a35; cursor:pointer; white-space:nowrap; }
@@ -614,22 +619,10 @@
   .modecompact .mcscrim{ position:absolute; inset:0; z-index:0;
     background:linear-gradient(180deg,#05040b30 0%,#05040bbb 52%,#05040bf2 100%); }
   .modecompact > *{ position:relative; z-index:1; }
-  /*+AG CÓMO JUGAR en el HOME: la (i) redonda de la esquina, SIEMPRE del mismo tamaño (VB Jaime 2026-07-27;
-     antes, sin tutorial hecho, era una pastilla con el texto "CÓMO JUGAR" que competia con el nombre del
-     modo y llenaba la tarjeta de ruido). Lo que cambia con el estado es solo el "!": .done lo apaga. */
-  /* z-index por encima del nombre del modo: el halo de la (i) baja hasta el, y el que se pinta despues
-     se queda los toques. Sin esto, los ultimos 8 px del area de la (i) abrian el selector. */
-  .modecompact .mkrow{ position:relative; z-index:2; display:flex; align-items:center; min-height:18px; }
-  .mchow{ position:relative; margin-left:auto; flex:none; border:1px solid #ffffff40; border-radius:999px;
-    padding:5px; font-family:inherit; color:#cfe4ff; background:#0b1c33cc; cursor:pointer; display:flex; align-items:center; }
-  .mchow:active{ transform:scale(.95); }
-  /* area de toque mayor que el dibujo (la pastilla es pequeña, el dedo no): sin coste de layout.
-     26-jul: -5px daba 33 px de alto y el minimo es 44. Dos trampas medidas: el inset cuenta desde la caja
-     de PADDING (con borde de 1px se queda 2 px corto) y la tarjeta RECORTA, asi que lo que asome por
-     encima de su borde deja de recibir toques. Con la (i) sola (25 px de dibujo) el halo va a -10: son
-     45 px reales y siguen cayendo DENTRO de la tarjeta (padding 13/11 > 10). */
-  .mchow::before{ content:''; position:absolute; inset:-10px; border-radius:999px; }
-  .mchow.done .hbadge{ display:none; }
+  /*+AG aqui vivia la (i) de CÓMO JUGAR (.mchow/.mkrow). SE FUE entera el 2026-07-27: el tutorial solo se
+     ofrece al pulsar JUGAR. Con ella se van sus dos apaños medidos —el halo de 45 px y el z-index de la
+     fila para que no le robase toques a la tarjeta—, que ya no hacen falta porque no hay nada que tocar
+     dentro de la tarjeta: la tarjeta ENTERA es el unico objetivo. */
   .modecompact .mn{ min-width:0; display:flex; align-items:center; gap:7px; font-weight:900; letter-spacing:-.01em; text-shadow:0 2px 8px #000a; }
   .modecompact .micon{ font-size:22px; line-height:1; flex:0 0 auto; }
   /*+AG doc 41 bloque C: el SVG canonico de modo. Va TODO ORO por spec del canal (los colores de
@@ -725,16 +718,11 @@
      de masa y de luz: mismo verde, mas hondo y mas bajo. Es jerarquia, no estado. */
   #sSolo:not(.ready){ padding:15px 12px; font-size:17px;
     background:linear-gradient(#5cc47c,#1a8a3d); box-shadow:0 5px 0 #12662c, 0 6px 16px #0006; }
-  .showbtn .qi, .mchow .qi{ width:20px; height:20px; border-radius:50%; background:#3aa0ff; color:#04122a; font-size:13px;
+  .showbtn .qi{ width:20px; height:20px; border-radius:50%; background:#3aa0ff; color:#04122a; font-size:13px;
     font-style:italic; font-weight:900; display:grid; place-items:center; flex:none; }
-  .mchow .qi{ width:15px; height:15px; font-size:10px; }
-  .showbtn .hbadge, .mchow .hbadge{ position:absolute; top:-7px; right:-5px; min-width:20px; height:20px; padding:0 5px; border-radius:999px;
+  .showbtn .hbadge{ position:absolute; top:-7px; right:-5px; min-width:20px; height:20px; padding:0 5px; border-radius:999px;
     background:#ff4a4a; color:#fff; font-size:13px; font-weight:900; display:grid; place-items:center;
     box-shadow:0 2px 6px #000a; animation:howpulse 1.1s ease-in-out infinite; }
-  /*+AG 2026-07-27: el "!" medía 16 px sobre una (i) de 15 y se le montaba encima del aro. La marca de aviso
-     no puede ser más grande que lo que marca, ni ser el elemento más contrastado de la tarjeta: lo que esa
-     tarjeta tiene que comunicar es el NOMBRE DEL MODO. Baja a 13 y se retira a la esquina. */
-  .mchow .hbadge{ top:-5px; right:-5px; min-width:13px; height:13px; font-size:9.5px; }
   @keyframes howpulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.22); } }
   /*+AG REJILLA de modos (selector, tiles 2 columnas estilo eventos de Brawl) */
   #selector{ background:radial-gradient(130% 90% at 50% 8%, #5a2ec2 0%, var(--bg-mid) 45%, var(--bg-lo) 100%); }
@@ -881,13 +869,13 @@
   .tile .tcond{ font-size:10px; font-weight:800; color:#8b93b8; background:#ffffff0d; border:1px solid var(--line); border-radius:999px; padding:3px 8px; }
   /*+AG COPAS POR BOLA (doc 37): tarjeta de copas de la bola + tabla de 8 puestos en Resultados */
   #results{ overflow-y:auto; justify-content:flex-start; padding-top:calc(20px + env(safe-area-inset-top)); }
-  #results .r-card{ margin-top:auto; }
-  /*+AG doc 40: los DOS PASOS. Cada bloque declara a que paso pertenece y el contenedor decide con data-step.
-     El primer bloque de cada paso lleva margin-top:auto para que el contenido quede junto al pulgar (regla
-     Gornicki: "todo lo accionable en el 50% inferior"), con las acciones sticky justo debajo. */
-  #results[data-step="1"] .rs2{ display:none!important; }
-  #results[data-step="2"] .rs1{ display:none!important; }
-  #results[data-step="2"] .r-rewards{ margin-top:auto; }
+  /*+AG aqui vivian los DOS PASOS del doc 40 (.rs1/.rs2 + data-step) y el `margin-top:auto` de la tarjeta.
+     Los dos se van juntos el 2026-07-27, y por la misma razon: ese margin-top empujaba el bloque al 50%
+     inferior (regla Gornicki, buena cuando el bloque es grande) pero el paso 1 tenia CUATRO cosas, asi que
+     dejaba media pantalla en negro — "super fea y vacia", con razon. Fusionada en una sola pantalla el
+     contenido llena de arriba abajo y ya no hace falta empujar nada: lo unico que se ancla abajo son las
+     ACCIONES, que es lo que de verdad tiene que caer bajo el pulgar. Ojo: el `margin-top:auto` que hace eso
+     NO va aqui — va en la regla sticky de mas abajo, que es identica en especificidad y gana por orden. */
   #results .r-arow{ display:flex; gap:9px; align-items:stretch; }
   #results .r-arow .r-again{ flex:1; min-width:0; }
   /*+AG el secundario pasa a ICONO cuadrado al lado del primario (patron Supercell) en vez de una segunda fila:
@@ -908,7 +896,10 @@
      fila de acciones va PEGADA abajo (sticky), siempre visible, y lo que se desplaza es el resumen. Sticky y
      no fixed: en pantallas altas se queda en su sitio, sin flotar. El degradado tapa lo que pasa por detras. */
   #results{ padding-bottom:0; }
-  #results .r-actions{ position:sticky; bottom:0; z-index:2; margin-top:14px;
+  /*+AG `margin-top:auto` (antes 14px): con Resultados en UNA pantalla, si el botin es corto las acciones se
+     quedaban flotando a media altura con medio movil vacio debajo. Auto las manda al fondo del flex y el aire
+     sobrante queda ARRIBA, entre el contenido, en vez de debajo del boton. */
+  #results .r-actions{ position:sticky; bottom:0; z-index:2; margin-top:auto;
     padding:12px 0 calc(16px + env(safe-area-inset-bottom));
     background:linear-gradient(#08071a00, #08071ae6 32%, #08071a 62%); }
   .r-cups{ width:100%; max-width:430px; display:flex; align-items:center; gap:12px; background:#fbb9150f; border:1px solid #fbb91544; border-radius:16px; padding:12px 15px; margin-top:12px;
@@ -1040,20 +1031,17 @@
                scrim la oscurece desde abajo para que el nombre se lea siempre. -->
           <img class="mcart" id="mcArt" alt="">
           <div class="mcscrim" id="mcScrim"></div>
-          <!--+AG CÓMO JUGAR en el HOME (feedback Jaime: "está escondido"). Como la (i) de la tarjeta de evento
-               de Brawl: vive SIEMPRE en la esquina de la tarjeta de modo, y lleva "!" hasta que hagas el
-               tutorial de ESE modo.
-               +AG VB Jaime 2026-07-27: esta tarjeta era un RECUADRO CON RECUADROS DENTRO — rótulo "Modo",
-               pastilla de CÓMO JUGAR con texto, pastilla del bonus del día y botón CAMBIAR enmarcado. Cuatro
-               cajas pidiendo un toque cuando lo ÚNICO pulsable es la tarjeta entera ("parece que a cada
-               recuadro lo puedes clicar"). Ahora, como la carta de evento de Brawl: UNA caja y el contenido
-               suelto encima.
+          <!--+AG VB Jaime 2026-07-27: esta tarjeta era un RECUADRO CON RECUADROS DENTRO — rótulo "Modo",
+               pastilla de CÓMO JUGAR, pastilla del bonus del día y botón CAMBIAR enmarcado. Cuatro cajas
+               pidiendo un toque cuando lo ÚNICO pulsable es la tarjeta entera ("parece que a cada recuadro
+               lo puedes clicar"). Ahora, como la carta de evento de Brawl: UNA caja y el contenido encima.
                  · el rótulo "Modo" SE FUE (el nombre del modo ya dice lo que es) y el nombre crece;
-                 · CÓMO JUGAR se queda SIEMPRE en la (i) redonda, sin texto: era el ruido del que se queja;
-                 · CAMBIAR pierde el marco y es etiqueta + chevron: la afford la da la tarjeta entera. -->
-          <div class="mkrow">
-            <button class="mchow" id="mcHow" type="button" data-tt="howTo"><span class="qi">i</span><span class="hbadge" id="mcHowBadge">!</span></button>
-          </div>
+                 · CAMBIAR pierde el marco y es etiqueta + chevron: la afford la da la tarjeta entera.
+               +AG SEGUNDA PASADA, mismo día: la (i) de CÓMO JUGAR **también se va**. Se había quedado por
+               no cerrar una puerta al tutorial, y Jaime lo repitió sin lugar a dudas: *"no tiene sentido
+               que el tutorial esté en el menú principal; donde tiene que estar es cuando le das a jugar"*.
+               El tutorial vive ahora SOLO en la hoja de JUGAR, que vuelve a salir siempre. La portada
+               queda con lo que es: qué modo vas a jugar y cómo cambiarlo. -->
           <div class="mn"><span class="micon" id="mcIcon">🏁</span><b id="mcName">LA GRAN CARRERA</b></div>
           <!-- sin data-t a proposito: el texto lo pone renderHome (dayBadge) y applyShell lo pisaria al
                abrir la hoja o el selector -->
@@ -1208,15 +1196,23 @@
 </div>
 
 <!-- ===== RESULTADOS (post-partida, doc 09: celebra a todos, corona a uno, gana siempre algo) ===== -->
-<!--+AG doc 40 (feedback Jaime 2026-07-24, "el ranking se corta"): Resultados era UNA SABANA de 965px en un
-     movil de ~660 visibles. Investigacion de Clash Royale (Game UI Database: "Level Complete" -> "Results" ->
-     "Rewards and Experience" son PANTALLAS SEPARADAS): Supercell comprime EN EL TIEMPO, no en el espacio.
-     Ahora son DOS PASOS taponables, cada uno holgado en pantalla:
-       paso 1 = VEREDICTO (quien gano + tu puesto + copas de tu bola)   -> boton Continuar
-       paso 2 = BOTIN     (Chispas + nivel + clasificacion de la partida) -> Jugar otra / Inicio
-     data-step en el contenedor manda; .rs1/.rs2 marcan a que paso pertenece cada bloque. -->
-<div id="results" class="scr" data-step="1">
-  <div class="r-card rs1">
+<!--+AG HISTORIA, porque esto ya se ha volteado una vez y conviene no volver a la sabana:
+     doc 40 (feedback Jaime 2026-07-24, "el ranking se corta") partio Resultados en DOS PASOS porque era una
+     SABANA de 965px en un movil de ~660 visibles, siguiendo a Clash Royale (Game UI Database: "Level
+     Complete" -> "Results" -> "Rewards and Experience" son pantallas separadas): Supercell comprime EN EL
+     TIEMPO, no en el espacio. Lo que fallo NO fue partirla, fue QUE se puso en cada mitad: el paso 1 se
+     quedo con cuatro cosas y media pantalla vacia. Al fusionar hay que vigilar justo eso: que quepa. Lo
+     mide fitStandings() recortando la clasificacion, y __fitCheck() lo comprueba. -->
+<!--+AG VB Jaime 2026-07-27, con captura: *"la siguiente pantalla que sale es súper fea y vacía; o me haces
+     algo más chulo o mezclas esta pantalla con la anterior"*. Los DOS PASOS del doc 40 (veredicto → botín)
+     SE FUSIONAN en una sola pantalla. Por qué el paso 1 salía vacío: tenía cuatro cosas y un
+     `margin-top:auto` que las empujaba todas al 50% inferior (regla Górnicki, correcta cuando el bloque es
+     grande), así que la mitad de arriba quedaba en negro. Y por qué se puede fusionar sin perder nada: el
+     VEREDICTO ya no hace falta anunciarlo aquí, porque desde hoy el propio motor te dice en qué puesto has
+     quedado EN META, que es la otra mitad del mismo feedback ("cuando yo llego no me sale en qué posición
+     he quedado"). Esta pantalla es ya solo el BOTÍN, y con todo junto está llena. -->
+<div id="results" class="scr">
+  <div class="r-card">
     <!--+AG DOS INFORMACIONES SEPARADAS (feedback Jaime: "no queda claro quien gana y por que gana"):
          (a) arriba, la BANDA DE GANADOR = quien gano la carrera (disco con SU color real + su nombre);
          (b) debajo, TU PUESTO en grande. Antes el disco (color del ganador) volaba encima del numerote
@@ -1230,23 +1226,22 @@
     <div class="r-place" id="rPlace">1º</div>
     <div class="r-sub" id="rSub"></div>
   </div>
-  <!--+AG COPAS de LA BOLA jugada (doc 37): van en el PASO 1 porque son parte del veredicto (subes o bajas) -->
-  <div class="r-cups rs1" id="rCups"><div class="ic">🏆</div><div><div class="cn" id="rCupsName">Cohete</div><div class="cw" id="rCupsWhy">Copas</div></div><div class="cv" id="rCupsVal">0<span class="cd" id="rCupsDelta"></span></div></div>
-  <div class="r-rewards rs2">
+  <!--+AG COPAS de LA BOLA jugada (doc 37): son botín igual que las Chispas, solo que se pueden perder -->
+  <div class="r-cups" id="rCups"><div class="ic">🏆</div><div><div class="cn" id="rCupsName">Cohete</div><div class="cw" id="rCupsWhy">Copas</div></div><div class="cv" id="rCupsVal">0<span class="cd" id="rCupsDelta"></span></div></div>
+  <div class="r-rewards">
     <div class="r-reward" id="rRewChispa"><div class="ic chispa">✦</div><div><div class="lbl2" data-t="chispasWord">Chispas</div><div class="lbl2" id="rChispaWhy" style="text-transform:none;color:#8fe0a8;margin-top:2px"></div></div><div class="val" id="rChispaVal">+0</div></div>
     <div class="r-reward" id="rRewXp"><div class="ic xp">⭐</div><div style="flex:1"><div class="lbl2"><span data-t="lvl">Nivel</span> <span id="rLvlNum">1</span></div><div class="r-xpbar"><div class="r-xpfill" id="rXpFill"></div></div></div></div>
   </div>
   <!--+AG tabla de puestos REALES de la partida (viene del motor). Si no cabe entera, se muestra el podio +
        TU fila y el resto queda tras un tap (regla Supercell: reducir la info, no obligar a deslizar). -->
-  <div class="rtbl-h rs2" id="rTableH">Clasificación</div>
-  <div class="rtable rs2" id="rTable"></div>
-  <button class="r-more rs2" id="rMore" hidden></button>
-  <div class="r-actions rs1">
-    <button class="r-again ready" id="rNext" data-t="rNext">Continuar ▸</button>
-  </div>
-  <div class="r-actions rs2">
+  <div class="rtbl-h" id="rTableH">Clasificación</div>
+  <div class="rtable" id="rTable"></div>
+  <button class="r-more" id="rMore" hidden></button>
+  <!--+AG con una sola pantalla, "Jugar otra" pasa a ser el único primario y se lleva el brillo .ready que
+       tenía el "Continuar ▸" del paso 1 (que ya no existe). Sigue habiendo un solo .ready por pantalla. -->
+  <div class="r-actions">
     <div class="r-arow">
-      <button class="r-again" id="rAgain" data-t="again">▶ Jugar otra</button>
+      <button class="r-again ready" id="rAgain" data-t="again">▶ Jugar otra</button>
       <button class="r-home ico" id="rHome" data-tt="back" title="Atrás" aria-label="Atrás"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5 L8 12 L14.5 18.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     </div>
   </div>
@@ -2560,7 +2555,7 @@ const MORE={
     setParental:'Control parental y límite de gasto', setData:'Exportar / borrar datos',
     setLangGrp:'🌐 Idioma', setLangSub:'menús y textos',
     //+AG doc 38 Fase 2/3: audio separado, soporte, legal y cuenta
-    setMusic:'Música', setMusicSub:'la pista del modo',
+    setMusic:'Música', setMusicSub:'menús y pista del modo',
     setSfx:'Efectos', setSfxSub:'golpes, boosters y meta',
     setSupport:'🛟 Soporte', setRedeemRow:'Canjear código del canal', setRedeemSub:'premio fijo, un uso por cuenta',
     setBuildRow:'Versión del juego', setChannelRow:'Cómo se hizo', setChannelSub:'el canal de BallTrials',
@@ -2719,7 +2714,7 @@ const MORE={
     setParental:'Parental controls and spending limit', setData:'Export / delete data',
     setLangGrp:'🌐 Language', setLangSub:'menus and text',
     //+AG doc 38 Fase 2/3: split audio, support, legal and account
-    setMusic:'Music', setMusicSub:'the mode soundtrack',
+    setMusic:'Music', setMusicSub:'menus and mode soundtrack',
     setSfx:'Effects', setSfxSub:'hits, boosters and finish',
     setSupport:'🛟 Support', setRedeemRow:'Redeem a channel code', setRedeemSub:'fixed prize, one use per account',
     setBuildRow:'Game version', setChannelRow:'How it was made', setChannelSub:'the BallTrials channel',
@@ -3077,7 +3072,6 @@ function renderHome(){ applyShell();
   const _md=el('mcDay'), _isDay=SAVE.mode===dayMode();
   _md.style.display = _isDay ? '' : 'none';
   if(_isDay) _md.textContent=S().dayBadge;
-  el('mcHow').classList.toggle('done', !!SAVE.tutorialDone[SAVE.mode]);   //+AG hecho -> se encoge a la (i) sola
   el('hPassSub').textContent=S().passSub(SAVE.level, SAVE.xp+'/'+xpForLevel(SAVE.level));
   el('hPassBar').style.width=Math.round(100*SAVE.xp/xpForLevel(SAVE.level))+'%';
   //+AG doc 39: badge = bolas listas para SUBIR DE NIVEL. Vive en la PESTAÑA Garaje de abajo y en ningun
@@ -3157,8 +3151,13 @@ function openFrame(src){
   //   showScreen no se entera: el fondo vivo se quedaria corriendo detras de la partida con su
   //   propio contexto WebGL. Se apaga aqui. Al volver, goHome() -> showScreen('home') lo reenciende.
   if(window.BT_AMBIENT) BT_AMBIENT.off();
+  //+AG MUSICA DE MENU: la partida trae la suya (cada motor la suelta en el "¡YA!"), asi que la del shell se
+  //   calla mientras dura. Tiene que ir DESPUES de closeGameFrame(): al encadenar partidas ("Jugar otra")
+  //   ese cierre la reenciende, y este apagado es el que deja la cosa en su sitio.
+  if(window.BT_MUSIC) BT_MUSIC.off();
 }
-function closeGameFrame(){ if(gameFrameEl){ gameFrameEl.remove(); gameFrameEl=null; } }
+function closeGameFrame(){ if(gameFrameEl){ gameFrameEl.remove(); gameFrameEl=null;
+  if(window.BT_MUSIC) BT_MUSIC.on(); } }   //+AG se vuelve al shell (Resultados o Home) -> vuelve su musica
 window.addEventListener('message', e=>{
   const d=e.data; if(!d || (d.type!=='bt:matchEnd' && d.type!=='bt:tutorialEnd')) return;
   if(!gameFrameEl || e.source!==gameFrameEl.contentWindow) return;   //+AG solo el iframe del juego, ignora mensajes espurios
@@ -3226,7 +3225,7 @@ function finishRace(){
   persist(); checkHitos(); showResults(place, rew, leveled, st2d[0]?st2d[0].color:null, 0, {standings:st2d});
 }
 function showResults(place, rew, leveled, colArg, teamP, d){
-  showScreen('results'); setResultsStep(1); applyShell();   //+AG los rotulos fijos de Resultados (Chispas/Nivel) tambien por idioma
+  showScreen('results'); applyShell();   //+AG los rotulos fijos de Resultados (Chispas/Nivel) tambien por idioma
   const s=S();
   //+AG DISCO DE CAMPEON = color REAL del ganador (viene del motor). Si no llega, se cae al 1o de la clasificacion.
   const w = lastStandings && (lastStandings.find(r=>r.win) || lastStandings[0]);
@@ -3295,6 +3294,7 @@ function showResults(place, rew, leveled, colArg, teamP, d){
   //   (antes era '1º' fijo, español colado con el juego en ingles).
   el('rTableH').style.display = lastStandings ? '' : 'none';
   tblExpanded=false; tblTeamP=teamP||0; renderStandingsTable(tblTeamP,0);
+  enterResults();
 }
 //+AG doc 40: la clasificacion se pinta RECORTADA si no cabe entera. Regla Supercell (Gornicki: la tienda
 //   enseña "up to 6 items"; Muhtar: el layout se diseña para "reduce the amount of scroll"): mejor enseñar
@@ -3305,7 +3305,7 @@ let tblExpanded=false, tblTeamP=0;
 //   en uno pequeño (o con las barras del navegador comiendo alto) se recorta solo lo justo. Asi la regla
 //   "no hay que deslizar" se cumple en TODOS los telefonos sin castigar a los que si tienen sitio.
 function fitStandings(){
-  const r=el('results'); if(r.dataset.step!=='2' || tblExpanded) return;
+  const r=el('results'); if(tblExpanded) return;
   //+AG se mide la posicion FINAL, no la de la animacion de entrada: las tarjetas llegan con un translateY de
   //   8px que cuenta como desbordamiento y hacia recortar la tabla en moviles donde si cabia entera.
   const anim=[...document.querySelectorAll('.r-reward:not(.in)')];
@@ -3340,14 +3340,17 @@ function renderStandingsTable(teamP, topN){
   more.hidden = !cut;
   more.textContent = S().rSeeAll(lastStandings.length);
 }
-//+AG PASOS de Resultados: 1 = veredicto, 2 = botin. Volver atras no se ofrece a proposito (el botin ya esta
-//   cobrado y el paso 1 no tiene nada que decidir); el camino es siempre hacia delante, como en CR.
+//+AG Resultados es UNA sola pantalla desde el 2026-07-27 (antes: paso 1 veredicto -> paso 2 botin, doc 40).
+//   Esto es lo que hacia el antiguo salto al paso 2, ahora al entrar: medir el recorte de la tabla y soltar
+//   la animacion de recompensas. Va en un rAF porque las dos cosas necesitan la pantalla YA con alto real:
+//   medidas sobre una pantalla sin pintar, fitStandings recorta de mas y la animacion corre a puerta cerrada.
 let rewardAnim=null, rewFinal=null;
-function setResultsStep(n){
-  el('results').dataset.step=String(n);
+function enterResults(){
   el('results').scrollTop=0;
-  if(n===2){ fitStandings();   //+AG el recorte de la tabla se mide con el paso 2 YA visible (antes no tiene alto)
-    if(rewardAnim){ const f=rewardAnim; rewardAnim=null; requestAnimationFrame(()=>f()); } }
+  requestAnimationFrame(()=>{
+    fitStandings();
+    if(rewardAnim){ const f=rewardAnim; rewardAnim=null; f(); }
+  });
 }
 //+AG los nombres de bot son de un roster cerrado, pero la tabla se pinta con innerHTML: escapamos por higiene
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -3369,7 +3372,6 @@ function skipResults(){ cancelAnimationFrame(animRAF);
     el('rCupsDelta').textContent=deltaTxt(lastCups.delta); }
 }
 el('results').addEventListener('click', e=>{ if(!e.target.closest('.r-actions') && !e.target.closest('.r-more')) skipResults(); });
-el('rNext').addEventListener('click', ()=>setResultsStep(2));
 //+AG "ver todos": despliega la clasificacion completa. Es una accion EXPLICITA del jugador, asi que aqui si
 //   vale que la pantalla se desplace: nadie se pierde nada por no deslizar.
 el('rMore').addEventListener('click', ()=>{ tblExpanded=true; renderStandingsTable(tblTeamP,0); });
@@ -3561,7 +3563,12 @@ function drawHex(cv, attrs, cap, color, faded){ const x=cv.getContext('2d'), W=c
 }
 
 // ===== TIENDA (doc 12: dinero→Gemas→todo, cero azar, precios visibles, puerta parental) · números de ARRANQUE =====
-const GEM_PACKS=[{g:100,p:'0,99 €'},{g:550,p:'4,99 €',bonus:'+10%'},{g:1200,p:'9,99 €',bonus:'+20%'},{g:2500,p:'19,99 €',bonus:'+25%'}];
+//+AG doc 45 §5: la escalera de packs es la de Clash Royale, cantidades y precios (peticion de
+//   Jaime, 27-07-2026). El bonus NO es decorativo: sale de comparar las gemas por euro de cada
+//   pack con las del pack pequeno, o sea es la ventaja real de comprar mas grande.
+const GEM_PACKS=[{g:80,p:'0,99 €'},{g:500,p:'4,99 €'},{g:1200,p:'9,99 €'},{g:2500,p:'19,99 €'},{g:6500,p:'49,99 €'},{g:14000,p:'99,99 €'}];
+(()=>{ const eur=s=>parseFloat(s.replace(',','.')), base=GEM_PACKS[0].g/eur(GEM_PACKS[0].p);
+  GEM_PACKS.forEach((pk,i)=>{ if(i){ const v=Math.round((pk.g/eur(pk.p)/base-1)*100); if(v>0) pk.bonus='+'+v+'%'; } }); })();
 const COSM=[ {id:'sk_llamas',nm:'Llamas',cat:'Skin',rar:1,ic:'🔥',g:150}, {id:'sk_galaxia',nm:'Galaxia',cat:'Skin',rar:3,ic:'🌌',g:450},
   {id:'es_arcoiris',nm:'Estela Arcoíris',cat:'Estela',rar:2,ic:'🌈',g:250}, {id:'ce_fuegos',nm:'Fuegos',cat:'Celebración',rar:2,ic:'🎆',g:250},
   {id:'em_gg',nm:'¡GG!',cat:'Emote',rar:0,ic:'👏',g:60}, {id:'ma_corona',nm:'Marco Corona',cat:'Marco',rar:4,ic:'👑',g:800} ];
@@ -3974,7 +3981,10 @@ function buildSettings(){ const S2=SAVE.settings, b=el('setBody'); b.innerHTML='
   //+AG AUDIO: dos toggles (musica/efectos, patron Supercell). Se propagan al motor via modeEmbedUrl (&music=&sfx=).
   //   El flag legacy 'audio' se mantiene sincronizado (= musica||efectos) por si algo viejo lo lee.
   b.appendChild(grp(s.setAudio, [
-    swRow(s.setMusic, s.setMusicSub, S2.music!==false, v=>{ S2.music=v; S2.audio=(S2.music||S2.sfx); setPersist(); }),
+    //+AG el toggle de musica manda EN EL ACTO sobre la pista del shell (BT_MUSIC.refresh): apagarlo estando en los
+    //   menus tiene que callar la musica ahi mismo, no "en la proxima partida". Sobre el MOTOR sigue mandando por
+    //   &music= al arrancar la partida (el iframe en curso no se re-sincroniza en vivo, la siguiente ya sale bien).
+    swRow(s.setMusic, s.setMusicSub, S2.music!==false, v=>{ S2.music=v; S2.audio=(S2.music||S2.sfx); setPersist(); if(window.BT_MUSIC) BT_MUSIC.refresh(); }),
     swRow(s.setSfx, s.setSfxSub, S2.sfx!==false, v=>{ S2.sfx=v; S2.audio=(S2.music||S2.sfx); setPersist(); }) ]));
   //+AG IDIOMA (ya funcionaba; se conserva el selector real que reusa #lang)
   const langRow=document.createElement('div'); langRow.className='set-row'; langRow.innerHTML='<div class="lb">'+s.langWord+'<small>'+s.setLangSub+'</small></div>';
@@ -4152,8 +4162,7 @@ el('selClose').onclick=goHome;
 el('modecompact').onclick=openSelector;
 el('modecompact').addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openSelector(); } });
 //+AG "CAMBIAR" ya no es un boton propio (VB Jaime 2026-07-27): es la etiqueta .mcgo y la abre la tarjeta.
-//+AG CÓMO JUGAR desde el HOME: la tarjeta entera abre el selector, la (i) NO (stopPropagation)
-el('mcHow').onclick=e=>{ e.stopPropagation(); startTutorial(SAVE.mode); };
+//+AG y CÓMO JUGAR ya no vive aqui: se fue a la hoja de JUGAR, su unico sitio (VB Jaime, misma tarde).
 //+AG rieles laterales (atajos a lo que NO tiene pestaña propia) + banda del pase + protagonista.
 //   Tienda y Garaje ya no estan aqui: viven en la barra de pestañas de abajo (VB Jaime 2026-07-27).
 el('rlNoticias').onclick=()=>toast(S().noticiasToast);
@@ -4205,17 +4214,17 @@ if(CHEAT_MONEDAS){
 //   la pildora del saldo, que es donde Supercell pone ese atajo.
 //   Con el TRUCO DE PRUEBAS encendido NO abre la tienda: ahi tocar la moneda regala +100 y son incompatibles.
 ['cChispa','cGema'].forEach(id=>{ const e=el(id); if(e) e.onclick=()=>{ if(!CHEAT_MONEDAS) openTienda(); }; });
-//+AG auditoria Supercell 26-jul: JUGAR abria SIEMPRE la hoja de formato (docs/35 v2.2), pero con
-//   TEAM_READY todo a false la hoja ofrece UNA sola opcion jugable: era un toque de mas en cada partida,
-//   y en Brawl/Clash el boton de batalla arranca en uno. Ahora la hoja solo se interpone cuando aporta:
-//     · el modo tiene POR EQUIPOS vivo (hay algo que elegir), o
-//     · aun no has hecho el tutorial de ese modo (la hoja es una de las dos puertas de CÓMO JUGAR; la
-//       otra, la (i) de la tarjeta, sigue estando siempre). Hecho el tutorial, JUGAR arranca directo.
-//   El dia que un modo encienda equipos, la hoja vuelve sola: no hay que tocar nada aqui.
-el('hPlay').onclick=()=>{
-  if(TEAM_READY[SAVE.mode] || !SAVE.tutorialDone[SAVE.mode]) return openSheet();
-  SAVE.fmt='individual'; persist(); startRace(SAVE.mode,'individual');
-};
+//+AG JUGAR abre SIEMPRE la hoja. Historia, porque esto ya se ha volteado una vez:
+//   · docs/35 v2.2 la puso siempre;
+//   · la auditoria Supercell del 26-jul la hizo condicional (solo si el modo tenia POR EQUIPOS vivo o te
+//     faltaba su tutorial), con el argumento de que con TEAM_READY todo a false la hoja ofrecia una sola
+//     opcion y era un toque de mas;
+//   · VB Jaime 2026-07-27, probandolo: *"si yo voy a jugar y le doy a play, me está lanzando a jugar, no
+//     me sale ni jugar por equipo ni tutorial; había un menú previo antes y te lo has cargado"*.
+//   Manda el dueno del producto: la hoja VUELVE SIEMPRE. Y no era solo un toque de mas — al saltarsela
+//   desaparecia la unica puerta que queda al tutorial, porque la (i) de la tarjeta tambien se ha ido hoy.
+//   Si algun dia se vuelve a proponer quitarla, leer esto antes: ya se probo y se revoco.
+el('hPlay').onclick=()=>openSheet();
 el('rAgain').onclick=()=>startRace(curMode,curFmt); el('rHome').onclick=goHome;
 //+AG doc 34 Fase C: navegacion de pestañas por data-nav (incluye Temporada/Perfil, antes eran toast)
 const NAV={ jugar:goHome, garaje:openGaraje, tienda:openTienda, temporada:openTemporada, perfil:openPerfil, ranking:openRanking };
@@ -4258,9 +4267,11 @@ window.__fitCheck=function(w,h){
   for(const n of SCREENS){
     showScreen(n);
     const e=el(n); if(!e) continue;
-    const steps = n==='results' ? ['1','2'] : [null];
+    //+AG Resultados era la unica pantalla con dos pasos que medir; desde que se fusionaron (2026-07-27) todas
+    //   se miden igual. Se conserva el bucle porque el dia que otra pantalla tenga estados, se enchufan aqui.
+    const steps = [null];
     for(const st of steps){
-      if(st) setResultsStep(+st);   // por la puerta de siempre: asi tambien se mide el recorte adaptativo real
+      if(n==='results'){ tblExpanded=false; fitStandings(); }   // por la puerta de siempre: mide el recorte adaptativo real
       // solo cuentan las cajas que RECORTAN de verdad (overflow != visible): son las unicas donde el jugador
       // pierde contenido si no desliza. Una caja con overflow visible "sobresale" en el papel pero se ve
       // entera — p.ej. una tarjeta que entra animandose con un translateY de 8px.
@@ -4287,7 +4298,6 @@ window.__fitCheck=function(w,h){
         if(fuera>1) out.push({screen:scr, box:nom(d), eje:'ancho', extra:fuera});
       });
     }
-    if(n==='results') e.dataset.step='1';
   }
   SCREENS.forEach(s=>{ const x=el(s); if(x) x.classList.toggle('on', was.includes(s)); });
   if(out.length) console.warn('[fit] se salen de pantalla ('+H+'px):', out); else console.log('[fit] ✓ todo cabe en '+H+'px');
@@ -4325,6 +4335,62 @@ else if((FRESH || _pend) && !SAVE.onboarded && _onbParam!=='0'){
       this.h = startAmbient(document.getElementById('ambient')); },
     off(){ if(this.h){ this.h.stop(); this.h=null; } } };
   if(document.getElementById('home').classList.contains('on')) BT_AMBIENT.on();
+</script>
+
+<!--+AG MUSICA DEL SHELL. Hasta ahora el juego solo sonaba DENTRO de la partida: portada, modos, Garaje,
+     Tienda, Liga y Resultados estaban mudos del todo (doc 14 §1 pide playlist por contexto). Suena la pista
+     de lobby: el tema del canal (BallMania Main Intro) en su version tranquila -mas lenta y filtrada- que ya
+     usa la web oficial, asi que el juego y balltrials.com suenan a lo mismo.
+     Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
+     rescate al volver de segundo plano en movil. -->
+<script type="module">
+  import { createWebAudio } from './motor/chassis/webaudio.mjs';
+  //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
+  //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
+  //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
+  //   verdad, y aun asi la partida da un escalon de volumen al arrancar.
+  const audio = createWebAudio({ musicUrl:'motor/_music/lobby.mp3', musicGain:0.40, musicLoopTrim:0.12 });
+
+  //+AG UNA sola verdad de "¿deberia estar sonando?" = quiere() && !enPartida, y aplicar() la persigue. Con dos
+  //   interruptores independientes (Ajustes y la partida) llevar un solo booleano "playing" se desincroniza solo.
+  window.BT_MUSIC = {
+    lista:false, enPartida:false, sonando:false,
+    quiere(){ try{ return !(SAVE.settings && SAVE.settings.music===false); }catch(e){ return true; } },
+    aplicar(){
+      if(!this.lista) return;
+      const debe = this.quiere() && !this.enPartida;
+      if(debe===this.sonando) return;
+      //+AG start(null, ...) = solo musica: el shell no tiene banco de SFX (eso vive en el motor).
+      if(debe) audio.start(null, 44100); else audio.stop();
+      this.sonando = debe;
+    },
+    on(){ this.enPartida=false; this.aplicar(); },
+    off(){ this.enPartida=true; this.aplicar(); },
+    refresh(){ this.aplicar(); },                       //+AG lo llama el toggle de Ajustes
+    //+AG estado VIVO para poder comprobarlo sin oidos: 'sonando' es lo que este objeto cree, pero ctx y nivel
+    //   los da el propio AudioContext. Si ctx sale 'suspended' o nivel 0 con sonando=true, es que se esta
+    //   mintiendo (paso una vez con el fondo vivo) y el fallo esta aqui, no en los altavoces del jugador.
+    get estado(){ return { lista:this.lista, sonando:this.sonando, enPartida:this.enPartida,
+      hasMusic:audio.hasMusic, ctx:(audio.ctx?audio.ctx.state:'sin-ctx'), nivel:audio.musicLevel }; },
+  };
+
+  //+AG DECODIFICAR NO NECESITA GESTO (el AudioContext nace 'suspended'): se hace ya, al cargar, para que el
+  //   primer toque del jugador suelte la musica en el acto y no se coma el segundo y pico del decode.
+  audio.prefetch();
+
+  //+AG EL GESTO. Los navegadores no dejan sonar nada hasta que el jugador toca algo, asi que se engancha el
+  //   PRIMER toque -sea el que sea- y se suelta el listener. Va en captura para llegar antes que el handler de
+  //   la pantalla: si ese primer toque resulta ser "JUGAR", openFrame() marca enPartida y aplicar() ya no la
+  //   suelta -> la musica de menu NUNCA se cuela encima de la cuenta atras de la partida.
+  const despertar = async ()=>{
+    document.removeEventListener('pointerdown', despertar, true);
+    document.removeEventListener('keydown', despertar, true);
+    try{ await audio.unlock(); }catch(e){ return; }
+    if(!audio.hasMusic) return;      //+AG sin pista (red caida, 404) no se miente: se queda dormido y en silencio
+    BT_MUSIC.lista=true; BT_MUSIC.aplicar();
+  };
+  document.addEventListener('pointerdown', despertar, true);
+  document.addEventListener('keydown', despertar, true);
 </script>
 
 <!--+AG docs/42 Fase 1: el progreso deja de vivir solo en este movil.

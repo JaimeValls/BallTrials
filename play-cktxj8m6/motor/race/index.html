@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-27 5174ef1">
+<meta name="bt-build" content="2026-07-27 45dc14e">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>YouBall · La Gran Carrera (WebGL)</title>
 <style>
@@ -195,11 +195,12 @@ import { Sim, RNG, TEAMS, SHORT_COLORS, BALL_R, WIDTH, GATE_Y, GATE_H, TOP, FPS,
          DIR, N_BALLS, CAM_SCALE, ASPA_R, ASPA_THICK, PLAT_HW, PLAT_HH } from './sim.js';   //+AG extras de la capa de agencia
 import { EmoBook, PRIO } from '../chassis/emotions.mjs';
 import { itemTexture } from '../chassis/itemgen.mjs';
-import { createWebAudio } from '../chassis/webaudio.mjs';
+import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs';
 import { buildSfxBuffer } from './sfxmap.mjs';
 import { runToEnd } from '../chassis/simrun.mjs';
 import { createCoach } from '../chassis/coach.mjs';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
 import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
+import { cantarPuesto } from '../chassis/veredicto.mjs';   //+AG cartel de META: "en qué puesto has quedado", antes de soltar el resultado al shell
 
 window.addEventListener('error', e => { document.getElementById('err').style.display='grid'; console.error(e.error||e.message); });
 
@@ -839,7 +840,10 @@ const BPT = INDIVIDUAL ? 1 : 3;                  // bolas por equipo (pips por t
 // ---- AUDIO en vivo (Web Audio): MISMO buffer de SFX que el render (sfxmap) + música del modo por debajo,
 // arrancados a la vez que la partida (deterministas a 30 FPS → sincronizados). Necesita un gesto del usuario. ----
 const AUDIO_SR=44100;
-const audio=createWebAudio({ musicUrl:'../_music/race.mp3' });   //+AG música vendorizada (race.wav del canal convertido; misma pista MODE_TRACK)
+//+AG PLAYLIST (doc 14 §1): las 3 pistas de carrera del canal, una al azar por partida. race.mp3 es la de siempre
+//   (MODE_TRACK del vídeo); race2/race3 son BallMania Race 02 y 03, que estaban sin usar. Mismo estilo y mismo
+//   tempo: la carrera suena igual de carrera con cualquiera de las tres, solo deja de ser SIEMPRE la misma.
+const audio=createWebAudio({ musicUrl:pickTrack(['../_music/race.mp3','../_music/race2.mp3','../_music/race3.mp3']) });
 //+AG doc 38 Fase 1: DOS flags de audio (musica / efectos por separado, patron Supercell). En EMBED los manda el
 //   shell via &music=/&sfx= (defecto ON: sin parametro = suena, defecto de JUEGO no de video). En standalone
 //   arrancan mudos y el boton #snd los enciende juntos (ese boton solo existe fuera del shell, para el trabajo de video).
@@ -1053,7 +1057,7 @@ function showEnd(){
   if(TUTORIAL) return;   //+AG tutorial: ni matchEnd ni cartel de fin; el COACH cierra con bt:tutorialEnd
   lastPlace=sim.player.rank||sim.playerPlace();
   myTeam=sim.player.team; winnerTeam=sim.winner_team!==null?sim.winner_team:myTeam;
-  if(EMBED){   //+AG el shell manda: emite el resultado y NO pinta cartel propio (evita el flash antes de que el shell cierre el iframe)
+  if(EMBED){   //+AG el shell manda el DESPUÉS (Resultados), pero el puesto se canta AQUÍ, en meta (ver veredicto.mjs)
     let tPlace;
     if(!INDIVIDUAL){ const st=teamStandings(); tPlace=st.findIndex(s=>s.t===myTeam)+1;   // POR EQUIPOS: puesto real del equipo (1..4)
       winnerTeam=sim.winner_team!==null?sim.winner_team:st[0].t; }
@@ -1063,7 +1067,11 @@ function showEnd(){
     //   visto celebrar en pista. El shell corona esa misma fila de la tabla → disco, nombre y corona siempre casan.
     const st=standingsPayload(), tst=INDIVIDUAL?null:teamStandingsPayload();
     const winnerColor = sim.teams[winnerTeam] ? [...sim.teams[winnerTeam].color] : (st[0]?st[0].color:null);
-    try{ parent.postMessage({type:'bt:matchEnd', mode:'race', seed, playerPlace:lastPlace, teamPlace:tPlace, winnerTeam, winnerColor, standings:st, teamStandings:tst, durationF:sim.f}, '*'); }catch(e){}
+    //+AG el cartel de META va PRIMERO y el resultado se suelta DESPUÉS: mientras el cartel esté en pantalla
+    //   el shell no puede cerrar el iframe, que era justo el "flash" que se queria evitar no pintando nada.
+    //   En POR EQUIPOS lo que cuenta es el puesto del EQUIPO, que es el que el jugador ha visto coronar.
+    const _fin=()=>{ try{ parent.postMessage({type:'bt:matchEnd', mode:'race', seed, playerPlace:lastPlace, teamPlace:tPlace, winnerTeam, winnerColor, standings:st, teamStandings:tst, durationF:sim.f}, '*'); }catch(e){} };
+    cantarPuesto({ place: INDIVIDUAL?lastPlace:tPlace, total: st.length, lang:LANG }, _fin);
     return; }
   if(!INDIVIDUAL){   //+AG torneo standalone 16:9: el resultado que cuenta es el del EQUIPO
     const st=teamStandings(); teamPlace=st.findIndex(s=>s.t===myTeam)+1; winnerTeam=sim.winner_team!==null?sim.winner_team:st[0].t; }
