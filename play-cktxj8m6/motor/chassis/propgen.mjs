@@ -168,15 +168,46 @@ const DRAW = {
 
 export const PROP_KEYS = Object.keys(DRAW);
 
+//+AG 27-jul · v3: LOS PROPS YA NO SE DIBUJAN, SE PINTAN (encargos 13/15/16).
+//  Por que cambia: los DRAW de arriba son dibujos de canvas hechos a mano, siluetas planas con
+//  contorno de tinta. Se defienden solos, pero la FICHA que el jugador compra es render pintado,
+//  y puestos uno al lado del otro no son la misma familia. Jaime lo dijo sin rodeos: "lo de la
+//  tienda no se corresponde ni de blas con lo que aparece in game". Comprar una foto y recibir
+//  otra cosa es el peor fallo que puede tener un juego que cobra.
+//  Las 12 piezas nuevas vienen de Codex, validadas con tools/integrar-props.py (alfa, esfera
+//  pintada, pupilas, banda del anillo YOU, corte por el borde, peso de tinta, candado de color y
+//  separacion de siluetas a 56 px).
+//
+//  Los DRAW se CONSERVAN a proposito, no son codigo muerto: son el respaldo si una imagen no
+//  carga (red caida, fichero que no se copio en un despliegue). Un prop es identidad de la bola;
+//  quedarse sin el en silencio es peor que verlo dibujado.
+//
+//  La ruta se resuelve contra import.meta.url y no contra la pagina: los tres modos viven en
+//  motor/<modo>/index.html pero la pagina de previsualizacion cuelga de otro sitio, y con una
+//  ruta relativa a la pagina cada una necesitaria la suya.
+const ART = k => new URL(`../../arte/props/prop-${k}.webp`, import.meta.url).href;
+
 const cache = new Map();
+function dibujada(arch){                 // el respaldo: la version de canvas de siempre
+  const c = document.createElement('canvas'); c.width = c.height = TEX;
+  DRAW[arch](c.getContext('2d'));
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
+  t.minFilter = THREE.LinearMipmapLinearFilter; t.magFilter = THREE.LinearFilter; t.needsUpdate = true;
+  return t;
+}
 function texture(arch){
   let t = cache.get(arch);
   if (!t){
-    const c = document.createElement('canvas'); c.width = c.height = TEX;
-    DRAW[arch](c.getContext('2d'));
-    t = new THREE.CanvasTexture(c);
+    // La textura se devuelve YA, vacia, y se rellena sola cuando llega la imagen (asi el prop no
+    // bloquea el arranque de la partida). Si falla la carga, se cae al dibujo de canvas.
+    t = new THREE.TextureLoader().load(ART(arch), undefined, undefined, () => {
+      console.warn(`[propgen] no cargo el prop pintado de ${arch}; se usa el dibujado`);
+      const f = dibujada(arch);
+      t.image = f.image; t.needsUpdate = true;
+    });
     t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
-    t.minFilter = THREE.LinearMipmapLinearFilter; t.magFilter = THREE.LinearFilter; t.needsUpdate = true;
+    t.minFilter = THREE.LinearMipmapLinearFilter; t.magFilter = THREE.LinearFilter;
     cache.set(arch, t);
   }
   return t;
