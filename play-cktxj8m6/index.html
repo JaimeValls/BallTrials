@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-27 45dc14e"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-07-27 068861b+SUCIO"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -461,13 +461,19 @@
   .pr-emotes{ display:flex; gap:8px; flex-wrap:wrap; } .pr-emote{ background:#ffffff0d; border:1px solid var(--line); border-radius:12px; padding:8px 12px; font-size:13px; font-weight:700; color:#e7ebff; cursor:pointer; }
   .pr-toggle{ display:flex; align-items:center; gap:11px; } .pr-toggle .tx{ flex:1; font-size:13px; color:#d6dbf4; line-height:1.4; }
   .pr-sw{ width:46px; height:27px; border-radius:999px; background:#ffffff1c; border:1px solid var(--line); position:relative; cursor:pointer; flex:0 0 auto; transition:background .2s; } .pr-sw::after{ content:''; position:absolute; top:2px; left:2px; width:21px; height:21px; border-radius:50%; background:#fff; transition:left .2s; } .pr-sw.on{ background:linear-gradient(#5bc46a,#2fa049); } .pr-sw.on::after{ left:21px; }
-  /* --- Fase D: botones de barra (⚙ 🎬), modo jugable, Onboarding (doc 05 §3), Settings (doc 26), canje de codigo (doc 16) --- */
+  /* --- Fase D: boton de barra (⚙️), modo jugable, Onboarding (doc 05 §3), Settings (doc 26), canje de codigo (doc 16) --- */
   /*+AG auditoria Supercell 26-jul: median 34 px de lado y ademas el flex los encogia a 15-24 px REALES
      (sintoma del desbordamiento de la fila) — muy por debajo del minimo tactil de 44 px. Se arregla en
      dos pasos: flex:0 0 auto para que no vuelvan a encogerse nunca, y un halo transparente que sube el
      area de toque a 44 sin engordar el dibujo (la fila iba justa de ancho: crecer la habria desbordado). */
-  .h-ic{ position:relative; flex:0 0 auto; width:36px; height:36px; border-radius:12px; background:#0007; border:1px solid var(--line); color:#e7ebff; font-size:16px; cursor:pointer; display:grid; place-items:center; padding:0; } .h-ic:active{ transform:translateY(1px); }
-  .h-ic::before{ content:''; position:absolute; inset:-5px; border-radius:16px; }   /* inset mide desde la caja de PADDING: con borde de 1px, -4 daba 42 y no 44 */
+  /*+AG VB Jaime 2026-07-27: "el icono de ajustes no es claro, es muy pequeño y no parece un ajuste". Pasa de
+     36 a 46 px con la rueda a 26 (era 16: la mitad del boton era hueco), y deja de ser una caja negra plana —
+     relieve claro arriba, borde visible y sombra— para que se LEA como un boton pulsable y no como un adorno.
+     El sitio lo paga el 🎬 que se ha ido de la fila, asi que .h-top sigue cabiendo a 360 px. El halo de toque
+     ya no hace falta: el propio boton pasa del minimo tactil de 44. */
+  .h-ic{ position:relative; flex:0 0 auto; width:46px; height:46px; border-radius:14px; color:#fff; font-size:26px; line-height:1; cursor:pointer; display:grid; place-items:center; padding:0;
+         background:linear-gradient(#ffffff26,#ffffff0d) , #0008; border:1px solid #ffffff3d; box-shadow:0 3px 10px #0006, inset 0 1px 0 #ffffff2e; }
+  .h-ic:active{ transform:translateY(1px); }
   .h-modes .m.open{ filter:none; opacity:1; border-color:var(--gold2); background:#ffffff16; cursor:pointer; box-shadow:0 4px 14px #fbb91533; } .h-modes .m.open .lk{ color:var(--gold2); }
   #onb{ position:absolute; inset:0; z-index:70; background:radial-gradient(120% 80% at 50% 18%,var(--bg),var(--bg-lo)); display:none; flex-direction:column; align-items:center; justify-content:center; padding:24px; }
   #onb.on{ display:flex; }
@@ -973,8 +979,11 @@
 <div id="home" class="scr on">
   <div class="h-top">
     <div class="h-lvl"><div class="h-lvlnum"><b id="hLvl">1</b></div><div class="cap" data-t="lvl">NIVEL</div></div>
-    <button class="h-ic" id="hCode" data-tt="redeemTitle" title="Canjear código">🎬</button>
-    <button class="h-ic" id="hSet" data-tt="settings" title="Ajustes">⚙</button>
+    <!--+AG VB Jaime 2026-07-27: el boton de CANJEAR CODIGO (🎬) sale de la portada. Todavia no hay codigos que
+         canjear (los da el canal, que aun no ha lanzado), asi que ocupaba sitio en la fila mas apretada de la
+         pantalla para una funcion que hoy no existe. NO se borra la funcion: la fila "Canjear codigo del canal"
+         sigue en Ajustes → Soporte (buildSettings), que es donde Jaime quiere que viva si algun dia hace falta. -->
+    <button class="h-ic" id="hSet" data-tt="settings" title="Ajustes">⚙️</button>
     <!--+AG auditoria Supercell 26-jul: este selector (112 px, el elemento mas ancho de la fila) hacia que
          .h-top pidiera 473 px. A 360 px de ancho las pildoras de moneda se salian de pantalla y la de gemas
          quedaba INVISIBLE. Supercell no pone idioma en la portada: vive en Ajustes, donde ya habia un
@@ -2556,6 +2565,7 @@ const MORE={
     setLangGrp:'🌐 Idioma', setLangSub:'menús y textos',
     //+AG doc 38 Fase 2/3: audio separado, soporte, legal y cuenta
     setMusic:'Música', setMusicSub:'menús y pista del modo',
+    setMusicVol:'Volumen de la música', setMusicVolSub:'empieza baja para no molestar', setMusicVolOpts:['Bajo','Medio','Alto'],
     setSfx:'Efectos', setSfxSub:'golpes, boosters y meta',
     setSupport:'🛟 Soporte', setRedeemRow:'Canjear código del canal', setRedeemSub:'premio fijo, un uso por cuenta',
     setBuildRow:'Versión del juego', setChannelRow:'Cómo se hizo', setChannelSub:'el canal de BallTrials',
@@ -2715,6 +2725,7 @@ const MORE={
     setLangGrp:'🌐 Language', setLangSub:'menus and text',
     //+AG doc 38 Fase 2/3: split audio, support, legal and account
     setMusic:'Music', setMusicSub:'menus and mode soundtrack',
+    setMusicVol:'Music volume', setMusicVolSub:'starts low so it never gets in the way', setMusicVolOpts:['Low','Medium','High'],
     setSfx:'Effects', setSfxSub:'hits, boosters and finish',
     setSupport:'🛟 Support', setRedeemRow:'Redeem a channel code', setRedeemSub:'fixed prize, one use per account',
     setBuildRow:'Game version', setChannelRow:'How it was made', setChannelSub:'the BallTrials channel',
@@ -2857,10 +2868,15 @@ const BUILD_VER='v0.5 · doc 39';   //+AG doc 39: bolas-héroe con rareza fija y
 const FRESH = !localStorage.getItem(SAVE_KEY);   //+AG Fase D: primera sesion (sin save previo) dispara el Onboarding
 let SAVE=Object.assign({chispas:0,gemas:20,xp:0,level:1,played:0,lastWinDay:'',
     balls:[{arch:'cohete',q:0,attrs:[8,7,3,4,4,5],xp:0,pts:0,copas:0}], equipped:0, cosmetics:[], pase:false,
-    onboarded:false, codes:[], settings:{audio:true, music:true, sfx:true, reducedFx:false, quality:'auto', colorblind:'off'},
+    onboarded:false, codes:[], settings:{audio:true, music:true, sfx:true, musicVol:0.20, reducedFx:false, quality:'auto', colorblind:'off'},
     mode:'race', fmt:'individual', dayBonusDay:'', cupsToday:null, tutorialDone:{}}, //+AG colección inicial: Cohete Común (bola de arranque, doc 05 §3.3) + estado Fase D + Home v3 (modo/formato elegidos, bonus del día) + copas (doc 37)
   (()=>{ try{ return JSON.parse(localStorage.getItem(SAVE_KEY))||{}; }catch(e){ return {}; } })());
-if(!SAVE.settings) SAVE.settings={audio:true, music:true, sfx:true, reducedFx:false, quality:'auto', colorblind:'off'};   //+AG saves viejos sin settings
+if(!SAVE.settings) SAVE.settings={audio:true, music:true, sfx:true, musicVol:0.20, reducedFx:false, quality:'auto', colorblind:'off'};   //+AG saves viejos sin settings
+//+AG VB Jaime 2026-07-27: la musica arranca MUY BAJA (20%) para que no moleste a nadie que abra el juego; el que
+//   la quiera mas fuerte la sube en Ajustes. musicVol es la escala DEL JUGADOR (0..1) sobre el nivel ya calibrado de
+//   cada contexto (1 = la mezcla de siempre: lobby 0.40, carrera/cazador 0.30, Red Light 0.42), no un volumen
+//   absoluto: asi el balance entre menus y partida se mantiene en cualquier posicion del control.
+if(typeof SAVE.settings.musicVol!=='number' || !(SAVE.settings.musicVol>=0 && SAVE.settings.musicVol<=1)) SAVE.settings.musicVol=0.20;
 //+AG doc 38 Fase 1: el audio se separa en dos flags (musica/efectos, patron Supercell). Saves viejos con el flag
 //   unico 'audio' migran a music+sfx = ese valor (idempotente: si ya existen, no se tocan).
 if(typeof SAVE.settings.music!=='boolean') SAVE.settings.music = SAVE.settings.audio!==false;
@@ -3087,6 +3103,10 @@ const MODE_SRC={ race:'motor/race/index.html', cazador:'motor/cazador/index.html
 let gameFrameEl=null, curMode='race', curFmt='individual', curTutorial=false;
 //+AG URL del iframe por modo y FORMATO (docs/35): INDIVIDUAL = perfil de 8 bolas sueltas; EQUIPOS = perfil de
 //   torneo 4×3 del motor (Fase 3). cazador individual va con short=1 (su embed pelado arranca el torneo).
+//+AG VB Jaime 2026-07-27: UNA sola verdad del volumen de musica (0..1). La leen el shell (BT_MUSIC) y los tres
+//   motores (por &mvol). Blindada: un save corrupto o antiguo cae en 0.20, el defecto "muy bajita".
+function musicVolPref(){ try{ const v=SAVE.settings&&SAVE.settings.musicVol; return (typeof v==='number' && v>=0 && v<=1) ? v : 0.20; }catch(e){ return 0.20; } }
+window.musicVolPref = musicVolPref;   //+AG el bloque de musica es un <script type="module">: alcanza el global, no el scope de este script
 function modeEmbedUrl(mode, fmt){
   let u = fmt==='equipos' ? MODE_SRC[mode]+'?embed=1&fmt=team'      // race/redlight leen fmt=team (Fase 3); cazador: su embed sin 'short' YA es el torneo 4×3
         : mode==='cazador' ? MODE_SRC[mode]+'?embed=1&short=1'      // individual real de 8 (perfil short del motor; su embed pelado era el torneo)
@@ -3103,6 +3123,9 @@ function modeEmbedUrl(mode, fmt){
   //   curso no la re-sincroniza en vivo, la siguiente ya sale con el estado nuevo.
   const st=SAVE.settings||{};
   u += '&music=' + (st.music===false?'0':'1') + '&sfx=' + (st.sfx===false?'0':'1');
+  //+AG VB Jaime 2026-07-27: y CUANTA musica (&mvol=0..1, escala del jugador sobre el nivel calibrado del modo).
+  //   Mismo trato que &music: se lee al arrancar la partida, la que ya esta en curso no se re-sincroniza.
+  u += '&mvol=' + musicVolPref();
   //+AG doc 38 Fase 2: GRAFICOS. La calidad (auto/low/med/high) y efectos-reducidos viajan al motor, que baja el
   //   pixelRatio en low/med/reducido (palanca barata). El bloom es el camino de render del chassis: no se salta.
   u += '&gfx=' + encodeURIComponent(st.quality||'auto') + (st.reducedFx?'&redfx=1':'');
@@ -3136,7 +3159,7 @@ function startTutorial(mode){
   if(new URLSearchParams(location.search).get('drive')==='1') u+='&drive=1';
   u += '&lang=' + encodeURIComponent(LANG);
   const st=SAVE.settings||{};
-  u += '&music=' + (st.music===false?'0':'1') + '&sfx=' + (st.sfx===false?'0':'1');
+  u += '&music=' + (st.music===false?'0':'1') + '&sfx=' + (st.sfx===false?'0':'1') + '&mvol=' + musicVolPref();
   u += '&gfx=' + encodeURIComponent(st.quality||'auto') + (st.reducedFx?'&redfx=1':'');
   openFrame(u);
 }
@@ -3985,6 +4008,12 @@ function buildSettings(){ const S2=SAVE.settings, b=el('setBody'); b.innerHTML='
     //   menus tiene que callar la musica ahi mismo, no "en la proxima partida". Sobre el MOTOR sigue mandando por
     //   &music= al arrancar la partida (el iframe en curso no se re-sincroniza en vivo, la siguiente ya sale bien).
     swRow(s.setMusic, s.setMusicSub, S2.music!==false, v=>{ S2.music=v; S2.audio=(S2.music||S2.sfx); setPersist(); if(window.BT_MUSIC) BT_MUSIC.refresh(); }),
+    //+AG VB Jaime 2026-07-27: VOLUMEN de la musica. Arranca en Bajo (20%) para que no moleste a nadie, y aqui se
+    //   sube. Manda en el acto sobre el shell (BT_MUSIC.refresh -> rampa de gain) y sobre la SIGUIENTE partida (&mvol).
+    //   La fila solo aparece con la musica encendida: un control de volumen bajo un interruptor apagado no hace nada.
+    ...(S2.music!==false ? [segRow(s.setMusicVol, s.setMusicVolSub,
+      [[0.2,s.setMusicVolOpts[0]],[0.5,s.setMusicVolOpts[1]],[1,s.setMusicVolOpts[2]]], musicVolPref(),
+      v=>{ S2.musicVol=v; setPersist(); if(window.BT_MUSIC) BT_MUSIC.refresh(); })] : []),
     swRow(s.setSfx, s.setSfxSub, S2.sfx!==false, v=>{ S2.sfx=v; S2.audio=(S2.music||S2.sfx); setPersist(); }) ]));
   //+AG IDIOMA (ya funcionaba; se conserva el selector real que reusa #lang)
   const langRow=document.createElement('div'); langRow.className='set-row'; langRow.innerHTML='<div class="lb">'+s.langWord+'<small>'+s.setLangSub+'</small></div>';
@@ -4248,7 +4277,9 @@ el('pgIn').addEventListener('keydown',e=>{ if(e.key==='Enter') parentalOk(); });
 //+AG doc 34 Fase D: onboarding, settings, canje de codigo (los modos ahora se eligen en la REJILLA, Home v3)
 el('rrRanking').onclick=openRanking;   //+AG Fase 2: pantalla de Ranking real (riel + banda de copas)
 el('hCupsBand').onclick=openRanking;
-el('hCode').onclick=openCode; el('hSet').onclick=openSettings;
+//+AG hCode ya no esta en la portada (vive en Ajustes → Soporte); el guardia deja el codigo a prueba de que vuelva.
+if(el('hCode')) el('hCode').onclick=openCode;
+el('hSet').onclick=openSettings;
 el('onbGo').onclick=onbFinish; el('onbSkip').onclick=onbSkipFn;
 el('welGoogle').onclick=welConGoogle; el('welSkip').onclick=welSkipFn;   //+AG bienvenida: ofrecer Google / jugar ya
 el('setClose').onclick=()=>el('settings').classList.remove('on');
@@ -4349,7 +4380,11 @@ else if((FRESH || _pend) && !SAVE.onboarded && _onbParam!=='0'){
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
   //   verdad, y aun asi la partida da un escalon de volumen al arrancar.
-  const audio = createWebAudio({ musicUrl:'motor/_music/lobby.mp3', musicGain:0.40, musicLoopTrim:0.12 });
+  //+AG VB Jaime 2026-07-27: 0.40 pasa a ser el nivel de REFERENCIA (el 100% del control de Ajustes), no el que
+  //   suena. Lo que suena es 0.40 x musicVol, y musicVol arranca en 0.20: la musica esta ahi, pero no molesta.
+  const LOBBY_BASE = 0.40;
+  const vol = ()=>{ try{ return window.musicVolPref ? musicVolPref() : 0.20; }catch(e){ return 0.20; } };
+  const audio = createWebAudio({ musicUrl:'motor/_music/lobby.mp3', musicGain:LOBBY_BASE*vol(), musicLoopTrim:0.12 });
 
   //+AG UNA sola verdad de "¿deberia estar sonando?" = quiere() && !enPartida, y aplicar() la persigue. Con dos
   //   interruptores independientes (Ajustes y la partida) llevar un solo booleano "playing" se desincroniza solo.
@@ -4357,6 +4392,11 @@ else if((FRESH || _pend) && !SAVE.onboarded && _onbParam!=='0'){
     lista:false, enPartida:false, sonando:false,
     quiere(){ try{ return !(SAVE.settings && SAVE.settings.music===false); }catch(e){ return true; } },
     aplicar(){
+      //+AG el volumen se re-aplica SIEMPRE, y ANTES del guardia de "lista": asi subirlo o bajarlo en Ajustes se
+      //   oye en el acto si ya suena, y queda puesto para cuando arranque si todavia no ha sonado (el ctx ya
+      //   existe desde el prefetch, aunque siga suspendido). Sin AudioContext setMusicGain no hace nada y manda
+      //   el gain de creacion, que ya se calculo con este mismo valor.
+      audio.setMusicGain(LOBBY_BASE*vol(), 0.12);
       if(!this.lista) return;
       const debe = this.quiere() && !this.enPartida;
       if(debe===this.sonando) return;
