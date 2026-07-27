@@ -98,9 +98,28 @@
   //  igual se pide a Google la fuente de emoji SUBSETEADA a estos 20 glifos y nada mas (&text=).
   //  Pesa 668 KB, asi que se carga PEREZOSA: solo al abrir la hoja de idioma, que es una pantalla a
   //  la que casi nadie entra. Quien no la abre no paga nada, y la portada no se retrasa un ms.
+  //+AG auditoria supercell-arte: ¿DIBUJA ESTE APARATO BANDERAS? Antes se pedia la fuente siempre, o
+  //   sea que iPhone y Android se tragaban 668 KB para nada (sus banderas son del sistema). Se mide:
+  //   una bandera son DOS codepoints (🇬🇧 = 🇬 + 🇧). Si el aparato las dibuja, la pareja se fusiona en
+  //   UN glifo y mide bastante menos que las dos letras sueltas; si no (Windows), pinta las dos letras
+  //   y la pareja mide lo mismo que la suma. Comprobado en Windows: 20 px y 20 px -> no las dibuja.
+  //   OJO: la comparacion es al reves de lo que parece — IGUALES significa que NO hay banderas.
+  let soporta = null;
+  function dibujaBanderas() {
+    if (soporta !== null) return soporta;
+    try {
+      const c = document.createElement('canvas').getContext('2d');
+      c.font = '20px sans-serif';
+      const par = c.measureText('🇬🇧').width;
+      const sueltas = c.measureText('🇬').width + c.measureText('🇧').width;
+      soporta = par < sueltas - 1;
+    } catch (e) { soporta = false; }   // si no se puede medir, se pide la fuente: mejor pesar que no verlas
+    return soporta;
+  }
+
   let fuenteBanderas = false;
   function cargaFuenteBanderas() {
-    if (fuenteBanderas) return;
+    if (fuenteBanderas || dibujaBanderas()) return;
     fuenteBanderas = true;
     const glifos = Object.keys(LANGS).map(k => LANGS[k].flag).join('');
     const lk = document.createElement('link');
