@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-27 9c892d1">
+<meta name="bt-build" content="2026-07-27 9ea616b">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <!--+AG el HTML se sirve en INGLES (defecto del juego); ?lang=es lo traduce por JS (applyLang) -->
 <title>YouBall · The Hunter (WebGL)</title>
@@ -150,6 +150,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
+<script src="../../i18n/idiomas.js"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -819,12 +820,32 @@ let LANG='en';
 //   llama durante la carga del módulo: con const/let declarado después daría ReferenceError.
 let arranque=null, banner=null;
 const T=()=>I18N[LANG]||I18N.en;
-//+AG ordinal de puesto: igual que el del shell (1st/2nd/3rd · 1º) para no dar dos vocabularios del mismo dato
-function ord(n){ if(LANG==='es') return n+'º'; const s=['th','st','nd','rd'], v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); }
+//+AG ordinal de puesto: igual que el del shell (1st/2nd/3rd · 1º) para no dar dos vocabularios del mismo dato.
+//   Desde el doc 49 lo dice el catalogo, que es donde estan los 20 idiomas.
+function ord(n){ return BTI18N.ord(n,LANG); }
 const _id=x=>document.getElementById(x);
+//+AG doc 49: los idiomas que no son en/es llegan en un fichero aparte. Quien quiera enterarse de que ya
+//   esta (el tutorial, abajo) se apunta a TRAS_PACK; se le llama una vez por cada idioma que aterriza.
+//   Se apuntan tarde (el bloque del tutorial esta 100 lineas mas abajo que la primera llamada a
+//   applyLang), asi que si el paquete YA habia llegado se les llama en el acto al apuntarse.
+let PACK=null;
+const TRAS_PACK=[];
+function alLlegarPack(f){ TRAS_PACK.push(f); if(PACK){ try{ f(PACK,LANG); }catch(e){} } }
 function applyLang(l){
-  LANG=I18N[l]?l:'en'; const t=T();
-  document.documentElement.lang=LANG; document.title=t.title;
+  LANG=BTI18N.LANGS[l]?l:'en'; PACK=null;
+  //   la PISTA no se espeja aunque el idioma sea arabe (noRtl): los botones apuntan a lo que pasa en
+  //   pantalla y darles la vuelta mentiria sobre el juego. Sí se le pone su fuente y su <html lang>.
+  BTI18N.applyDoc(LANG,{noRtl:true});
+  pintaLang();
+  BTI18N.load(LANG).then(p=>{ if(!p || LANG!==l) return;
+    PACK=p;
+    if(p.cazador) I18N[LANG]=Object.assign({},I18N.en,p.cazador);
+    TRAS_PACK.forEach(f=>{ try{ f(p,LANG); }catch(e){} });
+    pintaLang(); });
+}
+function pintaLang(){
+  const t=T();
+  document.title=t.title;
   _id('hudName').textContent=t.title; _id('backMenu').textContent=t.menu;
   _id('keys').innerHTML=t.keys; _id('youlbl').textContent=t.you; _id('countYou').textContent=t.youIntro;
   _id('lblIntent').textContent=t.lblIntent; _id('lblBoost').textContent=t.lblBoost;
@@ -954,6 +975,9 @@ if(TUTORIAL)(function(){
         '¡Barra del SEÑUELO llena de regalo! Pulsa ⭐ SEÑUELO (D): el cazador fija a otro',
         'Ese es el CAZADOR. Hoy está dormido — obsérvalo 10s y recuerda su marca de fijado' ] },
   };
+  //+AG doc 49: los otros 18 idiomas del tutorial llegan en el paquete. createCoach lee i18n[lang()] en
+  //   cada paso, asi que basta con meter la tabla dentro del MISMO objeto CI aunque ya este en marcha.
+  alLlegarPack((p,l)=>{ if(p.cazadorCoach) CI[l]=Object.assign({},CI.en,p.cazadorCoach); });
   //+AG condiciones leídas de la Sim: intención elegida, orbe recogido (events.pickup del jugador), uso real de
   //   dash/escudo/señuelo y observación del cazador (tiempo). pause:true = el mundo se congela mientras lees; el
   //   único paso que no pausa es el de MIRAR al cazador, que es justo la lección de verlo moverse.

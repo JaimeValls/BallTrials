@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-27 9c892d1">
+<meta name="bt-build" content="2026-07-27 9ea616b">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>YouBall · La Gran Carrera (WebGL)</title>
 <style>
@@ -178,6 +178,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
+<script src="../../i18n/idiomas.js"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -930,14 +931,16 @@ const I18N={
   ko:{name:'그레이트 레이스', sub:'공은 스스로 굴러 내려가요. <b>방향</b>을 고르고 <b>부스터</b>를 써요. 나머지 11개를 이길 수 있나요?', hint:'방향: <kbd>◀</kbd> 왼쪽 · <kbd>●</kbd> 가운데 · <kbd>▶</kbd> 오른쪽 &nbsp;·&nbsp; 부스터: <kbd>A</kbd> 니트로 · <kbd>S</kbd> 실드.<br>휴대폰·태블릿은 아래 버튼을 사용하세요.', play:'▶ 플레이', again:'▶ 다시하기', atts:'방향', boosts:'부스터', att:['◀ 왼쪽','● 가운데','오른쪽 ▶'], nitro:'⚡ 니트로', shield:'🛡 실드', ready:'준비', superLbl:'슈퍼', pos:(o,N)=>`<b>${o}</b> <small>/ ${N}</small>`, fin:o=>`결과 <b>${o}</b>`, podium:'포디움! 조작? 니트로? 아니면 운?', retry:'다시. 빈틈으로 방향을 틀어 추월하거나, 지진에 대비해 실드를 아껴요.', you:'나', super:'⭐ 슈퍼', go:'출발!', youIntro:'이게 너야'},
   zh:{name:'超级弹珠赛', sub:'你的弹珠会自己往下滚。你只需选择它的<b>方向</b>并释放<b>加速道具</b>。能赢过其他 11 个吗？', hint:'方向：<kbd>◀</kbd> 左 · <kbd>●</kbd> 中 · <kbd>▶</kbd> 右 &nbsp;·&nbsp; 道具：<kbd>A</kbd> 氮气 · <kbd>S</kbd> 护盾。<br>手机或平板请用下方按钮。', play:'▶ 开始', again:'▶ 再玩一次', atts:'方向', boosts:'道具', att:['◀ 左','● 中','右 ▶'], nitro:'⚡ 氮气', shield:'🛡 护盾', ready:'就绪', superLbl:'超级', pos:(o,N)=>`<b>${o}</b> <small>/ ${N}</small>`, fin:o=>`结果 <b>${o}</b>`, podium:'登上领奖台！是靠操控、氮气……还是运气？', retry:'再来。往空档转向超车，或把护盾留给地震。', you:'你', super:'⭐ 超级', go:'出发!', youIntro:'这是你'},
 };
-const LANGS={en:'English',es:'Español',pt:'Português',fr:'Français',de:'Deutsch',it:'Italiano',ja:'日本語',ko:'한국어',zh:'中文'};
-function ord(n,l){ if(l==='en'){ const s=['th','st','nd','rd'], v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); }
-  if(l==='es'||l==='it') return n+'º'; if(l==='pt') return n+'º'; if(l==='fr') return n===1?'1er':n+'e'; if(l==='de') return n+'.';
-  if(l==='ja') return n+'位'; if(l==='ko') return n+'등'; if(l==='zh') return '第'+n+'名'; return n+'.'; }
+//+AG doc 49: el catalogo de idiomas y el ordinal se mudaron a i18n/idiomas.js, que comparten el shell y los
+//   3 motores. Estaban escritos en cuatro sitios y ya habian dado dos vocabularios del mismo dato.
+const LANGS=BTI18N.LANGS;
+const ord=(n,l)=>BTI18N.ord(n,l||LANG);
 //+AG modo EQUIPO: el resultado que importa es el del EQUIPO (1er equipo con sus 3 bolas), no el puesto individual.
 //   Punto de color = identidad de equipo (idéntico a Rojo/Verde/Azul/Amarillo de TEAMS), sin traducir 9 idiomas.
 const TEAMDOT=['🔴','🟢','🔵','🟡'];
-const MENUTXT={en:'← Menu',es:'← Menú',pt:'← Menu',fr:'← Menu',de:'← Menü',it:'← Menu',ja:'← メニュー',ko:'← 메뉴',zh:'← 菜单'};
+//+AG doc 49: el "← Menú" vivia en su propia tablita de 9 idiomas al margen de todo. Se muda a AUX (abajo),
+//   que es la tabla de textos de CHASIS de este motor, para que un idioma nuevo llegue entero en su paquete
+//   y no haya que acordarse de tocar dos sitios.
 const TEAMI18N={
   en:{tp:o=>`Your team: ${o}`, tw:'Your team wins!', tW:d=>`${d} wins the race`, xd:o=>`You crossed ${o}`},
   es:{tp:o=>`Tu equipo: ${o}`, tw:'¡Gana tu equipo!', tW:d=>`Gana el equipo ${d}`, xd:o=>`Cruzaste ${o}`},
@@ -954,10 +957,10 @@ const TT=()=>TEAMI18N[LANG]||TEAMI18N.en;
 //   INGLES, igual que el SHELL (juego.html). El texto de JUEGO sigue en los 9 idiomas de I18N; estos no valen la
 //   pena traducirlos a 9 y en un idioma sin tabla salen en ingles (nunca en espanol).
 const AUX={
-  en:{ hud:n=>`YouBall · ${n} · WebGL`, meta:(s,top)=>`seed ${s} · drop ${top}u`,
+  en:{ menu:'← Menu', hud:n=>`YouBall · ${n} · WebGL`, meta:(s,top)=>`seed ${s} · drop ${top}u`,
     keys:'1 2 3 (or ← ↓ →) = direction &nbsp;·&nbsp; A/S/D = nitro/shield/super &nbsp;·&nbsp; R = new round',
     sound:'Turn sound on', err:'The 3D modules failed to load from the CDN. Open this with internet access.' },
-  es:{ hud:n=>`YouBall · ${n} · WebGL`, meta:(s,top)=>`seed ${s} · descenso ${top}u`,
+  es:{ menu:'← Menú', hud:n=>`YouBall · ${n} · WebGL`, meta:(s,top)=>`seed ${s} · descenso ${top}u`,
     keys:'1 2 3 (o ← ↓ →) = dirección &nbsp;·&nbsp; A/S/D = nitro/escudo/súper &nbsp;·&nbsp; R = otra ronda',
     sound:'Activar sonido', err:'No cargaron los módulos 3D del CDN. Ábrelo con internet activo.' },
 };
@@ -1011,21 +1014,41 @@ function renderOverlay(){ const t=T();
     el('ovSub').innerHTML = `${winLine}<br><small style="opacity:.72">${tt.xd(ord(lastPlace,LANG))}</small>`;
     el('ovBtn').textContent=t.again; }
 }
-function applyLang(l){ LANG=I18N[l]?l:'en'; const t=T(); el('lang').value=LANG;
+//+AG doc 49: 18 de los 20 idiomas se DESCARGAN, asi que cambiar de idioma tiene dos tiempos: se pinta ya con
+//   lo que haya (ingles) y se repinta cuando aterriza el paquete. El fundido es SIEMPRE sobre el ingles, no
+//   sobre el idioma anterior: si no, saltar de aleman a turco heredaba las claves alemanas que al turco le
+//   faltasen y salia una pista en dos idiomas.
+let PACK=null;
+const TRAS_PACK=[];
+function alLlegarPack(f){ TRAS_PACK.push(f); if(PACK){ try{ f(PACK,LANG); }catch(e){} } }
+function applyLang(l){
+  LANG=BTI18N.LANGS[l]?l:'en'; PACK=null;
+  //   la PISTA no se espeja aunque el idioma sea arabe (noRtl): ◀/▶ apuntan a lo que pasa en pantalla.
+  BTI18N.applyDoc(LANG,{noRtl:true});
+  pintaLang();
+  BTI18N.load(LANG).then(p=>{ if(!p || LANG!==l) return;
+    PACK=p;
+    if(p.race)     I18N[LANG]    =Object.assign({},I18N.en,p.race);
+    if(p.raceAux)  AUX[LANG]     =Object.assign({},AUX.en,p.raceAux);
+    if(p.raceTeam) TEAMI18N[LANG]=Object.assign({},TEAMI18N.en,p.raceTeam);
+    TRAS_PACK.forEach(f=>{ try{ f(p,LANG); }catch(e){} });
+    pintaLang(); });
+}
+function pintaLang(){ const t=T(); el('lang').value=LANG;
   el('hint').innerHTML=t.hint; el('lblAtt').textContent=t.atts; el('lblBoost').textContent=t.boosts;
   el('bL').querySelector('.t').textContent=t.att[0]; el('bC').querySelector('.t').textContent=t.att[1]; el('bR').querySelector('.t').textContent=t.att[2];
   el('bNit').querySelector('.t').textContent=t.nitro; el('bShd').querySelector('.t').textContent=t.shield; el('bSup').querySelector('.t').textContent=t.super;
   el('superlbl').textContent=t.superLbl; youLbl.textContent=t.you; el('countYou').textContent=t.youIntro;
-  const mt=MENUTXT[LANG]||MENUTXT.en; el('backMenu').textContent=mt; el('ovMenu').textContent=mt;   //+AG menu localizado (esquina + cartel de fin)
   //+AG capa +AG: titulo de pestaña, esquinas y error tambien por idioma (antes eran fijos en espanol)
-  const a=A(); document.documentElement.lang=LANG; document.title=`YouBall · ${t.name} (WebGL)`;
+  const a=A(); el('backMenu').textContent=a.menu; el('ovMenu').textContent=a.menu;   //+AG menu localizado (esquina + cartel de fin)
+  document.title=`YouBall · ${t.name} (WebGL)`;
   el('hudName').textContent=a.hud(t.name); el('keys').innerHTML=a.keys; el('err').textContent=a.err;
   const sb=el('snd'); if(sb) sb.title=a.sound;
   if(sim) el('meta').textContent=a.meta(seed, TOP|0);
   if(arranque) arranque.refresh(); if(banner) banner.refresh();   //+AG el cartel de arranque y la banda del modo también viven en el idioma del shell
   renderOverlay(); if(sim) updateHUD();
 }
-(function(){ const sel=el('lang'); for(const k in LANGS){ const o=document.createElement('option'); o.value=k; o.textContent=LANGS[k]; sel.appendChild(o); }
+(function(){ const sel=el('lang'); for(const k in LANGS){ const o=document.createElement('option'); o.value=k; o.textContent=LANGS[k].name; sel.appendChild(o); }
   sel.onchange=()=>applyLang(sel.value);
   //+AG el idioma lo MANDA EL SHELL por ?lang= (juego.html lo cuelga de la URL del iframe). Sin ?lang, o con un
   //   idioma no soportado, INGLES — ya no se mira navigator.language (con un navegador en espanol el modo salia
@@ -1140,6 +1163,9 @@ if(TUTORIAL)(function(){
         '¡Barra de SÚPER llena de regalo! Pulsa ⭐ SÚPER',
         '¡Ya está! Baja hasta la META para terminar' ] },
   };
+  //+AG doc 49: los otros 18 idiomas del tutorial llegan en el paquete. createCoach lee i18n[lang()] en
+  //   cada paso, asi que basta con meter la tabla dentro del MISMO objeto CI aunque ya este en marcha.
+  alLlegarPack((p,l)=>{ if(p.raceCoach) CI[l]=Object.assign({},CI.en,p.raceCoach); });
   const C=()=>CI[LANG]||CI.en;
   //+AG los pasos solo LEEN la Sim: dirección mantenida ~1s, pad de impulso (in_boost), nitro/escudo/súper activos,
   //   meta (rank). pause:true = el mundo se congela mientras lo lees (los pasos de MIRAR el juego no pausan).

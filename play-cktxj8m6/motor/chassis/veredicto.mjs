@@ -25,13 +25,15 @@
 
 const TXT = {
   en: { kicker:'YOUR PLACE', won:'YOU WON!', wonSub:'Champion of the race',
-        podium:'On the podium!', again:'Again! Every race counts.',
-        ord:n=>{ const s=['th','st','nd','rd'], v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); } },
+        podium:'On the podium!', again:'Again! Every race counts.' },
   es: { kicker:'TU PUESTO', won:'¡GANASTE!', wonSub:'Campeón de la carrera',
-        podium:'¡En el podio!', again:'¡Otra! Cada carrera suma.',
-        ord:n=>n+'º' },
+        podium:'¡En el podio!', again:'¡Otra! Cada carrera suma.' },
 };
-const T = l => TXT[l] || TXT.en;
+//+AG doc 49: en+es viven aqui arriba; los otros 18 llegan en i18n/<l>.js. El ORDINAL ya no se declara por
+//   idioma en esta tabla — lo dice el catalogo, que es el mismo que usan el shell y los 3 motores: tener
+//   "3º / 3rd / 第3名" escrito en cuatro sitios ya habia dado dos vocabularios del mismo dato.
+const T = l => (window.BTI18N ? BTI18N.tabla(l, 'veredicto', TXT[l] || TXT.en) : (TXT[l] || TXT.en));
+const ORD = (n, l) => (window.BTI18N ? BTI18N.ord(n, l) : n + '.');
 const MEDAL = { 1:'🏆', 2:'🥈', 3:'🥉' };
 
 const CSS = `
@@ -90,7 +92,7 @@ export function cantarPuesto({ place, total, lang = 'en', ms = 1700 } = {}, onDo
     const h = build();
     h.classList.toggle('win', won);
     h.querySelector('.k').textContent = won ? '' : t.kicker;
-    h.querySelector('.p').textContent = won ? t.won : (t.ord(p) + (MEDAL[p] ? ' ' + MEDAL[p] : ''));
+    h.querySelector('.p').textContent = won ? t.won : (ORD(p, lang) + (MEDAL[p] ? ' ' + MEDAL[p] : ''));
     h.querySelector('.s').textContent = won ? t.wonSub : (p <= 3 ? t.podium : t.again);
     h.classList.add('on');
     //+AG reinicia la animación del numerote aunque el nodo se reutilice entre partidas

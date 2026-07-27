@@ -49,7 +49,11 @@
     ru:   { name: 'Русский',            html: 'ru',      nloc: 'ru-RU', ord: n => n + '-й',
             font: { fam: 'Nunito', url: 'Nunito:wght@600;700;800;900' } },       // Fredoka no trae cirilico
     tr:   { name: 'Türkçe',             html: 'tr',      nloc: 'tr-TR', ord: n => n + '.' },
-    ar:   { name: 'العربية',              html: 'ar',      nloc: 'ar-EG', ord: n => '#' + n, rtl: true,
+    //+AG el numero arabe va en cifras OCCIDENTALES a proposito. 'ar-EG' a secas formatea en cifras
+    //   arabe-indigas (٠ ١ ٢) y el juego quedaba con DOS sistemas a la vez en la misma pantalla: las
+    //   copas en ٠ (pasan por nfmt) y el nivel y las gemas en 0-9 (no pasan). Mezclar es peor que
+    //   elegir; el sufijo -u-nu-latn mantiene el resto del formato arabe y unifica los digitos.
+    ar:   { name: 'العربية',              html: 'ar',      nloc: 'ar-EG-u-nu-latn', ord: n => '#' + n, rtl: true,
             font: { fam: 'Baloo Bhaijaan 2', url: 'Baloo+Bhaijaan+2:wght@600;700;800' } },
     hi:   { name: 'हिन्दी',                html: 'hi',      nloc: 'hi-IN', ord: n => n + 'वां',
             font: { fam: 'Baloo 2', url: 'Baloo+2:wght@600;700;800' } },

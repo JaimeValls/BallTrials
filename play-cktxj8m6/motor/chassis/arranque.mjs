@@ -176,7 +176,10 @@ export function sfxCountdown(audio, { digits = 3, digitDur = 1.15, goAt = 3.45 }
 // ─────────────────────────────────────────────────────────────────────────────────────────────────
 export function createArranque(cfg){
   const { mode, lang, audio, autoSec = 5, onStart } = cfg;
-  const L = () => TXT[lang()] || TXT.en;
+  //+AG doc 49: en+es viven aqui arriba; los otros 18 idiomas llegan en i18n/<l>.js y BTI18N.tabla los
+  //   funde sobre el ingles. Si el paquete aun no ha aterrizado devuelve el respaldo, asi que el cartel
+  //   siempre tiene texto — un idioma que tarda no puede dejar en blanco la pantalla de arranque.
+  const L = () => (window.BTI18N ? BTI18N.tabla(lang(), 'arranque', TXT[lang()] || TXT.en) : (TXT[lang()] || TXT.en));
 
   const st = document.createElement('style'); st.textContent = CSS; document.head.appendChild(st);
   const card = document.createElement('div'); card.id = 'btRdy';
@@ -263,7 +266,7 @@ export function modeBanner({ mode, lang, title }){
   let b = document.getElementById('btBanner');
   if(!b){ b = document.createElement('div'); b.id = 'btBanner';
     b.innerHTML = '<span class="plate"><span class="k"></span><span class="n"></span></span>'; host.appendChild(b); }
-  const refresh = () => { const t = TXT[lang()] || TXT.en;
+  const refresh = () => { const t = (window.BTI18N ? BTI18N.tabla(lang(), 'arranque', TXT[lang()] || TXT.en) : (TXT[lang()] || TXT.en));
     b.querySelector('.k').textContent = t.kicker;
     b.querySelector('.n').textContent = (title && title()) || t.name[mode] || mode; };
   refresh();

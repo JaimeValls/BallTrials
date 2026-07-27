@@ -71,6 +71,17 @@ export function createWebAudio({ musicUrl = null, musicGain = 0.30, sfxGain = 0.
     return loadingMusic;
   }
 
+  //+AG CAMBIAR DE PISTA SIN CAMBIAR DE REPRODUCTOR (lo pide el shell: menús → Resultados → menús). Se descarta el
+  //   buffer viejo y se pide el nuevo; NO para lo que esté sonando ni lo arranca — de eso manda quien llama, que
+  //   es el único que sabe si en ese momento debe oírse algo. Un segundo createWebAudio sería un segundo
+  //   AudioContext, y en iOS/Safari eso es justo lo que no conviene tener suelto.
+  function setMusicUrl(url){
+    if (url === musicUrl) return false;
+    musicUrl = url; musicBuf = null; loadingMusic = null;
+    if (ctx) prefetch();          // sin ctx todavía no hay nada que precargar: ya lo hará el prefetch() de siempre
+    return true;
+  }
+
   //+AG CAMINO CORTO del gesto: solo reanuda el AudioContext, sin esperar al decode de la música. Lo usa el cartel
   //   de "¡LISTO!" (chassis/arranque.mjs) porque su beep de confirmación tiene que sonar EN EL MISMO TAP: si
   //   esperase a la música (megas de mp3) el jugador tocaría y no oiría nada, que es justo lo que veníamos a arreglar.
@@ -148,7 +159,7 @@ export function createWebAudio({ musicUrl = null, musicGain = 0.30, sfxGain = 0.
   }
 
   return {
-    unlock, resume, prefetch, start, stop, loadMusic, setMusicGain, musicGain,
+    unlock, resume, prefetch, start, stop, loadMusic, setMusicUrl, setMusicGain, musicGain,
     get unlocked(){ return unlocked; },
     get hasMusic(){ return !!musicBuf; },
     //+AG "¿ya está sonando (o a punto de sonar) la música?". Lo usan los motores para que el "¡YA!" NO reinicie

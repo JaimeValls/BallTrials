@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-27 9c892d1"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-07-27 9ea616b"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -50,9 +50,11 @@
   .rtl .ricon .badge{ right:auto; left:-5px; }
   .rtl .showbtn .hbadge{ right:auto; left:-5px; }
   .rtl .tile .tart .tday{ right:auto; left:6px; }
-  /*+AG las flechas del riel de ranking apuntan a un LADO, no a una direccion de lectura: en arabe
-     "‹" tiene que llevarte al siguiente igual que "›" en español. Se giran con el resto. */
-  .rtl .rkarr{ transform:scaleX(-1); }
+  /*+AG las flechas apuntan a un LADO, no a una direccion de lectura: en arabe "‹" tiene que llevarte
+     al siguiente igual que "›" en español. El algoritmo bidi NO gira los glifos ‹ › — solo recoloca
+     el texto — asi que hay que girarlos a mano. Van los tres sitios donde hay una: el riel del
+     ranking, el "CAMBIAR ›" de la tarjeta de modo y el "‹ Inicio" de las cabeceras. */
+  .rtl .rkarr, .rtl .ch{ display:inline-block; transform:scaleX(-1); }
   /*+AG doc 49: --fam la escribe i18n/idiomas.js al elegir idioma. Fredoka no dibuja cirilico, arabe ni
      tailandes, y las CJK como webfont pesan megas: cada escritura antepone SU fuente y Fredoka se queda
      de respaldo para el latino. Todo lo demas de la app hereda con font-family:inherit, asi que con
@@ -612,6 +614,12 @@
   /*+AG doc 41: candado y entrada como arte. El candado del riel es diminuto (14 px): por eso
      se pidio a Codex un candado GORDO y redondo, que a ese tamaño un icono fino se borra. */
   .ricon img.lk{ width:16px; height:16px; object-fit:contain; bottom:-3px; right:-3px; filter:drop-shadow(0 1px 2px #000a); }
+  /*+AG doc 49: el candado sube a la esquina de ARRIBA. Vivia abajo a la derecha, justo donde acaba la
+     etiqueta, y en español no se notaba porque "Amigos" mide 28 px dentro de un boton de 48. Medido con
+     los 20 idiomas: aleman "Freunde" 31 px y turco "Arkadaşlar" 42 px se le meten debajo. Arriba no hay
+     nada (el icono va centrado y estos botones nunca llevan insignia), asi que el choque desaparece para
+     cualquier idioma, tambien para los que aun no existen. */
+  .ricon.lock img.lk{ bottom:auto; top:-3px; }
   .passband img.pi{ width:20px; height:20px; object-fit:contain; flex:0 0 auto; }
   .ico-in{ width:15px; height:15px; object-fit:contain; vertical-align:-2px; display:inline-block; }
   .ricon .badge{ position:absolute; top:-5px; right:-5px; min-width:18px; height:18px; padding:0 4px; border-radius:999px;
@@ -876,6 +884,17 @@
   .tile .tsub{ min-width:0; font-size:12px; font-weight:800; letter-spacing:.01em;
     color:color-mix(in srgb, var(--mc,#9aa3c7) 80%, #FFFFFF);
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  /*+AG doc 49: la linea NO cabia ni en su propio idioma. Medido con tools/prueba-encaje-idiomas.mjs:
+     a 360 px de pantalla el INGLES ya se cortaba ("Escape the monster", "Grab the most gems", 3 px
+     cada uno), o sea que la caja iba justa para la referencia y los otros 19 idiomas pagaban una
+     deuda que no era suya. Se le quita el espaciado y baja 1 px SOLO en la carta estrecha: la
+     destacada, que es ancha, se queda como estaba. Con eso entran los 20 sin recortar y sin
+     inventarse traducciones raras — que era la otra salida, y la mala. */
+  @media (max-width:390px){ .tile:not(.tancha) .tsub{ font-size:11px; letter-spacing:0; } }
+  /*+AG y un escalon mas para el movil pequeño. A 320 px se cortaban tambien el ingles y el ESPAÑOL
+     ("Huye del monstruo", "Recoge más gemas"): venia de antes de este pase, y se ha visto ahora
+     porque el barrido de idiomas mide los 20 en tres tamaños y antes solo se miraba uno. */
+  @media (max-width:340px){ .tile:not(.tancha) .tsub{ font-size:10px; } }
   .tile .tart{ position:relative; z-index:0; flex:1 1 auto; min-height:0; overflow:hidden; background:#0b0a1e; }
   .tile .tart img{ width:100%; height:100%; object-fit:cover; display:block; }
   /* la arena del Cazador es negra POR DISEÑO y a 175 px se volvia un rectangulo muerto. Se realza
@@ -1163,7 +1182,7 @@
 <!-- ===== RANKING (doc 37 §5 + doc 36): Global / Por bola / Diario · bots-persona ===== -->
 <div id="ranking" class="scr">
   <div class="rk-top">
-    <button class="g-back" id="rkBack">‹ <span data-t="home">Inicio</span></button>
+    <button class="g-back" id="rkBack"><span class="ch">‹</span> <span data-t="home">Inicio</span></button>
     <div class="g-title">🏆 <span data-t="rRanking">Ranking</span></div>
   </div>
   <div class="rktabs">
@@ -1298,7 +1317,7 @@
 <!-- ===== GARAJE (colección + calidad + hexágono + alineación, doc 05) ===== -->
 <div id="garaje" class="scr">
   <div class="g-top">
-    <button class="g-back" id="gBack">‹ <span data-t="home">Inicio</span></button>
+    <button class="g-back" id="gBack"><span class="ch">‹</span> <span data-t="home">Inicio</span></button>
     <div class="g-title" data-t="tGaraje">Garaje</div>
     <div class="h-coins" style="margin-left:auto">
       <div class="coin chispa"><img class="cico" src="arte/ui/moneda-chispa.webp" alt=""><span id="gChispas">0</span></div>
@@ -1338,7 +1357,7 @@
 <!-- ===== TIENDA (secciones, cero azar, puerta parental, doc 12) ===== -->
 <div id="tienda" class="scr">
   <div class="g-top">
-    <button class="g-back" id="shBack">‹ <span data-t="home">Inicio</span></button>
+    <button class="g-back" id="shBack"><span class="ch">‹</span> <span data-t="home">Inicio</span></button>
     <div class="g-title" data-t="tTienda">Tienda</div>
     <div class="h-coins" style="margin-left:auto">
       <div class="coin chispa"><img class="cico" src="arte/ui/moneda-chispa.webp" alt=""><span id="shChispas">0</span></div>
@@ -3139,6 +3158,11 @@ function showScreen(n){ ['home','results','garaje','tienda','temporada','perfil'
   //   (rAF, listeners y contexto WebGL): dos contextos vivos a la vez -fondo + motor- es lo que
   //   tumba un movil, y ademas la partida se merece toda la GPU.
   if(window.BT_AMBIENT) n==='home' ? BT_AMBIENT.on() : BT_AMBIENT.off();
+  //+AG el TEMA DE RESULTADOS vuelve a la pista de menu en cuanto se sale de Resultados, sea por donde sea
+  //   ("Jugar otra", el Garaje, la pestana de abajo...). Va aqui, en la unica puerta de cambio de pantalla, y
+  //   no en cada boton de salida: un camino nuevo se olvidaria de devolverla y la victoria se quedaria sonando
+  //   por los menus. Quien la PONE es showResults(), que es el unico que sabe si has quedado en el podio.
+  if(window.BT_MUSIC && n!=='results') BT_MUSIC.tema('lobby');
   if(typeof refreshTabBadges==='function') refreshTabBadges(); }   //+AG doc 40: el badge del Garaje se refresca al cambiar de pantalla
 function drawPreviewBall(cv,col){ const x=cv.getContext('2d'), S=cv.width, r=S*0.4, cx=S/2, cy=S/2; x.clearRect(0,0,S,S);
   const grd=x.createRadialGradient(cx-r*0.35,cy-r*0.4,r*0.1,cx,cy,r*1.1); grd.addColorStop(0,rgb(col,1.55)); grd.addColorStop(0.5,rgb(col,1.05)); grd.addColorStop(1,rgb(col,0.55));
@@ -3290,9 +3314,15 @@ function onTutorialEnd(d){
   if(d.completed) toast(S().howToDone(modeTitle(curMode)));
 }
 function onMatchEnd(d){
-  closeGameFrame();
   //+AG doc 07: los 3 modos son INDIVIDUALES → el resultado que cuenta es el PUESTO del jugador (playerPlace)
   const place = d.playerPlace||1;
+  //+AG EL TEMA SE ELIGE ANTES DE CERRAR EL IFRAME, y el orden es lo único que importa aquí: closeGameFrame()
+  //   reenciende la música del shell, así que si esto fuera después se oiría un pellizco de la pista de MENÚ
+  //   antes de entrar la de victoria. Con enPartida todavía en true, tema() solo cambia la pista y la precarga
+  //   (no arranca nada), y el on() de closeGameFrame ya suelta la buena. De regalo, el mp3 empieza a bajar
+  //   mientras se pinta Resultados. En EQUIPOS solo hay 4 puestos, así que "podio" ahí es ganar.
+  if(window.BT_MUSIC) BT_MUSIC.tema(((curFmt==='equipos'?(d.teamPlace||1)===1:place<=3)) ? 'victoria' : 'resultado');
+  closeGameFrame();
   const rew=computeRewards(place, curMode);   //+AG el modo importa: bonus del MODO DEL DIA (+50% 1a victoria)
   SAVE.chispas+=rew.chispas; SAVE.xp+=rew.xp; SAVE.played++;
   let leveled=false; while(SAVE.xp>=xpForLevel(SAVE.level)){ SAVE.xp-=xpForLevel(SAVE.level); SAVE.level++; leveled=true; }
@@ -3342,6 +3372,10 @@ function finishRace(){
 }
 function showResults(place, rew, leveled, colArg, teamP, d){
   showScreen('results'); applyShell();   //+AG los rotulos fijos de Resultados (Chispas/Nivel) tambien por idioma
+  //+AG MUSICA DE RESULTADOS por PODIO (decision de Jaime 2026-07-27: podio, no solo el 1o). Va DESPUES de
+  //   showScreen porque showScreen devuelve el tema a 'lobby' al salir de Resultados: si se pusiera antes, el
+  //   propio cambio de pantalla lo borraria. En EQUIPOS solo hay 4 puestos, asi que "podio" ahi es ganar.
+  if(window.BT_MUSIC) BT_MUSIC.tema((teamP ? teamP===1 : place<=3) ? 'victoria' : 'resultado');
   const s=S();
   //+AG DISCO DE CAMPEON = color REAL del ganador (viene del motor). Si no llega, se cae al 1o de la clasificacion.
   const w = lastStandings && (lastStandings.find(r=>r.win) || lastStandings[0]);
@@ -4527,6 +4561,24 @@ else if((FRESH || _pend) && !SAVE.onboarded && _onbParam!=='0'){
   const vol = ()=>{ try{ return window.musicVolPref ? musicVolPref() : 0.65; }catch(e){ return 0.65; } };
   const audio = createWebAudio({ musicUrl:'motor/_music/lobby.mp3', musicGain:LOBBY_BASE*vol(), musicLoopTrim:0.12 });
 
+  //+AG TEMA DE RESULTADOS (doc 14 §1; el hueco que doc 48 dejo abierto). Hasta hoy Resultados heredaba la pista
+  //   de menu, o sea que ganar y quedar ultimo sonaban EXACTAMENTE igual. Dos listas, elegidas por PODIO:
+  //   1o-3o suena la fanfarria; del 4o para abajo, la version calmada. Decision de Jaime (2026-07-27): podio y
+  //   no solo el 1o. Dos pistas por lista y al azar, igual que los modos: la de Resultados se oye en CADA ronda,
+  //   que es justo donde una sola pista cansa antes.
+  //+AG LOS NIVELES SON MEDIDOS, no a ojo (misma regla que doc 48). Las 4 salieron de Suno a -14,5..-15,2 LUFS,
+  //   o sea ~7 dB MAS FUERTES que lobby.mp3 (-22,3): con el 0.40 del lobby, Resultados habria pegado un salto de
+  //   volumen absurdo al terminar la partida. Con 0.24 la victoria queda ~2 dB por encima de los menus y ~2 por
+  //   debajo de la partida — se nota que has ganado sin gritar; la de no-victoria va 1,6 dB mas abajo, que es lo
+  //   que la hace leerse como "otra vez sera" y no como una celebracion.
+  const TEMAS = {
+    lobby:     { base:LOBBY_BASE, pistas:['motor/_music/lobby.mp3'] },
+    victoria:  { base:0.24, pistas:['motor/_music/victory.mp3','motor/_music/victory2.mp3'] },
+    resultado: { base:0.20, pistas:['motor/_music/result.mp3','motor/_music/result2.mp3'] },
+  };
+  let tema = 'lobby';
+  const base = ()=> (TEMAS[tema]||TEMAS.lobby).base;
+
   //+AG UNA sola verdad de "¿deberia estar sonando?" = quiere() && !enPartida, y aplicar() la persigue. Con dos
   //   interruptores independientes (Ajustes y la partida) llevar un solo booleano "playing" se desincroniza solo.
   window.BT_MUSIC = {
@@ -4537,7 +4589,7 @@ else if((FRESH || _pend) && !SAVE.onboarded && _onbParam!=='0'){
       //   oye en el acto si ya suena, y queda puesto para cuando arranque si todavia no ha sonado (el ctx ya
       //   existe desde el prefetch, aunque siga suspendido). Sin AudioContext setMusicGain no hace nada y manda
       //   el gain de creacion, que ya se calculo con este mismo valor.
-      audio.setMusicGain(LOBBY_BASE*vol(), 0.12);
+      audio.setMusicGain(base()*vol(), 0.12);
       if(!this.lista) return;
       const debe = this.quiere() && !this.enPartida;
       if(debe===this.sonando) return;
@@ -4545,13 +4597,31 @@ else if((FRESH || _pend) && !SAVE.onboarded && _onbParam!=='0'){
       if(debe) audio.start(null, 44100); else audio.stop();
       this.sonando = debe;
     },
+    //+AG CAMBIAR DE TEMA (lobby / victoria / resultado). Si de verdad cambia la pista, se corta la vieja y se
+    //   arranca la nueva: no hay cross-fade a proposito, porque el corte cae en el salto de pantalla a
+    //   Resultados, donde ya hay un cambio visual completo y una transicion suave solo lo emborronaria.
+    //   El azar se tira AQUI y no al cargar la pagina (como en los modos): el shell no se recarga entre rondas,
+    //   asi que si se eligiera una vez sonaria la misma toda la sesion, que es justo lo que se venia a evitar.
+    tema(t){
+      if(!TEMAS[t]) return;
+      //+AG si YA SUENA ese tema no se toca (cambiar de pantalla dentro del shell no debe cortar la musica).
+      //   Pero si NO suena, se vuelve a tirar el dado aunque el tema sea el mismo: al encadenar rondas con el
+      //   mismo desenlace ("Jugar otra" y vuelves a quedar 4o) el shell no se recarga, y sin este re-sorteo
+      //   oirias SIEMPRE la misma de las dos. Es gratis: si sale la que ya estaba, setMusicUrl no hace nada.
+      if(t===tema && this.sonando) return;
+      tema = t;
+      const lista = TEMAS[t].pistas;
+      const cambio = audio.setMusicUrl(lista[Math.floor(Math.random()*lista.length)]);
+      audio.setMusicGain(base()*vol(), 0.12);
+      if(cambio && this.sonando){ audio.stop(); this.sonando=false; this.aplicar(); }
+    },
     on(){ this.enPartida=false; this.aplicar(); },
     off(){ this.enPartida=true; this.aplicar(); },
     refresh(){ this.aplicar(); },                       //+AG lo llama el toggle de Ajustes
     //+AG estado VIVO para poder comprobarlo sin oidos: 'sonando' es lo que este objeto cree, pero ctx y nivel
     //   los da el propio AudioContext. Si ctx sale 'suspended' o nivel 0 con sonando=true, es que se esta
     //   mintiendo (paso una vez con el fondo vivo) y el fallo esta aqui, no en los altavoces del jugador.
-    get estado(){ return { lista:this.lista, sonando:this.sonando, enPartida:this.enPartida,
+    get estado(){ return { lista:this.lista, sonando:this.sonando, enPartida:this.enPartida, tema,
       hasMusic:audio.hasMusic, ctx:(audio.ctx?audio.ctx.state:'sin-ctx'), nivel:audio.musicLevel }; },
   };
 
