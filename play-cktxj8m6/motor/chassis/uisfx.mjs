@@ -52,8 +52,8 @@ export function createUiSfx(audio, sfxOn){
   // CLIC genérico: el toque de cualquier botón, pestaña o carta. Corto y seco (60 ms), con un pelín de aire en
   // el ataque para que suene a "toc" físico y no a pitido.
   const TAP = ()=>{ const { buf:b, S } = mkBuf(0.07);
-    S.note(0, 0.055, 740, 0.20, { wave:'pulse', duty:0.35, decay:16 });
-    S.add(0, 0.022, 2400, 1300, 0.06, 0.45, 20);
+    S.note(0, 0.055, 740, 0.24, { wave:'pulse', duty:0.35, decay:16 });
+    S.add(0, 0.022, 2400, 1300, 0.07, 0.45, 20);
     return b; };
 
   // CONFIRMAR: lo que ARRANCA algo (JUGAR, equipar, comprar, volver a jugar). Dos notas hacia ARRIBA, hermano
@@ -62,6 +62,16 @@ export function createUiSfx(audio, sfxOn){
     S.note(0,     0.09, 880,  0.22, { wave:'pulse', duty:0.42, decay:13 });
     S.note(0.065, 0.18, 1319, 0.20, { wave:'pulse', duty:0.42, decay:8 });
     S.note(0.065, 0.18, 1760, 0.06, { wave:'sine', decay:7 });
+    return b; };
+
+  // ABRIR: las tarjetas GRANDES que te llevan a otra pantalla (la tarjeta de modo, la bola-héroe, la banda del
+  // Pase, los rieles, una ficha del Garaje). Un swish de aire que SUBE, con un pelín de nota para que tenga
+  // cuerpo. Existe porque un clic seco de 55 ms se pierde debajo de la transición de pantalla: lo que mueve
+  // medio juego tiene que sonar a algo más que una pestaña (VB Jaime 2026-07-27: "la tarjeta de cambiar modo
+  // no suena" — sonaba, pero con el mismo clic diminuto que un botón cualquiera).
+  const OPEN = ()=>{ const { buf:b, S } = mkBuf(0.20);
+    S.add(0,    0.16, 430, 1250, 0.17, 0.32, 5);
+    S.note(0.02,0.13, 880,  0.11, { wave:'tri', decay:9 });
     return b; };
 
   // VOLVER / cerrar: las mismas dos notas, hacia ABAJO y más apagadas. Cerrar no es un logro.
@@ -79,6 +89,7 @@ export function createUiSfx(audio, sfxOn){
 
   return {
     tap(){     play(buf('tap',     TAP)); },
+    open(){    play(buf('open',    OPEN)); },
     confirm(){ play(buf('confirm', CONFIRM)); },
     back(){    play(buf('back',    BACK)); },
     denied(){  play(buf('denied',  DENIED)); },
