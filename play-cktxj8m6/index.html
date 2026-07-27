@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-27 068861b+SUCIO"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-07-27 cbfeff0+SUCIO"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -4376,6 +4376,7 @@ else if((FRESH || _pend) && !SAVE.onboarded && _onbParam!=='0'){
      rescate al volver de segundo plano en movil. -->
 <script type="module">
   import { createWebAudio } from './motor/chassis/webaudio.mjs';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -4431,6 +4432,39 @@ else if((FRESH || _pend) && !SAVE.onboarded && _onbParam!=='0'){
   };
   document.addEventListener('pointerdown', despertar, true);
   document.addEventListener('keydown', despertar, true);
+
+  //+AG VB Jaime 2026-07-27: "echo en falta los efectos de hacer clic en los botones, menu y tal, no oigo nada".
+  //   Los menus estaban MUDOS: el unico banco de SFX vivia en el motor y solo sonaba dentro de la partida.
+  //   El vocabulario (clic / confirmar / volver / no-se-puede) se sintetiza con el MISMO synth del video en
+  //   motor/chassis/uisfx.mjs; aqui solo se decide QUE elemento suena a que.
+  const ui = createUiSfx(audio, ()=>{ try{ return !(SAVE.settings && SAVE.settings.sfx===false); }catch(e){ return true; } });
+  window.BT_UI = ui;
+
+  //+AG QUE SUENA: se reusan LAS MISMAS listas del squash de pulsacion (el bloque "SQUASH al pulsar" del CSS).
+  //   Si un elemento se aplasta al tocarlo es que es pulsable, asi que es exactamente el que tiene que sonar:
+  //   una sola lista que mantener y cero botones mudos por olvido. Un delegado en el documento (y no N
+  //   listeners) porque medio juego se pinta en caliente: Ajustes, Garaje y Tienda montan sus botones al abrirse.
+  //+AG las listas se MIDIERON contra el DOM vivo (sonda: todo lo que es <button>, role=button o tiene onclick,
+  //   con las 8 pantallas pintadas). Copiarlas del CSS del squash no bastaba: .h-play es un fosil que ya no
+  //   existe y el CTA de verdad es .playbig, y asi se habrian quedado mudos 12 pulsables (los rieles de la
+  //   portada, la bola-heroe, la banda del Pase, la tarjeta de modo, las casillas del Pase y la hoja de JUGAR).
+  const SEL_CONFIRM = '.playbig, .sfmt, .sh-buy, .r-again, .onb-go, .gd-btn.prim, .se-cta';       // ARRANCA/COMPRA algo
+  const SEL_BACK    = '.gd-close, .gd-btn.back, .gd-btn.ghost, #setClose, .sclose, .sheetback, .onb-skip';   // cierra/vuelve
+  const SEL_NO      = '[disabled], .locked, .ricon.lock, .sc-soon, .soontag';                     // no se puede (todavia)
+  const SEL_TAP     = 'button, select, [role="switch"], .tab, .coin, .cups, .g-card, .h-modecard, .m.open, .h-ic, .onb-opt, .onb-b, .sh-sec, .sc-block, .ricon, .herotap, .passband, .modecompact, .tile, .set-row';
+  const SEL_TODO    = SEL_CONFIRM+', '+SEL_BACK+', '+SEL_NO+', '+SEL_TAP;
+  document.addEventListener('pointerdown', e=>{
+    const t = e.target && e.target.closest ? e.target.closest(SEL_TODO) : null;
+    if(!t) return;
+    //+AG el PRIMER toque tambien suena: resume() marca desbloqueado y reanuda el contexto en el mismo gesto
+    //   (camino corto de webaudio.mjs, sin esperar al decode del mp3). Sin esto, el primer clic del juego
+    //   -justo el que estrena el sonido- seria el unico mudo.
+    if(!audio.unlocked){ try{ audio.resume(); }catch(err){} }
+    if(t.matches(SEL_NO)) ui.denied();
+    else if(t.matches(SEL_BACK)) ui.back();
+    else if(t.matches(SEL_CONFIRM)) ui.confirm();
+    else ui.tap();
+  }, true);
 </script>
 
 <!--+AG docs/42 Fase 1: el progreso deja de vivir solo en este movil.
