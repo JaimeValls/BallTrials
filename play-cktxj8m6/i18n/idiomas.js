@@ -135,6 +135,20 @@
     return me ? me.slice(0, me.lastIndexOf('i18n/')) : '';
   })();
 
+  //+AG SELLO DE VERSION, y existe por un fallo de produccion del 27-07. Hostinger cachea una copia
+  //   GZIP aparte de cada fichero, y esa copia se quedo rancia: el servidor daba el idiomas.js nuevo
+  //   sin comprimir (15 KB) y una version vieja al pedirlo comprimido, que es lo que hace todo
+  //   navegador. Resultado: index.html nuevo llamando a una funcion que su hermano viejo no tenia.
+  //   El build le cuelga ?v=<sello> al <script src> de este fichero; aqui se lee de la propia URL y
+  //   se le pasa a los 18 paquetes. Un sello nuevo = una URL nueva = una entrada de cache nueva, asi
+  //   que a partir de ahora cada despliegue se sirve entero o no se sirve, pero nunca mezclado.
+  const VER = (function () {
+    const me = document.currentScript && document.currentScript.src;
+    const m = me && me.match(/[?&]v=([^&]+)/);
+    return m ? m[1] : '';
+  })();
+  const conVer = u => VER ? u + (u.indexOf('?') < 0 ? '?' : '&') + 'v=' + VER : u;
+
   const packs = {};
   const pending = {};
   function load(l) {
@@ -144,7 +158,7 @@
     if (!LANGS[l]) return Promise.resolve(null);
     pending[l] = new Promise(res => {
       const s = document.createElement('script');
-      s.src = BASE + 'i18n/' + l + '.js';
+      s.src = conVer(BASE + 'i18n/' + l + '.js');
       s.onload = () => { packs[l] = packs[l] || null; res(packs[l]); };
       s.onerror = () => { console.warn('[i18n] no se pudo cargar el idioma', l); packs[l] = null; res(null); };
       document.head.appendChild(s);
