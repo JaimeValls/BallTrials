@@ -39,6 +39,30 @@
 // desplegar esto y ver que las fichas viajan, y solo despues encender el panel.
 export const TURNSTILE_SITEKEY = '0x4AAAAAAD-Wy0gh4sTjZE0g';
 
+//+AG 27-jul: EL 400 QUE VES EN LA CONSOLA EN LOCAL ES ESTE, Y ES ESPERABLE.
+// Sirviendo el juego en localhost (node prototipo/serve.mjs) la consola escupe un
+// "Failed to load resource: the server responded with a status of 400" seguido de
+// "[Cloudflare Turnstile] Error: 110200". El 110200 es "Domain not authorized": el
+// widget solo tiene dados de alta balltrials.com y www.balltrials.com en Hostname
+// Management, y localhost no esta en esa lista. NO es una llamada a Supabase, aunque
+// lo parezca por el momento en que sale.
+//
+// NO pasa en produccion y NO rompe nada. Comprobado el 27-07-2026 con un barrido de
+// page.on('response') sobre balltrials.com/play-cktxj8m6/: cero respuestas >=400, la
+// ficha se emite y viaja. Y en local, el 'error-callback' de mas abajo devuelve null,
+// el alta sale sin ficha y GoTrue contesta 200 porque la proteccion del panel de
+// Supabase sigue apagada (que es justo el orden seguro descrito arriba).
+//
+// Solo asoma en la PRIMERA carga de un aparato nuevo: quien ya tiene sesion entra por
+// refresh_token, que no pide ficha, y el script de Cloudflare ni se descarga. Medido
+// cargando dos veces seguidas con el mismo perfil: en la 2a vuelta, cero peticiones a
+// challenges.cloudflare.com.
+//
+// EL DIA QUE SE ENCIENDA el interruptor de captcha en el panel de Supabase esto deja
+// de ser cosmetico en local: sin ficha el signup pasara a 400 y toda sesion abierta
+// desde localhost se quedara en localStorage, sin nube. El arreglo es de panel y no de
+// codigo: anadir "localhost" a Hostname Management del widget en Cloudflare.
+
 const SCRIPT_URL = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
 
 // Tope de paciencia. Es el retraso maximo que este modulo puede meter en la primera
