@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-27 e0b0b71"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-07-27 5174ef1"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -91,7 +91,10 @@
      definida... en prototipo/index.html, que es OTRO archivo. Una variable que no existe invalida la
      declaracion entera, asi que el fondo salia TRANSPARENTE y del badge solo se pintaba su box-shadow: un
      aro negro sobre la barra, un agujero en vez de un aviso. Llevaba escondido detras del gris de la barra. */
-  :root{ --gold:#fbb915; --gold2:#ffd23f; --cyan:#18c7d6; --line:#ffffff1a; --red:#e0293d;
+  /*+AG --green tenia el MISMO problema que --red y se cazó barriendo el resto: lo usa el "+bonus" de los
+     packs de la Tienda (.sh-pack .amt small) sin valor de respaldo, asi que ese texto salia del color
+     heredado en vez de verde. Se toma el mismo verde del boton de comprar que tiene justo al lado. */
+  :root{ --gold:#fbb915; --gold2:#ffd23f; --cyan:#18c7d6; --line:#ffffff1a; --red:#e0293d; --green:#5bc46a;
     --bg-hi:#6d3ae0; --bg:#5024b5; --bg-mid:#3a1a8f; --bg-lo:#241159; }
   /*+AG las texturas de la web (el mismo PNG, pasado a webp): la tribuna hace de horizonte en la Home y
      los doodles dan grano a las pantallas de contenido. Reutilizar el asset es lo que garantiza que
