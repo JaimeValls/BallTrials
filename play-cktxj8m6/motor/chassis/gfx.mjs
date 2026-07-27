@@ -11,7 +11,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { faceTexture, hunterTexture, faceLayers, PRESETS as FACE_PRESETS } from './facegen.mjs';
 import { itemTexture } from './itemgen.mjs';
-import { ballMaterial } from './ballmat.mjs';
+import { ballMaterial, skinTexture } from './ballmat.mjs';   //+AG skinTexture: la piel del cuerpo (encargo 17)
 import { makeProp } from './propgen.mjs';   //+AG doc 41 bloque G: prop de la bola-heroe
 
 export { THREE };
@@ -209,7 +209,11 @@ export function makeBall(scene, b, BALL_R){
 export function makeBallVinyl(scene, b, BALL_R, look, arch){
   const g = new THREE.Group();
   const col = sat(b.color);
-  const mat = ballMaterial(col, look || undefined);
+  //+AG la PIEL entra por la MISMA puerta que el material y el prop: solo si llega 'arch', o sea
+  //   solo tu bola en individual. Sin arch no hay piel y el shader queda byte-identico -> el
+  //   torneo y el video del motor no cambian ni un pixel. Si el heroe no tiene piel todavia, la
+  //   textura falla al cargar y ballmat la deja en gris neutro (bola lisa, no bola negra).
+  const mat = ballMaterial(col, look || undefined, arch ? skinTexture(arch) : null);
   const body = new THREE.Mesh(new THREE.SphereGeometry(BALL_R, 40, 28), mat); g.add(body);
   //+AG doc 41 bloque G (2a tajada): el PROP cuelga del GRUPO, no del cuerpo. attachSquash escala
   //   body y le gira body.rotation.z con el rumbo; al grupo solo le toca el tilt. Asi el prop se
