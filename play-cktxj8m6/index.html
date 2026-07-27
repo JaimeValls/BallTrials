@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-27 748dc84"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-07-27 eb6a354"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -958,7 +958,7 @@
   .rkstrip::-webkit-scrollbar{ display:none; }
   .rktile{ flex:0 0 auto; min-width:62px; display:flex; flex-direction:column; align-items:center; gap:1px; padding:5px 7px 4px;
     font-family:inherit; background:#ffffff10; border:2px solid #ffffff2e; border-radius:12px; cursor:pointer; }
-  .rktile i{ font-size:19px; font-style:normal; line-height:1.15; }
+  .rktile img{ width:28px; height:28px; object-fit:contain; display:block; filter:drop-shadow(0 2px 4px #0008); }   /*+AG doc 41: el retrato de la bola, no un emoji */
   .rktile span{ font-size:9.5px; font-weight:900; letter-spacing:.02em; color:#c4cbe6; white-space:nowrap; }
   .rktile.on{ border-color:#fff; background:#ffffff22; box-shadow:0 0 0 1px #ffffff55, 0 4px 12px #00000055; }
   .rktile.on span{ color:#fff; }
@@ -971,6 +971,8 @@
   .rkrow{ display:flex; align-items:center; gap:9px; background:#ffffff08; border:1px solid var(--line); border-radius:12px; padding:7px 11px; font-size:13px; font-weight:800; flex:0 0 auto; }
   .rkrow .kp{ width:34px; font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; font-weight:900; flex:0 0 auto; }
   .rkrow .rdisc{ width:22px; height:22px; border-radius:50%; flex:0 0 auto; box-shadow:inset 0 2px 4px #ffffff33, 0 1px 3px #0006; }
+  /*+AG doc 41: en "Por bola" cada fila ES una bola de ese tipo, asi que lleva su retrato, no un disco de color */
+  .rkrow img.rdisc{ width:26px; height:26px; border-radius:0; object-fit:contain; box-shadow:none; filter:drop-shadow(0 2px 4px #0008); }
   .rkrow .kn{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .rkrow .kt{ font-size:11px; flex:0 0 auto; }
   .rkrow .kv{ font-variant-numeric:tabular-nums; font-weight:900; color:#e7ebff; flex:0 0 auto; }
@@ -1145,7 +1147,7 @@
   </div>
   <div class="rkprize" data-t="rkPrize">🎁 Franjas de premio · Top 10% → 🎟️ Fichas de Torneo · Top 1% → título + skin</div>
   <div class="rkme" id="rkMe"></div>
-  <div class="rklist" id="rkList"></div>
+  <div class="rklist" id="rkList" data-fit="scroll"></div>   <!-- misma excepcion que #gGrid: una clasificacion es una lista larga por definicion -->
   <div class="h-tabs">
     <button class="tab" data-nav="jugar"><i class="tico t-jugar"></i><span data-t="tJugar">Jugar</span></button>
     <button class="tab" data-nav="garaje"><i class="tico t-garaje"></i><span data-t="tGaraje">Garaje</span></button>
@@ -1272,7 +1274,9 @@
       <div class="coin gema"><img class="cico" src="arte/ui/moneda-gema.webp" alt=""><span id="gGemas">0</span></div>
     </div>
   </div>
-  <div class="g-grid" id="gGrid"></div>
+  <!-- data-fit="scroll": la coleccion son 12 bolas y subiendo; deslizar DENTRO de la rejilla es su forma
+       correcta y __fitCheck() no lo cuenta como desbordamiento (ver la excepcion en __fitCheck) -->
+  <div class="g-grid" id="gGrid" data-fit="scroll"></div>
   <div class="h-tabs">
     <button class="tab" id="garTabJugar"><i class="tico t-jugar"></i><span data-t="tJugar">Jugar</span></button>
     <button class="tab on"><i class="tico t-garaje"></i><span data-t="tGaraje">Garaje</span></button>
@@ -4103,8 +4107,12 @@ function redeemCode(){ const v=el('codeIn').value.trim().toUpperCase(); const m=
 let rkTab='global', rkBallFilt='cohete';   // Por bola SIEMPRE filtra a un tipo (el total ya vive en Global, como en BS: Players vs charts por brawler)
 function rankRows(){ const dn=todayNum(), rows=[], s=S();
   if(rkTab==='bola'){
-    BOTS.forEach(b=>b.balls.forEach((bb,i)=>{ const k=botBallArch(b,i), A=ARCHS[k]; rows.push({name:bb.name+' · '+b.name, color:bb.color, v:effBall(b,i,dn), me:false, arch:k}); }));
-    SAVE.balls.forEach(b=>{ const A=ARCHS[b.arch], an=A?archName(b.arch):b.arch; rows.push({name:an+' · '+s.you, color:rgb(ARCH_COLOR[b.arch]||[0.16,0.42,1.0]), v:b.copas||0, me:true, ball:an, arch:b.arch}); });
+    BOTS.forEach(b=>b.balls.forEach((bb,i)=>{ const k=botBallArch(b,i), A=ARCHS[k]; rows.push({name:b.name, color:bb.color, v:effBall(b,i,dn), me:false, arch:k}); }));
+    //+AG la fila lleva solo el NOMBRE DEL JUGADOR; el tipo lo dice el retrato (y ya lo dice el filtro), como en
+    //   el ranking por brawler de BS. Antes llevaba el mote decorativo de la bola del bot, asi que el filtro
+    //   "Cohete" listaba filas llamadas "Estrella/Rana/Burbuja" —contradecia al propio filtro— y ademas ese
+    //   mote salia siempre en español con el juego en ingles.
+    SAVE.balls.forEach(b=>{ const A=ARCHS[b.arch], an=A?archName(b.arch):b.arch; rows.push({name:s.you, color:rgb(ARCH_COLOR[b.arch]||[0.16,0.42,1.0]), v:b.copas||0, me:true, ball:an, arch:b.arch}); });
     for(let i=rows.length-1;i>=0;i--) if(rows[i].arch!==rkBallFilt) rows.splice(i,1);
   } else {
     BOTS.forEach(b=>{ let v=0; if(rkTab==='global') v=effTotal(b,dn); else b.balls.forEach((bb,i)=>v+=effBall(b,i,dn)-effBall(b,i,dn-1)); rows.push({name:b.name, color:b.color, v, me:false}); });
@@ -4112,6 +4120,10 @@ function rankRows(){ const dn=todayNum(), rows=[], s=S();
     rows.push({name:s.you, color:rgb(ARCH_COLOR[(equippedBall()||{}).arch]||[0.16,0.42,1.0]), v:mc, me:true});
   }
   rows.sort((a,b)=>b.v-a.v || a.name.localeCompare(b.name));
+  //+AG un bot puede tener DOS bolas del mismo tipo (el sorteo del roster no lo impide), y ahora que la fila
+  //   lleva su nombre saldria repetido en la tabla de ese tipo. Se queda con su mejor bola (ya viene ordenado).
+  if(rkTab==='bola'){ const vis={}; for(let i=0;i<rows.length;i++){ const r=rows[i]; if(r.me) continue;
+    if(vis[r.name]){ rows.splice(i--,1); continue; } vis[r.name]=1; } }
   return rows;
 }
 function paintRanking(){ applyShell(); const s=S();
@@ -4125,7 +4137,9 @@ function paintRanking(){ applyShell(); const s=S();
   function addRow(r,i){ const row=document.createElement('div'); row.className='rkrow'+(r.me?' meRow':'');
     let vTxt,vCls='';
     if(rkTab==='diario'){ vTxt=deltaTxt(r.v); vCls=r.v>0?' up':(r.v<0?' dn':''); } else vTxt='🏆 '+nfmt(r.v);
-    row.innerHTML='<span class="kp">'+(medals[i]||'#'+(i+1))+'</span><span class="rdisc" style="background:'+r.color+'"></span>'+
+    const disc = r.arch ? '<img class="rdisc" src="'+ballArt(r.arch)+'" alt="" loading="lazy">'
+                        : '<span class="rdisc" style="background:'+r.color+'"></span>';
+    row.innerHTML='<span class="kp">'+(medals[i]||'#'+(i+1))+'</span>'+disc+
       '<span class="kn">'+r.name+'</span>'+(i<prize&&rkTab!=='diario'?'<span class="kt" title="'+S().rkPrizeTip+'">🎟️</span>':'')+
       '<span class="kv'+vCls+'">'+vTxt+'</span>';
     list.appendChild(row); }
@@ -4137,7 +4151,7 @@ function renderRkFilt(){ const box=el('rkPick'); if(!box) return;
   box.classList.toggle('on', rkTab==='bola');
   const strip=el('rkStrip');
   if(rkTab!=='bola'){ strip.innerHTML=''; return; }
-  strip.innerHTML=ARCH_KEYS.map(k=>'<button class="rktile'+(k===rkBallFilt?' on':'')+'" data-filt="'+k+'"><i>'+ARCHS[k].icon+'</i><span>'+archName(k)+'</span></button>').join('');
+  strip.innerHTML=ARCH_KEYS.map(k=>'<button class="rktile'+(k===rkBallFilt?' on':'')+'" data-filt="'+k+'"><img src="'+ballArt(k)+'" alt="" loading="lazy"><span>'+archName(k)+'</span></button>').join('');
   strip.querySelectorAll('.rktile').forEach(b=>b.onclick=()=>{ rkBallFilt=b.dataset.filt; paintRanking(); });
   const on=strip.querySelector('.rktile.on'); if(on) on.scrollIntoView({inline:'nearest',block:'nearest'});
   updateRkArrows();
@@ -4302,16 +4316,30 @@ el('codeOk').onclick=redeemCode; el('codeNo').onclick=closeCode;
 el('codeIn').addEventListener('keydown',e=>{ if(e.key==='Enter') redeemCode(); });
 //+AG doc 40: GUARDIA DE ENCAJE. Regla de producto (Jaime 2026-07-24): "todas las user interface deben cuadrar
 //   en el aspect ratio del movil... casi nunca hay que deslizar". Esto lo hace comprobable en vez de opinable:
-//   desde la consola (o con ?fit=1) recorre TODAS las pantallas al viewport actual y devuelve las que se salen.
+//   desde la consola recorre TODAS las pantallas al viewport actual y devuelve las que se salen. Lo llama
+//   tambien tools/captura-pantalla.mjs en cada captura, que es como acaba mirandose sin acordarse de mirarlo.
 //   Uso:  __fitCheck()            -> [] si todo cabe
 //         __fitCheck(375,600)     -> avisa si algo se sale suponiendo ese alto util
 //   Lo secundario (modales, hojas) no entra: se abren sobre la pantalla y se cierran solos.
+//+AG PUNTO CIEGO CAZADO EL 27-jul, y era el peor de los tres: esto MEDIA PANTALLAS VACIAS. Solo hacia
+//   showScreen(n), que enciende el <div> pero NO lo pinta — el contenido del Garaje, la Tienda y el
+//   Ranking lo escupen renderGaraje()/renderTienda()/paintRanking() al abrirlos. En una sesion recien
+//   nacida __fitCheck() devolvia [] ("todo cabe") midiendo un #gGrid con CERO tarjetas; el aviso solo
+//   aparecia si el que medía había pasado antes por esa pantalla a mano. De ahi que el desbordamiento
+//   del Garaje saliera 203 px unas veces y nada otras: no es que el numero bailara, es que la mitad de
+//   las medidas eran de una pantalla en blanco. Ahora cada pantalla se PINTA por su puerta antes de
+//   medirla. Se llama al pintor, no al open*(): openGaraje() arranca con checkHitos(), que puede
+//   regalar una bola y lanzar un toast, y una herramienta de MEDIR no toca la partida.
 window.__fitCheck=function(w,h){
   const H=h||innerHeight, out=[], was=[...document.querySelectorAll('.scr.on')].map(e=>e.id);
   tblExpanded=false;   // se mide el estado POR DEFECTO; que la clasificacion desplegada a mano se desplace es lo esperado
   const SCREENS=['home','results','garaje','tienda','temporada','perfil','selector','ranking'];
+  const PINTA={ home:renderHome, garaje:renderGaraje, tienda:renderTienda, temporada:openTemporada,
+                perfil:openPerfil, selector:paintSelector, ranking:paintRanking };   // results se pinta con setResultsStep, mas abajo
   for(const n of SCREENS){
     showScreen(n);
+    // si un pintor peta, se DICE: callarlo devolveria a medir la pantalla vacia, que es justo el fallo de arriba
+    try{ if(PINTA[n]) PINTA[n](); }catch(err){ out.push({screen:n, box:'NO SE HA PODIDO PINTAR', eje:String(err&&err.message||err).slice(0,60), extra:0}); }
     const e=el(n); if(!e) continue;
     //+AG Resultados era la unica pantalla con dos pasos que medir; desde que se fusionaron (2026-07-27) todas
     //   se miden igual. Se conserva el bucle porque el dia que otra pantalla tenga estados, se enchufan aqui.
@@ -4321,10 +4349,22 @@ window.__fitCheck=function(w,h){
       // solo cuentan las cajas que RECORTAN de verdad (overflow != visible): son las unicas donde el jugador
       // pierde contenido si no desliza. Una caja con overflow visible "sobresale" en el papel pero se ve
       // entera — p.ej. una tarjeta que entra animandose con un translateY de 8px.
+      //+AG 27-jul: LA EXCEPCION, y es una sola. "Todo cabe sin deslizar" habla de la PANTALLA: los mandos,
+      //   la navegacion y el contenido de una vista tienen que verse sin buscarlos. Una COLECCION que crece
+      //   con la partida (12 bolas y subiendo, el ranking entero) no puede cumplirlo por definicion, y
+      //   deslizar DENTRO de la lista es su forma correcta — asi es en Brawl Stars. Esas cajas se marcan a
+      //   mano con data-fit="scroll" y no se cuentan. Se marcan UNA A UNA a proposito: excluir de golpe
+      //   todo lo que tenga overflow-y:auto habria cegado al guardia justo donde ha servido — .modegrid
+      //   tambien es auto y ahi cazo dos bugs de verdad (la rejilla de modos empezando a deslizar por 6 px
+      //   y por 24 px). Un aviso que se ignora siempre acaba en un guardia al que nadie mira; una exclusion
+      //   que se traga todo, en un guardia que no ve nada. La marca no vale para tapar un overflow:hidden,
+      //   que ahi el contenido SE PIERDE y no hay deslizamiento que lo rescate.
       const nom=d=>(d.id||d.className||d.tagName).toString().slice(0,32), scr=n+(st?(' · paso '+st):'');
       [e, ...e.querySelectorAll('*')].forEach(d=>{
         if(d.clientHeight<60) return;
-        if(d!==e && getComputedStyle(d).overflowY==='visible') return;
+        const ov=getComputedStyle(d).overflowY;
+        if(d!==e && ov==='visible') return;
+        if(d!==e && d.dataset.fit==='scroll' && (ov==='auto'||ov==='scroll')) return;
         const extra=d.scrollHeight-d.clientHeight;
         if(extra>4) out.push({screen:scr, box:nom(d), eje:'alto', extra});
       });
