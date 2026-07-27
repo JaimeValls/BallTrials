@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-26 058d1ba"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-07-27 0698494"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -2343,6 +2343,7 @@ const MORE={
     cosmNames:{sk_llamas:'Llamas',sk_galaxia:'Galaxia',es_arcoiris:'Estela Arcoíris',ce_fuegos:'Fuegos',em_gg:'¡GG!',ma_corona:'Marco Corona'},
     cosmCats:{Skin:'Skin',Estela:'Estela','Celebración':'Celebración',Emote:'Emote',Marco:'Marco'},
     gemsAmt:g=>g+' Gemas',
+    dealAmt:c=>'+'+c+' Chispas', dealDay:'oferta del día', dealDone:'Vuelve mañana', tDeal:c=>'✦ +'+c+' Chispas',
     pgTitle:'🔒 Compra con dinero real', pgIntro:'Para proteger a los peques, un <b>adulto</b> debe aprobar esta compra.',
     pgQuestion:'Resuelve:', pgOk:'Aprobar', pgBad:'Respuesta incorrecta, pregunta a un adulto',
     tGems:g=>'¡+'+g+' Gemas! (compra simulada)', pgAnswer:'Respuesta',
@@ -2490,6 +2491,7 @@ const MORE={
     cosmNames:{sk_llamas:'Flames',sk_galaxia:'Galaxy',es_arcoiris:'Rainbow Trail',ce_fuegos:'Fireworks',em_gg:'GG!',ma_corona:'Crown Frame'},
     cosmCats:{Skin:'Skin',Estela:'Trail','Celebración':'Celebration',Emote:'Emote',Marco:'Frame'},
     gemsAmt:g=>g+' Gems',
+    dealAmt:c=>'+'+c+' Sparks', dealDay:'deal of the day', dealDone:'Come back tomorrow', tDeal:c=>'✦ +'+c+' Sparks',
     pgTitle:'🔒 Real-money purchase', pgIntro:'To keep kids safe, an <b>adult</b> has to approve this purchase.',
     pgQuestion:'Solve:', pgOk:'Approve', pgBad:'Wrong answer — ask an adult',
     tGems:g=>'+'+g+' Gems! (simulated purchase)', pgAnswer:'Answer',
@@ -3388,6 +3390,12 @@ const COSM=[ {id:'sk_llamas',nm:'Llamas',cat:'Skin',rar:1,ic:'🔥',g:150}, {id:
   {id:'em_gg',nm:'¡GG!',cat:'Emote',rar:0,ic:'👏',g:60}, {id:'ma_corona',nm:'Marco Corona',cat:'Marco',rar:4,ic:'👑',g:800} ];
 const BUNDLE={nm:'Pack de Temporada',fl:'Destacado de esta semana',items:['🛡️ Tanque (Común)','🌈 Estela Arcoíris','✦ +300 Chispas'],g:600,was:'~870'};
 const PASE={nm:'Pase de Batalla',g:900};
+//+AG doc 45 §2: las Gemas compran Chispas, pero UNA VEZ AL DIA. El tope es lo que separa
+//   "el dinero acelera" de "el dinero compra el techo" (docs/20 §2.1): sin el, pagar seria
+//   un grifo infinito de progreso. El cambio (72 ✦ por ◆) va en linea con el que ya usa el
+//   juego para desbloquear bolas con Gemas (gemaPrice = ✦/60), un poco mejor por ser oferta.
+const CHISPA_DEAL={g:25,c:1800};
+const dealDone=()=>SAVE.dealDay===todayKey();
 const SECS=['destacados','bolas','cosmeticos','gemas','pase'];   //+AG las etiquetas visibles salen de S().shSecs (i18n)
 let shSec='destacados';
 const hasCosm=id=>SAVE.cosmetics.includes(id);
@@ -3427,6 +3435,20 @@ function cosmEl(){ const s=S(), d=document.createElement('div'); d.innerHTML='<d
   d.appendChild(g); return d;
 }
 function gemasEl(){ const s=S(), d=document.createElement('div'); d.innerHTML='<div class="sh-note">'+s.shNoteGems+'</div>';
+  //+AG doc 45 §2: la oferta del dia va ARRIBA y con su propio marco, para que se lea como lo
+  //   que es (una vez al dia) y no como un pack mas. Gastada, se queda a la vista en gris con
+  //   "vuelve manana": esconderla haria pensar que ha desaparecido.
+  const done=dealDone();
+  const deal=document.createElement('div'); deal.className='sh-pack'; deal.style.cssText='border-color:#c9a227';
+  deal.innerHTML=`<div class="pg">✦</div><div class="amt" style="white-space:nowrap">${s.dealAmt(CHISPA_DEAL.c)}<small style="display:block;opacity:.8;color:inherit">${s.dealDay}</small></div>`;
+  //+AG el boton se comporta como el de los packs (margin-left:auto y ancho al contenido): con
+  //   el ancho completo de .sh-buy empujaba el texto y "+1800 Chispas" partia en dos lineas.
+  const db=document.createElement('button'); db.className='sh-buy gem';
+  db.style.cssText='margin-left:auto;width:auto;padding:11px 15px;white-space:nowrap';
+  db.innerHTML = done ? s.dealDone : `${CHISPA_DEAL.g} ◆`;
+  db.disabled = done || SAVE.gemas<CHISPA_DEAL.g;
+  db.onclick=()=>buyChispaDeal();
+  deal.appendChild(db); d.appendChild(deal);
   GEM_PACKS.forEach(pk=>{ const row=document.createElement('div'); row.className='sh-pack'; row.innerHTML=`<div class="pg">◆</div><div class="amt">${s.gemsAmt(pk.g)} ${pk.bonus?`<small>${pk.bonus}</small>`:''}</div>`;
     const btn=document.createElement('button'); btn.className='money'; btn.textContent=pk.p; btn.onclick=()=>parentalBuy(pk); row.appendChild(btn); d.appendChild(row); });
   return d;
@@ -3440,6 +3462,11 @@ function paseEl(){ const s=S(), d=document.createElement('div'); d.innerHTML=`<d
   return d;
 }
 function buyCosm(c){ if(SAVE.gemas<c.g) return; SAVE.gemas-=c.g; SAVE.cosmetics.push(c.id); persist(); toast(S().tCosm(cosmName(c))); renderTienda(); }
+//+AG doc 45 §2. El tope se comprueba AQUI y no solo en el boton: el boton es pintura, y un
+//   toque doble o una pestana vieja no pueden colar dos veces la oferta del dia.
+function buyChispaDeal(){ if(dealDone() || SAVE.gemas<CHISPA_DEAL.g) return;
+  SAVE.gemas-=CHISPA_DEAL.g; SAVE.chispas+=CHISPA_DEAL.c; SAVE.dealDay=todayKey();
+  persist(); toast(S().tDeal(CHISPA_DEAL.c)); renderTienda(); }
 function buyBundle(){ if(SAVE.gemas<BUNDLE.g) return; SAVE.gemas-=BUNDLE.g;
   if(!owned('tanque')) SAVE.balls.push({arch:'tanque',lvl:1,xp:0,copas:0});
   if(!hasCosm('es_arcoiris')) SAVE.cosmetics.push('es_arcoiris'); SAVE.chispas+=300; persist(); toast(S().tBundle); renderTienda(); }
