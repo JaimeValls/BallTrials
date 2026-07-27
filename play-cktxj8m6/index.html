@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-27 f3db70a"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-07-27 9c892d1"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -30,7 +30,33 @@
   @supports (height:100dvh){ :root{ --vh:100dvh; } }
   *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html,body{ margin:0; height:100%; background:#000; color:var(--ink);
-    font-family:'Fredoka','Segoe UI Rounded','Nunito',system-ui,-apple-system,Arial,sans-serif; overflow:hidden; user-select:none; }
+    font-family:var(--fam,'Fredoka','Segoe UI Rounded','Nunito',system-ui,-apple-system,Arial,sans-serif); overflow:hidden; user-select:none; }
+  /* ══ ARABE: LA INTERFAZ SE ESPEJA ══════════════════════════════════════════════════════════
+     El <html dir="rtl"> lo pone i18n/idiomas.js y con eso se da la vuelta SOLO todo lo que se
+     coloca con flex/grid (que es casi toda la app). Lo que NO se entera es lo que va clavado con
+     position:absolute + left/right, porque ahi la izquierda es la izquierda y punto. Son 8 sitios
+     contados uno a uno; el resto de los 17 absolutos o van centrados (left:50%) o van a los dos
+     lados (left:0;right:0), y esos ya salen bien.
+     LO QUE NO SE ESPEJA, A PROPOSITO: la PISTA. En los 3 motores el HUD se queda de izquierda a
+     derecha porque sus botones apuntan a lo que pasa en pantalla — el carril de la izquierda es
+     el de la izquierda — y darles la vuelta seria mentir sobre el juego. Se espeja el menu, no
+     el mando. */
+  .rtl .g-eq{ right:auto; left:8px; }
+  .rtl .g-dot{ left:auto; right:-5px; }
+  .rtl .gd-close{ right:auto; left:15px; }
+  .rtl .pr-sw::after{ left:auto; right:2px; transition:right .2s; }
+  .rtl .pr-sw.on::after{ right:21px; }
+  .rtl .ricon .lk{ right:auto; left:-4px; }
+  .rtl .ricon .badge{ right:auto; left:-5px; }
+  .rtl .showbtn .hbadge{ right:auto; left:-5px; }
+  .rtl .tile .tart .tday{ right:auto; left:6px; }
+  /*+AG las flechas del riel de ranking apuntan a un LADO, no a una direccion de lectura: en arabe
+     "‹" tiene que llevarte al siguiente igual que "›" en español. Se giran con el resto. */
+  .rtl .rkarr{ transform:scaleX(-1); }
+  /*+AG doc 49: --fam la escribe i18n/idiomas.js al elegir idioma. Fredoka no dibuja cirilico, arabe ni
+     tailandes, y las CJK como webfont pesan megas: cada escritura antepone SU fuente y Fredoka se queda
+     de respaldo para el latino. Todo lo demas de la app hereda con font-family:inherit, asi que con
+     tocar el body cambia la app entera. */
   /*+AG doc 34 Fase B: COLUMNA PORTRAIT. En movil llena la pantalla; en escritorio se centra como un telefono
      (max-width de columna, alto por dvh). Todas las pantallas son absolutas DENTRO de #app (antes fixed). */
   body{ display:grid; place-items:center; background:radial-gradient(120% 80% at 50% 0%, var(--bg-mid), var(--bg-lo) 70%); }
@@ -880,6 +906,11 @@
   .tile .tlk{ font-size:18px; }
   .tile img.tlk{ width:22px; height:22px; object-fit:contain; }   /*+AG doc 41: candado de arte */
   .tile .tcond{ font-size:10px; font-weight:800; color:#8b93b8; background:#ffffff0d; border:1px solid var(--line); border-radius:999px; padding:3px 8px; }
+  /*+AG PROXIMAMENTE, no "Nivel 5". Los dos modos apagados NO tienen motor: prometer "se desbloquea en el Nivel 5"
+     es una mentira con fecha — el que llegue al 5 se encuentra la misma carta gris. La condicion de nivel volvera
+     a su sitio (.tcond de siempre) el dia que el modo exista. Mientras, la etiqueta dice la verdad: viene, no esta.
+     Va en DORADO tenue y no en gris: es una promesa (apetece), no un requisito (frustra). */
+  .tile .tcond.soon{ color:#ffd489; background:#ffbf4a1a; border-color:#ffbf4a3d; letter-spacing:.04em; }
   /*+AG COPAS POR BOLA (doc 37): tarjeta de copas de la bola + tabla de 8 puestos en Resultados */
   #results{ overflow-y:auto; justify-content:flex-start; padding-top:calc(20px + env(safe-area-inset-top)); }
   /*+AG aqui vivian los DOS PASOS del doc 40 (.rs1/.rs2 + data-step) y el `margin-top:auto` de la tarjeta.
@@ -1116,16 +1147,16 @@
       <div class="tscrim"></div>
     </div>
     <!-- RECOLECTA (bloqueado decorativo) -->
-    <div class="tile locked" data-locklvl="5">
+    <div class="tile locked" data-soonmode="recolecta">
       <div class="thead"><div class="ticon" data-mico="recolecta"></div><div class="ttxt"><div class="tname" data-t="mRecolecta">RECOLECTA</div><div class="tsub" data-t="subRecolecta">Recoge más gemas</div></div></div>
       <div class="tart"><img src="arte/modos/recolecta.webp" alt="" loading="lazy">
-        <div class="tlockbox"><img class="tlk" src="arte/ui/ui-candado.webp" alt=""><div class="tcond" data-lvln="5">Nivel 5</div></div></div>
+        <div class="tlockbox"><img class="tlk" src="arte/ui/ui-candado.webp" alt=""><div class="tcond soon" data-t="comingSoon">PRÓXIMAMENTE</div></div></div>
     </div>
     <!-- SUELO MENGUANTE (bloqueado decorativo) -->
-    <div class="tile locked" data-locklvl="8">
+    <div class="tile locked" data-soonmode="suelo">
       <div class="thead"><div class="ticon" data-mico="suelo"></div><div class="ttxt"><div class="tname" data-t="mSuelo">SUELO MENGUANTE</div><div class="tsub" data-t="subSuelo">Sobrevive al suelo</div></div></div>
       <div class="tart"><img src="arte/modos/suelo.webp" alt="" loading="lazy">
-        <div class="tlockbox"><img class="tlk" src="arte/ui/ui-candado.webp" alt=""><div class="tcond" data-lvln="8">Nivel 8</div></div></div>
+        <div class="tlockbox"><img class="tlk" src="arte/ui/ui-candado.webp" alt=""><div class="tcond soon" data-t="comingSoon">PRÓXIMAMENTE</div></div></div>
     </div>
   </div>
 </div>
@@ -1468,7 +1499,7 @@
         </div>
         <div class="pr-slots" style="gap:7px;margin-top:7px">
           <button class="pr-inv" id="prAccGoogle" style="flex:1" data-t="prAccGoogle">Continuar con Google</button>
-          <button class="pr-inv" id="prAccMeta" style="flex:1;opacity:.45" disabled data-t="prAccMeta">Facebook · pronto</button>
+          <button class="pr-inv" id="prAccMeta" style="flex:1" data-t="prAccMeta">Continuar con Facebook</button>
         </div>
       </div>
       <!--+AG con la cuenta ya guardada el formulario se esconde, pero hay un caso real: el
@@ -1577,6 +1608,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
+<script src="i18n/idiomas.js"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -2367,9 +2399,12 @@ const I18N={
   ko:{name:'그레이트 레이스', sub:'공은 스스로 굴러 내려가요. <b>방향</b>을 고르고 <b>부스터</b>를 써요. 나머지 11개를 이길 수 있나요?', hint:'방향: <kbd>◀</kbd> 왼쪽 · <kbd>●</kbd> 가운데 · <kbd>▶</kbd> 오른쪽 &nbsp;·&nbsp; 부스터: <kbd>A</kbd> 니트로 · <kbd>S</kbd> 실드.<br>휴대폰·태블릿은 아래 버튼을 사용하세요.', play:'▶ 플레이', again:'▶ 다시하기', atts:'방향', boosts:'부스터', att:['◀ 왼쪽','● 가운데','오른쪽 ▶'], nitro:'⚡ 니트로', shield:'🛡 실드', ready:'준비', sup:'슈퍼!', superLbl:'슈퍼', pos:(o,N)=>`<b>${o}</b> <small>/ ${N}</small>`, fin:o=>`결과 <b>${o}</b>`, podium:'포디움! 조작? 니트로? 아니면 운?', retry:'다시. 빈틈으로 방향을 틀어 추월하거나, 지진에 대비해 실드를 아껴요.', you:'나', super:'⭐ 슈퍼'},
   zh:{name:'超级弹珠赛', sub:'你的弹珠会自己往下滚。你只需选择它的<b>方向</b>并释放<b>加速道具</b>。能赢过其他 11 个吗？', hint:'方向：<kbd>◀</kbd> 左 · <kbd>●</kbd> 中 · <kbd>▶</kbd> 右 &nbsp;·&nbsp; 道具：<kbd>A</kbd> 氮气 · <kbd>S</kbd> 护盾。<br>手机或平板请用下方按钮。', play:'▶ 开始', again:'▶ 再玩一次', atts:'方向', boosts:'道具', att:['◀ 左','● 中','右 ▶'], nitro:'⚡ 氮气', shield:'🛡 护盾', ready:'就绪', sup:'超级！', superLbl:'超级', pos:(o,N)=>`<b>${o}</b> <small>/ ${N}</small>`, fin:o=>`结果 <b>${o}</b>`, podium:'登上领奖台！是靠操控、氮气……还是运气？', retry:'再来。往空档转向超车，或把护盾留给地震。', you:'你', super:'⭐ 超级'},
 };
-const LANGS={en:'English',es:'Español',pt:'Português',fr:'Français',de:'Deutsch',it:'Italiano',ja:'日本語',ko:'한국어',zh:'中文'};
-//+AG v0.1 shell i18n (es/en; el resto cae a en, pendiente traducir el shell a los 9 como la carrera). El texto de la
-//   CARRERA sí está en los 9 (I18N). Mezcla evitada: en un idioma sin shell, todo el shell sale en inglés (consistente).
+//+AG doc 49: el catalogo de idiomas ya no vive aqui, vive en i18n/idiomas.js (lo comparten el shell y los 3
+//   motores). Aqui solo se lee. 20 idiomas; cada uno trae su nombre, su formato de numero y su ordinal.
+const LANGS=BTI18N.LANGS;
+//+AG v0.2 shell i18n: es/en van AQUI (son el idioma de trabajo y el de respaldo, y tienen que estar sin
+//   descargar nada). Los otros 18 llegan en i18n/<l>.js y se funden sobre el ingles clave a clave, asi que
+//   una clave que falte sale en ingles y NUNCA en español ni en "undefined".
 const SHELL={
   es:{ featured:'Modo destacado', play:'▶ JUGAR', you:'TÚ', lvl:'Nivel', again:'▶ Jugar otra', back:'Atrás', home:'Inicio',
     rNext:'Continuar ▸', rSeeAll:n=>'Ver los '+n+' ▾',   //+AG doc 40: paso 1 (veredicto) → paso 2 (botín)
@@ -2381,7 +2416,8 @@ const SHELL={
     teamPlay:'Jugar en equipo', teamSoon:'Próximamente', teamToast:'El juego en equipo llegará con las cuentas online',
     soon:' · próximamente', levelUp:n=>'¡Subiste al nivel '+n+'! 🎉',
     //+AG Home v3 (docs/35 v2.2 + 37): rejilla, hoja de formato, rieles, copas
-    mCazador:'EL CAZADOR', mRedlight:'LUZ ROJA', modeLbl:'Modo', change:'CAMBIAR', playWord:'JUGAR',
+    mRace:'LA GRAN CARRERA', mCazador:'EL CAZADOR', mRedlight:'LUZ ROJA', modeLbl:'Modo', change:'CAMBIAR', playWord:'JUGAR',
+    comingSoon:'PRÓXIMAMENTE', modeSoonToast:m=>m+' se está construyendo · llega pronto',
     //+AG segunda linea de la carta de modo. En la carta de evento de Brawl bajo el nombre del modo va
     //   siempre el del mapa; aqui no hay mapas, asi que la linea dice QUE SE HACE. Corta a proposito:
     //   a 175 px de carta no cabe una frase.
@@ -2415,7 +2451,8 @@ const SHELL={
     teamPlay:'Play with your team', teamSoon:'Coming soon', teamToast:'Team play arrives with online accounts',
     soon:' · coming soon', levelUp:n=>'Level '+n+' reached! 🎉',
     //+AG Home v3 (docs/35 v2.2 + 37)
-    mCazador:'THE HUNTER', mRedlight:'RED LIGHT', modeLbl:'Mode', change:'CHANGE', playWord:'PLAY',
+    mRace:'THE GREAT RACE', mCazador:'THE HUNTER', mRedlight:'RED LIGHT', modeLbl:'Mode', change:'CHANGE', playWord:'PLAY',
+    comingSoon:'COMING SOON', modeSoonToast:m=>m+' is being built · coming soon',
     subRace:'Get there first', subCazador:'Escape the monster', subRedlight:'Run and brake',
     subRecolecta:'Grab the most gems', subSuelo:'Outlast the floor',
     dayBadge:'⭐ TODAY · +50%', dayBonusWhy:'+50% mode of the day', cupsTotal:'Total',
@@ -2529,7 +2566,7 @@ const MORE={
     prAccSavedG:'Estás dentro con <b>Google</b>:',
     prAccNote:'Tu partida ya se guarda en el servidor, pero <b>solo este móvil sabe que es tuya</b>. Guarda tu cuenta y podrás entrar desde cualquier sitio.',
     prAccNoteOk:'Tu partida está <b>a salvo en tu cuenta</b>. Entra desde cualquier móvil y la tendrás ahí, tal y como la dejaste.',
-    prAccCreate:'Guardar mi cuenta', prAccLogin:'Ya tengo cuenta', prAccGoogle:'Continuar con Google', prAccMeta:'Facebook · pronto',
+    prAccCreate:'Guardar mi cuenta', prAccLogin:'Ya tengo cuenta', prAccGoogle:'Continuar con Google', prAccMeta:'Continuar con Facebook',
     prAccMailPh:'correo@ejemplo.com', prAccPassPh:'contraseña (6 o más)',
     prAccOut:'Cerrar sesión', prAccOutAsk:'¿Cerrar sesión? Este móvil volverá a empezar como invitado. Tu partida queda guardada en tu cuenta y vuelve al entrar.', prAccOutOk:'✓ Sesión cerrada. Volviendo a empezar…',
     prAccOkNew:'✓ Cuenta guardada. Ya puedes entrar desde otro móvil.', prAccOkIn:'✓ ¡Hola de nuevo! Trayendo tu partida…',
@@ -2689,7 +2726,7 @@ const MORE={
     prAccSavedG:'You are signed in with <b>Google</b>:',
     prAccNote:'Your game is already saved on the server, but <b>only this phone knows it is yours</b>. Save your account and you can log in from anywhere.',
     prAccNoteOk:'Your game is <b>safe in your account</b>. Log in from any phone and it will be there, exactly as you left it.',
-    prAccCreate:'Save my account', prAccLogin:'I already have one', prAccGoogle:'Continue with Google', prAccMeta:'Facebook · soon',
+    prAccCreate:'Save my account', prAccLogin:'I already have one', prAccGoogle:'Continue with Google', prAccMeta:'Continue with Facebook',
     prAccMailPh:'email@example.com', prAccPassPh:'password (6 or more)',
     prAccOut:'Log out', prAccOutAsk:'Log out? This phone starts again as a guest. Your game stays in your account and comes back when you log in.', prAccOutOk:'✓ Logged out. Starting over…',
     prAccOkNew:'✓ Account saved. You can now log in from another phone.', prAccOkIn:'✓ Welcome back! Bringing your game…',
@@ -2769,9 +2806,9 @@ const MORE={
 };
 Object.assign(SHELL.es, MORE.es); Object.assign(SHELL.en, MORE.en);
 const S=()=>SHELL[LANG]||SHELL.en;
-//+AG formato de numero por idioma (antes TODO iba con toLocaleString('es-ES') → "1.234" con la app en ingles)
-const NLOC={es:'es-ES',en:'en-US',pt:'pt-BR',fr:'fr-FR',de:'de-DE',it:'it-IT',ja:'ja-JP',ko:'ko-KR',zh:'zh-CN'};
-const nfmt=n=>Number(n||0).toLocaleString(NLOC[LANG]||'en-US');
+//+AG formato de numero por idioma (antes TODO iba con toLocaleString('es-ES') → "1.234" con la app en ingles).
+//   La tabla se mudo al catalogo (i18n/idiomas.js) para que los 20 idiomas la declaren en un solo sitio.
+const nfmt=n=>Number(n||0).toLocaleString(BTI18N.nloc(LANG));
 function applyShell(){ const s=S();
   document.querySelectorAll('[data-t]').forEach(e=>{ const v=s[e.dataset.t]; if(typeof v==='string') e.textContent=v; });
   //+AG data-th = el texto lleva <b>/<small> (notas legales, hero de Temporada…); data-tt = title; data-tp = aria-label
@@ -2790,9 +2827,9 @@ function applyShell(){ const s=S();
   //+AG Home v3: nombres de modo en tiles/tarjeta (race sale del i18n de la carrera; el resto del SHELL) y niveles de los bloqueados
   document.querySelectorAll('[data-mname]').forEach(e=>{ e.textContent=modeTitle(e.dataset.mname); });
   document.querySelectorAll('[data-lvln]').forEach(e=>{ e.textContent=s.lvl+' '+e.dataset.lvln; }); }
-function ord(n,l){ if(l==='en'){ const s=['th','st','nd','rd'], v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); }
-  if(l==='es'||l==='it') return n+'º'; if(l==='pt') return n+'º'; if(l==='fr') return n===1?'1er':n+'e'; if(l==='de') return n+'.';
-  if(l==='ja') return n+'位'; if(l==='ko') return n+'등'; if(l==='zh') return '第'+n+'名'; return n+'.'; }
+//+AG el ordinal ("3º" / "3rd" / "第3名") tambien se mudo al catalogo: lo usan el shell, los 3 motores y el
+//   cartel de veredicto, y tenerlo escrito en cuatro sitios ya habia dado dos vocabularios del mismo dato.
+const ord=(n,l)=>BTI18N.ord(n,l||LANG);
 let LANG='en';
 const T=()=>I18N[LANG]||I18N.en;
 
@@ -2805,7 +2842,26 @@ function renderOverlay(){ const t=T();
   else { const medal={1:' 🏆',2:' 🥈',3:' 🥉'}[lastPlace]||''; el('ovTitle').textContent=ord(lastPlace,LANG)+medal;
     el('ovSub').innerHTML=lastPlace<=3?t.podium:t.retry; el('ovBtn').textContent=t.again; }
 }
-function applyLang(l){ LANG=I18N[l]?l:'en'; const t=T(); el('lang').value=LANG;
+//+AG doc 49: cambiar de idioma pasa a tener DOS tiempos, porque 18 de los 20 idiomas se descargan.
+//   1) se pinta YA con lo que haya (ingles si el paquete aun no esta): la pantalla nunca se queda a medias
+//      ni en el idioma anterior, y sobre todo nunca se queda con el español fijo del HTML.
+//   2) cuando aterriza el paquete se funde sobre el ingles y se repinta. El fundido es SOBRE INGLES y no
+//      sobre el idioma que hubiera antes: si no, saltar de aleman a turco heredaba las claves alemanas
+//      que al turco le faltasen y salia una pantalla en dos idiomas.
+//   Si vuelve un paquete de un idioma que ya no es el activo (el jugador cambio dos veces rapido) se tira.
+function applyLang(l){
+  LANG=LANGS[l]?l:'en';
+  const sel=el('lang'); if(sel) sel.value=LANG;
+  BTI18N.applyDoc(LANG);
+  paintLang();
+  BTI18N.load(LANG).then(pack=>{
+    if(!pack || LANG!==l) return;
+    SHELL[LANG]=Object.assign({}, SHELL.en, pack.shell||{});
+    if(pack.race) I18N[LANG]=Object.assign({}, I18N.en, pack.race);
+    paintLang();
+  });
+}
+function paintLang(){ const t=T();
   el('hint').innerHTML=t.hint; el('lblAtt').textContent=t.atts; el('lblBoost').textContent=t.boosts;
   el('bL').querySelector('.t').textContent=t.att[0]; el('bC').querySelector('.t').textContent=t.att[1]; el('bR').querySelector('.t').textContent=t.att[2];
   el('bNit').querySelector('.t').textContent=t.nitro; el('bShd').querySelector('.t').textContent=t.shield; el('bSup').querySelector('.t').textContent=t.super; el('superlbl').textContent=t.superLbl;
@@ -2827,11 +2883,16 @@ function relangScreens(){
   }catch(e){}
 }
 // selector de idioma
-(function(){ const sel=el('lang'); for(const k in LANGS){ const o=document.createElement('option'); o.value=k; o.textContent=LANGS[k]; sel.appendChild(o); }
-  sel.onchange=()=>applyLang(sel.value);
-  const nav=(navigator.language||'en').toLowerCase(); let d='en';
-  if(nav.startsWith('zh'))d='zh'; else { const two=nav.slice(0,2); if(I18N[two])d=two; }
-  applyLang(d);
+//+AG doc 49: el idioma SE RECUERDA. Antes se re-adivinaba del navegador en cada carga, asi que el que
+//   jugaba en turco con el movil en ingles tenia que volver a Ajustes cada vez que abria el juego. Va en su
+//   propia clave y no dentro del SAVE porque hace falta ANTES de que el save exista (y de que se cargue), y
+//   porque es una preferencia del aparato: borrar la partida no tiene por que devolverte a otro idioma.
+const LANG_KEY='bt.lang';
+(function(){ const sel=el('lang');
+  for(const k in LANGS){ const o=document.createElement('option'); o.value=k; o.textContent=LANGS[k].name; sel.appendChild(o); }
+  sel.onchange=()=>{ try{ localStorage.setItem(LANG_KEY,sel.value); }catch(e){} applyLang(sel.value); };
+  let guardado=null; try{ guardado=localStorage.getItem(LANG_KEY); }catch(e){}
+  applyLang(LANGS[guardado] ? guardado : BTI18N.pick(navigator.language));
 })();
 
 function setDir(a){ if(!sim||sim.player.rank!==null) return; sim.player.dir=a; for(const k in dirBtns) dirBtns[k].classList.toggle('on',+k===a); }
@@ -2962,7 +3023,10 @@ document.querySelectorAll('.tile[data-mode] .ticon, .ticon[data-mico]').forEach(
   const svg=modeIco(key); if(svg) icon.innerHTML=svg;
 });
 const OPEN_MODES=['race','cazador','redlight'];
-function modeTitle(m){ return m==='race' ? T().name.toUpperCase() : (m==='cazador' ? S().mCazador : S().mRedlight); }
+//+AG los dos modos SIN motor tambien tienen nombre traducido: el toast de "proximamente" los nombra.
+function modeTitle(m){ const s=S();
+  if(m==='race') return (s.mRace||T().name).toUpperCase();
+  return { cazador:s.mCazador, redlight:s.mRedlight, recolecta:s.mRecolecta, suelo:s.mSuelo }[m] || m; }
 //+AG dia local como entero + clave (mockups/flow.html): rotacion determinista del MODO DEL DIA entre los abiertos.
 //   ?dayn=N (debug) simula otra fecha para verificar la rotacion y el bonus sin esperar a manana.
 const _dayParam=new URLSearchParams(location.search).get('dayn');
@@ -3811,20 +3875,24 @@ function wireCuenta(){
     //   URL de ENLACE, que es la que conserva la identidad; solo si el proyecto no deja
     //   enlazar se cae al login normal, que entra en la cuenta de ese Google. El caso de
     //   "ese Google ya tenia cuenta" lo resuelve la vuelta, abajo en el modulo de la nube.
-    const goog=el('prAccGoogle');
+    //+AG Facebook recorre EXACTAMENTE el mismo camino que Google (Supabase no distingue: solo
+    //   cambia el nombre del proveedor), asi que comparten codigo en vez de duplicarlo.
+    [['prAccGoogle','google'],['prAccMeta','facebook']].forEach(([id,prov])=>{
+    const goog=el(id);
     if(goog){ goog.onclick=async()=>{
       if(!nube()) return di(S().prAccOff,false);
       goog.disabled=true; di('…');
       let destino=null, hayRed=true;
-      try{ destino=await nube().urlDeEnlace('google', location.href); }
-      catch(e){ hayRed=!!(e&&e.estado); console.warn('[cuenta] enlazar google', e); }
+      try{ destino=await nube().urlDeEnlace(prov, location.href); }
+      catch(e){ hayRed=!!(e&&e.estado); console.warn('[cuenta] enlazar '+prov, e); }
       //+AG sin red NO se navega: urlDeProveedor solo pega una cadena y devolveria una URL que el
       //   navegador no puede cargar, dejando al jugador en la pantalla de error, fuera del juego.
       //   Al login normal solo se cae si el servidor ha CONTESTADO que no deja enlazar (e.estado).
-      if(!destino && hayRed){ try{ destino=nube().urlDeProveedor('google', location.href); }catch(e){} }
+      if(!destino && hayRed){ try{ destino=nube().urlDeProveedor(prov, location.href); }catch(e){} }
       if(!destino){ goog.disabled=false; return di(S().prAccOff,false); }
       location.href=destino;
     }; }
+    });
   } }
 
 //+AG docs/42 Fase 2: LLEVARSE LA PARTIDA. Dos botones, ningun concepto nuevo que explicar.
@@ -4229,7 +4297,9 @@ function paintSelector(){ applyShell();
 }
 document.querySelectorAll('.tile[data-mode]').forEach(t=>{ t.onclick=()=>{   // tocar un tile = SELECCIONA y vuelve (no arranca; regla de oro)
   SAVE.mode=t.dataset.mode; persist(); goHome(); }; });
-document.querySelectorAll('.tile[data-locklvl]').forEach(t=>{ t.onclick=()=>toast(S().lockLvl(t.dataset.locklvl)); });
+//+AG el toast decia "Se desbloquea en el Nivel 5" para dos modos QUE NO EXISTEN: promesa con fecha que no se
+//   puede cumplir. Ahora dice lo unico cierto — se esta construyendo. Cuando el modo tenga motor, vuelve lockLvl().
+document.querySelectorAll('.tile[data-soonmode]').forEach(t=>{ t.onclick=()=>toast(S().modeSoonToast(modeTitle(t.dataset.soonmode))); });
 el('selClose').onclick=goHome;
 el('modecompact').onclick=openSelector;
 el('modecompact').addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openSelector(); } });
