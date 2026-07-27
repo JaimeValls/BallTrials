@@ -28,7 +28,7 @@ export function pickTrack(tracks){
 export function createWebAudio({ musicUrl = null, musicGain = 0.30, sfxGain = 0.92, musicLoopTrim = 0 } = {}){
   let ctx = null, masterSfx = null, masterMusic = null;
   let sfxSrc = null, musicSrc = null, musicBuf = null;
-  let unlocked = false, loadingMusic = null;
+  let unlocked = false, loadingMusic = null, musicWanted = false;
 
   //+AG plataforma-y-cuentas: al volver de segundo plano (cambiar de app, bloquear
   //   pantalla, una llamada) iOS/Android SUSPENDEN el AudioContext por su cuenta y
@@ -95,6 +95,21 @@ export function createWebAudio({ musicUrl = null, musicGain = 0.30, sfxGain = 0.
   function stop(){
     if (sfxSrc){ try { sfxSrc.stop(); } catch {} sfxSrc = null; }
     if (musicSrc){ try { musicSrc.stop(); } catch {} musicSrc = null; }
+    musicWanted = false;   // un stop() cancela también la música que venía en camino (ver musicWanted abajo)
+  }
+
+  // suelta el bucle de música en el instante `at`. Devuelve false si todavía no hay buffer decodificado.
+  function playMusic(at){
+    if (!musicBuf || !ctx) return false;
+    musicSrc = ctx.createBufferSource(); musicSrc.buffer = musicBuf; musicSrc.loop = true;
+    //+AG loop sin costura (ver musicLoopTrim arriba). Se protege de una pista más corta que el propio recorte:
+    //   con loopEnd <= loopStart el navegador ignora el bucle y la música se pararía a la primera vuelta.
+    if (musicLoopTrim > 0 && musicBuf.duration > musicLoopTrim * 3){
+      musicSrc.loopStart = musicLoopTrim * 0.4;
+      musicSrc.loopEnd   = musicBuf.duration - musicLoopTrim;
+    }
+    musicSrc.connect(masterMusic); musicSrc.start(at);
+    return true;
   }
 
   // arranca AHORA el buffer de SFX (Float32 mono) + la música (en loop por debajo), alineados al mismo instante.
@@ -110,15 +125,16 @@ export function createWebAudio({ musicUrl = null, musicGain = 0.30, sfxGain = 0.
       if (gain === 1) ch.set(sfxFloat); else for (let i = 0; i < sfxFloat.length; i++) ch[i] = sfxFloat[i] * gain;
       sfxSrc = ctx.createBufferSource(); sfxSrc.buffer = ab; sfxSrc.connect(masterSfx); sfxSrc.start(t0);
     }
-    if (musicBuf){
-      musicSrc = ctx.createBufferSource(); musicSrc.buffer = musicBuf; musicSrc.loop = true;
-      //+AG loop sin costura (ver musicLoopTrim arriba). Se protege de una pista más corta que el propio recorte:
-      //   con loopEnd <= loopStart el navegador ignora el bucle y la música se pararía a la primera vuelta.
-      if (musicLoopTrim > 0 && musicBuf.duration > musicLoopTrim * 3){
-        musicSrc.loopStart = musicLoopTrim * 0.4;
-        musicSrc.loopEnd   = musicBuf.duration - musicLoopTrim;
-      }
-      musicSrc.connect(masterMusic); musicSrc.start(t0);
+    //+AG LA MÚSICA QUE LLEGA TARDE YA NO SE PIERDE (fallo real, Jaime 2026-07-27: "en el Cazador no hay música").
+    //   Antes esto era un `if (musicBuf)` seco: si en el instante del arranque el mp3 no estaba decodificado, la
+    //   ronda ENTERA se jugaba muda y nadie volvía a intentarlo. Y el Cazador es justo el que más papeletas
+    //   tiene: sus pistas (platform/platform2, 3 min) pesan 2,9 MB, el doble que las de la Carrera, así que en
+    //   un móvil con red normal la descarga puede acabar DESPUÉS de la cuenta atrás. Ahora se apunta la
+    //   intención (musicWanted) y la música entra en cuanto el buffer llega. stop() la cancela.
+    musicWanted = true;
+    if (!playMusic(t0) && musicUrl){
+      const p = loadingMusic || (loadingMusic = loadMusic(musicUrl));
+      p.then(() => { if (musicWanted && !musicSrc) playMusic(ctx.currentTime + 0.04); });
     }
   }
 
@@ -135,6 +151,10 @@ export function createWebAudio({ musicUrl = null, musicGain = 0.30, sfxGain = 0.
     unlock, resume, prefetch, start, stop, loadMusic, setMusicGain, musicGain,
     get unlocked(){ return unlocked; },
     get hasMusic(){ return !!musicBuf; },
+    //+AG "¿ya está sonando (o a punto de sonar) la música?". Lo usan los motores para que el "¡YA!" NO reinicie
+    //   la pista que entró con la cuenta atrás. musicWanted cuenta: la música pedida y aún sin decodificar ya
+    //   está reservada, y un segundo start() la duplicaría al llegar el buffer.
+    get musicPlaying(){ return !!musicSrc || musicWanted; },
     get ctx(){ return ctx; },
     get musicLevel(){ return masterMusic ? masterMusic.gain.value : 0; },   // nivel vivo (debug)
   };

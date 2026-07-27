@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-27 eb6a354">
+<meta name="bt-build" content="2026-07-27 f3db70a">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <!--+AG el HTML se sirve en INGLES (defecto del juego); ?lang=es lo traduce por JS (applyLang) -->
 <title>YouBall · The Hunter (WebGL)</title>
@@ -846,7 +846,7 @@ const AUDIO_SR=44100;
 //+AG VB Jaime 2026-07-27: VOLUMEN DE MUSICA del jugador. El shell manda &mvol=0..1 (Ajustes; defecto 0.20 = muy
 //   baja, para que no moleste) y multiplica el nivel calibrado del modo. FUERA del shell (standalone/captura de
 //   video) no hay parametro y se queda en 1: el material del canal sigue sonando exactamente igual que siempre.
-const MVOL=(()=>{ const v=parseFloat(params.get('mvol')); return (isFinite(v)&&v>=0&&v<=1)?v:(EMBED?0.20:1); })();
+const MVOL=(()=>{ const v=parseFloat(params.get('mvol')); return (isFinite(v)&&v>=0&&v<=1)?v:(EMBED?0.65:1); })();   //+AG el 0.65 es el respaldo si el shell no manda &mvol; el defecto de verdad vive en MUSIC_VOL_DEF de juego.html
 const audio=createWebAudio({ musicUrl:pickTrack(['../_music/platform.mp3','../_music/platform2.mp3']), musicGain:0.30*MVOL });
 //+AG doc 38 Fase 1: DOS flags de audio (musica / efectos por separado). En EMBED los manda el shell via
 //   &music=/&sfx= (defecto ON). En standalone arrancan mudos y el boton #snd los enciende (solo fuera del shell).
@@ -856,7 +856,13 @@ if(EMBED){ musicOn = params.get('music')!=='0'; sfxOn = params.get('sfx')!=='0';
 //   ?capture). MISMA sintesis del video (buildSfxBuffer de sfxmap) pero disparada evento a evento al ocurrir.
 function startAudio(){
   if(!musicOn || !audio.unlocked) return;
-  if(phase!=='play') return;     //+AG la musica entra en el "¡YA!", nunca antes (doc 38: va sincronizada con f=0): desde que el cartel de "¡LISTO!" desbloquea el audio ANTES de la ronda, esta guarda es la que evita que se cuele encima de la cuenta atras
+  //+AG LA MUSICA ENTRA CON LA CUENTA ATRAS (VB Jaime 2026-07-27), no en el "¡YA!" como pedia doc 38/44. El motivo
+  //   de la regla vieja era no pisar los beeps de la cuenta; el motivo de tirarla es que la entrada a partida se
+  //   jugaba en silencio hasta 8,5 s (cartel de "¡LISTO!" 5 s + cuenta 3,45 s) con la del shell ya apagada, y eso
+  //   se lee como "este juego no tiene musica". Los beeps van a pico 0.9 y la musica a ~0.20: no la pisa.
+  //   Sigue sin sonar en 'ready' (el cartel) porque hasta ese tap el audio ni siquiera esta desbloqueado.
+  if(phase!=='play' && phase!=='intro') return;
+  if(audio.musicPlaying) return; //+AG y el "¡YA!" NO la reinicia: si ya entro con el 3-2-1, sigue donde va
   audio.start(null, AUDIO_SR);   // solo la musica en loop; los SFX se disparan en vivo (liveSfx)
 }
 let liveGain=null;
@@ -889,7 +895,7 @@ if(EMBED){
     document.removeEventListener('pointerdown', onFirstGesture, true);
     document.removeEventListener('keydown', onFirstGesture, true);
     await audio.unlock();
-    if(musicOn && phase==='play') startAudio();
+    if(musicOn) startAudio();   //+AG la propia startAudio() decide: suena en 'intro' y en 'play', calla en 'ready'
   };
   document.addEventListener('pointerdown', onFirstGesture, true);
   document.addEventListener('keydown', onFirstGesture, true);
@@ -902,6 +908,8 @@ function startCountdown(){
   phase='intro'; introT=0; introRingT=-1; clearTimeout(goT);
   document.getElementById('count').classList.add('show');
   if(sfxOn && audio.unlocked) sfxCountdown(audio, { digits:DIGITS, digitDur:DIGIT, goAt:INTRO_DUR });
+  audio.stop(); startAudio();   //+AG ronda nueva: la musica arranca YA, con el 3-2-1 (ver startAudio). El stop()
+                               //   es lo que la deja empezar de cero si se encadena otra ronda sin recargar.
 }
 
 buildSim(seed); buildHud();

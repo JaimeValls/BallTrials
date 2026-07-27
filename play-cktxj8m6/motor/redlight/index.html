@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-27 eb6a354">
+<meta name="bt-build" content="2026-07-27 f3db70a">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <!--+AG el HTML se sirve en INGLES (defecto del juego); ?lang=es lo traduce por JS (applyLang) -->
 <title>YouBall · Red Light Rush (WebGL) · The Marble Games</title>
@@ -1306,7 +1306,7 @@ const AUDIO_SR=44100;
 //   baja, para que no moleste) y multiplica el nivel calibrado del modo. FUERA del shell (standalone/captura de
 //   video) no hay parametro y se queda en 1: el material del canal sigue sonando exactamente igual que siempre.
 //   El ducking de rojo/verde tambien va escalado (MUSIC_BASE / MUSIC_RED), o el rojo sonaria MAS que el verde.
-const MVOL=(()=>{ const v=parseFloat(_q0.get('mvol')); return (isFinite(v)&&v>=0&&v<=1)?v:(EMBED?0.20:1); })();
+const MVOL=(()=>{ const v=parseFloat(_q0.get('mvol')); return (isFinite(v)&&v>=0&&v<=1)?v:(EMBED?0.65:1); })();   //+AG el 0.65 es el respaldo si el shell no manda &mvol; el defecto de verdad vive en MUSIC_VOL_DEF de juego.html
 const MUSIC_BASE=0.42*MVOL, MUSIC_RED=0.10*MVOL;
 const audio=createWebAudio({ musicUrl:pickTrack(['../_music/redlight.mp3','../_music/tension1.mp3','../_music/tension2.mp3']),
                              musicGain:MUSIC_BASE, musicLoopTrim:0.12 });
@@ -1316,7 +1316,11 @@ let musicOn=false, sfxOn=false, lastMusicColor=null;
 if(EMBED){ musicOn = _q0.get('music')!=='0'; sfxOn = _q0.get('sfx')!=='0'; }
 function startAudio(){
   if(!musicOn || !audio.unlocked) return;
-  if(phase!=='play') return;     //+AG la música entra en el "¡YA!", nunca antes (doc 38: va sincronizada con f=0): desde que el cartel de "¡LISTO!" desbloquea el audio ANTES de la ronda, esta guarda es la que evita que se cuele encima de la cuenta atrás
+  //+AG LA MÚSICA ENTRA CON LA CUENTA ATRÁS (VB Jaime 2026-07-27), no en el "¡YA!" como pedía doc 38/44: la entrada
+  //   a partida se jugaba en silencio hasta 8,5 s (cartel de "¡LISTO!" + 3-2-1) con la del shell ya apagada, y eso
+  //   se lee como "este juego no tiene música". Los beeps van a pico 0.9 y la música a ~0.27: no la pisa.
+  if(phase!=='play' && phase!=='intro') return;
+  if(audio.musicPlaying) return; //+AG y el "¡YA!" NO la reinicia: si ya entró con el 3-2-1, sigue donde va
   audio.start(null, AUDIO_SR);   //+AG solo la música en loop; los SFX se disparan EN VIVO (liveSfx): con un jugador el futuro no se precalcula
   lastMusicColor=null;           // el ducking se re-aplica en el 1er updateSemaforo
 }
@@ -1428,6 +1432,7 @@ function startCountdown(){
   phase='intro'; introT=0; introRingT=-1; clearTimeout(goT);
   document.getElementById('count').classList.add('show');
   if(sfxOn && audio.unlocked) sfxCountdown(audio, { digits:DIGITS, digitDur:DIGIT, goAt:INTRO_DUR });
+  audio.stop(); startAudio();   //+AG ronda nueva: la música arranca YA, con el 3-2-1 (ver startAudio)
 }
 
 buildSim(seed);
@@ -1453,7 +1458,7 @@ else {
       document.removeEventListener('pointerdown', onFirstGesture, true);
       document.removeEventListener('keydown', onFirstGesture, true);
       await audio.unlock();
-      if(musicOn && phase==='play') startAudio();
+      if(musicOn) startAudio();   //+AG la propia startAudio() decide: suena en 'intro' y en 'play', calla en 'ready'
     };
     document.addEventListener('pointerdown', onFirstGesture, true);
     document.addEventListener('keydown', onFirstGesture, true);

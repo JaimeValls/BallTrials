@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-27 eb6a354"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-07-27 f3db70a"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -2577,7 +2577,7 @@ const MORE={
     setLangGrp:'🌐 Idioma', setLangSub:'menús y textos',
     //+AG doc 38 Fase 2/3: audio separado, soporte, legal y cuenta
     setMusic:'Música', setMusicSub:'menús y pista del modo',
-    setMusicVol:'Volumen de la música', setMusicVolSub:'empieza baja para no molestar', setMusicVolOpts:['Bajo','Medio','Alto'],
+    setMusicVol:'Volumen de la música', setMusicVolSub:'súbela o bájala sin tocar los efectos', setMusicVolOpts:['Bajo','Medio','Alto'],
     setSfx:'Efectos', setSfxSub:'golpes, boosters y meta',
     setSupport:'🛟 Soporte', setRedeemRow:'Canjear código del canal', setRedeemSub:'premio fijo, un uso por cuenta',
     setBuildRow:'Versión del juego', setChannelRow:'Cómo se hizo', setChannelSub:'el canal de BallTrials',
@@ -2737,7 +2737,7 @@ const MORE={
     setLangGrp:'🌐 Language', setLangSub:'menus and text',
     //+AG doc 38 Fase 2/3: split audio, support, legal and account
     setMusic:'Music', setMusicSub:'menus and mode soundtrack',
-    setMusicVol:'Music volume', setMusicVolSub:'starts low so it never gets in the way', setMusicVolOpts:['Low','Medium','High'],
+    setMusicVol:'Music volume', setMusicVolSub:'turn it up or down without touching the SFX', setMusicVolOpts:['Low','Medium','High'],
     setSfx:'Effects', setSfxSub:'hits, boosters and finish',
     setSupport:'🛟 Support', setRedeemRow:'Redeem a channel code', setRedeemSub:'fixed prize, one use per account',
     setBuildRow:'Game version', setChannelRow:'How it was made', setChannelSub:'the BallTrials channel',
@@ -2878,17 +2878,31 @@ function start(){ const seed=(Date.now()&0xffffff)>>>0||1; sim=new Sim(seed); si
 const SAVE_KEY='bt_save_v1';
 const BUILD_VER='v0.5 · doc 39';   //+AG doc 39: bolas-héroe con rareza fija y niveles con Chispas
 const FRESH = !localStorage.getItem(SAVE_KEY);   //+AG Fase D: primera sesion (sin save previo) dispara el Onboarding
+//+AG LOS TRES PELDANOS DEL VOLUMEN DE MUSICA, y el que arranca. Un solo sitio: lo leen el save nuevo, la
+//   migracion, musicVolPref() y la fila de Ajustes.
+//   HISTORIA (importa, para no repetir el fallo): el 27-jul salieron a produccion con 0.20 / 0.50 / 1 y defecto
+//   0.20, pidiendo "muy bajita, para que nunca moleste". Jaime lo probo en el movil y no oia NADA en el Cazador.
+//   Y con la cuenta hecha se entiende: un gain de 0.20 son -14 dB, y sobre el 0.30 ya calibrado del modo deja la
+//   musica en ~-39 LUFS contra unos SFX a pico 0.9. No era "bajita": era inaudible. Los peldanos suben para que
+//   "Bajo" siga siendo bajo pero se OIGA, y el defecto pasa a Medio (-3,7 dB sobre la mezcla calibrada).
+const MUSIC_VOL_STEPS = [0.35, 0.65, 1];
+const MUSIC_VOL_DEF   = MUSIC_VOL_STEPS[1];   // Medio
+const MUSIC_VOL_VIEJO = 0.20;                 // el defecto inaudible del 27-jul (solo para la migracion)
 let SAVE=Object.assign({chispas:0,gemas:20,xp:0,level:1,played:0,lastWinDay:'',
     balls:[{arch:'cohete',q:0,attrs:[8,7,3,4,4,5],xp:0,pts:0,copas:0}], equipped:0, cosmetics:[], pase:false,
-    onboarded:false, codes:[], settings:{audio:true, music:true, sfx:true, musicVol:0.20, reducedFx:false, quality:'auto', colorblind:'off'},
+    onboarded:false, codes:[], settings:{audio:true, music:true, sfx:true, musicVol:MUSIC_VOL_DEF, reducedFx:false, quality:'auto', colorblind:'off'},
     mode:'race', fmt:'individual', dayBonusDay:'', cupsToday:null, tutorialDone:{}}, //+AG colección inicial: Cohete Común (bola de arranque, doc 05 §3.3) + estado Fase D + Home v3 (modo/formato elegidos, bonus del día) + copas (doc 37)
   (()=>{ try{ return JSON.parse(localStorage.getItem(SAVE_KEY))||{}; }catch(e){ return {}; } })());
-if(!SAVE.settings) SAVE.settings={audio:true, music:true, sfx:true, musicVol:0.20, reducedFx:false, quality:'auto', colorblind:'off'};   //+AG saves viejos sin settings
-//+AG VB Jaime 2026-07-27: la musica arranca MUY BAJA (20%) para que no moleste a nadie que abra el juego; el que
-//   la quiera mas fuerte la sube en Ajustes. musicVol es la escala DEL JUGADOR (0..1) sobre el nivel ya calibrado de
-//   cada contexto (1 = la mezcla de siempre: lobby 0.40, carrera/cazador 0.30, Red Light 0.42), no un volumen
-//   absoluto: asi el balance entre menus y partida se mantiene en cualquier posicion del control.
-if(typeof SAVE.settings.musicVol!=='number' || !(SAVE.settings.musicVol>=0 && SAVE.settings.musicVol<=1)) SAVE.settings.musicVol=0.20;
+if(!SAVE.settings) SAVE.settings={audio:true, music:true, sfx:true, musicVol:MUSIC_VOL_DEF, reducedFx:false, quality:'auto', colorblind:'off'};   //+AG saves viejos sin settings
+//+AG musicVol es la escala DEL JUGADOR (0..1) sobre el nivel ya calibrado de cada contexto (1 = la mezcla de
+//   siempre: lobby 0.40, carrera/cazador 0.30, Red Light 0.42), no un volumen absoluto: asi el balance entre
+//   menus y partida se mantiene en cualquier posicion del control. Los peldanos, en MUSIC_VOL_STEPS (arriba).
+if(typeof SAVE.settings.musicVol!=='number' || !(SAVE.settings.musicVol>=0 && SAVE.settings.musicVol<=1)) SAVE.settings.musicVol=MUSIC_VOL_DEF;
+//+AG MIGRACION del 0.20 inaudible. Sin esto el arreglo no le llega a NADIE que ya haya abierto el juego: el 0.20
+//   quedo guardado en su localStorage y un defecto nuevo no toca los saves que ya existen. Se sube solo a quien
+//   este EXACTAMENTE en el viejo defecto, que ya no es un peldano ofrecido: si alguien eligio Bajo/Medio/Alto a
+//   mano, su eleccion se respeta. Idempotente: tras subirlo, 0.65 !== 0.20 y no vuelve a entrar.
+if(SAVE.settings.musicVol === MUSIC_VOL_VIEJO) SAVE.settings.musicVol = MUSIC_VOL_DEF;
 //+AG doc 38 Fase 1: el audio se separa en dos flags (musica/efectos, patron Supercell). Saves viejos con el flag
 //   unico 'audio' migran a music+sfx = ese valor (idempotente: si ya existen, no se tocan).
 if(typeof SAVE.settings.music!=='boolean') SAVE.settings.music = SAVE.settings.audio!==false;
@@ -3120,7 +3134,7 @@ let gameFrameEl=null, curMode='race', curFmt='individual', curTutorial=false;
 //   torneo 4×3 del motor (Fase 3). cazador individual va con short=1 (su embed pelado arranca el torneo).
 //+AG VB Jaime 2026-07-27: UNA sola verdad del volumen de musica (0..1). La leen el shell (BT_MUSIC) y los tres
 //   motores (por &mvol). Blindada: un save corrupto o antiguo cae en 0.20, el defecto "muy bajita".
-function musicVolPref(){ try{ const v=SAVE.settings&&SAVE.settings.musicVol; return (typeof v==='number' && v>=0 && v<=1) ? v : 0.20; }catch(e){ return 0.20; } }
+function musicVolPref(){ try{ const v=SAVE.settings&&SAVE.settings.musicVol; return (typeof v==='number' && v>=0 && v<=1) ? v : MUSIC_VOL_DEF; }catch(e){ return MUSIC_VOL_DEF; } }
 window.musicVolPref = musicVolPref;   //+AG el bloque de musica es un <script type="module">: alcanza el global, no el scope de este script
 function modeEmbedUrl(mode, fmt){
   let u = fmt==='equipos' ? MODE_SRC[mode]+'?embed=1&fmt=team'      // race/redlight leen fmt=team (Fase 3); cazador: su embed sin 'short' YA es el torneo 4×3
@@ -4031,7 +4045,7 @@ function buildSettings(){ const S2=SAVE.settings, b=el('setBody'); b.innerHTML='
     //   sube. Manda en el acto sobre el shell (BT_MUSIC.refresh -> rampa de gain) y sobre la SIGUIENTE partida (&mvol).
     //   La fila solo aparece con la musica encendida: un control de volumen bajo un interruptor apagado no hace nada.
     ...(S2.music!==false ? [segRow(s.setMusicVol, s.setMusicVolSub,
-      [[0.2,s.setMusicVolOpts[0]],[0.5,s.setMusicVolOpts[1]],[1,s.setMusicVolOpts[2]]], musicVolPref(),
+      MUSIC_VOL_STEPS.map((v,i)=>[v, s.setMusicVolOpts[i]]), musicVolPref(),
       v=>{ S2.musicVol=v; setPersist(); if(window.BT_MUSIC) BT_MUSIC.refresh(); })] : []),
     swRow(s.setSfx, s.setSfxSub, S2.sfx!==false, v=>{ S2.sfx=v; S2.audio=(S2.music||S2.sfx); setPersist(); }) ]));
   //+AG IDIOMA (ya funcionaba; se conserva el selector real que reusa #lang)
@@ -4437,9 +4451,10 @@ else if((FRESH || _pend) && !SAVE.onboarded && _onbParam!=='0'){
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
   //   verdad, y aun asi la partida da un escalon de volumen al arrancar.
   //+AG VB Jaime 2026-07-27: 0.40 pasa a ser el nivel de REFERENCIA (el 100% del control de Ajustes), no el que
-  //   suena. Lo que suena es 0.40 x musicVol, y musicVol arranca en 0.20: la musica esta ahi, pero no molesta.
+  //   suena. Lo que suena es 0.40 x musicVol (peldanos en MUSIC_VOL_STEPS, arranca en Medio = 0.65 -> 0.26, que
+  //   es justo el nivel con el que suena balltrials.com; el 0.20 del primer intento dejaba esto en 0.08: mudo).
   const LOBBY_BASE = 0.40;
-  const vol = ()=>{ try{ return window.musicVolPref ? musicVolPref() : 0.20; }catch(e){ return 0.20; } };
+  const vol = ()=>{ try{ return window.musicVolPref ? musicVolPref() : 0.65; }catch(e){ return 0.65; } };
   const audio = createWebAudio({ musicUrl:'motor/_music/lobby.mp3', musicGain:LOBBY_BASE*vol(), musicLoopTrim:0.12 });
 
   //+AG UNA sola verdad de "¿deberia estar sonando?" = quiere() && !enPartida, y aplicar() la persigue. Con dos
