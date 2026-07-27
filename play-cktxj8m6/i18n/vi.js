@@ -143,7 +143,7 @@ shell: {
   welFail:'Không mở được Google. Bạn chơi tiếp với tư cách khách và game vẫn được lưu; có thể làm việc này sau trong Hồ sơ.',
   tGoogleIn:'Bạn đã đăng nhập bằng tài khoản Google ✓',
   tGoogleNew:'Xong! Giờ game của bạn đi cùng bạn qua Google',
-  tGoogleNo:'Không đăng nhập được bằng Google. Bạn chơi tiếp với tư cách khách.',
+  tProvNo:p=>'Không đăng nhập được bằng '+p+'. Bạn chơi tiếp với tư cách khách.',
   quizStart:'Bạn thích gì nhất?', quizRun:'Khi chạy thì sao?', quizPush:'Khi đẩy thì sao?',
   quizOpts:{run:'Chạy',push:'Đẩy',survive:'Sống sót qua mọi thứ',straight:'Đi thẳng, hết ga',
     chaos:'Nảy giữa hỗn loạn',plant:'Tôi đứng yên một chỗ',stick:'Tôi bám vào mọi thứ'},

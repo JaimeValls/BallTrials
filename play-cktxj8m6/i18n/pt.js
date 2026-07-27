@@ -143,7 +143,7 @@ shell: {
   welFail:'Não deu para abrir o Google. Você segue como convidado e seu jogo continua salvo; dá para fazer isso depois no Perfil.',
   tGoogleIn:'Você entrou com sua conta do Google ✓',
   tGoogleNew:'Pronto! Agora seu jogo viaja com você pelo Google',
-  tGoogleNo:'Não deu para entrar com o Google. Você segue como convidado.',
+  tProvNo:p=>'Não deu para entrar com '+p+'. Você segue como convidado.',
   quizStart:'Do que você gosta mais?', quizRun:'Correndo, como?', quizPush:'Empurrando, como?',
   quizOpts:{run:'Correr',push:'Empurrar',survive:'Sobreviver a tudo',straight:'Reta, no talo',
     chaos:'Quicando no meio do caos',plant:'Fico firme no lugar',stick:'Grudo em tudo'},

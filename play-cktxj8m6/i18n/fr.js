@@ -143,7 +143,7 @@ shell: {
   welFail:'Google n\'a pas pu s\'ouvrir. Tu continues en invité et ton jeu reste enregistré ; tu pourras le faire plus tard depuis le Profil.',
   tGoogleIn:'Tu es connecté avec ton compte Google ✓',
   tGoogleNew:'C\'est fait ! Ton jeu voyage maintenant avec toi via Google',
-  tGoogleNo:'Connexion Google impossible. Tu continues en invité.',
+  tProvNo:p=>'Connexion à '+p+' impossible. Tu continues en invité.',
   quizStart:'Tu préfères quoi ?', quizRun:'Pour courir, comment ?', quizPush:'Pour pousser, comment ?',
   quizOpts:{run:'Courir',push:'Pousser',survive:'Survivre à tout',straight:'Tout droit, à fond',
     chaos:'Rebondir dans le chaos',plant:'Je ne bouge pas d\'un pouce',stick:'Je m\'accroche à tout'},

@@ -143,7 +143,7 @@ shell: {
   welFail:'Google tidak bisa dibuka. Kamu lanjut sebagai tamu dan game-mu tetap tersimpan; ini bisa dilakukan nanti lewat Profil.',
   tGoogleIn:'Kamu masuk dengan akun Google ✓',
   tGoogleNew:'Selesai! Sekarang game-mu ikut ke mana pun lewat Google',
-  tGoogleNo:'Tidak bisa masuk dengan Google. Kamu lanjut sebagai tamu.',
+  tProvNo:p=>'Tidak bisa masuk dengan '+p+'. Kamu lanjut sebagai tamu.',
   quizStart:'Kamu paling suka apa?', quizRun:'Kalau lari, gimana?', quizPush:'Kalau mendorong, gimana?',
   quizOpts:{run:'Berlari',push:'Mendorong',survive:'Selamat dari apa pun',straight:'Lurus, gas pol',
     chaos:'Mental-mental di tengah kekacauan',plant:'Aku diam di tempat',stick:'Aku menempel ke apa saja'},

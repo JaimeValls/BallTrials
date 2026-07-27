@@ -144,7 +144,7 @@ shell: {
   welFail:'Googleを開けませんでした。ゲストのまま続けられ、ゲームも保存されます。あとからプロフィールでやり直せます。',
   tGoogleIn:'Googleアカウントでログインしました ✓',
   tGoogleNew:'完了！ これでゲームはGoogle経由でどこへでもついてきます',
-  tGoogleNo:'Googleでログインできませんでした。ゲストのまま続けます。',
+  tProvNo:p=>p+'でログインできませんでした。ゲストのまま続けます。',
   quizStart:'いちばん好きなのは？', quizRun:'走るなら、どんな感じ？', quizPush:'押すなら、どんな感じ？',
   quizOpts:{run:'走る',push:'押す',survive:'何があっても生き残る',straight:'まっすぐ、全開で',
     chaos:'混戦の中で跳ね回る',plant:'その場に踏ん張る',stick:'何にでも食らいつく'},

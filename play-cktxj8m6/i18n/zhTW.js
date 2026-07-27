@@ -145,7 +145,7 @@ shell: {
   welFail:'沒能開啟 Google。你可以繼續用訪客身分玩，遊戲一樣會存起來；之後在「個人檔案」再弄也行。',
   tGoogleIn:'你已用 Google 帳號登入 ✓',
   tGoogleNew:'搞定！現在你的遊戲會透過 Google 跟著你走',
-  tGoogleNo:'沒能用 Google 登入。你繼續以訪客身分遊玩。',
+  tProvNo:p=>'沒能用 '+p+' 登入。你繼續以訪客身分遊玩。',
   quizStart:'你最喜歡哪一種？', quizRun:'跑起來的時候呢？', quizPush:'推擠的時候呢？',
   quizOpts:{run:'跑',push:'推',survive:'什麼都扛得住',straight:'直線，油門催到底',
     chaos:'在混戰裡到處彈',plant:'我站著不動',stick:'我什麼都黏得住'},

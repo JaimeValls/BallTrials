@@ -145,7 +145,7 @@ shell: {
   welFail:'Google tidak dapat dibuka. Awak teruskan sebagai tetamu dan permainan awak tetap tersimpan; boleh buat ini nanti dari Profil.',
   tGoogleIn:'Awak log masuk dengan akaun Google ✓',
   tGoogleNew:'Siap! Sekarang permainan awak mengikut awak melalui Google',
-  tGoogleNo:'Tidak dapat log masuk dengan Google. Awak teruskan sebagai tetamu.',
+  tProvNo:p=>'Tidak dapat log masuk dengan '+p+'. Awak teruskan sebagai tetamu.',
   quizStart:'Apa yang awak paling suka?', quizRun:'Bila berlari, macam mana?', quizPush:'Bila menolak, macam mana?',
   quizOpts:{run:'Berlari',push:'Menolak',survive:'Terselamat daripada apa sahaja',straight:'Lurus, pedal penuh',
     chaos:'Melantun dalam kekacauan',plant:'Saya berdiri tak berganjak',stick:'Saya melekat pada apa sahaja'},

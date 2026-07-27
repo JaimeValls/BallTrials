@@ -143,7 +143,7 @@ shell: {
   welFail:'Google kon niet worden geopend. Je speelt verder als gast en je spel blijft bewaard; je kunt dit later via het Profiel doen.',
   tGoogleIn:'Je bent ingelogd met je Google-account ✓',
   tGoogleNew:'Klaar! Je spel reist nu met je mee via Google',
-  tGoogleNo:'Inloggen met Google lukte niet. Je speelt verder als gast.',
+  tProvNo:p=>'Inloggen met '+p+' lukte niet. Je speelt verder als gast.',
   quizStart:'Wat vind je het leukst?', quizRun:'Bij het rennen, hoe?', quizPush:'Bij het duwen, hoe?',
   quizOpts:{run:'Rennen',push:'Duwen',survive:'Alles overleven',straight:'Rechtdoor, vol gas',
     chaos:'Stuiteren door de chaos',plant:'Ik blijf staan waar ik sta',stick:'Ik plak aan alles'},

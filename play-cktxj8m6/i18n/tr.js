@@ -143,7 +143,7 @@ shell: {
   welFail:'Google açılamadı. Misafir olarak devam ediyorsun ve oyunun yine kayıtlı; bunu sonra Profil\'den yapabilirsin.',
   tGoogleIn:'Google hesabınla giriş yaptın ✓',
   tGoogleNew:'Tamamdır! Oyunun artık Google ile seninle geziyor',
-  tGoogleNo:'Google ile giriş yapılamadı. Misafir olarak devam ediyorsun.',
+  tProvNo:p=>p+' ile giriş yapılamadı. Misafir olarak devam ediyorsun.',
   quizStart:'En çok neyi seversin?', quizRun:'Koşarken nasıl?', quizPush:'İterken nasıl?',
   quizOpts:{run:'Koşmak',push:'İtmek',survive:'Her şeye dayanmak',straight:'Dümdüz, tam gaz',
     chaos:'Kaosun içinde sekmek',plant:'Yerimden kıpırdamam',stick:'Her şeye yapışırım'},

@@ -145,7 +145,7 @@ shell: {
   welFail:'Google ließ sich nicht öffnen. Du spielst als Gast weiter und dein Spiel bleibt gesichert; du kannst das später im Profil nachholen.',
   tGoogleIn:'Du bist mit deinem Google-Konto angemeldet ✓',
   tGoogleNew:'Fertig! Dein Spiel reist jetzt über Google mit dir',
-  tGoogleNo:'Anmeldung mit Google nicht möglich. Du spielst als Gast weiter.',
+  tProvNo:p=>'Anmeldung mit '+p+' nicht möglich. Du spielst als Gast weiter.',
   quizStart:'Was magst du am liebsten?', quizRun:'Beim Laufen, wie?', quizPush:'Beim Schieben, wie?',
   quizOpts:{run:'Laufen',push:'Schieben',survive:'Alles überleben',straight:'Geradeaus, Vollgas',
     chaos:'Durchs Chaos hüpfen',plant:'Ich bleibe stehen',stick:'Ich klebe an allem'},

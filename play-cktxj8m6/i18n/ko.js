@@ -144,7 +144,7 @@ shell: {
   welFail:'Google을 열 수 없었어요. 손님으로 계속 플레이할 수 있고 게임도 저장돼요. 나중에 프로필에서 다시 할 수 있어요.',
   tGoogleIn:'Google 계정으로 로그인했어요 ✓',
   tGoogleNew:'완료! 이제 게임이 Google을 통해 당신을 따라다녀요',
-  tGoogleNo:'Google 로그인에 실패했어요. 손님으로 계속합니다.',
+  tProvNo:p=>p+' 로그인에 실패했어요. 손님으로 계속합니다.',
   quizStart:'무엇을 제일 좋아하나요?', quizRun:'달릴 때는 어떤 쪽?', quizPush:'밀 때는 어떤 쪽?',
   quizOpts:{run:'달리기',push:'밀기',survive:'무엇이든 버티기',straight:'직선으로, 풀 스피드',
     chaos:'난전 속에서 튀기',plant:'그 자리에 버티기',stick:'무엇에든 달라붙기'},

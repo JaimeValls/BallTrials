@@ -143,7 +143,7 @@ shell: {
   welFail:'Google non si è aperto. Continui come ospite e il tuo gioco resta salvato; puoi farlo più tardi dal Profilo.',
   tGoogleIn:'Hai fatto accesso con il tuo account Google ✓',
   tGoogleNew:'Fatto! Ora il tuo gioco viaggia con te tramite Google',
-  tGoogleNo:'Accesso con Google non riuscito. Continui come ospite.',
+  tProvNo:p=>'Accesso con '+p+' non riuscito. Continui come ospite.',
   quizStart:'Cosa ti piace di più?', quizRun:'Quando corri, come?', quizPush:'Quando spingi, come?',
   quizOpts:{run:'Correre',push:'Spingere',survive:'Sopravvivere a tutto',straight:'Dritta, a tutto gas',
     chaos:'Rimbalzare nel caos',plant:'Sto piantata lì',stick:'Mi attacco a tutto'},

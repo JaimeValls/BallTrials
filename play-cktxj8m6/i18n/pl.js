@@ -145,7 +145,7 @@ shell: {
   welFail:'Nie udało się otworzyć Google. Grasz dalej jako gość, a twoja gra i tak jest zapisana; zrobisz to później w Profilu.',
   tGoogleIn:'Jesteś zalogowany kontem Google ✓',
   tGoogleNew:'Gotowe! Twoja gra podróżuje teraz z tobą przez Google',
-  tGoogleNo:'Nie udało się zalogować przez Google. Grasz dalej jako gość.',
+  tProvNo:p=>'Nie udało się zalogować przez '+p+'. Grasz dalej jako gość.',
   quizStart:'Co lubisz najbardziej?', quizRun:'Jak wolisz biegać?', quizPush:'Jak wolisz pchać?',
   quizOpts:{run:'Biegać',push:'Pchać',survive:'Przetrwać wszystko',straight:'Prosto, na full',
     chaos:'Odbijać się w chaosie',plant:'Stoję jak wryty',stick:'Przyklejam się do wszystkiego'},
