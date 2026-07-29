@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-28 806d4f9">
+<meta name="bt-build" content="2026-07-29 b34007d">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <!--+AG el HTML se sirve en INGLES (defecto del juego); ?lang=es lo traduce por JS (applyLang) -->
 <title>YouBall · The Hunter (WebGL)</title>
@@ -150,7 +150,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=806d4f9"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=b34007d"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -165,7 +165,8 @@ import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, makeFac
 import { archLook } from '../chassis/ballmat.mjs';   //+AG doc 41 bloque G: material de la bola-heroe
 import { attachSquash } from '../chassis/squash.mjs';
 import { Sim, RNG, TEAMS, BALL_R, ARENA_W, ARENA_H, FPS } from './sim.js';
-import { EmoBook, PRIO, archIdle } from '../chassis/emotions.mjs';   //+AG archIdle: cara de firma de la bola-heroe en reposo
+import { EmoBook, PRIO } from '../chassis/emotions.mjs';
+import { archFace } from '../chassis/facegen.mjs';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
 import { createCelebration } from '../chassis/celebration.mjs';
 import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs';
 import { buildSfxBuffer } from './sfxmap.mjs';
@@ -422,7 +423,7 @@ function sync(dt, a=1){
       else if(fewAlive) emo.ambient(i,'concentrada',PRIO.concentrada);
       else emo.ambient(i,'neutral',0);
     }
-    o.setExpr(archIdle(i===0?ARCH_KEY_P:null, emo.resolve(i,f)));   //+AG en reposo, TU bola pone la cara de su ficha
+    o.setExpr(archFace(i===0?ARCH_KEY_P:null, emo.resolve(i,f)));   //+AG en reposo, TU bola pone la cara de su ficha
   }
   // cazador: cara animada según su estado (ruge/digiere/caza). Posición/escala INTERPOLADAS (60 fps).
   const fury=H.fury;                                           // CZ1: 0 calma · 1 irritado · 2 furioso

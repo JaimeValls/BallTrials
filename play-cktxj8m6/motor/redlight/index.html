@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-28 806d4f9">
+<meta name="bt-build" content="2026-07-29 b34007d">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <!--+AG el HTML se sirve en INGLES (defecto del juego); ?lang=es lo traduce por JS (applyLang) -->
 <title>YouBall · Red Light Rush (WebGL) · The Marble Games</title>
@@ -199,7 +199,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=806d4f9"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=b34007d"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -218,7 +218,8 @@ import { createKillfeed } from '../chassis/killfeed.mjs';
 import { createCensusBoard } from '../chassis/censusboard.mjs';
 import { createCupoGauge } from '../chassis/cupogauge.mjs';
 import { createKillTags } from '../chassis/killtag.mjs';
-import { EmoBook, PRIO, archIdle } from '../chassis/emotions.mjs';   //+AG archIdle: cara de firma de la bola-heroe en reposo
+import { EmoBook, PRIO } from '../chassis/emotions.mjs';
+import { archFace } from '../chassis/facegen.mjs';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
 import { Sim, TEAMS, SHORT_COLORS, SHORT_COLORS_6, BALL_R, FPS, FIELD_W, FIELD_L, XL, XR, SPAWN_Y, GATE_Y, SAFE_Y } from './sim.js';
 import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs';
 import { buildSfxBuffer } from './sfxmap.mjs';
@@ -898,7 +899,7 @@ function sync(dt, a=1){
     else if(sim.color==='red') emo.ambient(i,'concentrada',PRIO.concentrada);   // parada/vigilante en rojo (NUNCA dormida)
     else if((b.y-py[i])>0.02) emo.ambient(i,'concentrada',PRIO.concentrada);      // avanzando en verde
     else emo.ambient(i,'neutral',0);
-    o.setExpr(archIdle(i===0?ARCH_KEY_P:null, emo.resolve(i,f)));   //+AG en reposo, TU bola pone la cara de su ficha
+    o.setExpr(archFace(i===0?ARCH_KEY_P:null, emo.resolve(i,f)));   //+AG en reposo, TU bola pone la cara de su ficha
   }
   // MIRILLAS (medidor de peligro ROJO): el disco interior CRECE hasta LLENAR el aro mientras la bola sigue en
   // rojo; al llenarse (charge→1) es cuando dispara. Palpita cada vez más rápido cerca del tope. Haz rojo la señala.

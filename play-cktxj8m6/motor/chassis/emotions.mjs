@@ -60,22 +60,15 @@ const FIGHT_CYCLE = 100;   // ~3.3 s por variante a 30 fps
 //     escalera de prioridad de siempre y la cara de firma desaparece.
 // Es 100% cosmetico y entra por la misma puerta que el material (&arch, solo individual, solo
 // balls[0]): el torneo y el video del motor no lo reciben y quedan byte-identicos.
-export const ARCH_IDLE = {
-  cohete:  'feliz',        // lanzada y con ganas
-  tanque:  'concentrada',  // estoico
-  chispa:  'feliz',        // sonrison de la ficha
-  pinball: 'chuleria',     // guiña en la ficha
-  lapa:    'concentrada',  // ceño de la ficha, sin llegar al enfado (las marcas rojas a 56 px son ruido)
-  burbuja: 'neutral',      // dulce: su ficha YA es la cara neutral de ojos grandes
-  meteoro: 'concentrada',  // agresivo
-  bunker:  'concentrada',  // serio militar
-  volcan:  'feliz',        // se rie a carcajadas en la ficha
-  yunque:  'concentrada',  // duro
-  fantasma:'chuleria',     // sonrisa picara
-  estrella:'chuleria',     // guiña en la ficha
-};
-// Devuelve la expresion a pintar: la de firma si la bola esta en reposo, y si no la que venga.
-export const archIdle = (arch, expr) => (expr === 'neutral' && ARCH_IDLE[arch]) ? ARCH_IDLE[arch] : expr;
+// ⚠ ESTO YA NO VIVE AQUI (doc 51, 29-jul). Reemplazar el reposo por OTRA expresion del atlas se
+// quedaba corto: 'feliz' y 'chuleria' siguen siendo caras de bebe (sin cejas, boca de puntito), asi
+// que Cohete pasaba de "duro" a "contento" pero nunca a lo que enseña su ficha. Y ademas se rompia
+// al parpadear: 'blink' no es 'neutral', asi que la cara de firma desaparecia cada parpadeo.
+//
+// Lo que hay ahora es un MODIFICADOR de ceja/ojo/boca por heroe que se pega encima de la expresion
+// que toque: `archFace(arch, expr)` en chassis/facegen.mjs (tabla HERO_FACE). Los motores lo
+// importan de alli. Aqui no queda nada: un campo muerto no da error, pinta `undefined` y sobrevive
+// a cualquier revision visual (leccion del docs/41 §12).
 
 // Libro de emociones para todas las bolas de una sim.
 export class EmoBook {

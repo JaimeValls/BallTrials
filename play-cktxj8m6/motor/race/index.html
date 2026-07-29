@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-28 806d4f9">
+<meta name="bt-build" content="2026-07-29 b34007d">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>YouBall · La Gran Carrera (WebGL)</title>
 <style>
@@ -178,7 +178,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=806d4f9"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=b34007d"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -194,7 +194,8 @@ import { archLook } from '../chassis/ballmat.mjs';   //+AG doc 41 bloque G: mate
 import { attachSquash } from '../chassis/squash.mjs';
 import { Sim, RNG, TEAMS, SHORT_COLORS, BALL_R, WIDTH, GATE_Y, GATE_H, TOP, FPS,
          DIR, N_BALLS, CAM_SCALE, ASPA_R, ASPA_THICK, PLAT_HW, PLAT_HH } from './sim.js';   //+AG extras de la capa de agencia
-import { EmoBook, PRIO, archIdle } from '../chassis/emotions.mjs';   //+AG archIdle: cara de firma de la bola-heroe en reposo
+import { EmoBook, PRIO } from '../chassis/emotions.mjs';
+import { archFace } from '../chassis/facegen.mjs';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
 import { itemTexture } from '../chassis/itemgen.mjs';
 import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs';
 import { buildSfxBuffer } from './sfxmap.mjs';
@@ -649,7 +650,7 @@ function sync(dt, a=1){
     if(b.y < GATE_Y+6.0) emo.ambient(i,conc,PRIO.concentrada);   // sprint final
     else if((py[i]-b.y) > 0.30) emo.ambient(i,conc,PRIO.concentrada);  // bajando en carrera -> FOCO
     else emo.ambient(i,'neutral',0); }                                         // lenta/parada -> neutral alerta (parpadeo natural ok)
-    o.setExpr(archIdle(i===0?ARCH_KEY_P:null, emo.resolve(i,f)));   //+AG en reposo, TU bola pone la cara de su ficha
+    o.setExpr(archFace(i===0?ARCH_KEY_P:null, emo.resolve(i,f)));   //+AG en reposo, TU bola pone la cara de su ficha
   }
   // celebración: confeti cayendo sobre la meta (la cámara de la sim ya hace zoom a la meta)
   if(celebrating){

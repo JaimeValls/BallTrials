@@ -21,6 +21,13 @@ const STARC = 'rgb(255,226,90)';
 const IRIS_HI = 'rgb(70,55,90)';   // v2 kawaii: iris vidrioso (morado-tinta claro arriba)
 const IRIS_LO = 'rgb(14,11,20)';   // casi negro abajo → la pupila sigue leyéndose oscura sobre cualquier color de equipo
 
+// Aclara/oscurece un '#rrggbb' para montar el degradado del iris de color (arriba claro, abajo casi negro:
+// la pupila TIENE que seguir leyéndose oscura encima de cualquier color de equipo).
+const hex2 = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+const mixTo = (h, to, k) => { const c = hex2(h); return `rgb(${c.map(v => Math.round(v + (to - v) * k)).join(',')})`; };
+const tintUp = h => mixTo(h, 255, 0.34);
+const tintDown = h => mixTo(h, 0, 0.62);
+
 // --- métricas base en espacio 256 (se escalan por f=size/256) ---
 // v2 KAWAII (2026-06-27): ojos más grandes y juntos, pupila enorme (~75% del ojo), boca más baja → cara de bebé.
 const EX = 41, EYE_CY = 118, RX = 41, RY = 50, PUPR = 33, MCY = 200;
@@ -104,12 +111,18 @@ function drawEye(x, u, ecx, ecy, side, spec, part = 'all'){
     const ox = part === 'all' ? u(gx * 9) : 0, oy = part === 'all' ? u(gy * 9) : 0;   // gaze 11→9: pupila gigante no debe salirse del blanco
     const ir = pr * 0.92;                                        // IRIS con degradado vertical (efecto vidrioso/gominola)
     const g = x.createRadialGradient(ecx + ox, ecy + oy - ir * 0.3, ir * 0.15, ecx + ox, ecy + oy, ir);
-    g.addColorStop(0, IRIS_HI); g.addColorStop(1, IRIS_LO);
+    //+AG paridad ficha/pista: los retratos tienen el IRIS EN COLOR (Cohete azul cielo, Pinball azul).
+    //  Sin spec.iris queda el morado-tinta de siempre, así que el atlas de gameplay no se mueve.
+    if (spec.iris){ g.addColorStop(0, tintUp(spec.iris)); g.addColorStop(1, tintDown(spec.iris)); }
+    else { g.addColorStop(0, IRIS_HI); g.addColorStop(1, IRIS_LO); }
     ell(x, ecx + ox, ecy + oy, ir, ir, g);
     ell(x, ecx + ox, ecy + oy + ir * 0.18, pr * 0.5, pr * 0.5, PUP);   // núcleo de pupila casi negro
-    const c = u(PUPR * 0.42 * pupm + 2);                         // BRILLO principal GRANDE (catchlight) = factor ternura nº1
+    //+AG spec.glow encoge el catchlight para las caras de heroe: es el factor ternura nº1, y una bola
+    //  con ceja de duro y un brillo de peluche en el ojo sigue leyendose como un bebe. Por defecto 1.
+    const gk = spec.glow ?? 1;
+    const c = u((PUPR * 0.42 * pupm + 2) * gk);                  // BRILLO principal GRANDE (catchlight) = factor ternura nº1
     ell(x, ecx + ox - pr * 0.42, ecy + oy - pr * 0.45, c, c, WHITE);
-    const c2 = u(PUPR * 0.20 * pupm + 1);                        // brillo secundario
+    const c2 = u((PUPR * 0.20 * pupm + 1) * gk);                 // brillo secundario
     ell(x, ecx + ox + pr * 0.40, ecy + oy + pr * 0.42, c2, c2, 'rgba(255,255,255,0.90)');
   } else if (part === 'pup'){                                    // formas sin pupila (blink/happy/x/star...) viven en la capa eyes
     return;
@@ -133,26 +146,37 @@ function drawEye(x, u, ecx, ecy, side, spec, part = 'all'){
     heart(x, ecx, ecy + u(2), u(RX * 1.05), PINK);
   }
 }
-function drawBrow(x, u, ecx, ecy, side, kind){
+// t = grosor (×), dy = cuánto BAJA la ceja sobre el ojo, sl = pendiente del angry/sad (×).
+//+AG paridad ficha/pista: los retratos de Codex llevan la ceja GRUESA y APOYADA sobre el ojo (le come
+//  el borde de arriba). La ceja de gameplay flota 8 px por encima y es fina, que es justo la diferencia
+//  entre "duro" y "bebé". Los tres mandos van por defecto a 1/0/1 → el atlas de siempre no se mueve.
+function drawBrow(x, u, ecx, ecy, side, kind, t = 1, dy = 0, sl = 1, exm = 1, eym = 1){
   if (!kind || kind === 'none') return;
-  const rx = u(RX), ry = u(RY), top = ecy - ry - u(8);
+  //+AG rx/ry llevan los multiplicadores del OJO **solo en las caras de heroe** (exm/eym llegan a 1
+  //  en las demas). Sin esto, encoger el ojo dejaba la ceja clavada donde estaba el ojo grande: se
+  //  separaba y volvia a flotar, que es justo lo que se estaba arreglando.
+  //  ⚠ Y aplicarlo a TODAS movia la ceja de las 8 caras del atlas que ya traian rx/ry (concentrada
+  //  y sus variantes, sorpresa, susto, enfado, triste). Lo cazo el banco de atlas comparando contra
+  //  HEAD: el torneo y el video del motor tienen que salir byte-identicos sin `arch`.
+  const rx = u(RX * exm), ry = u(RY * eym), top = ecy - ry - u(8) + u(dy);
   const inn = ecx + (side === 'L' ? rx * 0.7 : -rx * 0.7);
   const out = ecx + (side === 'L' ? -rx : rx);
-  if (kind === 'angry') thick(x, [[out, top], [inn, top + u(20)]], u(8), INK);
-  else if (kind === 'sad') thick(x, [[out, top + u(20)], [inn, top]], u(8), INK);
-  else if (kind === 'up') arc(x, [Math.min(out, inn), top - u(10), Math.max(out, inn), top + u(16)], 200, 340, INK, u(7));
-  else if (kind === 'flat') thick(x, [[out, top + u(8)], [inn, top + u(8)]], u(7), INK);
+  if (kind === 'angry') thick(x, [[out, top], [inn, top + u(20 * sl)]], u(8 * t), INK);
+  else if (kind === 'sad') thick(x, [[out, top + u(20 * sl)], [inn, top]], u(8 * t), INK);
+  else if (kind === 'up') arc(x, [Math.min(out, inn), top - u(10), Math.max(out, inn), top + u(16)], 200, 340, INK, u(7 * t));
+  else if (kind === 'flat') thick(x, [[out, top + u(8)], [inn, top + u(8)]], u(7 * t), INK);
 }
-function drawMouth(x, u, cx, cy, style){
+// mw = ancho de la boca (×). Por defecto 1 → el atlas de siempre no se mueve.
+function drawMouth(x, u, cx, cy, style, mw = 1){
   if (!style || style === 'none') return;
-  const w = u(28);   // v2 kawaii: boca notablemente MÁS PEQUEÑA (la cara cute habla por los ojos)
+  const w = u(28 * mw);   // v2 kawaii: boca notablemente MÁS PEQUEÑA (la cara cute habla por los ojos)
   if (style === 'smile') arc(x, [cx - w, cy - u(14), cx + w, cy + u(16)], 25, 155, INK, u(7));
   else if (style === 'smirk') arc(x, [cx - w, cy - u(16), cx + w * 0.5, cy + u(14)], 25, 150, INK, u(7));
   else if (style === 'big_smile'){
     pie(x, [cx - w, cy - u(18), cx + w, cy + u(22)], 18, 162, INK);
     pie(x, [cx - w * 0.5, cy + u(4), cx + w * 0.5, cy + u(20)], 20, 160, PINK);   // lengüita rosa
-  } else if (style === 'open_o'){ const r = u(13); ell(x, cx, cy, r, r * 1.15, INK); }   // óvalo vertical = bostecito tierno
-  else if (style === 'open_big') ell(x, cx, cy + u(2), u(16), u(20), INK);
+  } else if (style === 'open_o'){ const r = u(13 * mw); ell(x, cx, cy, r, r * 1.15, INK); }   // óvalo vertical = bostecito tierno
+  else if (style === 'open_big') ell(x, cx, cy + u(2), u(16 * mw), u(20 * mw), INK);
   else if (style === 'frown') arc(x, [cx - w, cy + u(2), cx + w, cy + u(34)], 200, 340, INK, u(7));
   else if (style === 'grimace'){
     const y0 = cy + u(4);
@@ -161,7 +185,7 @@ function drawMouth(x, u, cx, cy, style){
     rrect(x, [cx - w * 0.8, cy - u(9), cx + w * 0.8, cy + u(11)], u(7), INK);
     for (const k of [-0.4, 0.0, 0.4]){ const xx = cx + w * 0.8 * k; thick(x, [[xx, cy - u(9)], [xx, cy + u(11)]], u(2.5), WHITE); }
     thick(x, [[cx - w * 0.8, cy + u(1)], [cx + w * 0.8, cy + u(1)]], u(2.5), WHITE);
-  } else if (style === 'neutral') thick(x, [[cx - u(8), cy], [cx + u(8), cy]], u(6), INK);   // raya más corta
+  } else if (style === 'neutral') thick(x, [[cx - u(8 * mw), cy], [cx + u(8 * mw), cy]], u(6), INK);   // raya más corta
   else if (style === 'cat') thick(x, [[cx - w * 0.6, cy + u(4)], [cx - w * 0.15, cy - u(3)], [cx, cy + u(4)], [cx + w * 0.15, cy - u(3)], [cx + w * 0.6, cy + u(4)]], u(5), INK);   // boca "ω" de gatito (kawaii)
   else if (style === 'tiny') ell(x, cx, cy, u(7), u(6), INK);   // boquita diminuta (reposo adorable)
 }
@@ -186,8 +210,10 @@ function newCanvas(){ const c = document.createElement('canvas'); c.width = c.he
 function paintSkin(x, u, S, spec){                 // mofletes + cejas + boca (mobiliario estable de la cara)
   const cx0 = S / 2, lx = cx0 - u(EX), rx = cx0 + u(EX), ey = u(EYE_CY);
   if (spec.cheeks){ ell(x, lx - u(20), ey + u(50), u(19), u(15), CHEEK); ell(x, rx + u(20), ey + u(50), u(19), u(15), CHEEK); }   // v2: mofletes más grandes, rosas y bajos
-  drawBrow(x, u, lx, ey, 'L', spec.brow); drawBrow(x, u, rx, ey, 'R', spec.brow);
-  drawMouth(x, u, cx0, u(MCY), spec.mouth || 'neutral');
+  const bx = spec.browFit ? spec.rx : 1, by = spec.browFit ? spec.ry : 1;   // ver el ⚠ de drawBrow
+  drawBrow(x, u, lx, ey, 'L', spec.brow, spec.browT, spec.browY, spec.browSl, bx, by);
+  drawBrow(x, u, rx, ey, 'R', spec.brow, spec.browT, spec.browY, spec.browSl, bx, by);
+  drawMouth(x, u, cx0, u(MCY + (spec.mouthY || 0)), spec.mouth || 'neutral', spec.mw);
 }
 function paintEyes(x, u, S, spec, part){
   const cx0 = S / 2, lx = cx0 - u(EX), rx = cx0 + u(EX), ey = u(EYE_CY);
@@ -240,6 +266,79 @@ export const PRESETS = {
   chuleria:    { eye_l: 'happy', eye_r: 'round', pup: 1.0, mouth: 'smirk', symbols: ['sparkle'], cheeks: true },
   alivio:      { eye: 'happy', mouth: 'big_smile', symbols: ['sweat'], cheeks: true },
 };
+
+// ── CARA DE HÉROE (paridad ficha ↔ pista, doc 51) ─────────────────────────────
+// EL PROBLEMA QUE ARREGLA: la ficha que compras vende ACTITUD (Cohete tiene cejas negras gruesas y
+// una sonrisa de listo, Tanque está harto, Volcán grita) y en pista salía la cara de reposo del
+// atlas: ojos enormes, CERO cejas y una boca de puntito. O sea un bebé. Y no era una limitación,
+// era un descuadre de fechas: el pase "v2 kawaii" de este fichero es del 27-jun y los retratos v3
+// con actitud llegaron el 26-jul. Un mes de separación y nadie los reconcilió.
+//
+// CÓMO ENTRA (importante): esto NO es una expresión nueva, es un MODIFICADOR que se pega encima de
+// la expresión que toque. Se pide con la clave compuesta `<arch>/<expr>` (p.ej. 'cohete/neutral').
+// Así el parpadeo hereda las cejas solo — si fuesen 12 presets fijos, la bola pasaría de dura a
+// bebé y otra vez a dura cada vez que parpadea.
+//
+// DÓNDE SE APLICA: solo al reposo (neutral/blink) y solo por la puerta `&arch` (individual,
+// balls[0]). Sin `arch` el atlas queda IDÉNTICO → el torneo y el vídeo del motor no se mueven.
+// Las caras de lucha (concentrada y sus variantes) ya traían ceja y boca de verdad: el hueco
+// gordo estaba en el reposo, que es justo la cara que enseña la Tienda.
+//
+// LOS TRES MANDOS QUE LO HACEN: `browT` (ceja gruesa), `browY` (la ceja BAJA y se apoya sobre el
+// ojo, que es lo que la hace dura — la de gameplay flota por encima) y `mw` (boca de verdad).
+const IRIS_AZUL = '#2E86E8', IRIS_HIELO = '#4FB8E8';
+export const HERO_FACE = {
+  //         ceja                                                    ojo                                        boca
+  cohete:  { brow:'angry', browT:2.7, browY:17, browSl:0.75, rx:0.92, ry:0.80, pup:0.86, glow:0.70, iris:IRIS_AZUL,  mouth:'smirk',     mw:1.6 },
+  tanque:  { brow:'flat',  browT:2.9, browY:19,              rx:0.94, ry:0.60, pup:0.84, glow:0.62, iris:'#8FA36B',  mouth:'neutral',   mw:2.1 },
+  chispa:  { brow:'angry', browT:2.6, browY:16, browSl:0.65, rx:0.92, ry:0.82, pup:0.86, glow:0.72, iris:IRIS_AZUL,  mouth:'big_smile', mw:1.35 },
+  pinball: { brow:'angry', browT:2.6, browY:16, browSl:0.65, eye_r:'happy', rx:0.92, ry:0.82, pup:0.86, glow:0.72, iris:IRIS_AZUL, mouth:'big_smile', mw:1.25 },
+  lapa:    { brow:'angry', browT:2.8, browY:18, browSl:0.85, rx:0.92, ry:0.74, pup:0.84, glow:0.66, iris:IRIS_AZUL,  mouth:'neutral',   mw:1.8 },
+  burbuja: { brow:'none',                                    rx:1.0,  ry:1.02, pup:1.0,  glow:1.0,  iris:IRIS_HIELO, mouth:'open_o',    mw:0.9 },
+  meteoro: { brow:'angry', browT:2.7, browY:17, browSl:0.75, rx:0.92, ry:0.78, pup:0.86, glow:0.68, iris:IRIS_AZUL,  mouth:'smirk',     mw:1.55 },
+  bunker:  { brow:'angry', browT:2.6, browY:17, browSl:0.75, rx:0.92, ry:0.80, pup:0.86, glow:0.70, iris:IRIS_AZUL,  mouth:'smile',     mw:1.35 },
+  volcan:  { brow:'angry', browT:2.8, browY:16, browSl:0.85, rx:0.92, ry:0.78, pup:0.82, glow:0.66, iris:'#E8622E',  mouth:'open_big',  mw:1.7 },
+  yunque:  { brow:'flat',  browT:2.9, browY:19,              rx:0.94, ry:0.62, pup:0.84, glow:0.60, iris:'#7E93B8',  mouth:'neutral',   mw:2.1 },
+  fantasma:{ brow:'up',    browT:2.2, browY:13,              eye_l:'happy', rx:0.92, ry:0.84, pup:0.86, glow:0.76, iris:'#A98BE8', mouth:'smirk', mw:1.6 },
+  estrella:{ brow:'up',    browT:2.3, browY:13,              eye_l:'happy', rx:0.92, ry:0.84, pup:0.86, glow:0.76, iris:IRIS_AZUL, mouth:'big_smile', mw:1.35 },
+};
+// CUANTO del modificador entra, segun lo que este haciendo la bola. Esto es la parte pensada:
+//
+//  · REPOSO (neutral/blink) → el modificador ENTERO. Es la cara de la ficha, la que vende la bola.
+//    Excepto en 'blink', donde las claves del OJO se caen: con `eye:'blink'` puesto, el
+//    `eye_r:'happy'` de Pinball dejaria un ojo guiñando y el otro cerrado a la vez.
+//
+//  · TODO LO DEMAS (concentrada, susto, extasis, KO…) → solo el PESO de la ceja: grosor, caida y
+//    pendiente. Ni la forma de la ceja, ni la boca, ni los ojos.
+//    POR QUE, que es lo que casi se me escapa: en una carrera tu bola esta bajando casi todo el
+//    rato, y bajando la cara es 'concentrada' (race/index.html:649), NO 'neutral'. O sea que un
+//    modificador que solo tocase el reposo casi no se veria JUGANDO, que es justo donde tenia que
+//    verse. Se hereda solo el peso porque la FORMA de la ceja y la boca son las que llevan la
+//    emocion del momento: cambiarlas por las de la ficha convertiria un susto en una pose.
+const EYEKEYS = ['eye', 'eye_l', 'eye_r', 'rx', 'ry', 'pup', 'gaze'];
+const REPOSO = new Set(['neutral', 'blink']);
+const PESO_CEJA = ['browT', 'browY', 'browSl'];
+// Resuelve una clave de expresión, que puede ser simple ('neutral') o de héroe ('cohete/neutral').
+function specOf(name){
+  const i = name.indexOf('/');
+  if (i < 0) return PRESETS[name] || PRESETS.neutral;
+  const expr = name.slice(i + 1);
+  const base = PRESETS[expr] || PRESETS.neutral;
+  const mod = HERO_FACE[name.slice(0, i)];
+  if (!mod) return base;
+  if (!REPOSO.has(expr)){                                  // cara de lucha: solo el peso de la ceja
+    const m = {};
+    for (const k of PESO_CEJA) if (mod[k] != null) m[k] = mod[k];
+    return { ...base, ...m };
+  }
+  const m = { ...mod, browFit: 1 };   // solo las caras de heroe apoyan la ceja en el ojo redimensionado
+  if (expr !== 'neutral') for (const k of EYEKEYS) delete m[k];
+  return { ...base, ...m };
+}
+export const bareExpr = name => name.slice(name.indexOf('/') + 1);
+// La que llaman los motores: convierte la expresión del frame en la clave que toca. `arch` llega
+// null salvo por la puerta `&arch`, así que fuera de ahí devuelve la expresión tal cual.
+export const archFace = (arch, expr) => (arch && HERO_FACE[arch]) ? arch + '/' + expr : expr;
 
 // ── CARA DEL CAZADOR (depredador) — port de draw_hunter_face ───────────────────
 const HRED = 'rgb(232,42,42)', HMAW = 'rgb(110,12,14)', HTONGUE = 'rgb(206,64,74)', HFANG = 'rgb(250,248,244)';
@@ -308,13 +407,13 @@ function toTex(canvas){
 }
 export function faceTexture(name){
   let t = cache.get(name); if (t) return t;
-  const spec = PRESETS[name] || PRESETS.neutral;
+  const spec = specOf(name);
   t = toTex(drawFace(spec)); cache.set(name, t); return t;
 }
 // Texturas por CAPA de una expresion (para makeFaceRig). pups/deco son null si la expresion no las usa.
 export function faceLayers(name){
   const key = 'L:' + name; let L = cache.get(key); if (L) return L;
-  const spec = PRESETS[name] || PRESETS.neutral;
+  const spec = specOf(name);
   L = {
     skin: toTex(drawLayer(spec, 'skin')),
     eyes: toTex(drawLayer(spec, 'eyes')),

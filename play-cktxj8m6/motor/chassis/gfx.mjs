@@ -9,7 +9,7 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { faceTexture, hunterTexture, faceLayers, PRESETS as FACE_PRESETS } from './facegen.mjs';
+import { faceTexture, hunterTexture, faceLayers, bareExpr, PRESETS as FACE_PRESETS } from './facegen.mjs';
 import { itemTexture } from './itemgen.mjs';
 import { ballMaterial, skinTexture } from './ballmat.mjs';   //+AG skinTexture: la piel del cuerpo (encargo 17)
 import { makeProp } from './propgen.mjs';   //+AG doc 41 bloque G: prop de la bola-heroe
@@ -154,8 +154,11 @@ export function makeFaceRig(R, phase = 0, size = R * 2.05){
     eyes.material.map = L.eyes; eyes.material.needsUpdate = true;
     pups.visible = !!L.pups; if (L.pups){ pups.material.map = L.pups; pups.material.needsUpdate = true; }
     deco.visible = !!L.deco; if (L.deco){ deco.material.map = L.deco; deco.material.needsUpdate = true; }
-    baseG = (FACE_PRESETS[name] && FACE_PRESETS[name].gaze) || [0, 0];
-    fx = FACE_FX[name] || null;
+    //+AG la clave puede venir compuesta ('cohete/neutral', cara de héroe). El gaze base y los FX
+    //  son de la EXPRESIÓN, no del héroe, así que se buscan con el nombre pelado.
+    const b = bareExpr(name);
+    baseG = (FACE_PRESETS[b] && FACE_PRESETS[b].gaze) || [0, 0];
+    fx = FACE_FX[b] || null;
     eyes.rotation.z = 0; eyes.scale.set(1, 1, 1);   // reset de FX al cambiar (que no herede poses)
     deco.rotation.z = 0; deco.scale.set(1, 1, 1); deco.position.x = deco.position.y = 0;
     fxg.rotation.z = 0; fxg.position.x = fxg.position.y = 0;

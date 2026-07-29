@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-28 806d4f9"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-07-29 b34007d"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -320,7 +320,15 @@
   .gd-close{ position:absolute; top:calc(12px + env(safe-area-inset-top)); right:15px; width:38px; height:38px; border-radius:50%; background:#ffffff14; border:1px solid var(--line); color:#fff; font-size:19px; cursor:pointer; }
   /*+AG doc 41: el retrato del heroe. Entra cayendo y rebotando una vez (400 ms) y luego respira:
      convierte "abrir una ficha" en un momento, que es justo lo que hace Brawl Stars. */
-  .gd-art{ width:150px; height:150px; display:grid; place-items:center; margin:2px 0 -6px; }
+  .gd-art{ width:150px; height:150px; display:grid; place-items:center; margin:2px 0 -6px; position:relative; }
+  /*+AG doc 51: la vista previa de PISTA, anclada a la esquina del retrato. 56 px NO es un tamaño
+     de escaparate elegido a ojo: es el tamaño EXACTO al que se ve la bola en carrera, así que lo
+     que no se reconozca en este recuadro tampoco se reconoce jugando. */
+  .gd-pista{ position:absolute; right:-32px; bottom:-14px; width:76px; text-align:center; pointer-events:none; }
+  .gd-pista > div{ width:76px; height:76px; margin:0 auto; border-radius:50%; background:#0b0725aa;
+                   box-shadow:0 3px 10px #0008, inset 0 0 0 1.5px #ffffff26; overflow:hidden; }
+  .gd-pista span{ display:block; margin-top:2px; font-size:.5rem; font-weight:800; letter-spacing:.05em;
+                  text-transform:uppercase; color:#b9aee6; }
   .gd-art img{ width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 10px 16px #000a);
     animation:gdDrop .42s cubic-bezier(.34,1.56,.64,1), bobIdle 2.8s ease-in-out .42s infinite; }
   @keyframes gdDrop{ 0%{ transform:translateY(-38px) scale(.86); opacity:0; } 60%{ transform:translateY(0) scale(1.06,.94); opacity:1; } 100%{ transform:none; } }
@@ -384,7 +392,10 @@
     .gd-art{ width:112px; height:112px; }
     .gd-hex{ width:180px; height:161px; }
     .gd-btn{ padding:12px; }
-  }
+    /*+AG doc 51: aqui el retrato baja a 112 px y el badge de pista NO se encoge con el — se APARTA.
+       Encogerlo seria lo facil y seria mentir: la etiqueta dice "en pista" porque la bola mide los
+       56 px de carrera, y una bola de 44 px con ese cartel es exactamente el fallo que arregla. */
+    .gd-pista{ right:-52px; bottom:-10px; }
   /* --- TIENDA (doc 12: secciones + escaparate, cero azar, puerta parental) --- */
   #tienda{ background:url(arte/fondo/doodles.webp) repeat top left/340px 340px, radial-gradient(130% 90% at 50% 8%, #3f3ad0 0%, #2a1c86 45%, var(--bg-lo) 100%); }
   /*+AG La fila de secciones era una tira con scroll lateral: las 5 pastillas sumaban 449px en 369
@@ -1450,7 +1461,14 @@
     <div class="gd-name" id="gdName"></div>
     <!--+AG doc 41: la pantalla del heroe ENSEÑA al heroe. Antes solo habia un hexagono de stats:
          en Brawl Stars el personaje ocupa la mitad de su ficha, y era el hueco mas gordo del Garaje. -->
-    <div class="gd-art"><img id="gdBall" alt=""></div>
+    <!--+AG doc 51: «asi se ve en pista». El retrato es una escena pintada (estela de fuego, muro
+         agrietado) y lo que juegas es una bola de 56 px con el color de tu EQUIPO. Ver por primera
+         vez esa diferencia cuando ya has pagado es el peor momento posible para verla. Va DENTRO de
+         la caja del retrato, en absoluto: no gasta ni un pixel de alto, que es lo que la deja pasar
+         la regla de "toda pantalla cabe en el movil sin deslizar". -->
+    <div class="gd-art"><img id="gdBall" alt="">
+      <div class="gd-pista"><div id="gdPista"></div><span data-t="gdPista">en pista</span></div>
+    </div>
     <canvas class="gd-hex" id="gdHex" width="266" height="238"></canvas>
     <div class="gd-tags" id="gdTags"></div>
     <div class="gd-xp" id="gdXpWrap"><div class="gd-xplbl"><span id="gdXpCap" data-t="ballLvl">Nivel de bola</span><span id="gdXpNum"></span></div><div class="gd-xpbar"><div class="gd-xpfill" id="gdXpFill"></div></div></div>
@@ -1736,7 +1754,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=806d4f9"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=b34007d"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -2645,6 +2663,7 @@ const MORE={
     gdMoney:'El dinero solo compra VARIEDAD (bolas hasta Rara), nunca poder.',
     unlockBtn:p=>'Desbloquear · '+p+' ✦', orPay:g=>'o pagar '+g+' ◆',
     equipBtn:'Equipar', equippedBtn:'✓ Equipada', tEquipped:'¡Equipada!', tUnlocked:n=>'¡'+n+' desbloqueado!',
+    gdPista:'en pista',
     // — Tienda —
     shSecs:['Destacados','Bolas','Cosméticos','Gemas','Pase'],
     shNoteFeat:'Escaparate que rota cada semana con el tema de temporada. Todo con precio y contenido a la vista, <b>nunca cajas sorpresa</b>.',
@@ -2805,6 +2824,7 @@ const MORE={
     gdMoney:'Money only buys VARIETY (balls up to Rare), never power.',
     unlockBtn:p=>'Unlock · '+p+' ✦', orPay:g=>'or pay '+g+' ◆',
     equipBtn:'Equip', equippedBtn:'✓ Equipped', tEquipped:'Equipped!', tUnlocked:n=>n+' unlocked!',
+    gdPista:'in a match',
     // — Shop —
     shSecs:['Featured','Balls','Cosmetics','Gems','Pass'],
     shNoteFeat:'A storefront that rotates every week with the season theme. Price and contents always in plain sight, <b>never loot boxes</b>.',
@@ -3262,7 +3282,29 @@ function buildTeamStandings(rows, winnerTeam){
 }
 
 // ===== PANTALLAS =====
+// ===== METRICAS (docs/52; catalogo docs/24) =====
+//+AG La nube arranca DESPUES que el shell (el modulo del final), asi que lo que se dispare
+//   antes espera en una cola corta. Fire-and-forget SIEMPRE: medir jamas bloquea el juego,
+//   y si no hay red los eventos se pierden sin ruido (Regla 2 de sincro.mjs — el progreso
+//   del jugador es sagrado, la telemetria no).
+let _metCola=[], _metTimer=0, _metPantalla='';
+function _metManda(x){ const n=window.BT_NUBE&&BT_NUBE.nube;
+  if(!n){ _metCola.push(x); if(_metCola.length>30)_metCola.shift();   // tope: si la nube nunca llega, la cola no crece
+    if(!_metTimer) _metTimer=setInterval(()=>{ if(window.BT_NUBE&&BT_NUBE.nube){ clearInterval(_metTimer); _metTimer=0; _metCola.splice(0).forEach(_metManda); } }, 1000);
+    return; }
+  try{ (x.partida ? n.apuntarPartida(x.partida) : n.apuntarEvento(x.nombre, x.props)).catch(()=>{}); }catch(e){}
+}
+function apunta(nombre, props){ _metManda({nombre, props}); }
+function apuntaPartida(partida){ _metManda({partida}); }
+//+AG un session_start por carga de pagina. props sin nada personal (docs/24 §1/§4).
+apunta('session_start', { lang:LANG, level:SAVE.level, played:SAVE.played,
+  movil: !!(window.matchMedia && matchMedia('(pointer:coarse)').matches) });
+
 function showScreen(n){ ['home','results','garaje','tienda','temporada','perfil','selector','ranking'].forEach(s=>{ const e=el(s); if(e) e.classList.toggle('on',s===n); }); document.body.classList.toggle('race',n==='race');
+  //+AG docs/52: pantallas clave para el embudo (¿la gente encuentra la tienda? ¿el garaje?).
+  //   home/results fuera: home es el estado de reposo y results ya lo cuenta la partida.
+  //   Dedup del ultimo enviado: navegar ida-y-vuelta no debe contar doble.
+  if(['garaje','tienda','temporada','perfil','selector','ranking'].indexOf(n)>=0 && n!==_metPantalla){ _metPantalla=n; apunta('screen_view',{screen:n}); }
   //+AG doc 41 bloque E: el fondo vivo SOLO existe en la Home. Fuera de ella se para de verdad
   //   (rAF, listeners y contexto WebGL): dos contextos vivos a la vez -fondo + motor- es lo que
   //   tumba un movil, y ademas la partida se merece toda la GPU.
@@ -3270,6 +3312,10 @@ function showScreen(n){ ['home','results','garaje','tienda','temporada','perfil'
   //   Resultados se sigue parando de verdad, y sigue habiendo UN solo contexto de fondo vivo a la vez.
   if(window.BT_AMBIENT){ const amb = n==='home' ? 'ambient' : (n==='results' ? 'ambientR' : null);
     amb ? BT_AMBIENT.on(amb) : BT_AMBIENT.off(); }
+  //+AG doc 51: la ficha del Garaje es un overlay, asi que se puede cambiar de pantalla con ella
+  //   abierta y su rAF se quedaria girando. Aqui, en la unica puerta de cambio de pantalla, para
+  //   que ningun camino nuevo se olvide (mismo motivo que el tema de Resultados de abajo).
+  if(n!=='garaje' && window.BT_PISTA) BT_PISTA.stop();
   //+AG el TEMA DE RESULTADOS vuelve a la pista de menu en cuanto se sale de Resultados, sea por donde sea
   //   ("Jugar otra", el Garaje, la pestana de abajo...). Va aqui, en la unica puerta de cambio de pantalla, y
   //   no en cada boton de salida: un camino nuevo se olvidaria de devolverla y la victoria se quedaria sonando
@@ -3376,6 +3422,9 @@ function modeEmbedUrl(mode, fmt){
 function startRace(mode, fmt){
   mode = MODE_SRC[mode] ? mode : 'race';   // sin modo valido -> Carrera
   curMode=mode; curFmt = fmt==='equipos' ? 'equipos' : 'individual'; curTutorial=false;
+  //+AG docs/52: con que bola se ENTRA (la fila de match del final cuenta las que TERMINAN;
+  //   la resta entre ambas es la gente que abandona a mitad, que no manda matchEnd).
+  { const eb=equippedBall(); apunta('match_start', { mode, fmt:curFmt, ball:eb?eb.arch:null, ball_lvl:eb?(eb.lvl||1):null }); }
   openFrame(modeEmbedUrl(mode, curFmt));
 }
 //+AG CÓMO JUGAR (tutorial por modo): mismo iframe que una partida pero con &tutorial=1, seed FIJA (el nivel de
@@ -3384,6 +3433,7 @@ function startRace(mode, fmt){
 function startTutorial(mode){
   mode = MODE_SRC[mode] ? mode : 'race';
   curMode=mode; curFmt='individual'; curTutorial=true;
+  apunta('tutorial_start', { mode });   //+AG docs/52: embudo del CÓMO JUGAR (empezados vs completados)
   let u = MODE_SRC[mode]+'?embed=1&tutorial=1&seed=7' + (mode==='cazador'?'&short=1':'');
   if(new URLSearchParams(location.search).get('drive')==='1') u+='&drive=1';
   u += '&lang=' + encodeURIComponent(LANG);
@@ -3421,6 +3471,7 @@ window.addEventListener('message', e=>{
 //   y se vuelve a la HOJA (el jugador aterriza donde estaba, a un tap de jugar de verdad).
 function onTutorialEnd(d){
   closeGameFrame(); curTutorial=false;
+  apunta('tutorial_end', { mode:curMode, completed:!!d.completed });   //+AG docs/52
   if(d.completed){ SAVE.tutorialDone[curMode]=true; persist(); }
   goHome(); openSheet();
   if(d.completed) toast(S().howToDone(modeTitle(curMode)));
@@ -3443,6 +3494,12 @@ function onMatchEnd(d){
   const teamP = curFmt==='equipos' ? (d.teamPlace||1) : 0;
   applyCupsForResult(teamP ? {teamPlace:teamP} : {place}, eb, place, d);
   persist(); checkHitos();   //+AG doc 39: ¿algún hito de copas cruzado? la Épica se une sola
+  //+AG docs/52: LA FILA DE PARTIDA en la nube (tabla match, que existia desde 0001 sin que nadie
+  //   escribiera en ella). Solo apunta, NO cobra: la economia ya se pago arriba en local (Fase 1,
+  //   0004). durationF son frames a 60fps del motor. Fire-and-forget: si no hay red, no pasa nada.
+  apuntaPartida({ mode:curMode, format:curFmt, seed:(typeof d.seed==='number'?d.seed:null), place,
+    result:{ teamPlace:teamP||null, durationF:(typeof d.durationF==='number'?d.durationF:null),
+             ball:(eb?{arch:eb.arch, lvl:eb.lvl||1}:null), level:SAVE.level, played:SAVE.played, lang:LANG } });
   //+AG COLOR DEL DISCO DE CAMPEON: lo manda el MOTOR (winnerColor = color real del ganador en su paleta activa).
   //   Antes se hacia TEAMS[d.winnerTeam] con los 4 colores de torneo del shell y un winnerTeam indexado a la paleta
   //   de 8 del motor → indice >=4 caia a TEAMS[0] y el disco salia SIEMPRE rojo. Fallback: 1o de la clasificacion.
@@ -3799,9 +3856,16 @@ function openDetail(k){ applyShell(); const A=ARCHS[k], b=owned(k), q=QUAL[A.q],
   //+AG doc 40: el boton grande brilla solo si se puede pulsar Y no hay ya otra cosa brillando en la ficha
   //   (si la bola esta lista para subir de nivel, ESA es la accion del momento).
   prim.classList.toggle('ready', !prim.disabled && !lvlUpReady);
+  //+AG doc 51: la vista previa de PISTA. Va con la ficha ABIERTA (no antes): el lienzo compartido
+  //   se muda al hueco de esta ficha, y si aun no ha aterrizado el modulo se guarda cual pintar.
+  window.BT_PISTA_CUR = k;
+  if(window.BT_PISTA) BT_PISTA.show(el('gdPista'), k);
   el('gDetail').classList.add('on');
 }
-function closeDetail(){ el('gDetail').classList.remove('on'); }   //+AG una sola puerta de salida: ✕, VOLVER, tocar fuera y equipar pasan por aqui
+//+AG una sola puerta de salida: ✕, VOLVER, tocar fuera y equipar pasan por aqui. Y por eso es el
+//   sitio donde parar la vista previa de pista: su rAF no puede quedarse girando detras de una
+//   ficha cerrada (mismo trato que el fondo vivo, doc 51).
+function closeDetail(){ el('gDetail').classList.remove('on'); window.BT_PISTA_CUR=null; if(window.BT_PISTA) BT_PISTA.stop(); }
 function unlock(k,withGems){ const A=ARCHS[k];   // transacción compartida por Garaje y Tienda; el que llama re-renderiza
   if(A.price==null) return false;   //+AG doc 39: hitos/Fichas no pasan por aquí
   if(withGems){ const p=gemaPrice(A.price); if(SAVE.gemas<p) return false; SAVE.gemas-=p; } else { if(SAVE.chispas<A.price) return false; SAVE.chispas-=A.price; }
@@ -4710,6 +4774,16 @@ else if((FRESH || _pend) && !SAVE.onboarded && _onbParam!=='0'){
       this.h = startAmbient(document.getElementById(id)); this.cv=id; },
     off(){ if(this.h){ this.h.stop(); this.h=null; } this.cv=null; } };
   if(document.getElementById('home').classList.contains('on')) BT_AMBIENT.on();
+
+  //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
+  //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
+  //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
+  import('./arte/pista-preview.mjs').then(m => {
+    window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
+    // Si la ficha ya estaba abierta cuando aterrizo el modulo, la pinta ahora.
+    const g=document.getElementById('gDetail');
+    if(g && g.classList.contains('on') && window.BT_PISTA_CUR) BT_PISTA.show(document.getElementById('gdPista'), BT_PISTA_CUR);
+  });
 </script>
 
 <!--+AG MUSICA DEL SHELL. Hasta ahora el juego solo sonaba DENTRO de la partida: portada, modos, Garaje,

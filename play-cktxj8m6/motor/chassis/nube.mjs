@@ -237,6 +237,35 @@ export function crearNube(opts = {}) {
     return id;
   }
 
+  // ------------------------------------------------------------- metricas
+  //
+  // docs/52 (catalogo en docs/24). Dos diferencias con reportarPartida, a proposito:
+  //   1. apuntarPartida SOLO inserta la fila de match, sin cobrar nada. En Fase 1
+  //      la economia vive en el cliente (0004); cobrar aqui seria pagar dos veces.
+  //      reportarPartida queda para la Fase 3, cuando el servidor mande.
+  //   2. Fire-and-forget de verdad: Prefer minimal (no nos hace falta el id) y
+  //      quien llama NUNCA espera esto para seguir. La Regla de Oro de esta capa
+  //      aplica doble a las metricas: medir jamas puede estorbar al juego.
+  async function apuntarPartida({ mode, format = 'individual', seed = null, place = null, result = {} }) {
+    await asegurarSesion();
+    await pedir('/rest/v1/match', {
+      metodo: 'POST',
+      cuerpo: { player_id: ses.user_id, mode, format, seed, place, result },
+      cabeceras: { Prefer: 'return=minimal' }
+    });
+  }
+
+  // Evento ligero de shell (session_start, screen_view...). La lista blanca de
+  // nombres vive en la base (0008): un nombre fuera de ella rebota con 23514.
+  async function apuntarEvento(nombre, props) {
+    await asegurarSesion();
+    await pedir('/rest/v1/app_event', {
+      metodo: 'POST',
+      cuerpo: { player_id: ses.user_id, name: nombre, props: props || {} },
+      cabeceras: { Prefer: 'return=minimal' }
+    });
+  }
+
   async function gastar({ moneda = 'chispas', cantidad, motivo, ref }) {
     await asegurarSesion();
     await pedir('/rest/v1/rpc/spend', {
@@ -410,6 +439,7 @@ export function crearNube(opts = {}) {
     get sesion() { return ses ? { user_id: ses.user_id, es_anonimo: ses.es_anonimo, caduca_en: ses.caduca_en } : null; },
     asegurarSesion, entrarAnonimo, renovar,
     perfil, guardarPerfil, bolas, crearBola, guardarBola, saldos, reportarPartida, gastar,
+    apuntarPartida, apuntarEvento,
     crearCodigoTransferencia, canjearCodigoTransferencia,
     estadoCuenta, refrescarUsuario, crearCuentaEmail, entrarConEmail, salir, cambiarPassword, pedirCorreoDeRecuperacion,
     urlDeProveedor, urlDeEnlace, adoptarSesionDeUrl,

@@ -217,11 +217,27 @@ function texture(arch){
 // El 3er parametro (color de equipo) ya NO se usa: los props llevan los colores canonicos del
 // heroe, que es lo que hace que la pista se parezca a su ficha. Se conserva en la firma para no
 // tocar las 3 llamadas de los modos.
+// ── COLOCACION por bola (doc 51) ─────────────────────────────────────────────────────────────
+// POR QUE HACE FALTA: el encuadre esta HORNEADO en el WebP que pinta Codex, asi que si una pieza
+// cae mal sobre la cara no hay forma de arreglarlo sin repintarla... salvo mover el plano entero.
+// Medido con la formula del guardia de tools/integrar-props.py (mitad baja del ojo, la de la
+// pupila): Estrella tapaba el 100% de las pupilas y Cohete el 14% — y el 14% de Cohete era justo
+// el trozo que hacia que su morro se leyera como un PICO de pajaro saliendo del ojo derecho.
+//
+// dx/dy van en RADIOS de bola, k es escala. Lo que no aparece aqui no se mueve.
+// ⚠ Esto es un PARCHE de encuadre, no la solucion: las dos piezas estan pedidas a Codex en el
+// encargo 19 con la composicion de su ficha (Cohete sin morro delantero — en la ficha la BOLA es
+// el morro —, y Estrella como chapa mas pequeña y baja). Cuando lleguen, estas dos filas se van.
+const PLACE = {
+  cohete:   { dx: 0.34, dy: -0.24, k: 0.94 },
+  estrella: { dx: 0.00, dy: -0.54, k: 0.58 },   // barrido de escala/altura: la unica pareja que baja
+};
 export function makeProp(arch, R, _col){
   if (!DRAW[arch]) return null;
   const mat = new THREE.MeshBasicMaterial({ map: texture(arch), transparent: true, depthWrite: false, toneMapped: false });
-  const plane = new THREE.Mesh(new THREE.PlaneGeometry(R * SPAN, R * SPAN), mat);
-  plane.position.set(0, 0, R * 1.04);   // delante de la esfera, detras del plano de la cara (1.06R)
+  const p = PLACE[arch] || { dx: 0, dy: 0, k: 1 };
+  const plane = new THREE.Mesh(new THREE.PlaneGeometry(R * SPAN * p.k, R * SPAN * p.k), mat);
+  plane.position.set(R * p.dx, R * p.dy, R * 1.04);   // delante de la esfera, detras del plano de la cara (1.06R)
   plane.renderOrder = 2;                 // la cara va en 3: los ojos siempre ganan
   const g = new THREE.Group(); g.add(plane);
   return g;
