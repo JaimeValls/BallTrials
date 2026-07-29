@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-29 b34007d"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-07-29 c457f9c"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -1754,7 +1754,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=b34007d"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=c457f9c"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -3296,6 +3296,17 @@ function _metManda(x){ const n=window.BT_NUBE&&BT_NUBE.nube;
 }
 function apunta(nombre, props){ _metManda({nombre, props}); }
 function apuntaPartida(partida){ _metManda({partida}); }
+//+AG docs/53: TODO movimiento de moneda pasa por aqui, y por eso MUTA ademas de apuntar.
+//   No es telemetria de adorno: es la unica forma de contestar "la economia infla o drena?"
+//   (fuentes-vs-sumideros, doc 24 §B / docs/20 T2.1), que hay que saber ANTES de cobrar
+//   dinero real. Si alguien anade una fuente nueva tocando SAVE.chispas a mano, el informe
+//   lo delata: el neto deja de cuadrar con los saldos. La aritmetica es la de antes (sin
+//   topes nuevos) a proposito, para no cambiar el comportamiento del juego al instrumentarlo.
+function dinero(tipo, delta, motivo){
+  delta = Math.round(delta) || 0;
+  SAVE[tipo] = (SAVE[tipo] || 0) + delta;
+  if(delta) apunta('currency', { t:tipo, d:delta, m:motivo });
+}
 //+AG un session_start por carga de pagina. props sin nada personal (docs/24 §1/§4).
 apunta('session_start', { lang:LANG, level:SAVE.level, played:SAVE.played,
   movil: !!(window.matchMedia && matchMedia('(pointer:coarse)').matches) });
@@ -3487,7 +3498,7 @@ function onMatchEnd(d){
   if(window.BT_MUSIC) BT_MUSIC.tema(((curFmt==='equipos'?(d.teamPlace||1)===1:place<=3)) ? 'victoria' : 'resultado');
   closeGameFrame();
   const rew=computeRewards(place, curMode);   //+AG el modo importa: bonus del MODO DEL DIA (+50% 1a victoria)
-  SAVE.chispas+=rew.chispas; SAVE.xp+=rew.xp; SAVE.played++;
+  dinero('chispas', rew.chispas, 'partida'); SAVE.xp+=rew.xp; SAVE.played++;
   let leveled=false; while(SAVE.xp>=xpForLevel(SAVE.level)){ SAVE.xp-=xpForLevel(SAVE.level); SAVE.level++; leveled=true; }
   const eb=SAVE.balls[SAVE.equipped]; if(eb){ eb.xp=(eb.xp||0)+rew.xp; }   //+AG doc 39: la XP de bola se ACUMULA (subir de nivel se paga en el Garaje con Chispas)
   //+AG COPAS de LA BOLA equipada (doc 37): en EQUIPOS puntua el puesto de equipo (1..4); en INDIVIDUAL el puesto (1..8)
@@ -3529,7 +3540,7 @@ function applyCupsForResult(res, ball, place, d){
 }
 function finishRace(){
   const place=sim.player.rank||sim.playerPlace(), rew=computeRewards(place, 'race');
-  SAVE.chispas+=rew.chispas; SAVE.xp+=rew.xp; SAVE.played++;
+  dinero('chispas', rew.chispas, 'partida'); SAVE.xp+=rew.xp; SAVE.played++;
   let leveled=false; while(SAVE.xp>=xpForLevel(SAVE.level)){ SAVE.xp-=xpForLevel(SAVE.level); SAVE.level++; leveled=true; }
   const eb=SAVE.balls[SAVE.equipped]; if(eb){ eb.xp=(eb.xp||0)+rew.xp; }   //+AG doc 39: XP de bola acumulada (el nivel se compra en el Garaje)
   //+AG clasificacion REAL tambien en el camino 2D heredado (mismo criterio que sim.playerPlace: rank, luego Y)
@@ -3831,7 +3842,8 @@ function openDetail(k){ applyShell(); const A=ARCHS[k], b=owned(k), q=QUAL[A.q],
       const bt=document.createElement('button'); bt.className='gd-chip'; bt.style.cssText='flex:1;font-weight:800';
       bt.textContent=s.lvlUpBtn(next,cost); bt.disabled=!haveXp||SAVE.chispas<cost;
       lvlUpReady=!bt.disabled; bt.classList.toggle('ready', lvlUpReady);   //+AG doc 40: brilla solo si HOY puedes subirla (XP + Chispas)
-      bt.onclick=()=>{ if(canLvlUp(b)){ SAVE.chispas-=cost; b.lvl=(b.lvl||1)+1; persist();
+      bt.onclick=()=>{ if(canLvlUp(b)){ dinero('chispas', -cost, 'bola_nivel'); b.lvl=(b.lvl||1)+1;
+        apunta('ball_up', { arch:k, lvl:b.lvl, coste:cost }); persist();
         toast(s.tBallLvl(archName(k),b.lvl)); openDetail(k); renderGaraje(); } };
       assign.appendChild(bt);
       el('gdHint').textContent = !haveXp ? s.gdNeedXp(xpNeed(next)-Math.round(b.xp||0))
@@ -3868,14 +3880,18 @@ function openDetail(k){ applyShell(); const A=ARCHS[k], b=owned(k), q=QUAL[A.q],
 function closeDetail(){ el('gDetail').classList.remove('on'); window.BT_PISTA_CUR=null; if(window.BT_PISTA) BT_PISTA.stop(); }
 function unlock(k,withGems){ const A=ARCHS[k];   // transacción compartida por Garaje y Tienda; el que llama re-renderiza
   if(A.price==null) return false;   //+AG doc 39: hitos/Fichas no pasan por aquí
-  if(withGems){ const p=gemaPrice(A.price); if(SAVE.gemas<p) return false; SAVE.gemas-=p; } else { if(SAVE.chispas<A.price) return false; SAVE.chispas-=A.price; }
-  SAVE.balls.push({arch:k,lvl:1,xp:0,copas:0}); persist(); toast(S().tUnlocked(archName(k))); return true;
+  if(withGems){ const p=gemaPrice(A.price); if(SAVE.gemas<p) return false; dinero('gemas', -p, 'bola_compra'); } else { if(SAVE.chispas<A.price) return false; dinero('chispas', -A.price, 'bola_compra'); }
+  SAVE.balls.push({arch:k,lvl:1,xp:0,copas:0});
+  apunta('ball_get', { arch:k, via: withGems?'gemas':'chispas' });   //+AG docs/53: que bolas QUIERE la gente
+  persist(); toast(S().tUnlocked(archName(k))); return true;
 }
 //+AG doc 39: las ÉPICAS se unen SOLAS al Garaje al cruzar su hito de copas totales (prestigio jugado, no comprable).
 //   Se comprueba al terminar cada partida y al abrir el Garaje (por si el hito se cruzó antes de este build).
 function checkHitos(){ const tot=totalCopas();
   ARCH_KEYS.forEach(k=>{ const A=ARCHS[k];
-    if(A.hito && tot>=A.hito && !owned(k)){ SAVE.balls.push({arch:k,lvl:1,xp:0,copas:0}); persist(); toast(S().tHito(archName(k))); } });
+    if(A.hito && tot>=A.hito && !owned(k)){ SAVE.balls.push({arch:k,lvl:1,xp:0,copas:0});
+      apunta('ball_get', { arch:k, via:'hito' });   //+AG docs/53: las Epicas no se compran, se cruzan
+      persist(); toast(S().tHito(archName(k))); } });
 }
 // hexágono radar (VEL/ACE/PES/AGA/RES/BST): rejilla + anillo del TECHO de calidad (punteado) + polígono de valores
 function drawHex(cv, attrs, cap, color, faded){ const x=cv.getContext('2d'), W=cv.width, H=cv.height, cx=W/2, cy=H/2+3, R=Math.min(W,H)*0.34, N=6, ang=i=>-Math.PI/2+i*Math.PI/3;
@@ -3972,24 +3988,24 @@ function paseEl(){ const s=S(), d=document.createElement('div'); d.innerHTML=`<d
   <button class="sh-buy gem" id="buyPase"></button></div>`;
   const b=d.querySelector('#buyPase');
   if(SAVE.pase){ b.className='sh-buy owned'; b.textContent=s.paseOn; b.disabled=true; }
-  else { b.textContent=s.paseBuy(PASE.g); b.disabled=SAVE.gemas<PASE.g; b.onclick=()=>{ if(SAVE.gemas>=PASE.g){ SAVE.gemas-=PASE.g; SAVE.pase=true; persist(); toast(S().tPase); renderTienda(); } }; }
+  else { b.textContent=s.paseBuy(PASE.g); b.disabled=SAVE.gemas<PASE.g; b.onclick=()=>{ if(SAVE.gemas>=PASE.g){ dinero('gemas', -PASE.g, 'pase'); SAVE.pase=true; persist(); toast(S().tPase); renderTienda(); } }; }
   return d;
 }
-function buyCosm(c){ if(SAVE.gemas<c.g) return; SAVE.gemas-=c.g; SAVE.cosmetics.push(c.id); persist(); toast(S().tCosm(cosmName(c))); renderTienda(); }
+function buyCosm(c){ if(SAVE.gemas<c.g) return; dinero('gemas', -c.g, 'cosmetico'); SAVE.cosmetics.push(c.id); persist(); toast(S().tCosm(cosmName(c))); renderTienda(); }
 //+AG doc 45 §2. El tope se comprueba AQUI y no solo en el boton: el boton es pintura, y un
 //   toque doble o una pestana vieja no pueden colar dos veces la oferta del dia.
 function buyChispaDeal(){ if(dealDone() || SAVE.gemas<CHISPA_DEAL.g) return;
-  SAVE.gemas-=CHISPA_DEAL.g; SAVE.chispas+=CHISPA_DEAL.c; SAVE.dealDay=todayKey();
+  dinero('gemas', -CHISPA_DEAL.g, 'oferta_chispas'); dinero('chispas', CHISPA_DEAL.c, 'oferta_chispas'); SAVE.dealDay=todayKey();
   persist(); toast(S().tDeal(CHISPA_DEAL.c)); renderTienda(); }
-function buyBundle(){ if(SAVE.gemas<BUNDLE.g) return; SAVE.gemas-=BUNDLE.g;
-  if(!owned('tanque')) SAVE.balls.push({arch:'tanque',lvl:1,xp:0,copas:0});
-  if(!hasCosm('es_arcoiris')) SAVE.cosmetics.push('es_arcoiris'); SAVE.chispas+=300; persist(); toast(S().tBundle); renderTienda(); }
+function buyBundle(){ if(SAVE.gemas<BUNDLE.g) return; dinero('gemas', -BUNDLE.g, 'pack');
+  if(!owned('tanque')){ SAVE.balls.push({arch:'tanque',lvl:1,xp:0,copas:0}); apunta('ball_get', { arch:'tanque', via:'pack' }); }
+  if(!hasCosm('es_arcoiris')) SAVE.cosmetics.push('es_arcoiris'); dinero('chispas', 300, 'pack'); persist(); toast(S().tBundle); renderTienda(); }
 // puerta parental: una pregunta de adulto (multiplicación) antes de abonar Gemas (compra simulada, sin pago real)
 let pgPack=null, pgAns=0;
 function parentalBuy(pk){ pgPack=pk; const a=6+Math.floor(Math.random()*6), b2=6+Math.floor(Math.random()*6); pgAns=a*b2;
   el('pgSum').innerHTML=`${pk.p} → <b>${S().gemsAmt(pk.g)} ◆</b>`; el('pgQ').textContent=a+' × '+b2; el('pgIn').value=''; el('pgIn').style.borderColor=''; el('parent').classList.add('on'); setTimeout(()=>el('pgIn').focus(),60); }
 function parentalOk(){ if(+el('pgIn').value!==pgAns){ el('pgIn').style.borderColor='#eb3030'; toast(S().pgBad); return; }
-  SAVE.gemas+=pgPack.g; persist(); el('parent').classList.remove('on'); toast(S().tGems(pgPack.g)); renderTienda(); }
+  dinero('gemas', pgPack.g, 'pack_gemas'); persist(); el('parent').classList.remove('on'); toast(S().tGems(pgPack.g)); renderTienda(); }
 
 // ===== TEMPORADA (doc 10) y PERFIL (doc 13) · placeholders fieles (solo UI/estado; acciones sociales reales = "pronto") =====
 function buildPaseTrack(){ const t=el('seTrack'); if(!t) return; t.innerHTML='';   //+AG se reconstruye por idioma (gratis/premium)   // 50 peldaños; se muestra una ventana representativa
@@ -4213,6 +4229,8 @@ function onbPickStep(){ el('onbQuiz').style.display='none'; el('onbPick').style.
     b.innerHTML=`<img class="gi" src="${ballArt(k)}" alt=""><div class="nm">${archName(k)}</div><div class="ds">${archBest(k)}</div>`;
     b.onclick=()=>{ onbSel=k; onbPickStep(); }; box.appendChild(b); }); }
 function onbFinish(){ SAVE.balls=[{arch:onbSel,lvl:1,xp:0,copas:0}]; SAVE.equipped=0; SAVE.onboarded=true; persist(); onbPendiente(false);
+  //+AG docs/53: que bola elige la gente de las 5 fundadoras, y si sigue la recomendacion del quiz
+  apunta('ball_get', { arch:onbSel, via:'onboarding', recomendada:onbSel===onbRec });
   el('onb').classList.remove('on'); toast(S().tFirstBall(archName(onbSel))); openGaraje(); }
 function onbSkipFn(){ SAVE.onboarded=true; persist(); onbPendiente(false); el('onb').classList.remove('on'); goHome(); }
 function startOnboarding(){ applyShell(); onbRec=onbSel='cohete'; el('onbQuiz').style.display=''; el('onbPick').style.display='none'; onbQuizStep('start'); el('onb').classList.add('on'); }
@@ -4410,7 +4428,7 @@ function closeCode(){ el('code').style.display='none'; }
 function redeemCode(){ const v=el('codeIn').value.trim().toUpperCase(); const m=el('codeMsg');
   if(!/^BT-[A-Z0-9]{4,8}$/.test(v)){ m.style.color='#eb6b6b'; m.textContent=S().cdBad; return; }
   if(SAVE.codes.includes(v)){ m.style.color='#eb6b6b'; m.textContent=S().cdUsed; return; }
-  SAVE.codes.push(v); SAVE.chispas+=100; if(!hasCosm('es_arcoiris')) SAVE.cosmetics.push('es_arcoiris'); persist();
+  SAVE.codes.push(v); dinero('chispas', 100, 'codigo'); if(!hasCosm('es_arcoiris')) SAVE.cosmetics.push('es_arcoiris'); persist();
   m.style.color='#8fe0a8'; m.textContent=S().cdOk; renderHome(); }
 
 // ===== RANKING (doc 37 §5 + doc 36): Global (total coleccion) / Por bola (bolas individuales) / Diario =====
@@ -4604,7 +4622,10 @@ if(CHEAT_MONEDAS){
     const c=ev.target.closest('.coin'); if(!c) return;
     const gema=c.classList.contains('gema');
     if(!gema && !c.classList.contains('chispa')) return;
-    if(gema) SAVE.gemas+=100; else SAVE.chispas+=100;
+    //+AG docs/53: el truco tambien se apunta, y a proposito. Es DEUDA que hay que borrar antes
+    //   de abrir al publico; que salga con su nombre en el informe de economia es justo lo que
+    //   evita que se olvide, y ademas impide leer como "ingreso de juego" lo que es un cheat.
+    dinero(gema ? 'gemas' : 'chispas', 100, 'truco');
     persist(); pinta();
     //+AG re-render de la pantalla abierta: si no, los precios y los botones de comprar siguen
     //   deshabilitados con el saldo viejo y parece que el truco no ha hecho nada.

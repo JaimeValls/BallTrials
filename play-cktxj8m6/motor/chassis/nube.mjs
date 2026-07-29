@@ -145,8 +145,35 @@ export function crearNube(opts = {}) {
 
   async function entrarAnonimo() {
     // El equivalente de signInAnonymously() del SDK: un signup sin credenciales.
-    return guardarSesion(await pedir('/auth/v1/signup',
+    const s = guardarSesion(await pedir('/auth/v1/signup',
       { metodo: 'POST', cuerpo: await conCaptcha({ data: {} }), conSesion: false }));
+    await marcarSiEsPrueba();
+    return s;
+  }
+
+  // ------------------------------------------------------- cuentas de prueba
+  //
+  // docs/53. El juego SOLO corre en un navegador, asi que una sesion creada desde
+  // Node es por definicion una bateria de tools/db o una herramienta, no una persona.
+  // Se marca sola y el informe la excluye. Se arregla aqui, en el unico sitio por el
+  // que nacen todas, y no bateria a bateria: de las 9 que crean usuarios solo una se
+  // acordaba de marcarse, y por eso habia 294 fantasmas envenenando todos los ratios.
+  // El caso del navegador es tools/captura-pantalla.mjs, que abre el juego DE VERDAD
+  // contra la base de produccion en cada captura: pide el marcado con ?bt_test=1.
+  //
+  // No es una barrera de seguridad y no hace falta que lo sea: marcarse como prueba
+  // solo te quita de las estadisticas, no da nada. Y nunca puede tumbar el arranque.
+  function esPrueba() {
+    try {
+      if (typeof window === 'undefined') return true;
+      return /[?&]bt_test=1\b/.test(String(window.location?.search || ''));
+    } catch (e) { return false; }
+  }
+
+  async function marcarSiEsPrueba() {
+    if (!esPrueba() || !ses?.user_id) return;
+    try { await pedir(`/rest/v1/player?id=eq.${ses.user_id}`, { metodo: 'PATCH', cuerpo: { is_test: true } }); }
+    catch (e) { /* si no se puede marcar, se sigue: es telemetria, no el juego */ }
   }
 
   // Sin captcha a proposito, y no es un olvido: refresh_token no es un endpoint

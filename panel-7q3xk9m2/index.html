@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>BallTrials · Estadísticas</title>
+<!-- ============================================================================
+     PANEL DE ANALITICA de BallTrials (docs/53; el catalogo de eventos es docs/24).
+     Se abre de dos formas:
+       - en el PC:  Estadisticas.bat (sirve el repo y abre esta pagina)
+       - en el movil: la ruta secreta de balltrials.com, que el build publica
+     La clave sale de ./estadisticas-clave.js (local, fuera de git) o se pide una
+     vez y queda guardada en el navegador. Nunca viaja en el repo ni en el paquete.
+
+     TODO lo que se pinta viene de UNA llamada al RPC informe_estadisticas, que solo
+     devuelve agregados: aqui es imposible ver a un jugador concreto (docs/24 §1).
+
+     COLOR: cian #0995b6 (lo normal), naranja #a8701f (lo que SALE de la economia),
+     violeta #7a6bd6 (la ventana anterior). Los tres pasan las cinco comprobaciones
+     de contraste y daltonismo sobre este fondo; el verde/rojo que pedia el instinto
+     para "entra/sale" es indistinguible en deuteranopia (medido: dE 1.7).
+     ============================================================================ -->
+<style>
+  :root{
+    --bg:#0b0f1e; --panel:#121830; --panel2:#0f1428; --linea:#232c4d;
+    --tinta:#eef2ff; --tinta2:#9aa5c9; --tinta3:#5f6a8f;
+    --dato:#0995b6;      /* lo normal */
+    --sale:#a8701f;      /* lo que se gasta */
+    --antes:#7a6bd6;     /* la ventana anterior */
+    --alerta:#ff5d7c;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0 }
+  html,body{ max-width:100%; overflow-x:hidden }
+  body{ background:var(--bg); color:var(--tinta); font-family:Fredoka,system-ui,-apple-system,sans-serif;
+        padding:16px clamp(10px,3vw,32px) 70px; -webkit-text-size-adjust:100% }
+  h1{ font-size:clamp(17px,4.5vw,22px); font-weight:700 }
+  .sub{ color:var(--tinta3); font-size:12px; margin-top:2px }
+  h2{ font-size:12px; font-weight:600; color:var(--tinta2); text-transform:uppercase;
+      letter-spacing:.9px; margin:0 0 12px }
+  .h2n{ color:var(--tinta3); text-transform:none; letter-spacing:0; font-weight:400 }
+
+  /* ---- filtros: UNA fila (envuelve en movil), encima de todo lo demas ---- */
+  .filtros{ display:flex; flex-wrap:wrap; gap:6px 14px; align-items:center; margin:14px 0 18px;
+            padding:12px; background:var(--panel2); border:1px solid var(--linea); border-radius:12px }
+  .grupo{ display:flex; align-items:center; gap:6px; flex-wrap:wrap }
+  .grupo>.et{ color:var(--tinta3); font-size:11px; text-transform:uppercase; letter-spacing:.6px }
+  .chip{ font:inherit; font-size:12px; color:var(--tinta2); background:#1a2140; border:1px solid var(--linea);
+         border-radius:999px; padding:4px 11px; cursor:pointer; white-space:nowrap }
+  .chip:hover{ border-color:var(--dato) }
+  .chip.on{ background:var(--dato); border-color:var(--dato); color:#04121a; font-weight:600 }
+  #estado{ color:var(--tinta3); font-size:12px; margin-left:auto }
+
+  /* ---- tiles ---- */
+  .tiles{ display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:12px }
+  .tile{ background:var(--panel); border:1px solid var(--linea); border-radius:14px; padding:14px 16px }
+  .tile .n{ font-size:clamp(22px,6vw,30px); font-weight:700; line-height:1.1; font-variant-numeric:tabular-nums }
+  .tile .t{ font-size:11px; color:var(--tinta2); margin-top:3px; line-height:1.3 }
+  .tile .d{ font-size:11px; margin-top:5px; color:var(--tinta3); font-variant-numeric:tabular-nums }
+
+  .malla{ display:grid; grid-template-columns:repeat(auto-fit,minmax(285px,1fr)); gap:12px }
+  .panel{ background:var(--panel); border:1px solid var(--linea); border-radius:14px; padding:15px 17px; min-width:0 }
+  .ancho{ grid-column:1/-1 }
+  .vacio{ color:var(--tinta3); font-size:12px; padding:6px 0; line-height:1.5 }
+
+  /* ---- FUNNEL: barras horizontales, siempre decreciente, con su numero al lado ---- */
+  .fn{ display:flex; flex-direction:column; gap:9px }
+  .fn-p{ display:grid; grid-template-columns:1fr auto; gap:2px 10px; align-items:baseline }
+  .fn-et{ font-size:13px; color:var(--tinta) }
+  .fn-v{ font-size:13px; font-variant-numeric:tabular-nums; color:var(--tinta); font-weight:600 }
+  .fn-bar{ grid-column:1/-1; height:12px; background:#1a2140; border-radius:4px; overflow:hidden }
+  .fn-bar i{ display:block; height:100%; background:var(--dato); border-radius:0 4px 4px 0 }
+  .fn-nota{ grid-column:1/-1; font-size:11px; color:var(--tinta3) }
+  .fn-nota b{ color:var(--alerta); font-weight:600 }
+
+  /* ---- listas de barras ---- */
+  .lb{ display:grid; grid-template-columns:minmax(60px,auto) 1fr auto; gap:5px 10px; align-items:center; font-size:12.5px }
+  .lb .e{ color:var(--tinta2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+  .lb .v{ font-variant-numeric:tabular-nums; color:var(--tinta); white-space:nowrap }
+  .lb .b{ height:9px; border-radius:0 4px 4px 0; background:var(--dato); min-width:2px }
+  .lb .b.sale{ background:var(--sale) }
+  .lb .sub{ color:var(--tinta3); font-size:10.5px }
+
+  /* ---- columnas por dia ---- */
+  .dias{ display:flex; align-items:flex-end; gap:2px; height:96px; padding-top:4px }
+  .dias .col{ flex:1; min-width:0; background:var(--dato); border-radius:3px 3px 0 0; min-height:2px }
+  .dias .col:hover{ filter:brightness(1.3) }
+  .dias .col.cero{ background:#1a2140 }
+  .ejes{ display:flex; justify-content:space-between; color:var(--tinta3); font-size:10.5px; margin-top:5px }
+
+  /* ---- retencion ---- */
+  .ret{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px }
+  .ret .c{ background:var(--panel2); border:1px solid var(--linea); border-radius:10px; padding:10px; text-align:center }
+  .ret .c .p{ font-size:20px; font-weight:700; font-variant-numeric:tabular-nums }
+  .ret .c .l{ font-size:10.5px; color:var(--tinta2); margin-top:2px }
+  .ret .c .co{ font-size:10px; color:var(--tinta3); margin-top:3px }
+
+  /* ---- economia ---- */
+  .eco{ display:grid; gap:12px }
+  .eco-m{ border:1px solid var(--linea); border-radius:10px; padding:11px 13px; background:var(--panel2) }
+  .eco-h{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:9px }
+  .eco-h .nm{ font-size:13px; font-weight:600 }
+  .eco-h .neto{ font-size:12px; font-variant-numeric:tabular-nums }
+  .eco-t{ font-size:10.5px; color:var(--tinta3); text-transform:uppercase; letter-spacing:.6px; margin:8px 0 4px }
+
+  /* tablas: el scroll vive DENTRO, la pagina nunca se mueve de lado */
+  .tabla-wrap{ overflow-x:auto; -webkit-overflow-scrolling:touch }
+  table{ border-collapse:collapse; font-size:12.5px; width:100% }
+  th{ text-align:left; color:var(--tinta2); font-weight:500; padding:3px 14px 4px 0; white-space:nowrap }
+  td{ padding:3px 14px 3px 0; font-variant-numeric:tabular-nums; white-space:nowrap }
+  td.mal{ color:var(--alerta) }
+  #aviso{ display:none; background:#2a1220; border:1px solid var(--alerta); border-radius:12px;
+          padding:12px 15px; margin:14px 0; font-size:13.5px; line-height:1.5 }
+  #tip{ position:fixed; display:none; background:#000d; border:1px solid var(--linea); border-radius:8px;
+        padding:5px 9px; font-size:11.5px; pointer-events:none; z-index:9; white-space:nowrap }
+</style>
+</head>
+<body>
+<h1>BallTrials · Estadísticas</h1>
+<div class="sub" id="sello"></div>
+<div class="filtros" id="filtros"></div>
+<div id="aviso"></div>
+<div class="tiles" id="tiles"></div>
+<div class="malla" id="malla"></div>
+<div id="tip"></div>
+
+<script>
+const URL_NUBE = 'https://tmirprwlstpdryenjvtl.supabase.co';
+// Clave PUBLICABLE de Supabase: publica por diseno. Lo que protege esto es la clave
+// del informe (admin_secreto) y que las tablas no tienen permiso de lectura.
+const KEY_NUBE = 'sb_publishable_WGhVbvwX64XUvQqElcJTPg_axDh0pLr';
+
+const NOM_MODO = { race:'Carrera', cazador:'Cazador', redlight:'Luz Roja' };
+const NOM_PANT = { garaje:'Garaje', tienda:'Tienda', temporada:'Temporada',
+                   perfil:'Perfil', selector:'Selector', ranking:'Ranking' };
+const NOM_MOT = { partida:'Recompensa de partida', bola_nivel:'Subir nivel de bola',
+                  bola_compra:'Comprar bola', pase:'Pase de temporada', cosmetico:'Cosmético',
+                  oferta_chispas:'Oferta del día', pack:'Pack', pack_gemas:'Compra de Gemas',
+                  codigo:'Código canjeado', truco:'⚠ TRUCO (deuda por quitar)' };
+
+let F = { dias:14, mode:null, ball:null, lang:null, movil:null, incluir_test:false };
+let BASE = null;   // informe SIN filtros de la misma ventana: de aqui salen los chips
+
+// ------------------------------------------------------------------ datos
+function clave(){
+  let c = (typeof window.BT_CLAVE === 'string' && window.BT_CLAVE) || null;
+  try{ c = c || localStorage.getItem('bt_informe_clave'); }catch(e){}
+  if(!c){ c = (prompt('Clave del informe:') || '').trim();
+    try{ localStorage.setItem('bt_informe_clave', c); }catch(e){} }
+  return c;
+}
+async function pide(filtros){
+  const r = await fetch(URL_NUBE + '/rest/v1/rpc/informe_estadisticas', {
+    method:'POST', headers:{ apikey:KEY_NUBE, 'Content-Type':'application/json' },
+    body: JSON.stringify({ p_clave: clave(), p_dias: F.dias, p_filtros: filtros })
+  });
+  if(!r.ok){ const e = new Error('http ' + r.status); e.status = r.status; throw e; }
+  return await r.json();
+}
+async function carga(){
+  el('estado').textContent = 'cargando…';
+  try{
+    const activos = {};
+    for(const k of ['mode','ball','lang','movil']) if(F[k] !== null) activos[k] = F[k];
+    if(F.incluir_test) activos.incluir_test = true;
+    // El informe base (sin filtros de dimension) sirve para dos cosas: construir los
+    // chips SOLO con valores que existen de verdad, y no tener que adivinar el catalogo.
+    const base = await pide(F.incluir_test ? { incluir_test:true } : {});
+    BASE = base;
+    const inf = Object.keys(activos).length && !(Object.keys(activos).length === 1 && F.incluir_test)
+              ? await pide(activos) : base;
+    el('aviso').style.display = 'none';
+    pintaFiltros(); pinta(inf, base);
+    el('estado').textContent = '';
+  }catch(e){
+    const a = el('aviso'); a.style.display = 'block';
+    if(e.status === 400){
+      try{ localStorage.removeItem('bt_informe_clave'); }catch(x){}
+      a.innerHTML = '<b>Clave incorrecta.</b> Recarga la página y vuelve a escribirla.';
+    } else a.textContent = 'No se pudo cargar el informe (' + (e.message || e) + ').';
+    el('estado').textContent = '';
+    pintaFiltros();
+  }
+}
+
+// ------------------------------------------------------------------ utiles
+const el = id => document.getElementById(id);
+const nuevo = (t, cls, html) => { const e = document.createElement(t); if(cls) e.className = cls;
+  if(html !== undefined) e.innerHTML = html; return e; };
+const num = n => Number(n || 0).toLocaleString('es');
+const pct = (a, b) => b > 0 ? Math.round(100 * a / b) : null;
+const ordena = o => Object.entries(o || {}).map(([k,v]) => [k, Number(v)]).sort((a,b) => b[1] - a[1]);
+const claves = o => Object.keys(o || {});
+
+// ------------------------------------------------------------------ filtros
+function pintaFiltros(){
+  const f = el('filtros'); f.innerHTML = '';
+  const grupo = (etq, opciones, campo) => {
+    if(!opciones.length) return;
+    const g = nuevo('div','grupo'); g.append(nuevo('span','et', etq));
+    for(const [val, txt] of opciones){
+      const b = nuevo('button','chip' + (F[campo] === val ? ' on' : ''), txt);
+      b.onclick = () => { F[campo] = val; carga(); };
+      g.append(b);
+    }
+    f.append(g);
+  };
+  grupo('Ventana', [[7,'7 d'],[14,'14 d'],[30,'30 d'],[90,'90 d']], 'dias');
+
+  const modos = BASE ? claves(BASE.partidas.arrancadas_por_modo).concat(claves(BASE.partidas.por_modo))
+                     : [];
+  const uniq = a => [...new Set(a.filter(x => x && x !== '?'))];
+  grupo('Modo', [[null,'todos']].concat(uniq(modos).map(m => [m, NOM_MODO[m] || m])), 'mode');
+  grupo('Bola', [[null,'todas']].concat(uniq(BASE ? claves(BASE.bolas.partidas_por_bola) : []).map(b => [b, b])), 'ball');
+  grupo('Idioma', [[null,'todos']].concat(uniq(BASE ? claves(BASE.sesiones.por_idioma) : []).map(l => [l, l])), 'lang');
+  grupo('Aparato', [[null,'todos'],[true,'móvil'],[false,'escritorio']], 'movil');
+
+  const g = nuevo('div','grupo');
+  const b = nuevo('button','chip' + (F.incluir_test ? ' on' : ''), 'incluir cuentas de prueba');
+  b.onclick = () => { F.incluir_test = !F.incluir_test; carga(); };
+  g.append(b); f.append(g);
+  f.append(nuevo('span', null, '<span id="estado"></span>'));
+}
+
+// ------------------------------------------------------------------ piezas
+function tile(n, t, antes){
+  const d = nuevo('div','tile');
+  d.append(nuevo('div','n', num(n)));
+  d.append(nuevo('div','t', t));
+  if(antes !== undefined && antes !== null){
+    const dif = n - antes;
+    const flecha = dif > 0 ? '▲' : (dif < 0 ? '▼' : '=');
+    const p = antes > 0 ? ' (' + (dif >= 0 ? '+' : '') + Math.round(100 * dif / antes) + '%)' : '';
+    d.append(nuevo('div','d', flecha + ' ' + (dif >= 0 ? '+' : '') + num(dif) + p +
+                              ' <span style="color:var(--antes)">vs ventana anterior</span>'));
+  }
+  return d;
+}
+
+// El funnel es la pieza estrella: donde se cae la gente. Cada paso incluye al
+// anterior (lo garantiza el SQL), asi que la barra solo puede bajar.
+function funnel(titulo, pasos, nota){
+  const p = nuevo('div','panel ancho');
+  p.append(nuevo('h2', null, titulo));
+  const inicio = pasos.length ? Number(pasos[0].jugadores) : 0;
+  if(!inicio){ p.append(nuevo('div','vacio','— todavía no ha entrado nadie en esta ventana —')); return p; }
+  // el peor salto se marca en rojo: es la accion que hay que arreglar
+  let peor = -1, peorCaida = 0;
+  for(let i = 1; i < pasos.length; i++){
+    const a = Number(pasos[i-1].jugadores), b = Number(pasos[i].jugadores);
+    if(a > 0 && (a - b) / a > peorCaida){ peorCaida = (a - b) / a; peor = i; }
+  }
+  const c = nuevo('div','fn');
+  pasos.forEach((s, i) => {
+    const v = Number(s.jugadores), ant = i ? Number(pasos[i-1].jugadores) : v;
+    const f = nuevo('div','fn-p');
+    f.append(nuevo('div','fn-et', s.paso));
+    f.append(nuevo('div','fn-v', num(v) + (i ? ' <span class="sub" style="color:var(--tinta3)"> · ' +
+      (pct(v, inicio) ?? 0) + '% del inicio</span>' : '')));
+    const bar = nuevo('div','fn-bar'); const fill = nuevo('i');
+    fill.style.width = (inicio ? 100 * v / inicio : 0) + '%';
+    bar.append(fill); f.append(bar);
+    if(i){
+      const caen = ant - v, pc = pct(caen, ant);
+      f.append(nuevo('div','fn-nota', caen > 0
+        ? (i === peor ? '<b>se caen ' + num(caen) + ' (' + pc + '%)</b> — el peor salto'
+                      : 'se caen ' + num(caen) + ' (' + pc + '%)')
+        : 'no se cae nadie'));
+    }
+    c.append(f);
+  });
+  p.append(c);
+  if(nota) p.append(nuevo('div','vacio', nota));
+  return p;
+}
+
+function listaBarras(titulo, pares, extra, sale){
+  const p = nuevo('div','panel'); p.append(nuevo('h2', null, titulo));
+  if(!pares.length){ p.append(nuevo('div','vacio','— sin datos aún —')); return p; }
+  const max = Math.max(...pares.map(x => x[1]));
+  const g = nuevo('div','lb');
+  for(const [etq, v] of pares){
+    g.append(nuevo('div','e', etq));
+    const b = nuevo('div','b' + (sale ? ' sale' : ''));
+    b.style.width = (max ? Math.max(2, 100 * v / max) : 2) + '%';
+    const cont = nuevo('div'); cont.append(b); g.append(cont);
+    g.append(nuevo('div','v', num(v) + (extra && extra[etq] ? ' <span class="sub">' + extra[etq] + '</span>' : '')));
+  }
+  p.append(g); return p;
+}
+
+function porDia(titulo, filas, campo, ventana){
+  const p = nuevo('div','panel'); p.append(nuevo('h2', null, titulo));
+  const idx = {}; for(const f of (filas || [])) idx[f.dia] = f;
+  const hoy = new Date(), serie = [];
+  for(let i = ventana - 1; i >= 0; i--){
+    const d = new Date(hoy); d.setDate(hoy.getDate() - i);
+    const iso = d.toISOString().slice(0,10);
+    serie.push({ dia:iso, v:Number((idx[iso] || {})[campo] || 0), fila:idx[iso] });
+  }
+  if(!serie.some(s => s.v)){ p.append(nuevo('div','vacio','— sin datos aún —')); return p; }
+  const max = Math.max(...serie.map(s => s.v)), tip = el('tip');
+  const g = nuevo('div','dias');
+  for(const s of serie){
+    const c = nuevo('div','col' + (s.v ? '' : ' cero'));
+    c.style.height = (s.v ? Math.max(2, 100 * s.v / max) : 2) + '%';
+    c.onmousemove = ev => { tip.style.display = 'block';
+      tip.style.left = Math.min(ev.clientX + 12, innerWidth - 150) + 'px';
+      tip.style.top = (ev.clientY - 12) + 'px';
+      tip.textContent = s.dia.slice(5) + ' · ' + num(s.v) +
+        (s.fila && s.fila.jugadores !== undefined ? ' (' + num(s.fila.jugadores) + ' jugadores)' : ''); };
+    c.onmouseleave = () => tip.style.display = 'none';
+    g.append(c);
+  }
+  p.append(g);
+  const e = nuevo('div','ejes');
+  e.append(nuevo('span', null, serie[0].dia.slice(5)), nuevo('span', null, 'máx ' + num(max)), nuevo('span', null, 'hoy'));
+  p.append(e); return p;
+}
+
+function retencion(r){
+  const p = nuevo('div','panel'); p.append(nuevo('h2', null, 'Retención <span class="h2n">(¿vuelven?)</span>'));
+  const g = nuevo('div','ret');
+  let algo = false;
+  for(const [k, etq] of [['d1','al día siguiente'],['d7','a los 7 días'],['d30','a los 30 días']]){
+    const d = r && r[k], c = nuevo('div','c');
+    if(d && d.cohorte > 0){
+      algo = true;
+      c.append(nuevo('div','p', (d.pct ?? 0) + '%'));
+      c.append(nuevo('div','l', etq));
+      c.append(nuevo('div','co', d.volvieron + ' de ' + d.cohorte));
+    } else {
+      c.append(nuevo('div','p','—'));
+      c.append(nuevo('div','l', etq));
+      c.append(nuevo('div','co','sin cohorte aún'));
+    }
+    g.append(c);
+  }
+  p.append(g);
+  p.append(nuevo('div','vacio', algo
+    ? 'De los que entraron por primera vez hace ≥N días, cuántos volvieron a abrir el juego el día N.'
+    : 'Hace falta que pase al menos un día desde la primera visita de alguien. Se llena solo.'));
+  return p;
+}
+
+function economia(e){
+  const p = nuevo('div','panel ancho');
+  p.append(nuevo('h2', null, 'Economía <span class="h2n">— ¿de dónde sale y a dónde va?</span>'));
+  const c = nuevo('div','eco');
+  let algo = false;
+  for(const [k, nm, simb] of [['chispas','Chispas','✦'],['gemas','Gemas','◆']]){
+    const m = e && e[k]; if(!m) continue;
+    const ent = ordena(m.entradas), sal = ordena(m.salidas);
+    if(!ent.length && !sal.length) continue;
+    algo = true;
+    const box = nuevo('div','eco-m');
+    const h = nuevo('div','eco-h');
+    h.append(nuevo('div','nm', simb + ' ' + nm));
+    const neto = Number(m.neto || 0);
+    h.append(nuevo('div','neto', 'neto ' + (neto >= 0 ? '+' : '') + num(neto) +
+      ' <span style="color:var(--tinta3)">' + (neto > 0 ? '(entra más de lo que sale → infla)' :
+        neto < 0 ? '(sale más de lo que entra → drena)' : '(en equilibrio)') + '</span>'));
+    box.append(h);
+    const nom = x => NOM_MOT[x] || x;
+    if(ent.length){ box.append(nuevo('div','eco-t','entra por'));
+      box.append(listaBarras('', ent.map(([a,b]) => [nom(a), b])).querySelector('.lb')); }
+    if(sal.length){ box.append(nuevo('div','eco-t','se gasta en'));
+      box.append(listaBarras('', sal.map(([a,b]) => [nom(a), b]), null, true).querySelector('.lb')); }
+    c.append(box);
+  }
+  if(!algo){ p.append(nuevo('div','vacio',
+    'Todavía no se ha movido ninguna moneda en esta ventana. Aparecerá en cuanto alguien juegue una partida, compre en la tienda o suba una bola de nivel.')); return p; }
+  p.append(c);
+  return p;
+}
+
+function abandono(inf){
+  const p = nuevo('div','panel');
+  p.append(nuevo('h2', null, 'Abandono a mitad <span class="h2n">(por modo)</span>'));
+  const arr = inf.partidas.arrancadas_por_modo || {}, fin = inf.partidas.por_modo || {};
+  const modos = [...new Set([...claves(arr), ...claves(fin)])].filter(m => m && m !== '?');
+  if(!modos.length){ p.append(nuevo('div','vacio','— sin datos aún —')); return p; }
+  const w = nuevo('div','tabla-wrap'), t = nuevo('table');
+  t.append(nuevo('tr', null, '<th>Modo</th><th>Empieza</th><th>Termina</th><th>Se va</th>'));
+  for(const m of modos){
+    const a = Number(arr[m] || 0), f = Number(fin[m] || 0), d = Math.max(0, a - f);
+    const pc = a > 0 ? Math.round(100 * d / a) : null;
+    t.append(nuevo('tr', null, '<td>' + (NOM_MODO[m] || m) + '</td><td>' + num(a) + '</td><td>' + num(f) +
+      '</td><td class="' + (pc !== null && pc >= 30 ? 'mal' : '') + '">' +
+      (pc === null ? '—' : pc + '%') + '</td>'));
+  }
+  w.append(t); p.append(w);
+  p.append(nuevo('div','vacio','"Se va" = pulsó jugar pero no llegó al final. Quien abandona no manda resultado, así que se mide por la resta.'));
+  return p;
+}
+
+// ------------------------------------------------------------------ pintar
+function pinta(inf, base){
+  el('sello').innerHTML = 'ventana de ' + inf.ventana_dias + ' días · generado ' +
+    new Date(inf.generado_en).toLocaleString('es') +
+    (inf.jugadores.fantasmas_excluidos ? ' · <b>' + num(inf.jugadores.fantasmas_excluidos) +
+      '</b> cuentas de prueba excluidas' : '');
+
+  const cmp = inf.comparativa || {};
+  const t = el('tiles'); t.innerHTML = '';
+  t.append(
+    tile(inf.jugadores.activos_en_ventana, 'jugadores que han abierto el juego', cmp.activos),
+    tile(inf.partidas.ventana, 'partidas terminadas', cmp.partidas),
+    tile(inf.sesiones.total, 'veces que se ha abierto', cmp.sesiones),
+    tile(inf.jugadores.nuevos_en_ventana, 'jugadores nuevos', cmp.nuevos),
+    tile(inf.jugadores.con_cuenta, 'con cuenta guardada')
+  );
+
+  const m = el('malla'); m.innerHTML = '';
+  m.append(funnel('Embudo de entrada <span class="h2n">— ¿dónde se cae la gente?</span>',
+                  inf.funnel_entrada || [],
+                  'Cada paso incluye el anterior, así que el embudo solo puede bajar.'));
+  m.append(retencion(inf.retencion));
+  m.append(abandono(inf));
+  m.append(economia(inf.economia));
+
+  m.append(porDia('Partidas por día', inf.partidas.por_dia, 'n', inf.ventana_dias));
+  m.append(porDia('Jugadores nuevos por día', inf.jugadores.nuevos_por_dia, 'n', inf.ventana_dias));
+  m.append(porDia('Veces que se abre, por día', inf.sesiones.por_dia, 'sesiones', inf.ventana_dias));
+
+  const dur = inf.partidas.duracion_media_s_por_modo || {}, durTxt = {};
+  for(const k in dur) durTxt[NOM_MODO[k] || k] = Math.round(dur[k]) + ' s de media';
+  m.append(listaBarras('Partidas por modo', ordena(inf.partidas.por_modo).map(([k,v]) => [NOM_MODO[k] || k, v]), durTxt));
+
+  // Bolas: partidas y podios juntos, que es lo que dice si una bola gusta Y funciona
+  const pb = inf.bolas.partidas_por_bola || {}, pod = inf.bolas.podios_por_bola || {}, podTxt = {};
+  for(const k in pb){ const p3 = pct(Number(pod[k] || 0), Number(pb[k])); if(p3 !== null) podTxt[k] = p3 + '% podio'; }
+  m.append(listaBarras('Bolas más jugadas', ordena(pb), podTxt));
+  m.append(listaBarras('Bolas conseguidas', ordena(inf.bolas.conseguidas_por_bola)));
+  m.append(listaBarras('Subidas de nivel de bola', ordena(inf.bolas.subidas_de_nivel)));
+  m.append(listaBarras('Pantallas visitadas', ordena(inf.pantallas).map(([k,v]) => [NOM_PANT[k] || k, v])));
+  m.append(listaBarras('Puestos del jugador',
+    Object.entries(inf.partidas.reparto_puestos || {}).map(([k,v]) => [k + 'º', Number(v)])
+      .sort((a,b) => parseInt(a[0]) - parseInt(b[0]))));
+  m.append(listaBarras('Nivel de cuenta',
+    Object.entries(inf.jugadores.por_nivel || {}).map(([k,v]) => ['nivel ' + k, Number(v)])
+      .sort((a,b) => parseInt(a[0].slice(6)) - parseInt(b[0].slice(6)))));
+  m.append(listaBarras('Idioma', ordena(inf.sesiones.por_idioma)));
+  m.append(listaBarras('Aparato', ordena(inf.sesiones.por_dispositivo)));
+
+  // Tutorial: empezados vs completados por modo
+  const tu = nuevo('div','panel');
+  tu.append(nuevo('h2', null, 'Cómo jugar <span class="h2n">(tutorial)</span>'));
+  const emp = inf.tutorial.empezados_por_modo || {}, com = inf.tutorial.completados_por_modo || {};
+  const modos = [...new Set([...claves(emp), ...claves(com)])];
+  if(!modos.length) tu.append(nuevo('div','vacio','— nadie ha abierto el tutorial en esta ventana —'));
+  else{
+    const w = nuevo('div','tabla-wrap'), tb = nuevo('table');
+    tb.append(nuevo('tr', null, '<th>Modo</th><th>Empieza</th><th>Acaba</th><th>%</th>'));
+    for(const k of modos){
+      const a = Number(emp[k] || 0), b = Number(com[k] || 0), p3 = pct(b, a);
+      tb.append(nuevo('tr', null, '<td>' + (NOM_MODO[k] || k) + '</td><td>' + num(a) + '</td><td>' +
+        num(b) + '</td><td class="' + (p3 !== null && p3 < 50 ? 'mal' : '') + '">' +
+        (p3 === null ? '—' : p3 + '%') + '</td>'));
+    }
+    w.append(tb); tu.append(w);
+  }
+  m.append(tu);
+}
+
+pintaFiltros();
+carga();
+</script>
+</body>
+</html>
