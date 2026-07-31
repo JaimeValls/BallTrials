@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-31 5380ea9"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-07-31 a3c56af"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -348,17 +348,19 @@
   .gd-q{ font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--qc); }
   .gd-name{ font-size:23px; font-weight:900; }
   /*+AG las 6 barras de atributos. Reusan el lenguaje de la barra de XP que ya vive en esta misma
-    ficha (mismo alto, mismo radio, mismo carril): no se inventa un medidor nuevo para la pantalla
-    que ya tiene uno. El color del relleno es el de la RAREZA (--qc) para que la ficha se sienta de
-    esa bola, y el carril lleva una marca al 100% para que «8 de 10» se vea sin leer el numero. */
+    ficha (mismo alto, mismo radio): no se inventa un medidor nuevo para la pantalla que ya tiene uno.
+    ⚠ El CARRIL VACIO va en NEGRO translucido, no en blanco. Estaba en `#ffffff16`, o sea aclarando
+    sobre una carta ya oscura, y eso es literalmente el «todo gris es un poco feo» que vio Jaime. En
+    las capturas reales de Brawl Stars y Clash Royale (vida en combate, Record Level, progreso de
+    carta) el carril es casi negro SIEMPRE: se hunde, no se aclara. */
   .gd-stats{ width:100%; display:flex; flex-direction:column; gap:6px; margin:2px 0 2px; }
   .gd-st{ display:grid; grid-template-columns:16px 1fr 30px; align-items:center; gap:8px; }
   .gd-st .ic{ width:16px; height:16px; display:block; opacity:.9; }
-  .gd-st .ic svg{ width:100%; height:100%; display:block; fill:none; stroke:var(--qc,#cfd3ff); stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
+  .gd-st .ic svg{ width:100%; height:100%; display:block; fill:none; stroke:var(--sc,#cfd3ff); stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
   .gd-st .nm{ font-size:11px; font-weight:800; letter-spacing:.02em; color:#e9e6ff; text-transform:none;
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .gd-st .vl{ font-size:11px; font-weight:900; color:var(--muted); text-align:right; font-variant-numeric:tabular-nums; }
-  .gd-st .bar{ grid-column:2 / span 2; height:9px; border-radius:6px; background:#ffffff16; position:relative; margin-top:-2px; }
+  .gd-st .bar{ grid-column:2 / span 2; height:9px; border-radius:6px; background:#00000042; box-shadow:inset 0 2px 3px #00000059; position:relative; margin-top:-2px; }
   /* ⚠ `display:block`: el relleno es un <span>, o sea EN LINEA, y a un elemento en linea no se le
      aplica ni ancho ni alto — salia de 0x0 y la barra se veia vacia con la muesca flotando. La
      muesca si se veia porque es `position:absolute`, que ya lo convierte en bloque. */
@@ -366,7 +368,7 @@
      asi que en una barra corta (un atributo de 2) casi todo lo que se ve es el final del degradado
      —el blanco— y la barra sale gris: el color de rareza solo se veia en las barras largas. Con
      color plano + brillo por dentro, un 2 y un 9 son igual de verdes. */
-  .gd-st .fill{ display:block; height:100%; border-radius:6px; background:var(--qc,#7ef0ff);
+  .gd-st .fill{ display:block; height:100%; border-radius:6px; background:var(--sc,#7ef0ff);
     box-shadow:inset 0 2px 0 #ffffff59, inset 0 -3px 0 #0000002e;
     transition:width .45s cubic-bezier(.34,1.2,.64,1); }
   /* LO QUE LE QUEDA POR CRECER. Antes esto era una muesca vertical suelta y Jaime no la entendia,
@@ -375,7 +377,7 @@
      de ese atributo al nivel maximo: lo solido es lo que tienes, lo apagado es hasta donde puede
      llegar. No hace falta leyenda — se entiende de un vistazo porque es la misma forma. */
   .gd-st .futuro{ position:absolute; left:0; top:0; height:100%; border-radius:6px;
-    background:var(--qc,#7ef0ff); opacity:.26; }
+    background:var(--sc,#7ef0ff); opacity:.28; }
   /* La bola que NO tienes enseña sus barras en color, a proposito. Apagarlas era copiar el gris del
      retrato sin pensar: la ficha de una bola bloqueada es justo donde se decide comprarla, y ahi lo
      que hay que ver bien es en que es buena. Lo que esta apagado es la BOLA, que ya dice que no es
@@ -1831,7 +1833,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=5380ea9"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=a3c56af"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -4019,6 +4021,15 @@ const MAXSTAT=(()=>{ let m=1; for(const k of ARCH_KEYS){ const a=attrsOf({arch:k
 //   Iconos en SVG dentro del propio HTML: son seis glifos de una línea, y pedirlos como imagen
 //   sería un viaje de red por cada uno para dibujar una flecha. Si el arte pide más carácter, se
 //   encargan a Codex y solo cambia esta tabla.
+//+AG UN COLOR POR ATRIBUTO, fijo, y NO el de la rareza (auditoría del 31-jul con capturas reales de
+//   Brawl Stars y Clash Royale). Con el color de rareza las seis barras de una bola salían del mismo
+//   color, así que no se podía escanear «¿en qué es buena?» de un vistazo: era exactamente el «todo
+//   gris es un poco feo» de Jaime. En los juegos de Supercell el color de una barra dice QUÉ ES
+//   (oro=progreso, magenta=vida), nunca de qué rareza es el objeto que la lleva. La rareza ya tiene
+//   su sitio en esta ficha: el borde de la carta, el brillo y el nombre.
+//   Velocidad e Impulso heredan los colores que el MOTOR ya usa para eso mismo en pista (la estela
+//   cian y el boost magenta), que es una pista gratis para quien juega.
+const STAT_COL=['#3FD8FF','#63E24A','#9AA6C8','#FF9A2E','#4A7BFF','#FF4FA3'];
 const STAT_ICO=[
   'M3 12h7M6 8l4 4-4 4M13 8l4 4-4 4',                                  // velocidad: se lanza hacia delante
   'M3 15c4 0 5-9 9-9M12 6h4v4',                                        // aceleración: la curva que sube
@@ -4034,7 +4045,7 @@ function drawStats(host, k, attrs, apagada){
     const v=attrs[i], tope=topes[i];
     const pct=Math.max(4, Math.round(v/MAXSTAT*100));      // 4% de suelo: una barra a cero no se ve
     const pt=Math.round(tope/MAXSTAT*100);
-    return `<div class="gd-st">
+    return `<div class="gd-st" style="--sc:${STAT_COL[i]}">
       <span class="ic"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="${STAT_ICO[i]}"/></svg></span>
       <span class="nm">${attrFull(i)}</span>
       <span class="vl">${v}</span>
