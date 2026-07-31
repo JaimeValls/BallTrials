@@ -10,6 +10,49 @@ import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { faceTexture, hunterTexture, faceLayers, bareExpr, PRESETS as FACE_PRESETS } from './facegen.mjs';
+import { geometriaCuerpo } from './silueta.mjs';   //+AG doc 55 capa 1: cuerpos que no son esferas
+
+//+AG doc 55 capa 1 v2: bolas cuyo cuerpo es una FORMA PINTADA (bola invisible + sprite teñible).
+const CUERPO_SPRITE = new Set(['fantasma']);
+//+AG la cache guarda una LISTA DE ESPERA, no solo la textura. La primera version avisaba unicamente
+//   al primero que pedia la imagen: el segundo llegaba mientras aun estaba descargando, se
+//   encontraba la entrada ya en la cache pero sin `image`, y su aviso se perdia para siempre. En
+//   partida no se veia (solo TU bola lleva arch, o sea una sola por pantalla), pero en cuanto dos
+//   bolas piden el mismo cuerpo —la pagina de previsualizacion pinta la misma bola cuatro veces— la
+//   segunda y siguientes se quedaban como esfera. Un fallo que solo aparece con dos.
+const cuerpoCache = new Map();
+function cuerpoTexture(arch, onOk){
+  const e = cuerpoCache.get(arch);
+  if (e){ if (e.listo) onOk(); else e.espera.push(onOk); return e.tex; }
+  const url = new URL(`../../arte/cuerpos/cuerpo-${arch}.webp`, import.meta.url).href;
+  const ent = { tex: null, listo: false, espera: [onOk] };
+  const t = new THREE.TextureLoader().load(url,
+    () => { ent.listo = true; const q = ent.espera; ent.espera = []; q.forEach(f => f()); },
+    undefined, () => { ent.espera = []; });
+  t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
+  t.minFilter = THREE.LinearMipmapLinearFilter; t.magFilter = THREE.LinearFilter;
+  ent.tex = t;
+  cuerpoCache.set(arch, ent);
+  return t;
+}
+//+AG el CUERPO PINTADO, sacado a funcion propia por la misma razon que `makeProp`: la pagina de
+//   previsualizacion (bolas-vivas.html) tiene que poder montarlo y RE-MONTARLO al cambiar de bola
+//   o de color de equipo, y antes vivia enterrado dentro de makeBallVinyl. Un previsualizador que
+//   no puede enseñar la pieza no sirve para aprobarla. Devuelve null si esta bola no tiene cuerpo
+//   pintado -> quien llama se queda con la esfera de siempre.
+//   `onReady` se dispara cuando la textura HA CARGADO, y es quien apaga la esfera: si el arte no
+//   existe o no carga, la esfera sigue ahi y no se ve un agujero.
+export function makeCuerpo(arch, R, col, onReady){
+  if (!CUERPO_SPRITE.has(arch)) return null;
+  const pl = new THREE.Mesh(new THREE.PlaneGeometry(R * 3.2, R * 3.2),
+    new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, toneMapped: false }));
+  pl.material.color.setRGB(col[0], col[1], col[2]);   // el TEÑIDO de equipo
+  pl.position.set(0, 0, R * 1.02);
+  pl.renderOrder = 1;                                 // bajo el prop (2) y la cara (3+)
+  pl.visible = false;                                 // se enciende solo si el arte existe
+  pl.material.map = cuerpoTexture(arch, () => { pl.visible = true; pl.material.needsUpdate = true; onReady && onReady(); });
+  return pl;
+}
 import { itemTexture } from './itemgen.mjs';
 import { ballMaterial, skinTexture } from './ballmat.mjs';   //+AG skinTexture: la piel del cuerpo (encargo 17)
 import { makeProp } from './propgen.mjs';   //+AG doc 41 bloque G: prop de la bola-heroe
@@ -217,7 +260,25 @@ export function makeBallVinyl(scene, b, BALL_R, look, arch){
   //   torneo y el video del motor no cambian ni un pixel. Si el heroe no tiene piel todavia, la
   //   textura falla al cargar y ballmat la deja en gris neutro (bola lisa, no bola negra).
   const mat = ballMaterial(col, look || undefined, arch ? skinTexture(arch) : null);
-  const body = new THREE.Mesh(new THREE.SphereGeometry(BALL_R, 40, 28), mat); g.add(body);
+  //+AG doc 55 capa 1: hay bolas cuyo CUERPO no es una esfera (el Fantasma). La geometria entra por
+  //   la misma puerta que todo lo demas: sin `arch` sale null y se construye la esfera de siempre,
+  //   asi que el torneo y los videos no se mueven. El material, el color de equipo y el squash son
+  //   exactamente los mismos: lo unico que cambia es la forma.
+  const geo = (arch && geometriaCuerpo(arch, BALL_R)) || new THREE.SphereGeometry(BALL_R, 40, 28);
+  const body = new THREE.Mesh(geo, mat); g.add(body);
+  //+AG doc 55 capa 1 v2 — LA RECETA DE JAIME, literal, despues de que yo la sorteara dos veces:
+  //   «mantienes el collider redondo, pero haces la bola invisible y ponemos encima la forma del
+  //   fantasma». O sea: el cuerpo NO se deforma — se OCULTA, y encima va la forma PINTADA.
+  //   Por que su receta es mejor que la mia (deformar la esfera): la esfera deformada conserva el
+  //   material de plastico del motor, y un fantasma de plastico brillante no es un fantasma. Una
+  //   forma pintada trae su acabado (translucidez, borde suave) de fabrica.
+  //   El sprite viene en GRIS CLARO y se TIÑE del color del equipo (mismo truco que la piel):
+  //   blanco toma el color puro, el sombreado gris lo oscurece -> la regla del color se conserva.
+  //   La fisica ni se mira: el collider sigue siendo el circulo de la Sim.
+  //   Si la textura no existe o no carga, no pasa nada: se queda el cuerpo de siempre (la
+  //   geometria de silueta.mjs hace de RESPALDO dibujado, igual que los DRAW de los props).
+  let cuerpo = null;
+  if (arch){ cuerpo = makeCuerpo(arch, BALL_R, col, () => { body.visible = false; }); if (cuerpo) g.add(cuerpo); }
   //+AG doc 41 bloque G (2a tajada): el PROP cuelga del GRUPO, no del cuerpo. attachSquash escala
   //   body y le gira body.rotation.z con el rumbo; al grupo solo le toca el tilt. Asi el prop se
   //   ladea con la bola como un personaje pero ni se deforma ni RUEDA (un casco rodando canta).
@@ -231,7 +292,7 @@ export function makeBallVinyl(scene, b, BALL_R, look, arch){
   scene.add(g);
   const noop = { set(){} };
   return { g, body, mat, col, squash: 0, excite: 0, fall: 0, fz: 0, frot: 0,
-    setExpr: face.setExpr, face, prop,
+    setExpr: face.setExpr, face, prop, cuerpo,
     eyes: [], pups: [], mouth: { visible: false, scale: noop } };
 }
 

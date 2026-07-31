@@ -127,8 +127,14 @@ const BLANCO = (() => {                    // 1 px neutro: el sampler SIEMPRE ti
   const x = c.getContext('2d'); x.fillStyle = '#808080'; x.fillRect(0, 0, 1, 1);
   return new THREE.CanvasTexture(c);
 })();
+//+AG doc 54: bolas cuyo personaje CAMBIO y cuya piel vieja ya no dice nada de ellas. `lapa` era una
+//   lapa/pulpo y su piel son VENTOSAS; hoy es EL IMAN, y las ventosas se leen como celulas naranjas
+//   pegadas al cuerpo. Jaime: «no entiendo por que tiene como de textura celulas naranjas; un iman
+//   deberia ser algo magnetico, metalico, deberia de ser de superficie normal». La piel se apaga
+//   aqui en vez de borrar el fichero: el arte no es mio y la lapa puede volver como otra bola.
+const SIN_PIEL = new Set(['lapa']);
 export function skinTexture(arch){
-  if (!arch) return null;
+  if (!arch || SIN_PIEL.has(arch)) return null;
   let t = skinCache.get(arch);
   if (t === undefined){
     // Si el mapa no carga, la textura se queda SIN imagen y el sampler devuelve NEGRO: la bola

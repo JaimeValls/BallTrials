@@ -237,9 +237,34 @@ function texture(arch){
 // ⚠ Esto es un PARCHE de encuadre, no la solucion: las dos piezas estan pedidas a Codex en el
 // encargo 19 con la composicion de su ficha (Cohete sin morro delantero — en la ficha la BOLA es
 // el morro —, y Estrella como chapa mas pequeña y baja). Cuando lleguen, estas dos filas se van.
+//+AG 31-jul: ESTOS NUMEROS LOS PUSO JAIME A MANO, uno a uno, con prototipo/ajuste-props.html.
+//   Los mios estaban mal por una razon que merece quedar escrita: yo colocaba cada pieza mirando
+//   a los OJOS (que no los tapara) en vez de mirar a la CABEZA (donde se apoya), y por eso todos
+//   los gorros salian calados hasta las cejas. Su correccion: «tienes que detectar cual es la BASE
+//   del gorro y ajustarla con el TOP de la cabeza; en el aviador es mas complicado porque las
+//   orejeras no van encima de la cabeza, van en las orejas».
+//   Si se repinta una pieza, hay que volver a pasarla por la herramienta: estos numeros son de
+//   ESTE dibujo, no del personaje.
 const PLACE = {
-  cohete:   { dx: 0.34, dy: -0.24, k: 0.94 },
-  estrella: { dx: 0.00, dy: -0.54, k: 0.58 },   // barrido de escala/altura: la unica pareja que baja
+  cohete:   { dx: 0.00, dy: -0.60, k: 1.49 },   // el casco del Aviador, mucho mas grande
+  tanque:   { dx: 0.00, dy:  0.00, k: 1.00 },
+  chispa:   { dx: 0.00, dy:  0.04, k: 1.00 },
+  pinball:  { dx: 0.00, dy:  0.02, k: 1.00 },
+  lapa:     { dx: 0.00, dy:  0.02, k: 1.00, rot: 180, pivY: 0.896 },   // EL IMAN: girado 180 EN SU SITIO
+  burbuja:  { dx: 0.00, dy:  0.00, k: 1.00 },
+  meteoro:  { dx: 0.00, dy:  0.20, k: 1.00 },
+  bunker:   { dx: 0.00, dy: -0.44, k: 1.57 },
+  volcan:   { dx: 0.00, dy:  0.37, k: 1.08 },
+  //+AG EL ESPARTANO, reencajado (Jaime, 31-jul: «se ha quedado un poco desencajado, hay que hacerlo
+  //   un poquito mas grande y quizas subirlo un pelin»). Medido el porque: su ala es CONCAVA —una
+  //   media luna que curva hacia arriba por las puntas— y la coronilla de la bola es CONVEXA, asi
+  //   que a k=1.00 el ala era mas estrecha que la bola y las puntas se quedaban flotando en el aire
+  //   con el centro mordiendo. No era cuestion de altura: era de ANCHO. A k=1.25 la cuerda del ala
+  //   coincide con la de la bola y las puntas aterrizan en los hombros. Ganan 0.29R de altura de
+  //   propina, que es el «subirlo un pelin».
+  yunque:   { dx: 0.00, dy:  0.22, k: 1.25 },
+  fantasma: { dx: 0.00, dy:  0.00, k: 1.00 },   // provisional: el CUERPO pasa a ser el fantasma
+  estrella: { dx: 0.00, dy:  0.10, k: 1.12 },
 };
 //+AG la capa FX se pide SIEMPRE que la bola tenga tabla, pero puede no existir todavia (el arte
 //   con isla suelta llega por el encargo 21b). Por eso el plano nace INVISIBLE y solo se enciende
@@ -279,31 +304,149 @@ function textureCapa(arch, cual, onOk){
 //   kick   · SALTA con el impacto   · el sombrero del Vaquero al rebotar
 //   drag   · se retrasa con la velocidad · lo que ondea hacia atras al correr
 // `phase` desfasa el canal para que dos bolas iguales no vayan sincronizadas.
+const SIN_PROP = new Set(['fantasma']);
 const PROP_FX = {
   // Lo que hoy tiene isla aprovechable en el alfa ya puede animarse; el resto entra con el
   // encargo 21b (Codex pinta lo movil como isla suelta con hilo de aire).
-  chispa:  { fx: { blink: 0.55, blinkHz: 3.1, bob: 0.03, bobHz: 1.7, phase: 0.7 } },
-  burbuja: { fx: { bob: 0.05, bobHz: 0.9, pulse: 0.06, pulseHz: 1.3 } },
+  //+AG CHISPA ya no lleva accesorio: su personaje lo cuenta el AURA (ver makeAura). El canal
+  //   `chispeo` que se escribio para hacer parpadear sus rayos murio con ellos, y se ha quitado:
+  //   un canal que no usa nadie es una promesa de que algo se anima cuando no se anima nada.
+  burbuja: { fx: { bob: 0.05, bobHz: 0.9, pulse: 0.06, pulseHz: 1.3, pulseBase: 0.05, pulseBaseHz: 0.8 } },
   meteoro: { fx: { sway: 0.05, swayHz: 0.8, drag: 0.06 } },
+  //+AG EL IMAN: las dos chispas entre las puntas PARPADEAN, y pegan un chispazo cuando la partida
+  //   dice que ha pasado algo. Su rol es AGA 9 —«se agarra y no se suelta»— asi que el gesto tiene
+  //   que leerse como magnetismo, no como decoracion.
+  lapa:    { fx: { blink: 0.75, blinkHz: 4.2, pulse: 0.08, pulseHz: 3.0, flash: '*', phase: 0.9 } },
   //+AG volcan es la casilla de EL MAGO (doc 54): su rol es encadenar boosts (BST 9 + rasgo), asi
   //   que su accesorio destella con el boost. El personaje cuenta su rol jugando.
   volcan:  { fx: { bob: 0.04, bobHz: 1.1, pulse: 0.05, pulseHz: 2.2, flash: 'nitro' } },
-  fantasma:{ fx: { sway: 0.10, swayHz: 1.2, drag: 0.10, phase: 1.3 } },
+  //+AG FANTASMA YA NO LLEVA PROP. Su cuerpo ES el fantasma (chassis/silueta.mjs, doc 55 capa 1):
+  //   los jirones colgando de una esfera se leian como una barba — «hay que cambiar la bola entera,
+  //   tiene que ser un cuerpo entero» (Jaime, 31-jul). Un faldon ADEMAS del cuerpo seria el mismo
+  //   error dos veces.
   // Los que necesitan el arte del 21 para tener capa (aqui documentados, sin efecto hasta
   // entonces): pinball -> el sombrero del Vaquero salta al rebotar (kick).
-  pinball: { fx: { kick: 0.12, bob: 0.02, bobHz: 1.0 } },
+  //+AG EL VAQUERO: el sombrero BOTA en cada rebote (su rol es el caos y los rebotes, doc 54) y
+  //   respira despacio. No necesita capa suelta: son canales de pieza entera.
+  pinball: { fx: { kick: 0.14, bob: 0.022, bobHz: 0.9 } },
+  //+AG EL REY: la corona se balancea muy poco — es una corona, no un gorro de fiesta.
+  estrella: { fx: { sway: 0.035, swayHz: 0.7, bob: 0.014, bobHz: 1.1, phase: 0.4 } },
+  //+AG EL AVIADOR: el casco acusa el golpe. Poco: pesa.
+  cohete:  { fx: { kick: 0.07, bob: 0.012, bobHz: 1.3, phase: 1.1 } },
+  //+AG las TRES QUE SEGUIAN QUIETAS. Jaime las caza a la primera, y con razon: doce accesorios de
+  //   los que nueve se mueven y tres no parece un fallo, no una decision. Cada gesto sale de su ROL
+  //   en el codigo (doc 54), no de lo que quedaba bonito.
+  //   EL ESPARTANO: «se planta y no se mueve» (PES 10). Lo unico que se mueve en el es EL PENACHO,
+  //   que ondea despacio — el doc 54 se lo prometia y era el unico incumplido. El penacho es capa
+  //   suelta desde hoy (partir-props lo corta por 0.645R: por islas no salia, venia fundido).
+  yunque:  { fx: { sway: 0.055, swayHz: 0.9, phase: 0.3 } },
+  //+AG EL SOLDADO: «sobrevive a todo» (RES 9). El casco se le HUNDE con el golpe y vuelve a subir
+  //   (kick negativo = hacia abajo), que es el gag de toda la vida del casco tapando los ojos.
+  //   Sin capa suelta: son canales de pieza entera, no hace falta repintar nada.
+  bunker:  { fx: { kick: -0.10, bob: 0.012, bobHz: 1.0, phase: 1.6 } },
+  //+AG EL BLINDADO: «empuja y aguanta» (PES 9). Las placas ACUSAN el impacto y se cimbrean un poco
+  //   al andar: chapa remachada, no tela. Amplitudes cortas a proposito — si se moviera mucho
+  //   dejaria de parecer acero.
+  tanque:  { fx: { kick: 0.075, sway: 0.022, swayHz: 1.4, phase: 2.2 } },
 };
 const TAU = 6.28318;
 
+//+AG `rot` (grados) en PLACE: girar la pieza sin repintarla. Nace con el Iman, que llego con la
+//   herradura boca abajo — «tienes que darle la vuelta 180 grados porque no tiene sentido». Un
+//   giro es un numero; pedir un repintado por eso seria una vuelta de arte entera para nada.
 function plano(tex, R, p, z, orden){
   const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, toneMapped: false });
   const m = new THREE.Mesh(new THREE.PlaneGeometry(R * SPAN * p.k, R * SPAN * p.k), mat);
   m.position.set(R * p.dx, R * p.dy, z);
+  //+AG la rotacion es sobre el centro del PLANO, que es el centro de la BOLA — no el de la pieza.
+  //   Girar 180 una pieza que vive en la coronilla la manda al menton. `pivY` (en radios) dice
+  //   donde esta el centro de la pieza para poder devolverla a su sitio despues de girar.
+  if (p.rot){
+    m.rotation.z = p.rot * Math.PI / 180;
+    if (p.pivY){
+      const a = p.rot * Math.PI / 180;
+      m.position.y += R * p.pivY * (1 - Math.cos(a));
+      m.position.x += R * p.pivY * Math.sin(a);
+    }
+  }
   m.renderOrder = orden;
   return m;
 }
 
+// ── AURA · lo que RODEA a la bola (doc 55, capa 4) ───────────────────────────────────────────
+// POR QUE NO ES UN ACCESORIO MAS. Chispa llevaba tres rayos de comic clavados en la coronilla, y el
+// mayor ni se movia. Jaime, con una referencia delante: «prefiero que la bola tenga como
+// electricidad alrededor de ella... entiende que poner tres pelos ahi arriba y uno estatico no es
+// electricidad». No es una pieza que se lleva puesta: es un ANILLO que rodea a la bola entera. Y
+// encaja solo con la regla de los 360 grados — un anillo no apunta a ningun sitio.
+//
+// COMO SE ANIMA, y por que asi. Un atlas de N dibujos que se van turnando, que es lo que hace la
+// animacion 2D de toda la vida: cuesta UN plano y UNA textura, sale exacto y solo lo lleva TU bola.
+// NO se interpola entre fotogramas a proposito: la electricidad SALTA, no se funde. Y el fotograma
+// no va en orden — se elige con el mismo hash determinista que `chispeo`, o al cuarto ciclo el ojo
+// caza el bucle. `hz` es a que ritmo cambia; `salto` cuanto se apaga entre chispazo y chispazo.
+const ART_AURA = k => new URL(`../../arte/props/aura-${k}.webp`, import.meta.url).href;
+const AURA = {
+  chispa: { cols: 3, filas: 2, n: 6, hz: 15, k: 1.0, apagones: 0.22 },
+};
+const auraCache = new Map();
+function auraTexture(arch){
+  let t = auraCache.get(arch);
+  if (!t){
+    t = new THREE.TextureLoader().load(ART_AURA(arch), undefined, undefined,
+      () => console.warn(`[propgen] no cargo el aura de ${arch}`));
+    t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
+    t.minFilter = THREE.LinearMipmapLinearFilter; t.magFilter = THREE.LinearFilter;
+    auraCache.set(arch, t);
+  }
+  return t;
+}
+function makeAura(arch, R){
+  const A = AURA[arch];
+  if (!A) return null;
+  const g = new THREE.Group();
+  // cada bola necesita SU clone: el offset del atlas vive en la textura, y con una compartida las
+  // doce bolas de la pagina de previsualizacion pintarian todas el mismo fotograma.
+  const tex = auraTexture(arch).clone();
+  tex.needsUpdate = true;
+  tex.repeat.set(1 / A.cols, 1 / A.filas);
+  const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false,
+                                            toneMapped: false, blending: THREE.AdditiveBlending });
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(R * SPAN * A.k, R * SPAN * A.k), mat);
+  m.position.set(0, 0, R * 1.03);   // delante del cuerpo, DETRAS de la cara (que va a 1.06R)
+  m.renderOrder = 2;
+  g.add(m);
+  let t = 0, ult = -1;
+  const pon = i => {
+    const c = i % A.cols, f = Math.floor(i / A.cols);
+    tex.offset.set(c / A.cols, 1 - (f + 1) / A.filas);
+  };
+  pon(0);
+  g.userData.tick = dt => {
+    t += dt;
+    const paso = Math.floor(t * A.hz);
+    if (paso === ult) return;
+    ult = paso;
+    const x = Math.sin(paso * 127.1 + 311.7) * 43758.5453;
+    const r = x - Math.floor(x);
+    // un respiro de vez en cuando: sin apagones la bola parece envuelta en una bombilla fija
+    if (r < A.apagones){ mat.opacity = 0; return; }
+    mat.opacity = 1;
+    pon(Math.floor((r - A.apagones) / (1 - A.apagones) * A.n) % A.n);
+  };
+  return g;
+}
+
 export function makeProp(arch, R, _col){
+  //+AG doc 55 capa 4: si la bola tiene AURA, la electricidad ES su accesorio. No se le pone ademas
+  //   una pieza en la cabeza: seria contar el personaje dos veces, que es el error que ya se cometio
+  //   con el Fantasma. Entra por esta misma puerta para no tocar squash ni gfx: el que llama sigue
+  //   recibiendo un grupo con `userData.tick`, y le da igual lo que lleve dentro.
+  const au = makeAura(arch, R);
+  if (au) return au;
+  //+AG las bolas cuyo CUERPO ya cuenta el personaje (silueta.mjs) no llevan accesorio: seria
+  //   contarlo dos veces. Hoy es solo el Fantasma.
+  if (SIN_PROP.has(arch)) return null;
   if (!DRAW[arch]) return null;
   const p = PLACE[arch] || { dx: 0, dy: 0, k: 1 };
   const g = new THREE.Group();
@@ -336,8 +479,17 @@ export function makeProp(arch, R, _col){
   em.material.map = textureCapa(arch, 'em', () => { em.visible = true; em.material.needsUpdate = true; });
   g.add(em);
 
+  //+AG QUE SE MUEVE: la pieza ENTERA o solo su capa suelta.
+  //   Los canales de pieza entera (bob, kick, sway, drag) se aplican al GRUPO del prop, asi que
+  //   funcionan aunque la pieza NO este partida — el sombrero del Vaquero puede botar sin que
+  //   nadie tenga que repintarlo con una isla suelta. Los canales de capa (blink, pulse) solo
+  //   tienen sentido sobre `fx`, que puede no existir.
+  //   El grupo es seguro: squash escribe en el grupo de la BOLA, no en este.
   const F = cfg.fx, ph = F.phase || 0;
-  const base0 = { x: fx.position.x, y: fx.position.y };
+  //   Cada nodo recuerda SU sitio de partida: el del grupo es (0,0), pero el de la capa fx lleva
+  //   el desplazamiento de PLACE horneado, y perderlo la mandaria al centro de la bola.
+  const g0 = { x: g.position.x, y: g.position.y };
+  const fx0 = { x: fx.position.x, y: fx.position.y };
   let t = ph, salto = 0;
   //+AG el tick lo llama chassis/squash.mjs una vez por frame, con el dt del reloj de render del
   //   modo. `k` = velocidad normalizada 0..1 · `kick` = golpe de ESTE frame (0 si no hubo).
@@ -356,11 +508,18 @@ export function makeProp(arch, R, _col){
     if (F.bob)   dy += F.bob * R * Math.sin(t * (F.bobHz || 1) * TAU);
     if (F.kick)  dy += F.kick * R * salto;
     if (F.drag)  dx -= F.drag * R * (k || 0);            // se retrasa al correr, como una capa
-    fx.position.x = base0.x + dx;
-    fx.position.y = base0.y + dy;
-    if (F.sway)  fx.rotation.z = F.sway * Math.sin(t * (F.swayHz || 1) * TAU + 0.6);
+    const mueveTodo = F.todo || !fx.visible;             // sin capa suelta, se mueve la pieza entera
+    const q = mueveTodo ? g : fx, o0 = mueveTodo ? g0 : fx0;
+    q.position.x = o0.x + dx;
+    q.position.y = o0.y + dy;
+    if (F.sway)  q.rotation.z = F.sway * Math.sin(t * (F.swayHz || 1) * TAU + 0.6);
     const brinco = chispazo > 0 ? Math.sin(chispazo * Math.PI) : 0;    // sube y baja, no un corte seco
     if (F.pulse) fx.scale.setScalar(1 + F.pulse * Math.sin(t * (F.pulseHz || 1) * TAU + 1.1));
+    //+AG `pulseBase` late la capa BASE, no la suelta. Nace de la Burbuja: el reparto por islas deja
+    //   la burbuja MAS GRANDE en la base (es la mancha mayor), asi que era la unica que no respiraba
+    //   —«hay una burbuja que no cambia de tamaño, la más grande, está como atachada»—. Va con su
+    //   propia frecuencia y desfasada: si latieran a la vez pareceria un zoom, no burbujas sueltas.
+    if (F.pulseBase) base.scale.setScalar(1 + F.pulseBase * Math.sin(t * (F.pulseBaseHz || 1) * TAU + 2.4));
     if (F.blink) fx.material.opacity = 1 - F.blink * 0.5 * (1 + Math.sin(t * (F.blinkHz || 1) * TAU));
     //+AG lo que se enciende: un latido flojo de fondo (que la pieza este VIVA aunque no pase nada)
     //   y el destello del evento por encima. `emBase` deja regular cuanto alumbra en reposo.
