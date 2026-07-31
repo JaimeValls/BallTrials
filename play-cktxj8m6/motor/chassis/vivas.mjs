@@ -1,0 +1,222 @@
+// ============================================================================
+//  VIVAS · la bola DE VERDAD, viva, dentro de las pantallas del menu.
+//
+//  QUE SUSTITUYE Y POR QUE. El Garaje y la Tienda enseñaban un RETRATO PINTADO por bola
+//  (`arte/bolas/bola-<clave>-hero.webp`). Ese retrato es arte aparte del motor, asi que cada vez que
+//  cambia el personaje hay que repintar doce fichas — y mientras tanto la tienda vende una cosa y la
+//  partida entrega otra. El 31-07-2026 la tienda seguia vendiendo un pulpo («Lapa») cuando en pista
+//  ya salia un iman. Jaime, mirandolo: «quita la foto estatica, porque no tiene nada que ver con la
+//  del gameplay; quiero sencillamente la bola con sus efectos, saltando y haciendo gestos».
+//
+//  Asi que aqui no se pinta nada nuevo: se monta LA MISMA bola del motor (su material, su accesorio,
+//  su aura, su cuerpo si lo tiene, su cara de cuatro capas y el squash & stretch). Lo que promete la
+//  tienda pasa a ser, por construccion, lo que entrega la partida. No hay nada que sincronizar.
+//
+//  EL COLOR NO ES EL DE EQUIPO. En pista tu bola lleva el color de tu equipo, pero en la tienda eso
+//  seria mentir sobre el personaje: «la bola chispitas es amarilla, pues dejala amarilla; no la
+//  pongas roja, que creo que estas poniendo todas rojas». Aqui manda el color CANONICO del heroe
+//  (`arte/bolas-canon.js`, la misma tabla con la que se valida el arte). Y se pasa por `canonUI()`,
+//  que sube las cuatro oscuras (Volcan es #1C1A22, casi negro) SIN cambiarles tono ni orden: una
+//  bola de basalto sobre carta indigo, a 62 px, simplemente no se veria.
+//
+//  UN SOLO WebGLRenderer, con viewport + scissor por celda. No es una preferencia: con un renderer
+//  por tarjeta, Chromium pasa de ~16 contextos vivos, tira los mas viejos y media pantalla sale en
+//  blanco. Es la misma leccion que ya costo la pagina de previsualizacion.
+//
+//  COMO SE USA desde el shell:
+//     import { vivas } from './motor/chassis/vivas.mjs';
+//     ... pinta `<div class="gi" data-viva="cohete"></div>` en vez del <img> ...
+//     vivas.sincroniza();      // despues de cada render de la pantalla
+//     vivas.para();            // al salir de la pantalla (deja de gastar bateria)
+//  `data-viva-off="1"` en el elemento = bola no comprada: se pinta en gris.
+// ============================================================================
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+import { makeBallVinyl } from './gfx.mjs';
+import { archLook } from './ballmat.mjs';
+import { archFace } from './facegen.mjs';
+import { attachSquash } from './squash.mjs';
+
+// El mundo de cada celda. El encuadre lo manda el SALTO MAS ALTO, no la bola quieta: con el hueco
+// justo, la bola se sale por arriba en el punto alto del brinco y parece que la carta la corta.
+// HW es el SEMIANCHO en radios de bola, o sea cuanto ocupa la bola en la carta: a 1.62 salia una
+// bolita perdida en medio de un hueco enorme. La carta de personaje de Brawl Stars enseña al
+// personaje GRANDE; aqui la bola llena, y el aire justo va arriba para el brinco.
+const HW = 1.02, R = 0.62, SUELO = -0.86, REPOSO = SUELO + R;
+const SALTO = 0.52;              // altura del brinco, en radios
+const G_SOMBRA = 0.34;
+
+let REN = null, canvas = null, corriendo = false, celdas = [], ultimo = 0, lazo = 0;
+let CAM = null;
+
+function arranca(){
+  if (REN) return;
+  canvas = document.createElement('canvas');
+  canvas.id = 'vivasGL';
+  // fija y SIN eventos: se pinta encima del fondo de las cartas pero no roba ni un toque, asi que
+  // la carta entera sigue siendo pulsable como cuando era un <img>.
+  // z-index 20: por ENCIMA de las cartas y del fondo de pantalla (la escala del shell llega a 6 ahi)
+  // y por DEBAJO de todo lo que es chrome —fichas, modales, avisos, que empiezan en 45—. A 3 no se
+  // veia NADA: algo de la pantalla pintaba por encima y parecia que el motor no arrancaba.
+  canvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:20';
+  document.body.appendChild(canvas);
+  REN = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  REN.setPixelRatio(Math.min(2, devicePixelRatio || 1));   // a 3 no se nota y en movil se arrastra
+  REN.setClearColor(0x000000, 0);
+  REN.autoClear = false;
+  CAM = new THREE.OrthographicCamera(-HW, HW, HW, -HW, 0.1, 100); CAM.position.z = 10;
+  addEventListener('resize', ajusta);
+}
+
+function ajusta(){
+  if (!REN) return;
+  REN.setSize(innerWidth, innerHeight, false);
+}
+
+const SOMBRA = (() => {
+  const S = 64, c = document.createElement('canvas'); c.width = c.height = S;
+  const x = c.getContext('2d');
+  const g = x.createRadialGradient(S/2, S/2, 0, S/2, S/2, S/2);
+  g.addColorStop(0, 'rgba(0,0,0,0.55)'); g.addColorStop(0.55, 'rgba(0,0,0,0.24)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+  x.fillStyle = g; x.fillRect(0, 0, S, S);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+})();
+
+function color(arch){
+  const hex = (window.BOLAS_CANON || {})[arch];
+  if (!hex || !window.canonUI) return [0.16, 0.42, 1.0];
+  return window.canonUI(hex);
+}
+
+function construye(el, arch, apagada, i){
+  const scene = new THREE.Scene();
+  // La bola NO COMPRADA se apaga a gris, igual que hacia el filtro CSS del <img> de antes: sigue
+  // reconociendose la silueta y el accesorio, pero se lee «esta no es tuya». Se apaga en el COLOR
+  // que se le pasa, no tocando el material despues: el vinilo es un shader y hurgarle los uniforms
+  // desde fuera es como se rompen estas cosas.
+  //   ⚠ y se apaga A MEDIAS, no a gris plano. Con un save nuevo solo UNA de las doce es tuya, asi
+  //   que un gris total dejaba el Garaje entero en blanco y negro — justo lo contrario de «la bola
+  //   chispitas es amarilla, pues dejala amarilla». Se conserva el TONO y se le baja media
+  //   saturacion y algo de brillo, que es exactamente lo que hacia el filtro CSS del retrato viejo
+  //   (`grayscale(.5) brightness(.78)`): se sigue viendo de que color es, y se lee que no la tienes.
+  const vivo = color(arch);
+  const luz = vivo[0] * 0.299 + vivo[1] * 0.587 + vivo[2] * 0.114;
+  const col = apagada ? vivo.map(v => (v * 0.5 + luz * 0.5) * 0.78) : vivo;
+  // OJO: `makeBallVinyl` YA monta el accesorio si le llega `arch` (y guarda el handle en `o.prop`).
+  // Colgar otro `makeProp` aqui pondria DOS cascos superpuestos — se ve como un borde sucio y cuesta
+  // caro averiguar de donde sale.
+  const o = makeBallVinyl(scene, { id: i, color: col }, R, archLook(arch) || undefined, arch);
+  const sh = new THREE.Mesh(new THREE.PlaneGeometry(R * 2.8, R * 1.1),
+    new THREE.MeshBasicMaterial({ map: SOMBRA, transparent: true, depthWrite: false, toneMapped: false }));
+  sh.position.set(0, SUELO - R * 0.14, -2); scene.add(sh);
+  attachSquash(o, { R, vRef: 5.4, impact: 2.0, tilt: 0.16 });
+  // Desfase por tarjeta: doce bolas saltando a la vez parecen un unico bloque, no doce personajes.
+  return { el, arch, scene, o, sombra: sh, t: i * 0.37, apagada, caja: contenedor(el) };
+}
+
+function destruye(c){
+  c.scene.traverse(n => {
+    if (n.geometry) n.geometry.dispose();
+    if (n.material){ const m = Array.isArray(n.material) ? n.material : [n.material]; m.forEach(x => x.dispose && x.dispose()); }
+  });
+}
+
+// EL SALTO. Un brinco continuo con su pausa abajo: sin pausa parece una pelota de goma en bucle,
+// con pausa parece que el personaje SALTA porque quiere. La caida es mas rapida que la subida
+// (gravedad, no un seno), que es lo que hace que el aterrizaje tenga peso.
+function altura(t){
+  const CICLO = 1.15, VUELO = 0.72;
+  const u = t % CICLO;
+  if (u > VUELO) return 0;
+  const k = u / VUELO;
+  return Math.sin(k * Math.PI) * SALTO * (k < 0.5 ? 1 : 0.94);
+}
+
+function tick(c, dt){
+  c.t += dt;
+  const h = altura(c.t);
+  const x = Math.sin(c.t * 0.8) * 0.10;
+  const y = REPOSO + h;
+  c.o.g.position.set(x, y, 0);
+  c.o.sqUpdate(x, y, dt);
+  // GESTO: la cara de FIRMA del heroe en clave alegre. Se pide con `archFace`, la misma puerta que
+  // usa el motor, para que la ceja y la boca sean las suyas y no una cara generica (doc 51).
+  const alto = h > SALTO * 0.45;
+  c.o.setExpr(archFace(c.arch, alto ? 'extasis' : 'feliz'));
+  const k = Math.max(0, h / SALTO);
+  c.sombra.scale.set(1 - G_SOMBRA * k, 1 - G_SOMBRA * k, 1);
+  c.sombra.material.opacity = 1 - 0.6 * k;
+}
+
+// El contenedor que hace scroll. Se busca UNA vez por celda y se guarda: es el que define hasta
+// donde puede verse la bola.
+function contenedor(el){
+  for (let e = el.parentElement; e; e = e.parentElement){
+    const ov = getComputedStyle(e).overflowY;
+    if (ov === 'auto' || ov === 'scroll') return e;
+  }
+  return null;
+}
+
+function pinta(c){
+  const r = c.el.getBoundingClientRect();
+  if (r.width < 2 || r.height < 2) return;
+  if (r.bottom < 0 || r.top > innerHeight) return;         // fuera de pantalla: ni se pinta
+  const w = r.width, hgt = r.height;
+  const abajo = innerHeight - r.bottom;
+  // El VIEWPORT es la celda entera (manda la proyeccion) y el SCISSOR se recorta a lo que de verdad
+  // se ve. Y «lo que se ve» es lo que cabe DENTRO de la rejilla que hace scroll, no de la ventana:
+  // el lienzo esta por encima de la barra de pestañas, asi que sin este recorte una carta a medio
+  // salir por abajo pintaba su bola ENCIMA de las pestañas. Es la misma trampa del viewport contra
+  // el scissor de la pagina de previsualizacion, con otro disfraz.
+  const caja = c.caja ? c.caja.getBoundingClientRect() : null;
+  const tope  = Math.min(abajo + hgt, caja ? innerHeight - caja.top : innerHeight);
+  const suelo = Math.max(abajo, caja ? innerHeight - caja.bottom : 0);
+  if (tope - suelo <= 0) return;
+  REN.setViewport(r.left, abajo, w, hgt);
+  REN.setScissor(r.left, suelo, w, tope - suelo);
+  REN.setScissorTest(true);
+  CAM.left = -HW; CAM.right = HW; CAM.top = HW * hgt / w; CAM.bottom = -HW * hgt / w;
+  CAM.updateProjectionMatrix();
+  REN.render(c.scene, CAM);
+}
+
+function frame(now){
+  if (!corriendo) return;
+  const dt = Math.min(0.05, (now - ultimo) / 1000); ultimo = now;
+  ajusta();
+  REN.setScissorTest(false); REN.clear();
+  for (const c of celdas){ tick(c, dt); pinta(c); }
+  lazo = requestAnimationFrame(frame);
+}
+
+export const vivas = {
+  // Rehace las celdas a partir de lo que hay AHORA en el DOM. Se llama despues de cada render de
+  // pantalla: el shell repinta el Garaje entero con innerHTML, asi que los elementos viejos ya no
+  // existen y quedarse con ellos seria pintar bolas en coordenadas de la nada.
+  //   `raiz` limita a un subarbol y `z` sube el lienzo. Existe por la FICHA de la bola, que es un
+  //   overlay a z-index 45: con el lienzo a 20 su bola quedaba debajo del velo y no se veia, y
+  //   subirlo sin mas habria sacado las doce bolas de la rejilla por encima del velo. Cuando la
+  //   ficha esta abierta se monta SOLO su bola y el lienzo sube; al cerrarla se vuelve a la rejilla.
+  sincroniza(raiz, z){
+    arranca();
+    if (z !== undefined) canvas.style.zIndex = z;
+    const nodos = [...(raiz || document).querySelectorAll('[data-viva]')].filter(n => n.offsetParent !== null);
+    celdas.forEach(destruye);
+    celdas = nodos.map((n, i) => construye(n, n.dataset.viva, n.dataset.vivaOff === '1', i));
+    if (!celdas.length){ this.para(); return; }
+    if (!corriendo){ corriendo = true; ultimo = performance.now(); lazo = requestAnimationFrame(frame); }
+  },
+  para(){
+    corriendo = false;
+    if (lazo) cancelAnimationFrame(lazo), lazo = 0;
+    celdas.forEach(destruye); celdas = [];
+    if (REN){ REN.setScissorTest(false); REN.clear(); }
+  },
+  // sonda para verificar sin ojos: cuantas bolas vivas hay, si el WebGL arranco y donde esta cada una
+  info(){
+    return { celdas: celdas.length, gl: !!(REN && REN.getContext()), corriendo,
+      bolas: celdas.map(c => ({ k: c.arch, y: +c.o.g.position.y.toFixed(3),
+        prop: !!c.o.prop, cuerpo: !!(c.o.cuerpo && c.o.cuerpo.visible),
+        col: c.o.col && c.o.col.map(v => +v.toFixed(2)) })) };
+  }
+};

@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-31 631c180"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-07-31 65913e8"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -292,11 +292,14 @@
   /*+AG doc 41: la bola-heroe es ARTE de marca (Codex), no un emoji del sistema. Idle de flotacion
      suave: es lo que hace que la rejilla parezca viva sin costar nada (una sola imagen, cero sprites).
      El desfase por tarjeta (--d) evita que las 12 respiren a la vez, que canta a bucle. */
-  .g-card .gi{ width:62px; height:62px; object-fit:contain; display:block;
-    filter:drop-shadow(0 4px 7px #0009); animation:bobIdle 2.6s ease-in-out infinite; animation-delay:var(--d,0s); }
-  .g-card.locked .gi{ filter:grayscale(.5) brightness(.78) saturate(.8) drop-shadow(0 4px 7px #0009); }
-  @keyframes bobIdle{ 0%,100%{ transform:translateY(0) rotate(-1.2deg); } 50%{ transform:translateY(-5px) rotate(1.2deg); } }
-  @media (prefers-reduced-motion:reduce){ .g-card .gi{ animation:none; } }
+  /*+AG el hueco de la BOLA VIVA. Ya no es un <img>: es el rectangulo sobre el que el motor pinta la
+    bola de verdad (motor/chassis/vivas.mjs), asi que aqui solo se reserva el sitio.
+    ⚠ NADA de animarlo por CSS. El balanceo `bobIdle` que llevaba el retrato movia este rectangulo,
+    y la bola se posiciona LEYENDO este rectangulo cada frame: las dos animaciones se sumaban y el
+    salto salia borracho. El movimiento lo pone el motor, que ademas trae su aplastado y su sombra.
+    Se deja algo mas alto que ancho porque la bola SALTA y el brinco necesita aire por arriba. */
+  .g-card .gi{ width:66px; height:74px; display:block; }
+  .sh-item .sh-ic{ width:50px; height:56px; display:block; margin:0 auto; }
   .g-cname{ font-weight:800; font-size:14px; }
   .g-qtag{ font-size:9.5px; font-weight:800; letter-spacing:.09em; text-transform:uppercase; color:var(--qc,#9aa4b8); }
   .g-eq{ position:absolute; top:8px; right:8px; background:var(--gold2); color:#3a2400; font-size:9px; font-weight:900; padding:2px 8px; border-radius:999px; letter-spacing:.05em; }
@@ -329,10 +332,16 @@
                    box-shadow:0 3px 10px #0008, inset 0 0 0 1.5px #ffffff26; overflow:hidden; }
   .gd-pista span{ display:block; margin-top:2px; font-size:.5rem; font-weight:800; letter-spacing:.05em;
                   text-transform:uppercase; color:#b9aee6; }
-  .gd-art img{ width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 10px 16px #000a);
-    animation:gdDrop .42s cubic-bezier(.34,1.56,.64,1), bobIdle 2.8s ease-in-out .42s infinite; }
-  @keyframes gdDrop{ 0%{ transform:translateY(-38px) scale(.86); opacity:0; } 60%{ transform:translateY(0) scale(1.06,.94); opacity:1; } 100%{ transform:none; } }
-  @media (prefers-reduced-motion:reduce){ .gd-art img{ animation:none; } }
+  /*+AG el retrato de la ficha tambien es BOLA VIVA: solo reserva el sitio. Igual que en la rejilla,
+    nada de animarlo por CSS — la bola se coloca leyendo este rectangulo cada frame y las dos
+    animaciones se pelearian. Se va tambien `gdDrop` (la entrada con rebote): ahora la bola entra ya
+    saltando, que cuenta lo mismo y no compite con el salto de verdad. */
+  /* ⚠ `height:100%` NO vale aqui: `.gd-art` es un grid con `place-items:center`, asi que su fila la
+     mide el CONTENIDO — y un div vacio que pide el 100% de una fila que mide lo que el div... mide
+     cero. El <img> de antes colaba porque traia tamaño propio. Con el hueco a 0 de alto la ficha
+     entera se descuadraba (la carta perdia 150 px y el boton se comia el grafico). Se ancla a la
+     caja, que si tiene medida fija. */
+  .gd-art #gdBall{ position:absolute; inset:0; display:block; }
   .gd-card{ width:100%; max-width:370px; background:linear-gradient(165deg,#241d52,#171338); border:2px solid var(--qc,#fff3); border-radius:22px; padding:16px 18px; display:flex; flex-direction:column; align-items:center; gap:6px; box-shadow:0 20px 50px #000a, inset 0 0 30px var(--qglow,transparent); }
   .gd-q{ font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--qc); }
   .gd-name{ font-size:23px; font-weight:900; }
@@ -1475,7 +1484,11 @@
          vez esa diferencia cuando ya has pagado es el peor momento posible para verla. Va DENTRO de
          la caja del retrato, en absoluto: no gasta ni un pixel de alto, que es lo que la deja pasar
          la regla de "toda pantalla cabe en el movil sin deslizar". -->
-    <div class="gd-art"><img id="gdBall" alt="">
+    <!--+AG ⚠ el <div> VA CERRADO. Aqui habia un <img>, que es etiqueta vacia; al cambiarlo por un
+         <div> sin cerrar, la ficha se trago el grafico de atributos, las etiquetas, la barra de XP
+         y el pie: la carta perdia 150 px y el boton se montaba encima del grafico. Se caza mirando
+         los HIJOS de #gdCard (cuatro en vez de ocho), no la captura. -->
+    <div class="gd-art"><div id="gdBall"></div>
       <div class="gd-pista"><div id="gdPista"></div><span data-t="gdPista">en pista</span></div>
     </div>
     <canvas class="gd-hex" id="gdHex" width="266" height="238"></canvas>
@@ -1501,7 +1514,12 @@
     </div>
   </div>
   <div class="sh-secs" id="shSecs"></div>
-  <div class="sh-body" id="shBody"></div>
+  <!--+AG data-fit="scroll": el catalogo de la Tienda es una COLECCION (12 bolas + cosmeticos), igual
+       que la rejilla del Garaje, y deslizar dentro es su forma correcta. Sin esta marca __fitCheck()
+       lo cantaba como desbordamiento (580-783 px segun el movil) en cada medicion — y un guardia que
+       grita en falso es un guardia al que se deja de mirar. Lo cazo el auditor de UX el 31-07-2026;
+       yo me lo habia encontrado el mismo dia y lo di por «preexistente» sin arreglarlo. -->
+  <div class="sh-body" id="shBody" data-fit="scroll"></div>
   <div class="h-tabs">
     <button class="tab" id="shTabJugar"><i class="tico t-jugar"></i><span data-t="tJugar">Jugar</span></button>
     <button class="tab" id="shTabGaraje"><i class="tico t-garaje"></i><span data-t="tGaraje">Garaje</span></button>
@@ -1763,7 +1781,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=631c180"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=65913e8"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -3336,6 +3354,10 @@ function showScreen(n){ ['home','results','garaje','tienda','temporada','perfil'
   //   abierta y su rAF se quedaria girando. Aqui, en la unica puerta de cambio de pantalla, para
   //   que ningun camino nuevo se olvide (mismo motivo que el tema de Resultados de abajo).
   if(n!=='garaje' && window.BT_PISTA) BT_PISTA.stop();
+  //+AG las BOLAS VIVAS del Garaje y la Tienda se paran fuera de ahi, y por el mismo motivo que el
+  //   fondo vivo de arriba: un contexto WebGL de mas es lo que tumba un movil. Va en esta puerta
+  //   unica para que ningun camino nuevo se olvide de apagarlas.
+  if(n!=='garaje' && n!=='tienda' && typeof vivasPara==='function') vivasPara();
   //+AG el TEMA DE RESULTADOS vuelve a la pista de menu en cuanto se sale de Resultados, sea por donde sea
   //   ("Jugar otra", el Garaje, la pestana de abajo...). Va aqui, en la unica puerta de cambio de pantalla, y
   //   no en cada boton de salida: un camino nuevo se olvidaria de devolverla y la victoria se quedaria sonando
@@ -3815,7 +3837,10 @@ function renderGaraje(){ el('gChispas').textContent=SAVE.chispas; el('gGemas').t
   ARCH_KEYS.forEach(k=>{ const A=ARCHS[k], b=owned(k), q=QUAL[A.q];   //+AG doc 39: el marco es la rareza FIJA de la bola (tenida o no)
     const c=document.createElement('div'); c.className='g-card'+(b?'':' locked'); c.style.setProperty('--qc',q.c);
     c.style.setProperty('--d', (ARCH_KEYS.indexOf(k)*0.21).toFixed(2)+'s');   //+AG desfase del idle por tarjeta
-    let h=`<img class="gi" src="${ballArt(k)}" alt="" loading="lazy"><div class="g-cname">${archName(k)}</div>`;
+    //+AG la bola del Garaje ya NO es un retrato pintado: es LA MISMA bola del motor, viva y saltando
+    //   (motor/chassis/vivas.mjs). El retrato era arte aparte, asi que la tienda podia vender un
+    //   personaje y la partida entregar otro — y lo hizo. Ahora coinciden por construccion.
+    let h=`<div class="gi" data-viva="${k}"${b?'':' data-viva-off="1"'}></div><div class="g-cname">${archName(k)}</div>`;
     if(b){ h+=`<div class="g-qtag">${S().lvlShort(b.lvl||1)} · ${qualName(A.q)}</div><div class="gc">🏆 ${nfmt(b.copas||0)}</div>`;   //+AG doc 37: cada bola muestra SUS copas
       if(SAVE.equipped===SAVE.balls.indexOf(b)) h+=`<div class="g-eq">${S().equippedTag}</div>`;
       if(canLvlUp(b)) h+=`<div class="g-dot">↑</div>`;   //+AG doc 39: lista para subir (XP + Chispas suficientes)
@@ -3823,16 +3848,37 @@ function renderGaraje(){ el('gChispas').textContent=SAVE.chispas; el('gGemas').t
     else if(A.hito) h+=`<div class="g-price"><span class="pc"><img class="cico sm" src="arte/ui/moneda-copa.webp" alt="">${nfmt(A.hito)}</span></div>`;
     else h+=`<div class="g-price"><span class="pc"><img class="cico sm" src="arte/ui/moneda-ficha.webp" alt="">${nfmt(A.fichas)}</span></div>`;
     c.innerHTML=h; c.onclick=()=>openDetail(k); g.appendChild(c); });
+  vivasSync();   //+AG las bolas vivas se remontan DESPUES de repintar: el innerHTML de arriba se llevo por delante los nodos viejos
 }
+//+AG CARGA PEREZOSA de las bolas vivas. El modulo se trae Three.js, y eso NO puede pagarlo quien
+//   solo entra a jugar una carrera: se importa la primera vez que se abre el Garaje o la Tienda y
+//   ya se queda. Si fallara la carga (CDN caido, red mala), no pasa nada: las tarjetas se quedan sin
+//   bola en vez de romperse, porque el hueco es un <div> vacio y no un <img> roto.
+let _vivas=null, _vivasCargando=false;
+//+AG con la FICHA abierta se monta SOLO su bola y el lienzo sube por encima del velo (z 45). Si no,
+//   o la bola de la ficha quedaba debajo del velo, o las doce de la rejilla salian por encima de el.
+function vivasQue(){ const d=el('gDetail'); return d && d.classList.contains('on') ? [d,46] : [null,20]; }
+function vivasSync(){
+  const [raiz,z]=vivasQue();
+  if(_vivas){ _vivas.sincroniza(raiz,z); return; }
+  if(_vivasCargando) return;
+  _vivasCargando=true;
+  import('./motor/chassis/vivas.mjs').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+    .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
+}
+//+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
+//   tirada. Cuesta una linea en cada salida del Garaje y de la Tienda.
+function vivasPara(){ if(_vivas) _vivas.para(); }
 function openDetail(k){ applyShell(); const A=ARCHS[k], b=owned(k), q=QUAL[A.q], s=S();
   el('gdCard').style.setProperty('--qc',q.c); el('gdCard').style.setProperty('--qglow',q.c+'22');
   el('gdQ').textContent=qualName(A.q)+' · '+s.lvlMaxTag(maxLvl(k)); el('gdName').textContent=archName(k);
   //+AG doc 41: el retrato. Reasignar el mismo src NO relanza la animacion (el navegador no considera
   //   que el elemento haya cambiado), asi que la reinicio a mano: quitar la clase + forzar reflow + volver
   //   a ponerla. Si no, abrir la misma ficha dos veces seguidas se sentia muerto la segunda.
-  const gb=el('gdBall'); gb.src=ballArt(k,'hero');
-  gb.style.filter = b ? '' : 'grayscale(1) brightness(.6) drop-shadow(0 10px 16px #000a)';
-  gb.style.animation='none'; void gb.offsetWidth; gb.style.animation='';
+  //+AG el retrato grande TAMBIEN es la bola viva ahora (antes: bola-<clave>-hero.webp). Era LA foto
+  //   estatica de la que hablaba Jaime — la mas grande y la que menos se parecia a la partida.
+  //   El apaño de reiniciar la animacion CSS a mano ya no hace falta: el motor no se para.
+  const gb=el('gdBall'); gb.dataset.viva=k; if(b) delete gb.dataset.vivaOff; else gb.dataset.vivaOff='1';
   //+AG doc 39: el rasgo de Épicas/Legendaria YA ESTÁ CABLEADO a la física (2026-07-26) — se le quita el "llegará".
   //   Cada rasgo dice en qué modo actúa, porque no todos actúan en los tres y prometer de más es peor que no prometer.
   let tags=s.gdTags(archBest(k), archWorst(k));
@@ -3882,11 +3928,13 @@ function openDetail(k){ applyShell(); const A=ARCHS[k], b=owned(k), q=QUAL[A.q],
   window.BT_PISTA_CUR = k;
   if(window.BT_PISTA) BT_PISTA.show(el('gdPista'), k);
   el('gDetail').classList.add('on');
+  vivasSync();   //+AG con la ficha ya abierta: asi `vivasQue()` la ve puesta y monta SU bola, no las doce de detras
 }
 //+AG una sola puerta de salida: ✕, VOLVER, tocar fuera y equipar pasan por aqui. Y por eso es el
 //   sitio donde parar la vista previa de pista: su rAF no puede quedarse girando detras de una
 //   ficha cerrada (mismo trato que el fondo vivo, doc 51).
-function closeDetail(){ el('gDetail').classList.remove('on'); window.BT_PISTA_CUR=null; if(window.BT_PISTA) BT_PISTA.stop(); }
+function closeDetail(){ el('gDetail').classList.remove('on'); window.BT_PISTA_CUR=null; if(window.BT_PISTA) BT_PISTA.stop();
+  vivasSync(); }   //+AG y al cerrarla se vuelven a montar las doce de la rejilla, con el lienzo otra vez a su altura
 function unlock(k,withGems){ const A=ARCHS[k];   // transacción compartida por Garaje y Tienda; el que llama re-renderiza
   if(A.price==null) return false;   //+AG doc 39: hitos/Fichas no pasan por aquí
   if(withGems){ const p=gemaPrice(A.price); if(SAVE.gemas<p) return false; dinero('gemas', -p, 'bola_compra'); } else { if(SAVE.chispas<A.price) return false; dinero('chispas', -A.price, 'bola_compra'); }
@@ -3942,6 +3990,7 @@ function openTienda(){ showScreen('tienda'); applyShell(); renderTienda(); }
 function renderTienda(){ el('shChispas').textContent=SAVE.chispas; el('shGemas').textContent=SAVE.gemas;
   const secs=el('shSecs'); secs.innerHTML=''; SECS.forEach((k,ix)=>{ const b=document.createElement('button'); b.className='sh-sec'+(shSec===k?' on':''); b.textContent=S().shSecs[ix]; b.onclick=()=>{ shSec=k; renderTienda(); }; secs.appendChild(b); });
   const body=el('shBody'); body.innerHTML=''; body.appendChild({destacados:featEl,bolas:bolasEl,cosmeticos:cosmEl,gemas:gemasEl,pase:paseEl}[shSec]());
+  vivasSync();   //+AG la seccion «Bolas» trae bolas vivas; las otras cuatro no, y sincronizar sin ninguna las apaga solo
 }
 function featEl(){ const d=document.createElement('div');
   const s=S();
@@ -3955,7 +4004,8 @@ function featEl(){ const d=document.createElement('div');
 function bolasEl(){ const s=S(), d=document.createElement('div'); d.innerHTML='<div class="sh-note">'+s.shNoteBalls+'</div>';
   const g=document.createElement('div'); g.className='sh-grid';
   ARCH_KEYS.forEach(k=>{ const A=ARCHS[k], have=owned(k); const it=document.createElement('div'); it.className='sh-item'; it.style.setProperty('--qc',QUAL[A.q].c);   //+AG doc 39: marco = rareza de la bola
-    it.innerHTML=`<img class="sh-ic" src="${ballArt(k)}" alt="" loading="lazy"><div class="sh-nm">${archName(k)}</div><div class="sh-cat">${s.shBallCat(qualName(A.q), archBest(k))}</div>`;
+    //+AG misma bola viva que en el Garaje: lo que se vende es lo que se juega
+    it.innerHTML=`<div class="sh-ic" data-viva="${k}"${have?'':' data-viva-off="1"'}></div><div class="sh-nm">${archName(k)}</div><div class="sh-cat">${s.shBallCat(qualName(A.q), archBest(k))}</div>`;
     const btn=document.createElement('button');
     if(have){ btn.className='sh-buy owned'; btn.textContent=s.ownedGar; btn.disabled=true; }
     else if(A.price!=null){ btn.className='sh-buy'; btn.innerHTML=`${A.price} ✦ / ${gemaPrice(A.price)} ◆`; btn.disabled=SAVE.chispas<A.price&&SAVE.gemas<gemaPrice(A.price);
