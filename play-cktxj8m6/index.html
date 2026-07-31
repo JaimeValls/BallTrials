@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-31 4f84a35"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-07-31 5380ea9"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -369,9 +369,13 @@
   .gd-st .fill{ display:block; height:100%; border-radius:6px; background:var(--qc,#7ef0ff);
     box-shadow:inset 0 2px 0 #ffffff59, inset 0 -3px 0 #0000002e;
     transition:width .45s cubic-bezier(.34,1.2,.64,1); }
-  /* la MUESCA: hasta donde llega este atributo con la bola al maximo. Es lo que decia el anillo
-     punteado del hexagono; sin ella se perdia «cuanto le queda por crecer». */
-  .gd-st .tope{ position:absolute; top:-2px; width:2px; height:13px; border-radius:2px; background:#ffffff66; transform:translateX(-1px); }
+  /* LO QUE LE QUEDA POR CRECER. Antes esto era una muesca vertical suelta y Jaime no la entendia,
+     con razon: «una cosa es la barra y otra es la barra vertical, no se explica». Una raya flotando
+     no dice nada. Ahora es la MISMA barra en el mismo color pero apagada, desde cero hasta el techo
+     de ese atributo al nivel maximo: lo solido es lo que tienes, lo apagado es hasta donde puede
+     llegar. No hace falta leyenda — se entiende de un vistazo porque es la misma forma. */
+  .gd-st .futuro{ position:absolute; left:0; top:0; height:100%; border-radius:6px;
+    background:var(--qc,#7ef0ff); opacity:.26; }
   /* La bola que NO tienes enseña sus barras en color, a proposito. Apagarlas era copiar el gris del
      retrato sin pensar: la ficha de una bola bloqueada es justo donde se decide comprarla, y ahi lo
      que hay que ver bien es en que es buena. Lo que esta apagado es la BOLA, que ya dice que no es
@@ -1827,7 +1831,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=4f84a35"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=5380ea9"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -4034,7 +4038,7 @@ function drawStats(host, k, attrs, apagada){
       <span class="ic"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="${STAT_ICO[i]}"/></svg></span>
       <span class="nm">${attrFull(i)}</span>
       <span class="vl">${v}</span>
-      <span class="bar"><span class="fill" style="width:${pct}%"></span><i class="tope" style="left:${pt}%"></i></span>
+      <span class="bar"><i class="futuro" style="width:${pt}%"></i><span class="fill" style="width:${pct}%"></span></span>
     </div>`;
   }).join('');
 }
