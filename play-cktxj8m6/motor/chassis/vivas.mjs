@@ -89,6 +89,9 @@ function color(arch){
 
 function construye(el, arch, apagada, i){
   const scene = new THREE.Scene();
+  // `data-viva-hw` aprieta el encuadre de UNA celda. Existe por la Home: ahi la bola es LA
+  // protagonista y tiene que llenar, no flotar en medio de un hueco de 188 px.
+  const hw = +el.dataset.vivaHw || HW;
   // La bola NO COMPRADA se apaga a gris, igual que hacia el filtro CSS del <img> de antes: sigue
   // reconociendose la silueta y el accesorio, pero se lee «esta no es tuya». Se apaga en el COLOR
   // que se le pasa, no tocando el material despues: el vinilo es un shader y hurgarle los uniforms
@@ -110,7 +113,7 @@ function construye(el, arch, apagada, i){
   sh.position.set(0, SUELO - R * 0.14, -2); scene.add(sh);
   attachSquash(o, { R, vRef: 5.4, impact: 2.0, tilt: 0.16 });
   // Desfase por tarjeta: doce bolas saltando a la vez parecen un unico bloque, no doce personajes.
-  return { el, arch, scene, o, sombra: sh, t: i * 0.37, apagada, caja: contenedor(el) };
+  return { el, arch, scene, o, sombra: sh, t: i * 0.37, apagada, hw, caja: contenedor(el) };
 }
 
 function destruye(c){
@@ -121,14 +124,30 @@ function destruye(c){
 }
 
 // EL SALTO. Un brinco continuo con su pausa abajo: sin pausa parece una pelota de goma en bucle,
-// con pausa parece que el personaje SALTA porque quiere. La caida es mas rapida que la subida
-// (gravedad, no un seno), que es lo que hace que el aterrizaje tenga peso.
+// con pausa parece que el personaje SALTA porque quiere.
+//
+// ⚠ AQUI ESTABA LA CONVULSION que veia Jaime («el squash hace como una convulsion en la mayoria de
+// las bolas»). `squash.mjs` deduce la velocidad de cuanto se ha movido la bola entre fotogramas y
+// trata los CAMBIOS BRUSCOS de esa velocidad como impactos. La curva de antes salia disparada desde
+// el reposo: en un fotograma pasaba de estar quieta a subir a 2,27 radios/s. Eso es un impacto, y
+// otro igual al aterrizar: dos aplastados violentos por ciclo, en las doce bolas a la vez.
+//
+// MEDIDO antes de elegir, porque mi primer arreglo iba en la direccion contraria — el mayor golpe
+// de velocidad de cada curva, fotograma a fotograma:
+//     seno con escalon (la vieja) .... 2,27 radios/s, en el DESPEGUE
+//     parabola (mi primer intento) ... 2,82 radios/s, en el DESPEGUE   <- peor
+//     esta ........................... 1,81 radios/s, en el ATERRIZAJE
+//
+// Sube con sin² (que arranca con velocidad CERO: la bola se despega, no sale disparada) y cae con
+// sin (que sí llega al suelo con velocidad de verdad). En la cima las dos tienen pendiente cero, asi
+// que empalman sin costura. Resultado: UN aplastado por ciclo y en el sitio correcto — al aterrizar,
+// que es lo unico que de verdad tiene que aplastar una bola.
+const CICLO = 1.15, VUELO = 0.72;
 function altura(t){
-  const CICLO = 1.15, VUELO = 0.72;
   const u = t % CICLO;
-  if (u > VUELO) return 0;
-  const k = u / VUELO;
-  return Math.sin(k * Math.PI) * SALTO * (k < 0.5 ? 1 : 0.94);
+  if (u >= VUELO) return 0;
+  const k = u / VUELO, s = Math.sin(k * Math.PI);
+  return k < 0.5 ? SALTO * s * s : SALTO * s;
 }
 
 function tick(c, dt){
@@ -175,7 +194,7 @@ function pinta(c){
   REN.setViewport(r.left, abajo, w, hgt);
   REN.setScissor(r.left, suelo, w, tope - suelo);
   REN.setScissorTest(true);
-  CAM.left = -HW; CAM.right = HW; CAM.top = HW * hgt / w; CAM.bottom = -HW * hgt / w;
+  CAM.left = -c.hw; CAM.right = c.hw; CAM.top = c.hw * hgt / w; CAM.bottom = -c.hw * hgt / w;
   CAM.updateProjectionMatrix();
   REN.render(c.scene, CAM);
 }
@@ -215,7 +234,13 @@ export const vivas = {
   // sonda para verificar sin ojos: cuantas bolas vivas hay, si el WebGL arranco y donde esta cada una
   info(){
     return { celdas: celdas.length, gl: !!(REN && REN.getContext()), corriendo,
+      // `sq` = cuanto esta aplastada AHORA, leido de la ESCALA DEL CUERPO. ⚠ No sirve `o.squash`:
+      // ese campo es la ENTRADA (el golpe que le mandan los modos) y `squash.mjs` lo consume y lo
+      // pone a cero en el mismo frame, asi que leerlo da 0 siempre. El estado real vive en una
+      // closure; lo unico observable desde fuera es lo que acaba en la malla.
+      // Si entre dos muestras seguidas `sq` pega un salto grande, la curva del brinco tiene un escalon.
       bolas: celdas.map(c => ({ k: c.arch, y: +c.o.g.position.y.toFixed(3),
+        sq: +(c.o.body.scale.y / (c.o.body.scale.x || 1)).toFixed(4),
         prop: !!c.o.prop, cuerpo: !!(c.o.cuerpo && c.o.cuerpo.visible),
         col: c.o.col && c.o.col.map(v => +v.toFixed(2)) })) };
   }

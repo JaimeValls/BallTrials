@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-31 65913e8"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-07-31 2aefc9f"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -680,7 +680,10 @@
   .hero .shadow{ position:absolute; bottom:-4px; left:50%; transform:translateX(-50%);
     width:140px; height:24px; border-radius:50%; background:radial-gradient(closest-side,#000a,transparent); }
   /*+AG doc 41: la protagonista de la Home ya es un <img> con su arte (antes: canvas generico). */
-  .hero #hBall{ width:188px; height:188px; object-fit:contain; filter:drop-shadow(0 16px 24px #0009); animation:breathe 3.1s ease-in-out infinite; }
+  /*+AG hueco de la BOLA VIVA de la Home: solo reserva sitio. Nada de `breathe` ni de drop-shadow —
+    la bola ya salta por su cuenta y trae su propia sombra de contacto; animar el hueco movia el
+    rectangulo que el motor lee cada frame y las dos animaciones se sumaban. */
+  .hero #hBall{ width:188px; height:188px; display:block; }
   .hero canvas{ width:164px; height:164px; filter:drop-shadow(0 16px 24px #0009); animation:breathe 3.1s ease-in-out infinite; }
   .hero .ballname{ display:flex; align-items:center; gap:7px; font-size:24px; font-weight:900; letter-spacing:-.01em; margin-top:4px; text-shadow:0 3px 14px #000a; }
   .hero .ballcups{ display:flex; align-items:center; justify-content:center; gap:5px; font-size:14px; font-weight:900; color:var(--gold2); font-variant-numeric:tabular-nums; text-shadow:0 2px 8px #fbb91544; }
@@ -1193,7 +1196,13 @@
       <div class="herotap" id="heroTap" role="button" tabindex="0">
         <div class="platform">
           <div class="shadow"></div>
-          <img id="hBall" alt="">
+          <!--+AG la PROTAGONISTA de la Home tambien es la bola viva, no su retrato (Jaime, 31-jul:
+               «lo mismo que aparece en el garaje, la bola seleccionada, que haga lo mismo en el menu
+               principal, evidentemente mas grande»). Aqui es UNA sola bola, asi que se le apreta el
+               encuadre con data-viva-hw para que llene: con el de la rejilla se quedaba flotando en
+               medio de un hueco de 188 px. ⚠ El <div> VA CERRADO (un <img> es etiqueta vacia y este
+               no). -->
+          <div id="hBall" data-viva-hw="0.86"></div>
         </div>
         <div class="ballname" id="hBallName">🚀 Cohete</div>
         <div class="ballcups" id="hBallCups">🏆 0</div>
@@ -1781,7 +1790,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=65913e8"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=2aefc9f"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -3357,7 +3366,7 @@ function showScreen(n){ ['home','results','garaje','tienda','temporada','perfil'
   //+AG las BOLAS VIVAS del Garaje y la Tienda se paran fuera de ahi, y por el mismo motivo que el
   //   fondo vivo de arriba: un contexto WebGL de mas es lo que tumba un movil. Va en esta puerta
   //   unica para que ningun camino nuevo se olvide de apagarlas.
-  if(n!=='garaje' && n!=='tienda' && typeof vivasPara==='function') vivasPara();
+  if(VIVAS_SCR.indexOf(n)<0 && typeof vivasPara==='function') vivasPara();
   //+AG el TEMA DE RESULTADOS vuelve a la pista de menu en cuanto se sale de Resultados, sea por donde sea
   //   ("Jugar otra", el Garaje, la pestana de abajo...). Va aqui, en la unica puerta de cambio de pantalla, y
   //   no en cada boton de salida: un camino nuevo se olvidaria de devolverla y la victoria se quedaria sonando
@@ -3387,9 +3396,10 @@ function renderHome(){ applyShell();
   const b=equippedBall(), A=b?ARCHS[b.arch]:null;
   //+AG doc 41: la protagonista de la Home ya es su ARTE, no la bola generica de canvas (que salia
   //   igual para las 12, solo cambiaba de color). El emoji sale del nombre: ya no hace falta, la bola SE VE.
-  if(A){ el('hBall').src=ballArt(b.arch,'hero');
+  if(A){ el('hBall').dataset.viva=b.arch;   //+AG la bola viva de la Home: la equipada, con su color y su accesorio
     el('hBallName').textContent=archName(b.arch);
-    el('hBallCups').innerHTML=coinIco('copa')+nfmt(b.copas||0); }
+    el('hBallCups').innerHTML=coinIco('copa')+nfmt(b.copas||0);
+    vivasSync(); }
   const m=MODOS[SAVE.mode]||MODOS.race;
   el('mcIcon').innerHTML=modeIco(SAVE.mode); el('mcName').textContent=modeTitle(SAVE.mode);
   //+AG el still de la pista de ESTE modo + su encuadre. El gradiente del modo se queda como fondo de la
@@ -3858,6 +3868,8 @@ let _vivas=null, _vivasCargando=false;
 //+AG con la FICHA abierta se monta SOLO su bola y el lienzo sube por encima del velo (z 45). Si no,
 //   o la bola de la ficha quedaba debajo del velo, o las doce de la rejilla salian por encima de el.
 function vivasQue(){ const d=el('gDetail'); return d && d.classList.contains('on') ? [d,46] : [null,20]; }
+//+AG las tres pantallas que llevan bola viva. La Home entra desde el 31-jul (la bola equipada, grande).
+const VIVAS_SCR=['home','garaje','tienda'];
 function vivasSync(){
   const [raiz,z]=vivasQue();
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
