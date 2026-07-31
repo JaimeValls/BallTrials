@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-31 ee59275"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-07-31 f699a49"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -231,7 +231,11 @@
   .tico.t-temp{ background-image:url(arte/ui/nav-temporada.webp); }
   .tico.t-perfil{ background-image:url(arte/ui/nav-perfil.webp); }
   /*+AG doc 41: la moneda dentro de su pildora. Sustituye al circulo con degradado + glifo. */
-  .cico{ width:19px; height:19px; object-fit:contain; display:block; flex:0 0 auto; filter:drop-shadow(0 1px 2px #0007); }
+  /*+AG 1-ago: inline-block, no block. Mientras la moneda solo vivia en cabeceras (contenedores flex) daba
+     igual —un hijo de flex se comporta como bloque de todas formas—, pero ahora tambien va DENTRO de
+     frases ("Comprar · 600 ◆", "✦ +300 Chispas") y en bloque se llevaba el icono a su propia linea,
+     partiendo el boton en dos. inline-block no cambia nada en los flex y arregla el texto corrido. */
+  .cico{ width:19px; height:19px; object-fit:contain; display:inline-block; vertical-align:middle; flex:0 0 auto; filter:drop-shadow(0 1px 2px #0007); }
   .cico.sm{ width:15px; height:15px; }            /* chips de precio, junto al numero */
   .cico.big{ width:22px; height:22px; filter:drop-shadow(0 0 6px #fbb91566); }   /* banda de copas */
   .rico{ width:26px; height:26px; object-fit:contain; display:block; filter:drop-shadow(0 2px 4px #0008); }   /* rieles de la Home */
@@ -266,7 +270,11 @@
   .r-reward{ display:flex; align-items:center; gap:12px; background:#ffffff0d; border:1px solid var(--line); border-radius:16px; padding:12px 15px; opacity:0; transform:translateY(8px); transition:opacity .32s, transform .32s; }
   .r-reward.in{ opacity:1; transform:none; }
   .r-reward .ic{ width:34px; height:34px; border-radius:50%; display:grid; place-items:center; font-size:17px; color:#1a1330; }
-  .r-reward .ic.chispa{ background:radial-gradient(circle at 35% 30%,#ffe680,var(--gold)); box-shadow:0 0 10px #fbb91566; }
+  /*+AG 1-ago: Resultados es la pantalla donde MAS se mira la moneda (es el premio de la partida) y era
+     un glifo ✦ dentro de un disco pintado a mano. Ahora es la moneda de verdad, sin disco: la pieza ya
+     trae su volumen y su brillo, y el disco competia con ella. El halo dorado se mantiene, en el <img>. */
+  .r-reward .ic.chispa{ background:none; }
+  .r-reward .ic.chispa .cico{ width:30px; height:30px; filter:drop-shadow(0 0 7px #fbb91588); }
   .r-reward .ic.xp{ background:#ffffff18; color:#fff; }
   .r-reward .lbl2{ font-size:11px; color:var(--muted); font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
   .r-reward .val{ margin-left:auto; font-size:22px; font-weight:900; font-variant-numeric:tabular-nums; color:var(--gold2); }
@@ -482,6 +490,13 @@
      la seccion se salia 13px. El aire entre filas baja de 10 a 8: cabe sin deslizar y no se nota. */
   .sh-pack{ display:flex; align-items:center; gap:12px; background:#ffffff0d; border:1px solid var(--line); border-radius:16px; padding:12px 14px; margin-bottom:8px; }
   .sh-pack .pg{ width:44px; height:44px; border-radius:50%; display:grid; place-items:center; font-size:22px; background:radial-gradient(circle at 35% 30%,#aef4ff,var(--cyan)); box-shadow:0 0 12px #18c7d655; color:#052a30; }
+  /*+AG 1-ago: el disco de 44px con el simbolo dentro pasa a ser la MONEDA DIBUJADA a pelo. Dos razones:
+     el glifo tipografico era el fallo mas visible que quedaba (44px es el tamano mas grande al que se
+     ensenaba una moneda del juego), y el disco tenia el degradado CIAN CLAVADO — asi que la oferta de
+     Chispas salia con una estrella dorada sobre un disco de gema. La moneda ya trae su forma y su
+     brillo: encerrarla en otro circulo la ensucia. */
+  .sh-pack .pg.ico{ background:none; box-shadow:none; }
+  .sh-pack .pg.ico .cico{ width:40px; height:40px; }
   .sh-pack .amt{ font-weight:900; font-size:18px; } .sh-pack .amt small{ color:var(--green); font-size:12px; font-weight:800; }
   .sh-pack .money{ margin-left:auto; border:0; border-radius:12px; padding:11px 15px; font-family:inherit; font-weight:900; font-size:14px; color:#fff; background:linear-gradient(#5bc46a,#2fa049); box-shadow:0 3px 0 #1d7a35; cursor:pointer; white-space:nowrap; }
   .sh-note{ font-size:12px; color:#bcd0f0; background:#18c7d611; border:1px solid #18c7d633; border-radius:12px; padding:10px 13px; margin-bottom:13px; line-height:1.5; }
@@ -552,6 +567,9 @@
   .se-rung{ flex:0 0 auto; width:60px; display:flex; flex-direction:column; align-items:center; gap:4px; }
   .se-rung .n{ font-size:9px; font-weight:800; color:var(--muted); }
   .se-rung .cell{ width:100%; border-radius:12px; padding:9px 4px; text-align:center; font-size:17px; border:1px solid var(--line); background:#ffffff0d; }
+  /*+AG 1-ago: el peldaño de moneda lleva <img>, y un display:block dentro de un text-align:center se
+     pega a la izquierda. Se centra y se sube a 20px para que pese lo mismo que el emoji de al lado. */
+  .se-rung .cell .cico{ margin:0 auto; width:20px; height:20px; }
   .se-rung .cell.prem{ background:linear-gradient(#3a2a70,#2a1e55); border-color:#7a5cff55; }
   .se-rung.done .cell{ box-shadow:inset 0 0 0 2px var(--gold2); }
   .se-rung .lb{ font-size:8px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); }
@@ -1120,7 +1138,10 @@
   .r-cups{ width:100%; max-width:430px; display:flex; align-items:center; gap:12px; background:#fbb9150f; border:1px solid #fbb91544; border-radius:16px; padding:12px 15px; margin-top:12px;
     opacity:0; transform:translateY(8px); transition:opacity .32s, transform .32s; box-shadow:0 0 18px #fbb91518; }
   .r-cups.in{ opacity:1; transform:none; }
-  .r-cups .ic{ width:34px; height:34px; border-radius:50%; display:grid; place-items:center; font-size:19px; background:radial-gradient(circle at 35% 30%,#ffe680,var(--gold)); box-shadow:0 0 10px #fbb91566; }
+  /*+AG 1-ago: mismo trato que la Chispa de al lado — la copa dibujada sustituye al emoji, y el disco
+     dorado se retira para no competir con ella (el emoji sí lo necesitaba para tener peso). */
+  .r-cups .ic{ width:34px; height:34px; border-radius:50%; display:grid; place-items:center; font-size:19px; background:none; }
+  .r-cups .ic .cico{ width:30px; height:30px; filter:drop-shadow(0 0 7px #fbb91588); }
   .r-cups .cn{ font-size:13px; font-weight:900; }
   .r-cups .cw{ font-size:10.5px; color:var(--muted); font-weight:800; text-transform:uppercase; letter-spacing:.05em; margin-top:2px; }
   .r-cups .cv{ margin-left:auto; font-size:20px; font-weight:900; font-variant-numeric:tabular-nums; color:var(--gold2); }
@@ -1177,11 +1198,14 @@
   .rkrow img.rdisc{ width:26px; height:26px; border-radius:0; object-fit:contain; box-shadow:none; filter:drop-shadow(0 2px 4px #0008); }
   .rkrow .kn{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .rkrow .kt{ font-size:11px; flex:0 0 auto; }
-  .rkrow .kv{ font-variant-numeric:tabular-nums; font-weight:900; color:#e7ebff; flex:0 0 auto; }
+  /*+AG 1-ago: inline-flex por lo mismo que .gc — la copa es un <img class="cico"> y sin esto se iría a su línea */
+  .rkrow .kv{ font-variant-numeric:tabular-nums; font-weight:900; color:#e7ebff; flex:0 0 auto; display:inline-flex; align-items:center; gap:4px; }
   .rkrow .kv.up{ color:#6fe08f; } .rkrow .kv.dn{ color:#ff8b9a; }
   .rkrow.meRow{ background:#fbb9151f; border-color:var(--gold2); }
   .rksep{ text-align:center; color:#6f79a0; font-weight:900; letter-spacing:.3em; padding:1px 0; flex:0 0 auto; }
-  .gc{ color:var(--gold2); font-weight:900; font-size:13px; font-variant-numeric:tabular-nums; }
+  /*+AG 1-ago: inline-flex porque la copa ya no es un emoji sino un <img class="cico"> con display:block,
+     y en un contenedor de texto normal se iria a su propia linea partiendo la tarjeta en dos. */
+  .gc{ color:var(--gold2); font-weight:900; font-size:13px; font-variant-numeric:tabular-nums; display:inline-flex; align-items:center; gap:4px; }
 </style>
 
 <!--+AG doc 34 Fase B: #app = la "columna telefono" que contiene TODAS las pantallas y overlays (portrait) -->
@@ -1341,7 +1365,7 @@
 <div id="ranking" class="scr">
   <div class="rk-top">
     <button class="g-back" id="rkBack"><span class="ch">‹</span> <span data-t="home">Inicio</span></button>
-    <div class="g-title">🏆 <span data-t="rRanking">Ranking</span></div>
+    <div class="g-title"><img class="cico" src="arte/ui/moneda-copa.webp" alt=""> <span data-t="rRanking">Ranking</span></div>
   </div>
   <div class="rktabs">
     <button class="rktab on" data-rktab="global" data-t="rkGlobal">Global</button>
@@ -1353,7 +1377,7 @@
     <div class="rkstrip" id="rkStrip"></div>
     <button class="rkarr" id="rkArrR" aria-label="›">›</button>
   </div>
-  <div class="rkprize" data-t="rkPrize">🎁 Franjas de premio · Top 10% → 🎟️ Fichas de Torneo · Top 1% → título + skin</div>
+  <div class="rkprize" data-t="rkPrize">🎁 Franjas de premio · Top 10% y Top 1% · próximamente</div>
   <div class="rkme" id="rkMe"></div>
   <div class="rklist" id="rkList" data-fit="scroll"></div>   <!-- misma excepcion que #gGrid: una clasificacion es una lista larga por definicion -->
   <div class="h-tabs">
@@ -1477,9 +1501,9 @@
     <div class="r-sub" id="rSub"></div>
   </div>
   <!--+AG COPAS de LA BOLA jugada (doc 37): son botín igual que las Chispas, solo que se pueden perder -->
-  <div class="r-cups" id="rCups"><div class="ic">🏆</div><div><div class="cn" id="rCupsName">Cohete</div><div class="cw" id="rCupsWhy">Copas</div></div><div class="cv" id="rCupsVal">0<span class="cd" id="rCupsDelta"></span></div></div>
+  <div class="r-cups" id="rCups"><div class="ic"><img class="cico" src="arte/ui/moneda-copa.webp" alt=""></div><div><div class="cn" id="rCupsName">Cohete</div><div class="cw" id="rCupsWhy">Copas</div></div><div class="cv" id="rCupsVal">0<span class="cd" id="rCupsDelta"></span></div></div>
   <div class="r-rewards">
-    <div class="r-reward" id="rRewChispa"><div class="ic chispa">✦</div><div><div class="lbl2" data-t="chispasWord">Chispas</div><div class="lbl2" id="rChispaWhy" style="text-transform:none;color:#8fe0a8;margin-top:2px"></div></div><div class="val" id="rChispaVal">+0</div></div>
+    <div class="r-reward" id="rRewChispa"><div class="ic chispa"><img class="cico" src="arte/ui/moneda-chispa.webp" alt=""></div><div><div class="lbl2" data-t="chispasWord">Chispas</div><div class="lbl2" id="rChispaWhy" style="text-transform:none;color:#8fe0a8;margin-top:2px"></div></div><div class="val" id="rChispaVal">+0</div></div>
     <div class="r-reward" id="rRewXp"><div class="ic xp">⭐</div><div style="flex:1"><div class="lbl2"><span data-t="lvl">Nivel</span> <span id="rLvlNum">1</span></div><div class="r-xpbar"><div class="r-xpfill" id="rXpFill"></div></div></div></div>
   </div>
   <!--+AG tabla de puestos REALES de la partida (viene del motor). Si no cabe entera, se muestra el podio +
@@ -1832,7 +1856,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=ee59275"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=f699a49"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -2659,7 +2683,11 @@ const SHELL={
     noticiasToast:'Noticias: próximamente', amigosToast:'Amigos llegará con las cuentas online', clubToast:'El Club llegará con las cuentas online',
     //+AG Fase 2 · copas + ranking (doc 37)
     cupsWord:'Copas', floorWord:'mínimo', rkGlobal:'Global', rkBola:'Por bola', rkDiario:'Diario',
-    rkPrize:'🎁 Franjas de premio · Top 10% → 🎟️ Fichas de Torneo · Top 1% → título + skin',
+    //+AG 1-ago: el cartel prometia "Top 10% → Fichas de Torneo", una moneda que NO EXISTE, y encima
+    //   sin decir "pronto" (la ficha de la Legendaria sí lo decía). Y la clasificación es de BOTS. O sea,
+    //   el juego prometía un premio que no podía entregar por ganar a nadie. Ahora las franjas siguen
+    //   anunciándose —son buen gancho— pero marcadas como lo que son: algo que todavía no reparte nada.
+    rkPrize:'🎁 Franjas de premio · Top 10% y Top 1% · próximamente',
     rkYouPos:(p,n)=>'Tu puesto: #'+p+' de '+n, rkYouBest:(b,p,n)=>'Tu mejor bola: '+b+' · #'+p+' de '+n,
     rkNoBall:'No tienes bola de ese tipo',
     rkTodayTail:' · deriva de hoy', you:'TÚ',
@@ -2691,7 +2719,7 @@ const SHELL={
     noticiasToast:'News: coming soon', amigosToast:'Friends arrive with online accounts', clubToast:'The Club arrives with online accounts',
     //+AG Fase 2 · cups + ranking (doc 37)
     cupsWord:'Cups', floorWord:'floor', rkGlobal:'Global', rkBola:'Per ball', rkDiario:'Daily',
-    rkPrize:'🎁 Prize bands · Top 10% → 🎟️ Tournament Tickets · Top 1% → title + skin',
+    rkPrize:'🎁 Prize bands · Top 10% and Top 1% · coming soon',
     rkYouPos:(p,n)=>'Your rank: #'+p+' of '+n, rkYouBest:(b,p,n)=>'Your best ball: '+b+' · #'+p+' of '+n,
     rkNoBall:'You have no ball of that type',
     rkTodayTail:' · today\'s drift', you:'YOU',
@@ -2737,7 +2765,9 @@ const MORE={
     traits:{volcan:'su boost dura un 20% más',yunque:'los choques de otras bolas le empujan la mitad (el súper sí la arrolla)',fantasma:'el Cazador tarda un 15% más en fijarla',estrella:'su súper dura +1 segundo'},
     traitWhere:{volcan:'en los tres modos',yunque:'en los tres modos',fantasma:'solo en Cazador',estrella:'en los tres modos'},
     hitoBtn:n=>'Hito: '+n+' 🏆 totales', hitoProg:(h,n)=>'Se gana jugando: llevas '+h+' de '+n+' 🏆 totales',
-    fichasBtn:n=>n+' ⬡ Fichas de Torneo', fichasSoon:'Se gana compitiendo (Fichas de Torneo) · pronto',
+    //+AG 1-ago: mueren fichasBtn/fichasSoon (la moneda que nunca existió). La Legendaria se compra
+    //   con Gemas y esta es su pista: dice lo único que la distingue de las demás compras.
+    gdMoneyGem:'La Legendaria solo se compra con Gemas: no se consigue jugando.',
     tHito:n=>'¡Hito de copas alcanzado! '+n+' se une a tu Garaje 🎉',
     gdMoney:'El dinero solo compra VARIEDAD (bolas hasta Rara), nunca poder.',
     unlockBtn:p=>'Desbloquear · '+p+' ✦', orPay:g=>'o pagar '+g+' ◆',
@@ -2745,7 +2775,7 @@ const MORE={
     // — Tienda —
     shSecs:['Destacados','Bolas','Cosméticos','Gemas','Pase'],
     shNoteFeat:'Escaparate que rota cada semana con el tema de temporada. Todo con precio y contenido a la vista, <b>nunca cajas sorpresa</b>.',
-    shNoteBalls:'Con Chispas o Gemas compras bolas hasta <b>Rara</b> (variedad, <b>nunca poder</b>). Las <b>Épicas</b> se desbloquean por hitos de copas 🏆 y la <b>Legendaria</b> con Fichas de Torneo ⬡.',
+    shNoteBalls:'Con Chispas o Gemas compras bolas hasta <b>Rara</b> (variedad, <b>nunca poder</b>). Las <b>Épicas</b> se ganan por hitos de copas 🏆 y la <b>Legendaria</b> se compra con Gemas ◆.',
     shNoteCosm:'Cosméticos = <b>solo estética</b>, cualquier rareza. El marco (gris→dorado) marca la rareza. Nunca tocan atributos.',
     shNoteGems:'🔒 En cuentas de menores, las compras con dinero real pasan por <b>puerta parental</b> y <b>límite de gasto</b>, activados por defecto.',
     buyBtn:g=>'Comprar · '+g+' ◆', ownedGar:'En tu Garaje', ownedCosm:'En posesión',
@@ -2898,7 +2928,7 @@ const MORE={
     traits:{volcan:'its boost lasts 20% longer',yunque:'other balls shove it half as much (a super still bowls it over)',fantasma:'the Hunter takes 15% longer to lock on',estrella:'its super lasts +1 second'},
     traitWhere:{volcan:'all three modes',yunque:'all three modes',fantasma:'Hunter only',estrella:'all three modes'},
     hitoBtn:n=>'Milestone: '+n+' 🏆 total', hitoProg:(h,n)=>'Earned by playing: you have '+h+' of '+n+' 🏆 total',
-    fichasBtn:n=>n+' ⬡ Tournament Tickets', fichasSoon:'Earned by competing (Tournament Tickets) · soon',
+    gdMoneyGem:'The Legendary is Gems only: you cannot get it by playing.',
     tHito:n=>'Cup milestone reached! '+n+' joins your Garage 🎉',
     gdMoney:'Money only buys VARIETY (balls up to Rare), never power.',
     unlockBtn:p=>'Unlock · '+p+' ✦', orPay:g=>'or pay '+g+' ◆',
@@ -2906,7 +2936,7 @@ const MORE={
     // — Shop —
     shSecs:['Featured','Balls','Cosmetics','Gems','Pass'],
     shNoteFeat:'A storefront that rotates every week with the season theme. Price and contents always in plain sight, <b>never loot boxes</b>.',
-    shNoteBalls:'Sparks or Gems buy balls up to <b>Rare</b> (variety, <b>never power</b>). <b>Epics</b> unlock via cup milestones 🏆 and the <b>Legendary</b> takes Tournament Tickets ⬡.',
+    shNoteBalls:'Sparks or Gems buy balls up to <b>Rare</b> (variety, <b>never power</b>). <b>Epics</b> are earned via cup milestones 🏆 and the <b>Legendary</b> is bought with Gems ◆.',
     shNoteCosm:'Cosmetics = <b>looks only</b>, any rarity. The frame (grey→gold) shows the rarity. They never touch attributes.',
     shNoteGems:'🔒 On kids’ accounts, real-money purchases go through a <b>parental gate</b> and a <b>spending limit</b>, on by default.',
     buyBtn:g=>'Buy · '+g+' ◆', ownedGar:'In your Garage', ownedCosm:'Owned',
@@ -3035,10 +3065,44 @@ const S=()=>SHELL[LANG]||SHELL.en;
 //+AG formato de numero por idioma (antes TODO iba con toLocaleString('es-ES') → "1.234" con la app en ingles).
 //   La tabla se mudo al catalogo (i18n/idiomas.js) para que los 20 idiomas la declaren en un solo sitio.
 const nfmt=n=>Number(n||0).toLocaleString(BTI18N.nloc(LANG));
+//+AG doc 41: iconos de sistema. Las monedas eran ✦ ◆ ⬡ 🏆 — dos de ellas ni siquiera eran iconos,
+//   eran CARACTERES tipograficos, y la copa era un emoji distinto en cada movil. Las cuatro se
+//   distinguen por SILUETA en escala de grises (estrella / diamante / hexagono / copa): eso resuelve
+//   daltonismo sin depender del color, que es como lo pide docs/17.
+const uiArt=n=>`arte/ui/${n}.webp`;
+const coinIco=(n,cls)=>`<img class="cico${cls?' '+cls:''}" src="${uiArt('moneda-'+n)}" alt="">`;
+//+AG 1-ago: EL ARREGLO A MEDIAS DE DOC 41, TERMINADO. Aquella vez se cambiaron las CABECERAS a icono
+//   dibujado y ahi se paro: los botones de compra, la oferta del dia, los packs y los textos de premio
+//   seguian pintando el caracter tipografico (`600 ◆`, `+25 ✦`). O sea, el mismo juego dibujaba la
+//   moneda a mano en una pantalla y ensenaba un glifo del sistema para ESA MISMA moneda dos pantallas
+//   mas alla — que es justo el fallo que doc 41 daba por muerto. Lo cazaron los dos auditores Supercell.
+//
+//   POR QUE SE ARREGLA AQUI Y NO EN LOS TEXTOS: los simbolos viven DENTRO de las cadenas traducidas, y
+//   hay 20 idiomas. Sustituirlos a mano son 20 ficheros por cada retoque futuro y la garantia de que se
+//   vuelvan a desincronizar. Convirtiendo al PINTAR, el traductor sigue escribiendo `✦` (legible en su
+//   editor) y el jugador siempre ve la imagen.
+//
+//   ⚠ Y VIVE AQUI ARRIBA, NO CON EL RESTO DEL ARTE, POR UNA RAZON QUE COSTO UN ARRANQUE EN BLANCO:
+//   applyShell() —justo debajo— lo llama, y un `const` NO se adelanta como una `function`. Con el
+//   bloque 800 lineas mas abajo, la primera pintada del idioma reventaba con "Cannot access 'hasCoin'
+//   before initialization" y el juego no llegaba a dibujarse. Si se mueve, se mueve por encima de aqui.
+const COIN_CHAR={ '✦':'chispa', '◆':'gema', '⬡':'ficha', '🏆':'copa' };
+//+AG dos regex a proposito, y no una con /g reutilizada: un regex global guarda `lastIndex` entre
+//   llamadas, asi que el segundo .test() del mismo texto puede devolver FALSE y dejar el simbolo crudo.
+const RE_COIN=/[✦◆⬡]|🏆/g, RE_COIN1=/[✦◆⬡]|🏆/;
+const coinify=s=>String(s).replace(RE_COIN, c=>coinIco(COIN_CHAR[c],'sm'));
+//+AG setCoin() en vez de `.textContent=`: un <img> dentro de textContent se ve como texto plano con la
+//   etiqueta a pelo, asi que CADA sitio que pase por aqui tiene que escribir innerHTML. Todo lo que entra
+//   son cadenas NUESTRAS (i18n + numeros), nunca texto del jugador: no hay nada que escapar.
+const hasCoin=s=>RE_COIN1.test(String(s));
+function setCoin(node, str){ if(hasCoin(str)) node.innerHTML=coinify(str); else node.textContent=str; }
 function applyShell(){ const s=S();
-  document.querySelectorAll('[data-t]').forEach(e=>{ const v=s[e.dataset.t]; if(typeof v==='string') e.textContent=v; });
+  //+AG 1-ago: si el texto trae un simbolo de moneda (✦ ◆ ⬡ 🏆) se pinta su ICONO dibujado en vez del
+  //   caracter. Solo en ese caso se pasa a innerHTML: los demas siguen por textContent, porque cambiar
+  //   TODOS de golpe haria que cualquier cadena con un `<` se interpretara como etiqueta.
+  document.querySelectorAll('[data-t]').forEach(e=>{ const v=s[e.dataset.t]; if(typeof v==='string') setCoin(e,v); });
   //+AG data-th = el texto lleva <b>/<small> (notas legales, hero de Temporada…); data-tt = title; data-tp = aria-label
-  document.querySelectorAll('[data-th]').forEach(e=>{ const v=s[e.dataset.th]; if(typeof v==='string') e.innerHTML=v; });
+  document.querySelectorAll('[data-th]').forEach(e=>{ const v=s[e.dataset.th]; if(typeof v==='string') e.innerHTML=coinify(v); });
   document.querySelectorAll('[data-tt]').forEach(e=>{ const v=s[e.dataset.tt]; if(typeof v==='string') e.title=v; });
   document.querySelectorAll('[data-tp]').forEach(e=>{ const v=s[e.dataset.tp]; if(typeof v==='string') e.setAttribute('aria-label',v); });
   //+AG data-tph = el PLACEHOLDER del input (data-tp solo ponia el aria-label: los campos de Cuenta se quedaban en español)
@@ -3817,7 +3881,13 @@ const ARCHS={
   volcan:  {name:'Volcán',  q:3, base:[5,7,5,3,4,9],  firma:5, sec:[1,2], hito:1500},
   yunque:  {name:'Yunque',  q:3, base:[2,2,10,6,8,4], firma:2, sec:[4,3], hito:3500},
   fantasma:{name:'Fantasma',q:3, base:[4,5,3,8,9,4],  firma:4, sec:[3,0], hito:6000},
-  estrella:{name:'Estrella',q:4, base:[7,6,4,5,4,7],  firma:0, sec:[5,3], fichas:2000},
+  //+AG 1-ago: la Legendaria SE VENDE POR GEMAS (199 ◆). Antes pedia 2.000 "Fichas de Torneo", una
+  //   moneda que NO EXISTIA: sin saldo en SAVE, sin fuente que la diera y sin torneo que la ganara.
+  //   O sea, el juego ensenaba un precio que nadie podia pagar nunca. Vender por gemas es peor
+  //   diseno que el merito, pero es HONESTO, que es lo que no era. El campo `gemas` (en vez de
+  //   `price`) la deja fuera de las Chispas: sigue sin poder farmearse jugando, solo se compra.
+  //   Cuando existan los torneos, las Fichas vuelven como forma de GANARLA sin pagar.
+  estrella:{name:'Estrella',q:4, base:[7,6,4,5,4,7],  firma:0, sec:[5,3], gemas:199},
 };
 const ARCH_KEYS=Object.keys(ARCHS);
 //+AG doc 41: ARTE de las bolas-heroe (Codex, entregado 2026-07-25). 'icon' = rejilla/listas (512),
@@ -3825,12 +3895,8 @@ const ARCH_KEYS=Object.keys(ARCHS);
 //   PNG original, y el juego se sirve por web, no por store. Con esto muere el campo 'icon' de ARCHS:
 //   las 12 bolas ya no son emojis del sistema (que ademas se dibujaban distinto en cada movil).
 const ballArt=(k,kind)=>`arte/bolas/bola-${k}-${kind||'icon'}.webp`;
-//+AG doc 41: iconos de sistema. Las monedas eran ✦ ◆ ⬡ 🏆 — dos de ellas ni siquiera eran iconos,
-//   eran CARACTERES tipograficos, y la copa era un emoji distinto en cada movil. Las cuatro nuevas se
-//   distinguen por SILUETA en escala de grises (estrella / diamante / hexagono / copa): eso resuelve
-//   daltonismo sin depender del color, que es como lo pide docs/17.
-const uiArt=n=>`arte/ui/${n}.webp`;
-const coinIco=(n,cls)=>`<img class="cico${cls?' '+cls:''}" src="${uiArt('moneda-'+n)}" alt="">`;
+//+AG los iconos de moneda (uiArt/coinIco/coinify/setCoin) viven ARRIBA, junto a applyShell: lee alli el
+//   porque. Aqui solo queda el arte de las BOLAS.
 //+AG doc 39 NIVELES (cierra doc 37 §7): doble candado = XP de bola ACUMULADA (b.xp ya no se resetea; jugar CON
 //   ella, ~30 XP/partida) + Chispas. Coste de ENTRAR al nivel n:
 const LVL_COST={2:40,3:70,4:120,5:200,6:320,7:500,8:750,9:1100,10:1550,11:2100,12:2800,13:3600};
@@ -3897,12 +3963,12 @@ function renderGaraje(){ el('gChispas').textContent=SAVE.chispas; el('gGemas').t
     //   (motor/chassis/vivas.mjs). El retrato era arte aparte, asi que la tienda podia vender un
     //   personaje y la partida entregar otro — y lo hizo. Ahora coinciden por construccion.
     let h=`<div class="gi" data-viva="${k}"${b?'':' data-viva-off="1"'}></div><div class="g-cname">${archName(k)}</div>`;
-    if(b){ h+=`<div class="g-qtag">${S().lvlShort(b.lvl||1)} · ${qualName(A.q)}</div><div class="gc">🏆 ${nfmt(b.copas||0)}</div>`;   //+AG doc 37: cada bola muestra SUS copas
+    if(b){ h+=`<div class="g-qtag">${S().lvlShort(b.lvl||1)} · ${qualName(A.q)}</div><div class="gc">${coinIco('copa','sm')} ${nfmt(b.copas||0)}</div>`;   //+AG doc 37: cada bola muestra SUS copas
       if(SAVE.equipped===SAVE.balls.indexOf(b)) h+=`<div class="g-eq">${S().equippedTag}</div>`;
       if(canLvlUp(b)) h+=`<div class="g-dot">↑</div>`;   //+AG doc 39: lista para subir (XP + Chispas suficientes)
     } else if(A.price!=null) h+=`<div class="g-price"><span class="pc"><img class="cico sm" src="arte/ui/moneda-chispa.webp" alt="">${A.price}</span><span class="pc gm"><img class="cico sm" src="arte/ui/moneda-gema.webp" alt="">${gemaPrice(A.price)}</span></div>`;
     else if(A.hito) h+=`<div class="g-price"><span class="pc"><img class="cico sm" src="arte/ui/moneda-copa.webp" alt="">${nfmt(A.hito)}</span></div>`;
-    else h+=`<div class="g-price"><span class="pc"><img class="cico sm" src="arte/ui/moneda-ficha.webp" alt="">${nfmt(A.fichas)}</span></div>`;
+    else h+=`<div class="g-price"><span class="pc gm"><img class="cico sm" src="arte/ui/moneda-gema.webp" alt="">${nfmt(A.gemas)}</span></div>`;
     c.innerHTML=h; c.onclick=()=>openDetail(k); g.appendChild(c); });
   vivasSync();   //+AG las bolas vivas se remontan DESPUES de repintar: el innerHTML de arriba se llevo por delante los nodos viejos
 }
@@ -3952,23 +4018,27 @@ function openDetail(k){ applyShell(); const A=ARCHS[k], b=owned(k), q=QUAL[A.q],
     el('gdXpFill').style.width=(maxed?100:Math.max(0,Math.min(100,100*(b.xp||0)/xpNeed(next))))+'%';
     if(!maxed){ const cost=LVL_COST[next], haveXp=(b.xp||0)>=xpNeed(next);
       const bt=document.createElement('button'); bt.className='gd-chip'; bt.style.cssText='flex:1;font-weight:800';
-      bt.textContent=s.lvlUpBtn(next,cost); bt.disabled=!haveXp||SAVE.chispas<cost;
+      setCoin(bt, s.lvlUpBtn(next,cost)); bt.disabled=!haveXp||SAVE.chispas<cost;
       lvlUpReady=!bt.disabled; bt.classList.toggle('ready', lvlUpReady);   //+AG doc 40: brilla solo si HOY puedes subirla (XP + Chispas)
       bt.onclick=()=>{ if(canLvlUp(b)){ dinero('chispas', -cost, 'bola_nivel'); b.lvl=(b.lvl||1)+1;
         apunta('ball_up', { arch:k, lvl:b.lvl, coste:cost }); persist();
         toast(s.tBallLvl(archName(k),b.lvl)); openDetail(k); renderGaraje(); } };
       assign.appendChild(bt);
-      el('gdHint').textContent = !haveXp ? s.gdNeedXp(xpNeed(next)-Math.round(b.xp||0))
-                               : (SAVE.chispas<cost ? s.gdNeedChispas(cost) : s.gdLvlReady);
+      setCoin(el('gdHint'), !haveXp ? s.gdNeedXp(xpNeed(next)-Math.round(b.xp||0))
+                               : (SAVE.chispas<cost ? s.gdNeedChispas(cost) : s.gdLvlReady));
     } else el('gdHint').textContent=s.gdMaxed;
   } else { el('gdXpWrap').style.display='none';
-    el('gdHint').textContent = A.price!=null ? s.gdMoney : (A.hito ? s.hitoProg(totalCopas(),A.hito) : s.fichasSoon); }
+    setCoin(el('gdHint'), A.price!=null ? s.gdMoney : (A.hito ? s.hitoProg(totalCopas(),A.hito) : s.gdMoneyGem)); }
   const prim=el('gdPrim'), ghost=el('gdGhost');
   if(!b){
-    if(A.price!=null){ prim.textContent=s.unlockBtn(A.price); prim.disabled=SAVE.chispas<A.price; prim.onclick=()=>{ if(unlock(k,false)){ openDetail(k); renderGaraje(); } };
-      ghost.style.display=''; ghost.textContent=s.orPay(gemaPrice(A.price)); ghost.disabled=SAVE.gemas<gemaPrice(A.price); ghost.onclick=()=>{ if(unlock(k,true)){ openDetail(k); renderGaraje(); } };
-    } else {   //+AG doc 39: Épicas por hito de copas (se desbloquean SOLAS) y Legendaria por Fichas — nunca a la venta
-      prim.textContent = A.hito ? s.hitoBtn(A.hito) : s.fichasBtn(A.fichas); prim.disabled=true; prim.onclick=null; ghost.style.display='none'; }
+    if(A.price!=null){ setCoin(prim, s.unlockBtn(A.price)); prim.disabled=SAVE.chispas<A.price; prim.onclick=()=>{ if(unlock(k,false)){ openDetail(k); renderGaraje(); } };
+      ghost.style.display=''; setCoin(ghost, s.orPay(gemaPrice(A.price))); ghost.disabled=SAVE.gemas<gemaPrice(A.price); ghost.onclick=()=>{ if(unlock(k,true)){ openDetail(k); renderGaraje(); } };
+    //+AG 1-ago: la LEGENDARIA ya no es un escaparate muerto — se compra con gemas, como un cosmetico caro.
+    //   Las Epicas siguen intocables (hito de copas): esas son merito y no se venden.
+    } else if(A.gemas!=null){ setCoin(prim, s.buyBtn(A.gemas)); prim.disabled=SAVE.gemas<A.gemas;
+      prim.onclick=()=>{ if(unlock(k,true)){ openDetail(k); renderGaraje(); } }; ghost.style.display='none';
+    } else {   //+AG doc 39: Épicas por hito de copas (se desbloquean SOLAS) — nunca a la venta
+      setCoin(prim, s.hitoBtn(A.hito)); prim.disabled=true; prim.onclick=null; ghost.style.display='none'; }
   } else { const idx=SAVE.balls.indexOf(b), isEq=SAVE.equipped===idx;
     prim.textContent=isEq?S().equippedBtn:S().equipBtn; prim.disabled=isEq;
     //+AG EQUIPAR CIERRA LA FICHA (VB Jaime 26-jul). Antes se re-abria la ficha con el boton ya apagado
@@ -3991,8 +4061,12 @@ function openDetail(k){ applyShell(); const A=ARCHS[k], b=owned(k), q=QUAL[A.q],
 function closeDetail(){ el("gDetail").classList.remove("on");
   vivasSync(); }   //+AG y al cerrarla se vuelven a montar las doce de la rejilla, con el lienzo otra vez a su altura
 function unlock(k,withGems){ const A=ARCHS[k];   // transacción compartida por Garaje y Tienda; el que llama re-renderiza
-  if(A.price==null) return false;   //+AG doc 39: hitos/Fichas no pasan por aquí
-  if(withGems){ const p=gemaPrice(A.price); if(SAVE.gemas<p) return false; dinero('gemas', -p, 'bola_compra'); } else { if(SAVE.chispas<A.price) return false; dinero('chispas', -A.price, 'bola_compra'); }
+  //+AG 1-ago: dos formas de tener precio. `price` = Chispas (y su equivalente en gemas por gemaPrice);
+  //   `gemas` = SOLO gemas (la Legendaria). Las Épicas no tienen ninguno de los dos y siguen sin pasar
+  //   por aquí: se ganan por hito de copas. El candado de abajo es lo que lo garantiza.
+  if(A.price==null && A.gemas==null) return false;   //+AG doc 39: los hitos no pasan por aquí
+  if(A.gemas!=null){ if(SAVE.gemas<A.gemas) return false; dinero('gemas', -A.gemas, 'bola_compra'); withGems=true; }
+  else if(withGems){ const p=gemaPrice(A.price); if(SAVE.gemas<p) return false; dinero('gemas', -p, 'bola_compra'); } else { if(SAVE.chispas<A.price) return false; dinero('chispas', -A.price, 'bola_compra'); }
   SAVE.balls.push({arch:k,lvl:1,xp:0,copas:0});
   apunta('ball_get', { arch:k, via: withGems?'gemas':'chispas' });   //+AG docs/53: que bolas QUIERE la gente
   persist(); toast(S().tUnlocked(archName(k))); return true;
@@ -4086,8 +4160,8 @@ function renderTienda(){ el('shChispas').textContent=SAVE.chispas; el('shGemas')
 }
 function featEl(){ const d=document.createElement('div');
   const s=S();
-  d.innerHTML=`<div class="sh-feat"><div class="fl">${s.bundleFl}</div><h3>${s.bundleNm}</h3><ul>${s.bundleItems.map(i=>`<li>${i}</li>`).join('')}</ul>
-    <button class="sh-buy gem" id="buyBundle">${s.buyBtn(BUNDLE.g)} <span class="was">${BUNDLE.was} ◆</span></button></div>
+  d.innerHTML=`<div class="sh-feat"><div class="fl">${s.bundleFl}</div><h3>${s.bundleNm}</h3><ul>${s.bundleItems.map(i=>`<li>${coinify(i)}</li>`).join('')}</ul>
+    <button class="sh-buy gem" id="buyBundle">${coinify(s.buyBtn(BUNDLE.g))} <span class="was">${BUNDLE.was} ${coinIco('gema','sm')}</span></button></div>
     <div class="sh-note">${s.shNoteFeat}</div>`;
   const b=d.querySelector('#buyBundle'); b.disabled=SAVE.gemas<BUNDLE.g; b.onclick=buyBundle;
   b.classList.toggle('ready', !b.disabled);   //+AG doc 40: la oferta destacada es LA accion de la Tienda; el resto de botones de compra NO brillan
@@ -4100,9 +4174,12 @@ function bolasEl(){ const s=S(), d=document.createElement('div'); d.innerHTML='<
     it.innerHTML=`<div class="sh-ic" data-viva="${k}"${have?'':' data-viva-off="1"'}></div><div class="sh-nm">${archName(k)}</div><div class="sh-cat">${s.shBallCat(qualName(A.q), archBest(k))}</div>`;
     const btn=document.createElement('button');
     if(have){ btn.className='sh-buy owned'; btn.textContent=s.ownedGar; btn.disabled=true; }
-    else if(A.price!=null){ btn.className='sh-buy'; btn.innerHTML=`${A.price} ✦ / ${gemaPrice(A.price)} ◆`; btn.disabled=SAVE.chispas<A.price&&SAVE.gemas<gemaPrice(A.price);
+    else if(A.price!=null){ btn.className='sh-buy'; btn.innerHTML=`${A.price} ${coinIco('chispa','sm')} / ${gemaPrice(A.price)} ${coinIco('gema','sm')}`; btn.disabled=SAVE.chispas<A.price&&SAVE.gemas<gemaPrice(A.price);
       btn.onclick=()=>{ if(unlock(k, SAVE.chispas<A.price)) renderTienda(); }; }
-    else { btn.className='sh-buy owned'; btn.textContent = A.hito ? s.hitoBtn(A.hito) : s.fichasBtn(A.fichas); btn.disabled=true; }   //+AG doc 39: épicas/legendaria NUNCA a la venta
+    //+AG 1-ago: la Legendaria SÍ está a la venta ahora, y solo por gemas (botón `gem`, como los cosméticos)
+    else if(A.gemas!=null){ btn.className='sh-buy gem'; setCoin(btn, s.buyBtn(A.gemas)); btn.disabled=SAVE.gemas<A.gemas;
+      btn.onclick=()=>{ if(unlock(k,true)) renderTienda(); }; }
+    else { btn.className='sh-buy owned'; setCoin(btn, s.hitoBtn(A.hito)); btn.disabled=true; }   //+AG doc 39: las ÉPICAS nunca a la venta
     it.appendChild(btn); g.appendChild(it); });
   d.appendChild(g); return d;
 }
@@ -4111,7 +4188,7 @@ function cosmEl(){ const s=S(), d=document.createElement('div'); d.innerHTML='<d
   COSM.forEach(c=>{ const q=QUAL[c.rar], have=hasCosm(c.id); const it=document.createElement('div'); it.className='sh-item'; it.style.setProperty('--qc',q.c);
     it.innerHTML=`<div class="sh-ic">${c.ic}</div><div class="sh-nm">${cosmName(c)}</div><div class="sh-cat">${cosmCat(c)} · ${qualName(c.rar)}</div>`;
     const btn=document.createElement('button'); if(have){ btn.className='sh-buy owned'; btn.textContent=s.ownedCosm; btn.disabled=true; }
-    else { btn.className='sh-buy gem'; btn.innerHTML=`${c.g} ◆`; btn.disabled=SAVE.gemas<c.g; btn.onclick=()=>buyCosm(c); }
+    else { btn.className='sh-buy gem'; btn.innerHTML=`${c.g} ${coinIco('gema','sm')}`; btn.disabled=SAVE.gemas<c.g; btn.onclick=()=>buyCosm(c); }
     it.appendChild(btn); g.appendChild(it); });
   d.appendChild(g); return d;
 }
@@ -4121,16 +4198,16 @@ function gemasEl(){ const s=S(), d=document.createElement('div'); d.innerHTML='<
   //   "vuelve manana": esconderla haria pensar que ha desaparecido.
   const done=dealDone();
   const deal=document.createElement('div'); deal.className='sh-pack'; deal.style.cssText='border-color:#c9a227';
-  deal.innerHTML=`<div class="pg">✦</div><div class="amt" style="white-space:nowrap">${s.dealAmt(CHISPA_DEAL.c)}<small style="display:block;opacity:.8;color:inherit">${s.dealDay}</small></div>`;
+  deal.innerHTML=`<div class="pg ico">${coinIco('chispa')}</div><div class="amt" style="white-space:nowrap">${s.dealAmt(CHISPA_DEAL.c)}<small style="display:block;opacity:.8;color:inherit">${s.dealDay}</small></div>`;
   //+AG el boton se comporta como el de los packs (margin-left:auto y ancho al contenido): con
   //   el ancho completo de .sh-buy empujaba el texto y "+1800 Chispas" partia en dos lineas.
   const db=document.createElement('button'); db.className='sh-buy gem';
   db.style.cssText='margin-left:auto;width:auto;padding:11px 15px;white-space:nowrap';
-  db.innerHTML = done ? s.dealDone : `${CHISPA_DEAL.g} ◆`;
+  db.innerHTML = done ? s.dealDone : `${CHISPA_DEAL.g} ${coinIco('gema','sm')}`;
   db.disabled = done || SAVE.gemas<CHISPA_DEAL.g;
   db.onclick=()=>buyChispaDeal();
   deal.appendChild(db); d.appendChild(deal);
-  GEM_PACKS.forEach(pk=>{ const row=document.createElement('div'); row.className='sh-pack'; row.innerHTML=`<div class="pg">◆</div><div class="amt">${s.gemsAmt(pk.g)} ${pk.bonus?`<small>${pk.bonus}</small>`:''}</div>`;
+  GEM_PACKS.forEach(pk=>{ const row=document.createElement('div'); row.className='sh-pack'; row.innerHTML=`<div class="pg ico">${coinIco('gema')}</div><div class="amt">${s.gemsAmt(pk.g)} ${pk.bonus?`<small>${pk.bonus}</small>`:''}</div>`;
     const btn=document.createElement('button'); btn.className='money'; btn.textContent=pk.p; btn.onclick=()=>parentalBuy(pk); row.appendChild(btn); d.appendChild(row); });
   return d;
 }
@@ -4139,7 +4216,7 @@ function paseEl(){ const s=S(), d=document.createElement('div'); d.innerHTML=`<d
   <button class="sh-buy gem" id="buyPase"></button></div>`;
   const b=d.querySelector('#buyPase');
   if(SAVE.pase){ b.className='sh-buy owned'; b.textContent=s.paseOn; b.disabled=true; }
-  else { b.textContent=s.paseBuy(PASE.g); b.disabled=SAVE.gemas<PASE.g; b.onclick=()=>{ if(SAVE.gemas>=PASE.g){ dinero('gemas', -PASE.g, 'pase'); SAVE.pase=true; persist(); toast(S().tPase); renderTienda(); } }; }
+  else { setCoin(b, s.paseBuy(PASE.g)); b.disabled=SAVE.gemas<PASE.g; b.onclick=()=>{ if(SAVE.gemas>=PASE.g){ dinero('gemas', -PASE.g, 'pase'); SAVE.pase=true; persist(); toast(S().tPase); renderTienda(); } }; }
   return d;
 }
 function buyCosm(c){ if(SAVE.gemas<c.g) return; dinero('gemas', -c.g, 'cosmetico'); SAVE.cosmetics.push(c.id); persist(); toast(S().tCosm(cosmName(c))); renderTienda(); }
@@ -4154,7 +4231,7 @@ function buyBundle(){ if(SAVE.gemas<BUNDLE.g) return; dinero('gemas', -BUNDLE.g,
 // puerta parental: una pregunta de adulto (multiplicación) antes de abonar Gemas (compra simulada, sin pago real)
 let pgPack=null, pgAns=0;
 function parentalBuy(pk){ pgPack=pk; const a=6+Math.floor(Math.random()*6), b2=6+Math.floor(Math.random()*6); pgAns=a*b2;
-  el('pgSum').innerHTML=`${pk.p} → <b>${S().gemsAmt(pk.g)} ◆</b>`; el('pgQ').textContent=a+' × '+b2; el('pgIn').value=''; el('pgIn').style.borderColor=''; el('parent').classList.add('on'); setTimeout(()=>el('pgIn').focus(),60); }
+  el('pgSum').innerHTML=`${pk.p} → <b>${S().gemsAmt(pk.g)} ${coinIco('gema','sm')}</b>`; el('pgQ').textContent=a+' × '+b2; el('pgIn').value=''; el('pgIn').style.borderColor=''; el('parent').classList.add('on'); setTimeout(()=>el('pgIn').focus(),60); }
 function parentalOk(){ if(+el('pgIn').value!==pgAns){ el('pgIn').style.borderColor='#eb3030'; toast(S().pgBad); return; }
   dinero('gemas', pgPack.g, 'pack_gemas'); persist(); el('parent').classList.remove('on'); toast(S().tGems(pgPack.g)); renderTienda(); }
 
@@ -4163,7 +4240,9 @@ function buildPaseTrack(){ const t=el('seTrack'); if(!t) return; t.innerHTML='';
   const REW=['✦','◆','🎨','⭐','✦','🏅','🎨','✦','👑','◆','✦','🎁','🎨','✦','⭐'];
   for(let i=1;i<=15;i++){ const done=i<=12, prem=i%3===0;   // peldaño actual = 12
     const r=document.createElement('div'); r.className='se-rung'+(done?' done':'');
-    r.innerHTML=`<div class="n">${i}</div><div class="cell ${prem?'prem':'free'}">${REW[(i-1)%REW.length]}</div><div class="lb">${prem?S().rungPrem:S().rungFree}</div>`;
+    //+AG 1-ago: los peldaños de moneda (✦ ◆) pintan su icono; los demás siguen siendo emoji (son
+    //   premios genéricos —skin, marco, emote—, no monedas, y no tienen arte propio todavía).
+    r.innerHTML=`<div class="n">${i}</div><div class="cell ${prem?'prem':'free'}">${coinify(REW[(i-1)%REW.length])}</div><div class="lb">${prem?S().rungPrem:S().rungFree}</div>`;
     t.appendChild(r); } }
 //+AG la insignia grande de Liga COPIA la del escalon marcado con .cur. Antes era un 🥇 fijo en el
 //    HTML: si algun dia la escalera se mueve de sitio, el 🥇 se habria quedado contradiciendo a la
@@ -4580,7 +4659,7 @@ function redeemCode(){ const v=el('codeIn').value.trim().toUpperCase(); const m=
   if(!/^BT-[A-Z0-9]{4,8}$/.test(v)){ m.style.color='#eb6b6b'; m.textContent=S().cdBad; return; }
   if(SAVE.codes.includes(v)){ m.style.color='#eb6b6b'; m.textContent=S().cdUsed; return; }
   SAVE.codes.push(v); dinero('chispas', 100, 'codigo'); if(!hasCosm('es_arcoiris')) SAVE.cosmetics.push('es_arcoiris'); persist();
-  m.style.color='#8fe0a8'; m.textContent=S().cdOk; renderHome(); }
+  m.style.color='#8fe0a8'; setCoin(m, S().cdOk); renderHome(); }
 
 // ===== RANKING (doc 37 §5 + doc 36): Global (total coleccion) / Por bola (bolas individuales) / Diario =====
 let rkTab='global', rkBallFilt='cohete';   // Por bola SIEMPRE filtra a un tipo (el total ya vive en Global, como en BS: Players vs charts por brawler)
@@ -4615,11 +4694,13 @@ function paintRanking(){ applyShell(); const s=S();
   const prize=Math.ceil(total*0.10), medals={0:'🥇',1:'🥈',2:'🥉'}, list=el('rkList'); list.innerHTML='';
   function addRow(r,i){ const row=document.createElement('div'); row.className='rkrow'+(r.me?' meRow':'');
     let vTxt,vCls='';
-    if(rkTab==='diario'){ vTxt=deltaTxt(r.v); vCls=r.v>0?' up':(r.v<0?' dn':''); } else vTxt='🏆 '+nfmt(r.v);
+    if(rkTab==='diario'){ vTxt=deltaTxt(r.v); vCls=r.v>0?' up':(r.v<0?' dn':''); } else vTxt=coinIco('copa','sm')+' '+nfmt(r.v);
     const disc = r.arch ? '<img class="rdisc" src="'+ballArt(r.arch)+'" alt="" loading="lazy">'
                         : '<span class="rdisc" style="background:'+r.color+'"></span>';
     row.innerHTML='<span class="kp">'+(medals[i]||'#'+(i+1))+'</span>'+disc+
-      '<span class="kn">'+r.name+'</span>'+(i<prize&&rkTab!=='diario'?'<span class="kt" title="'+S().rkPrizeTip+'">🎟️</span>':'')+
+      //+AG 1-ago: el marcador de franja era 🎟️ —un TICKET, o sea la moneda muerta—. Marca quién está
+      //   dentro de la franja, no qué se cobra: pasa a 🎁, que es lo que dice el cartel de arriba.
+      '<span class="kn">'+r.name+'</span>'+(i<prize&&rkTab!=='diario'?'<span class="kt" title="'+S().rkPrizeTip+'">🎁</span>':'')+
       '<span class="kv'+vCls+'">'+vTxt+'</span>';
     list.appendChild(row); }
   const TOP=20; rows.slice(0,TOP).forEach(addRow);
