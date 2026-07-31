@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-31 a3c56af"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-07-31 ee59275"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -355,8 +355,7 @@
     carta) el carril es casi negro SIEMPRE: se hunde, no se aclara. */
   .gd-stats{ width:100%; display:flex; flex-direction:column; gap:6px; margin:2px 0 2px; }
   .gd-st{ display:grid; grid-template-columns:16px 1fr 30px; align-items:center; gap:8px; }
-  .gd-st .ic{ width:16px; height:16px; display:block; opacity:.9; }
-  .gd-st .ic svg{ width:100%; height:100%; display:block; fill:none; stroke:var(--sc,#cfd3ff); stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
+  .gd-st .ic{ width:18px; height:18px; display:block; object-fit:contain; }
   .gd-st .nm{ font-size:11px; font-weight:800; letter-spacing:.02em; color:#e9e6ff; text-transform:none;
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .gd-st .vl{ font-size:11px; font-weight:900; color:var(--muted); text-align:right; font-variant-numeric:tabular-nums; }
@@ -1833,7 +1832,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=a3c56af"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=ee59275"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -4030,14 +4029,11 @@ const MAXSTAT=(()=>{ let m=1; for(const k of ARCH_KEYS){ const a=attrsOf({arch:k
 //   Velocidad e Impulso heredan los colores que el MOTOR ya usa para eso mismo en pista (la estela
 //   cian y el boost magenta), que es una pista gratis para quien juega.
 const STAT_COL=['#3FD8FF','#63E24A','#9AA6C8','#FF9A2E','#4A7BFF','#FF4FA3'];
-const STAT_ICO=[
-  'M3 12h7M6 8l4 4-4 4M13 8l4 4-4 4',                                  // velocidad: se lanza hacia delante
-  'M3 15c4 0 5-9 9-9M12 6h4v4',                                        // aceleración: la curva que sube
-  'M6 8h8l3 9H3zM8 8V6a2 2 0 0 1 4 0v2',                               // peso: la pesa
-  'M6 4v7a4 4 0 0 0 8 0V4M4 4h4M12 4h4',                               // agarre: la herradura que se pega
-  'M10 3l7 3v5c0 4-3 6-7 7-4-1-7-3-7-7V6z',                            // resistencia: el escudo
-  'M11 2L5 12h5l-1 6 6-10h-5z',                                        // impulso: el chispazo
-];
+//   Los ICONOS ya son arte de verdad (encargo 27, entregado el 31-jul): mismo acabado grueso y
+//   biselado que el resto de la interfaz, y cada uno en el color de SU atributo, o sea el mismo de
+//   su barra. Sustituyen a seis glifos SVG de trazo fino que dibuje yo para no bloquear el cambio y
+//   que a 16 px se evaporaban. Cambiar de icono es cambiar un fichero: aqui solo vive el nombre.
+const STAT_ICO=['velocidad','aceleracion','peso','agarre','resistencia','impulso'];
 function drawStats(host, k, attrs, apagada){
   const s=S(), topes=attrsOf({arch:k,lvl:maxLvl(k)});
   host.classList.toggle('off', !!apagada);
@@ -4046,7 +4042,7 @@ function drawStats(host, k, attrs, apagada){
     const pct=Math.max(4, Math.round(v/MAXSTAT*100));      // 4% de suelo: una barra a cero no se ve
     const pt=Math.round(tope/MAXSTAT*100);
     return `<div class="gd-st" style="--sc:${STAT_COL[i]}">
-      <span class="ic"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="${STAT_ICO[i]}"/></svg></span>
+      <img class="ic" src="arte/ui/stat-${STAT_ICO[i]}.webp" alt="" loading="lazy">
       <span class="nm">${attrFull(i)}</span>
       <span class="vl">${v}</span>
       <span class="bar"><i class="futuro" style="width:${pt}%"></i><span class="fill" style="width:${pct}%"></span></span>
