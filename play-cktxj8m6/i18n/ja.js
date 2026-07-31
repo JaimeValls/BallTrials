@@ -45,6 +45,7 @@ shell: {
   // — ガレージ —
   qual:['コモン','アンコモン','レア','エピック','レジェンダリー'],
   attrs:['速度','加速','重さ','グリップ','持久','ブースト'],
+  attrsFull:['スピード','かそく','おもさ','グリップ','たいきゅう','ブースト'],
   archName:{cohete:'ロケット',tanque:'タンク',chispa:'スパーク',pinball:'ピンボール',lapa:'カサガイ',burbuja:'バブル',meteoro:'メテオ',bunker:'バンカー',volcan:'ボルケーノ',yunque:'アンビル',fantasma:'ゴースト',estrella:'スター'},
   archBest:{cohete:'ザ・グレートレース',tanque:'押し合いと粘り',chispa:'スタートダッシュ',pinball:'混戦とバウンド',lapa:'食らいついて離さないこと',burbuja:'すき間をすり抜けること',meteoro:'全速力で突っ込むこと',bunker:'何があっても生き残ること',volcan:'ブーストをつなげること',yunque:'一歩も動かないこと',fantasma:'ハンターをかわすこと',estrella:'全部そこそこ、しかも華やか'},
   archWorst:{cohete:'押し合い',tanque:'素の速さ',chispa:'当たりを受けること',pinball:'まっすぐ走ること',lapa:'飛び出すこと',burbuja:'押し負けること',meteoro:'間に合うブレーキ',bunker:'攻めること',volcan:'グリップ',yunque:'走ること',fantasma:'押し合い',estrella:'ほとんど無し'},

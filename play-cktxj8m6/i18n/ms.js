@@ -46,6 +46,7 @@ shell: {
   // — Garaj —
   qual:['Biasa','Jarang','Sukar dicari','Epik','Legenda'],
   attrs:['LAJU','PCT','BRT','CKM','TAH','BST'],
+  attrsFull:['Kelajuan','Pecutan','Berat','Cengkaman','Ketahanan','Dorongan'],
   archName:{cohete:'Roket',tanque:'Kereta Kebal',chispa:'Percikan',pinball:'Pinball',lapa:'Siput Lekat',burbuja:'Gelembung',meteoro:'Meteor',bunker:'Kubu',volcan:'Gunung Berapi',yunque:'Andas',fantasma:'Hantu',estrella:'Bintang'},
   archBest:{cohete:'Perlumbaan Agung',tanque:'menolak dan bertahan',chispa:'meluru dari garisan mula',pinball:'kekacauan dan melantun',lapa:'melekat dan tak mahu lepas',burbuja:'menyelit melalui celah',meteoro:'merempuh pada kelajuan penuh',bunker:'terselamat daripada apa sahaja',volcan:'menyambung rangsangan',yunque:'tidak berganjak',fantasma:'mengelak Sang Pemburu',estrella:'sedikit daripada segalanya, dengan gaya'},
   archWorst:{cohete:'menolak',tanque:'kelajuan semata',chispa:'menahan hentaman',pinball:'bergerak lurus',lapa:'meluru',burbuja:'menahan tolakan',meteoro:'membrek tepat pada masanya',bunker:'menyerang',volcan:'cengkaman',yunque:'berlari',fantasma:'menolak',estrella:'hampir tiada apa-apa'},

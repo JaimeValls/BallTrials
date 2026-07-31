@@ -44,6 +44,7 @@ shell: {
   // — Nhà xe —
   qual:['Thường','Ít gặp','Hiếm','Sử thi','Huyền thoại'],
   attrs:['TĐỘ','TỐC','NẶNG','BÁM','BỀN','ĐẨY'],
+  attrsFull:['Tốc độ','Tăng tốc','Trọng lượng','Độ bám','Sức bền','Tăng lực'],
   archName:{cohete:'Tên lửa',tanque:'Xe tăng',chispa:'Tia lửa',pinball:'Pinball',lapa:'Hà bám',burbuja:'Bong bóng',meteoro:'Thiên thạch',bunker:'Hầm trú',volcan:'Núi lửa',yunque:'Đe',fantasma:'Bóng ma',estrella:'Ngôi sao'},
   archBest:{cohete:'Cuộc Đua Lớn',tanque:'đẩy và trụ vững',chispa:'bứt khỏi vạch xuất phát',pinball:'hỗn loạn và nảy',lapa:'bám chặt không buông',burbuja:'lách qua khe hở',meteoro:'húc hết tốc lực',bunker:'sống sót qua mọi thứ',volcan:'nối các cú tăng tốc',yunque:'đứng yên không xê dịch',fantasma:'né Thợ Săn',estrella:'thứ gì cũng có một chút, và rực rỡ'},
   archWorst:{cohete:'đẩy',tanque:'tốc độ thuần',chispa:'chịu va đập',pinball:'đi thẳng',lapa:'bứt tốc',burbuja:'chống bị đẩy',meteoro:'phanh kịp lúc',bunker:'tấn công',volcan:'độ bám',yunque:'chạy',fantasma:'đẩy',estrella:'gần như không có gì'},

@@ -45,6 +45,7 @@ shell: {
   // — 차고 —
   qual:['일반','고급','희귀','에픽','레전더리'],
   attrs:['속도','가속','무게','접지','지구','부스트'],
+  attrsFull:['속도','가속','무게','접지력','내구력','부스트'],
   archName:{cohete:'로켓',tanque:'탱크',chispa:'스파크',pinball:'핀볼',lapa:'삿갓조개',burbuja:'버블',meteoro:'메테오',bunker:'벙커',volcan:'볼케이노',yunque:'모루',fantasma:'고스트',estrella:'스타'},
   archBest:{cohete:'그레이트 레이스',tanque:'밀고 버티기',chispa:'출발선에서 튀어나가기',pinball:'난전과 튕기기',lapa:'물고 놓지 않기',burbuja:'틈새로 빠져나가기',meteoro:'전속력으로 들이받기',bunker:'무엇이든 버텨내기',volcan:'부스트를 이어 붙이기',yunque:'한 발도 밀리지 않기',fantasma:'헌터 피하기',estrella:'뭐든 조금씩, 화려하게'},
   archWorst:{cohete:'밀기',tanque:'순수 속도',chispa:'충격 버티기',pinball:'직선으로 달리기',lapa:'치고 나가기',burbuja:'밀림 버티기',meteoro:'제때 멈추기',bunker:'공격',volcan:'접지력',yunque:'달리기',fantasma:'밀기',estrella:'거의 없음'},

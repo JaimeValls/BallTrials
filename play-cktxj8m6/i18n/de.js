@@ -46,6 +46,7 @@ shell: {
   // — Garage —
   qual:['Gewöhnlich','Ungewöhnlich','Selten','Episch','Legendär'],
   attrs:['SPD','BSL','GEW','GRP','AUS','BST'],
+  attrsFull:['Tempo','Beschleunigung','Gewicht','Haftung','Ausdauer','Schub'],
   archName:{cohete:'Rakete',tanque:'Panzer',chispa:'Funke',pinball:'Flipper',lapa:'Napfschnecke',burbuja:'Blase',meteoro:'Meteor',bunker:'Bunker',volcan:'Vulkan',yunque:'Amboss',fantasma:'Geist',estrella:'Stern'},
   archBest:{cohete:'Das große Rennen',tanque:'Schieben und Standhalten',chispa:'Blitzstarts',pinball:'Chaos und Abprallen',lapa:'Festkrallen und nicht loslassen',burbuja:'durch Lücken schlüpfen',meteoro:'Rammen mit Vollgas',bunker:'alles überleben',volcan:'Boosts aneinanderreihen',yunque:'sich nicht vom Fleck bewegen',fantasma:'dem Jäger ausweichen',estrella:'von allem etwas, mit Glanz'},
   archWorst:{cohete:'Schieben',tanque:'reines Tempo',chispa:'Treffer einstecken',pinball:'geradeaus fahren',lapa:'Losstarten',burbuja:'weggeschoben werden',meteoro:'rechtzeitig bremsen',bunker:'Angreifen',volcan:'Grip',yunque:'Laufen',fantasma:'Schieben',estrella:'fast nichts'},

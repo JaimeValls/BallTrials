@@ -44,6 +44,7 @@ shell: {
   // — Garaj —
   qual:['Sıradan','Az bulunur','Nadir','Destansı','Efsanevi'],
   attrs:['HIZ','İVM','AĞR','TUT','DAY','BST'],
+  attrsFull:['Hız','İvme','Ağırlık','Tutuş','Dayanıklılık','Hızlanma'],
   archName:{cohete:'Roket',tanque:'Tank',chispa:'Kıvılcım',pinball:'Langırt',lapa:'Midye',burbuja:'Baloncuk',meteoro:'Meteor',bunker:'Sığınak',volcan:'Yanardağ',yunque:'Örs',fantasma:'Hayalet',estrella:'Yıldız'},
   archBest:{cohete:'Büyük Yarış',tanque:'itmek ve dayanmak',chispa:'çıkıştan fırlamak',pinball:'kaos ve sekmek',lapa:'yapışıp bırakmamak',burbuja:'boşluklardan sıyrılmak',meteoro:'tam gaz çarpmak',bunker:'her şeye dayanmak',volcan:'hızlanmaları peş peşe bağlamak',yunque:'yerinden kıpırdamamak',fantasma:'Avcı\'dan kaçmak',estrella:'her şeyden biraz, parlak biçimde'},
   archWorst:{cohete:'itmek',tanque:'saf hız',chispa:'darbe yemek',pinball:'düz gitmek',lapa:'yerinden fırlamak',burbuja:'itilmek',meteoro:'zamanında fren yapmak',bunker:'saldırmak',volcan:'tutuş',yunque:'koşmak',fantasma:'itmek',estrella:'neredeyse hiçbir şey'},

@@ -46,6 +46,7 @@ shell: {
   // — 車庫 —
   qual:['普通','優良','稀有','史詩','傳說'],
   attrs:['速度','加速','重量','抓地','耐力','推進'],
+  attrsFull:['速度','加速','重量','抓地力','耐力','加速衝刺'],
   archName:{cohete:'火箭',tanque:'坦克',chispa:'火花',pinball:'彈珠台',lapa:'附著貝',burbuja:'泡泡',meteoro:'流星',bunker:'碉堡',volcan:'火山',yunque:'鐵砧',fantasma:'幽靈',estrella:'星星'},
   archBest:{cohete:'超級彈珠賽',tanque:'推擠與硬扛',chispa:'起跑瞬間衝出去',pinball:'混戰與彈跳',lapa:'咬住就不放',burbuja:'從縫隙鑽過去',meteoro:'全速撞過去',bunker:'什麼都能活下來',volcan:'把加速一段段接起來',yunque:'一步都不挪',fantasma:'閃過獵人',estrella:'樣樣都會一點，還很亮眼'},
   archWorst:{cohete:'推擠',tanque:'純速度',chispa:'挨撞',pinball:'走直線',lapa:'起步',burbuja:'被推開',meteoro:'及時煞車',bunker:'進攻',volcan:'抓地',yunque:'快跑',fantasma:'推擠',estrella:'幾乎沒有弱點'},

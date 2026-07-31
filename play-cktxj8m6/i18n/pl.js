@@ -46,6 +46,7 @@ shell: {
   // — Garaż —
   qual:['Zwykła','Nietypowa','Rzadka','Epicka','Legendarna'],
   attrs:['PRĘ','PRZ','WAG','PRZY','WYT','BST'],
+  attrsFull:['Prędkość','Przyspieszenie','Waga','Przyczepność','Wytrzymałość','Doładowanie'],
   archName:{cohete:'Rakieta',tanque:'Czołg',chispa:'Iskra',pinball:'Flipper',lapa:'Przylga',burbuja:'Bańka',meteoro:'Meteor',bunker:'Bunkier',volcan:'Wulkan',yunque:'Kowadło',fantasma:'Duch',estrella:'Gwiazda'},
   archBest:{cohete:'Wielki Wyścig',tanque:'pchaniu i wytrzymywaniu',chispa:'starcie z linii',pinball:'chaosie i odbijaniu',lapa:'trzymaniu się i niepuszczaniu',burbuja:'przeciskaniu się przez luki',meteoro:'taranowaniu na pełnej prędkości',bunker:'przetrwaniu wszystkiego',volcan:'łączeniu dopalaczy',yunque:'niedawaniu się ruszyć',fantasma:'unikaniu Łowcy',estrella:'wszystkim po trochu, z błyskiem'},
   archWorst:{cohete:'pchaniu',tanque:'czystej prędkości',chispa:'przyjmowaniu ciosów',pinball:'jeździe prosto',lapa:'ruszaniu z miejsca',burbuja:'odpieraniu popchnięć',meteoro:'hamowaniu na czas',bunker:'ataku',volcan:'przyczepności',yunque:'bieganiu',fantasma:'pchaniu',estrella:'prawie niczym'},

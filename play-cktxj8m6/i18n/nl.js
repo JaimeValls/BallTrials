@@ -44,6 +44,7 @@ shell: {
   // — Garage —
   qual:['Gewoon','Ongewoon','Zeldzaam','Episch','Legendarisch'],
   attrs:['SNH','ACC','GEW','GRP','UTH','BST'],
+  attrsFull:['Snelheid','Versnelling','Gewicht','Grip','Uithouding','Boost'],
   archName:{cohete:'Raket',tanque:'Tank',chispa:'Vonk',pinball:'Flipperkast',lapa:'Zeepok',burbuja:'Bubbel',meteoro:'Meteoor',bunker:'Bunker',volcan:'Vulkaan',yunque:'Aambeeld',fantasma:'Spook',estrella:'Ster'},
   archBest:{cohete:'De Grote Race',tanque:'duwen en volhouden',chispa:'wegschieten bij de start',pinball:'chaos en stuiteren',lapa:'vastgrijpen en niet loslaten',burbuja:'door de gaten glippen',meteoro:'op volle snelheid rammen',bunker:'alles overleven',volcan:'boosts aan elkaar knopen',yunque:'geen centimeter wijken',fantasma:'de Jager ontwijken',estrella:'van alles een beetje, met glans'},
   archWorst:{cohete:'duwen',tanque:'pure snelheid',chispa:'klappen opvangen',pinball:'rechtdoor gaan',lapa:'wegkomen',burbuja:'weggeduwd worden',meteoro:'op tijd remmen',bunker:'aanvallen',volcan:'grip',yunque:'rennen',fantasma:'duwen',estrella:'bijna niets'},

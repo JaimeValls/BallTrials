@@ -44,6 +44,7 @@ shell: {
   // — Garage —
   qual:['Commune','Peu commune','Rare','Épique','Légendaire'],
   attrs:['VIT','ACC','POI','ADH','END','BST'],
+  attrsFull:['Vitesse','Accélération','Poids','Adhérence','Endurance','Boost'],
   archName:{cohete:'Fusée',tanque:'Tank',chispa:'Étincelle',pinball:'Flipper',lapa:'Patelle',burbuja:'Bulle',meteoro:'Météore',bunker:'Bunker',volcan:'Volcan',yunque:'Enclume',fantasma:'Fantôme',estrella:'Étoile'},
   archBest:{cohete:'La Grande Course',tanque:'pousser et tenir bon',chispa:'jaillir au départ',pinball:'le chaos et les rebonds',lapa:'s\'accrocher et ne pas lâcher',burbuja:'se faufiler dans les trous',meteoro:'foncer à pleine vitesse',bunker:'survivre à tout',volcan:'enchaîner les boosts',yunque:'ne pas bouger d\'un pouce',fantasma:'esquiver le Chasseur',estrella:'un peu de tout, avec éclat'},
   archWorst:{cohete:'pousser',tanque:'la vitesse pure',chispa:'encaisser',pinball:'aller tout droit',lapa:'démarrer',burbuja:'se faire bousculer',meteoro:'freiner à temps',bunker:'attaquer',volcan:'l\'adhérence',yunque:'courir',fantasma:'pousser',estrella:'presque rien'},

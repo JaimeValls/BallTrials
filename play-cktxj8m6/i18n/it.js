@@ -44,6 +44,7 @@ shell: {
   // — Garage —
   qual:['Comune','Non comune','Rara','Epica','Leggendaria'],
   attrs:['VEL','ACC','PES','PRE','RES','BST'],
+  attrsFull:['Velocità','Accelerazione','Peso','Aderenza','Resistenza','Spinta'],
   archName:{cohete:'Razzo',tanque:'Carro',chispa:'Scintilla',pinball:'Flipper',lapa:'Patella',burbuja:'Bolla',meteoro:'Meteora',bunker:'Bunker',volcan:'Vulcano',yunque:'Incudine',fantasma:'Fantasma',estrella:'Stella'},
   archBest:{cohete:'La Grande Corsa',tanque:'spingere e resistere',chispa:'scattare al via',pinball:'caos e rimbalzi',lapa:'aggrapparsi e non mollare',burbuja:'infilarsi nei varchi',meteoro:'travolgere a tutta velocità',bunker:'sopravvivere a tutto',volcan:'incatenare i boost',yunque:'non spostarsi di un millimetro',fantasma:'schivare il Cacciatore',estrella:'un po\' di tutto, con stile'},
   archWorst:{cohete:'spingere',tanque:'la velocità pura',chispa:'incassare',pinball:'andare dritta',lapa:'partire',burbuja:'farsi spingere',meteoro:'frenare in tempo',bunker:'attaccare',volcan:'la presa',yunque:'correre',fantasma:'spingere',estrella:'quasi niente'},

@@ -51,6 +51,44 @@ import { attachSquash } from './squash.mjs';
 // Como la bola sale mas pequeña con este encuadre, los HUECOS de las cartas crecen a la vez: el
 // tamaño en pantalla se mantiene y lo unico que cambia es que ya no se corta nada.
 const HW = 1.62, CY = 0.50, R = 0.62, SUELO = -0.86, REPOSO = SUELO + R;
+
+//+AG ENCUADRE POR BOLA. Un encuadre unico para las doce lo tiene que fijar la pieza MAS grande —el
+//   aura de Chispa a 1.58 R de ancho, el penacho del Espartano a 1.87 R de alto— y entonces las
+//   otras once nadan en su carta. Jaime: «hay mucho espacio vacio, yo haria las bolas mas grandes».
+//   Asi que cada bola trae SU caja, medida del propio arte (alfa de base+fx+aura, ya con la escala
+//   y el desplazamiento de PLACE aplicados). El precio, dicho claro: los cuerpos NO salen todos del
+//   mismo tamaño entre cartas — el Mago, que lleva un gorro altisimo, sale con el cuerpo mas
+//   pequeño que el Blindado. A cambio ninguna carta tiene un agujero de aire.
+//   Se regenera con la medicion de tools/ (ver el comentario de PIEZA en el commit): si cambia el
+//   arte de una pieza, este numero cambia con ella.
+const PIEZA = {
+  cohete:   [1.10, 1.39, 0.62],   // [medio-ancho, cuanto sube sobre el centro, cuanto baja]
+  tanque:   [1.15, 0.94, 0.91],
+  chispa:   [1.58, 1.44, 1.36],
+  pinball:  [1.02, 1.43, 0.62],
+  lapa:     [0.81, 1.32, 0.62],
+  burbuja:  [1.36, 1.40, 0.95],
+  meteoro:  [0.86, 1.52, 0.62],
+  bunker:   [1.09, 1.60, 0.62],
+  volcan:   [0.62, 1.86, 0.62],
+  yunque:   [0.88, 1.87, 0.62],
+  fantasma: [0.63, 0.62, 0.97],
+  estrella: [0.94, 1.58, 0.62],
+};
+const MARGEN = 1.05;             // un pelin de aire: pegar la pieza al borde tambien canta
+
+// Devuelve el encuadre de ESTA bola para una celda de proporcion `agrandado = alto/ancho`:
+// {hw, cy}. Cubre desde la sombra en el suelo hasta lo mas alto que llega la pieza EN EL APICE del
+// brinco — que es el instante que decide, no la bola en reposo.
+function encuadre(arch, aspecto){
+  const p = PIEZA[arch] || [R, R, R];
+  const arriba = REPOSO + SALTO + p[1];
+  const abajo  = Math.min(SUELO - 0.18, REPOSO - p[2]);   // -0.18 = la sombra de contacto
+  const cy = (arriba + abajo) / 2;
+  const medioV = (arriba - abajo) / 2 * MARGEN;
+  const medioH = p[0] * MARGEN;
+  return { hw: Math.max(medioH, medioV / Math.max(aspecto, 0.01)), cy };
+}
 const SALTO = 0.52;              // altura del brinco, en radios
 const G_SOMBRA = 0.34;
 
@@ -98,9 +136,9 @@ function color(arch){
 
 function construye(el, arch, apagada, i){
   const scene = new THREE.Scene();
-  // `data-viva-hw` aprieta el encuadre de UNA celda. Existe por la Home: ahi la bola es LA
-  // protagonista y tiene que llenar, no flotar en medio de un hueco de 188 px.
-  const hw = +el.dataset.vivaHw || HW;
+  // `data-viva-hw` FIJA el encuadre de una celda a mano y se salta el calculo por bola. Solo para
+  // casos raros; lo normal es dejar que `encuadre()` lo mida.
+  const hwFijo = el.dataset.vivaHw ? +el.dataset.vivaHw : null;
   // La bola NO COMPRADA se apaga a gris, igual que hacia el filtro CSS del <img> de antes: sigue
   // reconociendose la silueta y el accesorio, pero se lee «esta no es tuya». Se apaga en el COLOR
   // que se le pasa, no tocando el material despues: el vinilo es un shader y hurgarle los uniforms
@@ -122,7 +160,7 @@ function construye(el, arch, apagada, i){
   sh.position.set(0, SUELO - R * 0.14, -2); scene.add(sh);
   attachSquash(o, { R, vRef: 5.4, impact: 2.0, tilt: 0.16 });
   // Desfase por tarjeta: doce bolas saltando a la vez parecen un unico bloque, no doce personajes.
-  return { el, arch, scene, o, sombra: sh, t: i * 0.37, apagada, hw, caja: contenedor(el) };
+  return { el, arch, scene, o, sombra: sh, t: i * 0.37, apagada, hwFijo, caja: contenedor(el) };
 }
 
 function destruye(c){
@@ -203,8 +241,11 @@ function pinta(c){
   REN.setViewport(r.left, abajo, w, hgt);
   REN.setScissor(r.left, suelo, w, tope - suelo);
   REN.setScissorTest(true);
-  const vv = c.hw * hgt / w;
-  CAM.left = -c.hw; CAM.right = c.hw; CAM.top = CY + vv; CAM.bottom = CY - vv;
+  // El encuadre se calcula con la proporcion REAL de la celda, aqui y cada frame: la misma bola en
+  // la carta del Garaje y en la ficha grande tiene cajas distintas, y el CSS puede cambiarlas.
+  const e = c.hwFijo != null ? { hw: c.hwFijo, cy: CY } : encuadre(c.arch, hgt / w);
+  const vv = e.hw * hgt / w;
+  CAM.left = -e.hw; CAM.right = e.hw; CAM.top = e.cy + vv; CAM.bottom = e.cy - vv;
   CAM.updateProjectionMatrix();
   REN.render(c.scene, CAM);
 }

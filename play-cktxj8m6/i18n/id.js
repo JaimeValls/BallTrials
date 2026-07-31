@@ -44,6 +44,7 @@ shell: {
   // — Garasi —
   qual:['Umum','Tidak umum','Langka','Epik','Legendaris'],
   attrs:['CPT','AKS','BRT','CKM','TAH','BST'],
+  attrsFull:['Kecepatan','Akselerasi','Berat','Cengkeraman','Ketahanan','Dorongan'],
   archName:{cohete:'Roket',tanque:'Tank',chispa:'Percikan',pinball:'Pinball',lapa:'Kerang Lekat',burbuja:'Gelembung',meteoro:'Meteor',bunker:'Bunker',volcan:'Gunung Api',yunque:'Landasan',fantasma:'Hantu',estrella:'Bintang'},
   archBest:{cohete:'Balapan Akbar',tanque:'mendorong dan bertahan',chispa:'melesat dari garis start',pinball:'kekacauan dan mental-mental',lapa:'menempel dan tak mau lepas',burbuja:'menyelinap lewat celah',meteoro:'menabrak dengan kecepatan penuh',bunker:'selamat dari apa pun',volcan:'menyambung dorongan',yunque:'tidak bergeser sedikit pun',fantasma:'menghindari Sang Pemburu',estrella:'sedikit dari segalanya, dengan gaya'},
   archWorst:{cohete:'mendorong',tanque:'kecepatan murni',chispa:'menahan benturan',pinball:'melaju lurus',lapa:'melesat',burbuja:'menahan dorongan',meteoro:'mengerem tepat waktu',bunker:'menyerang',volcan:'cengkeraman',yunque:'berlari',fantasma:'mendorong',estrella:'hampir tidak ada'},

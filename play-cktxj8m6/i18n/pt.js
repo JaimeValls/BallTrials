@@ -44,6 +44,7 @@ shell: {
   // — Garagem —
   qual:['Comum','Incomum','Raro','Épico','Lendário'],
   attrs:['VEL','ACL','PES','ADE','RES','IMP'],
+  attrsFull:['Velocidade','Aceleração','Peso','Aderência','Resistência','Impulso'],
   archName:{cohete:'Foguete',tanque:'Tanque',chispa:'Faísca',pinball:'Pinball',lapa:'Lapa',burbuja:'Bolha',meteoro:'Meteoro',bunker:'Bunker',volcan:'Vulcão',yunque:'Bigorna',fantasma:'Fantasma',estrella:'Estrela'},
   archBest:{cohete:'A Grande Corrida',tanque:'empurrar e aguentar',chispa:'disparar na largada',pinball:'caos e ricochete',lapa:'agarrar e não soltar',burbuja:'passar pelos vãos',meteoro:'atropelar a toda velocidade',bunker:'sobreviver a tudo',volcan:'emendar impulsos',yunque:'não sair do lugar',fantasma:'escapar do Caçador',estrella:'um pouco de tudo, com brilho'},
   archWorst:{cohete:'empurrar',tanque:'velocidade pura',chispa:'levar pancada',pinball:'andar em linha reta',lapa:'disparar',burbuja:'levar empurrão',meteoro:'frear a tempo',bunker:'atacar',volcan:'aderência',yunque:'correr',fantasma:'empurrar',estrella:'quase nada'},

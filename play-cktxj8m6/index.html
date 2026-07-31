@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-31 58558a8"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-07-31 4f84a35"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -347,7 +347,35 @@
   .gd-card{ width:100%; max-width:370px; background:linear-gradient(165deg,#241d52,#171338); border:2px solid var(--qc,#fff3); border-radius:22px; padding:16px 18px; display:flex; flex-direction:column; align-items:center; gap:6px; box-shadow:0 20px 50px #000a, inset 0 0 30px var(--qglow,transparent); }
   .gd-q{ font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--qc); }
   .gd-name{ font-size:23px; font-weight:900; }
-  .gd-hex{ width:222px; height:198px; touch-action:manipulation; }
+  /*+AG las 6 barras de atributos. Reusan el lenguaje de la barra de XP que ya vive en esta misma
+    ficha (mismo alto, mismo radio, mismo carril): no se inventa un medidor nuevo para la pantalla
+    que ya tiene uno. El color del relleno es el de la RAREZA (--qc) para que la ficha se sienta de
+    esa bola, y el carril lleva una marca al 100% para que «8 de 10» se vea sin leer el numero. */
+  .gd-stats{ width:100%; display:flex; flex-direction:column; gap:6px; margin:2px 0 2px; }
+  .gd-st{ display:grid; grid-template-columns:16px 1fr 30px; align-items:center; gap:8px; }
+  .gd-st .ic{ width:16px; height:16px; display:block; opacity:.9; }
+  .gd-st .ic svg{ width:100%; height:100%; display:block; fill:none; stroke:var(--qc,#cfd3ff); stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
+  .gd-st .nm{ font-size:11px; font-weight:800; letter-spacing:.02em; color:#e9e6ff; text-transform:none;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .gd-st .vl{ font-size:11px; font-weight:900; color:var(--muted); text-align:right; font-variant-numeric:tabular-nums; }
+  .gd-st .bar{ grid-column:2 / span 2; height:9px; border-radius:6px; background:#ffffff16; position:relative; margin-top:-2px; }
+  /* ⚠ `display:block`: el relleno es un <span>, o sea EN LINEA, y a un elemento en linea no se le
+     aplica ni ancho ni alto — salia de 0x0 y la barra se veia vacia con la muesca flotando. La
+     muesca si se veia porque es `position:absolute`, que ya lo convierte en bloque. */
+  /* ⚠ y el color va SOLIDO, no en degradado. Un `linear-gradient` se estira al ancho del elemento,
+     asi que en una barra corta (un atributo de 2) casi todo lo que se ve es el final del degradado
+     —el blanco— y la barra sale gris: el color de rareza solo se veia en las barras largas. Con
+     color plano + brillo por dentro, un 2 y un 9 son igual de verdes. */
+  .gd-st .fill{ display:block; height:100%; border-radius:6px; background:var(--qc,#7ef0ff);
+    box-shadow:inset 0 2px 0 #ffffff59, inset 0 -3px 0 #0000002e;
+    transition:width .45s cubic-bezier(.34,1.2,.64,1); }
+  /* la MUESCA: hasta donde llega este atributo con la bola al maximo. Es lo que decia el anillo
+     punteado del hexagono; sin ella se perdia «cuanto le queda por crecer». */
+  .gd-st .tope{ position:absolute; top:-2px; width:2px; height:13px; border-radius:2px; background:#ffffff66; transform:translateX(-1px); }
+  /* La bola que NO tienes enseña sus barras en color, a proposito. Apagarlas era copiar el gris del
+     retrato sin pensar: la ficha de una bola bloqueada es justo donde se decide comprarla, y ahi lo
+     que hay que ver bien es en que es buena. Lo que esta apagado es la BOLA, que ya dice que no es
+     tuya; las cifras no tienen por que esconderse. */
   .gd-tags{ font-size:13px; color:#c9cff0; text-align:center; line-height:1.5; }
   .gd-tags b{ color:#fff; }
   .gd-xp{ width:100%; }
@@ -1500,9 +1528,16 @@
          y el pie: la carta perdia 150 px y el boton se montaba encima del grafico. Se caza mirando
          los HIJOS de #gdCard (cuatro en vez de ocho), no la captura. -->
     <div class="gd-art"><div id="gdBall"></div>
-      <div class="gd-pista"><div id="gdPista"></div><span data-t="gdPista">en pista</span></div>
+      <!--+AG la mini «en pista» se retira (Jaime, 31-jul). Existia por el doc 51: cuando el retrato
+           grande era una ILUSTRACION, esta mini enseñaba la bola REAL del motor con color de equipo
+           («asi se ve en pista»). Desde que el retrato grande ES la bola real del motor, salian dos
+           bolas casi identicas pegadas y ya no contaba nada nuevo. -->
     </div>
-    <canvas class="gd-hex" id="gdHex" width="266" height="238"></canvas>
+    <!--+AG BARRAS en vez del radar hexagonal (Jaime, 31-jul): «no se ven bien las estadisticas, estan
+         abreviadas, no lo abrevies... la gente entiende mejor las barras de 0 de 10, 5 de 10, y ahi
+         ves en que es bueno». El hexagono es lenguaje de juego de estrategia; una barra la lee un
+         niño. Cada fila: icono + nombre COMPLETO + barra + numero. -->
+    <div class="gd-stats" id="gdStats"></div>
     <div class="gd-tags" id="gdTags"></div>
     <div class="gd-xp" id="gdXpWrap"><div class="gd-xplbl"><span id="gdXpCap" data-t="ballLvl">Nivel de bola</span><span id="gdXpNum"></span></div><div class="gd-xpbar"><div class="gd-xpfill" id="gdXpFill"></div></div></div>
     <div class="gd-assign" id="gdAssign"></div>
@@ -1792,7 +1827,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=58558a8"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=4f84a35"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -2676,6 +2711,7 @@ const MORE={
     // — Garaje —
     qual:['Común','Poco común','Rara','Épica','Legendaria'],
     attrs:['VEL','ACE','PES','AGA','RES','BST'],
+    attrsFull:['Velocidad','Aceleración','Peso','Agarre','Resistencia','Impulso'],
     archName:{cohete:'Cohete',tanque:'Tanque',chispa:'Chispa',pinball:'Pinball',lapa:'Lapa',burbuja:'Burbuja',meteoro:'Meteoro',bunker:'Búnker',volcan:'Volcán',yunque:'Yunque',fantasma:'Fantasma',estrella:'Estrella'},
     archBest:{cohete:'La Gran Carrera',tanque:'empujar y aguantar',chispa:'arrancar la primera',pinball:'el caos y los rebotes',lapa:'agarrarse y no soltarse',burbuja:'escurrirse por los huecos',meteoro:'embestir a toda velocidad',bunker:'sobrevivir a todo',volcan:'encadenar boosts',yunque:'plantarse y no moverse',fantasma:'esquivar al Cazador',estrella:'un poco de todo, brillando'},
     archWorst:{cohete:'empujar',tanque:'la velocidad pura',chispa:'aguantar golpes',pinball:'ir en línea recta',lapa:'salir disparada',burbuja:'los empujones',meteoro:'frenar a tiempo',bunker:'atacar',volcan:'agarrarse',yunque:'correr',fantasma:'empujar',estrella:'casi nada'},
@@ -2701,7 +2737,6 @@ const MORE={
     gdMoney:'El dinero solo compra VARIEDAD (bolas hasta Rara), nunca poder.',
     unlockBtn:p=>'Desbloquear · '+p+' ✦', orPay:g=>'o pagar '+g+' ◆',
     equipBtn:'Equipar', equippedBtn:'✓ Equipada', tEquipped:'¡Equipada!', tUnlocked:n=>'¡'+n+' desbloqueado!',
-    gdPista:'en pista',
     // — Tienda —
     shSecs:['Destacados','Bolas','Cosméticos','Gemas','Pase'],
     shNoteFeat:'Escaparate que rota cada semana con el tema de temporada. Todo con precio y contenido a la vista, <b>nunca cajas sorpresa</b>.',
@@ -2840,6 +2875,7 @@ const MORE={
     // — Garage —
     qual:['Common','Uncommon','Rare','Epic','Legendary'],
     attrs:['SPD','ACC','WGT','GRP','END','BST'],
+    attrsFull:['Speed','Acceleration','Weight','Grip','Endurance','Boost'],
     archName:{cohete:'Rocket',tanque:'Tank',chispa:'Spark',pinball:'Pinball',lapa:'Limpet',burbuja:'Bubble',meteoro:'Meteor',bunker:'Bunker',volcan:'Volcano',yunque:'Anvil',fantasma:'Ghost',estrella:'Star'},
     archBest:{cohete:'The Great Race',tanque:'pushing and holding on',chispa:'launching off the line',pinball:'chaos and bouncing',lapa:'grabbing on and not letting go',burbuja:'slipping through gaps',meteoro:'ramming at full speed',bunker:'surviving anything',volcan:'chaining boosts',yunque:'standing its ground',fantasma:'dodging the Hunter',estrella:'a bit of everything, brightly'},
     archWorst:{cohete:'pushing',tanque:'raw speed',chispa:'taking hits',pinball:'going in a straight line',lapa:'shooting off',burbuja:'getting shoved',meteoro:'braking in time',bunker:'attacking',volcan:'gripping',yunque:'running',fantasma:'pushing',estrella:'almost nothing'},
@@ -2862,7 +2898,6 @@ const MORE={
     gdMoney:'Money only buys VARIETY (balls up to Rare), never power.',
     unlockBtn:p=>'Unlock · '+p+' ✦', orPay:g=>'or pay '+g+' ◆',
     equipBtn:'Equip', equippedBtn:'✓ Equipped', tEquipped:'Equipped!', tUnlocked:n=>n+' unlocked!',
-    gdPista:'in a match',
     // — Shop —
     shSecs:['Featured','Balls','Cosmetics','Gems','Pass'],
     shNoteFeat:'A storefront that rotates every week with the season theme. Price and contents always in plain sight, <b>never loot boxes</b>.',
@@ -3825,6 +3860,10 @@ const archBest =k=>((S().archBest ||{})[k])||(ARCHS[k]&&ARCHS[k].best)||'';
 const archWorst=k=>((S().archWorst||{})[k])||(ARCHS[k]&&ARCHS[k].worst)||'';
 const qualName =i=>((S().qual||[])[i])||(QUAL[i]&&QUAL[i].n)||'';
 const attrName =i=>((S().attrs||[])[i])||ATTRS[i];
+//+AG el nombre COMPLETO del atributo, para las barras de la ficha. Si un paquete de idioma todavía
+//   no lo trae, cae a la abreviatura de siempre: un idioma sin traducir enseña "VEL", que es lo que
+//   había ayer, en vez de romper la ficha o soltar un "undefined".
+const attrFull =i=>((S().attrsFull||[])[i])||attrName(i);
 const cosmName =c=>((S().cosmNames||{})[c.id])||c.nm;
 const cosmCat  =c=>((S().cosmCats ||{})[c.cat])||c.cat;
 const HXF="'Segoe UI Rounded','Nunito',system-ui,sans-serif";
@@ -3899,8 +3938,7 @@ function openDetail(k){ applyShell(); const A=ARCHS[k], b=owned(k), q=QUAL[A.q],
   const tr=traitOf(k); if(tr) tags+='<br><b>'+s.traitWord+'</b>: '+tr+' <small>· '+(s.traitWhere||{})[k]+'</small>';
   el('gdTags').innerHTML=tags;
   const lvl=b?(b.lvl||1):1, attrs=b?attrsOf(b):A.base;
-  const cap=Math.max.apply(null, attrsOf({arch:k,lvl:maxLvl(k)}));   //+AG anillo punteado = a dónde llega su MEJOR atributo al nivel máximo
-  drawHex(el('gdHex'), attrs, cap, q.c, !b);
+  drawStats(el('gdStats'), k, attrs, !b);
   const assign=el('gdAssign'); assign.innerHTML='';
   let lvlUpReady=false;   //+AG doc 40: regla Supercell "un solo elemento brillando por pantalla"
   if(b){ const next=lvl+1, maxed=next>maxLvl(k);
@@ -3937,17 +3975,15 @@ function openDetail(k){ applyShell(); const A=ARCHS[k], b=owned(k), q=QUAL[A.q],
   //+AG doc 40: el boton grande brilla solo si se puede pulsar Y no hay ya otra cosa brillando en la ficha
   //   (si la bola esta lista para subir de nivel, ESA es la accion del momento).
   prim.classList.toggle('ready', !prim.disabled && !lvlUpReady);
-  //+AG doc 51: la vista previa de PISTA. Va con la ficha ABIERTA (no antes): el lienzo compartido
-  //   se muda al hueco de esta ficha, y si aun no ha aterrizado el modulo se guarda cual pintar.
-  window.BT_PISTA_CUR = k;
-  if(window.BT_PISTA) BT_PISTA.show(el('gdPista'), k);
+  //+AG la vista previa de PISTA (doc 51) se retira con su hueco: ya no hay `#gdPista` que pintar,
+  //   asi que tampoco se arranca su lienzo. Se deja de gastar un segundo contexto WebGL en la ficha.
   el('gDetail').classList.add('on');
   vivasSync();   //+AG con la ficha ya abierta: asi `vivasQue()` la ve puesta y monta SU bola, no las doce de detras
 }
 //+AG una sola puerta de salida: ✕, VOLVER, tocar fuera y equipar pasan por aqui. Y por eso es el
 //   sitio donde parar la vista previa de pista: su rAF no puede quedarse girando detras de una
 //   ficha cerrada (mismo trato que el fondo vivo, doc 51).
-function closeDetail(){ el('gDetail').classList.remove('on'); window.BT_PISTA_CUR=null; if(window.BT_PISTA) BT_PISTA.stop();
+function closeDetail(){ el("gDetail").classList.remove("on");
   vivasSync(); }   //+AG y al cerrarla se vuelven a montar las doce de la rejilla, con el lienzo otra vez a su altura
 function unlock(k,withGems){ const A=ARCHS[k];   // transacción compartida por Garaje y Tienda; el que llama re-renderiza
   if(A.price==null) return false;   //+AG doc 39: hitos/Fichas no pasan por aquí
@@ -3965,15 +4001,46 @@ function checkHitos(){ const tot=totalCopas();
       persist(); toast(S().tHito(archName(k))); } });
 }
 // hexágono radar (VEL/ACE/PES/AGA/RES/BST): rejilla + anillo del TECHO de calidad (punteado) + polígono de valores
-function drawHex(cv, attrs, cap, color, faded){ const x=cv.getContext('2d'), W=cv.width, H=cv.height, cx=W/2, cy=H/2+3, R=Math.min(W,H)*0.34, N=6, ang=i=>-Math.PI/2+i*Math.PI/3;
-  x.clearRect(0,0,W,H);
-  for(let r=1;r<=3;r++){ x.beginPath(); for(let i=0;i<N;i++){ const rr=R*r/3,px=cx+rr*Math.cos(ang(i)),py=cy+rr*Math.sin(ang(i)); i?x.lineTo(px,py):x.moveTo(px,py);} x.closePath(); x.strokeStyle='#ffffff14'; x.lineWidth=1; x.stroke(); }
-  for(let i=0;i<N;i++){ x.beginPath(); x.moveTo(cx,cy); x.lineTo(cx+R*Math.cos(ang(i)),cy+R*Math.sin(ang(i))); x.strokeStyle='#ffffff10'; x.stroke(); }
-  x.setLineDash([4,4]); x.beginPath(); for(let i=0;i<N;i++){ const rr=R*Math.min(1,cap/22),px=cx+rr*Math.cos(ang(i)),py=cy+rr*Math.sin(ang(i)); i?x.lineTo(px,py):x.moveTo(px,py);} x.closePath(); x.strokeStyle=color+'99'; x.lineWidth=1.5; x.stroke(); x.setLineDash([]);
-  x.beginPath(); for(let i=0;i<N;i++){ const rr=R*Math.min(1,attrs[i]/22),px=cx+rr*Math.cos(ang(i)),py=cy+rr*Math.sin(ang(i)); i?x.lineTo(px,py):x.moveTo(px,py);} x.closePath(); x.fillStyle=color+(faded?'2e':'5a'); x.fill(); x.strokeStyle=color; x.lineWidth=2.5; x.stroke();
-  x.font='800 12px '+HXF; x.textAlign='center'; x.textBaseline='middle';
-  for(let i=0;i<N;i++){ const lr=R+17,px=cx+lr*Math.cos(ang(i)),py=cy+lr*Math.sin(ang(i)); x.fillStyle='#aeb6d8'; x.fillText(attrName(i)+' '+attrs[i],px,py); }
+//+AG LAS 6 BARRAS DE ATRIBUTOS (sustituyen al radar hexagonal, 31-jul). Jaime: «no se ven bien las
+//   estadísticas, están abreviadas, no lo abrevies… la gente entiende mejor las barras de 0 de 10».
+//   Un radar es lenguaje de juego de estrategia; una barra la lee un niño de nueve años.
+//   TRES decisiones que no son de gusto:
+//   · La escala es el atributo MÁS ALTO QUE EXISTE en el juego, calculado, no un número a mano: así
+//     dos bolas distintas se pueden comparar mirando la misma longitud. Si mañana se sube el techo
+//     de una rareza, la escala se mueve sola en vez de mentir.
+//   · La MUESCA de cada barra es hasta dónde llega ESE atributo con la bola al nivel máximo — es lo
+//     que decía el anillo punteado del hexágono, que si no se perdía: «cuánto le queda por crecer».
+//   · Nombre COMPLETO y traducido, nunca la abreviatura.
+const MAXSTAT=(()=>{ let m=1; for(const k of ARCH_KEYS){ const a=attrsOf({arch:k,lvl:maxLvl(k)}); m=Math.max(m,Math.max.apply(null,a)); } return m; })();
+//   Iconos en SVG dentro del propio HTML: son seis glifos de una línea, y pedirlos como imagen
+//   sería un viaje de red por cada uno para dibujar una flecha. Si el arte pide más carácter, se
+//   encargan a Codex y solo cambia esta tabla.
+const STAT_ICO=[
+  'M3 12h7M6 8l4 4-4 4M13 8l4 4-4 4',                                  // velocidad: se lanza hacia delante
+  'M3 15c4 0 5-9 9-9M12 6h4v4',                                        // aceleración: la curva que sube
+  'M6 8h8l3 9H3zM8 8V6a2 2 0 0 1 4 0v2',                               // peso: la pesa
+  'M6 4v7a4 4 0 0 0 8 0V4M4 4h4M12 4h4',                               // agarre: la herradura que se pega
+  'M10 3l7 3v5c0 4-3 6-7 7-4-1-7-3-7-7V6z',                            // resistencia: el escudo
+  'M11 2L5 12h5l-1 6 6-10h-5z',                                        // impulso: el chispazo
+];
+function drawStats(host, k, attrs, apagada){
+  const s=S(), topes=attrsOf({arch:k,lvl:maxLvl(k)});
+  host.classList.toggle('off', !!apagada);
+  host.innerHTML=ATTRS.map((_,i)=>{
+    const v=attrs[i], tope=topes[i];
+    const pct=Math.max(4, Math.round(v/MAXSTAT*100));      // 4% de suelo: una barra a cero no se ve
+    const pt=Math.round(tope/MAXSTAT*100);
+    return `<div class="gd-st">
+      <span class="ic"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="${STAT_ICO[i]}"/></svg></span>
+      <span class="nm">${attrFull(i)}</span>
+      <span class="vl">${v}</span>
+      <span class="bar"><span class="fill" style="width:${pct}%"></span><i class="tope" style="left:${pt}%"></i></span>
+    </div>`;
+  }).join('');
 }
+//+AG el RADAR HEXAGONAL se retira: lo sustituyen las 6 barras de `drawStats`. Se borra en vez de
+//   dejarlo aparcado porque una funcion que no llama nadie promete una pantalla que ya no existe,
+//   y la siguiente persona pierde el rato entendiendo cual de las dos manda.
 
 // ===== TIENDA (doc 12: dinero→Gemas→todo, cero azar, precios visibles, puerta parental) · números de ARRANQUE =====
 //+AG doc 45 §5: la escalera de packs es la de Clash Royale, cantidades y precios (peticion de
@@ -4874,9 +4941,6 @@ else if((FRESH || _pend) && !SAVE.onboarded && _onbParam!=='0'){
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
   import('./arte/pista-preview.mjs').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
-    // Si la ficha ya estaba abierta cuando aterrizo el modulo, la pinta ahora.
-    const g=document.getElementById('gDetail');
-    if(g && g.classList.contains('on') && window.BT_PISTA_CUR) BT_PISTA.show(document.getElementById('gdPista'), BT_PISTA_CUR);
   });
 </script>
 
