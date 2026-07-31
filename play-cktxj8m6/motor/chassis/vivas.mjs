@@ -36,12 +36,21 @@ import { archLook } from './ballmat.mjs';
 import { archFace } from './facegen.mjs';
 import { attachSquash } from './squash.mjs';
 
-// El mundo de cada celda. El encuadre lo manda el SALTO MAS ALTO, no la bola quieta: con el hueco
-// justo, la bola se sale por arriba en el punto alto del brinco y parece que la carta la corta.
-// HW es el SEMIANCHO en radios de bola, o sea cuanto ocupa la bola en la carta: a 1.62 salia una
-// bolita perdida en medio de un hueco enorme. La carta de personaje de Brawl Stars enseña al
-// personaje GRANDE; aqui la bola llena, y el aire justo va arriba para el brinco.
-const HW = 1.02, R = 0.62, SUELO = -0.86, REPOSO = SUELO + R;
+// El mundo de cada celda. HW es el SEMIANCHO de la camara en radios de bola: cuanto MENOR, mas
+// grande sale la bola... y antes lo elegi mirando solo la bola. Error: lo que decide el encuadre no
+// es la bola, es EL ACCESORIO, que sobresale mucho mas. A 1.02 se cortaban las burbujas, la
+// electricidad y los cuernos — «la imagen se corta» (Jaime, 31-jul).
+//
+// MEDIDO pieza a pieza (medio-ancho y medio-alto que necesita cada una, en radios, ya con su escala
+// y su colocacion de PLACE): la mas ANCHA es Chispa con su aura, **1.58 R**; las mas ALTAS son el
+// penacho del Espartano y el gorro del Mago, **1.87 R**. Por eso HW = 1.62 y no un numero a ojo.
+//
+// Y la camara se DESPLAZA hacia arriba (`CY`): lo que hay que encuadrar va de la sombra en el suelo
+// (~-1.05) a la punta del gorro en lo alto del brinco (~+2.1), que no esta centrado en cero. Con la
+// camara en cero se malgastaba media vista en suelo vacio y aun asi se cortaba el gorro.
+// Como la bola sale mas pequeña con este encuadre, los HUECOS de las cartas crecen a la vez: el
+// tamaño en pantalla se mantiene y lo unico que cambia es que ya no se corta nada.
+const HW = 1.62, CY = 0.50, R = 0.62, SUELO = -0.86, REPOSO = SUELO + R;
 const SALTO = 0.52;              // altura del brinco, en radios
 const G_SOMBRA = 0.34;
 
@@ -194,7 +203,8 @@ function pinta(c){
   REN.setViewport(r.left, abajo, w, hgt);
   REN.setScissor(r.left, suelo, w, tope - suelo);
   REN.setScissorTest(true);
-  CAM.left = -c.hw; CAM.right = c.hw; CAM.top = c.hw * hgt / w; CAM.bottom = -c.hw * hgt / w;
+  const vv = c.hw * hgt / w;
+  CAM.left = -c.hw; CAM.right = c.hw; CAM.top = CY + vv; CAM.bottom = CY - vv;
   CAM.updateProjectionMatrix();
   REN.render(c.scene, CAM);
 }

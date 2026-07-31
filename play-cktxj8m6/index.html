@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-31 2aefc9f"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-07-31 58558a8"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -298,8 +298,10 @@
     y la bola se posiciona LEYENDO este rectangulo cada frame: las dos animaciones se sumaban y el
     salto salia borracho. El movimiento lo pone el motor, que ademas trae su aplastado y su sombra.
     Se deja algo mas alto que ancho porque la bola SALTA y el brinco necesita aire por arriba. */
-  .g-card .gi{ width:66px; height:74px; display:block; }
-  .sh-item .sh-ic{ width:50px; height:56px; display:block; margin:0 auto; }
+  /* El hueco crece con el encuadre: la vista pasa a enseñar 1.62 R (lo que necesita el accesorio mas
+     ancho) en vez de 1.02 R, asi que si el hueco no creciera la bola saldria un 40% mas pequeña. */
+  .g-card .gi{ width:96px; height:96px; display:block; }
+  .sh-item .sh-ic{ width:72px; height:72px; display:block; margin:0 auto; }
   .g-cname{ font-weight:800; font-size:14px; }
   .g-qtag{ font-size:9.5px; font-weight:800; letter-spacing:.09em; text-transform:uppercase; color:var(--qc,#9aa4b8); }
   .g-eq{ position:absolute; top:8px; right:8px; background:var(--gold2); color:#3a2400; font-size:9px; font-weight:900; padding:2px 8px; border-radius:999px; letter-spacing:.05em; }
@@ -683,7 +685,7 @@
   /*+AG hueco de la BOLA VIVA de la Home: solo reserva sitio. Nada de `breathe` ni de drop-shadow —
     la bola ya salta por su cuenta y trae su propia sombra de contacto; animar el hueco movia el
     rectangulo que el motor lee cada frame y las dos animaciones se sumaban. */
-  .hero #hBall{ width:188px; height:188px; display:block; }
+  .hero #hBall{ width:262px; height:262px; display:block; margin:0 auto; }
   .hero canvas{ width:164px; height:164px; filter:drop-shadow(0 16px 24px #0009); animation:breathe 3.1s ease-in-out infinite; }
   .hero .ballname{ display:flex; align-items:center; gap:7px; font-size:24px; font-weight:900; letter-spacing:-.01em; margin-top:4px; text-shadow:0 3px 14px #000a; }
   .hero .ballcups{ display:flex; align-items:center; justify-content:center; gap:5px; font-size:14px; font-weight:900; color:var(--gold2); font-variant-numeric:tabular-nums; text-shadow:0 2px 8px #fbb91544; }
@@ -1202,7 +1204,7 @@
                encuadre con data-viva-hw para que llene: con el de la rejilla se quedaba flotando en
                medio de un hueco de 188 px. ⚠ El <div> VA CERRADO (un <img> es etiqueta vacia y este
                no). -->
-          <div id="hBall" data-viva-hw="0.86"></div>
+          <div id="hBall"></div>
         </div>
         <div class="ballname" id="hBallName">🚀 Cohete</div>
         <div class="ballcups" id="hBallCups">🏆 0</div>
@@ -1790,7 +1792,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=2aefc9f"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=58558a8"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
