@@ -96,6 +96,28 @@ export function createWebAudio({ musicUrl = null, musicGain = 0.30, sfxGain = 0.
     return unlocked;
   }
 
+  //+AG DESPERTAR SIN GESTO (fallo real, Jaime 2026-07-31: "muchas veces la partida empieza sin música: sale el
+  //   3-2-1 y no hay nada, queda muy frío"). El iframe de la partida lleva allow="autoplay" (juego.html →
+  //   openFrame), o sea que el permiso de sonido que el jugador YA dio en el shell al pulsar JUGAR está delegado
+  //   dentro de la partida. Hasta hoy no se usaba: el motor esperaba un gesto PROPIO, así que quien dejaba que el
+  //   cartel de "¡LISTO!" se auto-arrancara jugaba la cuenta atrás muda —sin música y sin beeps— hasta su primer
+  //   toque de juego.
+  //   LA DIFERENCIA CON resume(): resume() marca unlocked ANTES de saber el resultado, a propósito (el cartel no
+  //   puede esperar). Aquí es al revés y es lo importante: solo se da por desbloqueado si el AudioContext queda de
+  //   VERDAD en 'running'. Donde el navegador lo rechace (Safari/iOS es el caso típico) devuelve false sin mentir y
+  //   sigue mandando el gesto de siempre — un unlocked falso dejaría al motor programando sonido que no sale.
+  //   EL TIMEOUT NO ES COSMÉTICO: cuando Chrome bloquea el autoplay, ctx.resume() no rechaza — se queda PENDIENTE
+  //   hasta que haya un gesto. Sin la carrera contra el reloj esta promesa no volvería nunca.
+  async function tryAutoplay(ms = 400){
+    ensureCtx();
+    if (unlocked) return true;
+    if (musicUrl && !musicBuf && !loadingMusic) loadingMusic = loadMusic(musicUrl);
+    try { await Promise.race([ ctx.resume(), new Promise(r => setTimeout(r, ms)) ]); } catch {}
+    if (ctx.state !== 'running') return false;
+    unlocked = true;
+    return true;
+  }
+
   // gesto del usuario: crea/reanuda el AudioContext y carga la música (espera al decode → el 1er play ya la lleva).
   async function unlock(){
     await resume();
@@ -159,7 +181,7 @@ export function createWebAudio({ musicUrl = null, musicGain = 0.30, sfxGain = 0.
   }
 
   return {
-    unlock, resume, prefetch, start, stop, loadMusic, setMusicUrl, setMusicGain, musicGain,
+    unlock, resume, tryAutoplay, prefetch, start, stop, loadMusic, setMusicUrl, setMusicGain, musicGain,
     get unlocked(){ return unlocked; },
     get hasMusic(){ return !!musicBuf; },
     //+AG "¿ya está sonando (o a punto de sonar) la música?". Lo usan los motores para que el "¡YA!" NO reinicie

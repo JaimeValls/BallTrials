@@ -186,6 +186,15 @@ export const PROP_KEYS = Object.keys(DRAW);
 //  motor/<modo>/index.html pero la pagina de previsualizacion cuelga de otro sitio, y con una
 //  ruta relativa a la pagina cada una necesitaria la suya.
 const ART = k => new URL(`../../arte/props/prop-${k}.webp`, import.meta.url).href;
+//+AG doc 55: la capa que se MUEVE, si la hay. La escribe tools/partir-props.py separando las islas
+//   del alfa de la pieza entregada; no es arte nuevo, es la misma pieza partida en dos.
+const ART_FX = k => new URL(`../../arte/props/prop-${k}-fx.webp`, import.meta.url).href;
+//+AG doc 55 capa 2: lo que se ENCIENDE. Es la misma pieza con todo en negro menos lo caliente, y
+//   se pinta como un plano ADITIVO encima: donde la mascara es negra no suma nada, donde es clara
+//   ilumina. Se hace con un plano y no con el shader del cuerpo a proposito — lo que brilla es el
+//   ACCESORIO (las estrellas del sombrero del Mago), no la bola, y el cuerpo lleva el color del
+//   equipo, que no se puede tocar.
+const ART_EM = k => new URL(`../../arte/props/prop-${k}-em.webp`, import.meta.url).href;
 
 const cache = new Map();
 function dibujada(arch){                 // el respaldo: la version de canvas de siempre
@@ -232,13 +241,134 @@ const PLACE = {
   cohete:   { dx: 0.34, dy: -0.24, k: 0.94 },
   estrella: { dx: 0.00, dy: -0.54, k: 0.58 },   // barrido de escala/altura: la unica pareja que baja
 };
+//+AG la capa FX se pide SIEMPRE que la bola tenga tabla, pero puede no existir todavia (el arte
+//   con isla suelta llega por el encargo 21b). Por eso el plano nace INVISIBLE y solo se enciende
+//   cuando la imagen carga de verdad: si el fichero no esta, no hay error, no hay hueco y no hay
+//   animacion — exactamente lo que se ve hoy. Es la misma cautela que ya tiene la base, que se cae
+//   al dibujo de canvas si su webp falla.
+const cacheCapa = new Map();
+function textureCapa(arch, cual, onOk){
+  const clave = cual + ':' + arch;
+  if (cacheCapa.has(clave)){ const t = cacheCapa.get(clave); if (t && t.image) onOk(); return t; }
+  const url = cual === 'em' ? ART_EM(arch) : ART_FX(arch);
+  const t = new THREE.TextureLoader().load(url, () => onOk(), undefined, () => {});
+  t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
+  t.minFilter = THREE.LinearMipmapLinearFilter; t.magFilter = THREE.LinearFilter;
+  cacheCapa.set(clave, t);
+  return t;
+}
+
+// ── PROP_FX · el accesorio SE MUEVE (doc 55, capa 3) ─────────────────────────────────────────
+// POR QUE: hasta ahora el prop era UN sprite muerto pegado a la bola. Un accesorio que se mueve se
+// entiende el doble — Jaime, sobre las chispas: «esas chispas se animan y entiendes que es el
+// chisposo». La identidad no la da solo la forma: la da el GESTO.
+//
+// ES LA MISMA MECANICA QUE LA CARA, a proposito: tabla declarativa + interprete de ocho lineas,
+// calcado de FACE_FX en gfx.mjs. Aqui no se inventa un sistema nuevo, se copia el que ya lleva
+// meses funcionando (y que ya sobrevivio al pase de la cara de heroe).
+//
+// DOS CAPAS COMO MUCHO, y por un motivo medido: la textura entregada es UNA (512 px), y
+// tools/partir-props.py la parte en `base` (lo quieto) y `fx` (lo que se mueve) leyendo las islas
+// del alfa. Mas capas no es mas bonito: son mas draw calls sobre la unica bola que lleva arch.
+//
+// Canales (amplitudes en RADIOS de bola, frecuencias en ciclos/s):
+//   bob    · sube y baja            · el sombrero que respira
+//   sway   · se balancea (rotacion) · el penacho que ondea
+//   blink  · parpadeo de opacidad   · las chispas que chispean
+//   pulse  · late de tamaño         · la joya
+//   kick   · SALTA con el impacto   · el sombrero del Vaquero al rebotar
+//   drag   · se retrasa con la velocidad · lo que ondea hacia atras al correr
+// `phase` desfasa el canal para que dos bolas iguales no vayan sincronizadas.
+const PROP_FX = {
+  // Lo que hoy tiene isla aprovechable en el alfa ya puede animarse; el resto entra con el
+  // encargo 21b (Codex pinta lo movil como isla suelta con hilo de aire).
+  chispa:  { fx: { blink: 0.55, blinkHz: 3.1, bob: 0.03, bobHz: 1.7, phase: 0.7 } },
+  burbuja: { fx: { bob: 0.05, bobHz: 0.9, pulse: 0.06, pulseHz: 1.3 } },
+  meteoro: { fx: { sway: 0.05, swayHz: 0.8, drag: 0.06 } },
+  //+AG volcan es la casilla de EL MAGO (doc 54): su rol es encadenar boosts (BST 9 + rasgo), asi
+  //   que su accesorio destella con el boost. El personaje cuenta su rol jugando.
+  volcan:  { fx: { bob: 0.04, bobHz: 1.1, pulse: 0.05, pulseHz: 2.2, flash: 'nitro' } },
+  fantasma:{ fx: { sway: 0.10, swayHz: 1.2, drag: 0.10, phase: 1.3 } },
+  // Los que necesitan el arte del 21 para tener capa (aqui documentados, sin efecto hasta
+  // entonces): pinball -> el sombrero del Vaquero salta al rebotar (kick).
+  pinball: { fx: { kick: 0.12, bob: 0.02, bobHz: 1.0 } },
+};
+const TAU = 6.28318;
+
+function plano(tex, R, p, z, orden){
+  const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, toneMapped: false });
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(R * SPAN * p.k, R * SPAN * p.k), mat);
+  m.position.set(R * p.dx, R * p.dy, z);
+  m.renderOrder = orden;
+  return m;
+}
+
 export function makeProp(arch, R, _col){
   if (!DRAW[arch]) return null;
-  const mat = new THREE.MeshBasicMaterial({ map: texture(arch), transparent: true, depthWrite: false, toneMapped: false });
   const p = PLACE[arch] || { dx: 0, dy: 0, k: 1 };
-  const plane = new THREE.Mesh(new THREE.PlaneGeometry(R * SPAN * p.k, R * SPAN * p.k), mat);
-  plane.position.set(R * p.dx, R * p.dy, R * 1.04);   // delante de la esfera, detras del plano de la cara (1.06R)
-  plane.renderOrder = 2;                 // la cara va en 3: los ojos siempre ganan
-  const g = new THREE.Group(); g.add(plane);
+  const g = new THREE.Group();
+  // La BASE: exactamente el mismo plano de siempre, en el mismo sitio. Si esta bola no tiene capa
+  // animable, aqui se acaba todo y el resultado es identico al de antes del doc 55.
+  const base = plano(texture(arch), R, p, R * 1.04, 2);
+  g.add(base);
+
+  const cfg = PROP_FX[arch];
+  if (!cfg) return g;                     // sin tabla no hay nada que animar: el prop de siempre
+
+  // La capa FX va un pelo por delante de la base pero SIGUE detras de la cara (1.06R): los ojos
+  // ganan siempre. La camara es ortografica, asi que la z no cambia el tamaño; lo que ordena el
+  // dibujo es el renderOrder.
+  //+AG los planos se construyen ANTES de pedir la textura a proposito: si ya esta en cache,
+  //   textureCapa llama al callback en el acto, y una `const` a medio declarar reventaria por zona
+  //   muerta temporal. Con el plano ya creado, encenderlo es seguro venga cuando venga.
+  const fx = plano(null, R, p, R * 1.045, 2);
+  fx.visible = false;                     // se enciende sola si la capa existe (ver textureCapa)
+  fx.material.map = textureCapa(arch, 'fx', () => { fx.visible = true; fx.material.needsUpdate = true; });
+  g.add(fx);
+
+  // La capa EMISIVA: aditiva, y arranca apagada. Late suave siempre y PEGA UN DESTELLO con el
+  // evento del heroe (el Mago al usar boost). Va delante de la fx y sigue detras de la cara.
+  const em = plano(null, R, p, R * 1.05, 2);
+  em.visible = false;
+  em.material.blending = THREE.AdditiveBlending;
+  em.material.depthWrite = false;
+  em.material.opacity = 0;
+  em.material.map = textureCapa(arch, 'em', () => { em.visible = true; em.material.needsUpdate = true; });
+  g.add(em);
+
+  const F = cfg.fx, ph = F.phase || 0;
+  const base0 = { x: fx.position.x, y: fx.position.y };
+  let t = ph, salto = 0;
+  //+AG el tick lo llama chassis/squash.mjs una vez por frame, con el dt del reloj de render del
+  //   modo. `k` = velocidad normalizada 0..1 · `kick` = golpe de ESTE frame (0 si no hubo).
+  //+AG doc 55 capa 5: el accesorio REACCIONA a lo que pasa en la partida. Es lo que convierte un
+  //   adorno en identidad: el sombrero del Mago destella JUSTO cuando usas boost, o sea que el
+  //   personaje cuenta su rol jugando (su BST 9 es lo que lo define, doc 54). Lo llama el modo
+  //   desde donde ya traduce la cola de eventos de la Sim; si nadie llama, no pasa nada.
+  let chispazo = 0;
+  g.userData.evento = tipo => { if (F.flash && (F.flash === tipo || F.flash === '*')) chispazo = 1; };
+  g.userData.tick = (dt, k, kick) => {
+    t += dt;
+    if (chispazo > 0){ chispazo = Math.max(0, chispazo - dt * 2.2); }   // ~0.45 s de destello
+    if (kick > 0) salto = Math.max(salto, kick);
+    salto *= Math.max(0, 1 - dt * 6);                    // el salto se deshincha en ~0.17 s
+    let dy = 0, dx = 0;
+    if (F.bob)   dy += F.bob * R * Math.sin(t * (F.bobHz || 1) * TAU);
+    if (F.kick)  dy += F.kick * R * salto;
+    if (F.drag)  dx -= F.drag * R * (k || 0);            // se retrasa al correr, como una capa
+    fx.position.x = base0.x + dx;
+    fx.position.y = base0.y + dy;
+    if (F.sway)  fx.rotation.z = F.sway * Math.sin(t * (F.swayHz || 1) * TAU + 0.6);
+    const brinco = chispazo > 0 ? Math.sin(chispazo * Math.PI) : 0;    // sube y baja, no un corte seco
+    if (F.pulse) fx.scale.setScalar(1 + F.pulse * Math.sin(t * (F.pulseHz || 1) * TAU + 1.1));
+    if (F.blink) fx.material.opacity = 1 - F.blink * 0.5 * (1 + Math.sin(t * (F.blinkHz || 1) * TAU));
+    //+AG lo que se enciende: un latido flojo de fondo (que la pieza este VIVA aunque no pase nada)
+    //   y el destello del evento por encima. `emBase` deja regular cuanto alumbra en reposo.
+    if (em.visible){
+      const latido = (F.emBase || 0.18) * (0.75 + 0.25 * Math.sin(t * (F.emHz || 1.6) * TAU));
+      em.material.opacity = Math.min(1, latido + brinco * 0.95);
+      em.scale.setScalar(1 + brinco * 0.10);
+    }
+  };
   return g;
 }

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-29 c457f9c">
+<meta name="bt-build" content="2026-07-31 9c3c473">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <!--+AG el HTML se sirve en INGLES (defecto del juego); ?lang=es lo traduce por JS (applyLang) -->
 <title>YouBall · Red Light Rush (WebGL) · The Marble Games</title>
@@ -199,7 +199,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=c457f9c"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=9c3c473"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -653,6 +653,11 @@ function buildSim(s){
 }
 
 function react(ev){ const f=sim.f;
+  //+AG doc 55 capa 5: el ACCESORIO reacciona al evento. Solo tu bola (la unica con arch), y solo
+  //   se avisa: si el heroe no tiene efecto para ese evento, no pasa nada. Sin arch no hay prop, o
+  //   sea que esta linea no existe para el torneo ni para el video.
+  for(const t of ['nitro','shieldup','super','dash']){ for(const e of (ev[t]||[])){
+    const o=ballObjs[e.id]; if(o&&o.prop&&o.prop.userData.evento) o.prop.userData.evento(t); } }
   for(const k of ev.kill){ const o=ballObjs[k.id]; if(!o) continue; const c=sat(PAL[sim.balls[k.id].team].color);
     emo.fire(k.id,'susto',PRIO.susto,8,f); shake=Math.max(shake,0.34);
     // KILL FEED (canvas, historial atenuado): el "quién" inmediato lo pone el mini-tag EN el punto de la ejecución
@@ -1342,6 +1347,12 @@ function startAudio(){
   audio.start(null, AUDIO_SR);   //+AG solo la música en loop; los SFX se disparan EN VIVO (liveSfx): con un jugador el futuro no se precalcula
   lastMusicColor=null;           // el ducking se re-aplica en el 1er updateSemaforo
 }
+//+AG ESTADO VIVO DEL AUDIO DE PARTIDA, para comprobarlo sin oídos (misma idea que BT_MUSIC.estado del shell, y por
+//   el mismo motivo): musicOn y sonando son lo que el motor CREE; ctx y nivel los da el propio AudioContext, que no
+//   puede mentir. Si sale ctx 'suspended' con sonando=true, la partida está muda aunque el juego diga que no.
+//   Lo lee tools/prueba-musica.mjs desde dentro del iframe.
+window.BT_MATCH_AUDIO = { get estado(){ return { phase, musicOn, sfxOn, unlocked:audio.unlocked,
+  sonando:audio.musicPlaying, hasMusic:audio.hasMusic, ctx:(audio.ctx?audio.ctx.state:'sin-ctx'), nivel:audio.musicLevel }; } };
 //+AG SFX EN VIVO: MISMA síntesis del vídeo (buildSfxBuffer de sfxmap) pero disparada evento a evento al ocurrir,
 //   como en el port del Cazador (el accumulateEvents del vídeo solo valdría sin jugador).
 let liveGain=null;
@@ -1498,6 +1509,13 @@ else {
     };
     document.addEventListener('pointerdown', onFirstGesture, true);
     document.addEventListener('keydown', onFirstGesture, true);
+    //+AG Y ANTES DE ESO SE INTENTA DESPERTAR SOLO (Jaime 2026-07-31: "sale el 3-2-1 y no hay música, queda muy frío").
+    //   El shell abre este iframe con allow="autoplay", así que el permiso que el jugador ya dio al pulsar JUGAR vale
+    //   aquí dentro. Si el navegador lo concede, la cuenta atrás suena SIEMPRE —música Y beeps— toque o no toque el
+    //   cartel de "¡LISTO!"; hasta hoy, dejar que el cartel se auto-arrancara significaba entrar en partida en
+    //   silencio. Si lo rechaza (Safari/iOS), tryAutoplay devuelve false sin marcar nada y manda el gesto de arriba.
+    //   Va DESPUÉS de registrar los listeners a propósito: si esto falla, la red de seguridad ya está puesta.
+    audio.tryAutoplay().then(ok=>{ if(ok && musicOn) startAudio(); });
   }
   //+AG ARRANQUE (chassis/arranque.mjs) — SOLO EN EMBED, o sea en el juego de verdad: Luz Roja abría de golpe en
   //   3-2-1, sin decir qué modo era y sin que el sonido hubiera podido desbloquearse todavía (feedback Jaime

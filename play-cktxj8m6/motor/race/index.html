@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-29 c457f9c">
+<meta name="bt-build" content="2026-07-31 9c3c473">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>YouBall · La Gran Carrera (WebGL)</title>
 <style>
@@ -178,7 +178,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=c457f9c"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=9c3c473"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -513,6 +513,11 @@ function react(ev){
   for(const e of (ev.nitro||[])){ const o=ballObjs[e.id]; if(o){ o.excite=Math.max(o.excite,0.25); P.burst(o.g.position.x,o.g.position.y,0.2,[0.2,0.85,1.0],10,3.5); } }
   for(const e of (ev.shieldup||[])){ const o=ballObjs[e.id]; if(o) P.ring(o.g.position.x,o.g.position.y,[0.33,0.85,1.0],0.8); }
   for(const e of (ev.super||[])){ const o=ballObjs[e.id]; if(o){ o.squash=0.6; P.burst(o.g.position.x,o.g.position.y,0.2,[1,0.9,0.4],22,5.0); P.ring(o.g.position.x,o.g.position.y,[1,0.85,0.3],0.9); emo.fire(e.id,'chuleria',PRIO.chuleria,50,f); } }
+  //+AG doc 55 capa 5: el ACCESORIO reacciona al evento. Solo tu bola (la unica con arch), y solo
+  //   se avisa: si el heroe no tiene efecto para ese evento, no pasa nada. Sin arch no hay prop, o
+  //   sea que esta linea no existe para el torneo ni para el video.
+  for(const t of ['nitro','shieldup','super','dash']){ for(const e of (ev[t]||[])){
+    const o=ballObjs[e.id]; if(o&&o.prop&&o.prop.userData.evento) o.prop.userData.evento(t); } }
   //+AG SFX en vivo (patron cazador): mismos canales del video; el jingle de victoria UNA sola vez
   const decidedNow=sim.decision_frame!==null && !jingled; if(decidedNow) jingled=true;
   liveSfx(ev, decidedNow);
@@ -878,6 +883,12 @@ function startAudio(){
   if(audio.musicPlaying) return; //+AG y el "¡YA!" NO la reinicia: si ya entro con el 3-2-1, sigue donde va
   audio.start(null, AUDIO_SR);   // solo la musica en loop; los SFX se disparan en vivo (liveSfx)
 }
+//+AG ESTADO VIVO DEL AUDIO DE PARTIDA, para comprobarlo sin oidos (misma idea que BT_MUSIC.estado del shell, y por
+//   el mismo motivo): musicOn y sonando son lo que el motor CREE; ctx y nivel los da el propio AudioContext, que no
+//   puede mentir. Si sale ctx 'suspended' con sonando=true, la partida esta muda aunque el juego diga que no.
+//   Lo lee tools/prueba-musica.mjs desde dentro del iframe.
+window.BT_MATCH_AUDIO = { get estado(){ return { phase, musicOn, sfxOn, unlocked:audio.unlocked,
+  sonando:audio.musicPlaying, hasMusic:audio.hasMusic, ctx:(audio.ctx?audio.ctx.state:'sin-ctx'), nivel:audio.musicLevel }; } };
 let liveGain=null;
 function liveSfx(ev, won){
   if(!sfxOn || !audio.unlocked || !audio.ctx) return;
@@ -924,6 +935,13 @@ if(EMBED){
   };
   document.addEventListener('pointerdown', onFirstGesture, true);
   document.addEventListener('keydown', onFirstGesture, true);
+  //+AG Y ANTES DE ESO SE INTENTA DESPERTAR SOLO (Jaime 2026-07-31: "sale el 3-2-1 y no hay musica, queda muy frio").
+  //   El shell abre este iframe con allow="autoplay", asi que el permiso que el jugador ya dio al pulsar JUGAR vale
+  //   aqui dentro. Si el navegador lo concede, la cuenta atras suena SIEMPRE -musica Y beeps- toque o no toque el
+  //   cartel de "¡LISTO!"; hasta hoy, dejar que el cartel se auto-arrancara significaba entrar en partida en
+  //   silencio. Si lo rechaza (Safari/iOS), tryAutoplay devuelve false sin marcar nada y manda el gesto de arriba.
+  //   Va DESPUES de registrar los listeners a proposito: si esto falla, la red de seguridad ya esta puesta.
+  audio.tryAutoplay().then(ok=>{ if(ok && musicOn) startAudio(); });
 }
 
 // ============================================================================

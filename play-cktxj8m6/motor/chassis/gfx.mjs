@@ -221,12 +221,17 @@ export function makeBallVinyl(scene, b, BALL_R, look, arch){
   //+AG doc 41 bloque G (2a tajada): el PROP cuelga del GRUPO, no del cuerpo. attachSquash escala
   //   body y le gira body.rotation.z con el rumbo; al grupo solo le toca el tilt. Asi el prop se
   //   ladea con la bola como un personaje pero ni se deforma ni RUEDA (un casco rodando canta).
-  if (arch){ const p = makeProp(arch, BALL_R, col); if (p) g.add(p); }
+  //+AG doc 55: el handle del prop se GUARDA. Hasta ahora se creaba, se metia en la escena y se
+  //   tiraba, asi que no habia forma de animarlo: era un adorno muerto. Con el handle, squash le
+  //   hace tick igual que ya se lo hace a la cara. Sigue colgando del `if (arch)`, o sea que sin
+  //   arch no existe ni el prop ni su tick y el motor queda byte-identico.
+  let prop = null;
+  if (arch){ const p = makeProp(arch, BALL_R, col); if (p){ g.add(p); prop = p; } }
   const face = makeFaceRig(BALL_R, (b.id || 0) * 1.7); g.add(face.plane);
   scene.add(g);
   const noop = { set(){} };
   return { g, body, mat, col, squash: 0, excite: 0, fall: 0, fz: 0, frot: 0,
-    setExpr: face.setExpr, face,
+    setExpr: face.setExpr, face, prop,
     eyes: [], pups: [], mouth: { visible: false, scale: noop } };
 }
 

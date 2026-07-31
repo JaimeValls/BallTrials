@@ -26,7 +26,7 @@ const POP_T = 0.14;                     // duracion del pop de cambio de expresi
 // Defaults = JSON aprobado por el dueno en el lab (2026-07-04): estirado generoso, impacto x2.
 export function attachSquash(o, { R = 0.5, vRef = 20, stretchMax = 0.28, impact = 2.0, tilt = 0.17,
   faceK = 0.8, faceMove = 0.16, lead = 0.10, pop = true, wind = null, stars = null, starK = 1.0 } = {}){
-  const st = { init: false, px: 0, py: 0, pvx: 0, pvy: 0, th: 0, tl: 0, s: 0, sv: 0, pop: 0, lx: 0, ly: 0, acc: 0 };
+  const st = { init: false, px: 0, py: 0, pvx: 0, pvy: 0, th: 0, tl: 0, s: 0, sv: 0, pop: 0, lx: 0, ly: 0, acc: 0, lastKick: 0 };
   const opts = { R, vRef, stretchMax, impact, tilt, faceK, faceMove, lead, pop, wind, stars, starK };
   o.sqOpts = opts;                       // expuesto para el lab (_look.html) y ajustes por modo
 
@@ -64,6 +64,10 @@ export function attachSquash(o, { R = 0.5, vRef = 20, stretchMax = 0.28, impact 
       }
     }
     if (o.squash > 0){ kick = Math.max(kick, o.squash); o.squash = 0; }   // kick de EVENTO del modo (se consume aqui)
+    //+AG doc 55: se APARCA el golpe de este frame para que lo lea el accesorio mas abajo (el
+    //   sombrero del Vaquero salta al rebotar). Aqui ya esta resuelto lo dificil —fuerza
+    //   normalizada 0..1, contacto y normal— y era informacion que moria en esta closure.
+    st.lastKick = kick;
     if (kick > 0){ st.s -= kick * 0.42 * opts.impact; st.sv -= kick * 2.0 * opts.impact; }
     // muelle amortiguado (sub-critico: un sobre-rebote y asienta en ~0.3 s)
     const W = 24, Z = 0.5;
@@ -107,6 +111,14 @@ export function attachSquash(o, { R = 0.5, vRef = 20, stretchMax = 0.28, impact 
     // OJOS que miran a donde va la bola (solo si la cara es un makeFaceRig). Convenio del atlas: +y = ABAJO.
     if (o.face.setGaze) o.face.setGaze(1.4 * vx / opts.vRef, -1.4 * vy / opts.vRef);
     if (o.face.tick) o.face.tick(dt);
+    //+AG doc 55: el ACCESORIO tambien respira. Va justo detras de la cara y con la misma forma
+    //   (duck-typing con guarda) porque comparte todo lo que importa: el mismo dt del reloj de
+    //   render del modo, y el mismo sitio del frame. `o.prop` solo existe si llego `arch`
+    //   (gfx.makeBallVinyl), asi que sin arch esta linea no hace nada y el motor no se mueve.
+    //   Se le pasa el estado que ya esta calculado aqui y que ninguna capa de fuera conoce:
+    //   k = velocidad normalizada 0..1, y el kick del impacto de ESTE frame.
+    if (o.prop && o.prop.userData.tick) o.prop.userData.tick(dt, k, st.lastKick);
+    st.lastKick = 0;                       // se consume: un impacto dispara UNA vez, no cada frame
     // TRAIL DE VIENTO al ir rapido: PAREJAS de rafagas por detras de la bola, espaciadas por distancia;
     // cada rafaga hereda el giro del rumbo (av) -> el viento se CURVA siguiendo la trayectoria
     if (opts.wind && k > 0.45){

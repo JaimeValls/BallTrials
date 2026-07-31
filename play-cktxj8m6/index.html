@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-29 c457f9c"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-07-31 9c3c473"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -396,6 +396,15 @@
        Encogerlo seria lo facil y seria mentir: la etiqueta dice "en pista" porque la bola mide los
        56 px de carrera, y una bola de 44 px con ese cartel es exactamente el fallo que arregla. */
     .gd-pista{ right:-52px; bottom:-10px; }
+  }
+  /*+AG ESA LLAVE DE ARRIBA FALTABA, y se llevo por delante el juego entero (encontrado 2026-07-31 persiguiendo
+     otra cosa). Sin cerrar el @media, TODO el CSS que viene despues -Tienda, Garaje, Temporada, Perfil, la portada
+     y su boton JUGAR- quedaba anidado dentro de "max-height:700px", asi que solo se aplicaba en ventanas de menos
+     de 700 px de alto. En un movil de verdad (812, 844, 915...) el shell se pintaba con los estilos por defecto del
+     navegador: la Home sin tarjeta de modo, el CTA convertido en un boton gris de 23 px y 1.895 px de desborde.
+     COMO NO SALTO ANTES: el navegador no da ningun error -el CSS es sintacticamente valido, solo dice otra cosa- y
+     el @media es justo lo que hace que a 375x640 se vea PERFECTO. Ahora lo vigila tools/prueba-css-shell.mjs, que
+     cuenta las reglas que llegan al CSSOM: si vuelve a tragarse el CSS, se cae la prueba y no una captura. */
   /* --- TIENDA (doc 12: secciones + escaparate, cero azar, puerta parental) --- */
   #tienda{ background:url(arte/fondo/doodles.webp) repeat top left/340px 340px, radial-gradient(130% 90% at 50% 8%, #3f3ad0 0%, #2a1c86 45%, var(--bg-lo) 100%); }
   /*+AG La fila de secciones era una tira con scroll lateral: las 5 pastillas sumaban 449px en 369
@@ -1754,7 +1763,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=c457f9c"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=9c3c473"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
