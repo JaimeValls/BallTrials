@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-01 39a2951"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-01 83c39f6"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -153,7 +153,24 @@
      que es un nivel (asi lo hace Brawl Stars), y asi entra cualquier idioma, tambien los que no existen. */
   @media (max-width:340px){ .h-lvl .cap{ display:none; } .h-lvl{ padding:4px 5px; } }
   .h-coins{ margin-left:auto; display:flex; gap:6px; }
-  .coin{ display:flex; align-items:center; gap:6px; background:#0007; border:1px solid var(--line); border-radius:999px; padding:5px 6px 5px 6px; font-weight:800; font-size:14px; font-variant-numeric:tabular-nums; }
+  /*+AG docs/56 (canon Brawl, VB Jaime 1-ago): la pildora de moneda se rehace entera. Tres cambios y
+     los tres vienen medidos de la captura real de Brawl Stars:
+       · el ICONO DESBORDA la pildora por arriba y por abajo (margin negativo). Antes era un adorno de
+         19 px metido dentro con aire de sobra; ahi el protagonista es el icono, no la caja.
+       · el NUMERO crece al ~70% del alto del icono y lleva el trazo (.bstroke). Antes iba a 14 px.
+       · el "+" SE VA (.pl, solo estaba en la Home): la pildora ENTERA ya lleva a la tienda, asi que el
+         circulito era un segundo boton dibujado dentro del primero — justo lo que Jaime cazo en la
+         tarjeta de modo el 27-jul ("parece que a cada recuadro lo puedes clicar").
+     Los tamanos son los que MIDEN bien en la fila mas apretada (.h-top a 320 px, con Nivel + Ajustes
+     + dos pildoras): icono 32 y numero 22. Con los 42/29 del mockup la fila se desbordaba. */
+  .coin{ position:relative; display:flex; align-items:center; gap:5px; height:30px; padding:0 12px 0 3px;
+    background:linear-gradient(#221c4e,#141034); border:1px solid #ffffff30;
+    box-shadow:0 3px 0 #0d0726, inset 0 1px 0 #ffffff2e;
+    border-radius:999px; font-weight:800; font-size:22px; font-variant-numeric:tabular-nums; color:#fff; }
+  /*+AG la pildora mide 30 px de alto y el minimo tactil son 44: este halo transparente sube el AREA DE
+     TOQUE sin engordar el dibujo. Es la misma receta que ya usaba .sclose, no un invento. */
+  .coin::before, .cups::before{ content:''; position:absolute; inset:-7px; border-radius:999px; }
+  .coin .cico{ width:32px; height:32px; margin:-7px 0; filter:drop-shadow(0 2px 3px #000a); }
   .coin i{ width:19px; height:19px; border-radius:50%; display:grid; place-items:center; font-style:normal; font-size:12px; color:#1a1330; }
   .coin.chispa i{ background:radial-gradient(circle at 35% 30%,#ffe680,var(--gold)); box-shadow:0 0 8px #fbb91577; }
   .coin.gema i{ background:radial-gradient(circle at 35% 30%,#aef4ff,var(--cyan)); box-shadow:0 0 8px #18c7d677; }
@@ -239,6 +256,18 @@
   .cico.sm{ width:15px; height:15px; }            /* chips de precio, junto al numero */
   .cico.big{ width:22px; height:22px; filter:drop-shadow(0 0 6px #fbb91566); }   /* banda de copas */
   .rico{ width:26px; height:26px; object-fit:contain; display:block; filter:drop-shadow(0 2px 4px #0008); }   /* rieles de la Home */
+  /*+AG EL TRAZO DE MARCA (docs/56 regla 1, VB Jaime 1-ago). Es LA pieza que separa un boton de Supercell
+     de uno "hecho con IA barata": relleno blanco + contorno oscuro grueso + sombra corta hacia abajo.
+     Va como utilidad y no suelto en cada regla porque lo llevan el CTA, las monedas, el nombre del modo
+     y las copas: si cada uno lo escribe a su manera dejan de ser el mismo idioma.
+     ⚠ paint-order:stroke fill es OBLIGATORIO. Sin el, el navegador pinta el trazo ENCIMA del relleno y
+     se come la mitad del grosor de la letra por dentro: a 22 px el numero se vuelve ilegible. Con el,
+     el trazo queda por fuera y la letra conserva su peso.
+     El color del trazo es #241a3f (el indigo del fondo, no negro puro) para que el canto no "recorte"
+     agujeros sobre las placas oscuras del juego. */
+  .bstroke{ color:#fff; -webkit-text-stroke:3px #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f66; }
+  .bstroke.thin{ -webkit-text-stroke-width:2px; }
+  .coin{ -webkit-text-stroke:3px #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f66; }
   /* --- RESULTADOS --- */
   #results{ background:radial-gradient(120% 80% at 50% 20%, #4a26a8ee, var(--bg-lo)), var(--bg-lo); align-items:center; justify-content:center; padding:22px; gap:14px; overflow:hidden; }
   /*+AG feedback Jaime 2026-07-27: "el fondo monocolor queda cutre" → el FONDO VIVO de la Home (bolas reales
@@ -603,9 +632,25 @@
      relieve claro arriba, borde visible y sombra— para que se LEA como un boton pulsable y no como un adorno.
      El sitio lo paga el 🎬 que se ha ido de la fila, asi que .h-top sigue cabiendo a 360 px. El halo de toque
      ya no hace falta: el propio boton pasa del minimo tactil de 44. */
-  .h-ic{ position:relative; flex:0 0 auto; width:46px; height:46px; border-radius:14px; color:#fff; font-size:26px; line-height:1; cursor:pointer; display:grid; place-items:center; padding:0;
-         background:linear-gradient(#ffffff26,#ffffff0d) , #0008; border:1px solid #ffffff3d; box-shadow:0 3px 10px #0006, inset 0 1px 0 #ffffff2e; }
-  .h-ic:active{ transform:translateY(1px); }
+  /*+AG docs/56 (canon Brawl, 1-ago): el engranaje era un EMOJI DEL SISTEMA sobre una placa apagada. Dos
+     problemas: un emoji se dibuja distinto en cada movil (y en Android puede salir sin color), y la placa
+     gris no dice "pulsame". Pasa al lenguaje del canon: amarillo + canto inferior = boton primario.
+     Las barras van en BLANCO CON CONTORNO oscuro, igual que la letra de los botones (.bstroke): es el
+     mismo idioma, dibujado con cajas en vez de con letras. */
+  /*+AG 1-ago, segunda pasada (auditoria UX): el boton nacio a 46 px con el MISMO amarillo y casi el mismo
+     canto que el CTA, y encima suelto en el centro-izquierda de la fila. Resultado medido: era el objeto
+     mas saturado de la mitad superior y se lo comia el ojo antes que a JUGAR, que esta 600 px mas abajo.
+     Dos arreglos, los dos de la referencia (docs/56 §1.6: en Brawl la hamburguesa vive en el CLUSTER DE LA
+     DERECHA, con las monedas, no aislada): se va a la derecha (order en .h-top) y baja de 46 a 40 px con el
+     canto de 5 a 3. Sigue siendo amarillo —es pulsable y eso no se negocia— pero con menos masa que el CTA. */
+  .h-ic{ position:relative; flex:0 0 auto; width:40px; height:40px; border-radius:12px; cursor:pointer;
+         padding:0; border:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+         background:linear-gradient(#ffe14d,#ffb42a); box-shadow:0 3px 0 #b45a10, 0 6px 14px #ffb42a2e, inset 0 2px 0 #ffffff8c;
+         font-size:0; line-height:0; order:9; }
+  .h-ic .bar{ width:20px; height:4px; border-radius:99px; background:#fff; box-shadow:0 0 0 2px #7a4a00; }
+  /*+AG el :active baja el boton HASTA su canto (5 px) y encoge el canto a 2: es el mismo gesto de
+     "hundirse" que ya hace .playbig, no un translate suelto. */
+  .h-ic:active{ transform:translateY(2px); box-shadow:0 1px 0 #b45a10, inset 0 2px 0 #ffffff8c; }
   .h-modes .m.open{ filter:none; opacity:1; border-color:var(--gold2); background:#ffffff16; cursor:pointer; box-shadow:0 4px 14px #fbb91533; } .h-modes .m.open .lk{ color:var(--gold2); }
   #onb{ position:absolute; inset:0; z-index:70; background:radial-gradient(120% 80% at 50% 18%,var(--bg),var(--bg-lo)); display:none; flex-direction:column; align-items:center; justify-content:center; padding:24px; }
   #onb.on{ display:flex; }
@@ -695,11 +740,22 @@
      modo + JUGAR dominante abajo, banda del Pase. La barra de 5 pestañas SE QUEDA (decision: la app real ya
      navega por ella y las otras pantallas la llevan; los rieles son ATAJOS, no la sustituyen). */
   .cupsband{ display:flex; align-items:center; padding:2px 13px 0; }
-  .cups{ display:flex; align-items:center; gap:8px; background:#0007; border:1px solid #fbb91544; border-radius:999px;
-    padding:4px 12px 4px 9px; cursor:pointer; box-shadow:0 0 14px #fbb91522, inset 0 1px 0 #ffffff10; transition:transform .08s; }
+  /*+AG 1-ago (auditoria de arte, docs/56): esta pildora se habia quedado en la generacion VIEJA justo al
+     lado de las nuevas, en la MISMA fila y en el primer fotograma del juego: el trofeo metido dentro con
+     aire y el numero sin trazo, mientras la moneda y la gema de al lado ya desbordan y llevan contorno.
+     Es el mismo componente (icono + cifra en pildora oscura) resuelto de dos maneras en una sola pantalla.
+     Pasa al mismo idioma que .coin. El oro del borde y el halo SE QUEDAN: esta pildora es la de COPAS y
+     su color es parte de como se distingue de las otras dos. */
+  .cups{ position:relative; display:flex; align-items:center; gap:7px; background:linear-gradient(#221c4e,#141034);
+    border:1px solid #fbb91566; border-radius:999px; height:30px;
+    padding:0 13px 0 4px; cursor:pointer; box-shadow:0 3px 0 #0d0726, 0 0 14px #fbb91522, inset 0 1px 0 #ffffff2e; transition:transform .08s; }
   .cups:active{ transform:scale(.96); }
   .cups i{ font-style:normal; font-size:16px; filter:drop-shadow(0 0 6px #fbb91588); }
-  .cups b{ font-size:19px; font-weight:900; color:var(--gold2); font-variant-numeric:tabular-nums; letter-spacing:.01em; text-shadow:0 2px 8px #fbb91544; }
+  /*+AG la copa desborda igual que las otras monedas. El .cico.big de 22 px se queda para los demas sitios
+     donde sale (recompensas, resultados): aqui manda esta regla por ser mas especifica. */
+  .cupsband .cups .cico{ width:32px; height:32px; margin:-8px 0; filter:drop-shadow(0 2px 3px #000a); }
+  .cups b{ font-size:22px; font-weight:900; color:var(--gold2); font-variant-numeric:tabular-nums; letter-spacing:.01em;
+    -webkit-text-stroke:3px #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f66; }
   .cups small{ font-size:9px; font-weight:800; color:var(--muted); letter-spacing:.08em; text-transform:uppercase; }
   #home .stage{ flex:1; min-height:0; position:relative; display:flex; flex-direction:column; }
   .siderail{ position:absolute; top:10px; display:flex; flex-direction:column; gap:11px; z-index:6; }
@@ -757,48 +813,93 @@
   .bottomrow{ display:flex; gap:10px; align-items:stretch; }
   /*+AG el CANTO (`0 5px 0`) es de la misma familia que el del botón JUGAR, que tiene 8 px: así la fila de
      abajo son DOS objetos físicos y no un botón con volumen al lado de una pegatina plana. */
+  /*+AG docs/56 (canon Brawl, VB Jaime 1-ago: "es importante copiar el boton de play y el de cambiar de modo").
+     La tarjeta deja de llevar la FOTO de la pista y pasa a PLACA OSCURA con la insignia del modo, como el
+     selector de modo de Brawl Stars.
+     ⚠ POR QUE SE VA LA FOTO, que se puso el 27-jul por dos motivos buenos y hay que responderles:
+       (1) "la tarjeta se leia como un agujero al lado del JUGAR dorado" -> ya no: la insignia es un disco
+           con anillo de oro, relieve y sombra propia, que es justo lo que llena la tarjeta de tinta.
+       (2) "el mismo objeto se dibujaba de dos maneras en la app" -> sigue siendo una gramatica, pero la de
+           Brawl: en el BOTON compacto manda la insignia, y la foto de la pista se reserva para la rejilla
+           de MODOS, que es donde la pista es la protagonista y no compite con nada.
+     El motivo de fondo es el canon: un solo amarillo dominante por pantalla. Con la foto, la tarjeta y el
+     CTA se disputaban la mirada; con la placa, JUGAR manda solo. */
   .modecompact{ flex:1 1 0; min-width:0; position:relative; border-radius:18px; overflow:hidden; cursor:pointer;
-    border:1px solid #ffffff26; box-shadow:0 5px 0 #0d0726, 0 10px 24px #0009, inset 0 1px 0 #ffffff22;
-    padding:13px 11px 10px; display:flex; flex-direction:column; gap:5px;
+    background:linear-gradient(#282059,#161139);
+    border:1px solid #ffffff30; box-shadow:0 5px 0 #0d0726, 0 10px 24px #0009, inset 0 2px 0 #ffffff2e;
+    padding:10px 11px; display:flex; align-items:center; gap:9px;
     transition:transform .1s; }
-  .modecompact:active{ transform:scale(.98); }
-  .modecompact .mcart{ position:absolute; inset:0; z-index:0; width:100%; height:100%; display:block;
-    object-fit:cover; object-position:50% var(--mcpos,50%); }
-  /*+AG el scrim ya no es el COLOR de la tarjeta (eso lo hace ahora el still), es su LEGIBILIDAD: oscurece de
-     arriba abajo para que el nombre del modo, la etiqueta del día y CAMBIAR se lean sobre cualquier pista.
-     Se declara aquí y no en JS porque es el mismo para los tres modos. */
-  .modecompact .mcscrim{ position:absolute; inset:0; z-index:0;
-    background:linear-gradient(180deg,#05040b30 0%,#05040bbb 52%,#05040bf2 100%); }
+  .modecompact:active{ transform:translateY(3px); box-shadow:0 2px 0 #0d0726, inset 0 2px 0 #ffffff2e; }
   .modecompact > *{ position:relative; z-index:1; }
+  /*+AG la PLACA de la insignia. Lleva la misma receta de capas que el boton JUGAR (canto, especular arriba,
+     sombra interior abajo) porque la auditoria de arte cazo justo eso: un disco plano al lado de un boton
+     con volumen es lo que delata "hecho con IA barata", aunque el icono de dentro este bien dibujado. */
+  .modecompact .micon{ flex:0 0 auto; width:46px; height:46px; border-radius:50%; display:grid; place-items:center;
+    background:radial-gradient(circle at 35% 25%, #3a3070, #1c1640 55%, #120d2e 100%);
+    /*+AG el especular de arriba iba a #ffffff3a con 4 px de difuminado y el de .h-ic (el mismo gesto, en la
+       misma pantalla) a #ffffff8c nitido: la placa se quedaba en el eslabon mas flojo de la fila. Se iguala
+       al lenguaje de .h-ic en vez de inventar un tercer valor. */
+    box-shadow:0 0 0 3px #e6b41e, 0 0 0 5px #1c1c24, 0 3px 5px #000a,
+      inset 0 2px 0 #ffffff70, inset 0 -4px 6px #00000066;
+    transform:rotate(-6deg); font-size:22px; line-height:1; }
+  .modecompact .mctx{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:3px; }
+  /*+AG el chevron dice "hay mas ahi dentro" (patron de la carta de evento de Brawl). La palabra CAMBIAR se
+     va con la foto: la tarjeta entera ya es el boton y el galon lo cuenta sin ocupar una linea. */
+  .modecompact .mcch{ flex:0 0 auto; font-size:24px; font-weight:900; color:#ffe9a8; opacity:.9; line-height:1; }
   /*+AG aqui vivia la (i) de CÓMO JUGAR (.mchow/.mkrow). SE FUE entera el 2026-07-27: el tutorial solo se
      ofrece al pulsar JUGAR. Con ella se van sus dos apaños medidos —el halo de 45 px y el z-index de la
      fila para que no le robase toques a la tarjeta—, que ya no hacen falta porque no hay nada que tocar
      dentro de la tarjeta: la tarjeta ENTERA es el unico objetivo. */
-  .modecompact .mn{ min-width:0; display:flex; align-items:center; gap:7px; font-weight:900; letter-spacing:-.01em; text-shadow:0 2px 8px #000a; }
-  .modecompact .micon{ font-size:22px; line-height:1; flex:0 0 auto; }
   /*+AG doc 41 bloque C: el SVG canonico de modo. Va TODO ORO por spec del canal (los colores de
-     equipo estan reservados) y la diferenciacion la da la silueta, no el color: no se retinta. */
+     equipo estan reservados) y la diferenciacion la da la silueta, no el color: no se retinta.
+     ⚠ 1-ago: la auditoria pregunto si habia que encargar insignias PINTADAS en 3D por modo, como el
+     salpicon de color de Brawl. La respuesta es NO: el todo-oro es decision del disenador de marca y
+     este mismo dibujo ya vive en balltrials.com y en la tarjeta del torneo. Pintarlo distinto solo en
+     la portada rompe mas de lo que arregla. Lo que le faltaba era la PLACA con volumen, no otro dibujo. */
   .msvg{ width:26px; height:26px; display:block; filter:drop-shadow(0 2px 4px #0008); }
-  .modecompact .micon .msvg{ width:32px; height:32px; }   /*+AG 26-jul: 24 px era timido; en la carta de modo de Brawl el icono es protagonista, no pie de foto */
+  .modecompact .micon .msvg{ width:30px; height:30px; transform:rotate(6deg); }   /*+AG rota al reves que la placa: el icono se queda derecho y la que se inclina es la placa */
   /*+AG el nombre del modo CRECE (VB Jaime 2026-07-27: "el modo se ve bastante pequeño"). Lo paga el sitio
-     que sueltan el rótulo "Modo" y el marco de CAMBIAR. Sigue con clamp: en 320 px no puede desbordar. */
-  .modecompact .mn b{ min-width:0; font-size:clamp(15px,4.8vw,19px); line-height:1.08; overflow-wrap:break-word; }
+     que sueltan el rótulo "Modo" y el marco de CAMBIAR. Sigue con clamp: en 320 px no puede desbordar.
+     +AG 1-ago: ahora lleva el trazo de marca (docs/56), como el CTA de al lado. */
+  .modecompact .mctx b{ min-width:0; font-size:clamp(14px,4.4vw,17px); line-height:1.08; overflow-wrap:break-word;
+    font-weight:900; letter-spacing:-.01em;
+    color:#fff; -webkit-text-stroke:2.5px #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f55; }
   /*+AG la píldora del día era, tras la limpieza, LA ÚLTIMA CAJA DENTRO DE LA CAJA: oro sólido con sombra,
      o sea exactamente el lenguaje del botón JUGAR, dentro de una tarjeta que ya no quiere parecer pulsable.
      Y ahora que solo sale cuando el bonus es de TU modo, no compite con nadie: no necesita gritar. Pasa a
      etiqueta —estrella + texto en oro— y la tarjeta se queda por fin con cero recuadros dentro. */
-  .modecompact .mday{ align-self:flex-start; max-width:100%; font-size:10px; font-weight:900; letter-spacing:.03em;
-    color:var(--gold2); text-shadow:0 2px 6px #000a; }
+  /*+AG docs/56: el bonus del dia pasa a VERDE. En Brawl el renglon de debajo del nombre del modo (el mapa)
+     va en verde, que es su color de "esto es bueno para ti / gratis / en vivo"; en oro competia con el CTA.
+     Y la estrella deja de ser el emoji ⭐ del sistema: se pinta con el SVG de la familia de modeicons
+     (oro #ffcf3a + tinta #1c1c24) como fondo del ::before. Va asi, y no metiendo el SVG en la cadena de
+     texto, porque el rotulo se traduce a 20 idiomas y varios viven en paquetes que se descargan aparte:
+     tocando las cadenas habria que perseguir el emoji fuera de este fichero. El JS le quita el ⭐ del
+     principio a la cadena, sea cual sea el idioma. */
+  .modecompact .mday{ display:flex; align-items:center; gap:4px; max-width:100%; font-size:10.5px; font-weight:900;
+    letter-spacing:.03em; color:#6fe08f; text-shadow:0 1px 0 #0009; }
+  .modecompact .mday::before{ content:''; flex:0 0 auto; width:12px; height:12px; background-repeat:no-repeat;
+    background-size:contain; background-position:center;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23ffcf3a' stroke='%231c1c24' stroke-width='4' stroke-linejoin='round' d='M32 6 L40.5 24.5 L60 26.5 L45 39.5 L49.5 59 L32 48.5 L14.5 59 L19 39.5 L4 26.5 L23.5 24.5 Z'/%3E%3C/svg%3E"); }
   /*+AG "CAMBIAR" SIN MARCO (VB Jaime 2026-07-27). La tarjeta entera ya era el boton, asi que esto pasa a ser
      una ETIQUETA, no un segundo boton dentro del primero: se va el <button>, el borde, el fondo y su area de
      toque propia. El chevron dice "hay mas ahi dentro", como en la carta de evento de Brawl. */
   .modecompact .mcgo{ margin-top:auto; display:flex; align-items:center; justify-content:center; gap:4px; padding-top:3px;
     font-size:11.5px; font-weight:900; letter-spacing:.06em; color:#ffe9a8; text-shadow:0 2px 6px #0009; }
   .modecompact .mcgo .ch{ font-size:15px; line-height:1; opacity:.9; }
-  .playbig{ flex:0 0 42%; border:0; border-radius:18px; padding:14px 10px; font-family:inherit; font-weight:900; font-size:22px; letter-spacing:.03em;
-    color:#3a2400; background:linear-gradient(#ffe27a,#ff9a3d); box-shadow:0 8px 0 #b45a10, 0 12px 30px #ff9a3d55; cursor:pointer;
+  /*+AG docs/56 (canon Brawl, 1-ago): el CTA llevaba la letra en MARRON OSCURO sobre el amarillo. Es el
+     cambio que mas acerca el juego a Brawl y no cuesta arte: letra BLANCA con trazo oscuro (.bstroke),
+     que ademas la despega del fondo pase lo que pase por detras. El amarillo sube a #ffe14d/#ffb42a
+     (mas vivo, menos naranja) y el canto se queda en 8 px, que ya era del canon.
+     ⚠ el trazo va aqui y NO con la clase .bstroke en el HTML: el <span data-t="playWord"> lo reescribe
+     applyShell al cambiar de idioma y una clase puesta a mano en el hijo se perderia. */
+  .playbig{ flex:0 0 42%; border:0; border-radius:18px; padding:14px 10px; font-family:inherit; font-weight:900; font-size:24px; letter-spacing:.03em;
+    color:#fff; -webkit-text-stroke:3.5px #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f55;
+    background:linear-gradient(#ffe14d 12%,#ffb42a); box-shadow:0 8px 0 #b45a10, 0 12px 30px #ffb42a55; cursor:pointer;
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; line-height:1; animation:breathe 2.6s ease-in-out infinite; }
-  .playbig .tri{ font-size:.66em; }
+  /*+AG el triangulo pasa de glifo Unicode (▶) a SVG: un glifo depende de que la fuente lo dibuje, y si el
+     sistema lo sustituye por el de otra fuente deja de casar con el trazo de la palabra. */
+  .playbig .tri{ width:.5em; height:.5em; display:block; }
+  .playbig .tri path{ fill:#fff; stroke:#241a3f; stroke-width:9; stroke-linejoin:round; paint-order:stroke fill; }
   .playbig:active{ animation:none; transform:translateY(5px) scale(1.03,.94); box-shadow:0 3px 0 #b45a10, 0 6px 16px #ff9a3d44; }
   /*+AG HOJA DE FORMATO (bottom sheet Supercell): JUGAR la abre; elegir formato = arranca en un toque */
   .sheetwrap{ position:absolute; inset:0; z-index:62; display:none; }
@@ -883,10 +984,26 @@
      de la app, y no se leía como "esto es lo que quieres pulsar"). Grande, con el brillo del sistema .ready
      (--rglow tiñe su glow de verde). Es el ÚNICO .ready de la hoja: si todo brilla, no brilla nada. */
   .sfmt{ --rglow:#3ddc6bcc;
-    border:0; border-radius:18px; padding:19px 12px; font-family:inherit; font-weight:900; font-size:19px; letter-spacing:.02em;
-    color:#04240f; background:linear-gradient(#86f2a4,#22a94c); box-shadow:0 6px 0 #157c34, 0 10px 26px #22a94c55; cursor:pointer;
+    /*+AG el letter-spacing sube de .02 a .07em POR EL TRAZO, no por gusto: el contorno engorda cada letra
+       hacia fuera, asi que dos letras que ya se rozaban acaban fundidas. Con "JUGAR INDIVIDUAL" se leia
+       literalmente "INDMDUAL" (la I, la V y la I se juntaban en una M). Trazo y espaciado se tocan SIEMPRE
+       a la vez: si en algun sitio se sube el grosor, hay que darle aire. */
+    border:0; border-radius:18px; padding:19px 12px; font-family:inherit; font-weight:900; font-size:19px; letter-spacing:.07em;
+    /*+AG docs/56: mismo cambio que .playbig. Este es el boton que ARRANCA la partida, asi que habla el mismo
+       idioma que el CTA de la portada: letra blanca con trazo, no verde oscuro sobre verde claro. */
+    /*+AG ⚠ el grosor del trazo TIENE QUE ESCALAR con el cuerpo de letra, y aqui la letra es mas pequena que
+       en .playbig (19 px contra 24). Con los 3 px del CTA grande, en "JUGAR INDIVIDUAL" las tres letras
+       estrechas de "IVI" se tocaban y se leia "INDMDUAL". Regla practica: trazo ≈ 11% del font-size. */
+    color:#fff; -webkit-text-stroke:2.1px #143d22; paint-order:stroke fill; text-shadow:0 2px 0 #143d2255;
+    background:linear-gradient(#86f2a4,#22a94c); box-shadow:0 6px 0 #157c34, 0 10px 26px #22a94c55; cursor:pointer;
     display:flex; align-items:center; justify-content:center; gap:8px; }
-  .sfmt .tri{ font-size:.72em; }
+  /*+AG el ▶ es un SVG, asi que se dimensiona en em (sigue al cuerpo de letra del boton) y se pinta con
+     fill/stroke, no con color. Mismo tratamiento que .playbig .tri. */
+  .sfmt .tri{ width:.72em; height:.72em; display:block; flex:0 0 auto; }
+  .sfmt .tri path{ fill:#fff; stroke:#143d22; stroke-width:8; stroke-linejoin:round; paint-order:stroke fill; }
+  .sfmt.sec .tri path{ stroke:#2b3047; fill:#e8ecf7; }
+  /*+AG el secundario lleva el trazo en su propio tono (gris azulado) para no arrastrar el verde del primario */
+  .sfmt.sec{ -webkit-text-stroke-color:#2b3047; text-shadow:0 2px 0 #2b304755; }
   .sfmt:active{ transform:translateY(4px); box-shadow:0 2px 0 #157c34; }
   /*+AG SECUNDARIO (por equipos): gris de verdad y más pequeño, no un verde apagado — tiene que quedar claro de un
      vistazo que el de arriba es el bueno. Cuando EQUIPOS se abra seguirá siendo secundario (el primario es JUGAR). */
@@ -1218,7 +1335,9 @@
          canjear (los da el canal, que aun no ha lanzado), asi que ocupaba sitio en la fila mas apretada de la
          pantalla para una funcion que hoy no existe. NO se borra la funcion: la fila "Canjear codigo del canal"
          sigue en Ajustes → Soporte (buildSettings), que es donde Jaime quiere que viva si algun dia hace falta. -->
-    <button class="h-ic" id="hSet" data-tt="settings" title="Ajustes">⚙️</button>
+    <!--+AG docs/56: el ⚙️ (emoji del sistema) pasa a hamburguesa dibujada. Se queda el title/data-tt para
+         que siga siendo accesible y traducible; el aria-label lo pone applyShell por data-tt. -->
+    <button class="h-ic" id="hSet" data-tt="settings" title="Ajustes" aria-label="Ajustes"><i class="bar"></i><i class="bar"></i><i class="bar"></i></button>
     <!--+AG auditoria Supercell 26-jul: este selector (112 px, el elemento mas ancho de la fila) hacia que
          .h-top pidiera 473 px. A 360 px de ancho las pildoras de moneda se salian de pantalla y la de gemas
          quedaba INVISIBLE. Supercell no pone idioma en la portada: vive en Ajustes, donde ya habia un
@@ -1226,8 +1345,10 @@
          gobierna; quitarlo del DOM romperia el cambio de idioma. -->
     <select id="lang" class="h-lang" data-tp="langWord" aria-label="Idioma" hidden style="display:none"></select>
     <div class="h-coins">
-      <div class="coin chispa" id="cChispa"><img class="cico" src="arte/ui/moneda-chispa.webp" alt=""><span id="hChispas">0</span><span class="pl">+</span></div>
-      <div class="coin gema" id="cGema"><img class="cico" src="arte/ui/moneda-gema.webp" alt=""><span id="hGemas">0</span><span class="pl">+</span></div>
+      <!--+AG docs/56: fuera el "+" (era un <span class="pl">). La pildora entera ya abre la Tienda
+           (onclick en #cChispa/#cGema), asi que el circulito era un boton dibujado dentro de otro. -->
+      <div class="coin chispa" id="cChispa"><img class="cico" src="arte/ui/moneda-chispa.webp" alt=""><span id="hChispas">0</span></div>
+      <div class="coin gema" id="cGema"><img class="cico" src="arte/ui/moneda-gema.webp" alt=""><span id="hGemas">0</span></div>
     </div>
   </div>
   <!--+AG HOME v3 (mockups/flow.html, docs/35 v2.2 + 37): total de copas + bola protagonista + rieles + modo/JUGAR -->
@@ -1276,11 +1397,10 @@
       </div>
       <div class="bottomrow">
         <div class="modecompact" id="modecompact" role="button" tabindex="0">
-          <!--+AG la IMAGEN REAL de la pista de ese modo, la misma que la carta de la rejilla de MODOS. Va
-               ANTES del scrim a proposito: los dos son z-index 0, asi que decide el orden del DOM y el
-               scrim la oscurece desde abajo para que el nombre se lea siempre. -->
-          <img class="mcart" id="mcArt" alt="">
-          <div class="mcscrim" id="mcScrim"></div>
+          <!--+AG 1-ago (docs/56): aqui vivian la FOTO de la pista (#mcArt) y su scrim (#mcScrim). Se van con
+               el paso a placa oscura estilo Brawl; el porque largo esta en el CSS de .modecompact.
+               El JS que las rellenaba (renderHome) ya iba protegido con `if(_ma && ...)`, asi que no se
+               rompe nada al no existir. La foto NO se pierde: sigue siendo la carta de la rejilla de MODOS. -->
           <!--+AG VB Jaime 2026-07-27: esta tarjeta era un RECUADRO CON RECUADROS DENTRO — rótulo "Modo",
                pastilla de CÓMO JUGAR, pastilla del bonus del día y botón CAMBIAR enmarcado. Cuatro cajas
                pidiendo un toque cuando lo ÚNICO pulsable es la tarjeta entera ("parece que a cada recuadro
@@ -1292,13 +1412,19 @@
                que el tutorial esté en el menú principal; donde tiene que estar es cuando le das a jugar"*.
                El tutorial vive ahora SOLO en la hoja de JUGAR, que vuelve a salir siempre. La portada
                queda con lo que es: qué modo vas a jugar y cómo cambiarlo. -->
-          <div class="mn"><span class="micon" id="mcIcon">🏁</span><b id="mcName">LA GRAN CARRERA</b></div>
-          <!-- sin data-t a proposito: el texto lo pone renderHome (dayBadge) y applyShell lo pisaria al
-               abrir la hoja o el selector -->
-          <span class="mday" id="mcDay">⭐ DÍA · +50%</span>
-          <span class="mcgo"><span data-t="change">CAMBIAR</span><span class="ch">›</span></span>
+          <!--+AG 1-ago: la tarjeta pasa de columna a FILA (insignia · texto · galon), como el selector de
+               modo de Brawl. El 🏁 es solo el valor de partida: renderHome lo sustituye por el SVG canonico
+               del modo (modeIco), asi que en pantalla nunca hay un emoji del sistema. -->
+          <span class="micon" id="mcIcon">🏁</span>
+          <span class="mctx">
+            <b id="mcName">LA GRAN CARRERA</b>
+            <!-- sin data-t a proposito: el texto lo pone renderHome (dayBadge) y applyShell lo pisaria al
+                 abrir la hoja o el selector -->
+            <span class="mday" id="mcDay">DÍA · +50%</span>
+          </span>
+          <span class="mcch" aria-hidden="true">›</span>
         </div>
-        <button class="playbig ready" id="hPlay"><span class="tri">▶</span><span data-t="playWord">JUGAR</span></button>
+        <button class="playbig ready" id="hPlay"><svg class="tri" viewBox="0 0 64 64" aria-hidden="true"><path d="M14 8 L56 32 L14 56 Z"/></svg><span data-t="playWord">JUGAR</span></button>
       </div>
     </div>
   </div>
@@ -1406,8 +1532,14 @@
          derecho de un botón de 356 px se leía como una notificación aparcada encima, no como parte de él.
          Además, con .ready el botón recorta (lo pide el barrido de brillo) y ahí dentro no se le come nadie. -->
     <button class="showbtn" id="sHow"><span class="qi">i</span><span class="hbadge" id="sHowBadge" style="display:none">!</span> <span data-t="howTo">CÓMO JUGAR</span></button>
-    <button class="sfmt ready" id="sSolo"><span class="tri">▶</span> <span data-t="playSolo">JUGAR INDIVIDUAL</span> <span>👤</span></button>
-    <button class="sfmt sec" id="sTeam"><span class="tri">▶</span> <span data-t="playTeam">JUGAR POR EQUIPOS</span> <span>👥</span><span class="soontag" id="sTeamSoon" data-t="soonTag" style="display:none">pronto</span></button>
+    <!--+AG 1-ago (docs/56): el ▶ pasa a SVG, el mismo de #hPlay. Era el MISMO simbolo dibujado de dos
+         maneras a un toque de distancia (glifo aqui, SVG en la portada), y un glifo depende de que la
+         fuente lo traiga.
+         ⚠ DEUDA ABIERTA: los 👤/👥 siguen siendo emoji del sistema — se dibujan distinto en cada movil y
+         rompen el acabado del boton. Estan pedidos como arte propio en arte/codex/30 (icono-solo /
+         icono-equipo); en cuanto lleguen, estos dos <span> pasan a <img class="cico sm">. -->
+    <button class="sfmt ready" id="sSolo"><svg class="tri" viewBox="0 0 64 64" aria-hidden="true"><path d="M14 8 L56 32 L14 56 Z"/></svg> <span data-t="playSolo">JUGAR INDIVIDUAL</span> <span>👤</span></button>
+    <button class="sfmt sec" id="sTeam"><svg class="tri" viewBox="0 0 64 64" aria-hidden="true"><path d="M14 8 L56 32 L14 56 Z"/></svg> <span data-t="playTeam">JUGAR POR EQUIPOS</span> <span>👥</span><span class="soontag" id="sTeamSoon" data-t="soonTag" style="display:none">pronto</span></button>
   </div>
 </div>
 <!-- ===== HOJA DE IDIOMA (VB Jaime 2026-07-27: "se ve feo") =====================================
@@ -1856,7 +1988,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=39a2951"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=83c39f6"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -3520,7 +3652,9 @@ function renderHome(){ applyShell();
   //   pierde: en la rejilla de MODOS el modo del dia se lleva la carta ancha y su estrella.
   const _md=el('mcDay'), _isDay=SAVE.mode===dayMode();
   _md.style.display = _isDay ? '' : 'none';
-  if(_isDay) _md.textContent=S().dayBadge;
+  //+AG docs/56: la estrella la pinta el ::before de .mday con el SVG de marca, asi que se le quita el emoji
+  //   a la cadena traducida (sea cual sea el idioma). Si algun paquete no lo trae, el replace no hace nada.
+  if(_isDay) _md.textContent=String(S().dayBadge).replace(/^[⭐★☆]\s*/,'');
   el('hPassSub').textContent=S().passSub(SAVE.level, SAVE.xp+'/'+xpForLevel(SAVE.level));
   el('hPassBar').style.width=Math.round(100*SAVE.xp/xpForLevel(SAVE.level))+'%';
   //+AG doc 39: badge = bolas listas para SUBIR DE NIVEL. Vive en la PESTAÑA Garaje de abajo y en ningun
