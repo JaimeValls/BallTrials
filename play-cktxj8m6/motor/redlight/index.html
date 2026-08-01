@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-01 af38a41">
+<meta name="bt-build" content="2026-08-01 121586f">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <!--+AG el HTML se sirve en INGLES (defecto del juego); ?lang=es lo traduce por JS (applyLang) -->
 <title>YouBall · Red Light Rush (WebGL) · The Marble Games</title>
@@ -142,6 +142,53 @@
   #count .n{font-size:clamp(64px,22vh,190px);font-weight:900;color:#fff;line-height:1;
     text-shadow:0 6px 34px #000,0 0 46px rgba(120,220,140,.5);transition:color .1s}
   #count .you{font-size:clamp(16px,3.6vw,28px);font-weight:800;color:#ffd23f;letter-spacing:.04em;text-shadow:0 2px 12px #000}
+  /* ═══ doc 60 · F4: EL HUD DE PARTIDA PASA A HABLAR EL IDIOMA DEL JUEGO ═══════════════════════════
+     La auditoria del 1-ago encontro los 3 HUD de partida con CERO trazos de texto, y son LA superficie
+     que el jugador mira todo el rato (el shell ya llevaba el trio en 18 sitios). Aqui se copia tal cual
+     el token del kit del shell (juego.html .bstroke, docs/56 regla 1): relleno BLANCO + contorno indigo
+     #241a3f + sombra corta hacia abajo. El HUD vive en este fichero, no en el shell, asi que el token se
+     copia; si un dia cambia el del kit, hay que cambiarlo en los 3 motores.
+     EL ANCHO NO SE PONE A OJO: va en `em`, o sea el 11 % del cuerpo que manda docs/56 §3bis.1, y asi cada
+     tamano (incluidos los clamp que cambian con el viewport) lleva el suyo solo y no hay 10 anchos distintos.
+     ⚠ paint-order:stroke fill es OBLIGATORIO: sin el, el trazo se pinta ENCIMA del relleno y se come la
+       letra por dentro (docs/56 §3bis.2).
+     ⚠ el trazo engorda cada letra hacia fuera, asi que lo que lo lleva gana letter-spacing o dos letras
+       que se rozaban acaban fundidas ("INDMDUAL", docs/56 §3bis.1). */
+  #controls button, #youlbl, #spectator .big, #specExit{
+    color:#fff; -webkit-text-stroke:.11em #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f66}
+  /* la cuenta atras conserva SU color (el numero blanco que JS pinta verde en el "¡YA!" y el ambar de
+     "este eres tu"): solo se le anade el contorno, que es lo que le faltaba. */
+  #count .n, #count .you{-webkit-text-stroke:.11em #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f66,0 6px 34px #000}
+  #controls button{letter-spacing:.02em}
+  #count .n{letter-spacing:.05em}
+  /* docs/56 regla 1: sobre el DORADO el texto es BLANCO con trazo, NUNCA tinta oscura sobre amarillo
+     (el mismo arreglo que se le hizo al JUGAR del shell). Van aparte porque estos selectores le ganan
+     en especificidad al grupo de arriba, no por orden. */
+  #bSup.ready, #bSup.act, #specExit{color:#fff}
+  /* EXCEPCION CONSCIENTE (doc 60 regla 14 pide listarlas): FANTASMA y NITRO EN MARCHA son placas CLARAS
+     —el fantasma es blanco a proposito, "atravesar", y su tinta oscura esta razonada arriba—, y letra
+     blanca sobre plancha casi blanca no se lee ni con contorno. Se quedan con su tinta oscura y SIN trazo:
+     con el, el contorno indigo alrededor de una letra ya oscura solo emborrona y funde letras. */
+  #bGhost.ready, #bGhost.act, #bNitro.act{-webkit-text-stroke-width:0;text-shadow:none}
+  /* doc 60 regla 9 · SUELO DE 11 px: ningun texto informativo del HUD baja de ahi. Los 10 y 9 px de este
+     HUD venian de cuando el HUD era una herramienta de preview en pantalla grande. */
+  #controls button .k{font-size:11px}
+  #bBrake,#bNitro,#bGhost,#bSup{font-size:clamp(11px,2.7vw,14px)}   /* el minimo era 10 px */
+  /* doc 60 regla 10 · MAYUSCULAS POR CSS, nunca editando los 20 diccionarios de i18n (en arabe/CJK el
+     transform es inocuo). Los botones de este modo ya venian en mayusculas escritas a mano; con el
+     transform lo siguen estando cuando el paquete de idioma los traduce. La frase larga de
+     #spectator .sub se queda en Sentence case. */
+  #controls button, #count .you, #spectator .big, #specExit{text-transform:uppercase}
+  /* ATAJOS DE TECLADO. Medido: los sufijos «←/1», «MANTÉN · espacio/↑», las letras F/A/S de recarga y la
+     leyenda de teclas de la esquina se pintan SIEMPRE — lo unico que los apagaba era ?capture=1 —, o sea
+     que en el movil de verdad (embed del shell) el jugador ve teclas que no tiene. NO se borran: en
+     escritorio se juega con el teclado y ayudan. Se apagan donde no hay teclado (puntero grueso = dedo).
+     ⚠ #bRun SE QUEDA FUERA A PROPOSITO: su .k no es solo teclas, es «MANTÉN · espacio/↑», y MANTÉN es la
+       instruccion que hace jugable el boton principal del modo. Apagarlo en el movil se llevaria por
+       delante lo unico que dice que hay que dejar el dedo puesto. Para separarlo hay que partir la clave
+       de i18n `runHold` en dos (instruccion + teclas) en los 20 diccionarios: queda pendiente, no se
+       apana aqui. Lo mismo con las letras F/A/S que el JS escribe en .cd cuando el booster esta listo. */
+  @media (pointer:coarse){ #controls button:not(#bRun) .k, .keys{display:none} }
 </style>
 </head>
 <body>
@@ -199,7 +246,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=af38a41"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=121586f"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -1484,6 +1531,13 @@ function startCountdown(){
 
 buildSim(seed);
 if(EMBED){ const bm=document.getElementById('backMenu'); if(bm) bm.style.display='none'; }   //+AG en embed el shell gestiona el volver
+//+AG doc 60 F4 (remate): EL TEXTO DE DESARROLLO NO SALE EN EL JUEGO DE VERDAD. #fps es el contador de
+//   desarrollo ("fps 60 · sim/f 0.5") y en embed se pintaba en la esquina de arriba TAPANDO el marcador
+//   de equipos: lo unico que lo apagaba era ?capture=1, o sea la captura de video. NO se borra, se
+//   condiciona: en standalone (la herramienta de preview/video) sigue saliendo siempre, y dentro del
+//   juego vuelve con &debug=1, que es como se mira una partida real cuando algo va mal — y en este modo
+//   ese contador es justo lo que hay que ver si alguien dice que va a tirones.
+if(EMBED && params.get('debug')!=='1'){ const f=document.getElementById('fps'); if(f) f.style.display='none'; }
 if(params.get('capture')==='1'){ document.querySelector('.keys').style.display='none'; const _f=document.getElementById('fps'); if(_f) _f.style.display='none';
   document.getElementById('controls').style.display='none'; youLbl.style.display='none'; }   //+AG sin controles/etiqueta en captura de vídeo
 else {

@@ -65,9 +65,16 @@ const CSS = `
   /*+AG los grises-lavanda son LOS DEL MOTOR, no unos nuevos: #a9a3c2 es el de los rótulos de los controles
      (#ctr .lbl), #c9cff0 el del subtítulo de la portada (#ovSub) y #8a92b8 el de su pista (#hint). Mismo rol,
      mismo color: tres lavandas más habrían sido tres decisiones que nadie recuerda. */
-  #btRdy .kick{ font-size:clamp(10px,1.5vh,13px); font-weight:600; letter-spacing:.22em; color:#a9a3c2; }
+  #btRdy .kick{ font-size:clamp(11px,1.5vh,13px); font-weight:600; letter-spacing:.22em; color:#a9a3c2; }
+  /*+AG doc 60 F4: el nombre del modo lleva el TRÍO de marca (blanco + trazo indigo + sombra corta), el
+     mismo token que el kit del shell y que los 3 HUD de partida. Y va en MAYÚSCULAS por CSS: docs/60
+     regla 10 nombra explícitamente los nombres de modo, y nunca se toca el diccionario de i18n.
+     ⚠ el letter-spacing pasa de -.01em a .01em: con tracking NEGATIVO el trazo funde las letras vecinas
+       (docs/56 §3bis.1, el caso "INDMDUAL"). Trazo y espaciado se tocan SIEMPRE a la vez. */
   #btRdy .name{ font-size:clamp(26px,5.4vh,50px); font-weight:700; line-height:1.06; color:#fff;
-    letter-spacing:-.01em; text-shadow:0 3px 18px rgba(0,0,0,.7); margin:.4vh 0 1.2vh; }
+    letter-spacing:.01em; text-transform:uppercase;
+    -webkit-text-stroke:.11em #241a3f; paint-order:stroke fill;
+    text-shadow:0 2px 0 #241a3f66, 0 3px 18px rgba(0,0,0,.7); margin:.4vh 0 1.2vh; }
   #btRdy .goal{ max-width:min(90vw,430px); font-size:clamp(13px,2.1vh,17px); font-weight:400; line-height:1.42;
     color:#c9cff0; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
   #btRdy .goal b{ color:#ffd23f; font-weight:600 }
@@ -80,7 +87,15 @@ const CSS = `
      Y NO se inventa nada encima: un brillo nuevo aquí sería un tercer lenguaje de "púlsame" (docs/40). */
   #btRdy .cta{ position:relative; overflow:hidden; margin-top:3vh; border:0; border-radius:18px;
     padding:clamp(12px,2.1vh,17px) clamp(34px,9vw,54px); font-family:inherit; font-weight:700;
-    font-size:clamp(18px,3vh,24px); letter-spacing:.02em; color:#3a2400; cursor:pointer;
+    /*+AG doc 60 F4 / docs/56 regla 1: el "¡LISTO!" iba en TINTA OSCURA sobre el oro, que es exactamente lo
+       que la regla prohíbe — es el mismo arreglo que se le hizo al JUGAR del shell. Pasa a blanco con el
+       trazo del kit. El trazo va en em = 11 % del cuerpo, así escala solo con el clamp.
+       ⚠ este CSS vive dentro de un TEMPLATE LITERAL de JS: una comilla invertida aquí, aunque sea dentro
+         de un comentario CSS, CIERRA la cadena y revienta el módulo entero (medido: el motor se quedaba
+         sin arranque, sin coach y sin cartel de meta a la vez). Nada de comillas invertidas en este bloque. */
+    font-size:clamp(18px,3vh,24px); letter-spacing:.04em; color:#fff; cursor:pointer;
+    text-transform:uppercase; -webkit-text-stroke:.11em #241a3f; paint-order:stroke fill;
+    text-shadow:0 2px 0 #241a3f66;
     background:linear-gradient(#ffe27a,#ff9a3d); box-shadow:0 6px 0 #b45a10, 0 10px 24px rgba(255,154,61,.32);
     animation:breathe 2.6s ease-in-out infinite, readyGlow 1.9s ease-in-out infinite; }
   #btRdy .cta:active{ transform:translateY(3px); box-shadow:0 3px 0 #b45a10; animation:none }
@@ -95,7 +110,7 @@ const CSS = `
   #btRdy .cta .w{ position:relative; z-index:1 }
   #btRdy .cta .drain{ position:absolute; inset:0; right:auto; width:100%; background:rgba(255,255,255,.42);
     pointer-events:none; }
-  #btRdy .sub{ margin-top:1.6vh; font-size:clamp(10px,1.6vh,13px); font-weight:400; color:#8a92b8; min-height:1.4em }
+  #btRdy .sub{ margin-top:1.6vh; font-size:clamp(11px,1.6vh,13px); font-weight:400; color:#8a92b8; min-height:1.4em }   /*+AG doc 60 regla 9: el suelo son 11 px, no 10 */
   /*+AG BANDA DEL MODO durante la cuenta atrás: el nombre sigue en pantalla mientras corre el 3-2-1, así que
      "¿qué estoy jugando?" tiene respuesta hasta el ¡YA!. Vive DENTRO de #count (los 3 motores lo tienen), así
      que aparece y desaparece con la cuenta atrás sin lógica extra.
@@ -108,9 +123,14 @@ const CSS = `
   #btBanner .plate{ display:inline-block; padding:.6vh clamp(14px,4vw,26px); border-radius:999px;
     background:rgba(36,17,89,.74); border:1px solid #ffffff1f; box-shadow:0 3px 16px rgba(0,0,0,.45);
     backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); }
-  #btBanner .k{ display:block; font-size:clamp(9px,1.4vh,12px); font-weight:600; letter-spacing:.2em; color:#a9a3c2 }
+  #btBanner .k{ display:block; font-size:clamp(11px,1.4vh,12px); font-weight:600; letter-spacing:.2em; color:#a9a3c2 }   /*+AG doc 60 regla 9: iba a 9 px */
+  /*+AG doc 60 F4: la banda de la cuenta atrás enseña el MISMO nombre de modo que el cartel, así que lleva
+     el MISMO trío y las mismas mayúsculas. Si uno de los dos se quedaba sin trazo, el jugador veía el
+     nombre cambiar de piel entre el "¡LISTO!" y el 3-2-1. */
   #btBanner .n{ display:block; font-size:clamp(17px,3vh,26px); font-weight:700; color:#fff;
-    text-shadow:0 2px 10px rgba(0,0,0,.6) }
+    letter-spacing:.01em; text-transform:uppercase;
+    -webkit-text-stroke:.11em #241a3f; paint-order:stroke fill;
+    text-shadow:0 2px 0 #241a3f66, 0 2px 10px rgba(0,0,0,.6) }
 `;
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────

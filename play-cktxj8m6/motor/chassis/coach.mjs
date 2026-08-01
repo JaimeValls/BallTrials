@@ -31,16 +31,25 @@ const CSS = `
   @keyframes coachTap{
     0%,100%{ transform:translate(-50%,4px) scale(1); }
     50%    { transform:translate(-50%,-12px) scale(1.32); } }
+  /*+AG doc 60 F4: el bocadillo del coach lleva el TRÍO de marca (blanco + trazo indigo .11em = 11 % del
+     cuerpo + sombra corta, con paint-order:stroke fill obligatorio), el mismo token que los HUD y los
+     carteles. NO se pone en mayúsculas a propósito: aquí el texto es una FRASE ("Pulsa ◀ IZQUIERDA: tu
+     bola deriva hacia ese lado"), y docs/60 regla 10 deja Sentence case justo para las frases largas. */
   #coach{ position:fixed; z-index:73; left:50%; transform:translateX(-50%); max-width:min(92vw,540px);
     background:#0b1526f2; border:2px solid #ffd700; border-radius:16px; padding:11px 16px; text-align:center;
     font-weight:900; font-size:clamp(15px,3.8vw,19px); color:#fff; box-shadow:0 8px 28px #000c; pointer-events:none;
+    letter-spacing:.01em; -webkit-text-stroke:.11em #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f66;
     display:none; }
   #coach:after{ content:''; position:absolute; left:50%; bottom:-9px; width:14px; height:14px; margin-left:-7px;
     background:#0b1526; border-right:2px solid #ffd700; border-bottom:2px solid #ffd700; transform:rotate(45deg); }
   #coach.nub-off:after{ display:none; }
-  #coach .cnum{ display:block; font-size:11px; font-weight:800; color:#ffd700; letter-spacing:.08em; margin-bottom:3px; }
+  /*+AG el ORO del contador de pasos se queda (es el color del sistema del coach): solo gana el contorno. */
+  #coach .cnum{ display:block; font-size:11px; font-weight:800; color:#ffd700; letter-spacing:.08em; margin-bottom:3px;
+    -webkit-text-stroke:.11em #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f66; }
   #coachExit{ position:fixed; top:10px; left:10px; z-index:74; border:1px solid #ffffff3a; border-radius:10px;
-    background:#0b1526e6; color:#cfe4ff; font-family:inherit; font-weight:800; font-size:13px; padding:7px 12px; cursor:pointer; }
+    background:#0b1526e6; color:#fff; font-family:inherit; font-weight:800; font-size:13px; padding:7px 12px; cursor:pointer;
+    text-transform:uppercase; letter-spacing:.02em;
+    -webkit-text-stroke:.11em #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f66; }
 `;
 
 // cfg:

@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-01 af38a41">
+<meta name="bt-build" content="2026-08-01 121586f">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>YouBall · La Gran Carrera (WebGL)</title>
 <style>
@@ -133,6 +133,41 @@
   .ldot{position:absolute;left:50%;transform:translate(-50%,-50%);width:3.1vh;height:3.1vh;border-radius:50%;z-index:3;
     box-shadow:inset 0 -0.5vh rgba(0,0,0,.32),0 0 .9vh rgba(0,0,0,.45)}   /* sin transition: el top cambia cada frame → en captura exacto */
   .ldot.fin{box-shadow:0 0 0 .42vh #ffd34d,0 0 2vh rgba(255,211,77,.85)}
+  /* ═══ doc 60 · F4: EL HUD DE PARTIDA PASA A HABLAR EL IDIOMA DEL JUEGO ═══════════════════════════
+     La auditoria del 1-ago encontro los 3 HUD de partida con CERO trazos de texto, y son LA superficie
+     que el jugador mira todo el rato (el shell ya llevaba el trio en 18 sitios). Aqui se copia tal cual
+     el token del kit del shell (juego.html .bstroke, docs/56 regla 1): relleno BLANCO + contorno indigo
+     #241a3f + sombra corta hacia abajo. El HUD vive en este fichero, no en el shell, asi que el token se
+     copia; si un dia cambia el del kit, hay que cambiarlo en los 3 motores.
+     EL ANCHO NO SE PONE A OJO: va en `em`, o sea el 11 % del cuerpo que manda docs/56 §3bis.1, y asi cada
+     tamano (incluidos los clamp que cambian con el viewport) lleva el suyo solo y no hay 10 anchos distintos.
+     ⚠ paint-order:stroke fill es OBLIGATORIO: sin el, el trazo se pinta ENCIMA del relleno y se come la
+       letra por dentro (docs/56 §3bis.2).
+     ⚠ el trazo engorda cada letra hacia fuera, asi que lo que lo lleva gana letter-spacing o dos letras
+       que se rozaban acaban fundidas ("INDMDUAL", docs/56 §3bis.1). */
+  #pos, #superlbl, #youlbl, #ctr .lbl, #ctr button, #ovTitle, #ovBtn, #ovMenu{
+    color:#fff; -webkit-text-stroke:.11em #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f66}
+  /* la cuenta atras conserva SU color (el numero blanco que JS pinta verde en el "¡YA!" y el ambar de
+     "este eres tu"): solo se le anade el contorno, que es lo que le faltaba. */
+  #count .n, #count .you{-webkit-text-stroke:.11em #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f66,0 6px 34px #000}
+  #ctr button{letter-spacing:.02em}
+  #count .n{letter-spacing:.05em}
+  /* docs/56 regla 1: sobre el dorado el texto es BLANCO con trazo, NUNCA tinta oscura sobre amarillo
+     (es el mismo arreglo que se le hizo al JUGAR del shell). Va aparte porque #bSup.ready le gana en
+     especificidad al grupo de arriba, no por orden. */
+  #bSup.ready{color:#fff}
+  /* doc 60 regla 9 · SUELO DE 11 px: ningun texto informativo del HUD baja de ahi. Los 10 y 9 px de este
+     HUD venian de cuando el HUD era una herramienta de preview en pantalla grande. */
+  #ctr .lbl, #superlbl, #ctr button .cd, #ctr button .k{font-size:11px}
+  #pos small{font-size:max(11px,.55em)}   /* iba a .55em = 8,8 px en un movil de 360: por debajo del suelo */
+  /* doc 60 regla 10 · MAYUSCULAS POR CSS, nunca editando los 20 diccionarios de i18n (en arabe/CJK el
+     transform es inocuo). DIRECCION y BOOSTERS ya lo estaban; aqui entran el contador y los botones. */
+  #pos, #superlbl, #ctr button, #count .you, #ovTitle, #ovBtn, #ovMenu{text-transform:uppercase}
+  /* ATAJOS DE TECLADO. Medido: los sufijos «1 / ←» y la leyenda de teclas de la esquina se pintan SIEMPRE
+     — lo unico que los apagaba era ?capture=1 —, o sea que en el movil de verdad (embed del shell) el
+     jugador ve teclas que no tiene. NO se borran: en escritorio se juega con el teclado y ayudan.
+     Se apagan donde no hay teclado, o sea donde el puntero es grueso (dedo). */
+  @media (pointer:coarse){ #ctr button .k, .keys{display:none} }
 </style>
 </head>
 <body>
@@ -186,7 +221,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=af38a41"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=121586f"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -1188,6 +1223,12 @@ if(EMBED){
 buildPanels(); layout(); buildSim(seed);
 if(EMBED){ const bm=el('backMenu'); if(bm) bm.style.display='none'; }   //+AG en embed el shell gestiona el volver; se oculta el "← Menu" de esquina
 if(EMBED){ const ls=el('lang'); if(ls) ls.style.display='none'; }       //+AG el idioma lo manda Ajustes del shell: el selector del motor no vuelve a aparecer nunca en el juego
+//+AG doc 60 F4 (remate): EL TEXTO DE DESARROLLO NO SALE EN EL JUEGO DE VERDAD. #hud es la linea de
+//   depuracion ("YouBall · La Gran Carrera (WebGL) · seed 7 · descenso 68u") y en embed se pintaba JUSTO
+//   ENCIMA de la fila de boosters: lo unico que la apagaba era ?capture=1, o sea la captura de video.
+//   NO se borra, se condiciona: en standalone (la herramienta de preview/video) sigue saliendo siempre,
+//   y dentro del juego vuelve con &debug=1, que es como se mira una partida real cuando algo va mal.
+if(EMBED && params.get('debug')!=='1'){ const h=el('hud'); if(h) h.style.display='none'; }
 //+AG en un pane/iframe embebido el viewport puede medir 0 en el load inicial → re-layout al primer frame real
 requestAnimationFrame(()=>{ if(innerWidth>0 && renderer.domElement.width===0) layout(); });
 if(params.get('capture')==='1'){ document.getElementById('hud').style.display='none'; document.querySelector('.keys').style.display='none';

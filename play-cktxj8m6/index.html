@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-01 af38a41"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-01 121586f"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -1670,6 +1670,40 @@
   /*+AG las bloqueadas conservan el grosor y lo apagan, igual que .ricon.lock y .sh-buy:disabled: son
      botones que hoy no puedes pulsar, no huecos donde falta un boton. */
   .tile.locked{ box-shadow:0 5px 0 #0d072699, 0 8px 20px #0009, inset 0 1px 0 #ffffff12; }
+
+  /* ══ 13 · EL ICONO DE AJUSTES (encargo 33) ═══════════════════════════════════════════════════
+     Lo suspendio supercell-arte auditando la insignia de nivel: dio la insignia por APTA y suspendio
+     la CABECERA por esta pieza. Las tres rayas eran `<i class="bar">` pintadas con box-shadow —
+     pildoras planas con contorno MARRON `#7a4a00`— mientras la moneda, la gema y ahora la insignia
+     llevan contorno navy y brillo. Era el ultimo sitio de la fila donde una primitiva de CSS hacia
+     de icono.
+     El BOTON no se toca: el amarillo, el canto y el bisel son chrome, y el chrome en CSS es correcto.
+     Lo que cambia es solo el glifo de dentro.
+
+     ⚠ EL DIBUJO SE RECORTO A SU SILUETA antes de convertirlo. Con el encargo 32 el lienzo traia aire
+     alrededor y hubo que compensarlo con un `background-size` del 109,4% calculado a mano; ademas la
+     tinta venia 8 px alta dentro del lienzo, que a tamaño de uso son 0,8 px de desvio — exactamente
+     el descentrado que Jaime caza. Recortando a la caja del dibujo las dos cosas desaparecen: el
+     tamaño se pide en pixeles reales y el centrado lo hace `center` sin trampa.
+
+     ⚠ Y UNA MEDIDA QUE NO CUMPLIA, dicha en alto porque el brief la exigia: pedi que a 20 px de uso
+     nada mas fino que 2 px existiera, y el separador oscuro entre barras medido en la entrega daba
+     1,65 px. El arreglo NO fue relajar el criterio: fue montar el glifo mas grande. A 28 px de ancho
+     el separador sube a 2,3 px y la regla se cumple de verdad.
+     Los 28 salieron de comparar 20, 22, 24, 26 y 28 montados sobre el boton real: a 24 el icono se
+     leia limpio pero perdia presencia contra las tres barras de CSS que sustituye (que ocupaban unos
+     24 px de ancho CONTANDO su contorno). A 28 recupera el peso sin comerse el aire del boton.
+
+     ⚠ CENTRADO DE LA TINTA comprobado (la revision que Jaime exigio tras el numero de la insignia):
+     el glifo cae a 0,17 px del centro, el 0,4% del lado del boton. No lleva compensacion y no la
+     necesita. Y AVISO PARA QUIEN LO REMIDA, porque me costo tres intentos: NO detectes el boton por
+     su color amarillo para sacar su centro. El bisel `inset 0 2px 0 #ffffff8c` pinta de BLANCO la
+     franja de arriba, asi que el amarillo empieza 2 px mas abajo del borde real y el centro te sale
+     desplazado — daba 1,83 px de desvio falso, diez veces el real. La captura con `--sel` ya viene
+     recortada a la caja del elemento: el centro es el centro de la imagen, y punto. */
+  .h-ic .bar{ display:none; }
+  .h-ic{ background:url(arte/ui/ui-ajustes-icono.webp?v=1) center/28px no-repeat,
+                    linear-gradient(#ffe14d,#ffb42a); }
 </style>
 
 <!--+AG doc 34 Fase B: #app = la "columna telefono" que contiene TODAS las pantallas y overlays (portrait) -->
@@ -2336,7 +2370,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=af38a41"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=121586f"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>

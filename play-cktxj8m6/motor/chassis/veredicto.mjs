@@ -51,15 +51,29 @@ const CSS = `
     font-family:'Fredoka','Segoe UI Rounded','Nunito',system-ui,sans-serif; -webkit-tap-highlight-color:transparent; }
   #btFin.on{ display:flex; animation:btFinIn .28s cubic-bezier(.2,1.1,.4,1) both; }
   @keyframes btFinIn{ from{ opacity:0; } to{ opacity:1; } }
+  /*+AG doc 60 F4: el cartel de meta lleva el TRÍO de marca, igual que los 3 HUD y que el cartel de
+     arranque — es la última cosa que el jugador mira de la partida y era la única sin contorno.
+     El TRAZO va en em (11 % del cuerpo, docs/56 §3bis.1) y paint-order:stroke fill NO es opcional.
+     ⚠ este CSS vive dentro de un TEMPLATE LITERAL de JS: una comilla invertida, aunque sea dentro de un
+       comentario CSS, CIERRA la cadena y revienta el módulo. Aquí no se escriben comillas invertidas.
+     Los COLORES no se tocan: el lila del rótulo y el oro del "¡GANASTE!" son decisiones vivas; lo que
+     se añade es el contorno, que es lo que faltaba (mismo criterio que la cuenta atrás de los motores). */
   #btFin .k{ font-size:clamp(11px,2.6vw,14px); font-weight:800; letter-spacing:.2em; text-transform:uppercase;
-    color:#c9b6ff; }
+    color:#c9b6ff; -webkit-text-stroke:.11em #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f66; }
   /*+AG el numerote entra con un golpe de escala (el "pum" de Supercell al rematar): es lo único que se anima,
      porque es lo único que el jugador ha venido a leer. */
-  #btFin .p{ font-size:clamp(56px,17vw,104px); font-weight:900; letter-spacing:-.03em; line-height:1.02;
-    color:#fff; text-shadow:0 6px 30px #000b; animation:btFinPop .42s cubic-bezier(.2,1.5,.4,1) both; }
+  /*+AG ⚠ el letter-spacing pasa de -.03em a .02em: con tracking NEGATIVO el trazo funde las letras
+     vecinas, y aquí la palabra más larga es "¡GANASTE!" a 100 px (docs/56 §3bis.1). */
+  #btFin .p{ font-size:clamp(56px,17vw,104px); font-weight:900; letter-spacing:.02em; line-height:1.02;
+    color:#fff; -webkit-text-stroke:.11em #241a3f; paint-order:stroke fill;
+    text-shadow:0 3px 0 #241a3f66, 0 6px 30px #000b; animation:btFinPop .42s cubic-bezier(.2,1.5,.4,1) both; }
   #btFin.win .p{ color:#ffd23f; text-shadow:0 6px 34px #fbb91566, 0 4px 22px #000a; font-size:clamp(40px,12vw,74px); }
   @keyframes btFinPop{ 0%{ transform:scale(.55); opacity:0; } 100%{ transform:scale(1); opacity:1; } }
-  #btFin .s{ margin-top:6px; font-size:clamp(14px,3.6vw,19px); font-weight:700; color:#dfe4ff; text-shadow:0 2px 12px #000a; }
+  /*+AG doc 60 regla 10: son 3-4 palabras de rótulo ("¡En el podio!", "Campeón de la carrera"), no una
+     frase de hoja, así que van en MAYÚSCULAS por CSS y nunca editando los 20 diccionarios. */
+  #btFin .s{ margin-top:6px; font-size:clamp(14px,3.6vw,19px); font-weight:700; color:#fff;
+    text-transform:uppercase; letter-spacing:.02em;
+    -webkit-text-stroke:.11em #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f66, 0 2px 12px #000a; }
 `;
 
 let host = null, timer = 0, pending = null;
