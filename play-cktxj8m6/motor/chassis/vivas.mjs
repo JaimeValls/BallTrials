@@ -204,10 +204,24 @@ function tick(c, dt){
   const y = REPOSO + h;
   c.o.g.position.set(x, y, 0);
   c.o.sqUpdate(x, y, dt);
-  // GESTO: la cara de FIRMA del heroe en clave alegre. Se pide con `archFace`, la misma puerta que
-  // usa el motor, para que la ceja y la boca sean las suyas y no una cara generica (doc 51).
+  // GESTO. Se pide con `archFace`, la misma puerta que usa el motor, para que la ceja y la boca sean
+  // las suyas y no una cara generica (doc 51).
+  //
+  // ⚠ ABAJO VA 'neutral', NO 'feliz'. Jaime: «estan con los ojos cerrados y de repente abren los ojos
+  // con estrellitas; parecen dormidas». Y tenia razon literal: el preset 'feliz' es `eye:'happy'`, que
+  // son los dos ojos CERRADOS en arco (^^). En una carta de 62 px eso no se lee como alegria, se lee
+  // como una bola dormida — y el salto la despertaba de golpe con ojos de estrella. Con 'neutral' el
+  // ojo es redondo y ABIERTO en todo el reposo, y las estrellitas quedan donde tienen sentido: en el
+  // aire, como premio del brinco.
+  //
+  // De regalo arregla la mayor perdida de caracter frente al retrato (auditoria del 31-jul, punto 1):
+  // 'feliz' NO esta en el set REPOSO de facegen, asi que cada heroe solo heredaba el GROSOR de ceja y
+  // la forma y la boca caian al preset generico — las doce ponian practicamente la misma cara.
+  // 'neutral' SI esta en REPOSO, o sea que entra el modificador ENTERO: vuelve el smirk de Cohete, la
+  // boca de matón de Tanque, el guiño de Pinball y el iris de cada uno. Y esto se queda en el MENU:
+  // no toca `facegen.mjs`, asi que el atlas del motor, el torneo y el video no se mueven.
   const alto = h > SALTO * 0.45;
-  c.o.setExpr(archFace(c.arch, alto ? 'extasis' : 'feliz'));
+  c.o.setExpr(archFace(c.arch, alto ? 'extasis' : 'neutral'));
   const k = Math.max(0, h / SALTO);
   c.sombra.scale.set(1 - G_SOMBRA * k, 1 - G_SOMBRA * k, 1);
   c.sombra.material.opacity = 1 - 0.6 * k;

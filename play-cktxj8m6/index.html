@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-01 034acf4"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-01 317129f"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -300,6 +300,7 @@
     border-radius:999px; padding:8px 18px 8px 12px; max-width:100%; }
   .r-winner.mine{ background:#fbb9151f; border-color:var(--gold2); box-shadow:0 0 18px #fbb91533; }
   .r-crown{ font-size:22px; filter:drop-shadow(0 3px 6px #0008); line-height:1; }
+  .r-crown img{ width:26px; height:26px; object-fit:contain; display:block; }
   .r-disc{ width:38px; height:38px; border-radius:50%; flex:0 0 auto; box-shadow:0 4px 12px #0007, inset 0 3px 8px #ffffff44; }
   .r-wtxt{ min-width:0; }
   .r-champlbl{ font-size:9.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); font-weight:800; }
@@ -309,7 +310,13 @@
      desde que el motor te lo canta en meta, aqui es un resumen. Los ~110 px que suelta se los queda la
      clasificacion, que es lo que de verdad se venia recortando. */
   .r-youlbl{ font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); font-weight:800; margin-top:8px; }
-  .r-place{ font-size:clamp(34px,10vw,48px); font-weight:900; letter-spacing:-.03em; line-height:1; margin-top:1px; text-shadow:0 4px 22px #000a; }
+  .r-place{ font-size:clamp(34px,10vw,48px); font-weight:900; letter-spacing:-.03em; line-height:1; margin-top:1px; text-shadow:0 4px 22px #000a;
+    display:flex; align-items:center; justify-content:center; gap:6px; }
+  /*+AG la medalla del puesto se dimensiona en EM, no en px: al lado de un "1º" de 48 px, los 22 px del
+     .cico.big generico se veian como una pegatina perdida. En em crece con el numero en cualquier
+     idioma y en cualquier ancho de pantalla (el font-size es un clamp con vw). */
+  .r-place img{ width:.86em; height:.86em; object-fit:contain; flex:0 0 auto;
+    filter:drop-shadow(0 3px 8px #0009); }
   .r-sub{ font-size:14px; color:#c9cff0; font-weight:700; }
   .r-rewards{ width:100%; max-width:430px; display:flex; flex-direction:column; gap:10px; margin-top:14px; }
   .r-reward{ display:flex; align-items:center; gap:12px; background:#ffffff0d; border:1px solid var(--line); border-radius:16px; padding:12px 15px; opacity:0; transform:translateY(8px); transition:opacity .32s, transform .32s; }
@@ -1805,7 +1812,9 @@
     <!--+AG data-solid: el fondo vivo REBOTA en estos dos bloques (banda de campeon y numerote) en vez de
          aparcarse encima del dato mas importante de la pantalla (director-de-arte 2026-07-27) -->
     <div class="r-winner" id="rWinner" data-solid>
-      <div class="r-crown" id="rCrown">👑</div>
+      <!--+AG 1-ago (encargo 31): era el emoji 👑 del sistema. Se ve al acabar CADA partida, asi que
+           era el emoji mas visto del juego. -->
+      <div class="r-crown" id="rCrown"><img src="arte/ui/corona-campeon.webp" alt=""></div>
       <div class="r-disc" id="rDisc"></div>
       <div class="r-wtxt"><div class="r-champlbl" id="rChampLbl">Campeón</div><div class="r-wname" id="rWinName">—</div></div>
     </div>
@@ -2169,7 +2178,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=034acf4"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=317129f"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -3384,6 +3393,14 @@ const nfmt=n=>Number(n||0).toLocaleString(BTI18N.nloc(LANG));
 //   daltonismo sin depender del color, que es como lo pide docs/17.
 const uiArt=n=>`arte/ui/${n}.webp`;
 const coinIco=(n,cls)=>`<img class="cico${cls?' '+cls:''}" src="${uiArt('moneda-'+n)}" alt="">`;
+//+AG 1-ago (encargo 31): los OBJETOS DE LOGRO — puesto 1º/2º/3º, corona del ganador y "hay premio"—
+//   eran emoji del sistema. En Windows las medallas salen con cinta AZUL, un color que no existe en la
+//   paleta, y al lado de la copa y las monedas dibujadas cantaban. Mismo patron que coinIco: el nombre
+//   entra, sale un <img> del pack. Los tres metales se piden por PUESTO (1,2,3), que es como los usan
+//   Ranking y Resultados, para no tener que acordarse de oro/plata/bronce en cada sitio.
+const METAL={1:'oro',2:'plata',3:'bronce'};
+const medalIco=(pos,cls)=>METAL[pos] ? `<img class="cico${cls?' '+cls:''}" src="${uiArt('medalla-'+METAL[pos])}" alt="">` : '';
+const uiIco=(n,cls)=>`<img class="cico${cls?' '+cls:''}" src="${uiArt(n)}" alt="">`;
 //+AG 1-ago: EL ARREGLO A MEDIAS DE DOC 41, TERMINADO. Aquella vez se cambiaron las CABECERAS a icono
 //   dibujado y ahi se paro: los botones de compra, la oferta del dia, los packs y los textos de premio
 //   seguian pintando el caracter tipografico (`600 ◆`, `+25 ✦`). O sea, el mismo juego dibujaba la
@@ -3442,7 +3459,7 @@ const dirBtns={[DIR.LEFT]:el('bL'),[DIR.CENTER]:el('bC'),[DIR.RIGHT]:el('bR')};
 
 function renderOverlay(){ const t=T();
   if(ovState==='intro'){ el('ovTitle').textContent=t.name; el('ovSub').innerHTML=t.sub; el('ovBtn').textContent=t.play; }
-  else { const medal={1:' 🏆',2:' 🥈',3:' 🥉'}[lastPlace]||''; el('ovTitle').textContent=ord(lastPlace,LANG)+medal;
+  else { el('ovTitle').innerHTML=ord(lastPlace,LANG)+medalIco(lastPlace,'big');   //+AG encargo 31: medalla dibujada, no emoji
     el('ovSub').innerHTML=lastPlace<=3?t.podium:t.retry; el('ovBtn').textContent=t.again; }
 }
 //+AG doc 49: cambiar de idioma pasa a tener DOS tiempos, porque 18 de los 20 idiomas se descargan.
@@ -4042,14 +4059,17 @@ function showResults(place, rew, leveled, colArg, teamP, d){
   //   que paga copas. En algunas rondas de Cazador/Luz Roja el criterio que corona y el que ordena la tabla no
   //   coinciden (~7% de las medidas); antes decia "¡Tu equipo ganó!" con la corona en OTRO equipo.
   if(teamP){   //+AG POR EQUIPOS (Fase 3): el resultado que cuenta es el del EQUIPO (1..4), no el puesto individual
-    const twon=winMine&&teamP===1, tmedal={1:' 🏆',2:' 🥈',3:' 🥉'}[teamP]||'';
-    el('rPlace').textContent=ord(teamP,LANG)+tmedal;
+    //+AG 1-ago (encargo 31): el puesto llevaba emoji (🏆🥈🥉). Ahora la medalla dibujada. Pasa de
+    //   textContent a innerHTML porque hay que meter un <img>; el texto que entra es ord(), que lo
+    //   genera el propio juego (no viene de fuera), asi que no hay nada que escapar.
+    const twon=winMine&&teamP===1;
+    el('rPlace').innerHTML=ord(teamP,LANG)+medalIco(teamP,'big');
     //+AG en equipos el subtitulo lleva TU puesto individual entre las 12 (la tabla de abajo es por equipos)
     const nb=(d&&d.standings&&d.standings.length)||12;
     el('rSub').textContent=(twon?s.teamWon:s.teamPlaceMsg(teamP))+' · '+s.youOf(ord(place,LANG), nb);
   } else {
-    const won=winMine&&place===1, medal={1:' 🏆',2:' 🥈',3:' 🥉'}[place]||'';
-    el('rPlace').textContent=ord(place,LANG)+medal;
+    const won=winMine&&place===1;
+    el('rPlace').innerHTML=ord(place,LANG)+medalIco(place,'big');
     el('rSub').textContent=won?s.wonSub:(place<=3?s.podium:s.againSub);
   }
   el('rTableH').textContent = teamP ? s.tblTeams : s.tblSolo;
@@ -4131,7 +4151,7 @@ function renderStandingsTable(teamP, topN){
     const dl=DELTAS[Math.min(DELTAS.length-1, e.place-1)];
     const row=document.createElement('div'); row.className='rrow'+(e.me?' meRow':'');
     row.innerHTML='<span class="rp">'+ord(e.place,LANG)+'</span><span class="rdisc" style="background:'+e.color+'"></span>'+
-      (e.win?'<span class="rcrown">👑</span>':'')+
+      (e.win?'<span class="rcrown">'+uiIco('corona-campeon','sm')+'</span>':'')+
       '<span class="rn">'+esc(e.name)+'</span><span class="rd '+deltaCls(dl)+'">🏆 '+deltaTxt(dl)+'</span>';
     tblEl.appendChild(row); });
   more.hidden = !cut;
@@ -5047,7 +5067,9 @@ function paintRanking(){ applyShell(); const s=S();
   el('rkMe').innerHTML = rkTab==='bola'
     ? (myIdx<0 ? s.rkNoBall : s.rkYouBest(rows[myIdx].ball, myIdx+1, total))
     : s.rkYouPos(myIdx+1, total) + (rkTab==='diario'?s.rkTodayTail:'');
-  const prize=Math.ceil(total*0.10), medals={0:'🥇',1:'🥈',2:'🥉'}, list=el('rkList'); list.innerHTML='';
+  //+AG 1-ago (encargo 31): los tres primeros puestos llevan la MEDALLA DIBUJADA, no el emoji. El indice
+  //   de la fila es 0-based y medalIco pide el PUESTO, de ahi el i+1.
+  const prize=Math.ceil(total*0.10), medals={0:medalIco(1,'sm'),1:medalIco(2,'sm'),2:medalIco(3,'sm')}, list=el('rkList'); list.innerHTML='';
   function addRow(r,i){ const row=document.createElement('div'); row.className='rkrow'+(r.me?' meRow':'');
     let vTxt,vCls='';
     if(rkTab==='diario'){ vTxt=deltaTxt(r.v); vCls=r.v>0?' up':(r.v<0?' dn':''); } else vTxt=coinIco('copa','sm')+' '+nfmt(r.v);
@@ -5056,7 +5078,7 @@ function paintRanking(){ applyShell(); const s=S();
     row.innerHTML='<span class="kp">'+(medals[i]||'#'+(i+1))+'</span>'+disc+
       //+AG 1-ago: el marcador de franja era 🎟️ —un TICKET, o sea la moneda muerta—. Marca quién está
       //   dentro de la franja, no qué se cobra: pasa a 🎁, que es lo que dice el cartel de arriba.
-      '<span class="kn">'+r.name+'</span>'+(i<prize&&rkTab!=='diario'?'<span class="kt" title="'+S().rkPrizeTip+'">🎁</span>':'')+
+      '<span class="kn">'+r.name+'</span>'+(i<prize&&rkTab!=='diario'?'<span class="kt" title="'+S().rkPrizeTip+'">'+uiIco('ranking-regalo','sm')+'</span>':'')+
       '<span class="kv'+vCls+'">'+vTxt+'</span>';
     list.appendChild(row); }
   const TOP=20; rows.slice(0,TOP).forEach(addRow);
