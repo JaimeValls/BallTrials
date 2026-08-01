@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-01 317129f"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-01 e0d18c5"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -1028,6 +1028,10 @@
   .sfmt .tri{ width:.72em; height:.72em; display:block; flex:0 0 auto; }
   .sfmt .tri path{ fill:#fff; stroke:#143d22; stroke-width:8; stroke-linejoin:round; paint-order:stroke fill; }
   .sfmt.sec .tri path{ stroke:#2b3047; fill:#e8ecf7; }
+  /*+AG encargo 30: el icono de formato (una bola / dos bolas). Va algo mas grande que un .cico porque
+     comparte linea con una letra de 19 px y tiene que pesar lo mismo que ella. */
+  .fmtico{ width:24px; height:24px; object-fit:contain; flex:0 0 auto; filter:drop-shadow(0 2px 3px #0007); }
+  .sfmt.sec .fmtico{ width:21px; height:21px; }
   /*+AG el secundario lleva el trazo en su propio tono (gris azulado) para no arrastrar el verde del primario */
   .sfmt.sec{ -webkit-text-stroke-color:#2b3047; text-shadow:0 2px 0 #2b304755; }
   .sfmt:active{ transform:translateY(4px); box-shadow:0 2px 0 #157c34; }
@@ -1544,7 +1548,7 @@
        codigo que la web (arte/ambient.mjs). No es arte nuevo: es el motor. -->
   <canvas id="ambient"></canvas>
   <div class="cupsband">
-    <div class="cups" id="hCupsBand" title="Ranking"><img class="cico big" src="arte/ui/moneda-copa.webp" alt=""><b id="hCups">0</b><small data-t="cupsTotal">Total</small></div>
+    <div class="cups" id="hCupsBand" title="Ranking"><img class="cico big" src="arte/ui/moneda-copa.webp?v=2" alt=""><b id="hCups">0</b><small data-t="cupsTotal">Total</small></div>
   </div>
   <div class="stage">
     <!--+AG VB Jaime 2026-07-27: TIENDA y GARAJE se van de este riel. Estaban DUPLICADOS con la barra de
@@ -1556,7 +1560,7 @@
       <div class="ricon" id="rlNoticias"><img class="rico" src="arte/ui/ui-news.webp" alt=""><span class="rl" data-t="rNoticias">Noticias</span></div>
     </div>
     <div class="siderail right">
-      <div class="ricon" id="rrRanking"><img class="rico" src="arte/ui/moneda-copa.webp" alt=""><span class="rl" data-t="rRanking">Ranking</span></div>
+      <div class="ricon" id="rrRanking"><img class="rico" src="arte/ui/moneda-copa.webp?v=2" alt=""><span class="rl" data-t="rRanking">Ranking</span></div>
       <div class="ricon lock" id="rrAmigos"><img class="rico" src="arte/ui/ui-friends.webp" alt=""><span class="rl" data-t="rAmigos">Amigos</span><img class="lk" src="arte/ui/ui-candado.webp" alt=""></div>
       <div class="ricon lock" id="rrClub"><img class="rico" src="arte/ui/ui-club.webp" alt=""><span class="rl" data-t="rClub">Club</span><img class="lk" src="arte/ui/ui-candado.webp" alt=""></div>
     </div>
@@ -1679,7 +1683,7 @@
 <div id="ranking" class="scr">
   <div class="rk-top">
     <button class="g-back" id="rkBack"><span class="ch">‹</span> <span data-t="home">Inicio</span></button>
-    <div class="g-title"><img class="cico" src="arte/ui/moneda-copa.webp" alt=""> <span data-t="rRanking">Ranking</span></div>
+    <div class="g-title"><img class="cico" src="arte/ui/moneda-copa.webp?v=2" alt=""> <span data-t="rRanking">Ranking</span></div>
   </div>
   <div class="rktabs">
     <button class="rktab on" data-rktab="global" data-t="rkGlobal">Global</button>
@@ -1723,11 +1727,10 @@
     <!--+AG 1-ago (docs/56): el ▶ pasa a SVG, el mismo de #hPlay. Era el MISMO simbolo dibujado de dos
          maneras a un toque de distancia (glifo aqui, SVG en la portada), y un glifo depende de que la
          fuente lo traiga.
-         ⚠ DEUDA ABIERTA: los 👤/👥 siguen siendo emoji del sistema — se dibujan distinto en cada movil y
-         rompen el acabado del boton. Estan pedidos como arte propio en arte/codex/30 (icono-solo /
-         icono-equipo); en cuanto lleguen, estos dos <span> pasan a <img class="cico sm">. -->
-    <button class="sfmt ready" id="sSolo"><svg class="tri" viewBox="0 0 64 64" aria-hidden="true"><path d="M14 8 L56 32 L14 56 Z"/></svg> <span data-t="playSolo">JUGAR INDIVIDUAL</span> <span>👤</span></button>
-    <button class="sfmt sec" id="sTeam"><svg class="tri" viewBox="0 0 64 64" aria-hidden="true"><path d="M14 8 L56 32 L14 56 Z"/></svg> <span data-t="playTeam">JUGAR POR EQUIPOS</span> <span>👥</span><span class="soontag" id="sTeamSoon" data-t="soonTag" style="display:none">pronto</span></button>
+         +AG 1-ago: los 👤/👥 (emoji del sistema) YA son arte propio — encargo 30, `icono-solo` y
+         `icono-equipo`: una bola y dos bolas, sin cara, que es lo unico que se lee a 15-19 px. -->
+    <button class="sfmt ready" id="sSolo"><svg class="tri" viewBox="0 0 64 64" aria-hidden="true"><path d="M14 8 L56 32 L14 56 Z"/></svg> <span data-t="playSolo">JUGAR INDIVIDUAL</span> <img class="fmtico" src="arte/ui/icono-solo.webp" alt=""></button>
+    <button class="sfmt sec" id="sTeam"><svg class="tri" viewBox="0 0 64 64" aria-hidden="true"><path d="M14 8 L56 32 L14 56 Z"/></svg> <span data-t="playTeam">JUGAR POR EQUIPOS</span> <img class="fmtico" src="arte/ui/icono-equipo.webp" alt=""><span class="soontag" id="sTeamSoon" data-t="soonTag" style="display:none">pronto</span></button>
   </div>
 </div>
 <!-- ===== HOJA DE IDIOMA (VB Jaime 2026-07-27: "se ve feo") =====================================
@@ -1823,7 +1826,7 @@
     <div class="r-sub" id="rSub"></div>
   </div>
   <!--+AG COPAS de LA BOLA jugada (doc 37): son botín igual que las Chispas, solo que se pueden perder -->
-  <div class="r-cups" id="rCups"><div class="ic"><img class="cico" src="arte/ui/moneda-copa.webp" alt=""></div><div><div class="cn" id="rCupsName">Cohete</div><div class="cw" id="rCupsWhy">Copas</div></div><div class="cv" id="rCupsVal">0<span class="cd" id="rCupsDelta"></span></div></div>
+  <div class="r-cups" id="rCups"><div class="ic"><img class="cico" src="arte/ui/moneda-copa.webp?v=2" alt=""></div><div><div class="cn" id="rCupsName">Cohete</div><div class="cw" id="rCupsWhy">Copas</div></div><div class="cv" id="rCupsVal">0<span class="cd" id="rCupsDelta"></span></div></div>
   <div class="r-rewards">
     <div class="r-reward" id="rRewChispa"><div class="ic chispa"><img class="cico" src="arte/ui/moneda-chispa.webp?v=2" alt=""></div><div><div class="lbl2" data-t="chispasWord">Chispas</div><div class="lbl2" id="rChispaWhy" style="text-transform:none;color:#8fe0a8;margin-top:2px"></div></div><div class="val" id="rChispaVal">+0</div></div>
     <div class="r-reward" id="rRewXp"><div class="ic xp">⭐</div><div style="flex:1"><div class="lbl2"><span data-t="lvl">Nivel</span> <span id="rLvlNum">1</span></div><div class="r-xpbar"><div class="r-xpfill" id="rXpFill"></div></div></div></div>
@@ -2178,7 +2181,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=317129f"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=e0d18c5"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -3087,9 +3090,6 @@ const MORE={
     traits:{volcan:'su boost dura un 20% más',yunque:'los choques de otras bolas le empujan la mitad (el súper sí la arrolla)',fantasma:'el Cazador tarda un 15% más en fijarla',estrella:'su súper dura +1 segundo'},
     traitWhere:{volcan:'en los tres modos',yunque:'en los tres modos',fantasma:'solo en Cazador',estrella:'en los tres modos'},
     hitoBtn:n=>'Hito: '+n+' 🏆 totales', hitoProg:(h,n)=>'Se gana jugando: llevas '+h+' de '+n+' 🏆 totales',
-    //+AG 1-ago: mueren fichasBtn/fichasSoon (la moneda que nunca existió). La Legendaria se compra
-    //   con Gemas y esta es su pista: dice lo único que la distingue de las demás compras.
-    gdMoneyGem:'La Legendaria solo se compra con Gemas: no se consigue jugando.',
     tHito:n=>'¡Hito de copas alcanzado! '+n+' se une a tu Garaje 🎉',
     gdMoney:'Se gana jugando o se compra con Gemas: tú eliges si pagas con tiempo o con prisa.',
     unlockBtn:p=>'Desbloquear · '+p+' ✦', orPay:g=>'o pagar '+g+' ◆',
@@ -3250,7 +3250,6 @@ const MORE={
     traits:{volcan:'its boost lasts 20% longer',yunque:'other balls shove it half as much (a super still bowls it over)',fantasma:'the Hunter takes 15% longer to lock on',estrella:'its super lasts +1 second'},
     traitWhere:{volcan:'all three modes',yunque:'all three modes',fantasma:'Hunter only',estrella:'all three modes'},
     hitoBtn:n=>'Milestone: '+n+' 🏆 total', hitoProg:(h,n)=>'Earned by playing: you have '+h+' of '+n+' 🏆 total',
-    gdMoneyGem:'The Legendary is Gems only: you cannot get it by playing.',
     tHito:n=>'Cup milestone reached! '+n+' joins your Garage 🎉',
     gdMoney:'Earn it by playing or buy it with Gems: you choose whether to pay with time or in a hurry.',
     unlockBtn:p=>'Unlock · '+p+' ✦', orPay:g=>'or pay '+g+' ◆',
@@ -3391,7 +3390,13 @@ const nfmt=n=>Number(n||0).toLocaleString(BTI18N.nloc(LANG));
 //   eran CARACTERES tipograficos, y la copa era un emoji distinto en cada movil. Las cuatro se
 //   distinguen por SILUETA en escala de grises (estrella / diamante / hexagono / copa): eso resuelve
 //   daltonismo sin depender del color, que es como lo pide docs/17.
-const uiArt=n=>`arte/ui/${n}.webp`;
+//+AG ⚠ EL `?v=` NO ES DECORACION: sin el, la CDN sirve la imagen VIEJA durante 7 dias y tu arte nuevo
+//   no llega al jugador aunque el fichero este bien en el servidor (medido el 1-ago con las monedas:
+//   `curl` devolvia los bytes nuevos y el navegador seguia pintando los viejos). La nota larga esta
+//   encima de `.cico` en el CSS. Al SUSTITUIR una imagen ya desplegada, sube este numero.
+//   v2 = 1-ago-2026: monedas de oro y gema (encargo 29) + trofeo con tinta (encargo 30).
+const ART_V='2';
+const uiArt=n=>`arte/ui/${n}.webp?v=${ART_V}`;
 const coinIco=(n,cls)=>`<img class="cico${cls?' '+cls:''}" src="${uiArt('moneda-'+n)}" alt="">`;
 //+AG 1-ago (encargo 31): los OBJETOS DE LOGRO — puesto 1º/2º/3º, corona del ganador y "hay premio"—
 //   eran emoji del sistema. En Windows las medallas salen con cinta AZUL, un color que no existe en la
@@ -4206,9 +4211,12 @@ const ATTRS=['VEL','ACE','PES','AGA','RES','BST'];
 const QUAL=[{n:'Común',c:'#9aa4b8'},{n:'Poco común',c:'#4bd06a'},{n:'Rara',c:'#3b86ff'},{n:'Épica',c:'#a855f7'},{n:'Legendaria',c:'#fbb915'}];
 const QMAX=[9,10,11,12,13];   // techo de NIVEL por rareza (doc 39: "una verde no sube tanto")
 //+AG doc 39: roster de 12. q = rareza FIJA (identidad, ya no se sube). Cada nivel: +1 al atributo FIRMA y +1
-//   alternando entre los dos SEC (sin reparto manual de puntos). Cómo se consigue: price=✦ (Común→Rara, también
-//   con ◆), hito=copas TOTALES (Épicas, no comprables), fichas=⬡ (Legendaria, pronto). Los 7 nombres nuevos ya
-//   existían en BALL_NAMES como bolas decorativas de bots (continuidad, cero lore nuevo). Datos = bolas-balltrials.html.
+//   alternando entre los dos SEC (sin reparto manual de puntos). Los 7 nombres nuevos ya existían en
+//   BALL_NAMES como bolas decorativas de bots (continuidad, cero lore nuevo). Datos = bolas-balltrials.html.
+//+AG 1-ago: CÓMO SE CONSIGUE cada bola ya NO se lee aquí — lo manda la regla única de abajo (Monedas o
+//   Gemas para las doce, `hito` solo como regalo en paralelo). Esta cabecera describía el modelo viejo
+//   («price=✦, hito=copas no comprables, fichas=⬡ Legendaria pronto») y las dos últimas piezas ya no
+//   existen: la moneda ⬡ nunca llegó a existir de verdad y las Épicas dejaron de ser solo-de-hito.
 const ARCHS={
   cohete:  {name:'Cohete',  q:0, base:[8,7,3,4,4,5],  firma:0, sec:[1,5], gratis:true},   // la de bienvenida
   tanque:  {name:'Tanque',  q:0, base:[3,3,9,6,7,5],  firma:2, sec:[4,3]},
