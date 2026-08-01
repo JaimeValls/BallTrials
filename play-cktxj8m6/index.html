@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-01 9f41fa9"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-01 5577ea6"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -1540,9 +1540,21 @@
      de 340 px (auditoria de los 20 idiomas) con este razonamiento escrito — el numero dentro del
      anillo ya dice que es un nivel, asi lo hace Brawl Stars. Lo que se hace aqui es dejar de tener dos
      diseños segun el ancho, y de paso el canon pide menos texto en todas partes (regla 5). */
-  .h-lvl{ width:34px; height:34px; padding:0; gap:0; border-radius:50%; flex:0 0 auto;
-    background:linear-gradient(#221c4e,#141034); border:1px solid #ffffff30;
-    box-shadow:0 3px 0 #0d0726, inset 0 1px 0 #ffffff2e; transition:transform .08s, box-shadow .08s; }
+  /*+AG ⚠ ENCARGO 32 YA ENTREGADO E INTEGRADO: la insignia deja de ser una placa de CSS y su aro pasa a
+     ser DIBUJO (`arte/ui/nivel-marco.webp`). Era el suspenso de los dos auditores, y con razon: un
+     `conic-gradient` es un grafico de tarta, y estaba a 30 px de una moneda y una gema pintadas con
+     volumen. Ahora la insignia es de la misma mano que sus vecinas.
+     ⚠ EL `background-size` NO ES 100% Y NO ES UN DESCUIDO. El dibujo trae aire alrededor: el objeto
+     mide 234 px en un lienzo de 256 (medido en la entrega, no supuesto). A 100% el oro se quedaria un
+     9% por dentro del borde del elemento, y el CANTO —que sigue la caja, no la silueta— asomaria por
+     fuera como un halo oscuro mas grande que la propia insignia. A 109,4% (256/234) el circulo dorado
+     coincide con la caja y el canto vuelve a ser un canto. Si algun dia se re-encarga el dibujo con
+     otro encuadre, este numero cambia con el.
+     El borde de 1 px se va: el dibujo ya trae su propio contorno de tinta, y sumarle otro lo ensucia. */
+  .h-lvl{ width:40px; height:40px; padding:0; gap:0; border-radius:50%; flex:0 0 auto;
+    justify-content:center; border:0;
+    background:url(arte/ui/nivel-marco.webp?v=1) center/109.4% no-repeat;
+    box-shadow:0 3px 0 #0d0726; transition:transform .08s, box-shadow .08s; }
   .h-lvl .cap{ display:none; }
   /*+AG el anillo llena la insignia y su disco interior deja ver 3 px de oro alrededor. El `inset 0 0 0
      3px` de la regla original se queda fuera a proposito: ahi tapaba el oro con el color del fondo.
@@ -1554,15 +1566,19 @@
      fuera un medidor. Se monto la insignia cuatro veces seguidas con cuatro tonos y se capturo la
      tira: gana el violeta claro, el unico que a 0% dibuja un ARO. El oro que llegue despues se le
      superpone con mas contraste todavia. */
-  .h-lvlnum{ width:100%; height:100%; box-shadow:none;
+     ⚠ Y AHORA EL ANILLO VA DENTRO DEL DIBUJO, no ocupando la insignia entera. El hueco oscuro que deja
+     el aro dorado mide el 69% del diametro (medido en la entrega): 27,6 px de los 40. El anillo se
+     clava a 27 px para caer justo ahi — si se dejara al 100% se comeria el oro, que es justo lo que se
+     acaba de encargar. Cambiar el tamaño de la insignia obliga a recalcular este numero. */
+  .h-lvlnum{ width:27px; height:27px; box-shadow:none;
     background:conic-gradient(var(--gold2) var(--lvlpct,30%), #3a3470 0); }
-  .h-lvlnum b{ width:26px; height:26px; background:#191046; color:#fff; font-size:15px;
+  .h-lvlnum b{ width:22px; height:22px; background:#191046; color:#fff; font-size:14px;
     -webkit-text-stroke:2px #241a3f; paint-order:stroke fill; }
-  /*+AG el area de toque: la insignia mide 34 y el minimo tactil son 44. Mismo halo transparente que
+  /*+AG el area de toque: la insignia mide 40 y el minimo tactil son 44. Mismo halo transparente que
      .coin y .g-back. (Hoy el nivel no abre nada, pero la fila entera se pulsa sin querer y el halo
      evita que el dedo caiga en la moneda de al lado.) */
   .h-lvl{ position:relative; }
-  .h-lvl::before{ content:''; position:absolute; inset:-6px; border-radius:999px; }
+  .h-lvl::before{ content:''; position:absolute; inset:-3px; border-radius:999px; }
 
   /*+AG 9.2 · LAS COPAS. La pildora ya se rehizo en la fase A (la copa desborda, el numero es grande y
      lleva trazo) pero su cifra se quedo DORADA mientras la moneda y la gema de al lado la tienen
@@ -1580,7 +1596,11 @@
      La diferencia es de un 15% de luminancia: no se ve, pero es exactamente el defecto que hizo nacer
      este bloque —cada componente heredando SU color— y el que garantiza que dentro de tres pantallas
      vuelva a haber cuatro estilos. Gana el token del kit, que es el que ya usan mas sitios. */
-  .h-lvl, .coin, .cupsband .cups{ background:linear-gradient(#282059,#161139); }
+  /*+AG ⚠ `.h-lvl` SALE de esta lista al llegar el encargo 32. Esta regla vive MAS ABAJO que la de la
+     insignia, asi que por cascada le pisaba el dibujo y devolvia la placa lisa: el arte entraba en el
+     fichero y no se veia. La insignia ya no es una placa marino, es un aro dorado dibujado; el token
+     unico sigue mandando en las otras dos. */
+  .coin, .cupsband .cups{ background:linear-gradient(#282059,#161139); }
 
   /* ══ 10 · EL RIEL DE LA PORTADA (Noticias · Ranking · Amigos · Club) ══════════════════════════
      Los cuatro botones que Jaime nombro por su nombre. Eran cuadrados de cristal: fondo blanco al 6%,
@@ -2294,7 +2314,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=9f41fa9"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=5577ea6"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
