@@ -65,7 +65,6 @@ shell: {
   hitoBtn:n=>'Pencapaian: '+n+' 🏆 kesemuanya', hitoProg:(h,n)=>'Diperoleh dengan bermain: awak ada '+h+' daripada '+n+' 🏆 kesemuanya',
   tHito:n=>'Pencapaian piala tercapai! '+n+' masuk ke Garaj awak 🎉',
   gdMoney:'Diperoleh dengan bermain atau dibeli dengan permata: anda pilih bayar dengan masa atau dengan segera.',
-  gdMoneyGem:'Yang Legenda hanya dengan permata: tidak boleh diperoleh dengan bermain.',
   unlockBtn:p=>'Buka · '+p+' ✦', orPay:g=>'atau bayar '+g+' ◆',
   equipBtn:'Pakai', equippedBtn:'✓ Dipakai', tEquipped:'Sudah dipakai!', tUnlocked:n=>n+' terbuka!',
   // — Kedai —

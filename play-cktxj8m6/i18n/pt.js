@@ -63,7 +63,6 @@ shell: {
   hitoBtn:n=>'Marco: '+n+' 🏆 no total', hitoProg:(h,n)=>'Ganha jogando: você tem '+h+' de '+n+' 🏆 no total',
   tHito:n=>'Marco de taças alcançado! '+n+' entra na sua Garagem 🎉',
   gdMoney:'Ganha-se a jogar ou compra-se com gemas: escolhes se pagas com tempo ou com pressa.',
-  gdMoneyGem:'A Lendária só com Gemas: não dá para conseguir jogando.',
   unlockBtn:p=>'Liberar · '+p+' ✦', orPay:g=>'ou pague '+g+' ◆',
   equipBtn:'Equipar', equippedBtn:'✓ Equipada', tEquipped:'Equipada!', tUnlocked:n=>n+' liberada!',
   // — Loja —

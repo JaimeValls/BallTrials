@@ -64,7 +64,6 @@ shell: {
   hitoBtn:n=>'이정표: 누적 '+n+' 🏆', hitoProg:(h,n)=>'플레이로 얻어요: 누적 '+n+' 🏆 중 '+h+'개',
   tHito:n=>'트로피 이정표 달성! '+n+'이(가) 차고에 합류했어요 🎉',
   gdMoney:'플레이해서 얻거나 젬으로 사거나: 시간으로 낼지 서둘러 낼지는 네 선택이야.',
-  gdMoneyGem:'레전더리는 젬으로만 살 수 있어요. 플레이로는 얻을 수 없습니다.',
   unlockBtn:p=>'해금 · '+p+' ✦', orPay:g=>'또는 '+g+' ◆ 결제',
   equipBtn:'장착', equippedBtn:'✓ 장착 중', tEquipped:'장착했어요!', tUnlocked:n=>n+' 해금!',
   // — 상점 —

@@ -64,7 +64,6 @@ shell: {
   hitoBtn:n=>'里程碑：累计 '+n+' 🏆', hitoProg:(h,n)=>'靠打比赛拿：累计 '+n+' 🏆 里你已有 '+h,
   tHito:n=>'达成奖杯里程碑！'+n+' 进入你的车库 🎉',
   gdMoney:'可以靠游玩赚到，也可以用宝石购买：用时间付还是用着急付，你自己定。',
-  gdMoneyGem:'传说只能用宝石购买，靠游玩拿不到。',
   unlockBtn:p=>'解锁 · '+p+' ✦', orPay:g=>'或支付 '+g+' ◆',
   equipBtn:'装备', equippedBtn:'✓ 已装备', tEquipped:'已装备！', tUnlocked:n=>n+' 已解锁！',
   // — 商店 —

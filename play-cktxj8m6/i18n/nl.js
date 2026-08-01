@@ -63,7 +63,6 @@ shell: {
   hitoBtn:n=>'Mijlpaal: '+n+' 🏆 totaal', hitoProg:(h,n)=>'Verdien je met spelen: je hebt '+h+' van '+n+' 🏆 totaal',
   tHito:n=>'Bekermijlpaal gehaald! '+n+' komt in je Garage 🎉',
   gdMoney:'Te verdienen door te spelen of te koop met edelstenen: jij kiest of je met tijd of met haast betaalt.',
-  gdMoneyGem:'De Legendarische koop je alleen met edelstenen: spelen levert hem niet op.',
   unlockBtn:p=>'Vrijspelen · '+p+' ✦', orPay:g=>'of betaal '+g+' ◆',
   equipBtn:'Uitrusten', equippedBtn:'✓ Uitgerust', tEquipped:'Uitgerust!', tUnlocked:n=>n+' vrijgespeeld!',
   // — Winkel —

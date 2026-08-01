@@ -63,7 +63,6 @@ shell: {
   hitoBtn:n=>'Tonggak: total '+n+' 🏆', hitoProg:(h,n)=>'Didapat dengan bermain: kamu punya '+h+' dari total '+n+' 🏆',
   tHito:n=>'Tonggak piala tercapai! '+n+' masuk ke Garasimu 🎉',
   gdMoney:'Didapat dengan bermain atau dibeli dengan permata: kamu pilih bayar pakai waktu atau buru-buru.',
-  gdMoneyGem:'Yang Legendaris hanya dengan permata: tidak bisa didapat dengan bermain.',
   unlockBtn:p=>'Buka · '+p+' ✦', orPay:g=>'atau bayar '+g+' ◆',
   equipBtn:'Pakai', equippedBtn:'✓ Dipakai', tEquipped:'Terpasang!', tUnlocked:n=>n+' terbuka!',
   // — Toko —

@@ -63,7 +63,6 @@ shell: {
   hitoBtn:n=>'Traguardo: '+n+' 🏆 in totale', hitoProg:(h,n)=>'Si ottiene giocando: hai '+h+' su '+n+' 🏆 in totale',
   tHito:n=>'Traguardo di coppe raggiunto! '+n+' entra nel tuo Garage 🎉',
   gdMoney:'Si guadagna giocando o si compra con le gemme: scegli tu se pagare con il tempo o con la fretta.',
-  gdMoneyGem:'La Leggendaria si compra solo con le Gemme: non si ottiene giocando.',
   unlockBtn:p=>'Sblocca · '+p+' ✦', orPay:g=>'o paga '+g+' ◆',
   equipBtn:'Equipaggia', equippedBtn:'✓ Equipaggiata', tEquipped:'Equipaggiata!', tUnlocked:n=>n+' sbloccata!',
   // — Negozio —

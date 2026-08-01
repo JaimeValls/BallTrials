@@ -65,7 +65,6 @@ shell: {
   hitoBtn:n=>'Meilenstein: '+n+' 🏆 gesamt', hitoProg:(h,n)=>'Gibt es fürs Spielen: du hast '+h+' von '+n+' 🏆 gesamt',
   tHito:n=>'Pokal-Meilenstein erreicht! '+n+' kommt in deine Garage 🎉',
   gdMoney:'Erspielbar oder mit Gems zu kaufen: Du entscheidest, ob du mit Zeit oder mit Eile zahlst.',
-  gdMoneyGem:'Die Legendäre gibt es nur für Gems – erspielen kann man sie nicht.',
   unlockBtn:p=>'Freischalten · '+p+' ✦', orPay:g=>'oder '+g+' ◆ zahlen',
   equipBtn:'Ausrüsten', equippedBtn:'✓ Ausgerüstet', tEquipped:'Ausgerüstet!', tUnlocked:n=>n+' freigeschaltet!',
   // — Shop —

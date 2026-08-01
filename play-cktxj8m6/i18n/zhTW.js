@@ -65,7 +65,6 @@ shell: {
   hitoBtn:n=>'里程碑：累計 '+n+' 🏆', hitoProg:(h,n)=>'靠打比賽拿：累計 '+n+' 🏆 裡你已有 '+h,
   tHito:n=>'達成獎盃里程碑！'+n+' 進到你的車庫 🎉',
   gdMoney:'可以靠遊玩賺到，也可以用寶石購買：用時間付還是用著急付，你自己決定。',
-  gdMoneyGem:'傳說只能用寶石購買，靠遊玩拿不到。',
   unlockBtn:p=>'解鎖 · '+p+' ✦', orPay:g=>'或支付 '+g+' ◆',
   equipBtn:'裝備', equippedBtn:'✓ 已裝備', tEquipped:'已裝備！', tUnlocked:n=>n+' 已解鎖！',
   // — 商店 —

@@ -63,7 +63,6 @@ shell: {
   hitoBtn:n=>'Kilometre taşı: toplam '+n+' 🏆', hitoProg:(h,n)=>'Oynayarak kazanılır: toplam '+n+' 🏆\'nin '+h+' tanesi sende',
   tHito:n=>'Kupa kilometre taşı geçildi! '+n+' Garajına katılıyor 🎉',
   gdMoney:'Oynayarak kazanılır ya da mücevherle satın alınır: zamanla mı aceleyle mi ödeyeceğine sen karar ver.',
-  gdMoneyGem:'Efsanevi yalnızca Mücevherle alınır: oynayarak kazanılmaz.',
   unlockBtn:p=>'Aç · '+p+' ✦', orPay:g=>'ya da '+g+' ◆ öde',
   equipBtn:'Kuşan', equippedBtn:'✓ Kuşanıldı', tEquipped:'Kuşanıldı!', tUnlocked:n=>n+' açıldı!',
   // — Mağaza —

@@ -63,7 +63,6 @@ shell: {
   hitoBtn:n=>'Palier : '+n+' 🏆 au total', hitoProg:(h,n)=>'S\'obtient en jouant : tu as '+h+' sur '+n+' 🏆 au total',
   tHito:n=>'Palier de coupes atteint ! '+n+' rejoint ton Garage 🎉',
   gdMoney:'Elle se gagne en jouant ou s\'achète avec des gemmes : à toi de payer en temps ou en vitesse.',
-  gdMoneyGem:'La Légendaire s\'achète uniquement avec des gemmes : elle ne se gagne pas en jouant.',
   unlockBtn:p=>'Débloquer · '+p+' ✦', orPay:g=>'ou payer '+g+' ◆',
   equipBtn:'Équiper', equippedBtn:'✓ Équipée', tEquipped:'Équipée !', tUnlocked:n=>n+' débloquée !',
   // — Boutique —

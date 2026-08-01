@@ -65,7 +65,6 @@ shell: {
   hitoBtn:n=>'Kamień milowy: '+n+' 🏆 łącznie', hitoProg:(h,n)=>'Zdobywasz grając: masz '+h+' z '+n+' 🏆 łącznie',
   tHito:n=>'Kamień milowy pucharów zdobyty! '+n+' trafia do twojego Garażu 🎉',
   gdMoney:'Zdobywasz ją grając albo kupujesz za klejnoty: sam decydujesz, czy płacisz czasem, czy pośpiechem.',
-  gdMoneyGem:'Legendarna tylko za klejnoty: nie zdobędziesz jej graniem.',
   unlockBtn:p=>'Odblokuj · '+p+' ✦', orPay:g=>'albo zapłać '+g+' ◆',
   equipBtn:'Załóż', equippedBtn:'✓ Założona', tEquipped:'Założona!', tUnlocked:n=>n+' odblokowana!',
   // — Sklep —

@@ -63,7 +63,6 @@ shell: {
   hitoBtn:n=>'Cột mốc: '+n+' 🏆 tổng cộng', hitoProg:(h,n)=>'Có được nhờ chơi: bạn đang có '+h+' trên '+n+' 🏆 tổng cộng',
   tHito:n=>'Đạt cột mốc cúp! '+n+' về Nhà xe của bạn 🎉',
   gdMoney:'Kiếm được khi chơi hoặc mua bằng đá quý: bạn chọn trả bằng thời gian hay bằng sự vội vàng.',
-  gdMoneyGem:'Huyền thoại chỉ mua bằng đá quý: chơi bao nhiêu cũng không có.',
   unlockBtn:p=>'Mở khóa · '+p+' ✦', orPay:g=>'hoặc trả '+g+' ◆',
   equipBtn:'Dùng bóng này', equippedBtn:'✓ Đang dùng', tEquipped:'Đã trang bị!', tUnlocked:n=>'Đã mở '+n+'!',
   // — Cửa hàng —
