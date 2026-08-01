@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-01 969c875"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-01 c8e22e4"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -911,11 +911,14 @@
   .playbig{ flex:0 0 42%; border:0; border-radius:18px; padding:14px 10px; font-family:inherit; font-weight:900; font-size:24px; letter-spacing:.03em;
     color:#fff; -webkit-text-stroke:3.5px #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f55;
     background:linear-gradient(#ffe14d 12%,#ffb42a); box-shadow:0 8px 0 #b45a10, 0 12px 30px #ffb42a55; cursor:pointer;
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; line-height:1; animation:breathe 2.6s ease-in-out infinite; }
+    /*+AG VB Jaime 1-ago: "el icono de play arriba pequeño, o lo quitas o lo pones a la derecha". Va a la
+       DERECHA: en columna el triangulo quedaba flotando encima de la palabra como un adorno suelto. En
+       fila lee como una sola cosa —JUGAR ▶— y el triangulo empuja hacia delante, que es lo que significa. */
+    display:flex; flex-direction:row; align-items:center; justify-content:center; gap:8px; line-height:1; animation:breathe 2.6s ease-in-out infinite; }
   /*+AG el triangulo pasa de glifo Unicode (▶) a SVG: un glifo depende de que la fuente lo dibuje, y si el
      sistema lo sustituye por el de otra fuente deja de casar con el trazo de la palabra. */
-  .playbig .tri{ width:.5em; height:.5em; display:block; }
-  .playbig .tri path{ fill:#fff; stroke:#241a3f; stroke-width:9; stroke-linejoin:round; paint-order:stroke fill; }
+  .playbig .tri{ width:.66em; height:.66em; display:block; flex:0 0 auto; }
+  .playbig .tri path{ fill:#fff; stroke:#241a3f; stroke-width:11; stroke-linejoin:round; paint-order:stroke fill; }
   .playbig:active{ animation:none; transform:translateY(5px) scale(1.03,.94); box-shadow:0 3px 0 #b45a10, 0 6px 16px #ff9a3d44; }
   /*+AG HOJA DE FORMATO (bottom sheet Supercell): JUGAR la abre; elegir formato = arranca en un toque */
   .sheetwrap{ position:absolute; inset:0; z-index:62; display:none; }
@@ -1440,7 +1443,7 @@
           </span>
           <span class="mcch" aria-hidden="true">›</span>
         </div>
-        <button class="playbig ready" id="hPlay"><svg class="tri" viewBox="0 0 64 64" aria-hidden="true"><path d="M14 8 L56 32 L14 56 Z"/></svg><span data-t="playWord">JUGAR</span></button>
+        <button class="playbig ready" id="hPlay"><span data-t="playWord">JUGAR</span><svg class="tri" viewBox="0 0 64 64" aria-hidden="true"><path d="M14 8 L56 32 L14 56 Z"/></svg></button>
       </div>
     </div>
   </div>
@@ -2004,7 +2007,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=969c875"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=c8e22e4"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
