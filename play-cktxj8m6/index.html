@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-01 2121881"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-01 9f41fa9"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -1515,6 +1515,119 @@
   /*+AG 8 · LA CARTA DE MODO SELECCIONADA en la pantalla de MODOS. La rejilla ya marcaba cual esta
      elegida con un borde, pero la carta seguia siendo plana: no decia "y ademas soy la activa". */
   .tile.sel{ box-shadow:0 4px 0 #b45a10, 0 8px 18px #ffb42a2e, inset 0 2px 0 #ffffff2e; }
+
+  /* ══ 9 · LA CABECERA DE LA PORTADA ═══════════════════════════════════════════════════════════
+     Jaime, 1-ago (segunda vuelta), mirando el PRIMER fotograma del juego: «lo del nivel cuatro es de
+     un estilo, el numero de copas totales a la izquierda es de otro estilo, el ranking es de otro
+     estilo, lo de friends y club es de otro estilo».
+     Tenia razon y el banco decia 0% de planos: el pase de la fase A se ocupo de los BOTONES de dentro
+     de las pantallas y dio por hecha la portada porque su CTA y sus monedas ya estaban. Pero la
+     cabecera nunca entro en ninguna lista. Cuatro componentes del mismo tipo (icono + cifra en una
+     caja) resueltos de cuatro maneras, en la pantalla que todo el mundo ve primero.
+
+     ⚠ Y EL BANCO MENTIA POR DOS AGUJEROS, los dos arreglados en tools/banco-canon.mjs:
+       · `.h-lvl` no estaba en su lista de pulsables, asi que ni se miraba.
+       · `tieneCanto` aceptaba una sombra INSET: el bisel `inset 0 1px 0` de `.ricon` pasaba por canto.
+         Un bisel interior es luz, no grosor. Ahora las inset se descartan antes de mirar.
+     Es la misma leccion de la pieza 5, otra vez: el banco dice cuanto falta, la captura dice si tu
+     arreglo ha llegado, y ninguno de los dos vale sin el otro. */
+
+  /*+AG 9.1 · EL NIVEL. Era una pildora negra translucida con el numero DORADO y la palabra "NIVEL"
+     en gris de 10 px al lado — la generacion vieja entera, pegada a unas monedas que ya desbordan y
+     llevan trazo. Pasa a INSIGNIA REDONDA: placa marino con canto, el anillo de progreso dorado como
+     borde y el numero blanco con trazo, que es el idioma de las otras tres cifras de esta fila.
+     La PALABRA se va en todos los tamaños. No es un recorte nuevo: el juego YA la escondia por debajo
+     de 340 px (auditoria de los 20 idiomas) con este razonamiento escrito — el numero dentro del
+     anillo ya dice que es un nivel, asi lo hace Brawl Stars. Lo que se hace aqui es dejar de tener dos
+     diseños segun el ancho, y de paso el canon pide menos texto en todas partes (regla 5). */
+  .h-lvl{ width:34px; height:34px; padding:0; gap:0; border-radius:50%; flex:0 0 auto;
+    background:linear-gradient(#221c4e,#141034); border:1px solid #ffffff30;
+    box-shadow:0 3px 0 #0d0726, inset 0 1px 0 #ffffff2e; transition:transform .08s, box-shadow .08s; }
+  .h-lvl .cap{ display:none; }
+  /*+AG el anillo llena la insignia y su disco interior deja ver 3 px de oro alrededor. El `inset 0 0 0
+     3px` de la regla original se queda fuera a proposito: ahi tapaba el oro con el color del fondo.
+     ⚠ EL COLOR DEL ARO VACIO SE ELIGIO MIDIENDO, no a ojo, y el primer intento fallo. El jugador NUEVO
+     esta a 0 XP: o sea que el anillo entero es la parte vacia, y ese —no el 62% de la demo— es el
+     estado en el que arranca el 100% de las instalaciones. En blanco al 15% (lo que habia) se fundia
+     con la placa; en ranura OSCURA (lo que probe despues) tambien, porque el fondo de la placa ya es
+     casi negro por abajo. Las dos veces salia un disco liso con un numero, sin pista de que aquello
+     fuera un medidor. Se monto la insignia cuatro veces seguidas con cuatro tonos y se capturo la
+     tira: gana el violeta claro, el unico que a 0% dibuja un ARO. El oro que llegue despues se le
+     superpone con mas contraste todavia. */
+  .h-lvlnum{ width:100%; height:100%; box-shadow:none;
+    background:conic-gradient(var(--gold2) var(--lvlpct,30%), #3a3470 0); }
+  .h-lvlnum b{ width:26px; height:26px; background:#191046; color:#fff; font-size:15px;
+    -webkit-text-stroke:2px #241a3f; paint-order:stroke fill; }
+  /*+AG el area de toque: la insignia mide 34 y el minimo tactil son 44. Mismo halo transparente que
+     .coin y .g-back. (Hoy el nivel no abre nada, pero la fila entera se pulsa sin querer y el halo
+     evita que el dedo caiga en la moneda de al lado.) */
+  .h-lvl{ position:relative; }
+  .h-lvl::before{ content:''; position:absolute; inset:-6px; border-radius:999px; }
+
+  /*+AG 9.2 · LAS COPAS. La pildora ya se rehizo en la fase A (la copa desborda, el numero es grande y
+     lleva trazo) pero su cifra se quedo DORADA mientras la moneda y la gema de al lado la tienen
+     blanca. Dos cifras hermanas, en la misma esquina, de dos colores. Pasa a blanco: el oro del borde
+     y el halo se quedan, que es lo que distingue esta pildora de las otras dos sin repintar el numero. */
+  .cupsband .cups b{ color:#fff; }
+  /*+AG y el :active de las copas se hunde en vez de encoger. Se quedo con el `scale(.96)` de la
+     generacion vieja cuando todo su vecindario ya se hunde hasta el canto — se veia solo al pulsar,
+     que es justo donde nadie mira una captura. Lo cazo el auditor leyendo el CSS, no la imagen. */
+  .cups:active{ transform:translateY(2px); box-shadow:0 1px 0 #0d0726, 0 0 14px #fbb91522, inset 0 1px 0 #ffffff2e; }
+
+  /*+AG 9.3 · UN SOLO MARINO. Habia DOS placas oscuras casi iguales conviviendo en la misma cabecera:
+     `#221c4e→#141034` (monedas, copas, y la insignia nueva por copiarlas) y `#282059→#161139`, que es
+     el token PLACA del kit y el que hablan las pestañas, el volver, los botones de opcion y el riel.
+     La diferencia es de un 15% de luminancia: no se ve, pero es exactamente el defecto que hizo nacer
+     este bloque —cada componente heredando SU color— y el que garantiza que dentro de tres pantallas
+     vuelva a haber cuatro estilos. Gana el token del kit, que es el que ya usan mas sitios. */
+  .h-lvl, .coin, .cupsband .cups{ background:linear-gradient(#282059,#161139); }
+
+  /* ══ 10 · EL RIEL DE LA PORTADA (Noticias · Ranking · Amigos · Club) ══════════════════════════
+     Los cuatro botones que Jaime nombro por su nombre. Eran cuadrados de cristal: fondo blanco al 6%,
+     una sombra BORROSA (que no es canto) y la etiqueta en gris de 8 px. Al lado de una portada que ya
+     tiene canto y trazo en todo lo demas, se leen como el hueco donde falta un boton.
+     Pasan a placa con canto, el mismo marino y el mismo `0 4px 0` de las pestañas: son navegacion
+     secundaria, no accion primaria, asi que NO llevan amarillo (regla 6, un solo amarillo por pantalla
+     y aqui es JUGAR).
+     ⚠ El :active pasa de `scale(.9)` a hundirse hasta el canto. Es la correccion de la fase A: un
+     objeto con grosor no encoge, se hunde; encoger es lo que hace una pegatina. */
+  .ricon{ background:linear-gradient(#282059,#161139); border:1px solid #ffffff30;
+    box-shadow:0 4px 0 #0d0726, inset 0 1px 0 #ffffff24; }
+  .ricon:active{ transform:translateY(2px); box-shadow:0 2px 0 #0d0726, inset 0 1px 0 #ffffff24; }
+  /*+AG la etiqueta deja el gris y pasa a blanco con trazo. El trazo va FINO (1.4 px) a proposito: a
+     9 px de cuerpo un contorno de los gordos se come el hueco de las letras y la palabra se emborrona.
+     Medido mirando la captura, no calculado. */
+  .ricon .rl{ font-size:9px; color:#fff; -webkit-text-stroke:1.4px #241a3f; paint-order:stroke fill;
+    text-shadow:0 1px 0 #241a3f66; }
+  /*+AG los bloqueados (Amigos, Club) siguen apagados: el canon les da grosor porque son botones, y la
+     opacidad sigue diciendo "todavia no". Las dos cosas a la vez, como .sh-buy:disabled. */
+  .ricon.lock{ box-shadow:0 4px 0 #0d0726cc, inset 0 1px 0 #ffffff1a; }
+
+  /* ══ 11 · LA BANDA DEL PASE ═══════════════════════════════════════════════════════════════════
+     Jaime la nombro en la PRIMERA vuelta («no lo haces con el season pass») y siguio plana: el banco
+     no la cazaba porque su bisel inset pasaba por canto. Arreglado el detector, salio a la primera —
+     y sale en DOS pantallas, la portada y la hoja de "Vas a jugar".
+     Lleva `0 6px 16px`, que es una sombra de PROYECCION: separa la banda del fondo pero no le da
+     grosor. Se le suma el canto solido. El violeta se queda: es el color del Pase en todo el juego. */
+  .passband{ box-shadow:0 4px 0 #170e3a, 0 8px 18px #0007, inset 0 1px 0 #ffffff26; }
+  .passband:active{ transform:translateY(2px); box-shadow:0 2px 0 #170e3a, inset 0 1px 0 #ffffff26; }
+  /*+AG el titulo pasa del oro palido al blanco con trazo. En oro sobre violeta competia con la barra
+     de progreso dorada que lleva al lado —dos cosas doradas en 64 px— y encima era el unico texto de
+     la portada sin contorno. El subtitulo (nivel y XP) se queda apagado: es el dato, no el titular. */
+  .passband .pt b{ color:#fff; -webkit-text-stroke:1.8px #241a3f; paint-order:stroke fill;
+    text-shadow:0 1px 0 #241a3f66; }
+
+  /* ══ 12 · LAS CARTAS DE MODO (pantalla MODOS) ═════════════════════════════════════════════════
+     67% de esta pantalla estaba plano y tampoco se veia: mismo agujero del inset. La pieza 8 ya le
+     habia dado canto a la carta ELEGIDA, asi que la rejilla decia "yo tengo grosor, mis cuatro
+     hermanas no" — que es peor que si no lo tuviera ninguna.
+     La sombra de proyeccion (`0 10px 26px`) se queda porque estas cartas flotan sobre un fondo con
+     foto; lo que se añade es el canto. `.tile.sel` (dos clases) sigue ganando con su canto dorado. */
+  .tile{ box-shadow:0 5px 0 #0d0726, 0 10px 26px #0009, inset 0 1px 0 #ffffff22; }
+  .tile:active{ transform:translateY(3px); box-shadow:0 2px 0 #0d0726, 0 6px 14px #0009, inset 0 1px 0 #ffffff22; }
+  /*+AG las bloqueadas conservan el grosor y lo apagan, igual que .ricon.lock y .sh-buy:disabled: son
+     botones que hoy no puedes pulsar, no huecos donde falta un boton. */
+  .tile.locked{ box-shadow:0 5px 0 #0d072699, 0 8px 20px #0009, inset 0 1px 0 #ffffff12; }
 </style>
 
 <!--+AG doc 34 Fase B: #app = la "columna telefono" que contiene TODAS las pantallas y overlays (portrait) -->
@@ -2181,7 +2294,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=2121881"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=9f41fa9"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>

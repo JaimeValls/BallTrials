@@ -36,6 +36,11 @@
 //  bola como un personaje pero NI se deforma NI rueda (un casco rodando canta a pegote).
 // ============================================================================
 import * as THREE from 'three';
+//+AG 01-ago · LA CARTA DE CAPAS. Dice que accesorios tienen capa animable (-fx) o emisiva (-em)
+//   instalada. La escribe tools/partir-props.py mirando la carpeta del arte, y por eso vive ALLI y
+//   no aqui: quien fabrica esas capas es esa herramienta, asi que la lista se actualiza sola en el
+//   mismo gesto en el que se instala el arte. Ver arte/props/capas.mjs para el por que largo.
+import { CAPAS_PROP } from '../../arte/props/capas.mjs';
 
 const TEX = 256;                 // lienzo del sprite
 const SPAN = 3.2;                // el plano mide 3.2R -> 1R = 40 px de textura
@@ -266,17 +271,26 @@ const PLACE = {
   fantasma: { dx: 0.00, dy:  0.00, k: 1.00 },   // provisional: el CUERPO pasa a ser el fantasma
   estrella: { dx: 0.00, dy:  0.10, k: 1.12 },
 };
-//+AG la capa FX se pide SIEMPRE que la bola tenga tabla, pero puede no existir todavia (el arte
-//   con isla suelta llega por el encargo 21b). Por eso el plano nace INVISIBLE y solo se enciende
-//   cuando la imagen carga de verdad: si el fichero no esta, no hay error, no hay hueco y no hay
-//   animacion — exactamente lo que se ve hoy. Es la misma cautela que ya tiene la base, que se cae
-//   al dibujo de canvas si su webp falla.
+//+AG el plano de la capa nace INVISIBLE y solo se enciende cuando la imagen carga de verdad: si no
+//   hay capa, no hay hueco y no hay animacion — la pieza entera se mueve en su lugar. Es la misma
+//   cautela que ya tiene la base, que se cae al dibujo de canvas si su webp falla.
+//
+//+AG 01-ago · PERO NO SE PIDE A CIEGAS. Antes se pedian las dos capas de cualquier bola con tabla y
+//   se aguantaba el 404 en silencio. Como solo 6 de los 12 accesorios tienen alguna, cada bola viva
+//   soltaba hasta 2 peticiones fallidas EN PRODUCCION (verificado con Cohete: -fx y -em, 404 las
+//   dos, en cada carga). No rompia nada, y ese es justo el problema: un fallo inofensivo que se
+//   repite llena la consola de rojo y ESCONDE los 404 de verdad entre el ruido — al auditar costo
+//   separarlos de los del reto de Cloudflare. Ahora se mira la carta primero.
+const tieneCapa = (arch, cual) => !!(CAPAS_PROP[arch] && CAPAS_PROP[arch][cual]);
 const cacheCapa = new Map();
 function textureCapa(arch, cual, onOk){
   const clave = cual + ':' + arch;
   if (cacheCapa.has(clave)){ const t = cacheCapa.get(clave); if (t && t.image) onOk(); return t; }
   const url = cual === 'em' ? ART_EM(arch) : ART_FX(arch);
-  const t = new THREE.TextureLoader().load(url, () => onOk(), undefined, () => {});
+  // El fallo ya NO es silencioso: con la carta delante, que una capa declarada no cargue significa
+  // que la carta miente (arte borrado, despliegue a medias) y eso hay que verlo, no tragarselo.
+  const t = new THREE.TextureLoader().load(url, () => onOk(), undefined,
+    () => console.warn(`[propgen] ${arch} declara capa "${cual}" en arte/props/capas.mjs pero no carga: ${url}`));
   t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
   t.minFilter = THREE.LinearMipmapLinearFilter; t.magFilter = THREE.LinearFilter;
   cacheCapa.set(clave, t);
@@ -464,9 +478,13 @@ export function makeProp(arch, R, _col){
   //+AG los planos se construyen ANTES de pedir la textura a proposito: si ya esta en cache,
   //   textureCapa llama al callback en el acto, y una `const` a medio declarar reventaria por zona
   //   muerta temporal. Con el plano ya creado, encenderlo es seguro venga cuando venga.
+  //+AG el plano se crea AUNQUE no haya capa: el tick lee `fx.visible`, `fx.position` y `fx.scale` en
+  //   media docena de sitios, y quitarlo obligaria a sembrar el bucle de comprobaciones. Lo que se
+  //   ahorra es la PETICION, que es lo que costaba un 404. Un plano invisible no se dibuja.
   const fx = plano(null, R, p, R * 1.045, 2);
   fx.visible = false;                     // se enciende sola si la capa existe (ver textureCapa)
-  fx.material.map = textureCapa(arch, 'fx', () => { fx.visible = true; fx.material.needsUpdate = true; });
+  if (tieneCapa(arch, 'fx'))
+    fx.material.map = textureCapa(arch, 'fx', () => { fx.visible = true; fx.material.needsUpdate = true; });
   g.add(fx);
 
   // La capa EMISIVA: aditiva, y arranca apagada. Late suave siempre y PEGA UN DESTELLO con el
@@ -476,7 +494,8 @@ export function makeProp(arch, R, _col){
   em.material.blending = THREE.AdditiveBlending;
   em.material.depthWrite = false;
   em.material.opacity = 0;
-  em.material.map = textureCapa(arch, 'em', () => { em.visible = true; em.material.needsUpdate = true; });
+  if (tieneCapa(arch, 'em'))
+    em.material.map = textureCapa(arch, 'em', () => { em.visible = true; em.material.needsUpdate = true; });
   g.add(em);
 
   //+AG QUE SE MUEVE: la pieza ENTERA o solo su capa suelta.
