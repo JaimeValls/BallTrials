@@ -73,6 +73,25 @@ const WALLAV = 10.0, WALL_NEAR = 2.1, SEEKPU = 4.5, WANDER = 2.0, DAMP = 0.05, V
 //   de SU bola (balls[0]). Solo suman a ax/ay como cualquier termino de la IA; no fijan posicion/velocidad,
 //   no consumen RNG (los bots no se desincronizan). Deterministas.
 const P_FLEE = 9.0, P_SEEK = 9.0, P_HERD = 6.0;
+//+AG doc 61 — LOS MANDOS DE LA OBEDIENCIA (feedback Jaime 1-ago-2026: «doy a coger booster y no lo hace»).
+//   Objeto MUTABLE a propósito: `tools/banco-control-cazador.mjs` lo pisa para barrer candidatos sin duplicar
+//   la sim. El juego NUNCA lo toca → los valores de aquí son los que se juegan. Ninguno consume RNG, así que
+//   los bots no se desincronizan pase lo que pase con ellos.
+//   ELEGIDOS MIDIENDO, no a ojo (500 semillas, 9 candidatas). Con los valores de antes —seek 9, herd 6, sin
+//   calma, sin giro, sin fijar— el **51,9%** de las veces que pulsabas "coger booster" con el Cazador viniendo
+//   a por ti la bola NO llegaba a girar hacia el orbe en 2 segundos: el botón no hacía nada. Con estos: 6,4%.
+//   Y el jugador que juega normal MEJORA (puesto medio 3,89 → 3,52), así que obedecer no rompe el modo.
+//   Se descartó la versión más obediente (calma 0.35): gana poco y quita tanto instinto que la bola deja de
+//   parecer una bola. El que NO pulsa nada juega EXACTAMENTE igual que antes (medido: puesto 3,84 en las dos).
+export const AGENCIA = {
+  seek:  14.0,     // empuje de "a por un booster" (era 9: perdía contra el pánico, que vale de 12,5 a 25)
+  herd:  10.0,     // empuje de "al tumulto" (era 6)
+  flee:  P_FLEE,   // empuje de "escapar como sea" — SIN TOCAR: esa orden ya se sentía bien porque va con la IA
+  calma: 0.5,      // ×pánico del JUGADOR mientras pide algo que NO es escapar. 1 = el miedo manda sobre tu orden.
+  giro:  0.22,     // amortiguación EXTRA los primeros frames tras cambiar de orden (mata la velocidad vieja)
+  giroF: 8,        // cuántos frames dura ese extra (0,27 s: gira en 0,40 s en vez de 0,67 s)
+  fijar: true,     // fijar el orbe al pulsar en vez de recalcular el más cercano cada frame (indecisión)
+};
 const P_DASH_DUR = 16, P_DASH_CD = 90, P_SHIELD_DUR = 40, P_SHIELD_CD = 150, P_SUPER_IMMUNE = 120;
 
 const HUNT_R0 = 0.78, HUNT_GROW = 0.10, HUNT_R_CAP = 1.9;
@@ -220,9 +239,18 @@ export class Sim {
 
     this.events = { save: [], falling: [], eliminations: [], bump: [], pickup: [], orbs: [], dash: [], swap: [], frenzy: [], invert: [] };
     this.oob = false; this.contacts = 0; this._touch = new Set();
+    //+AG doc 61: la intención pasa por un SETTER porque cambiarla es un EVENTO, no un dato: apunta el frame del
+    //   cambio (para el impulso de giro) y suelta el orbe que tuviera fijado. Leerla sigue siendo `sim.playerIntent`.
+    this._intent = null; this._intentF = -999; this._orbLock = null;
     this.playerIntent = 'escapar';   //+AG intencion del jugador: 'escapar' | 'booster' | 'tumulto'
+    this._intentF = -999;            //+AG doc 61: la intención DE SALIDA no es un cambio de orden. Sin esto el
+                                     //   impulso de giro frenaba a la bola en los primeros frames de cada ronda
+                                     //   (lo cazó el banco: empeoraba el puesto de un jugador que nunca pulsa nada).
     this._pev = null;                //+AG eventos de acciones del jugador pendientes de volcar al proximo step()
   }
+
+  get playerIntent(){ return this._intent; }
+  set playerIntent(k){ if (k === this._intent) return; this._intent = k; this._intentF = this.f; this._orbLock = null; }
 
   //+AG acciones del jugador (capa de boosters docs/04). Emiten EVENTOS DEL MOTOR (dash/save/swap) para que
   //   la reaccion visual y el SFX salgan por los MISMOS canales que el video (react()/sfxmap), sin glue extra.
@@ -319,7 +347,11 @@ export class Sim {
       let ax = 0, ay = 0;
       let dx = b.x - H.x, dy = b.y - H.y, dl = hyp(dx, dy) || 1e-6;
       const panic = FLEE * (dl > FLEE_NEAR ? 1.0 : 1.0 + (FLEE_NEAR - dl) / FLEE_NEAR);
-      ax += dx / dl * panic; ay += dy / dl * panic;
+      //+AG doc 61: el pánico NUNCA se apaga (12.5 de lejos, hasta 25 pegado) y por eso se comía la orden del
+      //   jugador justo cuando más importa. Pedir algo que no sea "escapar" es ACEPTAR EL RIESGO: su miedo baja a
+      //   ×AGENCIA.calma. Solo el jugador; los bots siguen con el pánico entero. Con calma=1 es la línea de antes.
+      const _pk = (b.isPlayer && this._intent !== 'escapar') ? AGENCIA.calma : 1;
+      ax += dx / dl * panic * _pk; ay += dy / dl * panic * _pk;
       const near = ab_mv.filter(o => o !== b && (o.x - b.x) ** 2 + (o.y - b.y) ** 2 < COH_R * COH_R);
       if (near.length){
         let cx = 0, cy = 0; for (const o of near){ cx += o.x; cy += o.y; } cx /= near.length; cy /= near.length;
@@ -345,19 +377,33 @@ export class Sim {
       if (b.isPlayer){
         //+AG doc 39 #1: ACE → fuerza de empuje/intención del jugador (huir/buscar/tumulto empujan más fuerte).
         const _ace = this.pmul.ace;
-        if (this.playerIntent === 'escapar'){ ax += dx / dl * P_FLEE * _ace; ay += dy / dl * P_FLEE * _ace; }
-        else if (this.playerIntent === 'booster' && this.orbs.length){
-          let po = this.orbs[0], pq = Infinity;
-          for (const oo of this.orbs){ const q = (oo.x - b.x) ** 2 + (oo.y - b.y) ** 2; if (q < pq){ pq = q; po = oo; } }
-          const odx = po.x - b.x, ody = po.y - b.y, ol = hyp(odx, ody) || 1e-6; ax += odx / ol * P_SEEK * _ace; ay += ody / ol * P_SEEK * _ace;
-        } else if (this.playerIntent === 'tumulto'){
-          const hdx = gcx - b.x, hdy = gcy - b.y, hl = hyp(hdx, hdy) || 1e-6; ax += hdx / hl * P_HERD * _ace; ay += hdy / hl * P_HERD * _ace;
+        if (this._intent === 'escapar'){ ax += dx / dl * AGENCIA.flee * _ace; ay += dy / dl * AGENCIA.flee * _ace; }
+        else if (this._intent === 'booster' && this.orbs.length){
+          //+AG doc 61: con AGENCIA.fijar, el orbe se elige UNA VEZ y no se suelta hasta cogerlo o hasta que
+          //   desaparece. Recalcular el más cercano cada frame hacía que la bola cambiara de destino a mitad de
+          //   camino (dos orbes casi empatados) y desde fuera eso se ve como que duda. fijar=false = lo de antes.
+          let po = null;
+          if (AGENCIA.fijar && this._orbLock !== null) po = this.orbs.find(oo => oo.id === this._orbLock) || null;
+          if (!po){
+            po = this.orbs[0]; let pq = Infinity;
+            for (const oo of this.orbs){ const q = (oo.x - b.x) ** 2 + (oo.y - b.y) ** 2; if (q < pq){ pq = q; po = oo; } }
+            if (AGENCIA.fijar) this._orbLock = po.id;
+          }
+          const odx = po.x - b.x, ody = po.y - b.y, ol = hyp(odx, ody) || 1e-6; ax += odx / ol * AGENCIA.seek * _ace; ay += ody / ol * AGENCIA.seek * _ace;
+        } else if (this._intent === 'tumulto'){
+          const hdx = gcx - b.x, hdy = gcy - b.y, hl = hyp(hdx, hdy) || 1e-6; ax += hdx / hl * AGENCIA.herd * _ace; ay += hdy / hl * AGENCIA.herd * _ace;
         }
       }
       ax += rng.uniform(-1, 1) * WANDER; ay += rng.uniform(-1, 1) * WANDER;
       //+AG doc 39 #1: AGA → respuesta de dirección del jugador = menos amortiguación (gira/reacciona más vivo); VEL →
       //   su tope de velocidad. pmul.aga/vel = 1 fuera de individual-con-stats → integración idéntica a la fuente.
-      const _dmp = b.isPlayer ? DAMP / this.pmul.aga : DAMP, _vc = b.isPlayer ? V_CLAMP * this.pmul.vel : V_CLAMP;
+      //+AG doc 61: IMPULSO DE GIRO. Con DAMP=0.05 la bola tarda ~0.65 s en girar y ~1.5 s en asentarse: aunque la
+      //   orden gane, la velocidad VIEJA sigue mandando medio segundo y eso se lee como "no me hace caso". Durante
+      //   los AGENCIA.giroF frames siguientes al cambio de orden se amortigua de más, que es soltar el impulso que
+      //   llevaba sin tocar su tope de velocidad. giroF=0 → la línea de siempre.
+      let _dmp = b.isPlayer ? DAMP / this.pmul.aga : DAMP;
+      if (b.isPlayer && f - this._intentF < AGENCIA.giroF) _dmp += AGENCIA.giro;
+      const _vc = b.isPlayer ? V_CLAMP * this.pmul.vel : V_CLAMP;
       b.vx = (b.vx + ax / FPS) * (1 - _dmp); b.vy = (b.vy + ay / FPS) * (1 - _dmp);
       clampv(b, _vc * (f < b.dash_until ? DASH_MUL : 1.0));
     }

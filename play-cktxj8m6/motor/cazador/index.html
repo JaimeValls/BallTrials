@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-01 39e17ef">
+<meta name="bt-build" content="2026-08-01 ab12cf0">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <!--+AG el HTML se sirve en INGLES (defecto del juego); ?lang=es lo traduce por JS (applyLang) -->
 <title>YouBall · The Hunter (WebGL)</title>
@@ -43,6 +43,10 @@
   #controls button .k{display:block;font-size:9px;opacity:.5;font-weight:800;margin-top:2px}
   #controls button .cd{display:block;font-size:10px;opacity:.75;font-weight:700}
   #controls button:disabled{opacity:.35;cursor:default}
+  /*+AG doc 61: ACUSE DE RECIBO. Aunque la bola ya gira en 0,4 s, 0,4 s mirando una bola que aún no ha
+     girado se leen como "no me ha oído". El botón contesta en el MISMO frame del dedo. */
+  @keyframes btntap{0%{transform:scale(1)}35%{transform:scale(1.09)}100%{transform:scale(1)}}
+  #controls button.tap{animation:btntap .18s ease-out; box-shadow:0 0 0 3px #fff8, 0 0 20px #ffffff66 !important}
   #iTum.on{background:linear-gradient(#48c78e,#2ba06a);box-shadow:0 3px 0 #1c6844, inset 0 1px 0 #fff5}
   #iBoo.on{background:linear-gradient(#9b8cff,#6f5be6);box-shadow:0 3px 0 #4133a0, inset 0 1px 0 #fff5}
   #iEsc.on{background:linear-gradient(#ff6b5a,#ec4433);box-shadow:0 3px 0 #a12a1e, inset 0 1px 0 #fff5}
@@ -93,6 +97,42 @@
   #cta .thumb{display:inline-block;transform-origin:center}
   #cta .bell{display:inline-block;transform-origin:50% 16%}
   #cta .sp{font-size:.56em;filter:drop-shadow(0 0 8px rgba(255,215,90,.95))}
+  /* ═══ doc 60 · F4: EL HUD DE PARTIDA PASA A HABLAR EL IDIOMA DEL JUEGO ═══════════════════════════
+     La auditoria del 1-ago encontro los 3 HUD de partida con CERO trazos de texto, y son LA superficie
+     que el jugador mira todo el rato (el shell ya llevaba el trio en 18 sitios). Aqui se copia tal cual
+     el token del kit del shell (juego.html .bstroke, docs/56 regla 1): relleno BLANCO + contorno indigo
+     #241a3f + sombra corta hacia abajo. El HUD vive en este fichero, no en el shell, asi que el token se
+     copia; si un dia cambia el del kit, hay que cambiarlo en los 3 motores.
+     EL ANCHO NO SE PONE A OJO: va en `em`, o sea el 11 % del cuerpo que manda docs/56 §3bis.1, y asi cada
+     tamano (incluidos los clamp que cambian con el viewport) lleva el suyo solo y no hay 10 anchos distintos.
+     ⚠ paint-order:stroke fill es OBLIGATORIO: sin el, el trazo se pinta ENCIMA del relleno y se come la
+       letra por dentro (docs/56 §3bis.2).
+     ⚠ el trazo engorda cada letra hacia fuera, asi que lo que lo lleva gana letter-spacing o dos letras
+       que se rozaban acaban fundidas ("INDMDUAL", docs/56 §3bis.1). */
+  #controls .lbl, #controls button, #youlbl, #spectator .big, #specExit{
+    color:#fff; -webkit-text-stroke:.11em #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f66}
+  /* la cuenta atras conserva SU color (el numero blanco que JS pinta verde en el "¡YA!" y el ambar de
+     "este eres tu"): solo se le anade el contorno, que es lo que le faltaba. */
+  #count .n, #count .you{-webkit-text-stroke:.11em #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f66,0 6px 34px #000}
+  #controls button{letter-spacing:.02em}
+  #count .n{letter-spacing:.05em}
+  /* docs/56 regla 1: sobre el dorado el texto es BLANCO con trazo, NUNCA tinta oscura sobre amarillo
+     (es el mismo arreglo que se le hizo al JUGAR del shell). Van aparte porque #bSup.ready y #specExit
+     le ganan en especificidad al grupo de arriba, no por orden. */
+  #bSup.ready{color:#fff}
+  #specExit{color:#fff}
+  /* doc 60 regla 9 · SUELO DE 11 px: ningun texto informativo del HUD baja de ahi. Los 10 y 9 px de este
+     HUD venian de cuando el HUD era una herramienta de preview en pantalla grande. */
+  #controls .lbl, #controls button .cd, #controls button .k{font-size:11px}
+  /* doc 60 regla 10 · MAYUSCULAS POR CSS, nunca editando los 20 diccionarios de i18n (en arabe/CJK el
+     transform es inocuo). "Tu intencion" y "Boosters" ya iban en mayusculas por el .lbl; aqui entran los
+     botones y el cartel de espectador. La frase larga de #spectator .sub se queda en Sentence case. */
+  #controls .lbl, #controls button, #count .you, #spectator .big, #specExit{text-transform:uppercase}
+  /* ATAJOS DE TECLADO. Medido: los sufijos «1/2/3» y la leyenda de teclas de la esquina se pintan SIEMPRE
+     — lo unico que los apagaba era ?capture=1 —, o sea que en el movil de verdad (embed del shell) el
+     jugador ve teclas que no tiene. NO se borran: en escritorio se juega con el teclado y ayudan.
+     Se apagan donde no hay teclado, o sea donde el puntero es grueso (dedo). */
+  @media (pointer:coarse){ #controls button .k, .keys{display:none} }
 </style>
 </head>
 <body>
@@ -150,7 +190,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=39e17ef"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=ab12cf0"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -164,7 +204,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, makeFacePlane, createItemPool, createItemPops, createStarBurst, createWindTrail, createBloom, frameOrtho } from '../chassis/gfx.mjs';
 import { archLook } from '../chassis/ballmat.mjs';   //+AG doc 41 bloque G: material de la bola-heroe
 import { attachSquash } from '../chassis/squash.mjs';
-import { Sim, RNG, TEAMS, BALL_R, ARENA_W, ARENA_H, FPS } from './sim.js';
+import { Sim, RNG, TEAMS, BALL_R, ARENA_W, ARENA_H, FPS, AGENCIA } from './sim.js';
 import { EmoBook, PRIO } from '../chassis/emotions.mjs';
 import { archFace } from '../chassis/facegen.mjs';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
 import { createCelebration } from '../chassis/celebration.mjs';
@@ -500,6 +540,11 @@ function sync(dt, a=1){
     let m=orbMeshes.get(ob.id);
     if(!m){ m=itemPool.get(ob.kind); orbMeshes.set(ob.id,m); }
     m.position.set(ob.x,ob.y,0.7+Math.sin(simNowF*0.004+ob.id)*0.12);
+    //+AG doc 61: el orbe AL QUE VA TU BOLA late. Es el acuse de recibo dentro de la pista: la orden ya no es
+    //   "voy a por un booster" sino "voy a por ESE", y se ve antes de que la bola llegue. Solo con tu orden puesta.
+    const mio = sim.playerIntent==='booster' && sim._orbLock===ob.id && sim.balls[0].rank===null;
+    const lat = mio ? 1.18+0.12*Math.sin(simNowF*0.018) : 1;
+    m.scale.set(lat,lat,1);
   }
   for(const [id,m] of [...orbMeshes]){ if(!seen.has(id)){ itemPool.release(m); orbMeshes.delete(id); } }
   // celebración: enfocada en el GANADOR (centroide), bote + chispas + confeti cayendo encima
@@ -660,6 +705,10 @@ window.__cap = {
   done(){ return sim.done; },
   info(){ return { fps:CAP_FPS, frame:sim.f, cap:capK, done:sim.done, seed:sim.seed, winner:sim.winner_team }; },
 };
+//+AG doc 61: ventana de SOLO LECTURA para verificar el control desde fuera (tools/verifica-control-cazador.mjs).
+//   Sin esto, comprobar que el botón hace caso en un móvil de verdad exige pedírselo a alguien. Hermano de
+//   __cap, que es el mismo apaño para el vídeo. No lo usa nada del juego.
+window.__test = { get sim(){ return sim; }, get phase(){ return phase; }, AGENCIA };
 
 addEventListener('resize',()=>{ renderer.setSize(innerWidth,innerHeight); bloom.setSize(innerWidth,innerHeight); });
 //+AG controles del jugador: intenciones (1/2/3) + boosters (A/S/D). R y flechas del video se conservan.
@@ -667,12 +716,20 @@ function setIntent(k){
   if(!sim || sim.balls[0].rank!==null) return; sim.playerIntent=k;
   for(const [id,key] of [['iTum','tumulto'],['iBoo','booster'],['iEsc','escapar']])
     document.getElementById(id).classList.toggle('on', key===k);
+  //+AG doc 61: el botón contesta YA, en el frame del dedo, aunque la bola tarde 0,4 s en girar.
+  const el=document.getElementById({tumulto:'iTum',booster:'iBoo',escapar:'iEsc'}[k]);
+  if(el){ el.classList.remove('tap'); void el.offsetWidth; el.classList.add('tap'); }
 }
 const bDash=document.getElementById('bDash'), bShd=document.getElementById('bShd'), bSup=document.getElementById('bSup');
 const cdDash=document.getElementById('cdDash'), cdShd=document.getElementById('cdShd'), cdSup=document.getElementById('cdSup');
-document.getElementById('iTum').onclick=()=>setIntent('tumulto');
-document.getElementById('iBoo').onclick=()=>setIntent('booster');
-document.getElementById('iEsc').onclick=()=>setIntent('escapar');
+//+AG doc 61: los tres de INTENCIÓN van con `pointerdown`, no con `click`. En móvil `click` solo dispara al
+//   LEVANTAR el dedo y se cancela si el dedo se desliza un pelo — jugando eso se cae a menudo y se siente
+//   exactamente igual que un botón que te ignora. Es el mismo arreglo que la Carrera (doc 59). Los BOOSTERS
+//   de abajo siguen con `onclick` A PROPÓSITO: gastan recurso y ahí el roce accidental cuesta caro.
+for(const [id,k] of [['iTum','tumulto'],['iBoo','booster'],['iEsc','escapar']]){
+  const b=document.getElementById(id);
+  b.addEventListener('pointerdown',e=>{ if(b.disabled) return; e.preventDefault(); setIntent(k); });
+}
 bDash.onclick=()=>{ if(sim) sim.playerDash(); };
 bShd.onclick=()=>{ if(sim) sim.playerShield(); };
 bSup.onclick=()=>{ if(sim && superVal>=1 && sim.playerDecoy()) superVal=0; };
@@ -681,6 +738,11 @@ function updateControls(){
   const dd=Math.max(0,p.dash_cd-f), sd=Math.max(0,p.shield_cd-f);
   bDash.disabled=dd>0||dead; cdDash.textContent=dd>0?Math.ceil(dd/30)+'s':'';
   bShd.disabled=sd>0||dead; cdShd.textContent=sd>0?Math.ceil(sd/30)+'s':'';
+  //+AG doc 61: sin ningún orbe en pista, "a por un booster" no hacía absolutamente nada y nadie te lo decía.
+  //   Se apaga. Si esa YA es tu orden no se toca: la orden sigue viva y se cumple en cuanto salga un orbe
+  //   (medido: solo el 3,9% del tiempo hay cero orbes, 1,4 veces por partida — no parpadea).
+  const iBoo=document.getElementById('iBoo');
+  iBoo.disabled = !sim.orbs.length && sim.playerIntent!=='booster' || dead;
   const ready=superVal>=1&&!dead; bSup.disabled=!ready; bSup.classList.toggle('ready',ready);
   cdSup.textContent=ready?T().ready:Math.round(superVal*100)+'%';
 }
@@ -954,6 +1016,12 @@ function startCountdown(){
 
 buildSim(seed); buildHud();
 if(EMBED){ const bm=document.getElementById('backMenu'); if(bm) bm.style.display='none'; }   //+AG en embed el shell gestiona el volver
+//+AG doc 60 F4 (remate): EL TEXTO DE DESARROLLO NO SALE EN EL JUEGO DE VERDAD. #hud es la linea de
+//   depuracion ("YouBall · El Cazador (WebGL) · seed 7 · corral 19×12.5") y en embed se pintaba JUSTO
+//   ENCIMA de la fila de boosters: lo unico que la apagaba era ?capture=1, o sea la captura de video.
+//   NO se borra, se condiciona: en standalone (la herramienta de preview/video) sigue saliendo siempre,
+//   y dentro del juego vuelve con &debug=1, que es como se mira una partida real cuando algo va mal.
+if(EMBED && params.get('debug')!=='1'){ const h=document.getElementById('hud'); if(h) h.style.display='none'; }
 if(params.get('capture')==='1'){ document.getElementById('hud').style.display='none'; document.querySelector('.keys').style.display='none'; document.getElementById('controls').style.display='none'; youLbl.style.display='none'; }   //+AG ocultar controles en captura
 //+AG ARRANQUE (chassis/arranque.mjs) — SOLO EN EMBED, o sea en el juego de verdad: el Cazador abria de golpe en
 //   3-2-1, sin decir que modo era y sin que el sonido hubiera podido desbloquearse todavia (feedback Jaime
