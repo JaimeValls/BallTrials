@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-01 83c39f6"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-01 969c875"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -247,6 +247,22 @@
   .tico.t-tienda{ background-image:url(arte/ui/nav-tienda.webp); }
   .tico.t-temp{ background-image:url(arte/ui/nav-temporada.webp); }
   .tico.t-perfil{ background-image:url(arte/ui/nav-perfil.webp); }
+  /*+AG ⚠⚠ EL `?v=N` DE LAS MONEDAS NO ES DECORACION — sin el, el arte nuevo NO LLEGA A LOS JUGADORES.
+     Medido en produccion el 1-ago: se desplego la moneda de oro y la gema verde, el HTML nuevo se sirvio
+     al instante, `curl` a la URL de la imagen devolvia los BYTES NUEVOS... y el navegador seguia pintando
+     las viejas. La caja negra era la CDN de Hostinger: las imagenes van con `Cache-Control: max-age=604800`
+     (7 dias) y su copia cacheada tenia `age=53557` (15 h). Ni `fetch(...,{cache:'reload'})` la movia.
+     La prueba que lo cerro, pedidas las tres a la vez desde la pagina de produccion:
+         sin query        -> 12462 bytes (la VIEJA)   age=53557
+         con ?v=2         ->  9290 bytes (la NUEVA)   age=null
+         con ?v=<sha>     ->  9290 bytes (la NUEVA)   age=null
+     O sea: la CDN SI distingue por query. Cambiar la URL es lo unico que invalida su copia.
+     REGLA: cuando se sustituya el fichero de una imagen ya desplegada, SUBE EL NUMERO aqui (v2 -> v3) en
+     TODAS sus apariciones. Si no, tu cambio existe en el repo, existe en el paquete, y el jugador sigue
+     viendo lo de antes durante una semana — que es exactamente lo que pasa sin darte cuenta, porque en
+     local y en el paquete construido se ve perfecto.
+     PENDIENTE (mejor solucion): que `build.mjs` inyecte el sello de build en todas las URLs de `arte/`
+     y esto deje de ser manual. Mientras tanto, es manual y esta es la nota que lo recuerda. */
   /*+AG doc 41: la moneda dentro de su pildora. Sustituye al circulo con degradado + glifo. */
   /*+AG 1-ago: inline-block, no block. Mientras la moneda solo vivia en cabeceras (contenedores flex) daba
      igual —un hijo de flex se comporta como bloque de todas formas—, pero ahora tambien va DENTRO de
@@ -1347,8 +1363,8 @@
     <div class="h-coins">
       <!--+AG docs/56: fuera el "+" (era un <span class="pl">). La pildora entera ya abre la Tienda
            (onclick en #cChispa/#cGema), asi que el circulito era un boton dibujado dentro de otro. -->
-      <div class="coin chispa" id="cChispa"><img class="cico" src="arte/ui/moneda-chispa.webp" alt=""><span id="hChispas">0</span></div>
-      <div class="coin gema" id="cGema"><img class="cico" src="arte/ui/moneda-gema.webp" alt=""><span id="hGemas">0</span></div>
+      <div class="coin chispa" id="cChispa"><img class="cico" src="arte/ui/moneda-chispa.webp?v=2" alt=""><span id="hChispas">0</span></div>
+      <div class="coin gema" id="cGema"><img class="cico" src="arte/ui/moneda-gema.webp?v=2" alt=""><span id="hGemas">0</span></div>
     </div>
   </div>
   <!--+AG HOME v3 (mockups/flow.html, docs/35 v2.2 + 37): total de copas + bola protagonista + rieles + modo/JUGAR -->
@@ -1635,7 +1651,7 @@
   <!--+AG COPAS de LA BOLA jugada (doc 37): son botín igual que las Chispas, solo que se pueden perder -->
   <div class="r-cups" id="rCups"><div class="ic"><img class="cico" src="arte/ui/moneda-copa.webp" alt=""></div><div><div class="cn" id="rCupsName">Cohete</div><div class="cw" id="rCupsWhy">Copas</div></div><div class="cv" id="rCupsVal">0<span class="cd" id="rCupsDelta"></span></div></div>
   <div class="r-rewards">
-    <div class="r-reward" id="rRewChispa"><div class="ic chispa"><img class="cico" src="arte/ui/moneda-chispa.webp" alt=""></div><div><div class="lbl2" data-t="chispasWord">Chispas</div><div class="lbl2" id="rChispaWhy" style="text-transform:none;color:#8fe0a8;margin-top:2px"></div></div><div class="val" id="rChispaVal">+0</div></div>
+    <div class="r-reward" id="rRewChispa"><div class="ic chispa"><img class="cico" src="arte/ui/moneda-chispa.webp?v=2" alt=""></div><div><div class="lbl2" data-t="chispasWord">Chispas</div><div class="lbl2" id="rChispaWhy" style="text-transform:none;color:#8fe0a8;margin-top:2px"></div></div><div class="val" id="rChispaVal">+0</div></div>
     <div class="r-reward" id="rRewXp"><div class="ic xp">⭐</div><div style="flex:1"><div class="lbl2"><span data-t="lvl">Nivel</span> <span id="rLvlNum">1</span></div><div class="r-xpbar"><div class="r-xpfill" id="rXpFill"></div></div></div></div>
   </div>
   <!--+AG tabla de puestos REALES de la partida (viene del motor). Si no cabe entera, se muestra el podio +
@@ -1658,8 +1674,8 @@
     <button class="g-back" id="gBack"><span class="ch">‹</span> <span data-t="home">Inicio</span></button>
     <div class="g-title" data-t="tGaraje">Garaje</div>
     <div class="h-coins" style="margin-left:auto">
-      <div class="coin chispa"><img class="cico" src="arte/ui/moneda-chispa.webp" alt=""><span id="gChispas">0</span></div>
-      <div class="coin gema"><img class="cico" src="arte/ui/moneda-gema.webp" alt=""><span id="gGemas">0</span></div>
+      <div class="coin chispa"><img class="cico" src="arte/ui/moneda-chispa.webp?v=2" alt=""><span id="gChispas">0</span></div>
+      <div class="coin gema"><img class="cico" src="arte/ui/moneda-gema.webp?v=2" alt=""><span id="gGemas">0</span></div>
     </div>
   </div>
   <!-- data-fit="scroll": la coleccion son 12 bolas y subiendo; deslizar DENTRO de la rejilla es su forma
@@ -1716,8 +1732,8 @@
     <button class="g-back" id="shBack"><span class="ch">‹</span> <span data-t="home">Inicio</span></button>
     <div class="g-title" data-t="tTienda">Tienda</div>
     <div class="h-coins" style="margin-left:auto">
-      <div class="coin chispa"><img class="cico" src="arte/ui/moneda-chispa.webp" alt=""><span id="shChispas">0</span></div>
-      <div class="coin gema"><img class="cico" src="arte/ui/moneda-gema.webp" alt=""><span id="shGemas">0</span></div>
+      <div class="coin chispa"><img class="cico" src="arte/ui/moneda-chispa.webp?v=2" alt=""><span id="shChispas">0</span></div>
+      <div class="coin gema"><img class="cico" src="arte/ui/moneda-gema.webp?v=2" alt=""><span id="shGemas">0</span></div>
     </div>
   </div>
   <div class="sh-secs" id="shSecs"></div>
@@ -1740,8 +1756,8 @@
   <div class="g-top">
     <div class="g-title" data-t="tTemp">Temporada</div>
     <div class="h-coins" style="margin-left:auto">
-      <div class="coin chispa"><img class="cico" src="arte/ui/moneda-chispa.webp" alt=""><span id="seChispas">0</span></div>
-      <div class="coin gema"><img class="cico" src="arte/ui/moneda-gema.webp" alt=""><span id="seGemas">0</span></div>
+      <div class="coin chispa"><img class="cico" src="arte/ui/moneda-chispa.webp?v=2" alt=""><span id="seChispas">0</span></div>
+      <div class="coin gema"><img class="cico" src="arte/ui/moneda-gema.webp?v=2" alt=""><span id="seGemas">0</span></div>
     </div>
   </div>
   <div class="sc-body">
@@ -1806,8 +1822,8 @@
   <div class="g-top">
     <div class="g-title" data-t="tPerfil">Perfil</div>
     <div class="h-coins" style="margin-left:auto">
-      <div class="coin chispa"><img class="cico" src="arte/ui/moneda-chispa.webp" alt=""><span id="prChispas">0</span></div>
-      <div class="coin gema"><img class="cico" src="arte/ui/moneda-gema.webp" alt=""><span id="prGemas">0</span></div>
+      <div class="coin chispa"><img class="cico" src="arte/ui/moneda-chispa.webp?v=2" alt=""><span id="prChispas">0</span></div>
+      <div class="coin gema"><img class="cico" src="arte/ui/moneda-gema.webp?v=2" alt=""><span id="prGemas">0</span></div>
     </div>
   </div>
   <div class="sc-body">
@@ -1988,7 +2004,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=83c39f6"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=969c875"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -4117,7 +4133,7 @@ function renderGaraje(){ el('gChispas').textContent=SAVE.chispas; el('gGemas').t
     //+AG un solo trozo de precio para las doce: Monedas y Gemas, siempre los dos. El hito de copas de
     //   las Epicas ya no se pinta aqui (ocupaba el sitio del precio y ahora no es la unica puerta):
     //   vive en la pista de la ficha, que es donde se lee "ademas te la regalan al llegar a N copas".
-    } else h+=`<div class="g-price"><span class="pc"><img class="cico sm" src="arte/ui/moneda-chispa.webp" alt="">${nfmt(A.price)}</span><span class="pc gm"><img class="cico sm" src="arte/ui/moneda-gema.webp" alt="">${nfmt(A.gemas)}</span></div>`;
+    } else h+=`<div class="g-price"><span class="pc"><img class="cico sm" src="arte/ui/moneda-chispa.webp?v=2" alt="">${nfmt(A.price)}</span><span class="pc gm"><img class="cico sm" src="arte/ui/moneda-gema.webp?v=2" alt="">${nfmt(A.gemas)}</span></div>`;
     c.innerHTML=h; c.onclick=()=>openDetail(k); g.appendChild(c); });
   vivasSync();   //+AG las bolas vivas se remontan DESPUES de repintar: el innerHTML de arriba se llevo por delante los nodos viejos
 }
