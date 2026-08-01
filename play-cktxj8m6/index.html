@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-01 c8e22e4"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-01 034acf4"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -1342,6 +1342,168 @@
   /*+AG 1-ago: inline-flex porque la copa ya no es un emoji sino un <img class="cico"> con display:block,
      y en un contenedor de texto normal se iria a su propia linea partiendo la tarjeta en dos. */
   .gc{ color:var(--gold2); font-weight:900; font-size:13px; font-variant-numeric:tabular-nums; display:inline-flex; align-items:center; gap:4px; }
+
+  /* ══ EL KIT DEL CANON · docs/57 fase A ═══════════════════════════════════════════════════════
+     POR QUE ESTE BLOQUE EXISTE, y por que va AL FINAL del <style>:
+
+     Jaime, 1-ago, con la portada ya pasada al canon: «no lo haces con el season pass, ni con las
+     copas, ni con la cuenta. Cuando abro el settings no sigue ese estilo. El ranking no lo tiene.
+     El boton de volver no lo tiene. Es como que no te lo tomas en serio.» Medido con
+     `node tools/banco-canon.mjs`: 143 de 182 pulsables del juego (79%) no hablaban el idioma, con
+     Ajustes y Ranking al 100%.
+
+     LA CAUSA no era pereza pantalla a pantalla: es que cada pantalla se invento SU boton. Habia ocho
+     maneras distintas de decir "esto se toca" —.tab .subtab .rktab .sh-sec .seg .set-row .g-card
+     .rkrow— y ninguna sabia de las otras. Parchearlas una a una es trabajo que se deshace solo: la
+     pantalla siguiente vuelve a nacer plana.
+
+     ASI QUE AQUI NO SE PARCHEA, SE GOBIERNA. Este bloque define el idioma UNA vez y reescribe los
+     selectores que ya existen para que lo hablen. Va al final del <style> a proposito: por cascada
+     gana sin necesidad de inventar selectores mas especificos ni de tocar el HTML de cinco pantallas.
+
+     LAS TRES PIEZAS (docs/56 §1.3):
+       · CTA    = amarillo + canto + letra blanca con trazo. La accion primaria. UNA por pantalla.
+       · PLACA  = marino + canto + bisel. Pulsable calmado: pestañas, volver, filas.
+       · TRAZO  = blanco + contorno. Ya vive en .bstroke, aqui solo se aplica.
+     El CANTO (`0 Npx 0` solido) es la afordancia: es lo que hace que el objeto tenga grosor y pida
+     el dedo. Sin canto no hay boton, por muy amarillo que sea.
+
+     ⚠ MANTENIMIENTO: si añades un pulsable nuevo, METELO EN ESTAS LISTAS. El banco lo caza si no
+     (`node tools/banco-canon.mjs --detalle`), pero llegar antes que el banco es mas barato. */
+
+  /*+AG 1 · SEGMENTOS — las barras de pestañas de dentro de una pantalla (Temporada, Perfil, Ranking,
+     Tienda). Las cuatro hacian lo mismo con cuatro CSS distintos y ninguna tenia canto: el activo era
+     un rectangulo amarillo PLANO, que es exactamente el "wireframe con color" del que huimos.
+     Apagado = placa con canto corto. Encendido = CTA con canto y trazo. */
+  .subtab, .rktab, .sh-sec{
+    background:linear-gradient(#282059,#161139); border:1px solid #ffffff30; color:#c9d0f2;
+    box-shadow:0 3px 0 #0d0726, inset 0 1px 0 #ffffff24; border-radius:13px;
+    transition:transform .08s, box-shadow .08s; }
+  .subtab.on, .rktab.on, .sh-sec.on{
+    background:linear-gradient(#ffe14d 12%,#ffb42a); border-color:transparent;
+    box-shadow:0 4px 0 #b45a10, 0 7px 16px #ffb42a3d, inset 0 2px 0 #ffffff8c;
+    color:#fff; -webkit-text-stroke:2.2px #241a3f; paint-order:stroke fill; text-shadow:0 1px 0 #241a3f55; }
+  /*+AG el :active se hunde HASTA su canto (mismo gesto que .playbig). Sustituye al scale(.96) de antes:
+     un boton con grosor no encoge, se hunde — encoger es lo que hace una pegatina. */
+  .subtab:active, .rktab:active, .sh-sec:active{ transform:translateY(2px); box-shadow:0 1px 0 #0d0726, inset 0 1px 0 #ffffff24; }
+  .subtab.on:active, .rktab.on:active, .sh-sec.on:active{ transform:translateY(3px); box-shadow:0 1px 0 #b45a10, inset 0 2px 0 #ffffff8c; }
+
+  /*+AG 2 · VOLVER — el boton que Jaime nombro por su nombre. Sale en Garaje, Tienda y Ranking, o sea
+     que es de lo mas pulsado del juego, y era un rectangulo gris translucido sin grosor. No pasa a
+     amarillo: volver NO es la accion primaria de ninguna pantalla (el canon dice UN solo amarillo
+     dominante). Pasa a placa con canto, que es "pulsable, pero no es lo que vengo a hacer aqui". */
+  .g-back{ background:linear-gradient(#282059,#161139); border:1px solid #ffffff30; color:#dfe4ff;
+    box-shadow:0 3px 0 #0d0726, inset 0 1px 0 #ffffff24; border-radius:13px; padding:8px 14px 8px 11px;
+    display:inline-flex; align-items:center; gap:5px; transition:transform .08s, box-shadow .08s; }
+  .g-back .ch{ font-size:17px; line-height:1; color:#ffe9a8; }
+  .g-back:active{ transform:translateY(2px); box-shadow:0 1px 0 #0d0726, inset 0 1px 0 #ffffff24; }
+  /*+AG las dos salidas REDONDAS (la ✕ del selector de modos y el galon de Resultados) hablan el mismo
+     idioma que .g-back aunque no compartan clase: son la misma funcion con otra forma. */
+  .sclose, .r-home.ico, .gd-close{ background:linear-gradient(#282059,#161139); border:1px solid #ffffff30;
+    color:#dfe4ff; box-shadow:0 3px 0 #0d0726, inset 0 1px 0 #ffffff24; transition:transform .08s, box-shadow .08s; }
+  .sclose:active, .r-home.ico:active, .gd-close:active{ transform:translateY(2px); box-shadow:0 1px 0 #0d0726, inset 0 1px 0 #ffffff24; }
+
+  /*+AG 3 · LA BARRA DE 5 PESTAÑAS de abajo. Va en las cinco pantallas, asi que es el elemento mas
+     repetido del juego — y estaba entero sin idioma.
+     ⚠ OJO: NO se le pone canto a cada pestaña. La barra es NAVEGACION, no cinco botones: si las cinco
+     tuvieran grosor competirian entre ellas y con el CTA de la pantalla. Lo que gana grosor es la
+     PLATAFORMA de la activa (el ::before que ya existia), que es lo que marca donde estas. El resto se
+     queda plano A PROPOSITO — y por eso el banco las sigue contando como planas: es correcto. */
+  .h-tabs .tab.on::before{ box-shadow:0 3px 0 #0d0726, inset 0 1px 0 #ffffff2e; }
+  .h-tabs .tab.on span{ color:#fff; -webkit-text-stroke:1.8px #241a3f; paint-order:stroke fill; }
+
+  /*+AG 4 · TARJETAS — lo que se toca pero no es un boton: las filas del Ranking y las tarjetas de bola
+     del Garaje. Canto CORTO (2 px) a proposito: dice "se puede tocar" sin gritar, que es lo que separa
+     una lista de una fila de botones.
+     ⚠ `.set-row` NO entra aqui, y se saco despues de VERLO: esas filas viven DENTRO de un grupo y ya
+     se separan con un `border-bottom`. Al darles canto, la sombra solida se sumaba a esa linea y cada
+     fila de Ajustes quedaba subrayada en negro — parecia un error de maquetacion, no un boton. Una
+     fila de lista no es una tarjeta: lo que se toca ahi es el control de la derecha, no la fila. */
+  .rkrow, .g-card, .sc-block{ box-shadow:0 2px 0 #0d0726, inset 0 1px 0 #ffffff18; }
+  .rkrow:active, .g-card:active{ transform:translateY(1px); box-shadow:0 1px 0 #0d0726, inset 0 1px 0 #ffffff18; }
+
+  /*+AG 5 · LOS BOTONES DE OPCION de Ajustes (Bajo/Medio/Alto, Auto/Baja/Media/Alta, el daltonismo).
+     ⚠ La primera version de este bloque apuntaba a `.seg`, una clase QUE NO EXISTE en el juego: me la
+     invente de memoria en vez de mirar el HTML. El banco no lo caza —cuenta el boton por su fondo, no
+     por si mi regla le llego— y solo se vio MIRANDO la captura de Ajustes: los botones seguian igual.
+     La clase real es `.set-seg button`. Moraleja: el banco dice cuanto FALTA, la captura dice si tu
+     arreglo ha LLEGADO. Hacen falta los dos. */
+  .set-seg button{ background:linear-gradient(#282059,#161139); border:1px solid #ffffff30; color:#c9d0f2;
+    border-radius:11px; padding:7px 10px;
+    box-shadow:0 3px 0 #0d0726, inset 0 1px 0 #ffffff24; transition:transform .08s, box-shadow .08s; }
+  .set-seg button.on{ background:linear-gradient(#ffe14d 12%,#ffb42a); border-color:transparent;
+    box-shadow:0 4px 0 #b45a10, inset 0 2px 0 #ffffff8c;
+    color:#fff; -webkit-text-stroke:2px #241a3f; paint-order:stroke fill; text-shadow:0 1px 0 #241a3f55; }
+  .set-seg button:active{ transform:translateY(2px); box-shadow:0 1px 0 #0d0726, inset 0 1px 0 #ffffff24; }
+  .set-seg button.on:active{ transform:translateY(3px); box-shadow:0 1px 0 #b45a10, inset 0 2px 0 #ffffff8c; }
+  /*+AG la fila de idioma lleva bandera + nombre + galon y ya era una placa: solo le faltaba el grosor. */
+  .lgrow{ box-shadow:0 3px 0 #0d0726, inset 0 1px 0 #ffffff24; }
+  .lgrow:active{ transform:translateY(2px); box-shadow:0 1px 0 #0d0726, inset 0 1px 0 #ffffff24; }
+
+  /*+AG 6 · COMPRAR — es el CTA de la Tienda y hablaba el idioma de nadie. Cuando esta deshabilitado
+     (no llegas de gemas) NO se le quita el grosor, solo se apaga: un boton sin canto se lee como
+     "esto no es un boton", y lo que queremos decir es "es un boton, pero hoy no puedes". */
+  /*+AG ⚠ ESTA REGLA LLEVA DOS CLASES A PROPOSITO (.sh-buy.gem, no .sh-buy a secas). La primera version
+     escribia solo `.sh-buy{color:#fff}` y NUNCA se aplicaba a los botones de comprar con gemas, porque
+     `.sh-buy.gem` (dos clases, definida arriba) le gana por especificidad. Resultado: cuatro CTA de
+     compra —el pack destacado, cosmeticos, gemas y el Pase— con letra azul OSCURA y encima el contorno
+     oscuro de esta misma regla, o sea texto oscuro perfilado en oscuro. Deshabilitado (que es como lo
+     ve cualquiera que no llegue de gemas) el filtro lo apagaba y el texto desaparecia del todo.
+     El banco no lo caza: mide si hay canto y si el fondo es amarillo, no de que color acabo la letra.
+     Lo vio el auditor mirando la captura. Moraleja: cuando una regla del kit "no llega", sospecha de
+     la especificidad antes que del valor. */
+  .sh-buy, .sh-buy.gem, .se-cta, .r-again, .se-tier.cur, .se-rk-tab.on{
+    color:#fff; -webkit-text-stroke:2.4px #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f55; }
+  /*+AG el trazo de los botones cian se tiñe de su propia sombra (verde azulado) en vez de heredar el
+     indigo: un contorno indigo sobre cian se lee como suciedad, no como canto. */
+  .sh-buy.gem, .se-cta{ -webkit-text-stroke-color:#0b4a55; text-shadow:0 2px 0 #0b4a5555; }
+  /*+AG deshabilitado: se apaga pero CONSERVA el grosor (misma razon que .gd-btn.prim:disabled). Antes
+     `box-shadow:none` lo dejaba plano y se leia como "esto no es un boton" en vez de "hoy no puedes". */
+  .sh-buy:disabled{ box-shadow:0 3px 0 #6b4a2a; }
+  .sh-buy.gem:disabled{ box-shadow:0 3px 0 #2a5c66; }
+
+  /*+AG ⚠ BUG REAL, no estilo: el precio ANTIGUO no se tachaba. La regla era `.sh-price .was`, pero el
+     <span class="was"> vive dentro del BOTON (.sh-buy), no dentro de .sh-price, asi que el selector no
+     coincidia con nada. En pantalla salia "Comprar · 600 ~870" con los dos precios del mismo tamaño y
+     ninguno tachado: dos numeros pegados que parecen el mismo dato. */
+  .sh-buy .was{ text-decoration:line-through; opacity:.72; font-size:.82em; -webkit-text-stroke-width:1.6px; }
+
+  /*+AG ⚠ el icono del modo salia ACHATADO en la hoja de "Vas a jugar". Es el mismo SVG que en la
+     rejilla de MODOS, pero `.smicon` solo fijaba font-size y un SVG sin width/height cae a su tamaño
+     intrinseco (300x150) y el flex lo aplasta. Se le da tamaño y la misma sombra que a sus hermanos. */
+  .sheet .smicon .msvg{ width:26px; height:26px; filter:drop-shadow(0 2px 4px #0009); }
+
+  /*+AG ⚠ AREA DE TOQUE. El canto da grosor pero no agranda el objetivo del dedo, y estos se quedaban
+     en 34-38 px con el minimo en 44. Se resuelve con el halo transparente que el juego YA usaba en
+     .coin y .sclose — no se inventa nada, se extiende.
+     ⚠ Y NO se le pone a los segmentos ni a los botones de opcion de Ajustes: ahi el hueco entre
+     vecinos es de 5-8 px, asi que un halo se solaparia con el boton de al lado y activaria el
+     equivocado — que es peor que el problema. A esos se les sube el padding REAL. */
+  .g-back, .gd-close{ position:relative; }
+  .g-back::before, .gd-close::before{ content:''; position:absolute; inset:-5px; border-radius:inherit; }
+  .subtab, .rktab, .sh-sec{ padding-top:12px; padding-bottom:12px; }
+  .set-seg button{ padding-top:11px; padding-bottom:11px; }
+  .sh-buy{ padding-top:13px; padding-bottom:13px; }
+
+  /*+AG 7 · LA FICHA DE BOLA (Garaje > tocar una bola). Es la pantalla de compra/equipar, o sea de las
+     mas importantes del juego, y sus tres botones estaban cada uno en un idioma: el primario con el
+     amarillo VIEJO y la letra marron, el de subir nivel en cian sin grosor, y el de volver plano. */
+  .gd-btn.prim{ background:linear-gradient(#ffe14d 12%,#ffb42a); box-shadow:0 6px 0 #b45a10, 0 9px 20px #ffb42a3d, inset 0 2px 0 #ffffff8c;
+    color:#fff; -webkit-text-stroke:2.6px #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f55; }
+  /*+AG deshabilitado: se apaga con el filtro pero CONSERVA el canto (misma razon que .sh-buy) */
+  .gd-btn.prim:disabled{ filter:grayscale(.5) brightness(.8); box-shadow:0 6px 0 #6b4a2a; cursor:default; }
+  .gd-btn.ghost, .gd-btn.back{ background:linear-gradient(#282059,#161139); border:1px solid #ffffff30; color:#dfe4ff;
+    box-shadow:0 3px 0 #0d0726, inset 0 1px 0 #ffffff24; }
+  .gd-btn.ghost:active, .gd-btn.back:active{ transform:translateY(2px); box-shadow:0 1px 0 #0d0726, inset 0 1px 0 #ffffff24; }
+  /*+AG la pastilla de SUBIR NIVEL conserva su cian (es su color en todo el juego: mejora, no compra)
+     pero gana el grosor, que es lo que le faltaba para parecer pulsable. */
+  .gd-chip{ box-shadow:0 3px 0 #0e5f68, inset 0 1px 0 #ffffff2e; }
+  .gd-chip:active{ transform:translateY(2px); box-shadow:0 1px 0 #0e5f68, inset 0 1px 0 #ffffff2e; }
+  .gd-chip:disabled{ box-shadow:0 3px 0 #1c1c30; }
+
+  /*+AG 8 · LA CARTA DE MODO SELECCIONADA en la pantalla de MODOS. La rejilla ya marcaba cual esta
+     elegida con un borde, pero la carta seguia siendo plana: no decia "y ademas soy la activa". */
+  .tile.sel{ box-shadow:0 4px 0 #b45a10, 0 8px 18px #ffb42a2e, inset 0 2px 0 #ffffff2e; }
 </style>
 
 <!--+AG doc 34 Fase B: #app = la "columna telefono" que contiene TODAS las pantallas y overlays (portrait) -->
@@ -2007,7 +2169,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=c8e22e4"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=034acf4"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -3525,6 +3687,11 @@ const BOTS=(function(){
 // deriva diaria coherente: ±0-8 copas por bola, f(seed del bot, fecha) — la tabla se mueve sola (doc 36 §2)
 function driftFor(bot, i, dn){ const r=mulberry32((bot.seed ^ Math.imul(dn,2654435761)) + i*1013904223)(); return Math.round((r*2-1)*8); }
 function effBall(bot, i, dn){ return Math.max(0, bot.balls[i].cups + driftFor(bot, i, dn)); }
+//+AG 1-ago: que BOLA REAL enseña un bot en el Ranking. Sus bolas solo guardan mote y color (arriba), asi
+//   que el arquetipo se deriva de su seed: determinista, o sea que el mismo bot sale siempre con la misma
+//   bola en todas las sesiones y aparatos. Existe porque la lista pintaba discos de color planos mientras
+//   la pestaña de al lado ya enseñaba la bola de verdad.
+function botArch(bot, i){ return ARCH_KEYS[Math.abs((bot.seed ^ Math.imul(i+1, 2246822519)) >>> 0) % ARCH_KEYS.length]; }
 function effTotal(bot, dn){ let s=0; bot.balls.forEach((b,i)=>s+=effBall(bot,i,dn)); return s; }
 
 // rivales de partida = N bots de la FRANJA de copas de la bola equipada (doc 37 §4), barajados por partida (no memorizable)
@@ -4847,9 +5014,24 @@ function rankRows(){ const dn=todayNum(), rows=[], s=S();
     SAVE.balls.forEach(b=>{ const A=ARCHS[b.arch], an=A?archName(b.arch):b.arch; rows.push({name:s.you, color:rgb(ARCH_COLOR[b.arch]||[0.16,0.42,1.0]), v:b.copas||0, me:true, ball:an, arch:b.arch}); });
     for(let i=rows.length-1;i>=0;i--) if(rows[i].arch!==rkBallFilt) rows.splice(i,1);
   } else {
-    BOTS.forEach(b=>{ let v=0; if(rkTab==='global') v=effTotal(b,dn); else b.balls.forEach((bb,i)=>v+=effBall(b,i,dn)-effBall(b,i,dn-1)); rows.push({name:b.name, color:b.color, v, me:false}); });
+    //+AG 1-ago: estas dos pestañas (Global y Diario) pintaban al jugador con un DISCO DE COLOR PLANO,
+    //   mientras que "Por bola" —la de al lado, con las mismas filas— ya enseñaba la bola REAL. Un
+    //   circulo de color liso es primitiva, no arte, y era lo primero que se veia al abrir Ranking.
+    //   No hacia falta arte nuevo ni tocar el HTML: la fila YA sabe pintar `<img>` si le llega `arch`
+    //   (ver addRow), solo que estas dos ramas nunca se lo pasaban. Se le da su mejor bola a cada bot
+    //   y la equipada al jugador.
+    //+AG ⚠ las bolas de un bot son {name, color, cups} — `name` es un MOTE de BALL_NAMES, NO un
+    //   arquetipo, y no hay ningun campo `arch`. El primer intento le paso `bb.arch` directamente y
+    //   `ballArt(undefined)` pidio 20 imagenes `bola-undefined-icon.webp`: veinte 404 en la pantalla
+    //   mas visitada. Lo cazo la captura (`"rotas": 20`), no el banco.
+    //   El arquetipo se DERIVA de la seed del bot, que es fija: mismo bot, misma bola, siempre.
+    BOTS.forEach(b=>{ let v=0, mejor=0;
+      if(rkTab==='global'){ v=effTotal(b,dn); b.balls.forEach((bb,i)=>{ if(effBall(b,i,dn)>effBall(b,mejor,dn)) mejor=i; }); }
+      else b.balls.forEach((bb,i)=>{ v+=effBall(b,i,dn)-effBall(b,i,dn-1); });
+      rows.push({name:b.name, color:b.color, v, me:false, arch:botArch(b, mejor)}); });
     const mc=rkTab==='global'?totalCopas():myTodayDelta();
-    rows.push({name:s.you, color:rgb(ARCH_COLOR[(equippedBall()||{}).arch]||[0.16,0.42,1.0]), v:mc, me:true});
+    rows.push({name:s.you, color:rgb(ARCH_COLOR[(equippedBall()||{}).arch]||[0.16,0.42,1.0]), v:mc, me:true,
+      arch:(equippedBall()||{}).arch});
   }
   rows.sort((a,b)=>b.v-a.v || a.name.localeCompare(b.name));
   //+AG un bot puede tener DOS bolas del mismo tipo (el sorteo del roster no lo impide), y ahora que la fila
