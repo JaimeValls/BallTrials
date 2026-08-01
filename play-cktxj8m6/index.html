@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-01 ab12cf0"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-01 af38a41"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -1581,7 +1581,20 @@
      El numero va suelto sobre el hueco oscuro que ya trae el dibujo: sin disco propio, que era el
      segundo circulo de mas. */
   .h-lvlnum{ width:100%; height:100%; background:none; box-shadow:none; }
+  /*+AG ⚠ EL `margin-bottom` SUBE EL NUMERO 1 px Y NO ES UN APAÑO SUCIO: es CENTRADO OPTICO.
+     Jaime: «el 3 no esta centrado». Y la CAJA lo estaba —medido en produccion, desvio de 0,01 px—,
+     asi que por todos los numeros del navegador aquello estaba perfecto. Lo que no estaba centrado
+     era la TINTA: una cifra se apoya en la linea base y la caja de texto reserva ademas el hueco de
+     las letras con rabito (p, g, j), asi que centrar la caja deja el digito BAJO. Medido sobre los
+     pixeles de la captura: 0,67 px bajo a 40 px de uso, un 1,7% del diametro. Dentro de un circulo
+     —que es el marco mas implacable que hay para el centrado— eso se ve.
+     Se probaron cinco valores capturando y midiendo la tinta cada vez (0 · 0,67 · 1 · 1,33 · 2). Del
+     0,67 para arriba todos dejan el mismo residuo de 0,33 px ALTO, porque a 3x el navegador solo
+     puede mover tercios de pixel: se elige 1 px por ser redondo, y el error se queda en la mitad.
+     ⚠ Y se comprobo que la captura usaba Fredoka de verdad y no una fuente de repuesto, porque si
+     no habria estado midiendo el centrado de OTRA letra. */
   .h-lvlnum b{ width:auto; height:auto; background:none; border-radius:0; color:#fff; font-size:15px;
+    margin-bottom:1px;
     -webkit-text-stroke:2px #241a3f; paint-order:stroke fill; }
   /*+AG el area de toque: la insignia mide 40 y el minimo tactil son 44. Mismo halo transparente que
      .coin y .g-back. (Hoy el nivel no abre nada, pero la fila entera se pulsa sin querer y el halo
@@ -2323,7 +2336,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=ab12cf0"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=af38a41"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
