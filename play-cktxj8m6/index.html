@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-07-31 f699a49"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-01 3a677e9"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -1856,7 +1856,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=f699a49"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=3a677e9"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -2737,7 +2737,7 @@ const MORE={
     youOf:(o,n)=>'Tú: '+o+' de '+n, tblSolo:'Clasificación de la partida', tblTeams:'Clasificación por equipos',
     teamNames:['Rojo','Verde','Azul','Amarillo'],
     // — monedas y comunes —
-    chispasWord:'Chispas', gemasWord:'Gemas', close:'Cerrar', cancel:'Cancelar', settings:'Ajustes',
+    chispasWord:'Monedas', gemasWord:'Gemas', close:'Cerrar', cancel:'Cancelar', settings:'Ajustes',
     langWord:'Idioma', redeemTitle:'Canjear código', backHome:'Volver al inicio', soonWord:'pronto',
     // — Home / selector —
     mRecolecta:'RECOLECTA', mSuelo:'SUELO MENGUANTE',
@@ -2754,7 +2754,7 @@ const MORE={
     lvlShort:n=>'Nv. '+n, lvlMaxTag:n=>'sube hasta Nv. '+n,
     lvlUpBtn:(n,c)=>'Subir a Nv. '+n+' · '+c+' ✦',
     gdNeedXp:m=>'Juégala: le faltan '+m+' XP para el siguiente nivel',
-    gdNeedChispas:c=>'Te faltan Chispas: subir cuesta '+c+' ✦',
+    gdNeedChispas:c=>'Te faltan Monedas: subir cuesta '+c+' ✦',
     gdLvlReady:'¡Lista para subir de nivel!',
     gdMaxed:'Nivel máximo de su rareza. ¡A por las copas!',
     tBallLvl:(n,l)=>'¡'+n+' sube al Nv. '+l+'! 🎉',
@@ -2769,19 +2769,19 @@ const MORE={
     //   con Gemas y esta es su pista: dice lo único que la distingue de las demás compras.
     gdMoneyGem:'La Legendaria solo se compra con Gemas: no se consigue jugando.',
     tHito:n=>'¡Hito de copas alcanzado! '+n+' se une a tu Garaje 🎉',
-    gdMoney:'El dinero solo compra VARIEDAD (bolas hasta Rara), nunca poder.',
+    gdMoney:'Se gana jugando o se compra con Gemas: tú eliges si pagas con tiempo o con prisa.',
     unlockBtn:p=>'Desbloquear · '+p+' ✦', orPay:g=>'o pagar '+g+' ◆',
     equipBtn:'Equipar', equippedBtn:'✓ Equipada', tEquipped:'¡Equipada!', tUnlocked:n=>'¡'+n+' desbloqueado!',
     // — Tienda —
     shSecs:['Destacados','Bolas','Cosméticos','Gemas','Pase'],
     shNoteFeat:'Escaparate que rota cada semana con el tema de temporada. Todo con precio y contenido a la vista, <b>nunca cajas sorpresa</b>.',
-    shNoteBalls:'Con Chispas o Gemas compras bolas hasta <b>Rara</b> (variedad, <b>nunca poder</b>). Las <b>Épicas</b> se ganan por hitos de copas 🏆 y la <b>Legendaria</b> se compra con Gemas ◆.',
+    shNoteBalls:'Las doce bolas se consiguen igual: <b>jugando</b> (Monedas ✦) o con <b>Gemas ◆</b> si tienes prisa. Las <b>Épicas</b> además se regalan al llegar a su hito de copas 🏆. <b>Aquí no hay nada que solo se pueda comprar.</b>',
     shNoteCosm:'Cosméticos = <b>solo estética</b>, cualquier rareza. El marco (gris→dorado) marca la rareza. Nunca tocan atributos.',
     shNoteGems:'🔒 En cuentas de menores, las compras con dinero real pasan por <b>puerta parental</b> y <b>límite de gasto</b>, activados por defecto.',
     buyBtn:g=>'Comprar · '+g+' ◆', ownedGar:'En tu Garaje', ownedCosm:'En posesión',
     shBallCat:(q,b)=>q+' · mejor en '+b,
     bundleNm:'Pack de Temporada', bundleFl:'Destacado de esta semana',
-    bundleItems:['🛡️ Tanque (Común)','🌈 Estela Arcoíris','✦ +300 Chispas'],
+    bundleItems:['🛡️ Tanque (Común)','🌈 Estela Arcoíris','✦ +300 Monedas'],
     paseNm:'Pase de Batalla', paseSeason:'Temporada',
     paseBullets:['50 peldaños con recompensas <b>visibles antes de comprar</b>','Vía <b>gratis</b> para todos + vía <b>premium</b>','Solo cosmética y comodidad, <b>nunca poder</b>'],
     paseOn:'✓ Pase activo', paseBuy:g=>'Activar premium · '+g+' ◆', tPase:'¡Pase activado!',
@@ -2789,7 +2789,7 @@ const MORE={
     cosmNames:{sk_llamas:'Llamas',sk_galaxia:'Galaxia',es_arcoiris:'Estela Arcoíris',ce_fuegos:'Fuegos',em_gg:'¡GG!',ma_corona:'Marco Corona'},
     cosmCats:{Skin:'Skin',Estela:'Estela','Celebración':'Celebración',Emote:'Emote',Marco:'Marco'},
     gemsAmt:g=>g+' Gemas',
-    dealAmt:c=>'+'+c+' Chispas', dealDay:'oferta del día', dealDone:'Vuelve mañana', tDeal:c=>'✦ +'+c+' Chispas',
+    dealAmt:c=>'+'+c+' Monedas', dealDay:'oferta del día', dealDone:'Vuelve mañana', tDeal:c=>'✦ +'+c+' Monedas',
     pgTitle:'🔒 Compra con dinero real', pgIntro:'Para proteger a los peques, un <b>adulto</b> debe aprobar esta compra.',
     pgQuestion:'Resuelve:', pgOk:'Aprobar', pgBad:'Respuesta incorrecta, pregunta a un adulto',
     tGems:g=>'¡+'+g+' Gemas! (compra simulada)', pgAnswer:'Respuesta',
@@ -2903,7 +2903,7 @@ const MORE={
     youOf:(o,n)=>'You: '+o+' of '+n, tblSolo:'Match standings', tblTeams:'Team standings',
     teamNames:['Red','Green','Blue','Yellow'],
     // — currencies & common —
-    chispasWord:'Sparks', gemasWord:'Gems', close:'Close', cancel:'Cancel', settings:'Settings',
+    chispasWord:'Coins', gemasWord:'Gems', close:'Close', cancel:'Cancel', settings:'Settings',
     langWord:'Language', redeemTitle:'Redeem code', backHome:'Back to home', soonWord:'soon',
     // — Home / selector —
     mRecolecta:'COLLECT', mSuelo:'SHRINKING FLOOR',
@@ -2920,7 +2920,7 @@ const MORE={
     lvlShort:n=>'Lv. '+n, lvlMaxTag:n=>'goes up to Lv. '+n,
     lvlUpBtn:(n,c)=>'Level up to '+n+' · '+c+' ✦',
     gdNeedXp:m=>'Play it: '+m+' XP to go before the next level',
-    gdNeedChispas:c=>'Not enough Sparks: leveling costs '+c+' ✦',
+    gdNeedChispas:c=>'Not enough Coins: leveling costs '+c+' ✦',
     gdLvlReady:'Ready to level up!',
     gdMaxed:'Max level for its rarity. Go get those cups!',
     tBallLvl:(n,l)=>n+' reaches Lv. '+l+'! 🎉',
@@ -2930,19 +2930,19 @@ const MORE={
     hitoBtn:n=>'Milestone: '+n+' 🏆 total', hitoProg:(h,n)=>'Earned by playing: you have '+h+' of '+n+' 🏆 total',
     gdMoneyGem:'The Legendary is Gems only: you cannot get it by playing.',
     tHito:n=>'Cup milestone reached! '+n+' joins your Garage 🎉',
-    gdMoney:'Money only buys VARIETY (balls up to Rare), never power.',
+    gdMoney:'Earn it by playing or buy it with Gems: you choose whether to pay with time or in a hurry.',
     unlockBtn:p=>'Unlock · '+p+' ✦', orPay:g=>'or pay '+g+' ◆',
     equipBtn:'Equip', equippedBtn:'✓ Equipped', tEquipped:'Equipped!', tUnlocked:n=>n+' unlocked!',
     // — Shop —
     shSecs:['Featured','Balls','Cosmetics','Gems','Pass'],
     shNoteFeat:'A storefront that rotates every week with the season theme. Price and contents always in plain sight, <b>never loot boxes</b>.',
-    shNoteBalls:'Sparks or Gems buy balls up to <b>Rare</b> (variety, <b>never power</b>). <b>Epics</b> are earned via cup milestones 🏆 and the <b>Legendary</b> is bought with Gems ◆.',
+    shNoteBalls:'All twelve balls work the same way: <b>play for them</b> (Coins ✦) or use <b>Gems ◆</b> if you are in a hurry. <b>Epics</b> are also a gift when you reach their cup milestone 🏆. <b>Nothing here is buy-only.</b>',
     shNoteCosm:'Cosmetics = <b>looks only</b>, any rarity. The frame (grey→gold) shows the rarity. They never touch attributes.',
     shNoteGems:'🔒 On kids’ accounts, real-money purchases go through a <b>parental gate</b> and a <b>spending limit</b>, on by default.',
     buyBtn:g=>'Buy · '+g+' ◆', ownedGar:'In your Garage', ownedCosm:'Owned',
     shBallCat:(q,b)=>q+' · best at '+b,
     bundleNm:'Season Pack', bundleFl:'This week’s featured deal',
-    bundleItems:['🛡️ Tank (Common)','🌈 Rainbow Trail','✦ +300 Sparks'],
+    bundleItems:['🛡️ Tank (Common)','🌈 Rainbow Trail','✦ +300 Coins'],
     paseNm:'Battle Pass', paseSeason:'Season',
     paseBullets:['50 rungs with rewards <b>visible before you buy</b>','A <b>free</b> track for everyone + a <b>premium</b> track','Cosmetics and comfort only, <b>never power</b>'],
     paseOn:'✓ Pass active', paseBuy:g=>'Activate premium · '+g+' ◆', tPase:'Pass activated!',
@@ -2950,7 +2950,7 @@ const MORE={
     cosmNames:{sk_llamas:'Flames',sk_galaxia:'Galaxy',es_arcoiris:'Rainbow Trail',ce_fuegos:'Fireworks',em_gg:'GG!',ma_corona:'Crown Frame'},
     cosmCats:{Skin:'Skin',Estela:'Trail','Celebración':'Celebration',Emote:'Emote',Marco:'Frame'},
     gemsAmt:g=>g+' Gems',
-    dealAmt:c=>'+'+c+' Sparks', dealDay:'deal of the day', dealDone:'Come back tomorrow', tDeal:c=>'✦ +'+c+' Sparks',
+    dealAmt:c=>'+'+c+' Coins', dealDay:'deal of the day', dealDone:'Come back tomorrow', tDeal:c=>'✦ +'+c+' Coins',
     pgTitle:'🔒 Real-money purchase', pgIntro:'To keep kids safe, an <b>adult</b> has to approve this purchase.',
     pgQuestion:'Solve:', pgOk:'Approve', pgBad:'Wrong answer — ask an adult',
     tGems:g=>'+'+g+' Gems! (simulated purchase)', pgAnswer:'Answer',
@@ -3870,25 +3870,37 @@ const QMAX=[9,10,11,12,13];   // techo de NIVEL por rareza (doc 39: "una verde n
 //   con ◆), hito=copas TOTALES (Épicas, no comprables), fichas=⬡ (Legendaria, pronto). Los 7 nombres nuevos ya
 //   existían en BALL_NAMES como bolas decorativas de bots (continuidad, cero lore nuevo). Datos = bolas-balltrials.html.
 const ARCHS={
-  cohete:  {name:'Cohete',  q:0, base:[8,7,3,4,4,5],  firma:0, sec:[1,5], price:0},
-  tanque:  {name:'Tanque',  q:0, base:[3,3,9,6,7,5],  firma:2, sec:[4,3], price:150},
-  chispa:  {name:'Chispa',  q:1, base:[7,9,2,4,3,6],  firma:1, sec:[0,5], price:350},
-  pinball: {name:'Pinball', q:1, base:[6,8,4,3,5,7],  firma:5, sec:[1,0], price:350},
-  lapa:    {name:'Lapa',    q:1, base:[4,4,5,9,7,4],  firma:3, sec:[4,1], price:350},
-  burbuja: {name:'Burbuja', q:2, base:[5,6,1,8,5,6],  firma:3, sec:[5,1], price:900},
-  meteoro: {name:'Meteoro', q:2, base:[7,5,8,2,4,6],  firma:0, sec:[2,5], price:900},
-  bunker:  {name:'Búnker',  q:2, base:[2,3,8,6,9,4],  firma:4, sec:[2,3], price:900},
+  cohete:  {name:'Cohete',  q:0, base:[8,7,3,4,4,5],  firma:0, sec:[1,5], gratis:true},   // la de bienvenida
+  tanque:  {name:'Tanque',  q:0, base:[3,3,9,6,7,5],  firma:2, sec:[4,3]},
+  chispa:  {name:'Chispa',  q:1, base:[7,9,2,4,3,6],  firma:1, sec:[0,5]},
+  pinball: {name:'Pinball', q:1, base:[6,8,4,3,5,7],  firma:5, sec:[1,0]},
+  lapa:    {name:'Lapa',    q:1, base:[4,4,5,9,7,4],  firma:3, sec:[4,1]},
+  burbuja: {name:'Burbuja', q:2, base:[5,6,1,8,5,6],  firma:3, sec:[5,1]},
+  meteoro: {name:'Meteoro', q:2, base:[7,5,8,2,4,6],  firma:0, sec:[2,5]},
+  bunker:  {name:'Búnker',  q:2, base:[2,3,8,6,9,4],  firma:4, sec:[2,3]},
   volcan:  {name:'Volcán',  q:3, base:[5,7,5,3,4,9],  firma:5, sec:[1,2], hito:1500},
   yunque:  {name:'Yunque',  q:3, base:[2,2,10,6,8,4], firma:2, sec:[4,3], hito:3500},
   fantasma:{name:'Fantasma',q:3, base:[4,5,3,8,9,4],  firma:4, sec:[3,0], hito:6000},
-  //+AG 1-ago: la Legendaria SE VENDE POR GEMAS (199 ◆). Antes pedia 2.000 "Fichas de Torneo", una
-  //   moneda que NO EXISTIA: sin saldo en SAVE, sin fuente que la diera y sin torneo que la ganara.
-  //   O sea, el juego ensenaba un precio que nadie podia pagar nunca. Vender por gemas es peor
-  //   diseno que el merito, pero es HONESTO, que es lo que no era. El campo `gemas` (en vez de
-  //   `price`) la deja fuera de las Chispas: sigue sin poder farmearse jugando, solo se compra.
-  //   Cuando existan los torneos, las Fichas vuelven como forma de GANARLA sin pagar.
-  estrella:{name:'Estrella',q:4, base:[7,6,4,5,4,7],  firma:0, sec:[5,3], gemas:199},
+  estrella:{name:'Estrella',q:4, base:[7,6,4,5,4,7],  firma:0, sec:[5,3]},
 };
+//+AG 1-ago (VB de Jaime): UNA SOLA REGLA PARA LAS DOCE. Toda bola se consigue de las dos formas
+//   —jugando (Monedas) o con Gemas si tienes prisa— y ninguna es solo-de-pago. Mueren los dos casos
+//   especiales que habia: el `hito` de copas como UNICA puerta de las Epicas, y el campo `gemas`
+//   suelto de la Legendaria, que era la unica cosa del juego que NO se podia conseguir jugando.
+//   El `hito` sobrevive, pero como REGALO en paralelo (checkHitos): al cruzar las copas te la dan.
+//
+//   POR QUE HIZO FALTA, medido sobre los precios que habia: las 7 bolas comprables sumaban 66 gemas
+//   = 0,82 EUR, o sea MENOS que el pack de gemas mas barato (0,99 EUR por 80). Con un euro te
+//   llevabas medio roster. Y de ahi la escalera saltaba de golpe a las 199 gemas de la Legendaria,
+//   trece veces mas, sin nada en medio.
+//
+//   LOS PRECIOS VIVEN AQUI Y SOLO AQUI, uno por rareza. Antes cada bola llevaba el suyo escrito a
+//   mano y por eso tres se quedaron sin ninguno: asi no puede volver a pasar, una bola nueva hereda
+//   el precio de su rareza por construccion. m = Monedas (jugando) · g = Gemas (el atajo).
+const PRECIO_POR_RAREZA=[{m:150,g:12},{m:350,g:25},{m:900,g:60},{m:2000,g:120},{m:4000,g:199}];
+for(const k in ARCHS){ const A=ARCHS[k];
+  if(A.gratis){ A.price=0; A.gemas=0; continue; }
+  const p=PRECIO_POR_RAREZA[A.q]; A.price=p.m; A.gemas=p.g; }
 const ARCH_KEYS=Object.keys(ARCHS);
 //+AG doc 41: ARTE de las bolas-heroe (Codex, entregado 2026-07-25). 'icon' = rejilla/listas (512),
 //   'hero' = retrato de pantalla (768). WebP: el pack entero pesa 1,5 MB en vez de los 14,6 MB del
@@ -3938,7 +3950,9 @@ const attrFull =i=>((S().attrsFull||[])[i])||attrName(i);
 const cosmName =c=>((S().cosmNames||{})[c.id])||c.nm;
 const cosmCat  =c=>((S().cosmCats ||{})[c.cat])||c.cat;
 const HXF="'Segoe UI Rounded','Nunito',system-ui,sans-serif";
-const gemaPrice=p=>Math.max(1,Math.round(p/60));
+//+AG 1-ago: `gemaPrice(precio)` muere. Convertia Monedas a Gemas dividiendo entre 60, y ese numero
+//   era el que hundia la escalera (una Rara salia por 15 gemas = 19 centimos). Ahora cada bola trae
+//   su precio en gemas de PRECIO_POR_RAREZA, escrito y no calculado.
 const owned=k=>SAVE.balls.find(b=>b.arch===k);
 //+AG doc 39: el badge del Garaje ya no cuenta puntos sueltos, cuenta BOLAS LISTAS para subir de nivel
 const totalUps=()=>SAVE.balls.reduce((s,b)=>s+(canLvlUp(b)?1:0),0);
@@ -3966,9 +3980,10 @@ function renderGaraje(){ el('gChispas').textContent=SAVE.chispas; el('gGemas').t
     if(b){ h+=`<div class="g-qtag">${S().lvlShort(b.lvl||1)} · ${qualName(A.q)}</div><div class="gc">${coinIco('copa','sm')} ${nfmt(b.copas||0)}</div>`;   //+AG doc 37: cada bola muestra SUS copas
       if(SAVE.equipped===SAVE.balls.indexOf(b)) h+=`<div class="g-eq">${S().equippedTag}</div>`;
       if(canLvlUp(b)) h+=`<div class="g-dot">↑</div>`;   //+AG doc 39: lista para subir (XP + Chispas suficientes)
-    } else if(A.price!=null) h+=`<div class="g-price"><span class="pc"><img class="cico sm" src="arte/ui/moneda-chispa.webp" alt="">${A.price}</span><span class="pc gm"><img class="cico sm" src="arte/ui/moneda-gema.webp" alt="">${gemaPrice(A.price)}</span></div>`;
-    else if(A.hito) h+=`<div class="g-price"><span class="pc"><img class="cico sm" src="arte/ui/moneda-copa.webp" alt="">${nfmt(A.hito)}</span></div>`;
-    else h+=`<div class="g-price"><span class="pc gm"><img class="cico sm" src="arte/ui/moneda-gema.webp" alt="">${nfmt(A.gemas)}</span></div>`;
+    //+AG un solo trozo de precio para las doce: Monedas y Gemas, siempre los dos. El hito de copas de
+    //   las Epicas ya no se pinta aqui (ocupaba el sitio del precio y ahora no es la unica puerta):
+    //   vive en la pista de la ficha, que es donde se lee "ademas te la regalan al llegar a N copas".
+    } else h+=`<div class="g-price"><span class="pc"><img class="cico sm" src="arte/ui/moneda-chispa.webp" alt="">${nfmt(A.price)}</span><span class="pc gm"><img class="cico sm" src="arte/ui/moneda-gema.webp" alt="">${nfmt(A.gemas)}</span></div>`;
     c.innerHTML=h; c.onclick=()=>openDetail(k); g.appendChild(c); });
   vivasSync();   //+AG las bolas vivas se remontan DESPUES de repintar: el innerHTML de arriba se llevo por delante los nodos viejos
 }
@@ -4028,17 +4043,15 @@ function openDetail(k){ applyShell(); const A=ARCHS[k], b=owned(k), q=QUAL[A.q],
                                : (SAVE.chispas<cost ? s.gdNeedChispas(cost) : s.gdLvlReady));
     } else el('gdHint').textContent=s.gdMaxed;
   } else { el('gdXpWrap').style.display='none';
-    setCoin(el('gdHint'), A.price!=null ? s.gdMoney : (A.hito ? s.hitoProg(totalCopas(),A.hito) : s.gdMoneyGem)); }
+    //+AG la pista de una bola que no tienes: si lleva hito de copas se enseña ESE (es el camino
+    //   gratis y ademas es un objetivo), y si no, la nota honesta de que todo se puede ganar jugando.
+    setCoin(el('gdHint'), A.hito ? s.hitoProg(totalCopas(),A.hito) : s.gdMoney); }
   const prim=el('gdPrim'), ghost=el('gdGhost');
   if(!b){
-    if(A.price!=null){ setCoin(prim, s.unlockBtn(A.price)); prim.disabled=SAVE.chispas<A.price; prim.onclick=()=>{ if(unlock(k,false)){ openDetail(k); renderGaraje(); } };
-      ghost.style.display=''; setCoin(ghost, s.orPay(gemaPrice(A.price))); ghost.disabled=SAVE.gemas<gemaPrice(A.price); ghost.onclick=()=>{ if(unlock(k,true)){ openDetail(k); renderGaraje(); } };
-    //+AG 1-ago: la LEGENDARIA ya no es un escaparate muerto — se compra con gemas, como un cosmetico caro.
-    //   Las Epicas siguen intocables (hito de copas): esas son merito y no se venden.
-    } else if(A.gemas!=null){ setCoin(prim, s.buyBtn(A.gemas)); prim.disabled=SAVE.gemas<A.gemas;
-      prim.onclick=()=>{ if(unlock(k,true)){ openDetail(k); renderGaraje(); } }; ghost.style.display='none';
-    } else {   //+AG doc 39: Épicas por hito de copas (se desbloquean SOLAS) — nunca a la venta
-      setCoin(prim, s.hitoBtn(A.hito)); prim.disabled=true; prim.onclick=null; ghost.style.display='none'; }
+    //+AG las mismas dos puertas para las doce: el boton grande cobra Monedas y el fantasma de al lado
+    //   cobra Gemas. Se acabaron los tres botones distintos segun la rareza (uno de ellos apagado).
+    setCoin(prim, s.unlockBtn(A.price)); prim.disabled=SAVE.chispas<A.price; prim.onclick=()=>{ if(unlock(k,false)){ openDetail(k); renderGaraje(); } };
+    ghost.style.display=''; setCoin(ghost, s.orPay(A.gemas)); ghost.disabled=SAVE.gemas<A.gemas; ghost.onclick=()=>{ if(unlock(k,true)){ openDetail(k); renderGaraje(); } };
   } else { const idx=SAVE.balls.indexOf(b), isEq=SAVE.equipped===idx;
     prim.textContent=isEq?S().equippedBtn:S().equipBtn; prim.disabled=isEq;
     //+AG EQUIPAR CIERRA LA FICHA (VB Jaime 26-jul). Antes se re-abria la ficha con el boton ya apagado
@@ -4061,12 +4074,12 @@ function openDetail(k){ applyShell(); const A=ARCHS[k], b=owned(k), q=QUAL[A.q],
 function closeDetail(){ el("gDetail").classList.remove("on");
   vivasSync(); }   //+AG y al cerrarla se vuelven a montar las doce de la rejilla, con el lienzo otra vez a su altura
 function unlock(k,withGems){ const A=ARCHS[k];   // transacción compartida por Garaje y Tienda; el que llama re-renderiza
-  //+AG 1-ago: dos formas de tener precio. `price` = Chispas (y su equivalente en gemas por gemaPrice);
-  //   `gemas` = SOLO gemas (la Legendaria). Las Épicas no tienen ninguno de los dos y siguen sin pasar
-  //   por aquí: se ganan por hito de copas. El candado de abajo es lo que lo garantiza.
-  if(A.price==null && A.gemas==null) return false;   //+AG doc 39: los hitos no pasan por aquí
-  if(A.gemas!=null){ if(SAVE.gemas<A.gemas) return false; dinero('gemas', -A.gemas, 'bola_compra'); withGems=true; }
-  else if(withGems){ const p=gemaPrice(A.price); if(SAVE.gemas<p) return false; dinero('gemas', -p, 'bola_compra'); } else { if(SAVE.chispas<A.price) return false; dinero('chispas', -A.price, 'bola_compra'); }
+  //+AG 1-ago: las doce se compran igual — Monedas o Gemas — y las dos cifras vienen de
+  //   PRECIO_POR_RAREZA, asi que aqui ya no hay ramas por rareza. La guarda sigue: una bola sin
+  //   precio (no deberia existir) no se cobra ni se entrega, en vez de salir gratis.
+  if(A.price==null || A.gemas==null) return false;
+  if(withGems){ if(SAVE.gemas<A.gemas) return false; dinero('gemas', -A.gemas, 'bola_compra'); }
+  else { if(SAVE.chispas<A.price) return false; dinero('chispas', -A.price, 'bola_compra'); }
   SAVE.balls.push({arch:k,lvl:1,xp:0,copas:0});
   apunta('ball_get', { arch:k, via: withGems?'gemas':'chispas' });   //+AG docs/53: que bolas QUIERE la gente
   persist(); toast(S().tUnlocked(archName(k))); return true;
@@ -4141,13 +4154,20 @@ const GEM_PACKS=[{g:80,p:'0,99 €',pri:'pri_01kyj68brv58pmf7hdw37frw03'},{g:500
 const COSM=[ {id:'sk_llamas',nm:'Llamas',cat:'Skin',rar:1,ic:'🔥',g:150}, {id:'sk_galaxia',nm:'Galaxia',cat:'Skin',rar:3,ic:'🌌',g:450},
   {id:'es_arcoiris',nm:'Estela Arcoíris',cat:'Estela',rar:2,ic:'🌈',g:250}, {id:'ce_fuegos',nm:'Fuegos',cat:'Celebración',rar:2,ic:'🎆',g:250},
   {id:'em_gg',nm:'¡GG!',cat:'Emote',rar:0,ic:'👏',g:60}, {id:'ma_corona',nm:'Marco Corona',cat:'Marco',rar:4,ic:'👑',g:800} ];
-const BUNDLE={nm:'Pack de Temporada',fl:'Destacado de esta semana',items:['🛡️ Tanque (Común)','🌈 Estela Arcoíris','✦ +300 Chispas'],g:600,was:'~870'};
+//+AG `items` aqui ya no se pinta (la Tienda usa s.bundleItems, que esta traducido a los 20 idiomas);
+//   se deja al dia igualmente para que nadie lo lea y se crea que la moneda sigue llamandose Chispas.
+const BUNDLE={nm:'Pack de Temporada',fl:'Destacado de esta semana',items:['🛡️ Tanque (Común)','🌈 Estela Arcoíris','✦ +300 Monedas'],g:600,was:'~870'};
 const PASE={nm:'Pase de Batalla',g:900};
-//+AG doc 45 §2: las Gemas compran Chispas, pero UNA VEZ AL DIA. El tope es lo que separa
+//+AG doc 45 §2: las Gemas compran Monedas, pero UNA VEZ AL DIA. El tope es lo que separa
 //   "el dinero acelera" de "el dinero compra el techo" (docs/20 §2.1): sin el, pagar seria
-//   un grifo infinito de progreso. El cambio (72 ✦ por ◆) va en linea con el que ya usa el
-//   juego para desbloquear bolas con Gemas (gemaPrice = ✦/60), un poco mejor por ser oferta.
-const CHISPA_DEAL={g:25,c:1800};
+//   un grifo infinito de progreso.
+//+AG 1-ago: BAJA de 1.800 a 750 monedas, y no por tacaneria. La oferta daba 72 ✦ por ◆ cuando el
+//   boton de gemas de una bola da 15: comprar monedas aqui y pagar la bola con ellas salia casi
+//   CINCO veces mas barato que pulsar ese boton, o sea que la escalera de precios nueva nacia de
+//   adorno. El limite no me lo invento: `tools/prueba-oferta-del-dia.mjs` ya exigia que la oferta
+//   estuviera entre una y dos veces el cambio de las bolas, y 750 es el tope de esa banda — la
+//   oferta sigue siendo el mejor cambio del juego, que es lo que tiene que ser.
+const CHISPA_DEAL={g:25,c:750};
 const dealDone=()=>SAVE.dealDay===todayKey();
 const SECS=['destacados','bolas','cosmeticos','gemas','pase'];   //+AG las etiquetas visibles salen de S().shSecs (i18n)
 let shSec='destacados';
@@ -4167,19 +4187,20 @@ function featEl(){ const d=document.createElement('div');
   b.classList.toggle('ready', !b.disabled);   //+AG doc 40: la oferta destacada es LA accion de la Tienda; el resto de botones de compra NO brillan
   return d;
 }
-function bolasEl(){ const s=S(), d=document.createElement('div'); d.innerHTML='<div class="sh-note">'+s.shNoteBalls+'</div>';
+//+AG la nota va por coinify: lleva ✦ y ◆ dentro de la frase y sin esto se pintaba el glifo del
+//   sistema, que es justo lo que el juego dejo de hacer en todas las demas pantallas.
+function bolasEl(){ const s=S(), d=document.createElement('div'); d.innerHTML='<div class="sh-note">'+coinify(s.shNoteBalls)+'</div>';
   const g=document.createElement('div'); g.className='sh-grid';
   ARCH_KEYS.forEach(k=>{ const A=ARCHS[k], have=owned(k); const it=document.createElement('div'); it.className='sh-item'; it.style.setProperty('--qc',QUAL[A.q].c);   //+AG doc 39: marco = rareza de la bola
     //+AG misma bola viva que en el Garaje: lo que se vende es lo que se juega
     it.innerHTML=`<div class="sh-ic" data-viva="${k}"${have?'':' data-viva-off="1"'}></div><div class="sh-nm">${archName(k)}</div><div class="sh-cat">${s.shBallCat(qualName(A.q), archBest(k))}</div>`;
     const btn=document.createElement('button');
     if(have){ btn.className='sh-buy owned'; btn.textContent=s.ownedGar; btn.disabled=true; }
-    else if(A.price!=null){ btn.className='sh-buy'; btn.innerHTML=`${A.price} ${coinIco('chispa','sm')} / ${gemaPrice(A.price)} ${coinIco('gema','sm')}`; btn.disabled=SAVE.chispas<A.price&&SAVE.gemas<gemaPrice(A.price);
+    //+AG un solo boton para las doce, con los dos precios a la vista. Paga en Monedas si te llegan, y
+    //   si no, en Gemas: nunca se cobra en Gemas teniendo Monedas suficientes (seria cobrar de mas).
+    else { btn.className='sh-buy'; btn.innerHTML=`${nfmt(A.price)} ${coinIco('chispa','sm')} / ${nfmt(A.gemas)} ${coinIco('gema','sm')}`;
+      btn.disabled=SAVE.chispas<A.price&&SAVE.gemas<A.gemas;
       btn.onclick=()=>{ if(unlock(k, SAVE.chispas<A.price)) renderTienda(); }; }
-    //+AG 1-ago: la Legendaria SÍ está a la venta ahora, y solo por gemas (botón `gem`, como los cosméticos)
-    else if(A.gemas!=null){ btn.className='sh-buy gem'; setCoin(btn, s.buyBtn(A.gemas)); btn.disabled=SAVE.gemas<A.gemas;
-      btn.onclick=()=>{ if(unlock(k,true)) renderTienda(); }; }
-    else { btn.className='sh-buy owned'; setCoin(btn, s.hitoBtn(A.hito)); btn.disabled=true; }   //+AG doc 39: las ÉPICAS nunca a la venta
     it.appendChild(btn); g.appendChild(it); });
   d.appendChild(g); return d;
 }
