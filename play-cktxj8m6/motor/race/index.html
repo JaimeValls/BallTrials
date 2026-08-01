@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-01 3cb9812">
+<meta name="bt-build" content="2026-08-01 2121881">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>YouBall · La Gran Carrera (WebGL)</title>
 <style>
@@ -48,6 +48,14 @@
   #ctr button .k{display:block;font-size:9px;opacity:.5;font-weight:800;margin-top:2px}
   #ctr button .cd{display:block;font-size:10px;opacity:.75;font-weight:700}
   #ctr button:disabled{opacity:.35;cursor:default}
+  /*+AG v0.15 los tres botones de ZONA se pulsan cientos de veces por carrera y con el pulgar sin mirar,
+     asi que se les da mas dedo que a los boosters: medidos daban 44 px de alto, que es EXACTAMENTE mi
+     minimo tolerable (la guia de iOS) y no un objetivo. A 50 el pulgar no tiene que apuntar, y el HUD
+     completo pasa de 144 a 150 px en un movil de 360x640 (queda de sobra: acaba a 630 de 640).
+     ⚠ el selector lleva #ctr delante A PROPOSITO: la regla de arriba es `#ctr button` (id + etiqueta) y
+     le gana en especificidad a un `#bL` suelto, asi que la primera version no hizo NADA — y solo se vio
+     porque se midio el boton despues de tocarlo, no porque se leyera el CSS. */
+  #ctr #bL,#ctr #bC,#ctr #bR{padding:13px 6px}
   #bL.on,#bR.on{background:linear-gradient(#4d95ff,#2f6ff0);box-shadow:0 3px 0 #17427d, inset 0 1px 0 #fff5}
   #bC.on{background:linear-gradient(#5b6b9e,#3a486f);box-shadow:0 3px 0 #232c47, inset 0 1px 0 #fff5}
   /*+AG doc 40: el SUPER cargado usa el lenguaje unico de "listo para pulsar" del juego (shell juego.html):
@@ -178,7 +186,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=3cb9812"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=2121881"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -1088,7 +1096,15 @@ function setDir(d){ if(!sim||sim.player.rank!==null) return; sim.player.dir=d; f
 function useNitro(){ if(sim&&phase==='play') sim.fireNitro(sim.player); }
 function useShield(){ if(sim&&phase==='play') sim.fireShield(sim.player); }
 function useSuper(){ if(sim&&phase==='play'&&sim.super>=1&&sim.fireSuper(sim.player)) sim.super=0; }   // super = estrella, consume la barra
-el('bL').onclick=()=>setDir(DIR.LEFT); el('bC').onclick=()=>setDir(DIR.CENTER); el('bR').onclick=()=>setDir(DIR.RIGHT);
+//+AG v0.15 LA ZONA SE CAMBIA AL TOCAR, NO AL SOLTAR. Los tres botones iban con `onclick`, y en un movil
+//   `click` solo dispara al LEVANTAR el dedo y el navegador lo CANCELA si el dedo se desliza un poco. Jugando
+//   —mirando la pista, no el pulgar— eso se cae a menudo, y desde el sofa se siente exactamente igual que
+//   «he pulsado derecha y no me ha hecho caso». Con `pointerdown` la zona cambia en el instante del contacto.
+//   `preventDefault` evita que el mismo toque genere ademas el click fantasma (doble setDir) y mata el
+//   arrastre/seleccion. Los boosters se quedan en `onclick` a proposito: son de un solo uso y gastan recurso,
+//   asi que ahi un roce accidental cuesta caro y el soltar-para-confirmar es lo correcto.
+for(const [d,id] of [[DIR.LEFT,'bL'],[DIR.CENTER,'bC'],[DIR.RIGHT,'bR']])
+  el(id).addEventListener('pointerdown',e=>{ e.preventDefault(); setDir(d); });
 el('bNit').onclick=useNitro; el('bShd').onclick=useShield; el('bSup').onclick=useSuper;
 function updateHUD(){ if(!sim) return; const t=T(), place=sim.playerPlace(), p=sim.player, o=ord(place,LANG);
   //+AG al llegar a meta se ocultan los controles y el HUD de posición para ver limpia la carrera/celebración (Jaime)

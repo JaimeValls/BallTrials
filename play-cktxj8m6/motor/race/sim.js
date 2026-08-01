@@ -65,11 +65,35 @@ const SPAWN_DY=2.5, PER_ROW=4;
 //+AG v0.9 CONTROL POR ZONAS (reemplaza agresivo/defensivo/equilibrado): el jugador elige a qué ZONA ir
 //   (izquierda/centro/derecha) y la bola DERIVA gradualmente hacia ella, como añadirle un peso hacia ese lado,
 //   nunca un tirón. Es un += capado (deriva), jamás un setear vx → no cuenta como recolocación.
+//+AG v0.15 EL CONTROL TE ABANDONABA A MEDIO CAMINO (1-ago-2026, lo levantó Jaime jugando: «pulso que
+//   quiero ir a la derecha y no hace mucho caso, y a veces se va al medio; tendría que tender a ir a la
+//   derecha de verdad»). No era sensación suya, era geometría — medido con 400 carreras conducidas a
+//   DERECHA de principio a fin:
+//     · la banda muerta arrancaba en x=1,19 y el tercio central llega hasta 1,5 ⇒ el control se apagaba
+//       ANTES de que la bola saliera del centro. El sitio donde el juego dejaba de ayudarte estaba, a
+//       ojo del jugador, en el medio.
+//     · y el empuje era proporcional puro: en el borde de la banda valía CERO. O sea que la fuerza era
+//       mínima justo donde la bola pasaba el rato ⇒ el borde se comportaba como un segundo imán.
+//   Resultado: 64% del tiempo en su tercio, 5,6 devoluciones al centro por carrera, 1,2 s de mediana
+//   para recuperarse... y en el 13,5% de las carreras la bola caía al centro y NO VOLVÍA NUNCA. Una de
+//   cada siete partidas el botón dejaba de servir para el resto de la carrera.
+//
+//   LOS TRES MANDOS QUE LO ARREGLAN (medidos los seis candidatos antes de elegir, no estimados):
+//     TX 0.62→0.78  el objetivo se va hacia fuera: «derecha» es la derecha, no el borde del centro.
+//     DZ 1.6→1.3    la banda arranca en x=2,21, ya DENTRO del tercio ⇒ el control no se apaga en el medio.
+//     MIN (nuevo)   suelo de empuje: al salirte de tu zona la corrección arranca en 0.14 en vez de en
+//                   cero. Esto es lo que de verdad mata el «no me hace caso» — sin suelo, el borde de la
+//                   banda es un punto de fuerza nula donde la bola se queda a vivir.
+//   Después: 92,7% del tiempo en su tercio, 1,7 devoluciones, 0,6 s para recuperarse y CERO carreras
+//   abandonadas en el centro. Sigue siendo plinko: dentro de tu tercio la bola rebota libre y nunca se
+//   setea vx. Probé una versión más fuerte (TX 0.82 / DZ 1.1 / MIN 0.20) y esa sí se siente pilotada y
+//   además desequilibra las zonas (el centro se hundía a 5,34 de puesto medio): descartada.
 const DIR={LEFT:0,CENTER:1,RIGHT:2};
-const STEER_TX=XHALF*0.62;          // objetivo de x por zona: LEFT -2.79, CENTER 0, RIGHT +2.79
-const STEER_K=0.5;                  // ganancia proporcional (want·K) fuera de la banda
+const STEER_TX=XHALF*0.78;          // objetivo de x por zona: LEFT -3.51, CENTER 0, RIGHT +3.51
+const STEER_K=0.6;                  // ganancia proporcional (want·K) fuera de la banda
 const STEER_ACC=0.45;               // tope del empuje lateral (u/s por frame)
-const STEER_DZ=1.6;                 // BANDA: dentro de ±1.6u del objetivo la bola rueda libre (no la clava al carril lento)
+const STEER_MIN=0.14;               // SUELO del empuje al salirse de la banda (nunca arranca en cero)
+const STEER_DZ=1.3;                 // BANDA: dentro de ±1.3u del objetivo la bola rueda libre (no la clava al carril lento)
 //+AG v0.9 UN-REST (vigía de progreso): parámetros del roll-off que despega a una bola clavada (ver step()).
 let UNR_T0=7, UNR_RAMP=8, UNR_BASE=0.18, UNR_MAX=0.9;   // dispara a los 7f sin progreso; rampa 0.18→0.9 en 8f
 let GEOM_WC=1.9*0.42+0.22;                              // 1.018u: ancho de franja lateral limpia de pegs interiores
@@ -317,7 +341,9 @@ class Sim{
     //+AG doc 39 #1: AGA → control/tirón de carril del jugador (deriva lateral más fuerte). Solo balls[0]; pmul.aga=1
     //   fuera de individual-con-stats → expresión idéntica a la fuente. Es un += capado (deriva), nunca setea vx.
     const _g=b.isPlayer?this.pmul.aga:1;
-    if(Math.abs(d)>STEER_DZ) b.vx += Math.max(-STEER_ACC*_g, Math.min(STEER_ACC*_g, (d-Math.sign(d)*STEER_DZ)*STEER_K*_g));
+    //+AG v0.15 el empuje arranca en STEER_MIN, no en cero (ver el bloque de constantes): fuera de la banda
+    //   siempre hay corrección que se NOTA, y sigue siendo un += capado a STEER_ACC — jamás se setea vx.
+    if(Math.abs(d)>STEER_DZ){ const e=Math.abs(d)-STEER_DZ; b.vx += Math.sign(d)*Math.min(STEER_ACC, STEER_MIN+e*STEER_K)*_g; }
   }
   _botThink(b){ const r=b._seedr;
     // el bot elige zona con su rng sembrado y cambia cada ~2-4s → se reparte por la pista, determinista
