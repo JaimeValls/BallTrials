@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-01 121586f"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-01 0a7bf1b"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -1704,6 +1704,85 @@
   .h-ic .bar{ display:none; }
   .h-ic{ background:url(arte/ui/ui-ajustes-icono.webp?v=1) center/28px no-repeat,
                     linear-gradient(#ffe14d,#ffb42a); }
+
+  /* ══ 23 · LO QUE VIVIA DEBAJO DE UNA SUB-PESTAÑA ══════════════════════════════════════════════
+     ⚠ SALTA DE LA 13 A LA 23 A PROPOSITO, no falta nada: las piezas 14 a 22 de este mismo <style>
+     vienen en camino desde OTRA SESION que las tiene sin commitear (la 22 es la del min-height:44px
+     de .pr-inv, que aqui abajo se declara igual porque en esta rama todavia no existe). Si esta
+     pieza se hubiera llamado 14 habria dos «pieza 14» al juntar las dos ramas y el numero dejaria de
+     servir para buscar, que es lo unico para lo que esta.
+
+     2-ago. Las trece piezas de arriba dejaron el juego al 0% de pulsables planos... midiendo ONCE
+     pantallas. Y una pantalla NO es una superficie: Tienda, Temporada, Perfil y Ranking tienen ocho
+     sub-pestañas mas, y lo que vive dentro de un `.sc-block` sin `.on` es display:none, o sea
+     invisible para el banco. Abriendolas (banco-canon ya las abre) salieron 45 pulsables planos que
+     llevaban ahi desde el principio — el 18% del juego, no un rincon.
+     EL PEOR: Perfil > Cuenta. Los cinco botones con los que alguien GUARDA SU PARTIDA (crear cuenta,
+     entrar, Google, Facebook, traer la partida) eran rectangulos translucidos sin grosor, o sea la
+     pantalla mas importante del juego para no perder el progreso hablando el idioma de nadie.
+     Todo lo de abajo es override al final del <style>: la regla base sigue donde estaba (linea ~636
+     para .pr-inv, ~617 para .se-rung, ~1327 para .rktile) porque la comparten cosas que no se tocan.
+
+     23a · LOS BOTONES DE CUENTA Y DE AMIGOS (.pr-inv y el boton de .pr-code).
+     Placa del kit, no amarillo: ninguno es la accion primaria de Perfil (son cuatro alternativas del
+     mismo peso; poner una en amarillo seria decirle a Jaime cual elegir). Sin trazo de texto, igual
+     que .g-back y .gd-btn.ghost: en el kit las placas secundarias no lo llevan.
+     ⚠ y min-height:44px, que NO es cosmetica: a 12px de cuerpo y 7px de padding median 30px de alto
+     y el minimo tactil del canon 14 son 44. */
+  .pr-inv, .pr-code button{ background:linear-gradient(#282059,#161139); border:1px solid #ffffff30;
+    color:#dfe4ff; border-radius:12px; min-height:44px; padding:9px 13px;
+    box-shadow:0 3px 0 #0d0726, inset 0 1px 0 #ffffff24; transition:transform .08s, box-shadow .08s; }
+  .pr-inv:active, .pr-code button:active{ transform:translateY(2px);
+    box-shadow:0 1px 0 #0d0726, inset 0 1px 0 #ffffff24; }
+
+  /* 23b · LOS PACKS DE GEMAS (Tienda > Gemas). Son FILAS de lista con su boton verde de comprar a la
+     derecha, no botones: les toca el canto CORTO de la pieza 4 (.rkrow, .g-card), que dice "esto es
+     una tarjeta" sin competir con el boton que lleva dentro. Sin :active por lo mismo — lo que se
+     hunde al tocar es el boton verde, no la fila. */
+  .sh-pack{ box-shadow:0 2px 0 #0d0726, inset 0 1px 0 #ffffff18; }
+
+  /* 23c · LOS PELDAÑOS DEL PASE (Temporada > Pase). Quince de golpe, la sub-pestaña mas plana del
+     juego. El peldaño era un contenedor transparente con una celda translucida dentro, asi que
+     ponerle el canto AL PELDAÑO y dejar la celda como estaba daba una tarjeta dentro de otra.
+     Se hace al reves: el PELDAÑO pasa a ser la placa (que es lo que se toca y lo que se cuenta) y la
+     celda se queda como el hueco del premio, sin borde ni fondo propios.
+     ⚠ `.se-rung .cell.prem` (3 clases) y `.se-rung.done .cell` NO se pisan a proposito: el violeta
+     del premium y el aro dorado del reclamado son los dos datos que distinguen un peldaño de otro y
+     ganan por especificidad a la regla de aqui abajo. */
+  .se-rung{ background:linear-gradient(#282059,#161139); border:1px solid #ffffff30; border-radius:14px;
+    padding:5px 3px; box-shadow:0 3px 0 #0d0726, inset 0 1px 0 #ffffff24;
+    transition:transform .08s, box-shadow .08s; }
+  .se-rung:active{ transform:translateY(2px); box-shadow:0 1px 0 #0d0726, inset 0 1px 0 #ffffff24; }
+  .se-rung .cell{ background:none; border-color:transparent; padding:6px 2px; }
+
+  /* 23d · LAS DOS PESTAÑAS DEL RANKING DE TEMPORADA (.se-rk-tab). La activa YA tenia su trazo blanco
+     de la pieza 6, asi que la fila decia "yo soy de este juego, mis hermanas no". Mismo tratamiento
+     que .set-seg button, que es el componente del que estas son gemelas: placa las apagadas, canto
+     dorado la encendida. */
+  .se-rk-tab{ background:linear-gradient(#282059,#161139); border:1px solid #ffffff30; color:#c9d0f2;
+    box-shadow:0 3px 0 #0d0726, inset 0 1px 0 #ffffff24; transition:transform .08s, box-shadow .08s; }
+  .se-rk-tab.on{ background:linear-gradient(#ffe14d 12%,#ffb42a); border-color:transparent;
+    box-shadow:0 4px 0 #b45a10, inset 0 2px 0 #ffffff8c; }
+  .se-rk-tab:active{ transform:translateY(2px); box-shadow:0 1px 0 #0d0726, inset 0 1px 0 #ffffff24; }
+  .se-rk-tab.on:active{ transform:translateY(3px); box-shadow:0 1px 0 #b45a10, inset 0 2px 0 #ffffff8c; }
+
+  /* 23e · EL CARRUSEL DE BOLAS DEL RANKING (Ranking > Por bola): doce fichas y las dos flechas.
+     La ficha ELEGIDA se marcaba solo con un borde blanco y una sombra BORROSA — que es justo el
+     agujero del inset/blur que ya costo la pieza 12: se ve "iluminada", no "con grosor". Ahora las
+     doce llevan canto y la elegida lo conserva ademas de su borde blanco.
+     ⚠ el :active pasa de `scale(.96)` a `translateY(2px)` con el canto reducido: encoger un boton que
+     tiene grosor lo despega del suelo en vez de hundirlo, y el idioma del canon es hundir. */
+  .rktile{ background:linear-gradient(#282059,#161139);
+    box-shadow:0 3px 0 #0d0726, inset 0 1px 0 #ffffff20; transition:transform .08s, box-shadow .08s; }
+  .rktile.on{ border-color:#fff; background:linear-gradient(#3a2f78,#221a52);
+    box-shadow:0 3px 0 #0d0726, 0 0 0 1px #ffffff55, inset 0 1px 0 #ffffff2e; }
+  .rktile:active{ transform:translateY(2px); box-shadow:0 1px 0 #0d0726, inset 0 1px 0 #ffffff20; }
+  .rktile.on:active{ transform:translateY(2px); box-shadow:0 1px 0 #0d0726, 0 0 0 1px #ffffff55, inset 0 1px 0 #ffffff2e; }
+  /*+AG las flechas conservan el grosor cuando estan deshabilitadas y solo se apagan (`opacity:.22`),
+     misma razon que .sh-buy:disabled y .tile.locked: "es un boton, pero aqui se acaba la lista". */
+  .rkarr{ background:linear-gradient(#282059,#161139); border:1px solid #ffffff30; color:#dfe4ff;
+    box-shadow:0 3px 0 #0d0726, inset 0 1px 0 #ffffff24; transition:transform .08s, box-shadow .08s; }
+  .rkarr:active:not(:disabled){ transform:translateY(2px); box-shadow:0 1px 0 #0d0726, inset 0 1px 0 #ffffff24; }
 </style>
 
 <!--+AG doc 34 Fase B: #app = la "columna telefono" que contiene TODAS las pantallas y overlays (portrait) -->
@@ -2370,7 +2449,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=121586f"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=0a7bf1b"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
