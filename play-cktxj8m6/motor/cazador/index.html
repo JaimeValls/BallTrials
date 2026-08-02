@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-02 6e0a65e">
+<meta name="bt-build" content="2026-08-02 7ea7a06">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <!--+AG el HTML se sirve en INGLES (defecto del juego); ?lang=es lo traduce por JS (applyLang) -->
 <title>YouBall · The Hunter (WebGL)</title>
@@ -190,7 +190,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=6e0a65e"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=7ea7a06"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -201,19 +201,19 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 </script>
 
 <script type="module">
-import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, makeFacePlane, createItemPool, createItemPops, createStarBurst, createWindTrail, createBloom, frameOrtho } from '../chassis/gfx.mjs?v=6e0a65e';
-import { archLook } from '../chassis/ballmat.mjs?v=6e0a65e';   //+AG doc 41 bloque G: material de la bola-heroe
-import { attachSquash } from '../chassis/squash.mjs?v=6e0a65e';
-import { Sim, RNG, TEAMS, BALL_R, ARENA_W, ARENA_H, FPS, AGENCIA } from './sim.js?v=6e0a65e';
-import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=6e0a65e';
-import { archFace } from '../chassis/facegen.mjs?v=6e0a65e';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
-import { createCelebration } from '../chassis/celebration.mjs?v=6e0a65e';
-import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=6e0a65e';
-import { buildSfxBuffer } from './sfxmap.mjs?v=6e0a65e';
-import { createCoach } from '../chassis/coach.mjs?v=6e0a65e';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
-import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=6e0a65e';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
-import { cantarPuesto } from '../chassis/veredicto.mjs?v=6e0a65e';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
-import { runToEnd } from '../chassis/simrun.mjs?v=6e0a65e';
+import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, makeFacePlane, createItemPool, createItemPops, createStarBurst, createWindTrail, createBloom, frameOrtho } from '../chassis/gfx.mjs?v=7ea7a06';
+import { archLook } from '../chassis/ballmat.mjs?v=7ea7a06';   //+AG doc 41 bloque G: material de la bola-heroe
+import { attachSquash } from '../chassis/squash.mjs?v=7ea7a06';
+import { Sim, RNG, TEAMS, BALL_R, ARENA_W, ARENA_H, FPS, AGENCIA } from './sim.js?v=7ea7a06';
+import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=7ea7a06';
+import { archFace } from '../chassis/facegen.mjs?v=7ea7a06';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
+import { createCelebration } from '../chassis/celebration.mjs?v=7ea7a06';
+import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=7ea7a06';
+import { buildSfxBuffer } from './sfxmap.mjs?v=7ea7a06';
+import { createCoach } from '../chassis/coach.mjs?v=7ea7a06';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=7ea7a06';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
+import { cantarPuesto } from '../chassis/veredicto.mjs?v=7ea7a06';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
+import { runToEnd } from '../chassis/simrun.mjs?v=7ea7a06';
 
 window.addEventListener('error', e => { document.getElementById('err').style.display='grid'; console.error(e.error||e.message); });
 
@@ -337,7 +337,7 @@ const youLbl = document.getElementById('youlbl');
 const _v3 = new THREE.Vector3();
 
 // --- estado ---
-let sim, emo, ballObjs, orbMeshes, shake=0, seed=1, celCam=null, celScale=10, shortOpts={};
+let sim, emo, ballObjs, orbMeshes, shake=0, seed=1, celCam=null, celScale=10, celHero=false, shortOpts={};
 let superVal=0, prevPlayerRank=null;   //+AG carga del senuelo (se gana jugando, docs/20 T1.6) + deteccion de caida del jugador
 //+AG ARRANQUE (feedback Jaime 2026-07-26): la partida ya no abre de golpe en 3-2-1. Antes va la fase 'ready' (el
 //   cartel del modo de chassis/arranque.mjs, que es donde se desbloquea el audio) y luego la cuenta atrás, más
@@ -368,7 +368,7 @@ function buildSim(s){
   if(ballObjs) ballObjs.forEach(o=>scene.remove(o.g));
   if(orbMeshes) orbMeshes.forEach(m=>itemPool.release(m));
   ballObjs=sim.balls.map((b,i)=>attachSquash(makeBallVinyl(scene,b,BALL_R, i===0?ARCH_LOOK_P:null, i===0?ARCH_KEY_P:null), { R:BALL_R, vRef:12, wind, stars }));   // VINILO v2; el CAZADOR conserva su cara de depredador (makeFacePlane)
-  orbMeshes=new Map(); celCam=null;
+  orbMeshes=new Map(); celCam=null; celHero=false;
   if(stains.length){ stains.forEach(m=>{ scene.remove(m); m.material.dispose(); }); stains=[]; }   // limpiar manchas de la ronda anterior
   flashUntil=-1; if(flashEl) flashEl.style.opacity='0';
   px=sim.balls.map(b=>b.x); py=sim.balls.map(b=>b.y);
@@ -600,14 +600,23 @@ function updateHud(){
 // dejaría ver VACÍO fuera del corral → clamp del centro a los límites del corral (render-only, no toca sim).
 // El corral 19×12.5 (aspecto 1.52 ≈ 16:9) llena bien el panorámico. Vale para 16:9 y 9:16 (usa el aspecto).
 const CAM_PAD=0.5;   // cuánto borde/muro se deja ver fuera del foco
-function clampCam(scale, cx, cy){
+function clampCam(scale, cx, cy, pad=CAM_PAD){
   const aspect=innerWidth/innerHeight;
   const vhw = aspect>=1 ? scale*0.5*aspect : scale*0.5;        // medio-ancho visible (frameOrtho 'auto')
   const vhh = aspect>=1 ? scale*0.5        : scale*0.5/aspect; // medio-alto visible
-  const bx = Math.max(0, (ARENA_W*0.5 + CAM_PAD) - vhw);       // margen de paneo permitido en X
-  const by = Math.max(0, (ARENA_H*0.5 + CAM_PAD) - vhh);
+  const bx = Math.max(0, (ARENA_W*0.5 + pad) - vhw);           // margen de paneo permitido en X
+  const by = Math.max(0, (ARENA_H*0.5 + pad) - vhh);
   return [ Math.max(-bx, Math.min(bx, cx)), Math.max(-by, Math.min(by, cy)) ];
 }
+//+AG doc 62 EL PLANO DEL HÉROE, ahora en los TRES modos (orden de Jaime, 2026-08-02: «el plano del héroe tiene
+//   que estar en todos los modos siempre»). El Cazador YA cerraba sobre el ganador desde el 2026-07-10, pero
+//   cerraba a 9 unidades de ANCHO: en un móvil eso son 19,5 de ALTO para un corral que mide 12,5, así que la
+//   bola protagonista salía al 4% de la pantalla, descentrada contra el muro y con medio plano en negro fuera
+//   del corral. Ahora el cierre se mide como en la Carrera: ALTO visible fijo → la bola ocupa ~10% de la
+//   pantalla, la misma talla en las tres partidas. Y el paneo puede acercarse más al muro (pad mayor) para que
+//   el protagonista quede centrado. Solo en el juego (EMBED): el vídeo 16:9 del canal se queda como estaba.
+const HERO_ALTO=8.4, HERO_PAD=1.8;
+const heroScale=()=>{ const a=innerWidth/innerHeight; return a>=1 ? HERO_ALTO : HERO_ALTO*a; };   // frameOrtho: apaisado scale=alto, vertical scale=ancho
 function frameCamera(dt, a=1){
   shake=Math.max(0,shake-dt*1.5);
   const fr=dt*FPS;
@@ -617,9 +626,16 @@ function frameCamera(dt, a=1){
     let cx=sim.cam[0], cy=sim.cam[1];
     if(w.length){ cx=0;cy=0; for(const b of w){cx+=b.x;cy+=b.y;} cx/=w.length; cy/=w.length; }
     if(!celCam){ celCam=[sim.cam[0],sim.cam[1]]; celScale=sim.scale; }
-    const kc=1-Math.pow(0.9,fr), ks=1-Math.pow(0.94,fr);       // suavizado POR FRAME DE SIM (no por llamada: a 60 sync corre 2x)
-    celCam[0]+=(cx-celCam[0])*kc; celCam[1]+=(cy-celCam[1])*kc; celScale+=(9.0-celScale)*ks;
-    scale=celScale; fx=celCam[0]; fy=celCam[1];
+    //+AG doc 62: el protagonista del cierre es el mismo de siempre (TÚ si sobrevives, el superviviente si te
+    //   cazaron: `w` sale del winner_team, y si has ganado esa bola eres tú); lo que cambia es la TALLA... y el
+    //   AGARRE. Al cerrar el plano, el suavizado viejo (10% por frame) se notaba como retraso: el superviviente
+    //   sigue moviéndose después de la decisión y salía pegado al borde derecho del cuadro con la cámara detrás.
+    //   En plano corto el mismo retraso en unidades es el triple de pantalla, así que el héroe se sigue al 25%.
+    const heroe = EMBED && w.length>0;
+    const kc=1-Math.pow(heroe?0.75:0.9,fr), ks=1-Math.pow(0.94,fr);   // suavizado POR FRAME DE SIM (no por llamada: a 60 sync corre 2x)
+    const objetivo = heroe ? heroScale() : 9.0;
+    celCam[0]+=(cx-celCam[0])*kc; celCam[1]+=(cy-celCam[1])*kc; celScale+=(objetivo-celScale)*ks;
+    scale=celScale; fx=celCam[0]; fy=celCam[1]; celHero=EMBED && w.length>0;
   } else if(EMBED && sim.balls[0].rank===null){
     //+AG cámara de JUGADOR (embed): centrada en TU bola (posición interpolada a 60fps), plano FIJO más abierto
     //    que el chase-cam del vídeo (feedback del dueño 2026-07-22, mismo combo que Luz Roja: "céntrate en el
@@ -633,7 +649,7 @@ function frameCamera(dt, a=1){
     scale=pCamS; fx=pCamX; fy=pCamY;
   } else { scale=prevScale+(sim.scale-prevScale)*a; fx=prevCamX+(sim.cam[0]-prevCamX)*a; fy=prevCamY+(sim.cam[1]-prevCamY)*a; }   // cámara de sim INTERPOLADA
   if(innerWidth>=innerHeight) scale=Math.min(scale, ARENA_H+1.0);   // 16:9: en tomas amplias no abrir más que el corral (evita vacío y bandas)
-  const [ccx,ccy]=clampCam(scale, fx, fy);
+  const [ccx,ccy]=clampCam(scale, fx, fy, celHero?HERO_PAD:CAM_PAD);   //+AG doc 62: en el plano del héroe la cámara puede arrimarse más al muro (si no, ganar en una esquina = celebrar en el borde)
   frameOrtho(cam, scale, ccx, ccy, shake);
 }
 

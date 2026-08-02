@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-02 6e0a65e">
+<meta name="bt-build" content="2026-08-02 7ea7a06">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <!--+AG el HTML se sirve en INGLES (defecto del juego); ?lang=es lo traduce por JS (applyLang) -->
 <title>YouBall · Red Light Rush (WebGL) · The Marble Games</title>
@@ -246,7 +246,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=6e0a65e"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=7ea7a06"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -257,22 +257,22 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 </script>
 
 <script type="module">
-import { THREE, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createBloom, frameOrtho, BLOOM } from '../chassis/gfx.mjs?v=6e0a65e';
-import { archLook } from '../chassis/ballmat.mjs?v=6e0a65e';   //+AG doc 41 bloque G: material de la bola-heroe
-import { attachSquash } from '../chassis/squash.mjs?v=6e0a65e';
-import { createCelebration } from '../chassis/celebration.mjs?v=6e0a65e';
-import { createKillfeed } from '../chassis/killfeed.mjs?v=6e0a65e';
-import { createCensusBoard } from '../chassis/censusboard.mjs?v=6e0a65e';
-import { createCupoGauge } from '../chassis/cupogauge.mjs?v=6e0a65e';
-import { createKillTags } from '../chassis/killtag.mjs?v=6e0a65e';
-import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=6e0a65e';
-import { archFace } from '../chassis/facegen.mjs?v=6e0a65e';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
-import { Sim, TEAMS, SHORT_COLORS, SHORT_COLORS_6, BALL_R, FPS, FIELD_W, FIELD_L, XL, XR, SPAWN_Y, GATE_Y, SAFE_Y } from './sim.js?v=6e0a65e';
-import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=6e0a65e';
-import { buildSfxBuffer } from './sfxmap.mjs?v=6e0a65e';
-import { createCoach } from '../chassis/coach.mjs?v=6e0a65e';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
-import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=6e0a65e';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
-import { cantarPuesto } from '../chassis/veredicto.mjs?v=6e0a65e';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
+import { THREE, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createBloom, frameOrtho, BLOOM } from '../chassis/gfx.mjs?v=7ea7a06';
+import { archLook } from '../chassis/ballmat.mjs?v=7ea7a06';   //+AG doc 41 bloque G: material de la bola-heroe
+import { attachSquash } from '../chassis/squash.mjs?v=7ea7a06';
+import { createCelebration } from '../chassis/celebration.mjs?v=7ea7a06';
+import { createKillfeed } from '../chassis/killfeed.mjs?v=7ea7a06';
+import { createCensusBoard } from '../chassis/censusboard.mjs?v=7ea7a06';
+import { createCupoGauge } from '../chassis/cupogauge.mjs?v=7ea7a06';
+import { createKillTags } from '../chassis/killtag.mjs?v=7ea7a06';
+import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=7ea7a06';
+import { archFace } from '../chassis/facegen.mjs?v=7ea7a06';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
+import { Sim, TEAMS, SHORT_COLORS, SHORT_COLORS_6, BALL_R, FPS, FIELD_W, FIELD_L, XL, XR, SPAWN_Y, GATE_Y, SAFE_Y } from './sim.js?v=7ea7a06';
+import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=7ea7a06';
+import { buildSfxBuffer } from './sfxmap.mjs?v=7ea7a06';
+import { createCoach } from '../chassis/coach.mjs?v=7ea7a06';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=7ea7a06';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
+import { cantarPuesto } from '../chassis/veredicto.mjs?v=7ea7a06';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
 
 window.addEventListener('error', e => { document.getElementById('err').style.display='grid'; console.error(e.error||e.message); });
 
@@ -409,7 +409,11 @@ const CAM_FIT = {
   padX: 1.8,      // aire lateral alrededor de la caja del pelotón
   padY: 2.4,      // aire arriba/abajo
   aheadFrac: 0.10,// sesgo hacia donde se corre: el centro se desplaza un 10% del alto hacia la meta
-  crownW: 8.0     // CORONACIÓN: plano CORTO sobre la campeona (la línea de meta entra justo debajo)
+  //+AG doc 62 EL PLANO DEL HÉROE en los TRES modos (orden de Jaime, 2026-08-02). La coronación ya se iba con la
+  //   campeona desde el 20-jul, pero el plano se pedía en ANCHO fijo (8 u) y en un móvil 375x812 eso son 17,3 u
+  //   de ALTO: la bola quedaba en el 4,9% de la pantalla, la mitad que en la Carrera. Ahora se pide el ALTO
+  //   visible, que es lo que decide cómo de grande se ve la bola, y sale igual en las tres partidas (~10%).
+  crownAlto: 8.4
 };
 //+AG cámara de JUGADOR (embed): el encuadre de grupo venía del VIDEO (ahí no hay jugador) y en el juego dejaba
 //    tu bola descentrada y el plano demasiado cerrado (feedback del dueño 2026-07-22: "céntrate en el jugador y
@@ -1041,9 +1045,13 @@ function frameCameraShort(dt){
     // descolgada, y parecía que "se teletransportaba al medio del mapa" (feedback del dueño 2026-07-20). Ahora la
     // cámara se va con ella y la línea de meta entra en cuadro: se entiende que ha LLEGADO.
     const w = sim.balls.find(b=>b.team===sim.winner_team) || sim.balls[0];
-    wantW = CAM_FIT.crownW;
+    //+AG doc 62: el plano se pide por ALTO visible y se traduce al ancho que toque según la pantalla. La cuenta
+    //   sale de cómo lo aplica frameOrtho más abajo: si la ventana es más ancha que 9:16 encuadra por alto
+    //   (camW*16/9), y si es más estrecha —cualquier móvil de verdad— encuadra por ancho (camW/aspecto).
+    //   `min(aspecto, 9/16)` cubre los dos casos con una sola línea.
+    wantW = CAM_FIT.crownAlto * Math.min(innerWidth/innerHeight, 9/16);
     cxT = w.x;
-    cyT = w.y - 0.02*(wantW*16/9);        // casi centrada: la copa cabe encima sin pisarla y el damero entra justo debajo
+    cyT = w.y - 0.02*CAM_FIT.crownAlto;   // casi centrada: la copa cabe encima sin pisarla y el damero entra justo debajo
   } else if(PCAM){
     //+AG cámara de JUGADOR: centrada en TU bola, ancho fijo PCAM_W. El sesgo hacia la meta te deja a ~40% de
     //    la parte BAJA del cuadro: ves lo que viene, y tú siempre en plano. Si mueres o cruzas la meta, cae al
@@ -1090,8 +1098,16 @@ function frameCameraShort(dt){
     const lo = SPAWN_Y-2.5+visH/2, hi = SAFE_Y+2.5-visH/2;
     cyT = lo>hi ? (lo+hi)/2 : Math.max(lo, Math.min(hi, cyT)); }
   if(!camWarm){ camX=cxT; camY=cyT; camWarm=true; }
-  else { camX += Math.max(-14*dt, Math.min(14*dt, (cxT-camX)*(1-Math.exp(-3.0*dt))));
-         camY += Math.max(-20*dt, Math.min(20*dt, (cyT-camY)*(1-Math.exp(-3.4*dt)))); }
+  else {
+    //+AG doc 62: EN LA CORONACIÓN el tope de velocidad de paneo se sube. Los 20 u/s son la regla de "la cámara
+    //   nunca salta" del juego, y está bien mientras se corre; pero al coronar, la campeona está en la meta y la
+    //   cámara podía venir de 38 unidades más atrás (donde murió el pelotón): tardaba 2 de los 3 segundos del
+    //   cierre en llegar, o sea que el plano del héroe se veía el último segundo. Medido en la semilla 9: a
+    //   f=1010 la cámara iba en y=39,5 con la campeona en y=45,0, o sea FUERA de cuadro. Ahora llega en ~0,6 s.
+    const cor = CROWN ? 3 : 1;
+    camX += Math.max(-14*cor*dt, Math.min(14*cor*dt, (cxT-camX)*(1-Math.exp(-(CROWN?6.0:3.0)*dt))));
+    camY += Math.max(-20*cor*dt, Math.min(20*cor*dt, (cyT-camY)*(1-Math.exp(-(CROWN?6.0:3.4)*dt))));
+  }
   // 5) el frame 9:16 pedido SIEMPRE cabe: en 1080×1920 sale exacto; en preview apaisado se ve de más a los lados.
   const A = innerWidth/innerHeight, byH = A >= 9/16;
   frameOrtho(cam, byH?visH:visW, camX, camY, shake, byH?'height':'width'); }
