@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-02 be8192a"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-02 1687de6"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG ICONO EN LA PANTALLA DE INICIO (docs/40 §6). Jaime: "la gente esta acostumbrada a clicar en el
@@ -3774,7 +3774,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=be8192a"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=1687de6"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -6353,7 +6353,19 @@ function bolasEl(){ const s=S(), d=document.createElement('div'); d.innerHTML=''
     if(have){ btn.className='sh-buy owned'; btn.textContent=s.ownedGar; btn.disabled=true; }
     //+AG un solo boton para las doce, con los dos precios a la vista. Paga en Monedas si te llegan, y
     //   si no, en Gemas: nunca se cobra en Gemas teniendo Monedas suficientes (seria cobrar de mas).
-    else { btn.className='sh-buy'; btn.innerHTML=`${nfmt(A.price)} ${coinIco('chispa','sm')} / ${nfmt(A.gemas)} ${coinIco('gema','sm')}`;
+    //+AG ⚠ 3-ago, dos arreglos de esta linea, los dos de la auditoria de UX:
+    //   · EL BOTON SE PINTA SEGUN LO QUE VA A COBRAR. La regla «la moneda manda sobre el boton» ya
+    //     estaba escrita (verde = Gemas) y se cumplia en Cosmeticos, Gemas y Pase... pero NO aqui,
+    //     que es la unica pestaña donde el boton puede cobrar de las dos. Salia siempre ambar aunque
+    //     el clic fuera a sacarte Gemas. Una regla que falla en una de cuatro no es una regla.
+    //   ⚠ QUEDA PENDIENTE, y no se hace aqui a proposito: el separador «/» entre los dos precios se
+    //     lee como una fraccion cuando son precios ALTERNATIVOS. Lo suyo seria la palabra «o», pero
+    //     esa palabra suelta NO existe en el diccionario (existe `orPay`, que es la frase entera «o
+    //     pagar N ◆», demasiado larga para este boton). Meter un «o» a pelo dejaria español en los 20
+    //     idiomas, que es peor que el fallo que arregla. Necesita clave nueva y sus 20 traducciones.
+    else { const conGemas = SAVE.chispas<A.price;
+      btn.className='sh-buy'+(conGemas?' gem':'');
+      btn.innerHTML=`${nfmt(A.price)} ${coinIco('chispa','sm')} / ${nfmt(A.gemas)} ${coinIco('gema','sm')}`;
       btn.disabled=SAVE.chispas<A.price&&SAVE.gemas<A.gemas;
       btn.onclick=()=>{ if(unlock(k, SAVE.chispas<A.price)) renderTienda(); }; }
     it.appendChild(btn); g.appendChild(it); });
@@ -7444,6 +7456,28 @@ if(CHEAT_MONEDAS){
 //   la pildora del saldo, que es donde Supercell pone ese atajo.
 //   Con el TRUCO DE PRUEBAS encendido NO abre la tienda: ahi tocar la moneda regala +100 y son incompatibles.
 ['cChispa','cGema'].forEach(id=>{ const e=el(id); if(e) e.onclick=()=>{ if(!CHEAT_MONEDAS) openTienda(); }; });
+//+AG ⚠ 3-ago · LAS PILDORAS DE MONEDA DE LAS OTRAS CUATRO PANTALLAS NO HACIAN NADA. Lo cazo
+//   supercell-ux auditando la Tienda: en la portada la pildora abre la Tienda desde hace tiempo, pero
+//   las de Garaje, Tienda, Temporada y Perfil son el MISMO componente —mismo dibujo, mismo hundirse
+//   al pulsar y el mismo halo tactil invisible de 44 px que la casa reserva para lo que se toca— y
+//   no tenian ni un onclick. O sea, cuatro pantallas con un boton que parece boton y no lo es. Es el
+//   mismo defecto que el «Equipada» de la ficha, repetido cuatro veces.
+//   ⚠ Y EN LA TIENDA VA UN PASO MAS ALLA: ahi la pildora de Gemas se toca en un momento muy concreto
+//   —estas mirando un precio que no puedes pagar—, asi que no basta con abrir la Tienda (ya estas en
+//   ella): lleva DERECHA a la pestaña de Gemas, que es lo que has ido a buscar.
+//   El `CHEAT_MONEDAS` se respeta igual que arriba: con el truco encendido, la pildora es el truco.
+[['gChispas','gar'],['gGemas','gar'],['shChispas','sh'],['shGemas','sh'],
+ ['seChispas','se'],['seGemas','se'],['prChispas','pr'],['prGemas','pr']].forEach(([spanId, donde])=>{
+  const sp=el(spanId); const pil=sp&&sp.closest('.coin'); if(!pil) return;
+  //+AG LA REGLA, y es una sola para las ocho: la pildora lleva a DONDE SE CONSIGUE ESA MONEDA.
+  //   Fuera de la Tienda, las dos abren la Tienda. Dentro, cambiar de pantalla no vale de nada, asi
+  //   que saltan a su pestaña: Gemas a «Gemas», y Monedas a «Destacados», que es donde se venden los
+  //   packs que las incluyen. Ninguna se queda sin ir a ningun sitio, que era el fallo original.
+  const esGema=/Gemas$/.test(spanId);
+  pil.onclick=()=>{ if(CHEAT_MONEDAS) return;
+    if(donde==='sh'){ shSec = esGema ? 'gemas' : 'destacados'; renderTienda(); }
+    else openTienda(); };
+});
 //+AG JUGAR abre SIEMPRE la hoja. Historia, porque esto ya se ha volteado una vez:
 //   · docs/35 v2.2 la puso siempre;
 //   · la auditoria Supercell del 26-jul la hizo condicional (solo si el modo tenia POR EQUIPOS vivo o te
