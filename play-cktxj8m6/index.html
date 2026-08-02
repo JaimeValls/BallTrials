@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-02 6bea86e"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-02 2928e1a"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG ICONO EN LA PANTALLA DE INICIO (docs/40 §6). Jaime: "la gente esta acostumbrada a clicar en el
@@ -447,6 +447,13 @@
   .g-cname{ font-weight:800; font-size:var(--fs-3); }
   .g-qtag{ font-size:var(--fs-2); font-weight:800; letter-spacing:.09em; text-transform:uppercase; color:var(--qc,#9aa4b8); }
   .g-eq{ position:absolute; top:8px; right:8px; background:var(--gold2); color:#3a2400; font-size:var(--fs-1); font-weight:900; padding:2px 8px; border-radius:999px; letter-spacing:.05em; }
+  /*+AG 3-ago · el mismo galon de la tarjeta del Garaje, pero DENTRO de la ficha y en flujo (no
+     absoluto): aqui va debajo del nombre, donde se lee como un estado del personaje y no tapa nada.
+     `hidden` de serie; lo enciende openDetail solo cuando la bola es la equipada. */
+  .gd-eqtag{ align-self:center; background:var(--gold2); color:#3a2400; font-size:var(--fs-1);
+    font-weight:900; padding:2px 10px; border-radius:999px; letter-spacing:.06em; text-transform:uppercase;
+    margin-top:1px; }
+  .gd-eqtag[hidden]{ display:none; }
   /*+AG el candado va ARRIBA A LA DERECHA, el mismo sitio y el mismo dibujo que en el riel de la
      portada. Es diminuto (22 px) a proposito: tiene que decir "no es tuya" sin taparte el personaje,
      que es lo que estas mirando para decidir si lo compras. z-index 21 porque el lienzo de las bolas
@@ -3082,7 +3089,12 @@
 <div id="gDetail">
   <div class="gd-card" id="gdCard">
     <div class="gd-q" id="gdQ"></div>
+    <!--+AG 3-ago · EL GALON DE "EQUIPADA" VIVE AQUI, no en el boton grande. Ver el porque en
+         openDetail(): un CTA dorado de 280 px que solo dice un estado y no hace nada es el elemento
+         mas llamativo de la ficha gastado en no hacer nada. El estado es una etiqueta; el boton es
+         para actuar. Es el mismo galon que ya lleva la tarjeta del Garaje (.g-eq). -->
     <div class="gd-name" id="gdName"></div>
+    <div class="gd-eqtag" id="gdEqTag" hidden></div>
     <!--+AG doc 41: la pantalla del heroe ENSEÑA al heroe. Antes solo habia un hexagono de stats:
          en Brawl Stars el personaje ocupa la mitad de su ficha, y era el hueco mas gordo del Garaje. -->
     <!--+AG doc 51: «asi se ve en pista». El retrato es una escena pintada (estela de fuego, muro
@@ -3520,7 +3532,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=6bea86e"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=2928e1a"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -5855,18 +5867,32 @@ function openDetail(k){ applyShell(); const A=ARCHS[k], b=owned(k), q=QUAL[A.q],
   drawStats(el('gdStats'), k, attrs, !b);
   const assign=el('gdAssign'); assign.innerHTML='';
   let lvlUpReady=false;   //+AG doc 40: regla Supercell "un solo elemento brillando por pantalla"
-  if(b){ const next=lvl+1, maxed=next>maxLvl(k);
+  //+AG 3-ago: el nivel se calcula AQUI ARRIBA porque ahora lo necesitan dos sitios — el chip y, cuando
+  //   la bola ya esta equipada, el BOTON GRANDE. Antes vivia dentro del if y el boton no podia verlo.
+  const idxB = b ? SAVE.balls.indexOf(b) : -1;
+  const isEq = !!b && SAVE.equipped===idxB;
+  const next = lvl+1, maxed = !!b && next>maxLvl(k);
+  const cost = maxed ? 0 : (LVL_COST[next]||0);
+  const haveXp = !!b && (b.xp||0)>=xpNeed(next);
+  const puedeSubir = !!b && !maxed && haveXp && SAVE.chispas>=cost;
+  const subeNivel = ()=>{ if(canLvlUp(b)){ dinero('chispas', -cost, 'bola_nivel'); b.lvl=(b.lvl||1)+1;
+    apunta('ball_up', { arch:k, lvl:b.lvl, coste:cost }); persist();
+    toast(s.tBallLvl(archName(k),b.lvl)); openDetail(k); renderGaraje(); } };
+  if(b){
     el('gdXpWrap').style.display='';
     el('gdXpNum').textContent = maxed ? s.lvlShort(lvl)+' · MÁX' : s.lvlShort(lvl)+' · '+Math.round(b.xp||0)+'/'+xpNeed(next)+' XP';
     el('gdXpFill').style.width=(maxed?100:Math.max(0,Math.min(100,100*(b.xp||0)/xpNeed(next))))+'%';
-    if(!maxed){ const cost=LVL_COST[next], haveXp=(b.xp||0)>=xpNeed(next);
-      const bt=document.createElement('button'); bt.className='gd-chip'; bt.style.cssText='flex:1;font-weight:800';
-      setCoin(bt, s.lvlUpBtn(next,cost)); bt.disabled=!haveXp||SAVE.chispas<cost;
-      lvlUpReady=!bt.disabled; bt.classList.toggle('ready', lvlUpReady);   //+AG doc 40: brilla solo si HOY puedes subirla (XP + Chispas)
-      bt.onclick=()=>{ if(canLvlUp(b)){ dinero('chispas', -cost, 'bola_nivel'); b.lvl=(b.lvl||1)+1;
-        apunta('ball_up', { arch:k, lvl:b.lvl, coste:cost }); persist();
-        toast(s.tBallLvl(archName(k),b.lvl)); openDetail(k); renderGaraje(); } };
-      assign.appendChild(bt);
+    if(!maxed){
+      //+AG ⚠ EL CHIP SOLO SI LA BOLA NO ES LA EQUIPADA. Si lo es, subir de nivel pasa a ser la accion
+      //   primaria y se va al boton grande: tenerlo en los dos sitios seria ofrecer lo mismo dos veces
+      //   con dos tamaños distintos, que es peor que no ofrecerlo.
+      if(!isEq){
+        const bt=document.createElement('button'); bt.className='gd-chip'; bt.style.cssText='flex:1;font-weight:800';
+        setCoin(bt, s.lvlUpBtn(next,cost)); bt.disabled=!puedeSubir;
+        lvlUpReady=puedeSubir; bt.classList.toggle('ready', lvlUpReady);   //+AG doc 40: brilla solo si HOY puedes subirla (XP + Chispas)
+        bt.onclick=subeNivel;
+        assign.appendChild(bt);
+      }
       setCoin(el('gdHint'), !haveXp ? s.gdNeedXp(xpNeed(next)-Math.round(b.xp||0))
                                : (SAVE.chispas<cost ? s.gdNeedChispas(cost) : s.gdLvlReady));
     } else el('gdHint').textContent=s.gdMaxed;
@@ -5881,26 +5907,42 @@ function openDetail(k){ applyShell(); const A=ARCHS[k], b=owned(k), q=QUAL[A.q],
     prim.classList.remove('wico');   //+AG el boton es el MISMO nodo en los tres estados: si venia de "Equipada" arrastraria su flex
     setCoin(prim, s.unlockBtn(A.price)); prim.disabled=SAVE.chispas<A.price; prim.onclick=()=>{ if(unlock(k,false)){ openDetail(k); renderGaraje(); } };
     ghost.style.display=''; setCoin(ghost, s.orPay(A.gemas)); ghost.disabled=SAVE.gemas<A.gemas; ghost.onclick=()=>{ if(unlock(k,true)){ openDetail(k); renderGaraje(); } };
-  } else { const idx=SAVE.balls.indexOf(b), isEq=SAVE.equipped===idx;
-    //+AG docs/60 pieza 24: el galon de "Equipada" era un ✓ (U+2713) DENTRO de la cadena traducida, o
-    //   sea un glifo del sistema multiplicado por 20 diccionarios. Ahora el diccionario solo lleva la
-    //   palabra y el galon lo dibuja este SVG, con el mismo trazo que el resto de los iconos de la casa.
-    //   `.wico` es lo que enciende el flex del boton: sin ella, el estado "Desbloquear · 1200 ✦" se
-    //   quedaria con un hueco de 7 px entre el precio y su moneda (ver la pieza 24 en el CSS).
-    if(isEq){ prim.classList.add('wico');
-      //+AG trazo 3.4 y no 2.2 como los iconos de seccion: aqui el galon convive con una palabra de peso
-      //   900, y a 1em (16 px reales) un 2.2 sobre viewBox de 24 se queda en 1,5 px — al lado de unos
-      //   palos de letra de 2,5 px parecia dibujado por otra mano. Se vio en la captura de la ficha.
-      prim.innerHTML=ckSvg(3.4)+'<span></span>';
-      prim.lastChild.textContent=S().equippedBtn; }
-    else { prim.classList.remove('wico'); prim.textContent=S().equipBtn; }
-    prim.disabled=isEq;
-    //+AG EQUIPAR CIERRA LA FICHA (VB Jaime 26-jul). Antes se re-abria la ficha con el boton ya apagado
-    //   ("✓ Equipada") y el jugador se quedaba parado: habia hecho lo que venia a hacer y la pantalla no
-    //   se movia, con la unica salida en la ✕ de arriba a la derecha, que no mira nadie. Ahora se comporta
-    //   como elegir personaje en Brawl Stars: eliges y te devuelve al Garaje, donde YA VES tu bola puesta.
-    //   El toast confirma; renderGaraje() antes de cerrar para que al aterrizar la marca ya este pintada.
-    prim.onclick=()=>{ SAVE.equipped=idx; persist(); renderGaraje(); closeDetail(); toast(S().tEquipped); }; ghost.style.display='none'; }
+  } else { const idx=idxB;
+    //+AG ⚠⚠ 3-ago · EL BOTON GRANDE YA NO ES UN CARTEL. Lo cazo supercell-ux midiendo la ficha de la
+    //   bola equipada a nivel 1 sin XP —o sea TU bola de siempre, el estado mas comun que existe—:
+    //     · #gdPrim, 280x50 px, dorado, el elemento con mas peso de la pantalla: decia "Equipada",
+    //       estaba `disabled` y no hacia nada.
+    //     · #gdAssign ("Subir a Nv. 2"), 137x44 px, la UNICA accion real, y ademas apagada por falta
+    //       de XP.
+    //   Resultado: la pantalla donde se decide que bola llevas y en que gastas las monedas no tenia
+    //   ni un boton que hiciera algo, y el que mas brillaba era el que menos hacia.
+    //   AHORA: el estado se va a un galon junto al nombre (que es lo que ya hace la tarjeta del
+    //   Garaje, .g-eq) y el boton grande ensena SIEMPRE lo siguiente que puedes hacer con esta bola:
+    //   equiparla si no lo esta, subirla de nivel si ya lo esta, y desaparecer si esta al maximo
+    //   (mejor sin boton que con uno fingido).
+    const eqTag=el('gdEqTag'); eqTag.hidden=!isEq; if(isEq) eqTag.textContent=S().equippedTag;
+    prim.classList.remove('wico');   //+AG el boton es el MISMO nodo en todos los estados: sin esto arrastraria el flex del anterior
+    prim.style.display='';
+    if(isEq && maxed){
+      //+AG al maximo y ya puesta no queda NADA que hacer con esta bola: el boton se va del todo. Un
+      //   boton apagado que no lleva a ningun sitio ocupa el mismo hueco y encima promete algo.
+      prim.style.display='none'; prim.onclick=null;
+    } else if(isEq){
+      //+AG ya la llevas: lo siguiente es SUBIRLA. El mismo texto y el mismo precio que tenia el chip.
+      setCoin(prim, s.lvlUpBtn(next,cost)); prim.disabled=!puedeSubir; prim.onclick=subeNivel;
+      //+AG ⚠ AQUI NO se toca `lvlUpReady`. Esa bandera significa "el brillo ya lo tiene el CHIP", y
+      //   cuando la bola esta equipada el chip NO EXISTE: la accion se la ha quedado este boton. Si se
+      //   marcara, la linea de abajo le quitaria el brillo justo al unico elemento pulsable que queda.
+    } else {
+      prim.textContent=S().equipBtn; prim.disabled=false;
+      //+AG EQUIPAR CIERRA LA FICHA (VB Jaime 26-jul). Antes se re-abria la ficha con el boton ya apagado
+      //   ("✓ Equipada") y el jugador se quedaba parado: habia hecho lo que venia a hacer y la pantalla no
+      //   se movia, con la unica salida en la ✕ de arriba a la derecha, que no mira nadie. Ahora se comporta
+      //   como elegir personaje en Brawl Stars: eliges y te devuelve al Garaje, donde YA VES tu bola puesta.
+      //   El toast confirma; renderGaraje() antes de cerrar para que al aterrizar la marca ya este pintada.
+      prim.onclick=()=>{ SAVE.equipped=idx; persist(); renderGaraje(); closeDetail(); toast(S().tEquipped); };
+    }
+    ghost.style.display='none'; }
   //+AG doc 40: el boton grande brilla solo si se puede pulsar Y no hay ya otra cosa brillando en la ficha
   //   (si la bola esta lista para subir de nivel, ESA es la accion del momento).
   prim.classList.toggle('ready', !prim.disabled && !lvlUpReady);
