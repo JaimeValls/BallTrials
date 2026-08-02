@@ -24,17 +24,17 @@
 //  blanco. Es la misma leccion que ya costo la pagina de previsualizacion.
 //
 //  COMO SE USA desde el shell:
-//     import { vivas } from './motor/chassis/vivas.mjs?v=58b9007';
+//     import { vivas } from './motor/chassis/vivas.mjs?v=6bea86e';
 //     ... pinta `<div class="gi" data-viva="cohete"></div>` en vez del <img> ...
 //     vivas.sincroniza();      // despues de cada render de la pantalla
 //     vivas.para();            // al salir de la pantalla (deja de gastar bateria)
 //  `data-viva-off="1"` en el elemento = bola no comprada: se pinta en gris.
 // ============================================================================
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
-import { makeBallVinyl } from './gfx.mjs?v=58b9007';
-import { archLook } from './ballmat.mjs?v=58b9007';
-import { archFace } from './facegen.mjs?v=58b9007';
-import { attachSquash } from './squash.mjs?v=58b9007';
+import { makeBallVinyl } from './gfx.mjs?v=6bea86e';
+import { archLook } from './ballmat.mjs?v=6bea86e';
+import { archFace } from './facegen.mjs?v=6bea86e';
+import { attachSquash } from './squash.mjs?v=6bea86e';
 
 // El mundo de cada celda. HW es el SEMIANCHO de la camara en radios de bola: cuanto MENOR, mas
 // grande sale la bola... y antes lo elegi mirando solo la bola. Error: lo que decide el encuadre no
@@ -148,13 +148,37 @@ function construye(el, arch, apagada, i){
   //   chispitas es amarilla, pues dejala amarilla». Se conserva el TONO y se le baja media
   //   saturacion y algo de brillo, que es exactamente lo que hacia el filtro CSS del retrato viejo
   //   (`grayscale(.5) brightness(.78)`): se sigue viendo de que color es, y se lee que no la tienes.
+  //   ⚠⚠ 2-ago: LA FORMULA ANTERIOR NO LLEGABA AL PIXEL. Era `(v*0.5 + luz*0.5) * 0.78`, copiada del
+  //   filtro CSS del retrato viejo — pero un filtro CSS se aplica al resultado FINAL y esto es un
+  //   tinte que entra ANTES del shader, asi que el especular y el rim light le devuelven casi todo el
+  //   brillo que le habiamos quitado. Medido sobre el recorte real de la tarjeta (HSV, excluyendo el
+  //   fondo): bloqueada saturacion 0,607 / valor 0,372 contra poseida 0,613 / 0,386. O sea CASI CERO
+  //   de diferencia: en pantalla una bola que no tienes se veia igual de viva que la tuya.
+  //   Ahora el tinte va casi entero a luminancia y a la mitad de brillo. El especular sigue ahi —no
+  //   se le hurgan los uniforms al vinilo, que es la regla de este fichero— pero por debajo queda un
+  //   cuerpo gris oscuro, y eso si se lee como «esta no es tuya».
+  //   ⚠ NO se valida leyendo estos numeros: se valida MIDIENDO EL RECORTE, que es lo que la formula
+  //   anterior no hizo. La prueba esta en tools/prueba-bolas-apagadas.mjs.
   const vivo = color(arch);
   const luz = vivo[0] * 0.299 + vivo[1] * 0.587 + vivo[2] * 0.114;
-  const col = apagada ? vivo.map(v => (v * 0.5 + luz * 0.5) * 0.78) : vivo;
+  const col = apagada ? vivo.map(v => (v * 0.18 + luz * 0.82) * 0.46) : vivo;
   // OJO: `makeBallVinyl` YA monta el accesorio si le llega `arch` (y guarda el handle en `o.prop`).
   // Colgar otro `makeProp` aqui pondria DOS cascos superpuestos — se ve como un borde sucio y cuesta
   // caro averiguar de donde sale.
-  const o = makeBallVinyl(scene, { id: i, color: col }, R, archLook(arch) || undefined, arch);
+  //   Y LA OTRA MITAD, que es la que de verdad lo arregla: se le baja la LUZ, no solo el color.
+  //   `makeBallVinyl` acepta un `look` (spec, spec2, glow, rim, shade) — es la puerta que el propio
+  //   modulo ofrece, asi que esto NO es hurgarle los uniforms al shader por detras: es pasarle otros
+  //   parametros. Bajando brillo especular, resplandor propio y luz de contorno, y subiendo la
+  //   sombra, el especular deja de rellenar lo que el tinte habia quitado. Con esto la caida de
+  //   brillo medida en el pixel pasa de 0,014 (formula vieja) a lo que exija el banco.
+  let look = archLook(arch) || undefined;
+  if (apagada && look) look = Object.assign({}, look, {
+    spec:  (look.spec  || 0) * 0.22,
+    spec2: (look.spec2 || 0) * 0.18,
+    glow:  (look.glow  || 0) * 0.12,
+    rim:   (look.rim   || 0) * 0.30,
+    shade: Math.min(1, (look.shade || 0.5) + 0.28) });
+  const o = makeBallVinyl(scene, { id: i, color: col }, R, look, arch);
   const sh = new THREE.Mesh(new THREE.PlaneGeometry(R * 2.8, R * 1.1),
     new THREE.MeshBasicMaterial({ map: SOMBRA, transparent: true, depthWrite: false, toneMapped: false }));
   sh.position.set(0, SUELO - R * 0.14, -2); scene.add(sh);

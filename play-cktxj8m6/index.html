@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-02 58b9007"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-02 6bea86e"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG ICONO EN LA PANTALLA DE INICIO (docs/40 §6). Jaime: "la gente esta acostumbrada a clicar en el
@@ -447,6 +447,12 @@
   .g-cname{ font-weight:800; font-size:var(--fs-3); }
   .g-qtag{ font-size:var(--fs-2); font-weight:800; letter-spacing:.09em; text-transform:uppercase; color:var(--qc,#9aa4b8); }
   .g-eq{ position:absolute; top:8px; right:8px; background:var(--gold2); color:#3a2400; font-size:var(--fs-1); font-weight:900; padding:2px 8px; border-radius:999px; letter-spacing:.05em; }
+  /*+AG el candado va ARRIBA A LA DERECHA, el mismo sitio y el mismo dibujo que en el riel de la
+     portada. Es diminuto (22 px) a proposito: tiene que decir "no es tuya" sin taparte el personaje,
+     que es lo que estas mirando para decidir si lo compras. z-index 21 porque el lienzo de las bolas
+     vivas va a 20: por debajo, la bola le pasaria por encima. */
+  .g-lock{ position:absolute; top:7px; right:7px; width:22px; height:22px; object-fit:contain; z-index:21;
+    filter:drop-shadow(0 2px 3px #000a); pointer-events:none; }
   .g-price{ display:flex; gap:9px; font-size:var(--fs-3); font-weight:800; font-variant-numeric:tabular-nums; margin-top:2px; }
   .g-price .pc{ display:flex; align-items:center; gap:3px; } .g-price i{ font-style:normal; color:var(--gold2); } .g-price .gm{ color:var(--cyan); }
   .g-dot{ position:absolute; top:-5px; left:-5px; min-width:20px; height:20px; padding:0 5px; border-radius:999px; background:var(--red); color:#fff; font-size:var(--fs-2); font-weight:900; display:grid; place-items:center; box-shadow:0 2px 6px #0008; }
@@ -462,7 +468,14 @@
   .tbadge{ position:absolute; z-index:3; top:1px; right:calc(50% - 20px); min-width:17px; height:17px; padding:0 4px;
     border-radius:999px; background:linear-gradient(#ff5b6e,var(--red)); color:#fff; font-size:var(--fs-2); font-weight:900;
     display:grid; place-items:center; box-shadow:0 2px 6px #e0293d99; border:1.5px solid #1a0d45; font-variant-numeric:tabular-nums; }
-  #gDetail{ position:absolute; inset:0; background:#06050eea; backdrop-filter:blur(3px); display:none; flex-direction:column; align-items:center; justify-content:center; padding:22px; gap:12px; z-index:45; }
+  /*+AG ⚠ 2-ago · `safe center` Y NO `center` A SECAS. Con `center` puro, cuando el contenido no cabe
+     el sobrante se reparte por ARRIBA y por ABAJO — y el de arriba queda FUERA del area que el scroll
+     puede alcanzar: no es "hay que deslizar", es contenido perdido sin remedio. Medido en la ficha a
+     360x540: se comia la linea de rareza y parte del nombre, y bajar el scroll lo empeoraba (de 47 a
+     107 px cortados). `safe` dice: cuando no quepa, ancla arriba y deja de centrar.
+     ⚠ Y POR QUE NADIE LO VIO: `__fitCheck` recorre las PANTALLAS, y esto es un modal que se abre
+     ENCIMA. Todos los "cabe bien" del Garaje eran ciertos y no decian nada de la ficha. */
+  #gDetail{ position:absolute; inset:0; background:#06050eea; backdrop-filter:blur(3px); display:none; flex-direction:column; align-items:center; justify-content:safe center; overflow-y:auto; padding:22px; gap:12px; z-index:45; }
   #gDetail.on{ display:flex; }
   .gd-close{ position:absolute; top:calc(12px + env(safe-area-inset-top)); right:15px; width:38px; height:38px; border-radius:50%; background:var(--plate-b); border:1px solid var(--line); color:#fff; font-size:var(--fs-5); cursor:pointer; }
   /*+AG doc 41: el retrato del heroe. Entra cayendo y rebotando una vez (400 ms) y luego respira:
@@ -495,7 +508,17 @@
     sobre una carta ya oscura, y eso es literalmente el «todo gris es un poco feo» que vio Jaime. En
     las capturas reales de Brawl Stars y Clash Royale (vida en combate, Record Level, progreso de
     carta) el carril es casi negro SIEMPRE: se hunde, no se aclara. */
-  .gd-stats{ width:100%; display:flex; flex-direction:column; gap:6px; margin:2px 0 2px; }
+  /*+AG ⚠ 2-ago · DOS COLUMNAS, no seis filas. Las seis barras ocupaban 228 px —el 38% de la ficha—
+     contra 150 px de la BOLA, que es lo que estas comprando: la lista de datos pesaba mas que el
+     personaje. Y ese alto era justo el que hacia que la ficha no cupiera: a 360x540 se comia la
+     rareza y parte del nombre, y no se recuperaba deslizando.
+     En dos columnas el bloque baja a ~120 px. Se mantienen las seis (Jaime las pidio expresamente el
+     31-jul para sustituir un hexagono ilegible): lo que cambia es como se reparten, no cuantas hay.
+     ⚠ A partir de 380 px de ancho vuelve a UNA columna: en un movil ancho caben de sobra y en una
+     sola columna la barra es mas larga, o sea que la diferencia entre un 3 y un 8 se lee mejor. Dos
+     columnas es la version APRETADA, no la preferida. */
+  .gd-stats{ width:100%; display:grid; grid-template-columns:1fr 1fr; gap:6px 13px; margin:2px 0 2px; }
+  @media (min-width:380px){ .gd-stats{ grid-template-columns:1fr; } }
   .gd-st{ display:grid; grid-template-columns:16px 1fr 30px; align-items:center; gap:8px; }
   .gd-st .ic{ width:18px; height:18px; display:block; object-fit:contain; }
   .gd-st .nm{ font-size:var(--fs-2); font-weight:800; letter-spacing:.02em; color:#e9e6ff; text-transform:none;
@@ -531,7 +554,13 @@
   .gd-xpfill{ height:100%; background:linear-gradient(90deg,var(--cyan),#7ef0ff); transition:width .4s; }
   .gd-assign{ display:flex; flex-wrap:wrap; gap:6px; justify-content:center; }
   .gd-chip{ border:1px solid var(--cyan); background:#18c7d61c; color:#bff4fb; font-family:inherit; font-weight:800; font-size:var(--fs-3); border-radius:10px; padding:6px 9px; cursor:pointer; }
-  .gd-chip:disabled{ opacity:.35; border-color:var(--line); color:var(--muted); cursor:default; background:var(--plate-a); }
+  /*+AG ⚠ 2-ago · APAGADO CON `filter`, NO CON `opacity`. La moneda dorada de este boton salia MARRON
+     SUCIA: `opacity:.35` no apaga el oro, lo MEZCLA con el violeta del fondo. Y se ve en el estado mas
+     comun que hay —bola a nivel 1 sin XP, o sea la primera vez que cualquiera abre una bola—.
+     Es la unica pastilla del juego que se habia quedado con la formula vieja: `.gd-btn.prim:disabled`,
+     `.sh-buy:disabled` y `.sfmt:disabled` ya usan grayscale + brightness, que da un gris limpio en vez
+     de un color mezclado contra lo que haya detras. */
+  .gd-chip:disabled{ filter:grayscale(.6) brightness(.8); border-color:var(--line); color:var(--muted); cursor:default; background:var(--plate-a); }
   .gd-hint{ font-size:var(--fs-3); color:#8fe0a8; font-weight:700; text-align:center; min-height:15px; }
   /*+AG REJILLA, NO DOS FILAS SUELTAS. Salio primero con la flecha metida en un div de fila junto al
      boton dorado y el "o pagar" suelto debajo: la flecha le robaba 66 px de ancho a la fila de arriba
@@ -3491,7 +3520,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=58b9007"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=6bea86e"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -5774,7 +5803,15 @@ function renderGaraje(){ el('gChispas').textContent=SAVE.chispas; el('gGemas').t
     //+AG un solo trozo de precio para las doce: Monedas y Gemas, siempre los dos. El hito de copas de
     //   las Epicas ya no se pinta aqui (ocupaba el sitio del precio y ahora no es la unica puerta):
     //   vive en la pista de la ficha, que es donde se lee "ademas te la regalan al llegar a N copas".
-    } else h+=`<div class="g-price"><span class="pc"><img class="cico sm" src="arte/ui/moneda-chispa.webp?v=2" alt="">${nfmt(A.price)}</span><span class="pc gm"><img class="cico sm" src="arte/ui/moneda-gema.webp?v=2" alt="">${nfmt(A.gemas)}</span></div>`;
+    //+AG ⚠ 2-ago · EL CANDADO. Una bola que no tienes se veia IGUAL DE VIVA que la tuya: la unica
+    //   diferencia era que la linea de abajo ponia un precio en vez de tu nivel, con la misma letra y
+    //   el mismo tamaño. El apagado por color existe (`data-viva-off`) pero no llega al pixel —el
+    //   cuerpo de la bola es una textura PINTADA, asi que ni el tinte ni la luz la mueven; medido en
+    //   tools/prueba-bolas-apagadas.mjs, la caida de brillo real es 0,04 sobre el 0,10 que hace falta.
+    //   Asi que se usa el lenguaje que el juego YA tiene para "esto no es tuyo todavia": el candado
+    //   dibujado del riel de la portada y de las cartas de modo. No es un parche: es su idioma.
+    } else h+=`<img class="g-lock" src="arte/ui/ui-candado.webp" alt="">`
+           +`<div class="g-price"><span class="pc"><img class="cico sm" src="arte/ui/moneda-chispa.webp?v=2" alt="">${nfmt(A.price)}</span><span class="pc gm"><img class="cico sm" src="arte/ui/moneda-gema.webp?v=2" alt="">${nfmt(A.gemas)}</span></div>`;
     c.innerHTML=h; c.onclick=()=>openDetail(k); g.appendChild(c); });
   vivasSync();   //+AG las bolas vivas se remontan DESPUES de repintar: el innerHTML de arriba se llevo por delante los nodos viejos
 }
