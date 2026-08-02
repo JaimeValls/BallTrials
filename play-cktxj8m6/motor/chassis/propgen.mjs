@@ -40,7 +40,7 @@ import * as THREE from 'three';
 //   instalada. La escribe tools/partir-props.py mirando la carpeta del arte, y por eso vive ALLI y
 //   no aqui: quien fabrica esas capas es esa herramienta, asi que la lista se actualiza sola en el
 //   mismo gesto en el que se instala el arte. Ver arte/props/capas.mjs para el por que largo.
-import { CAPAS_PROP } from '../../arte/props/capas.mjs?v=66b38e7';
+import { CAPAS_PROP } from '../../arte/props/capas.mjs?v=58b9007';
 
 const TEX = 256;                 // lienzo del sprite
 const SPAN = 3.2;                // el plano mide 3.2R -> 1R = 40 px de textura
@@ -186,20 +186,33 @@ export const PROP_KEYS = Object.keys(DRAW);
 //  Los DRAW se CONSERVAN a proposito, no son codigo muerto: son el respaldo si una imagen no
 //  carga (red caida, fichero que no se copio en un despliegue). Un prop es identidad de la bola;
 //  quedarse sin el en silencio es peor que verlo dibujado.
+//+AG 2-ago-2026 · EL SELLO `?v=` TAMBIEN AQUI. Sin el, el accesorio nuevo NO LLEGA. Jaime abrio el
+//   juego en su movil y su Pinball seguia siendo las dos manchitas blancas del prop viejo, meses
+//   despues de que entrara el sombrero. Medido ese dia contra produccion, pidiendo el MISMO fichero
+//   de dos maneras desde la propia pagina:
+//       fetch('arte/props/prop-pinball.webp')  -> 9494 bytes, last-modified 28-jul, age=352528 (4 dias)
+//       new Image().src = (lo mismo)           -> el sombrero, 512x512, marron de y=31 a y=193
+//   O sea: la CDN de Hostinger guarda DOS copias del mismo fichero y sirve la vieja segun como se
+//   pida. Con `max-age=604800` eso dura una semana, y el navegador que ya la tenga, otra mas.
+//   Es el mismo agujero que documentan las monedas en juego.html (busca "EL `?v=N` DE LAS MONEDAS"),
+//   solo que alli se tapo y aqui no, porque los props no se piden desde el HTML sino desde aqui.
+//   REGLA: si sustituyes el .webp de un prop YA DESPLEGADO, sube este numero. Uno solo vale para las
+//   tres capas — se despliegan juntas y no merece la pena llevarles la cuenta por separado.
+const PROP_V = '?v=3';
 //
 //  La ruta se resuelve contra import.meta.url y no contra la pagina: los tres modos viven en
 //  motor/<modo>/index.html pero la pagina de previsualizacion cuelga de otro sitio, y con una
 //  ruta relativa a la pagina cada una necesitaria la suya.
-const ART = k => new URL(`../../arte/props/prop-${k}.webp`, import.meta.url).href;
+const ART = k => new URL(`../../arte/props/prop-${k}.webp${PROP_V}`, import.meta.url).href;
 //+AG doc 55: la capa que se MUEVE, si la hay. La escribe tools/partir-props.py separando las islas
 //   del alfa de la pieza entregada; no es arte nuevo, es la misma pieza partida en dos.
-const ART_FX = k => new URL(`../../arte/props/prop-${k}-fx.webp`, import.meta.url).href;
+const ART_FX = k => new URL(`../../arte/props/prop-${k}-fx.webp${PROP_V}`, import.meta.url).href;
 //+AG doc 55 capa 2: lo que se ENCIENDE. Es la misma pieza con todo en negro menos lo caliente, y
 //   se pinta como un plano ADITIVO encima: donde la mascara es negra no suma nada, donde es clara
 //   ilumina. Se hace con un plano y no con el shader del cuerpo a proposito — lo que brilla es el
 //   ACCESORIO (las estrellas del sombrero del Mago), no la bola, y el cuerpo lleva el color del
 //   equipo, que no se puede tocar.
-const ART_EM = k => new URL(`../../arte/props/prop-${k}-em.webp`, import.meta.url).href;
+const ART_EM = k => new URL(`../../arte/props/prop-${k}-em.webp${PROP_V}`, import.meta.url).href;
 
 const cache = new Map();
 function dibujada(arch){                 // el respaldo: la version de canvas de siempre
@@ -399,7 +412,7 @@ function plano(tex, R, p, z, orden){
 // NO se interpola entre fotogramas a proposito: la electricidad SALTA, no se funde. Y el fotograma
 // no va en orden — se elige con el mismo hash determinista que `chispeo`, o al cuarto ciclo el ojo
 // caza el bucle. `hz` es a que ritmo cambia; `salto` cuanto se apaga entre chispazo y chispazo.
-const ART_AURA = k => new URL(`../../arte/props/aura-${k}.webp`, import.meta.url).href;
+const ART_AURA = k => new URL(`../../arte/props/aura-${k}.webp${PROP_V}`, import.meta.url).href;
 const AURA = {
   chispa: { cols: 3, filas: 2, n: 6, hz: 15, k: 1.0, apagones: 0.22 },
 };
