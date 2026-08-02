@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-02 9b277f6"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-02 00946e1"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -2404,11 +2404,31 @@
   /*+AG los dos botones de la hoja de confirmar. El que confirma manda por color, el que cancela se
      queda en placa: el orden es cancelar-primero porque el pulgar derecho cae en el de la derecha y
      ese tiene que ser el deliberado, no el accidental. */
+  /*+AG el campo de la hoja: mismo material que los inputs de Perfil > Cuenta (marino, canto, 11 px de
+     radio), para que pedir texto se vea igual en todo el juego. `hidden` necesita su regla porque el
+     input es `display:block` por defecto y la del navegador pierde -- la misma trampa del bloque 23b. */
+  .ask-in{ width:100%; margin-top:11px; background:#101a2c; border:2px solid #2b3d5c; border-radius:11px;
+    color:#eaf1ff; font:700 15px/1 inherit; padding:11px 10px; min-height:46px; }
+  .ask-in:focus{ outline:none; border-color:#5b7bc4; }
+  .ask-in[hidden]{ display:none; }
   .ask-btns{ display:flex; gap:9px; margin-top:13px; }
   .ask-btns .pr-inv{ flex:1; min-height:46px; font-size:var(--fs-3); }
+  /*+AG DOS NIVELES, y el rojo se gana. El rojo es de lo que NO tiene vuelta atras: cerrar sesion,
+     borrar los datos, machacar la partida con un codigo importado. Si tambien pintara de rojo
+     "Cambiar" el nombre, el color dejaria de avisar de nada — que es exactamente lo que hacia mi
+     primera version, y se vio en la captura. Lo benigno lleva el amarillo del CTA, que es el idioma
+     de "esto es lo que vienes a hacer". No pisa la regla de un solo CTA dominante por pantalla
+     (canon 6 de docs/56): la hoja tapa la pantalla entera con su velo, es su propia superficie. */
   .ask-si{ background:linear-gradient(#ff8a6b,#e0503a); border-color:transparent; color:#fff;
     box-shadow:0 3px 0 #8c2b1c, inset 0 1px 0 #ffffff3d; }
   .ask-si:active{ box-shadow:0 1px 0 #8c2b1c, inset 0 1px 0 #ffffff3d; }
+  .ask-si.suave{ background:linear-gradient(#ffe14d 12%,#ffb42a);
+    box-shadow:0 3px 0 #b45a10, inset 0 2px 0 #ffffff8c;
+    color:#fff; -webkit-text-stroke:2.2px #241a3f; paint-order:stroke fill; }
+  .ask-si.suave:active{ box-shadow:0 1px 0 #b45a10, inset 0 2px 0 #ffffff8c; }
+  /*+AG la hoja de "aqui tienes tu codigo" no pregunta nada: no hay un si y un no, hay un Cerrar.
+     Dos botones que hacen lo mismo obligan al jugador a buscarle la diferencia a algo que no la tiene. */
+  .ask-btns.solo-si .pr-inv:not(.ask-si){ display:none; }
 
   /* ══ 24 · LA ✕ Y EL ✓, DIBUJADOS · docs/60 canon (los iconos se dibujan) ═══════════════════════
      Quedaban cinco cierres con la ✕ del sistema (U+2715) y el boton de "Equipada" con un ✓. Son
@@ -2762,6 +2782,10 @@
       <button class="sclose" id="askClose" data-tt="close" title="Cerrar"><svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6.8 6.8 L17.2 17.2"/><path d="M17.2 6.8 L6.8 17.2"/></g></svg></button>
     </div>
     <div class="infotx" id="askTx" data-fit="scroll"></div>
+    <!--+AG el campo solo aparece cuando la hoja PIDE texto (pide()); con ask() va oculto y la hoja es
+         exactamente la de antes. Un solo componente para las dos preguntas, que si fueran dos hojas
+         acabarian separandose. -->
+    <input id="askIn" class="ask-in" hidden autocomplete="off" spellcheck="false">
     <div class="ask-btns"><button class="pr-inv" id="askNo"></button><button class="pr-inv ask-si" id="askSi"></button></div>
   </div>
 </div>
@@ -3316,7 +3340,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=9b277f6"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=00946e1"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -6321,17 +6345,29 @@ function loadProfile(str){
   Object.keys(SAVE).forEach(k=>delete SAVE[k]); Object.assign(SAVE, obj); persist(); return true;
 }
 //+AG doc 38 Fase 3: acciones de Cuenta (nombre editable, export/import de progreso, login placeholder honesto)
-function acctEditName(){ const s=S(), cur=(SAVE.profile&&SAVE.profile.name)||'';
-  const v=prompt(s.acctNamePrompt, cur); if(v===null) return; const nn=v.trim().slice(0,16); if(!nn) return;
+async function acctEditName(){ const s=S(), cur=(SAVE.profile&&SAVE.profile.name)||'';
+  //+AG 2-ago: era `prompt()`. El campo arranca con el nombre actual SELECCIONADO, que es lo que hacia
+  //   el del navegador: quien viene a cambiarlo escribe encima sin tener que borrar antes.
+  const v=await pide(s.acctName, s.acctNamePrompt, cur, s.acctNameEdit, {selecciona:true, suave:true});
+  if(v===null) return; const nn=v.trim().slice(0,16); if(!nn) return;
   if(!SAVE.profile) SAVE.profile={}; SAVE.profile.name=nn; persist(); toast(s.tNameSet);
   if(el('settings').classList.contains('on')) buildSettings(); renderHome(); }
+//+AG el respaldo de exportar NO pide nada: ENSEÑA el codigo cuando el portapapeles falla, ya
+//   seleccionado, para copiarlo a mano. Por eso su boton es "Cerrar" y no "Copiar": copiar es
+//   justo lo que acaba de no funcionar, y un boton que promete lo que fallo hace mas daño que
+//   ninguno. Lo que gana frente al `prompt()` es no sacar al jugador del juego.
 function acctExport(){ const s=S(), code=serializeProfile();
-  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(code).then(()=>toast(s.tCopied), ()=>prompt(s.acctExportSub, code)); }
-  else prompt(s.acctExportSub, code); }
-async function acctImport(){ const s=S(), code=prompt(s.acctImportPrompt); if(!code) return;
-  //+AG 2-ago: era `confirm()`. ⚠ El `prompt()` de la linea de arriba SIGUE SIENDO del navegador y esta
-  //   apuntado como deuda: pedir texto necesita una hoja con campo, que no existe todavia (ask() solo
-  //   contesta si/no). Se cambia lo que se puede cambiar hoy, no se deja el confirm por compañia.
+  const aMano=()=>pide(s.acctExport, s.acctExportSub, code, s.close, {selecciona:true, suave:true, sinCancelar:true});
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(code).then(()=>toast(s.tCopied), aMano); }
+  else aMano(); }
+async function acctImport(){ const s=S();
+  //+AG 2-ago: eran un `prompt()` y un `confirm()` del navegador, uno detras de otro.
+  //+AG esta primera solo RECOGE el codigo, asi que va en amarillo; la que machaca la partida es la
+  //   segunda, y esa es la que se lleva el rojo.
+  const code=await pide(s.acctImport, s.acctImportPrompt, '', s.acctImportBtn, {suave:true}); if(!code) return;
+  //+AG la pausa, por lo mismo que en wipeLocalData(): la segunda hoja pone su boton donde estaba el
+  //   de la primera, y aqui lo que se confirma es machacar la partida de este movil.
+  await new Promise(r=>setTimeout(r, 340));
   if(!await ask(s.acctImport, s.acctImportConfirm, s.acctImportBtn)) return;
   if(loadProfile(code)){ toast(s.tImported); setTimeout(()=>location.reload(), 500); } else toast(s.tImportBad); }
 //+AG filas del grupo Cuenta (Ajustes). Identidad local + export/import + login en gris candado (cero login falso).
@@ -6498,19 +6534,46 @@ function closeInfo(){ const w=el('infoSheet'); w.classList.remove('on'); w.setAt
 //     if(!confirm(txt)) return;   ->   if(!await ask(tit, txt, sí)) return;
 //   ⚠ SE CIERRA SIEMPRE RESOLVIENDO. Si el velo o la ✕ cerraran la hoja sin resolver, quien la
 //     abrio se quedaria esperando para siempre con su boton deshabilitado: cerrar es decir que NO.
+//   Y la hermana pide(), que ademas RECOGE TEXTO, para los `prompt()` (mismo dialogo gris del sistema,
+//   misma especie). Comparten hoja a proposito: dos hojas casi iguales acaban separandose.
+//     const v = await pide(tit, txt, valorInicial, sí);   // devuelve la cadena, o null si cancela
 let askResolve=null;
-function ask(tit, cuerpo, si){
+function hojaPregunta(tit, cuerpo, si, campo, o){
   el('askTit').textContent = tit || '';
   el('askTx').innerHTML = coinify(cuerpo || '');
   el('askNo').textContent = S().cancel;
-  el('askSi').textContent = si || S().cancel;
+  const bs=el('askSi');
+  bs.textContent = si || S().cancel;
+  //+AG el rojo solo para lo que no tiene vuelta atras; ver el bloque del CSS.
+  bs.classList.toggle('suave', !!(o && o.suave));
+  el('askSi').parentNode.classList.toggle('solo-si', !!(o && o.sinCancelar));
+  const inp=el('askIn');
+  inp.hidden = !campo;
+  if(campo){
+    inp.value = campo.valor || '';
+    //+AG el foco va DESPUES de la animacion (.34s). Enfocar de entrada levanta el teclado del movil
+    //   mientras la hoja todavia esta subiendo, y las dos cosas se pelean por el mismo espacio. El
+    //   area visible ya la reajusta fitViewport() por visualViewport, asi que la hoja no se tapa.
+    setTimeout(()=>{ try{ inp.focus(); if(campo.selecciona) inp.select(); }catch(e){} }, 380);
+  }
   const w=el('askSheet'); w.classList.add('on'); w.setAttribute('aria-hidden','false');
   return new Promise(r=>{ askResolve=r; });
 }
-function askCierra(v){ const w=el('askSheet'); w.classList.remove('on'); w.setAttribute('aria-hidden','true');
-  const r=askResolve; askResolve=null; if(r) r(!!v); }
+function ask(tit, cuerpo, si, o){ return hojaPregunta(tit, cuerpo, si, null, o).then(v => v !== false); }
+function pide(tit, cuerpo, valor, si, o){
+  return hojaPregunta(tit, cuerpo, si, { valor, selecciona: !!(o && o.selecciona) }, o)
+    .then(v => v === false ? null : String(v)); }
+function askCierra(ok){ const w=el('askSheet'); w.classList.remove('on'); w.setAttribute('aria-hidden','true');
+  const inp=el('askIn');
+  //+AG con campo, decir que SI es devolver lo escrito; sin campo, devolver true. Cancelar es false
+  //   SIEMPRE, y por eso pide() distingue "he cancelado" (null) de "he aceptado vacio" ('').
+  const val = ok ? (inp.hidden ? true : inp.value) : false;
+  const r=askResolve; askResolve=null; if(r) r(val); }
 el('askBack').onclick=()=>askCierra(false); el('askClose').onclick=()=>askCierra(false);
 el('askNo').onclick=()=>askCierra(false);   el('askSi').onclick=()=>askCierra(true);
+//+AG Enter confirma, que es lo que hacia el prompt del navegador y lo que espera cualquiera que
+//   acabe de escribir. Sin esto habria que escribir y ADEMAS buscar el boton con el teclado encima.
+el('askIn').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); askCierra(true); } });
 el('infoBack').onclick=closeInfo; el('infoClose').onclick=closeInfo;
 //+AG delegado y no un onclick por boton: las (i) de Temporada y Perfil viven en HTML estatico, pero
 //   nada impide que mañana alguna se pinte desde JS. Con el delegado, poner una (i) nueva es escribir
