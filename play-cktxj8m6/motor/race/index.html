@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-02 0ffba31">
+<meta name="bt-build" content="2026-08-02 3313508">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>YouBall · La Gran Carrera (WebGL)</title>
 <style>
@@ -221,7 +221,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=0ffba31"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=3313508"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -512,7 +512,7 @@ function buildMapMeshes(){
 function buildSim(s){
   sim=new Sim(s, indOpts);   //+AG indOpts=null → torneo (el constructor coacciona a {}); {individual:true,n:8} → individual
   emo=new EmoBook(sim.balls.length, s);
-  px=sim.balls.map(b=>b.x); py=sim.balls.map(b=>b.y); prevCam=sim.cam; prevScale=sim.cam_scale; prevCamX=sim.cam_x;
+  px=sim.balls.map(b=>b.x); py=sim.balls.map(b=>b.y); prevCam=sim.cam; prevScale=sim.cam_scale; prevCamX=sim.cam_x||0;
   lastOv=sim.balls.map(()=>-999);
   //+AG snapshots de aspas/plats para interpolar + reset de estado de agencia por ronda
   prevAspaU=sim.aspas.map(a=>({ux:a.ux,uy:a.uy})); prevPlatX=sim.plats.map(p=>p.x);
@@ -574,7 +574,7 @@ function react(ev){
 // La sim NO cambia (mismas seeds/casting/QA/audio); el render muestrea entre el estado previo y el actual.
 function stepOnce(){
   for(let i=0;i<sim.balls.length;i++){ const b=sim.balls[i]; px[i]=b.x; py[i]=b.y; }
-  prevCam=sim.cam; prevScale=sim.cam_scale; prevCamX=sim.cam_x;
+  prevCam=sim.cam; prevScale=sim.cam_scale; prevCamX=sim.cam_x||0;
   //+AG snapshot de aspas (orientacion) y plataformas (x) para interpolar a 60fps (mismo patron px/py)
   for(let i=0;i<sim.aspas.length;i++){ prevAspaU[i].ux=sim.aspas[i].ux; prevAspaU[i].uy=sim.aspas[i].uy; }
   for(let i=0;i<sim.plats.length;i++) prevPlatX[i]=sim.plats[i].x;
@@ -801,9 +801,14 @@ function updatePanels(){
 //   depende del ASPECTO de la columna (el mismo plano del héroe encuadra 3.7u de ancho en un móvil y 7 en
 //   escritorio): así el paneo se acerca al héroe todo lo que puede sin enseñar nunca el otro lado del muro.
 //   Fuera del cierre individual sim.cam_x=0 → devuelve 0 = la cámara de siempre, sin tocar un pixel.
+//   El `||0` NO es paranoia de estilo: sin el, un sim.js viejo servido por la cache (cam_x=undefined) mete
+//   NaN en cam.position.x y NO SE PINTA NADA — lienzo NEGRO con el HUD encima, que es justo como salio
+//   produccion el 2-ago. Y la primera prueba de desajuste lo dio por bueno porque solo miraba si habia
+//   errores en consola: no los hay, la pantalla simplemente se queda vacia. Se mide pintando.
 function camXAt(a){
   const cs=prevScale+(sim.cam_scale-prevScale)*a, lim=Math.max(0, XH-(cs/2)*(colW/colH));
-  return Math.max(-lim, Math.min(lim, prevCamX+(sim.cam_x-prevCamX)*a));
+  const p=prevCamX||0, c=sim.cam_x||0;
+  return Math.max(-lim, Math.min(lim, p+(c-p)*a));
 }
 function frameCamera(dt, a=1){ shake=Math.max(0,shake-dt*1.5);
   const cy=prevCam+(sim.cam-prevCam)*a, cs=prevScale+(sim.cam_scale-prevScale)*a;   // cámara INTERPOLADA (60 fps)
