@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-02 d84768d"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-02 26588e1"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -3165,7 +3165,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=d84768d"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=26588e1"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -6746,7 +6746,16 @@ else if((FRESH || _pend) && !SAVE.onboarded && _onbParam!=='0'){
       //   que todo lo que venga despues hable con la identidad correcta. En un arranque
       //   normal (sin fragmento) esto devuelve null y no cuesta nada.
       let vuelta=null;
-      try{ vuelta = await nube.adoptarSesionDeUrl(); }catch(e){ console.warn('[nube] vuelta', e); }
+      //+AG saber ANTES de adoptar si esta URL es una vuelta del proveedor, porque adoptar limpia
+      //   la barra: si revienta por el camino ya no queda rastro de que el jugador venia de un
+      //   login y el catch se lo tragaba en silencio. Asi fue como un "p is not defined" dejo el
+      //   login de Google roto seis dias sin que nadie viera un aviso: volvias de Google, no
+      //   pasaba nada, y el menu te llamaba invitado. Un fallo de login SIEMPRE se dice.
+      let veniaDeLogin=false;
+      try{ veniaDeLogin = /(^|[#&?])(access_token|error|error_description)=/.test(location.hash+location.search); }catch(e){}
+      try{ vuelta = await nube.adoptarSesionDeUrl(); }
+      catch(e){ console.warn('[nube] vuelta', e);
+        if(veniaDeLogin) vuelta = { error:'fallo inesperado: '+((e&&e.message)||e) }; }
       if(vuelta && vuelta.error){
         //+AG el proveedor por el que se salio; 'google' de respaldo porque es el unico que
         //   existia cuando se escribio esto y una pestana vieja puede no tener la marca.

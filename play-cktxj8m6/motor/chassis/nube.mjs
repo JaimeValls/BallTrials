@@ -123,7 +123,7 @@ export function crearNube(opts = {}) {
       if (typeof captchaOpt === 'function') return (await captchaOpt()) || null;
       if (captchaOpt && typeof captchaOpt.token === 'function') return (await captchaOpt.token()) || null;
       if (captchaPorDefecto === undefined) {
-        const m = await import('./captcha.mjs?v=d84768d');
+        const m = await import('./captcha.mjs?v=26588e1');
         captchaPorDefecto = m.crearCaptcha();
       }
       return (await captchaPorDefecto.token()) || null;
@@ -418,7 +418,11 @@ export function crearNube(opts = {}) {
     limpiarUrl(l, !!errQ);
     if (err) return { error: err };
     const antes = ses && ses.user_id ? ses.user_id : null;
-    guardarSesion({ access_token: at, refresh_token: p.get('refresh_token'), expires_in: +p.get('expires_in') || 3600 });
+    //+AG frag, NO p: el renombrado de arriba (p -> frag/query) se dejo esta linea sin tocar y la
+    //   vuelta BUENA de Google reventaba con "p is not defined" justo antes de guardar la sesion.
+    //   El jugador volvia del proveedor y se quedaba de invitado, sin aviso: el fragmento ya se
+    //   habia limpiado, asi que recargar tampoco lo salvaba.
+    guardarSesion({ access_token: at, refresh_token: frag.get('refresh_token'), expires_in: +frag.get('expires_in') || 3600 });
     // Quien es de verdad lo dice el servidor, no el fragmento.
     try {
       const u = await pedir('/auth/v1/user');
