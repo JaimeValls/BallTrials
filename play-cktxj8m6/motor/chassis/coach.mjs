@@ -26,8 +26,18 @@ const CSS = `
   @keyframes coachPulse{
     0%,100%{ box-shadow:0 0 0 4px #fff, 0 0 34px 12px #ffd700d0, 0 0 70px 26px #ffd70055, 0 0 0 9999px rgba(3,7,18,.82); }
     50%    { box-shadow:0 0 0 7px #fff, 0 0 54px 20px #ffd700, 0 0 110px 44px #ffd70077, 0 0 0 9999px rgba(3,7,18,.82); } }
-  #coachHand{ position:fixed; z-index:72; pointer-events:none; display:none; font-size:46px; line-height:1;
-    transform-origin:50% 0; filter:drop-shadow(0 5px 10px #000b); animation:coachTap .85s ease-in-out infinite; }
+  /*+AG docs/60 F5 (2-ago): la mano era el emoji «dedo hacia arriba» del sistema, o sea que en cada móvil salía una mano
+     distinta (y en Windows, gris). Ahora es un dibujo de la casa: mismo idioma que los iconos de sección
+     y los premios del Pase (viewBox 24, trazo 2.2, cabos redondos, currentColor). La ALTURA de la caja y la
+     animación son las de antes (46 px, coachTap intacto): sube y crece igual y la punta del dedo cae en el
+     mismo píxel. Lo único que cambia es el ancho, que antes lo ponía el glifo (63 px) y ahora se fija a 46 —
+     la caja era más ancha que alta porque un emoji lo es, no porque hiciera falta.
+     Blanca y no dorada a propósito: se apoya justo sobre el halo DORADO del foco, y oro sobre oro no se lee.
+     El trazo lleva su propia sombra en el filtro de abajo para que también se lea sobre el botón encendido. */
+  #coachHand{ position:fixed; z-index:72; pointer-events:none; display:none; width:46px; height:46px;
+    color:#fff; transform-origin:50% 0; filter:drop-shadow(0 5px 10px #000b) drop-shadow(0 0 3px #000c);
+    animation:coachTap .85s ease-in-out infinite; }
+  #coachHand svg{ display:block; width:100%; height:100%; }
   @keyframes coachTap{
     0%,100%{ transform:translate(-50%,4px) scale(1); }
     50%    { transform:translate(-50%,-12px) scale(1.32); } }
@@ -52,6 +62,21 @@ const CSS = `
     -webkit-text-stroke:.11em #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f66; }
 `;
 
+// LA MANO, dibujada aquí y no traída de un fichero: el coach lo monta todo solo (una etiqueta de estilo y
+// cuatro nodos) y así sigue siendo UNA importación para los tres motores, sin una imagen que se pueda quedar
+// en la caché vieja mientras el módulo ya es nuevo.
+// Anatomía, de arriba a abajo: el ÍNDICE apunta al botón —la punta cae en la mitad exacta de la caja, que es
+// la vertical del control señalado— y detrás bajan dos nudillos doblados, la palma y el pulgar recogido.
+// Cero relleno: solo trazo, como el resto de iconos del juego, para que la mano se lea igual sobre el halo
+// dorado del foco que sobre el fondo oscuro del velo.
+const HAND = '<svg viewBox="0 0 24 24" aria-hidden="true">'
+  + '<g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'
+  + '<path d="M9.7 14.9 V4.9 a2.3 2.3 0 0 1 4.6 0 V11.2"/>'
+  + '<path d="M14.3 11.4 V10.2 a1.6 1.6 0 0 1 3.2 0 V11.6"/>'
+  + '<path d="M17.5 11.8 V11 a1.6 1.6 0 0 1 3.2 0 V15.6 a5.6 5.6 0 0 1-5.6 5.6 H13 a6.2 6.2 0 0 1-4.4-1.8 '
+  +   'L4.5 15.1 a1.9 1.9 0 0 1 2.7-2.7 L9.7 14.9"/>'
+  + '</g></svg>';
+
 // cfg:
 //   mode        'race' | 'redlight' | 'cazador' — viaja en el bt:tutorialEnd que recibe el shell
 //   steps       [{ target:'idDelBoton'|()=>'idDelBoton'|null, pause:true|false, linger?:segundos, enter?:fn, check:(dt)=>bool }]
@@ -70,7 +95,7 @@ export function createCoach(cfg){
 
   const st = document.createElement('style'); st.textContent = CSS; document.head.appendChild(st);
   const veil = document.createElement('div'); veil.id = 'coachVeil';
-  const hand = document.createElement('div'); hand.id = 'coachHand'; hand.textContent = '👆';
+  const hand = document.createElement('div'); hand.id = 'coachHand'; hand.innerHTML = HAND;
   const bn   = document.createElement('div'); bn.id = 'coach';
   const exit = document.createElement('button'); exit.id = 'coachExit';
   document.body.append(veil, hand, bn, exit);
