@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-02 81cccca"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-02 ce0c08b"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -1451,7 +1451,16 @@
   /*+AG 2 · VOLVER — el boton que Jaime nombro por su nombre. Sale en Garaje, Tienda y Ranking, o sea
      que es de lo mas pulsado del juego, y era un rectangulo gris translucido sin grosor. No pasa a
      amarillo: volver NO es la accion primaria de ninguna pantalla (el canon dice UN solo amarillo
-     dominante). Pasa a placa con canto, que es "pulsable, pero no es lo que vengo a hacer aqui". */
+     dominante). Pasa a placa con canto, que es "pulsable, pero no es lo que vengo a hacer aqui".
+     ⚠ 2-ago-2026: `.g-back` SE HA QUEDADO SIN UN SOLO USUARIO EN EL DOM. Los tres botones que la
+     llevaban (Garaje, Tienda y Ranking) se fueron con la decision de Jaime de que ninguna pantalla del
+     nav de abajo lleva VOLVER. La receta se conserva a proposito y no es codigo muerto por descuido:
+     es la PIEZA 2 DEL KIT que docs/57 §"Volver" declara canonica, la que da su idioma a las salidas
+     redondas de aqui abajo (.sclose / .r-home.ico / .gd-close, que si tienen usuarios) y la que lleva
+     colgadas dos correcciones medidas — el halo de +5 px (pieza 18) y el min-height:44px (pieza 19).
+     Borrarla dejaria esas tres notas sin sujeto. Si algun dia vuelve un VOLVER a una pantalla, esta
+     es la forma que tiene que tener; si se decide que no vuelve nunca, se retira ENTERA con sus tres
+     notas y las de las lineas 1548, 1617, 1742, 1959 y 2191. */
   .g-back{ background:linear-gradient(var(--nav-1),var(--nav-2)); border:1px solid #ffffff30; color:#dfe4ff;
     box-shadow:0 3px 0 #0d0726, inset 0 1px 0 #ffffff24; border-radius:13px; padding:8px 14px 8px 11px;
     display:inline-flex; align-items:center; gap:5px; transition:transform .08s, box-shadow .08s; }
@@ -2461,7 +2470,13 @@
 <!-- ===== RANKING (doc 37 §5 + doc 36): Global / Por bola / Diario · bots-persona ===== -->
 <div id="ranking" class="scr">
   <div class="rk-top">
-    <button class="g-back" id="rkBack"><span class="ch">‹</span> <span data-t="home">Inicio</span></button>
+    <!--+AG sin VOLVER, misma decision que el Garaje (ver el comentario largo alli). EL RANKING ERA EL
+         SOSPECHOSO y por eso se midio aparte: no se entra por una pestaña sino por el riel de la
+         portada (#rrRanking) y por la banda de copas (#hCupsBand), asi que ninguna pestaña sale
+         encendida aqui y cabia esperar que la barra de abajo no estuviese. ESTA: medido en DOM vivo,
+         `.h-tabs` visible (360x640: y=577, alto 63) con las cinco pestañas alcanzables, y pulsando
+         "Jugar" [data-nav=jugar] se llega a #home — el mismo destino que daba este boton, y el mismo
+         sitio donde vive el riel por el que has entrado. Las otras cuatro llevan a su pantalla. -->
     <div class="g-title"><img class="cico" src="arte/ui/moneda-copa.webp?v=2" alt=""> <span data-t="rRanking">Ranking</span></div>
   </div>
   <!--+AG doc 60 fase F2: los cuatro bloques de cabecera del Ranking pasan a vivir DENTRO de una placa
@@ -2651,8 +2666,15 @@
 </div>
 <!-- ===== GARAJE (colección + calidad + hexágono + alineación, doc 05) ===== -->
 <div id="garaje" class="scr">
+  <!--+AG 2-ago-2026 (decision de Jaime): NINGUNA pantalla del nav de abajo lleva VOLVER. Llevaban tres
+       de cinco (Garaje, Tienda y Ranking si; Temporada y Perfil no) y esa era la inhomogeneidad: la
+       misma cabecera contaba dos historias distintas segun por donde entrases. La salida ya existe y es
+       LA MISMA en las cinco — la barra de pestañas de abajo, medida en DOM vivo antes de quitar nada:
+       visible en las cinco, sus cinco pestañas alcanzables por elementFromPoint y navegando de verdad.
+       Aqui ademas "Jugar" es #garTabJugar, que llama a goHome() igual que llamaba este boton.
+       ⚠ SI ALGUN DIA UNA PANTALLA DE ESTAS PIERDE LA BARRA DE ABAJO, se queda sin salida: el VOLVER
+       tendria que volver a la vez, no despues. -->
   <div class="g-top">
-    <button class="g-back" id="gBack"><span class="ch">‹</span> <span data-t="home">Inicio</span></button>
     <div class="g-title" data-t="tGaraje">Garaje</div>
     <div class="h-coins" style="margin-left:auto">
       <div class="coin chispa"><img class="cico" src="arte/ui/moneda-chispa.webp?v=2" alt=""><span id="gChispas">0</span></div>
@@ -2710,7 +2732,8 @@
 <!-- ===== TIENDA (secciones, cero azar, puerta parental, doc 12) ===== -->
 <div id="tienda" class="scr">
   <div class="g-top">
-    <button class="g-back" id="shBack"><span class="ch">‹</span> <span data-t="home">Inicio</span></button>
+    <!--+AG sin VOLVER, misma decision que el Garaje (ver el comentario largo alli). La salida es
+         #shTabJugar en la barra de abajo, que ya llamaba a goHome() exactamente igual. -->
     <div class="g-title" data-t="tTienda">Tienda</div>
     <div class="h-coins" style="margin-left:auto">
       <div class="coin chispa"><img class="cico" src="arte/ui/moneda-chispa.webp?v=2" alt=""><span id="shChispas">0</span></div>
@@ -3035,7 +3058,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=81cccca"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=ce0c08b"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -6060,7 +6083,8 @@ el('rkArrR').onclick=()=>{ const st=el('rkStrip'); st.scrollLeft+=Math.max(120,s
 el('rkStrip').onscroll=updateRkArrows;
 function openRanking(){ rkBallFilt=(equippedBall()||{}).arch||ARCH_KEYS[0]; showScreen('ranking'); paintRanking(); }
 document.querySelectorAll('#ranking .rktab').forEach(b=>b.onclick=()=>{ rkTab=b.dataset.rktab; paintRanking(); });
-el('rkBack').onclick=goHome;
+//+AG el VOLVER del Ranking (#rkBack) se fue con la decision del 2-ago; su goHome() lo sigue dando la
+//   pestaña "Jugar" de la barra de abajo, que ya estaba enganchada por [data-nav=jugar] mas abajo.
 
 // ===== HOJA DE FORMATO + SELECTOR (Home v3, docs/35 v2.2: JUGAR abre la hoja; CAMBIAR abre la rejilla) =====
 //+AG modos con POR EQUIPOS cableado. Feedback Jaime 2026-07-24: "por equipos por ahora no funciona" -> APAGADO en
@@ -6254,11 +6278,11 @@ document.querySelectorAll('.subtabs').forEach(grp=>{
     body.scrollTop=0;
   }));
 });
-el('homeGarTab').onclick=openGaraje; el('garTabJugar').onclick=goHome; el('gBack').onclick=goHome;
+el('homeGarTab').onclick=openGaraje; el('garTabJugar').onclick=goHome;   //+AG #gBack se fue el 2-ago: la salida es garTabJugar
 el('gdBack').onclick=closeDetail;
 el('gDetail').addEventListener('click',e=>{ if(e.target.id==='gDetail') closeDetail(); });
 el('homeShopTab').onclick=openTienda; el('garShopTab').onclick=openTienda;
-el('shBack').onclick=goHome; el('shTabJugar').onclick=goHome; el('shTabGaraje').onclick=openGaraje;
+el('shTabJugar').onclick=goHome; el('shTabGaraje').onclick=openGaraje;   //+AG #shBack se fue el 2-ago: la salida es shTabJugar
 el('pgOk').onclick=parentalOk; el('pgNo').onclick=()=>el('parent').classList.remove('on');
 el('pgIn').addEventListener('keydown',e=>{ if(e.key==='Enter') parentalOk(); });
 //+AG doc 34 Fase D: onboarding, settings, canje de codigo (los modos ahora se eligen en la REJILLA, Home v3)

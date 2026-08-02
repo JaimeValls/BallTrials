@@ -12,14 +12,14 @@
 //
 // SON EFECTOS, no música: van con el interruptor de EFECTOS de Ajustes (el que llama pásalo en sfxOn).
 //
-//   import { createUiSfx } from './motor/chassis/uisfx.mjs?v=81cccca';
+//   import { createUiSfx } from './motor/chassis/uisfx.mjs?v=ce0c08b';
 //   const ui = createUiSfx(audio, ()=>SAVE.settings.sfx!==false);
 //   ui.tap();  ui.confirm();  ui.back();  ui.denied();
 //
 // REGLA DE VOLUMEN: un clic de menú se oye 200 veces por sesión, así que se queda DEBAJO de lo que hace la
 // partida (amplitudes ~0.2 contra ~0.5 de los golpes del motor) y siempre por debajo de 90 ms. Tiene que
 // confirmar el toque, no llamar la atención.
-import { createSynth, makeRng, peakGain } from './synth.mjs?v=81cccca';
+import { createSynth, makeRng, peakGain } from './synth.mjs?v=ce0c08b';
 
 const SR = 44100;
 
