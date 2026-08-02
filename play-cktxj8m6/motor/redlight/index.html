@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-02 b8175e7">
+<meta name="bt-build" content="2026-08-02 9ebbeab">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <!--+AG el HTML se sirve en INGLES (defecto del juego); ?lang=es lo traduce por JS (applyLang) -->
 <title>YouBall · Red Light Rush (WebGL) · The Marble Games</title>
@@ -268,7 +268,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=b8175e7"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=9ebbeab"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -279,22 +279,22 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 </script>
 
 <script type="module">
-import { THREE, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createBloom, frameOrtho, BLOOM } from '../chassis/gfx.mjs?v=b8175e7';
-import { archLook } from '../chassis/ballmat.mjs?v=b8175e7';   //+AG doc 41 bloque G: material de la bola-heroe
-import { attachSquash } from '../chassis/squash.mjs?v=b8175e7';
-import { createCelebration } from '../chassis/celebration.mjs?v=b8175e7';
-import { createKillfeed } from '../chassis/killfeed.mjs?v=b8175e7';
-import { createCensusBoard } from '../chassis/censusboard.mjs?v=b8175e7';
-import { createCupoGauge } from '../chassis/cupogauge.mjs?v=b8175e7';
-import { createKillTags } from '../chassis/killtag.mjs?v=b8175e7';
-import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=b8175e7';
-import { archFace } from '../chassis/facegen.mjs?v=b8175e7';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
-import { Sim, TEAMS, SHORT_COLORS, SHORT_COLORS_6, BALL_R, FPS, FIELD_W, FIELD_L, XL, XR, SPAWN_Y, GATE_Y, SAFE_Y } from './sim.js?v=b8175e7';
-import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=b8175e7';
-import { buildSfxBuffer } from './sfxmap.mjs?v=b8175e7';
-import { createCoach } from '../chassis/coach.mjs?v=b8175e7';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
-import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=b8175e7';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
-import { cantarPuesto } from '../chassis/veredicto.mjs?v=b8175e7';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
+import { THREE, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createBloom, frameOrtho, BLOOM } from '../chassis/gfx.mjs?v=9ebbeab';
+import { archLook } from '../chassis/ballmat.mjs?v=9ebbeab';   //+AG doc 41 bloque G: material de la bola-heroe
+import { attachSquash } from '../chassis/squash.mjs?v=9ebbeab';
+import { createCelebration } from '../chassis/celebration.mjs?v=9ebbeab';
+import { createKillfeed } from '../chassis/killfeed.mjs?v=9ebbeab';
+import { createCensusBoard } from '../chassis/censusboard.mjs?v=9ebbeab';
+import { createCupoGauge } from '../chassis/cupogauge.mjs?v=9ebbeab';
+import { createKillTags } from '../chassis/killtag.mjs?v=9ebbeab';
+import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=9ebbeab';
+import { archFace } from '../chassis/facegen.mjs?v=9ebbeab';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
+import { Sim, TEAMS, SHORT_COLORS, SHORT_COLORS_6, BALL_R, FPS, FIELD_W, FIELD_L, XL, XR, SPAWN_Y, GATE_Y, SAFE_Y } from './sim.js?v=9ebbeab';
+import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=9ebbeab';
+import { buildSfxBuffer } from './sfxmap.mjs?v=9ebbeab';
+import { createCoach } from '../chassis/coach.mjs?v=9ebbeab';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=9ebbeab';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
+import { cantarPuesto } from '../chassis/veredicto.mjs?v=9ebbeab';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
 
 window.addEventListener('error', e => { document.getElementById('err').style.display='grid'; console.error(e.error||e.message); });
 
@@ -1159,9 +1159,9 @@ function updateHud(){
   for(let i=0;i<pipEls.length;i++){ const b=sim.balls[i], p=pipEls[i];
     if(b.rank===-1){ p.style.opacity='0.16'; p.style.filter='grayscale(1)'; }
     else { p.style.opacity='1'; p.style.filter = b.safe?'drop-shadow(0 0 6px #ffd34d)':'none'; } }
-  // CTA like/suscríbete (👍🔔) solo al coronar al ganador (SHORT). Animado POR FRAME (determinista en captura, usa sim.f).
+  // CTA like/suscríbete (👍🔔) solo al coronar al ganador (SHORT). Animado POR FRAME (determinista en captura, usa sim.f). Solo vídeo del canal: en EMBED no sale.
   const cta=document.getElementById('cta');
-  if(cta){ if(sim.individual && sim.winner_team!==null && sim.decision_frame!==null){
+  if(cta){ if(!EMBED && sim.individual && sim.winner_team!==null && sim.decision_frame!==null){
       const k=Math.min((sim.f-sim.decision_frame)/15,1), t=sim.f*0.2;
       const appear=0.6+0.4*k, pulse=1+0.09*Math.sin(t), bob=Math.sin(t*0.8)*6;
       cta.style.opacity=k.toFixed(3); cta.style.transform=`translateX(-50%) translateY(${bob.toFixed(1)}px) scale(${(appear*pulse).toFixed(3)})`;
