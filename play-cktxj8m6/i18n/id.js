@@ -39,6 +39,9 @@ shell: {
   teamNames:['Merah','Hijau','Biru','Kuning'],
   // — mata uang dan umum —
   chispasWord:'Koin', gemasWord:'Permata', close:'Tutup', cancel:'Batal', settings:'Pengaturan',
+  quitTitle:'Keluar dari pertandingan?', quitBody:'Kalau keluar sekarang, kemajuanmu di pertandingan ini hilang.',
+  quitYes:'Keluar', quitNo:'Lanjut main',
+  prLocalH:'Perangkat ini',
   langWord:'Bahasa', redeemTitle:'Tukar kode', backHome:'Kembali ke beranda', soonWord:'segera',
   mRecolecta:'KUMPULKAN', mSuelo:'LANTAI MENYUSUT',
   // — Garasi —
@@ -153,6 +156,10 @@ shell: {
   setGfx:'Grafis dan performa', setQuality:'Kualitas', setQualitySub:'mendeteksi perangkatmu sendiri',
   setQualityOpts:['Otomatis','Rendah','Sedang','Tinggi'], setRedFx:'Efek dikurangi', setRedFxSub:'lebih sedikit partikel dan guncangan',
   setFs:'Layar penuh', setFsSub:'menyembunyikan bilah peramban', setFsFail:'Peramban tidak mengizinkan layar penuh',
+  fsExit:'Keluar dari layar penuh',
+  pwaTit:'Taruh di layarmu', pwaBody:'Tambahkan BallTrials ke Layar Utama dan langsung main dengan sekali ketuk.',
+  pwaYes:'Tambah', pwaNo:'Nanti saja',
+  pwaIosTit:'Tambah ke Layar Utama', pwaIosBody:'Ketuk <b>Bagikan</b> di bawah, lalu pilih <b>Tambah ke Layar Utama</b>.', pwaIosOk:'Mengerti',
   setAudio:'Audio', setSound:'Suara', setSoundSub:'musik dan efek',
   setA11y:'Aksesibilitas', setCb:'Mode buta warna', setCbSub:'sebagai tambahan kode bentuk+angka',
   setCbOpts:['Mati','Prot','Deut','Trit'],

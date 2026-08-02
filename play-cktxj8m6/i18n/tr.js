@@ -39,6 +39,9 @@ shell: {
   teamNames:['Kırmızı','Yeşil','Mavi','Sarı'],
   // — para birimleri ve ortak —
   chispasWord:'Altın', gemasWord:'Mücevher', close:'Kapat', cancel:'Vazgeç', settings:'Ayarlar',
+  quitTitle:'Maçtan çıkılsın mı?', quitBody:'Şimdi çıkarsan bu maçtaki ilerlemen kaybolur.',
+  quitYes:'Çık', quitNo:'Oynamaya devam et',
+  prLocalH:'Bu cihaz',
   langWord:'Dil', redeemTitle:'Kod kullan', backHome:'Ana sayfaya dön', soonWord:'yakında',
   mRecolecta:'TOPLAMA', mSuelo:'KÜÇÜLEN ZEMİN',
   // — Garaj —
@@ -153,6 +156,10 @@ shell: {
   setGfx:'Grafik ve performans', setQuality:'Kalite', setQualitySub:'cihazını kendi algılar',
   setQualityOpts:['Oto','Düşük','Orta','Yüksek'], setRedFx:'Azaltılmış efektler', setRedFxSub:'daha az parçacık ve sarsıntı',
   setFs:'Tam ekran', setFsSub:'tarayıcı çubuklarını gizler', setFsFail:'Tarayıcın tam ekrana izin vermedi',
+  fsExit:'Tam ekrandan çık',
+  pwaTit:'Ekranına koy', pwaBody:'BallTrials\'ı Ana Ekrana ekle, tek dokunuşla oyuna gir.',
+  pwaYes:'Ekle', pwaNo:'Şimdi değil',
+  pwaIosTit:'Ana Ekrana Ekle', pwaIosBody:'Aşağıdaki <b>Paylaş</b>\'a dokun ve <b>Ana Ekrana Ekle</b>\'yi seç.', pwaIosOk:'Anladım',
   setAudio:'Ses', setSound:'Ses', setSoundSub:'müzik ve efektler',
   setA11y:'Erişilebilirlik', setCb:'Renk körü modu', setCbSub:'şekil+numara kodlamasına ek olarak',
   setCbOpts:['Kapalı','Prot','Deut','Trit'],

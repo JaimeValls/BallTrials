@@ -1,8 +1,29 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-02 00946e1"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-02 6dbad2a"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
+<!--+AG ICONO EN LA PANTALLA DE INICIO (docs/40 §6). Jaime: "la gente esta acostumbrada a clicar en el
+     icono y directamente jugar". Esto es lo unico que da icono propio y, en iPhone, pantalla sin barras.
+     · El manifest vive AL LADO de este fichero (prototipo/manifest.webmanifest) y el build lo copia a la
+       raiz de /play-cktxj8m6/, junto al index.html. Por eso "manifest.webmanifest" a secas vale igual en
+       el repo y en produccion, y por eso su start_url/scope son "./" (se resuelven contra la URL del
+       PROPIO manifest, no contra esta pagina).
+     · crossorigin="use-credentials" NO es decorativo: MEDIDO en Chrome, sin el la peticion del manifest
+       sale SIN cookies. Produccion esta detras del anti-bots de Hostinger/Cloudflare (docs/63), que a una
+       peticion sin la cookie de clearance le puede devolver un 403 -> manifest descartado -> el juego deja
+       de ser instalable, y en silencio.
+     · NO se pone apple-mobile-web-app-status-bar-style="black-translucent": eso mete el contenido DEBAJO
+       del reloj del iPhone, y este juego dejo `viewport-fit=cover` + safe areas fuera a proposito (docs/40
+       §6) por no tener un iPhone donde medirlo. Barra opaca y el juego debajo, que es lo que encaja hoy. -->
+<link rel="manifest" href="manifest.webmanifest" crossorigin="use-credentials">
+<meta name="theme-color" content="#241159">
+<link rel="apple-touch-icon" href="arte/pwa/apple-touch-icon-180.png">
+<link rel="icon" href="arte/pwa/icon-192.png" type="image/png">
+<!--+AG iOS < 16.4 ignora el manifest entero: sin estas dos, el icono anadido abre SAFARI con su barra. -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="BallTrials">
 <!--
   PROTOTIPO DE AGENCIA (docs/21) · BallTrials · v0.2
   Valida (docs/20 T0.1): ¿elegir ACTITUD + soltar BOOSTERS, sin coaching, se siente como que ganaste TÚ?
@@ -26,7 +47,21 @@
        Se combinan con min(), no sustituyendose: el JS solo puede ENCOGER, nunca agrandar. Asi, si un
        valor en px se queda obsoleto (evento resize que no llega), lo peor que pasa es que sobre un
        margen negro; jamas que la barra de abajo se salga de la pantalla, que es el fallo a evitar. */
-    --vh:100vh; --vhjs:100vh; }
+    --vh:100vh; --vhjs:100vh;
+    /*+AG COLCHON ANTI-BARRA (--zafe). Hay navegadores-envoltorio de Android (el "Free Adblocker Browser"
+       de Jaime, WebView) que pintan la pagina a PANTALLA COMPLETA y luego les ponen SU barra inferior
+       encima: innerHeight, visualViewport y 100dvh dicen los 812 px, y los ultimos ~70 los tapa la barra.
+       NINGUNA API del navegador delata eso, asi que la pagina no puede medirlo ni encogerse a tiempo; lo
+       unico que se puede hacer es que el final de una lista SIEMPRE se pueda subir a la vista. Eso es este
+       colchon: hueco de mas al fondo de cada caja que desliza, para que arrastrando se llegue de verdad al
+       ultimo boton. 0 en escritorio (ahi la app va centrada y no hay barra que tape nada), y solo se paga
+       —como hueco vacio— cuando la lista ya desliza y llegas al final. */
+    --zafe:0px; }
+  /*+AG 128 px NO es un numero bonito: es lo que hay que recuperar en el peor caso plausible. La caja ya
+     traia 14-20 px de relleno propio, asi que lo que se GANA son ~110 px, y una barra inferior de
+     navegador en Android son 48-56 dp mas, como mucho, la barra del sistema (24 dp de gesto o 48 de tres
+     botones). O sea: cubre el peor caso con margen. Medido en la reproduccion, abajo. */
+  @media(max-width:519px){ :root{ --zafe:128px; } }
   @supports (height:100dvh){ :root{ --vh:100dvh; } }
   *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html,body{ margin:0; height:100%; background:#000; color:var(--ink);
@@ -719,6 +754,19 @@
   .pr-show{ display:flex; gap:8px; margin-top:12px; } .pr-chip{ flex:1; text-align:center; background:var(--plate-a); border:1px solid var(--line); border-radius:12px; padding:9px 4px; } .pr-chip .v{ font-size:var(--fs-4); font-weight:900; } .pr-chip .k{ font-size:var(--fs-1); color:var(--muted); font-weight:800; text-transform:uppercase; letter-spacing:.04em; margin-top:2px; }
   .pr-code{ display:flex; align-items:center; gap:9px; background:#0006; border:1px solid var(--line); border-radius:12px; padding:10px 13px; } .pr-code .cd{ font-weight:900; letter-spacing:.13em; font-size:var(--fs-4); color:var(--gold2); }
   .pr-code button, .pr-inv{ border:1px solid var(--line); background:var(--plate-a); color:#c9cff0; font-family:inherit; font-weight:800; font-size:var(--fs-3); border-radius:10px; padding:7px 11px; cursor:pointer; } .pr-code button{ margin-left:auto; }
+  /*+AG el hueco de VALOR de .pr-code cuando lo que va dentro no es un codigo (el nombre del jugador, el
+     ID cortado). El `.cd` de al lado es dorado y con letter-spacing porque un BT-XXXX-XXXX se lee mejor
+     asi; un mote de hasta 16 letras con ese espaciado se sale de la columna a 360 px. Aqui: texto normal,
+     alineado a la derecha y con puntos suspensivos, que es lo unico que aguanta cualquier nombre. */
+  /*+AG ⚠ EL ROTULO DE .pr-code IBA EN PESO 400 A 16 px, rodeado de botones a 800/13 (medido, no visto de
+     lejos). En un juego donde TODO es gordo, un texto fino es lo unico que se lee como "pagina web".
+     Pasaba desapercibido mientras la unica fila era "Tu código:" en Amigos; con las cuatro que bajan de
+     Ajustes juntas, canta. Se le dan los valores EXACTOS de `.set-row .lb`, que es de donde vienen estas
+     filas: asi la mudanza no cambia como se leen. De regalo, arregla tambien la de Amigos. */
+  .pr-code > span:not(.cd){ font-size:var(--fs-3); font-weight:700; color:#e7ebff; }
+  .pr-code .cd.nm{ letter-spacing:0; color:#eaf1ff; font-size:var(--fs-3); margin-left:auto; text-align:right;
+    min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .pr-code .cd.nm + button{ margin-left:9px; }   /* ya lo empuja el valor: sin esto el boton se pega al borde */
   .pr-slots{ display:flex; gap:9px; margin-top:11px; align-items:center; } .pr-slots .s{ width:44px; height:44px; border-radius:50%; border:2px dashed #ffffff2e; color:var(--muted); display:grid; place-items:center; font-size:var(--fs-5); background:var(--plate-a); cursor:pointer; }
   /*+AG doc 41 §1: el regalo era un emoji del sistema sobre un azulejo dorado. Ahora es arte propio
      (ui-regalo.webp, morado con lazo dorado) y va DESNUDO, sin plato: el plato dorado le peleaba el
@@ -757,6 +805,35 @@
   /*+AG el :active baja el boton HASTA su canto (5 px) y encoge el canto a 2: es el mismo gesto de
      "hundirse" que ya hace .playbig, no un translate suelto. */
   .h-ic:active{ transform:translateY(2px); box-shadow:0 1px 0 #b45a10, inset 0 2px 0 #ffffff8c; }
+  /*+AG BOTON DE PANTALLA COMPLETA (peticion de Jaime, 2-ago): "al lado de donde pone nivel un boton que
+     sea el icono de full screen... y que si le vuelves a dar se quite". Reusa `.h-ic` entero —el amarillo,
+     el canto, el hundirse al pulsar y el halo de toque— y solo cambia las TRES cosas que .h-ic da por
+     supuestas porque hasta hoy era hijo unico:
+       · `order:0` en vez del 9 heredado. El 9 existe para mandar la hamburguesa al cluster de la DERECHA
+         con las monedas (docs/56 §1.6); este va a la IZQUIERDA, pegado al nivel, que es donde lo pidio.
+       · sin el webp de Ajustes de fondo: ese fondo lo pone `.h-ic` a secas mas abajo, asi que sin esto el
+         boton de pantalla completa saldria con la hamburguesa dibujada.
+         ⚠ Y SE PISA EL ATAJO `background` ENTERO, NO SOLO `background-image`. Costo una captura: aquel
+         atajo es `url(...) center/28px no-repeat, linear-gradient(...)`, o sea que ademas de la imagen
+         deja puestos un `background-size:28px`, un `center` y un `no-repeat`. Cambiando solo la imagen,
+         esas tres se quedaban y se aplicaban a MI degradado: salia pintado en un cuadro de 28 px en
+         mitad de un boton de 40, con dos bandas palidas a los lados. Los bancos daban verde —el
+         elemento tiene su box-shadow y su tamano— y el fallo solo se veia MIRANDO. El atajo completo
+         devuelve tamano, posicion y repeticion a su valor inicial de una vez.
+       · el SVG visible: `.h-ic` lleva `font-size:0; line-height:0` (para que las 3 barras no metan hueco).
+     Y OJO CON ESCONDERLO: no basta el atributo `hidden`, porque `.h-ic` trae su propio `display:flex` y
+     gana. Hay que decirlo explicito — es la trampa que ya se pago en este mismo fichero. */
+  .h-ic.h-fs{ order:0; background:linear-gradient(#ffe14d,#ffb42a); }
+  .h-ic.h-fs[hidden]{ display:none; }
+  .h-ic.h-fs svg{ width:21px; height:21px; display:block; }
+  /*+AG el area de toque: el boton dibuja 40 px y el minimo tactil son 44. Mismo halo transparente que
+     .h-lvl, .coin y las (i). Lo pide el banco de homogeneidad, que lo canto en cuanto nacio el boton.
+     ⚠ Y NO se resuelve metiendolo en la lista de exentos del banco al lado de #hSet: esa exencion es
+     una deuda vieja de un boton que mide 40 de verdad, y copiarla habria sido heredar el problema en
+     vez del arreglo. Con el halo son 46 px reales de dedo, que es lo que el canon pide. El hueco de la
+     fila es de 9 px, asi que con 3 por lado siguen quedando 3 px de aire con la insignia de nivel: el
+     dedo no puede caer en las dos. */
+  .h-ic.h-fs::before{ content:''; position:absolute; inset:-3px; border-radius:15px; }
   .h-modes .m.open{ filter:none; opacity:1; border-color:var(--gold2); background:var(--plate-b); cursor:pointer; box-shadow:0 4px 14px #fbb91533; } .h-modes .m.open .lk{ color:var(--gold2); }
   #onb{ position:absolute; inset:0; z-index:70; background:radial-gradient(120% 80% at 50% 18%,var(--bg),var(--bg-lo)); display:none; flex-direction:column; align-items:center; justify-content:center; padding:24px; }
   #onb.on{ display:flex; }
@@ -1458,6 +1535,27 @@
   .rkme{ font-size:var(--fs-3); color:var(--muted); font-weight:800; text-align:center; padding:0 13px 8px; }
   .rkme b{ color:var(--gold2); }
   .rklist{ flex:1; min-height:0; overflow-y:auto; padding:0 13px 14px; display:flex; flex-direction:column; gap:5px; }
+  /*+AG EL COLCHON, EN LAS CINCO LISTAS QUE DESLIZAN (ver --zafe arriba). Va aqui abajo del todo a proposito:
+     cada una de estas define su relleno con el atajo `padding:` y solo gana quien viene DESPUES.
+     Sintoma que mata (Jaime, 2-ago, Pixel 7 Pro + Free Adblocker Browser): Ajustes deslizado hasta el tope
+     y la seccion CUENTA sigue asomando cortada abajo. Reproducido con Playwright (pagina de 812, visible
+     682): lo ultimo de la lista acababa en y=792, o sea 110 px por debajo de la barra del navegador, y no
+     habia deslizamiento que lo rescatara porque ya estaba en su maximo. Con el colchon acaba en y=684.
+     (El "y por mucho que arrastre no baja" de ese mismo informe NO era esto: era el halo de la ✕, ver el
+     comentario del propio boton en el HTML. Son dos fallos distintos que se veian como uno.)
+     `overscroll-behavior:contain` es del mismo remedio por otro lado: que el arrastre se lo quede la lista
+     y no se lo lleve el navegador para enseñar o esconder sus barras.
+     ⚠ SON CINCO Y NO SIETE, y las dos que faltan se cayeron MIDIENDO, no opinando: .modegrid (MODOS) y
+     #gDetail (la ficha de bola) centran su contenido —`align-content:safe center` / `justify-content:center`—
+     asi que ahi el relleno de abajo no crea hueco al final: EMPUJA EL BLOQUE ENTERO HACIA ARRIBA. Medido a
+     390x844: las cartas de MODOS subian 39 px y la ficha 53, con las cartas del mismo tamaño pero el aire
+     descuadrado. Y ademas no ganaban nada, porque lo que se centra no desliza: no hay final al que llegar.
+     Las otras cinco alinean a start, asi que mientras la lista quepa el colchon no se ve ni un pixel
+     (comprobado: primer y ultimo hijo en la misma coordenada exacta que antes en las cinco). */
+  @media(max-width:519px){
+    .set-body, .sc-body, .sh-body, .g-grid, .rklist{
+      padding-bottom:calc(var(--zafe) + env(safe-area-inset-bottom)); overscroll-behavior:contain; }
+  }
   .rkrow{ display:flex; align-items:center; gap:9px; background:var(--plate-a); border:1px solid var(--line); border-radius:12px; padding:7px 11px; font-size:var(--fs-3); font-weight:800; flex:0 0 auto; }
   .rkrow .kp{ width:34px; font-size:var(--fs-3); color:var(--muted); font-variant-numeric:tabular-nums; font-weight:900; flex:0 0 auto; }
   .rkrow .rdisc{ width:22px; height:22px; border-radius:50%; flex:0 0 auto; box-shadow:inset 0 2px 4px #ffffff33, 0 1px 3px #0006; }
@@ -2106,6 +2204,14 @@
      ⚠ z-index 67: por encima de Ajustes (65) y de la hoja de idioma (66), porque la Tienda y Perfil
      pueden tenerlas abiertas debajo. Por debajo del onboarding (70) y de los toast (80). */
   #infoSheet{ z-index:67; }
+  /*+AG ⚠ LA HOJA DE PREGUNTAR VA POR ENCIMA DE TODO, Y ESTABA POR DEBAJO DE CASI TODO (arreglado 2-ago).
+     Heredaba el z-index:62 de .sheetwrap, o sea que quedaba DETRAS de #settings (65), que tiene fondo
+     opaco. Consecuencia medida con elementFromPoint: al pulsar "Borrar datos locales" o "Importar
+     progreso" DESDE AJUSTES, la pregunta se pintaba invisible detras de la pantalla; el jugador no veia
+     nada y la promesa de hojaPregunta() se quedaba esperando una respuesta que nadie podia dar.
+     1200 y no 68 porque ahora tambien tiene que salir ENCIMA DE LA PARTIDA, y el iframe del motor se
+     monta con z-index:1000. Una pregunta de si/no es lo mas modal que tiene el juego: si aparece, manda. */
+  #askSheet{ z-index:1200; }
   .sheet .infotx{ font-size:var(--fs-3); line-height:1.55; color:#d6dcf7; max-height:56vh;
     overflow-y:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; padding:2px 2px 6px; }
   .sheet .infotx::-webkit-scrollbar{ display:none; }
@@ -2504,6 +2610,13 @@
 <div id="home" class="scr on">
   <div class="h-top">
     <div class="h-lvl"><div class="h-lvlnum"><b id="hLvl">1</b></div><div class="cap" data-t="lvl">NIVEL</div></div>
+    <!--+AG PANTALLA COMPLETA, al lado del nivel (peticion literal de Jaime, 2-ago). Nace `hidden`: solo lo
+         enciende pintaFs() donde el navegador tiene la API (FS_OK) y el juego NO se esta ejecutando ya
+         instalado desde el icono — ahi no hay barras que esconder y el boton sobraria. En iPhone no sale
+         nunca (Safari no tiene la API), que es justo por lo que la pantalla completa es opcional y no se
+         fuerza (docs/40 §3). El icono lo pinta pintaFs(): cambia entre entrar y salir, y no es un emoji
+         (regla dura de la casa) sino trazo dibujado con el mismo contorno oscuro que las barras de #hSet. -->
+    <button class="h-ic h-fs" id="hFs" hidden></button>
     <!--+AG VB Jaime 2026-07-27: el boton de CANJEAR CODIGO (🎬) sale de la portada. Todavia no hay codigos que
          canjear (los da el canal, que aun no ha lanzado), asi que ocupaba sitio en la fila mas apretada de la
          pantalla para una funcion que hoy no existe. NO se borra la funcion: la fila "Canjear codigo del canal"
@@ -3257,6 +3370,32 @@
       <div class="sc-note" id="prMoveMsg" style="min-height:1.2em"></div>
     </div>
 
+    <!--+AG ESTE DISPOSITIVO (2-ago). Baja entero desde Ajustes > Cuenta, porque la pantalla de cuenta
+         pasa a ser UNA SOLA y Ajustes se queda con una puerta (decision de Jaime: "la gente se va a
+         ajustes para ver las cosas de la cuenta", patron Brawl Stars).
+         Se comprobo fila por fila antes de mover nada, y NINGUNA de estas cuatro estaba cubierta aqui:
+           · el NOMBRE no se pinta en ningun sitio de Perfil — lo que sale en "Tú" son las etiquetas
+             fijas "Jugador" y "alias", no como te llamas;
+           · el ID DE JUGADOR solo existia en acctRows();
+           · exportar/importar NO es lo mismo que "Llevar mi partida a otro movil": aquello es un codigo
+             del SERVIDOR (necesita cuenta y red) y esto es la copia local en base64, la unica via que
+             funciona sin internet y sin cuenta. Son dos mecanismos, no dos botones del mismo.
+         La quinta fila de Ajustes —"Conectar cuenta online · Google · Apple", en gris con candado— SI
+         estaba cubierta, y con creces: aqui arriba Google funciona de verdad. Esa se muere.
+         Cero cadenas nuevas salvo la cabecera: las cuatro filas reusan las claves que ya estaban
+         traducidas a los 20 idiomas (acctName, acctPlayerId, acctExport, acctImport y sus botones). -->
+    <div class="sc-block" data-sub="cuenta">
+      <div class="sc-h"><svg class="sc-ico" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5.4" y="2.6" width="13.2" height="18.8" rx="2.6"/><path d="M10.2 18.4 H13.8"/><path d="M8.6 6.6 H15.4"/><path d="M8.6 10.2 H13"/></g></svg><span data-t="prLocalH">Este dispositivo</span></div>
+      <!--+AG las cuatro van con .pr-code, que es la fila "etiqueta · valor · boton" que esta pantalla ya
+           usa para el codigo de amigos y para el de traspaso. No se inventa un componente para esto.
+           El nombre lleva `.cd.nm` (ver CSS) y no `.cd` a secas: el dorado espaciado es para CODIGOS, y
+           un mote de 16 letras con letter-spacing se sale de la columna a 360 px. -->
+      <div class="pr-code"><span data-t="acctName">Nombre</span><span class="cd nm" id="prMyName">—</span><button id="prMyNameEdit" data-t="acctNameEdit">Cambiar</button></div>
+      <div class="pr-code"><span data-t="acctPlayerId">Tu ID de jugador</span><span class="cd nm" id="prMyId" style="margin-left:auto">—</span></div>
+      <div class="pr-code" style="margin-top:7px"><span data-t="acctExport">Exportar progreso</span><button id="prMyExport" data-t="acctExportBtn">Copiar código</button></div>
+      <div class="pr-code" style="margin-top:7px"><span data-t="acctImport">Importar progreso</span><button id="prMyImport" data-t="acctImportBtn">Importar</button></div>
+    </div>
+
     <div class="sc-block" data-sub="mas">
       <div class="sc-h"><svg class="sc-ico" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.9" y="7.6" width="18.2" height="12.4" rx="2.6"/><path d="M8.4 3.6 L12 7.6"/><path d="M15.6 3.6 L12 7.6"/></g></svg><span data-t="prChanH">Salir en el canal</span><button class="ibtn" data-info="prChanNote" data-info-tit="prChanH" data-tp="infoWord" title="Info"><svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 10.8 V17"/><path d="M12 6.9 V7.2"/></g></svg></button></div>
       <div class="pr-toggle">
@@ -3322,7 +3461,19 @@
 </div>
 <!-- ===== SETTINGS (catalogo de 7 grupos, doc 26; persiste audio/idioma/calidad) ===== -->
 <div id="settings">
-  <div class="set-top"><div class="g-title" data-t="settings">Ajustes</div><button class="gd-close" id="setClose" data-tt="close" title="Cerrar" style="position:static;margin-left:auto"><svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6.8 6.8 L17.2 17.2"/><path d="M17.2 6.8 L6.8 17.2"/></g></svg></button></div>
+  <!--+AG ⚠ AQUI VIVIA "position:static", Y ERA EL FALLO DE "EL SCROLL DE AJUSTES NO FUNCIONA" (Jaime, 2-ago).
+       La ✕ lleva un halo de toque invisible (`.gd-close::before{ position:absolute; inset:-5px }`, el bloque
+       del area de 44 px) que se coloca respecto al PRIMER ANTEPASADO POSICIONADO. La regla del halo pone
+       `.gd-close{ position:relative }` justo para que ese antepasado sea el propio boton; este `static`
+       inline —puesto solo para que la ✕ fuera un hijo mas del flex— la ganaba por ser inline, y entonces el
+       halo se anclaba a #settings y media 385 x 822: una lamina invisible SOBRE AJUSTES ENTERO.
+       Lo que se veia: al arrastrar la lista, el dedo tocaba la lamina (que pertenece a la ✕, no a la lista),
+       asi que el navegador buscaba algo que deslizar por encima de la ✕ y no encontraba nada. La lista NO
+       se movia ni un pixel — ni con el dedo ni con la rueda del raton. Medido con elementsFromPoint sobre la
+       fila de Idioma: devolvia el boton de cerrar.
+       Se arregla con `relative` (en un flex se coloca igual, no se sale del flujo) + top/right/left a auto,
+       que anulan las coordenadas que .gd-close trae de cuando iba absoluta en la ficha de bola. -->
+  <div class="set-top"><div class="g-title" data-t="settings">Ajustes</div><button class="gd-close" id="setClose" data-tt="close" title="Cerrar" style="position:relative;top:auto;right:auto;left:auto;margin-left:auto"><svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6.8 6.8 L17.2 17.2"/><path d="M17.2 6.8 L6.8 17.2"/></g></svg></button></div>
   <div class="set-body" id="setBody"></div>
 </div>
 <!-- ===== CANJE DE CODIGO del canal (un uso por cuenta, premio fijo, doc 16) ===== -->
@@ -3340,7 +3491,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=00946e1"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=6dbad2a"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -3354,8 +3505,13 @@
 function fitViewport(){
   const ae=document.activeElement;
   if(ae && (ae.tagName==='INPUT'||ae.tagName==='TEXTAREA')) return;   // teclado abierto: no encoger la app
-  const vv=window.visualViewport, h=Math.round(vv ? vv.height : window.innerHeight);
-  if(h>0) document.documentElement.style.setProperty('--vhjs', h+'px');   // solo encoge: el CSS hace min() con --vh
+  //+AG se hace caso al MENOR de los dos relojes. Los dos miden lo mismo en un navegador sano, pero cuando
+  //   uno de ellos se queda viejo (WebView que no dispara resize en visualViewport, o al reves) el otro
+  //   salva el alto. Coger el minimo nunca puede agrandar la app, que es la regla de toda esta funcion.
+  //   Con el TECLADO abierto no llegamos aqui (return de arriba), asi que esto no pelea con ese caso.
+  const vv=window.visualViewport;
+  const h=Math.round(Math.min(vv&&vv.height>0 ? vv.height : Infinity, window.innerHeight>0 ? window.innerHeight : Infinity));
+  if(isFinite(h) && h>0) document.documentElement.style.setProperty('--vhjs', h+'px');   // solo encoge: el CSS hace min() con --vh
 }
 fitViewport();
 addEventListener('resize', fitViewport);
@@ -4228,6 +4384,17 @@ const MORE={
     teamNames:['Rojo','Verde','Azul','Amarillo'],
     // — monedas y comunes —
     chispasWord:'Monedas', gemasWord:'Gemas', close:'Cerrar', cancel:'Cancelar', settings:'Ajustes',
+    //+AG ABANDONAR PARTIDA (2-ago): las dice la hoja del juego cuando el atras del movil llega estando
+    //   en partida. Viven aqui, al lado de close/cancel, porque son de la misma familia: las palabras
+    //   con las que se sale de algo. quitNo existe en vez de reusar `cancel` porque "Cancelar" como
+    //   respuesta a "¿Abandonar la partida?" no dice si cancelas la partida o cancelas el abandono.
+    quitTitle:'¿Abandonar la partida?', quitBody:'Si sales ahora pierdes lo que llevas de esta partida.',
+    quitYes:'Abandonar', quitNo:'Seguir jugando',
+    //+AG cabecera del bloque que baja de Ajustes a Perfil > Cuenta (2-ago, una sola pantalla de cuenta).
+    //   "Este dispositivo" y no "Tu jugador" porque lo que agrupa a las cuatro filas es el MOVIL: el
+    //   nombre y el ID son locales, y el exportar/importar mueve la partida DE ESTE aparato. Asi se
+    //   distingue de un vistazo de "Tu cuenta" (la de internet) y de "Llevar mi partida" (por servidor).
+    prLocalH:'Este dispositivo',
     langWord:'Idioma', redeemTitle:'Canjear código', backHome:'Volver al inicio', soonWord:'pronto',
     // — Home / selector —
     mRecolecta:'RECOLECTA', mSuelo:'SUELO MENGUANTE',
@@ -4347,6 +4514,17 @@ const MORE={
     setGfx:'Gráficos y rendimiento', setQuality:'Calidad', setQualitySub:'auto detecta tu equipo',
     setQualityOpts:['Auto','Baja','Media','Alta'], setRedFx:'Efectos reducidos', setRedFxSub:'menos partículas y sacudidas',
     setFs:'Pantalla completa', setFsSub:'oculta las barras del navegador', setFsFail:'Tu navegador no ha permitido la pantalla completa',
+    //+AG el boton de pantalla completa de la portada REUSA `setFs` para "entrar" (ya existe en los 20
+    //   idiomas, es la fila de Ajustes) y solo estrena la frase de salir. Una clave nueva en vez de dos.
+    fsExit:'Salir de pantalla completa',
+    //+AG el aviso del ICONO en la pantalla de inicio (docs/40 §6). pwaIosBody lleva <b>: va por el innerHTML
+    //   de la hoja ask(), igual que las notas con negrita, no por textContent.
+    pwaTit:'Ponlo en tu pantalla', pwaBody:'Añade BallTrials a tu pantalla de inicio y entra a jugar de un toque.',
+    //+AG en minuscula como `quitYes`/`quitNo`: los botones de esta hoja NO llevan text-transform, asi que
+    //   escribirlos en mayusculas los dejaria gritando al lado de los que ya existen.
+    pwaYes:'Añadir', pwaNo:'Ahora no',
+    pwaIosTit:'Añadir a inicio', pwaIosBody:'Toca <b>Compartir</b> abajo y elige <b>Añadir a pantalla de inicio</b>.',
+    pwaIosOk:'Entendido',
     setAudio:'Audio', setSound:'Sonido', setSoundSub:'música y efectos',
     setA11y:'Accesibilidad', setCb:'Modo daltónico', setCbSub:'sobre la codificación por forma+número',
     setCbOpts:['No','Prot','Deut','Trit'],
@@ -4392,6 +4570,9 @@ const MORE={
     teamNames:['Red','Green','Blue','Yellow'],
     // — currencies & common —
     chispasWord:'Coins', gemasWord:'Gems', close:'Close', cancel:'Cancel', settings:'Settings',
+    quitTitle:'Quit the match?', quitBody:'If you leave now you lose your progress in this match.',
+    quitYes:'Quit', quitNo:'Keep playing',
+    prLocalH:'This device',
     langWord:'Language', redeemTitle:'Redeem code', backHome:'Back to home', soonWord:'soon',
     // — Home / selector —
     mRecolecta:'COLLECT', mSuelo:'SHRINKING FLOOR',
@@ -4508,6 +4689,11 @@ const MORE={
     setGfx:'Graphics and performance', setQuality:'Quality', setQualitySub:'auto detects your device',
     setQualityOpts:['Auto','Low','Medium','High'], setRedFx:'Reduced effects', setRedFxSub:'fewer particles and shakes',
     setFs:'Fullscreen', setFsSub:'hides the browser bars', setFsFail:'Your browser would not allow fullscreen',
+    fsExit:'Exit fullscreen',
+    pwaTit:'Put it on your screen', pwaBody:'Add BallTrials to your home screen and jump into the game with one tap.',
+    pwaYes:'Add', pwaNo:'Not now',
+    pwaIosTit:'Add to Home Screen', pwaIosBody:'Tap <b>Share</b> below, then choose <b>Add to Home Screen</b>.',
+    pwaIosOk:'Got it',
     setAudio:'Audio', setSound:'Sound', setSoundSub:'music and effects',
     setA11y:'Accessibility', setCb:'Colourblind mode', setCbSub:'on top of the shape+number coding',
     setCbOpts:['Off','Prot','Deut','Trit'],
@@ -4969,7 +5155,11 @@ function dinero(tipo, delta, motivo){
 }
 //+AG un session_start por carga de pagina. props sin nada personal (docs/24 §1/§4).
 apunta('session_start', { lang:LANG, level:SAVE.level, played:SAVE.played,
-  movil: !!(window.matchMedia && matchMedia('(pointer:coarse)').matches) });
+  movil: !!(window.matchMedia && matchMedia('(pointer:coarse)').matches),
+  //+AG ¿esta sesion ha arrancado desde el ICONO de la pantalla de inicio? Va como una prop mas y no como
+  //   un evento nuevo a proposito: props es jsonb y no tiene lista blanca, asi que el "% de sesiones que
+  //   entran ya instaladas" sale sin tocar la base ni gastar un nombre de evento.
+  pwa: pwaInstalado() });
 
 function showScreen(n){ ['home','results','garaje','tienda','temporada','perfil','selector','ranking'].forEach(s=>{ const e=el(s); if(e) e.classList.toggle('on',s===n); }); document.body.classList.toggle('race',n==='race');
   //+AG docs/52: pantallas clave para el embudo (¿la gente encuentra la tienda? ¿el garaje?).
@@ -5046,8 +5236,18 @@ function renderHome(){ applyShell();
   //+AG doc 39: badge = bolas listas para SUBIR DE NIVEL. Vive en la PESTAÑA Garaje de abajo y en ningun
   //   sitio mas: el riel de la Home ya no tiene Garaje (VB Jaime 2026-07-27), asi que el punto rojo de la
   //   barra es el unico aviso y tiene que salir SIEMPRE que haya subidas pendientes.
-  refreshTabBadges(); }
-function goHome(){ closeGameFrame(); showScreen('home'); renderHome(); }
+  refreshTabBadges();
+  //+AG el boton de pantalla completa: aqui y no en el arranque porque su etiqueta y su icono dependen del
+  //   idioma y del estado, y renderHome() es lo que ya se repite en cada vuelta a la portada.
+  pintaFs(); }
+function goHome(){ closeGameFrame(); showScreen('home'); renderHome();
+  //+AG EL AVISO DEL ICONO, en el momento aprobado: al volver al menu tras terminar la PRIMERA partida.
+  //   Va aqui y no en Resultados porque goHome() es el UNICO punto de retorno al menu, asi que cubre los
+  //   tres caminos de vuelta (el ‹ de Resultados, el atras del movil y la barra de abajo) sin repetirse.
+  //   El flag lo pone onMatchEnd(), que es lo que distingue "vuelvo de mi primera partida" de "acabo de
+  //   arrancar el juego" — goHome() tambien corre al bootear. El respiro deja que la portada se pinte
+  //   antes de que suba la hoja: encima de la transicion se lee como un error, no como una oferta.
+  if(pwaPend) setTimeout(ofreceIcono, 700); }
 
 //+AG COSTURA DEL MOTOR (docs/34 §4, Fase A): "Jugar" ya NO corre el sim 2D del bucle; abre el modo WebGL 1:1
 //   como iframe a pantalla completa (embed=1). El modo emite bt:matchEnd al terminar y el shell paga economia
@@ -5172,6 +5372,9 @@ function onMatchEnd(d){
   const teamP = curFmt==='equipos' ? (d.teamPlace||1) : 0;
   applyCupsForResult(teamP ? {teamPlace:teamP} : {place}, eb, place, d);
   persist(); checkHitos();   //+AG doc 39: ¿algún hito de copas cruzado? la Épica se une sola
+  //+AG el aviso del ICONO de la pantalla de inicio se arma AQUI y se dispara en goHome(): "primera partida"
+  //   es esta, la que acaba de sumar. Los tutoriales no cuentan — van por bt:tutorialEnd y no tocan played.
+  if(SAVE.played===1) pwaPend=true;
   //+AG docs/52: LA FILA DE PARTIDA en la nube (tabla match, que existia desde 0001 sin que nadie
   //   escribiera en ella). Solo apunta, NO cobra: la economia ya se pago arriba en local (Fase 1,
   //   0004). durationF son frames a 60fps del motor. Fire-and-forget: si no hay red, no pasa nada.
@@ -5896,7 +6099,20 @@ function syncLigaBadge(){ const cur=document.querySelector('.se-tier.cur img.em'
 function openTemporada(){ showScreen('temporada'); applyShell(); el('seChispas').textContent=SAVE.chispas; el('seGemas').textContent=SAVE.gemas; drawPreviewBall(el('seChamp'), TEAMS[3].color); buildPaseTrack(); syncLigaBadge(); }
 function openPerfil(){ showScreen('perfil'); applyShell(); el('prChispas').textContent=SAVE.chispas; el('prGemas').textContent=SAVE.gemas; el('prLvl').textContent=SAVE.level; el('prColl').textContent=SAVE.balls.length; drawPreviewBall(el('prAv'), TEAMS[0].color);
   const sw=el('prConsent'); sw.onclick=()=>{ const on=sw.classList.toggle('on'); sw.setAttribute('aria-checked',on?'true':'false'); toast(on?S().tChanOn:S().tChanOff); };
-  wireCuenta(); wireTraspaso(); }
+  wireCuenta(); wireTraspaso(); wireEsteDispositivo(); }
+
+//+AG las cuatro filas que bajaron de Ajustes (bloque "Este dispositivo"). Se PINTAN cada vez que se abre
+//   Perfil —el nombre se puede haber cambiado desde la propia pantalla— y se CABLEAN una sola vez, con la
+//   misma marca `_wired` que usa wireTraspaso: openPerfil() se llama en cada visita y sin eso cada apertura
+//   apilaria otro onclick sobre el mismo boton.
+function wireEsteDispositivo(){
+  const p=SAVE.profile||{}, nm=el('prMyName'), id=el('prMyId');
+  if(nm) nm.textContent = p.name || '—';
+  if(id) id.textContent = (p.playerId||'').slice(0,8)+'…';
+  const ed=el('prMyNameEdit'); if(ed && !ed._wired){ ed._wired=true; ed.onclick=acctEditName; }
+  const ex=el('prMyExport');   if(ex && !ex._wired){ ex._wired=true; ex.onclick=acctExport; }
+  const im=el('prMyImport');   if(im && !im._wired){ im._wired=true; im.onclick=acctImport; }
+}
 
 //+AG docs/42 Fase 2 + docs/23 §3: el invitado se convierte en cuenta SIN perder nada, porque
 //   es la MISMA cuenta de servidor (mismo user_id): no hay migracion que pueda salir mal.
@@ -6209,6 +6425,10 @@ async function welConGoogle(){
 
 // ===== SETTINGS (doc 26): 7 grupos; persiste audio, calidad, efectos reducidos, daltonico, idioma =====
 function openSettings(){ applyShell(); buildSettings(); el('settings').classList.add('on'); }
+//+AG cerrar Ajustes era una linea suelta colgada del onclick de la ✕. Pasa a funcion porque ahora hay DOS
+//   puertas para lo mismo —la ✕ y el boton atras del movil— y "el atras hace lo mismo que la ✕" tiene que
+//   ser cierto por construccion, no por que dos sitios digan hoy la misma frase.
+function closeSettings(){ el('settings').classList.remove('on'); }
 //+AG PANTALLA COMPLETA opcional (nunca forzada). iOS Safari NO tiene la API de fullscreen, asi que un
 //  auto-fullscreen dejaria el juego roto en medio parque movil; y donde SI existe hace falta un gesto del
 //  usuario. Por eso: boton en Ajustes, y la fila ni aparece donde el navegador no lo soporta.
@@ -6222,8 +6442,144 @@ function toggleFullscreen(){
   }catch(err){ toast(S().setFsFail); }
 }
 //+AG al entrar/salir de pantalla completa cambia el alto visible: re-ajustar y refrescar el interruptor
-addEventListener('fullscreenchange', ()=>{ fitViewport(); if(el('settings').classList.contains('on')) buildSettings(); });
-addEventListener('webkitfullscreenchange', ()=>{ fitViewport(); if(el('settings').classList.contains('on')) buildSettings(); });
+addEventListener('fullscreenchange', ()=>{ fitViewport(); pintaFs(); if(el('settings').classList.contains('on')) buildSettings(); });
+addEventListener('webkitfullscreenchange', ()=>{ fitViewport(); pintaFs(); if(el('settings').classList.contains('on')) buildSettings(); });
+
+//+AG ══ ICONO EN LA PANTALLA DE INICIO (PWA) ═══════════════════════════════════════════════════════
+//   Jaime, 2-ago: "como es una pagina web y no es una app, la gente esta acostumbrada a clicar en el
+//   icono y directamente jugar... a lo mejor se puede preguntar, sobre todo cuando se juega por primera
+//   vez, el crear un icono en el escritorio de Android o del que sea". El manifest y los iconos ya viajan
+//   (ver las etiquetas del <head>); esto es solo el AVISO, y el momento aprobado es al volver al menu
+//   despues de terminar la PRIMERA partida — nunca al entrar, que seria un muro antes de jugar.
+//
+//   LA MARCA DE "YA SE LO HE OFRECIDO" VA EN localStorage SUELTO, NO EN SAVE. Instalar es una decision de
+//   ESTE aparato: SAVE viaja a la nube, asi que meterla ahi silenciaria el aviso en el movil nuevo del
+//   jugador, que es justo donde hace falta.
+const PWA_KEY='bt_pwa_ofrecido';
+let pwaEvento=null;    // el beforeinstallprompt guardado (Android/Chromium)
+let pwaPend=false;     // "acabo de terminar mi PRIMERA partida"
+//+AG con display:"fullscreen" la app instalada casa con `fullscreen`, no con `standalone`; y iOS < 16.4 no
+//   entiende display-mode y solo delata el navigator.standalone suyo. Se preguntan los cuatro.
+//   ⚠ LAS TRES SON `function` Y NO `const`, Y ESO NO ES ESTILO. pwaInstalado() se llama desde el
+//   apunta('session_start') de MUY arriba, que corre mientras el script se ejecuta de una tirada; con un
+//   `const` aqui abajo eso es leerla antes de inicializarla, o sea un ReferenceError que tumba el script
+//   entero y deja el juego EN NEGRO sin pintar una sola pantalla. Una funcion declarada se iza y da igual
+//   el orden. Es el mismo tipo de trampa que el `const` repetido documentado en el gestor del atras.
+function pwaInstalado(){ return ['fullscreen','standalone','minimal-ui'].some(m=>matchMedia('(display-mode:'+m+')').matches)
+  || navigator.standalone===true; }
+function pwaIOS(){ return /iPad|iPhone|iPod/.test(navigator.userAgent)
+  || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1); }
+//+AG los navegadores DENTRO de otra app (Instagram, Facebook, TikTok, WebView) no tienen "Anadir a inicio":
+//   ensenarles la guia de iPhone es mandarles a buscar un boton que no existe.
+function pwaEnvoltorio(){ return /FBAN|FBAV|Instagram|Line\/|Twitter|TikTok|; wv\)/.test(navigator.userAgent); }
+//+AG EL EVENTO LLEGA PRONTO Y SOLO UNA VEZ, asi que hay que estar escuchando desde el arranque aunque el
+//   aviso se ensene mucho despues. El preventDefault() quita el bocadillo del navegador (que no controlamos
+//   ni podemos traducir); a partir de ahi el momento lo elegimos nosotros.
+addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); pwaEvento=e; });
+addEventListener('appinstalled', ()=>{ try{ localStorage.setItem(PWA_KEY,'si'); }catch(e){}
+  pwaEvento=null; apunta('pwa_install',{ plat:'android', r:'si' }); pintaFs(); });
+//+AG LOS DOS apunta() DE AQUI ABAJO NECESITAN LA MIGRACION 0011 (supabase/migrations/0011_evento_
+//   instalacion_pwa.sql), porque app_event.name tiene lista blanca por CHECK. Se dejan ACTIVOS a
+//   proposito: mientras Jaime no la pegue en el SQL Editor, la telemetria es fire-and-forget y el insert
+//   se descarta sin romper nada (docs/52) — que es un riesgo mucho menor que dejar codigo comentado que
+//   nadie vuelve a encender. Cuando la migracion este aplicada, esto empieza a medir solo.
+const SVG_COMPARTIR='<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" style="vertical-align:-4px">'
+  +'<path d="M12 3v11M12 3l-3.2 3.2M12 3l3.2 3.2" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>'
+  +'<path d="M6.5 10H5.2A1.2 1.2 0 0 0 4 11.2v7.6A1.2 1.2 0 0 0 5.2 20h13.6a1.2 1.2 0 0 0 1.2-1.2v-7.6A1.2 1.2 0 0 0 18.8 10h-1.3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> ';
+async function ofreceIcono(){
+  if(!pwaPend) return; pwaPend=false;
+  if(pwaInstalado() || pwaEnvoltorio()) return;
+  try{ if(localStorage.getItem(PWA_KEY)) return; }catch(e){}
+  const marca=()=>{ try{ localStorage.setItem(PWA_KEY,'1'); }catch(e){} };
+  const s=S();
+  if(pwaEvento){                                        //+AG Android/Chromium: el dialogo de instalar es del sistema
+    //+AG en escritorio no se ofrece solo: el navegador ya pone su propio boton en la barra de direcciones,
+    //   y lo que pidio Jaime es el icono del MOVIL. Se conserva el evento por si algun dia se quiere.
+    if(!matchMedia('(pointer:coarse)').matches) return;
+    apunta('pwa_offer',{ plat:'android', via:'prompt' });
+    //+AG `suave` NO es opcional aqui: el boton de "si" de esta hoja es ROJO por defecto, y el rojo esta
+    //   reservado a lo que no tiene vuelta atras (borrar datos, abandonar la partida). Poner un icono en la
+    //   pantalla de inicio se deshace arrastrandolo a la papelera; pintarlo de rojo lo lee como una amenaza.
+    //   Se vio en la captura, no en el codigo.
+    if(!await ask(s.pwaTit, s.pwaBody, s.pwaYes, { no:s.pwaNo, suave:true })){
+      marca(); apunta('pwa_install',{ plat:'android', r:'no' }); return; }
+    //+AG prompt() EXIGE un gesto del usuario: por eso va pegado al SI de la hoja y nunca en un temporizador.
+    try{ await pwaEvento.prompt(); const r=await pwaEvento.userChoice;
+         apunta('pwa_install',{ plat:'android', r: r && r.outcome==='accepted' ? 'si' : 'no' }); }catch(e){}
+    pwaEvento=null; marca();
+  } else if(pwaIOS()){                                  //+AG iPhone: NO existe el evento, solo se puede ENSENAR
+    //+AG el icono de Compartir va dibujado y FUERA de la cadena traducida: emojis no se usan en este juego,
+    //   y meter marcado dentro del texto lo pagarian las 20 traducciones.
+    await ask(s.pwaIosTit, SVG_COMPARTIR+s.pwaIosBody, s.pwaIosOk, { sinCancelar:true, suave:true });
+    apunta('pwa_offer',{ plat:'ios', via:'guia' });
+    marca();
+  }
+}
+
+//+AG ══ EL BOTON DE PANTALLA COMPLETA DE LA PORTADA ═════════════════════════════════════════════════
+//   Peticion literal de Jaime (2-ago): "al lado de donde pone nivel un boton que sea el icono de full
+//   screen... que brille un poco al principio y que el jugador le de ahi... y que si le vuelves a dar se
+//   quite". Es el MISMO interruptor que la fila de Ajustes: llama a toggleFullscreen() y lee fsOn(), no
+//   duplica ni la deteccion ni el toggle. Lo suyo es solo el icono, la etiqueta y cuando aparece.
+//
+//   EL BRILLO, Y POR QUE NO ES `.ready`. El sistema .ready es el unico lenguaje de "pulsame" del juego y
+//   trae una regla dura: UNO por pantalla, o si todo brilla no brilla nada. En la portada ese uno ya es
+//   JUGAR (#hPlay nace con .ready y solo la suelta mientras la hoja de formato esta abierta). Un boton de
+//   40 px latiendo arriba a la vez que el CTA de abajo es exactamente lo que la regla prohibe, y el que
+//   cede es este, no JUGAR. Asi que se usa la OTRA mitad del mismo sistema, que existe para esto:
+//   `.justready`, el destello unico que ya llevan nitro/escudo porque son tres y no pueden latir juntos.
+//   Destella cada vez que se pinta la portada MIENTRAS no lo hayas usado; al primer toque, se acabo.
+//   La marca es de ESTE aparato (localStorage suelto), por lo mismo que la del aviso del icono.
+const FS_USADO='bt_fs_usado';
+//+AG las dos figuras son las MISMAS cuatro escuadras; lo unico que cambia es donde esta el codo: pegado a
+//   la esquina del cuadro = "abrir hasta el borde", recogido hacia el centro = "volver a encogerlo".
+//   ⚠ LOS CODOS DE `OUT` ESTABAN A 6 UNIDADES UNOS DE OTROS Y SE EMPASTABAN. A 21 px de uso, esas 6
+//   unidades son 5,2 px, y el contorno oscuro solo ya mide 4,7: las cuatro escuadras se tocaban y el
+//   icono se leia como un signo de mas, no como "salir de pantalla completa". Se ve MIRANDO la captura;
+//   los bancos daban verde igual, porque para ellos es un boton con su sombra y su tamano. Ahora van a 8
+//   unidades (7 px) con el contorno bajado a 5,4, que deja hueco de sobra entre las cuatro.
+const FS_D_IN =['M2 8V2h6','M22 8V2h-6','M2 16v6h6','M22 16v6h-6'];    // codos en las ESQUINAS  = entrar
+const FS_D_OUT=['M8 2v6H2','M16 2v6h6','M8 22v-6H2','M16 22v-6h6'];    // codos hacia el CENTRO = salir
+//+AG el trazo se pinta DOS veces —gordo y oscuro debajo, fino y blanco encima— porque es el unico modo de
+//   darle a un trazo SVG el contorno que llevan las barras de #hSet (ahi lo hace un box-shadow, que dentro
+//   de un SVG no existe). Mismo lenguaje, distinta herramienta.
+const fsIcono = (d) => '<svg viewBox="0 0 24 24" aria-hidden="true">'
+  + [['#7a4a00','5.4'],['#fff','2.6']].map(([col,w]) =>
+      '<g fill="none" stroke="'+col+'" stroke-width="'+w+'" stroke-linecap="round" stroke-linejoin="round">'
+      + d.map(p=>'<path d="'+p+'"/>').join('') + '</g>').join('') + '</svg>';
+//+AG ⚠ EL CENTINELA NO ES PARANOIA: renderHome() CORRE ANTES QUE ESTE BLOQUE. El selector de idioma se
+//   construye a mitad del fichero con un IIFE que llama a applyLang() -> relangScreens() -> renderHome(),
+//   y eso pasa mientras el script todavia se esta ejecutando, ~1.600 lineas antes de que existan FS_OK,
+//   fsIcono y los demas. Leer ahi un `const` sin inicializar es un ReferenceError; y como relangScreens()
+//   se traga las excepciones en un catch vacio, el sintoma NO seria un error en consola sino una portada
+//   a medio pintar, que es de lo peor que se puede depurar. Un `var` se iza valiendo undefined y no lanza
+//   nunca — por eso es `var` y no `let`, y por eso se enciende al final del bloque. Hasta ese momento no
+//   hay nada que pintar de todos modos: la portada no se ha ensenado todavia.
+var fsListo=false;
+function pintaFs(){
+  const b=el('hFs'); if(!b || !fsListo) return;
+  //+AG ya instalado = no hay barras de navegador que esconder, asi que el boton sobra. iPhone tampoco lo ve
+  //   nunca: alli FS_OK es falso porque Safari no tiene la API (por eso mismo la pantalla completa de este
+  //   juego es opcional y jamas se fuerza, docs/40 §3).
+  const sale = FS_OK && !pwaInstalado();
+  b.hidden = !sale; if(!sale) return;
+  const dentro=fsOn(), s=S();
+  b.innerHTML = fsIcono(dentro ? FS_D_OUT : FS_D_IN);
+  //+AG "Pantalla completa" ya existe en los 20 idiomas (es la fila de Ajustes): se reusa `setFs` y solo se
+  //   traduce la frase que faltaba, la de salir. Una clave nueva en vez de dos.
+  const txt = dentro ? s.fsExit : s.setFs;
+  b.title=txt; b.setAttribute('aria-label', txt);
+  let usado=false; try{ usado=!!localStorage.getItem(FS_USADO); }catch(e){}
+  //+AG re-disparar una animacion de un solo tiro pide quitar la clase, FORZAR REFLOW y volver a ponerla: sin
+  //   el reflow el navegador no ve cambio ninguno y no la repite.
+  b.classList.remove('justready');
+  if(!usado && !dentro){ void b.offsetWidth; b.classList.add('justready'); }
+}
+el('hFs').onclick=()=>{ try{ localStorage.setItem(FS_USADO,'1'); }catch(e){}
+  el('hFs').classList.remove('justready'); toggleFullscreen(); };
+//+AG a partir de aqui pintaFs() ya tiene todo lo que necesita (ver el centinela, arriba). Se pinta una vez
+//   por si la portada ya estaba en pantalla desde el arranque del idioma.
+fsListo=true; pintaFs();
 function setPersist(){ persist(); }
 function segRow(label, sub, opts, cur, onpick){ const r=document.createElement('div'); r.className='set-row';
   r.innerHTML=`<div class="lb">${label}${sub?`<small>${sub}</small>`:''}</div>`;
@@ -6260,7 +6616,11 @@ const SET_ICO={
   soporte:'<circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="3.7"/><path d="M5.9 5.9 L9.4 9.4"/><path d="M14.6 14.6 L18.1 18.1"/><path d="M18.1 5.9 L14.6 9.4"/><path d="M9.4 14.6 L5.9 18.1"/>',
   legal:'<path d="M12 4.4 V20.2"/><path d="M7.6 20.2 H16.4"/><path d="M4.6 7.6 H19.4"/><path d="M12 4.4 a1.6 1.6 0 0 0 0 3.2 a1.6 1.6 0 0 0 0-3.2 Z"/><path d="M4.6 7.6 L2.2 13.2 H7 Z"/><path d="M19.4 7.6 L17 13.2 H21.8 Z"/>' };
 const setIco=k=>SET_ICO[k] ? '<svg class="sc-ico" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'+SET_ICO[k]+'</g></svg>' : '';
-function grp(title, rows, ico){ const g=document.createElement('div'); g.className='set-grp'; g.innerHTML=`<h4>${setIco(ico)}<span>${title}</span></h4>`; rows.forEach(x=>g.appendChild(x)); return g; }
+//+AG el `ico` se queda ademas en data-k. Los 7 grupos de Ajustes no se podian nombrar desde fuera: para
+//   apuntar a uno habia que contar posiciones o buscar por su texto traducido, que es justo lo que se
+//   rompe al cambiar de idioma. Ahora que hay DOS filas con galon (Idioma y Cuenta), un banco que quiera
+//   la segunda tiene como pedirla. No lo lee ningun CSS: es un asidero para las pruebas.
+function grp(title, rows, ico){ const g=document.createElement('div'); g.className='set-grp'; g.dataset.k=ico||''; g.innerHTML=`<h4>${setIco(ico)}<span>${title}</span></h4>`; rows.forEach(x=>g.appendChild(x)); return g; }
 //+AG doc 38 Fase 2: BORRAR DATOS LOCALES con DOBLE confirmacion (obligacion legal basica). Resetea SAVE y recarga.
 async function wipeLocalData(){ const s=S();
   //+AG 2-ago: eran dos `confirm()` del navegador. Ahora las dos son la hoja del juego (ask()).
@@ -6323,7 +6683,7 @@ function buildSettings(){ const S2=SAVE.settings, b=el('setBody'); b.innerHTML='
   b.appendChild(grp(s.setA11y, [
     segRow(s.setCb, s.setCbSub, [['off',s.setCbOpts[0]],['prot',s.setCbOpts[1]],['deut',s.setCbOpts[2]],['trit',s.setCbOpts[3]]], S2.colorblind, v=>{ S2.colorblind=v; setPersist(); }) ], 'acceso'));
   //+AG CUENTA (Fase 3): identidad local + export/import + placeholder honesto de login
-  b.appendChild(grp(s.setAcctGrp, acctRows(), 'cuenta'));
+  b.appendChild(grp(s.setAcctGrp, [puertaCuenta()], 'cuenta'));
   //+AG SOPORTE: canje de codigo (enlazado tambien aqui), version de build, enlace al canal
   b.appendChild(grp(s.setSupport, [
     btnRow(s.setRedeemRow, s.setRedeemSub, s.cdBtn, ()=>{ el('settings').classList.remove('on'); openCode(); }),
@@ -6351,6 +6711,9 @@ async function acctEditName(){ const s=S(), cur=(SAVE.profile&&SAVE.profile.name
   const v=await pide(s.acctName, s.acctNamePrompt, cur, s.acctNameEdit, {selecciona:true, suave:true});
   if(v===null) return; const nn=v.trim().slice(0,16); if(!nn) return;
   if(!SAVE.profile) SAVE.profile={}; SAVE.profile.name=nn; persist(); toast(s.tNameSet);
+  //+AG el nombre se cambia AHORA desde Perfil > Cuenta, asi que hay que repintar esa fila: sin esto el
+  //   jugador cambiaba el nombre, veia el toast de "Nombre actualizado"... y la fila seguia con el viejo.
+  if(el('perfil').classList.contains('on')) wireEsteDispositivo();
   if(el('settings').classList.contains('on')) buildSettings(); renderHome(); }
 //+AG el respaldo de exportar NO pide nada: ENSEÑA el codigo cuando el portapapeles falla, ya
 //   seleccionado, para copiarlo a mano. Por eso su boton es "Cerrar" y no "Copiar": copiar es
@@ -6370,16 +6733,37 @@ async function acctImport(){ const s=S();
   await new Promise(r=>setTimeout(r, 340));
   if(!await ask(s.acctImport, s.acctImportConfirm, s.acctImportBtn)) return;
   if(loadProfile(code)){ toast(s.tImported); setTimeout(()=>location.reload(), 500); } else toast(s.tImportBad); }
-//+AG filas del grupo Cuenta (Ajustes). Identidad local + export/import + login en gris candado (cero login falso).
-function acctRows(){ const s=S(), p=SAVE.profile||{};
-  const idShort=(p.playerId||'').slice(0,8)+'…';
-  const lock=soonRow(s.acctConnect, s.acctConnectSub); lock.style.cursor='pointer'; lock.onclick=()=>toast(s.acctConnectToast);
-  return [
-    btnRow(s.acctName+': '+(p.name||'—'), null, s.acctNameEdit, acctEditName),
-    infoRow(s.acctPlayerId, idShort),
-    btnRow(s.acctExport, s.acctExportSub, s.acctExportBtn, acctExport),
-    btnRow(s.acctImport, s.acctImportSub, s.acctImportBtn, acctImport),
-    lock ];
+//+AG AJUSTES > CUENTA ES UNA PUERTA, NO UNA PANTALLA (2-ago, decision de Jaime: "es conflictivo... la
+//   gente se va a ajustes para ver las cosas de la cuenta"). Habia DOS sitios donde mirar tu cuenta —este
+//   grupo y Perfil > Cuenta— y el bueno era el otro: alli esta el login de Google de verdad, el correo, el
+//   traspaso y la placa de identidad. Dos pantallas para lo mismo es como se consigue que la gente no
+//   encuentre ninguna. Patron Brawl Stars: Ajustes tiene UNA fila con galon que te lleva.
+//   Las cuatro filas que SI hacian falta (nombre, ID, exportar, importar) no se han borrado: viven ahora en
+//   el bloque "Este dispositivo" de Perfil > Cuenta. La quinta ("Conectar cuenta online", gris con candado)
+//   se muere porque alli hay un boton de Google que funciona: un candado que promete lo que ya existe a una
+//   pantalla de distancia es peor que nada.
+//   Es hermana de la fila de IDIOMA a proposito: mismo .set-row + .set-go + galon, mismo hueco de valor.
+//   En el hueco va el correo si hay cuenta guardada y el nombre del jugador si no — que es lo que quien
+//   entra a mirar viene a comprobar, y no hace falta ni una cadena nueva para decirlo.
+function puertaCuenta(){ const s=S(), p=SAVE.profile||{};
+  const fila=document.createElement('div'); fila.className='set-row';
+  fila.innerHTML='<div class="lb"></div>';
+  fila.querySelector('.lb').textContent=s.prAccH;
+  const bt=document.createElement('button'); bt.type='button'; bt.className='set-go';
+  bt.innerHTML='<span class="sgv"></span><span class="sgc">›</span>';
+  let quien=p.name||'';
+  try{ const est=window.BT_NUBE && BT_NUBE.nube && BT_NUBE.nube.estadoCuenta();
+       if(est && est.entrado && !est.anonimo && est.email) quien=est.email; }catch(e){}
+  bt.querySelector('.sgv').textContent=quien;
+  bt.onclick=abreCuentaEnPerfil; fila.appendChild(bt);
+  return fila;
+}
+//+AG deja al jugador EN la pantalla, no en Perfil "a secas": se pulsa la sub-pestaña por su propia puerta
+//   (el mismo click que daria el dedo), asi que no hay una segunda forma de activarla que se pueda
+//   desincronizar con la de verdad el dia que esa pestaña haga algo mas al abrirse.
+function abreCuentaEnPerfil(){
+  closeSettings(); openPerfil();
+  const t=document.querySelector('#perfil .subtab[data-subtab="cuenta"]'); if(t) t.click();
 }
 
 // ===== CANJE DE CODIGO (doc 16): un uso por cuenta, premio fijo y anunciado, sin backend =====
@@ -6541,7 +6925,10 @@ let askResolve=null;
 function hojaPregunta(tit, cuerpo, si, campo, o){
   el('askTit').textContent = tit || '';
   el('askTx').innerHTML = coinify(cuerpo || '');
-  el('askNo').textContent = S().cancel;
+  //+AG el boton de "no" casi siempre es Cancelar, pero no siempre: a "¿Abandonar la partida?" se le
+  //   responde "Seguir jugando", que dice lo que pasa si lo pulsas. "Cancelar" ahi es ambiguo (¿cancelas
+  //   la partida o cancelas el abandono?). Por eso `o.no` puede traer su propia palabra.
+  el('askNo').textContent = (o && o.no) || S().cancel;
   const bs=el('askSi');
   bs.textContent = si || S().cancel;
   //+AG el rojo solo para lo que no tiene vuelta atras; ver el bloque del CSS.
@@ -6557,6 +6944,15 @@ function hojaPregunta(tit, cuerpo, si, campo, o){
     setTimeout(()=>{ try{ inp.focus(); if(campo.selecciona) inp.select(); }catch(e){} }, 380);
   }
   const w=el('askSheet'); w.classList.add('on'); w.setAttribute('aria-hidden','false');
+  //+AG ⚠ ESTA HOJA PUEDE ABRIRSE SIN UN TOQUE, y entonces el gestor del atras no se entera. Su disparador
+  //   es el click/keydown en captura, con la premisa —escrita alli— de que "todo cambio de capa nace de un
+  //   toque". Dejo de ser cierto con el aviso del icono de la pantalla de inicio, que sube desde un
+  //   temporizador al volver de la primera partida: sin esta linea la hoja se abria sin apilar entrada, y
+  //   el atras del movil, en vez de cerrarla, SACABA AL JUGADOR DEL JUEGO. Lo cazo el caso 5c del banco,
+  //   no la lectura del codigo. Se arregla en la puerta unica de la hoja y no en quien la llama, para que
+  //   valga tambien para el siguiente que la abra desde un temporizador. Es idempotente: si el toque ya
+  //   habia reconciliado, atrasSync() no encuentra nada que hacer.
+  setTimeout(atrasSync, 0);
   return new Promise(r=>{ askResolve=r; });
 }
 function ask(tit, cuerpo, si, o){ return hojaPregunta(tit, cuerpo, si, null, o).then(v => v !== false); }
@@ -6734,7 +7130,7 @@ if(el('hCode')) el('hCode').onclick=openCode;
 el('hSet').onclick=openSettings;
 el('onbGo').onclick=onbFinish; el('onbSkip').onclick=onbSkipFn;
 el('welGoogle').onclick=welConGoogle; el('welSkip').onclick=welSkipFn;   //+AG bienvenida: ofrecer Google / jugar ya
-el('setClose').onclick=()=>el('settings').classList.remove('on');
+el('setClose').onclick=closeSettings;
 el('codeOk').onclick=redeemCode; el('codeNo').onclick=closeCode;
 el('codeIn').addEventListener('keydown',e=>{ if(e.key==='Enter') redeemCode(); });
 //+AG doc 40: GUARDIA DE ENCAJE. Regla de producto (Jaime 2026-07-24): "todas las user interface deben cuadrar
@@ -6756,6 +7152,7 @@ el('codeIn').addEventListener('keydown',e=>{ if(e.key==='Enter') redeemCode(); }
 window.__fitCheck=function(w,h){
   const H=h||innerHeight, out=[], was=[...document.querySelectorAll('.scr.on')].map(e=>e.id);
   tblExpanded=false;   // se mide el estado POR DEFECTO; que la clasificacion desplegada a mano se desplace es lo esperado
+  const ZAFE=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--zafe'))||0;   //+AG el colchon anti-barra, en px; 0 en escritorio
   const SCREENS=['home','results','garaje','tienda','temporada','perfil','selector','ranking'];
   const PINTA={ home:renderHome, garaje:renderGaraje, tienda:renderTienda, temporada:openTemporada,
                 perfil:openPerfil, selector:paintSelector, ranking:paintRanking };   // results se pinta con setResultsStep, mas abajo
@@ -6785,10 +7182,17 @@ window.__fitCheck=function(w,h){
       const nom=d=>(d.id||d.className||d.tagName).toString().slice(0,32), scr=n+(st?(' · paso '+st):'');
       [e, ...e.querySelectorAll('*')].forEach(d=>{
         if(d.clientHeight<60) return;
-        const ov=getComputedStyle(d).overflowY;
+        const cs=getComputedStyle(d), ov=cs.overflowY;
         if(d!==e && ov==='visible') return;
         if(d!==e && d.dataset.fit==='scroll' && (ov==='auto'||ov==='scroll')) return;
-        const extra=d.scrollHeight-d.clientHeight;
+        //+AG EL COLCHON ANTI-BARRA NO ES CONTENIDO PERDIDO, asi que se descuenta. Es hueco vacio puesto a
+        //   proposito al fondo de las cajas que deslizan (--zafe, ver el CSS); sin descontarlo, el guardia
+        //   suspenderia .modegrid y compañia por 112 px que nadie echa de menos, y un aviso que salta
+        //   siempre es un aviso al que nadie mira. Se reconoce por el relleno de abajo —nadie mas pone
+        //   tanto— y no por una lista de selectores repetida aqui, que se desincronizaria del CSS al primer
+        //   cambio. Lo que queda tras la resta es el desborde REAL: la sensibilidad de 4 px sigue viva.
+        const pb=parseFloat(cs.paddingBottom)||0;
+        const extra=d.scrollHeight-d.clientHeight - (ZAFE && pb>=ZAFE ? pb : 0);
         if(extra>4) out.push({screen:scr, box:nom(d), eje:'alto', extra});
       });
       //+AG PUNTO CIEGO CAZADO EL 26-jul: esto solo miraba el ALTO. La fila de arriba de la Home pedia 473 px
@@ -6826,6 +7230,100 @@ else if(_onbParam==='1') startOnboarding();                                     
 else if((FRESH || _pend) && !SAVE.onboarded && _onbParam!=='0'){
   if(FRESH && !_pend && _welParam!=='0') startWelcome(); else startOnboarding();
 }
+
+//+AG ══ EL ATRAS DEL MOVIL YA NO TE ECHA DEL JUEGO (2-ago) ═══════════════════════════════════════════
+//   Hasta hoy, cualquier "atras" —el boton de Android o el gesto de borde— descargaba la pagina y te ibas
+//   del sitio, aunque solo tuvieras Ajustes abierto encima. Es el gesto que TODAS las apps del movil le
+//   han enseñado al jugador para decir "cierra esto", asi que aqui castigaba justo a quien hace lo normal.
+//   AHORA: cada capa abierta (una hoja, Ajustes, la ficha de bola, una pantalla que no es la portada, la
+//   partida) vale UNA entrada de historial. Atras se come una y cierra la capa de MAS ARRIBA, sin recargar
+//   ni perder nada. Desde la portada limpia no queda ninguna entrada nuestra y el navegador sale del sitio
+//   con normalidad — eso se respeta a proposito: inflar el historial para que no se pueda salir es el truco
+//   sucio que hace que el atras parezca roto, y ademas los navegadores ya no lo permiten del todo.
+//
+//   POR QUE UN RECONCILIADOR Y NO UN pushState EN CADA open*(): estas capas se abren y se cierran desde
+//   treinta sitios, y varias se cierran SOLAS por el camino — el "Canjear" de Ajustes cierra Ajustes y abre
+//   el dialogo; el final de partida quita el iframe y pone Resultados. Un push por puerta y un back por
+//   puerta se desincronizan el primer dia, y entonces un atras cierra DOS cosas de golpe o ninguna. Aqui la
+//   verdad la dice el DOM: despues de cada toque se cuenta cuantas capas hay abiertas y se ajusta el
+//   historial a ese numero. Asi, cerrar con la ✕ del juego devuelve su entrada sola (un history.back()
+//   nuestro, apuntado en atrasComiendo para que su popstate se reconozca como eco y no cierre nada mas: ese
+//   es el cierre en cascada que hay que evitar).
+//+AG la pila se llama PILA y no NAV porque NAV ya es el mapa de los botones [data-nav] 200 lineas mas
+//   arriba. Un `const` repetido en el mismo ambito no es un aviso: es un SyntaxError que tumba el script
+//   entero y deja el juego en negro sin pintar una sola pantalla (pasado y medido hoy mismo).
+const PILA = [];          // pila propia: ids de las capas abiertas, de arriba a abajo. Su largo = entradas apiladas
+let atrasComiendo = 0;     // entradas devueltas por nosotros: su popstate es un eco, no un atras del jugador
+//+AG DE LA DE MAS ARRIBA A LA DE MAS ABAJO, que es el orden en que se apilan en pantalla (no el del
+//   fichero): el atras cierra la de encima del todo, que es la unica que el jugador esta mirando.
+const ATRAS_CAPAS = [
+  { id:'ask',      abierta:()=>el('askSheet').classList.contains('on'),  cierra:()=>askCierra(false) },   // cerrar es decir que NO, como el velo
+  { id:'info',     abierta:()=>el('infoSheet').classList.contains('on'), cierra:closeInfo },
+  { id:'idioma',   abierta:()=>el('langSheet').classList.contains('on'), cierra:closeLangSheet },
+  { id:'formato',  abierta:()=>el('fmtSheet').classList.contains('on'),  cierra:closeSheet },
+  { id:'canje',    abierta:()=>el('code').style.display==='flex',        cierra:closeCode },
+  { id:'ajustes',  abierta:()=>el('settings').classList.contains('on'),  cierra:closeSettings },
+  { id:'ficha',    abierta:()=>el('gDetail').classList.contains('on'),   cierra:closeDetail },
+  //+AG LA PARTIDA NO SE CIERRA SOLA: SE PREGUNTA (decision de Jaime, 2-ago, mirando a Clash Royale —
+  //   "si estas en algun sitio critico puede salirte un pop-up: ¿estas seguro de que quieres
+  //   abandonar?"). Un atras sin querer a falta de dos metros de la meta no puede costarte la partida.
+  { id:'partida',  abierta:()=>!!gameFrameEl,                            cierra:preguntaAbandonar },
+  //+AG y la capa de abajo del todo: estar en una pantalla que no es la portada (Garaje, Tienda, MODOS,
+  //   Ranking, Temporada, Perfil, Resultados). Su atras es el mismo "‹ Inicio" que ya tienen todas.
+  { id:'pantalla', abierta:()=>!el('home').classList.contains('on'),     cierra:goHome },
+];
+//+AG ¿ABANDONAR LA PARTIDA? Se pregunta con la hoja del propio juego (la misma que jubilo a los
+//   confirm() del navegador), nunca con un dialogo del sistema.
+//   ⚠ Y EL HISTORIAL SE RECOLOCA SOLO, que es lo bonito de que la verdad la diga el DOM. La cuenta:
+//     jugando hay 1 capa (partida) y 1 entrada. Llega el atras -> el navegador se come la entrada, esto
+//     abre la hoja, y el reconciliador ve 2 capas (hoja + partida) con 0 entradas, asi que apila 2.
+//     Si dice "Seguir jugando": 1 capa y 2 entradas -> devuelve 1, y volvemos EXACTAMENTE al estado de
+//     antes, o sea que el siguiente atras vuelve a preguntar. Si dice "Abandonar": 0 capas y 2 entradas
+//     -> devuelve las 2 y desde la portada el atras ya saca del sitio. Ni un caso especial, ni un bucle:
+//     pushState no dispara popstate, y los history.go() propios se comen su eco por atrasComiendo.
+//   El "ya se esta preguntando" se lee del DOM y no de una bandera: una bandera que se quede en true por
+//   una excepcion deja la partida imposible de abandonar para siempre.
+function preguntaAbandonar(){
+  if(el('askSheet').classList.contains('on')) return;
+  const s=S();
+  //+AG sin `suave`: el boton va en rojo porque abandonar NO tiene vuelta atras (la partida se pierde),
+  //   que es la regla del color de la casa.
+  ask(s.quitTitle, s.quitBody, s.quitYes, { no:s.quitNo }).then(si=>{ if(si) goHome(); });
+}
+function atrasAbiertas(){ return ATRAS_CAPAS.filter(c=>{ try{ return !!c.abierta(); }catch(e){ return false; } }); }
+function atrasSync(){
+  const hoy = atrasAbiertas();
+  for(let i=PILA.length; i<hoy.length; i++) history.pushState({ bt:i+1 }, '');   // capa nueva = una entrada
+  const sobran = PILA.length - hoy.length;                                       // capas que se han ido = entradas a devolver
+  PILA.length=0; for(const c of hoy) PILA.push(c.id);
+  //+AG sin URL en el pushState (dos argumentos, no tres): la barra de direcciones no cambia nunca. Ademas de
+  //   que asi no hay enlaces raros que compartir, evita el pushState con url por file://, que Chrome tumba.
+  //+AG ⚠ SE CUENTAN VIAJES, NO ENTRADAS, y esta linea decia `+= sobran`. Un `history.go(-2)` es UN SOLO
+  //   viaje y dispara UN SOLO popstate (no dos, uno por escalon), asi que el contador se quedaba con un
+  //   eco de mas apuntado... y el SIGUIENTE atras del jugador —uno de verdad— se descartaba como eco:
+  //   no cerraba nada, se comia la entrada, y al segundo intento te ibas del sitio. Lo cazo el caso 5b de
+  //   tools/prueba-atras-navegador.mjs (abandonar una partida y empezar otra), no la lectura del codigo.
+  if(sobran>0){ atrasComiendo++; history.go(-sobran); }
+}
+addEventListener('popstate', ()=>{
+  if(atrasComiendo>0){ atrasComiendo--; return; }     // eco de un cierre nuestro: el trabajo ya esta hecho
+  const hoy = atrasAbiertas();
+  if(!hoy.length){ PILA.length=0; return; }        // portada limpia: que el navegador se lleve al jugador donde quiera
+  PILA.pop();                                      // la entrada ya se la ha comido el navegador
+  try{ hoy[0].cierra(); }catch(e){}               // hoy[0] es la de mas arriba: ATRAS_CAPAS va ordenado
+  //+AG un cierre puede llevarse mas de una capa por delante (goHome se lleva la partida Y la pantalla). No se
+  //   corrige aqui a mano: el reconciliador cuenta lo que queda y devuelve las entradas que sobren.
+  setTimeout(atrasSync, 0);
+});
+//+AG EL DISPARADOR ES EL TOQUE, y va en captura para que corra aunque el handler de turno pare la
+//   propagacion; dentro de un setTimeout para leer el DOM DESPUES de que ese handler haya abierto o cerrado
+//   lo suyo. Todo cambio de capa de este juego nace de un toque o de una tecla, asi que con esto no hay que
+//   tocar ninguna de las treinta puertas — y una puerta nueva queda cubierta el dia que se escriba.
+//   El fin de partida llega por postMessage y no por un toque, pero ahi la cuenta no cambia (se va la
+//   partida, entra Resultados: una capa por una), asi que el historial ya esta bien sin hacer nada.
+addEventListener('click',   ()=>setTimeout(atrasSync,0), true);
+addEventListener('keydown', ()=>setTimeout(atrasSync,0), true);
+atrasSync();
 </script>
 
 <!--+AG doc 41 bloque E: three solo para el fondo de la Home. Mismo CDN y misma version que usan

@@ -39,6 +39,9 @@ shell: {
   teamNames:['Rouge','Verte','Bleue','Jaune'],
   // — monnaies et commun —
   chispasWord:'Pièces', gemasWord:'Gemmes', close:'Fermer', cancel:'Annuler', settings:'Réglages',
+  quitTitle:'Quitter la partie ?', quitBody:'Si tu pars maintenant, tu perds ta progression dans cette partie.',
+  quitYes:'Quitter', quitNo:'Continuer à jouer',
+  prLocalH:'Cet appareil',
   langWord:'Langue', redeemTitle:'Utiliser un code', backHome:'Retour à l\'accueil', soonWord:'bientôt',
   mRecolecta:'RÉCOLTE', mSuelo:'SOL QUI RÉTRÉCIT',
   // — Garage —
@@ -153,6 +156,10 @@ shell: {
   setGfx:'Graphismes et performance', setQuality:'Qualité', setQualitySub:'détecte ton appareil tout seul',
   setQualityOpts:['Auto','Basse','Moyenne','Haute'], setRedFx:'Effets réduits', setRedFxSub:'moins de particules et de secousses',
   setFs:'Plein écran', setFsSub:'cache les barres du navigateur', setFsFail:'Ton navigateur a refusé le plein écran',
+  fsExit:'Quitter le plein écran',
+  pwaTit:'Mets-le sur ton écran', pwaBody:'Ajoute BallTrials à ton écran d\'accueil et lance le jeu d\'un seul geste.',
+  pwaYes:'Ajouter', pwaNo:'Pas maintenant',
+  pwaIosTit:'Sur l\'écran d\'accueil', pwaIosBody:'Touche <b>Partager</b> en bas, puis choisis <b>Sur l\'écran d\'accueil</b>.', pwaIosOk:'Compris',
   setAudio:'Audio', setSound:'Son', setSoundSub:'musique et effets',
   setA11y:'Accessibilité', setCb:'Mode daltonien', setCbSub:'en plus du codage forme+numéro',
   setCbOpts:['Off','Prot','Deut','Trit'],

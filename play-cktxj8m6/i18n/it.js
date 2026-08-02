@@ -39,6 +39,9 @@ shell: {
   teamNames:['Rossa','Verde','Blu','Gialla'],
   // — monete e comuni —
   chispasWord:'Monete', gemasWord:'Gemme', close:'Chiudi', cancel:'Annulla', settings:'Impostazioni',
+  quitTitle:'Abbandonare la partita?', quitBody:'Se esci ora perdi i progressi di questa partita.',
+  quitYes:'Abbandona', quitNo:'Continua a giocare',
+  prLocalH:'Questo dispositivo',
   langWord:'Lingua', redeemTitle:'Riscatta codice', backHome:'Torna alla home', soonWord:'presto',
   mRecolecta:'RACCOLTA', mSuelo:'PAVIMENTO CHE SI RESTRINGE',
   // — Garage —
@@ -153,6 +156,10 @@ shell: {
   setGfx:'Grafica e prestazioni', setQuality:'Qualità', setQualitySub:'rileva il tuo dispositivo da sola',
   setQualityOpts:['Auto','Bassa','Media','Alta'], setRedFx:'Effetti ridotti', setRedFxSub:'meno particelle e scosse',
   setFs:'Schermo intero', setFsSub:'nasconde le barre del browser', setFsFail:'Il tuo browser non ha permesso lo schermo intero',
+  fsExit:'Esci da schermo intero',
+  pwaTit:'Mettilo sul tuo schermo', pwaBody:'Aggiungi BallTrials alla schermata Home ed entra in partita con un tocco.',
+  pwaYes:'Aggiungi', pwaNo:'Non ora',
+  pwaIosTit:'Aggiungi a Home', pwaIosBody:'Tocca <b>Condividi</b> in basso e scegli <b>Aggiungi a Home</b>.', pwaIosOk:'Ho capito',
   setAudio:'Audio', setSound:'Suono', setSoundSub:'musica ed effetti',
   setA11y:'Accessibilità', setCb:'Modalità daltonici', setCbSub:'oltre alla codifica forma+numero',
   setCbOpts:['Off','Prot','Deut','Trit'],

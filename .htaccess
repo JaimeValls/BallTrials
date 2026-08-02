@@ -1,3 +1,4 @@
 AddType text/javascript .mjs
 AddType video/webm .webm
 AddType audio/mpeg .mp3
+AddType application/manifest+json .webmanifest

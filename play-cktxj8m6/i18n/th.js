@@ -40,6 +40,9 @@ shell: {
   teamNames:['แดง','เขียว','น้ำเงิน','เหลือง'],
   // — สกุลเงินและคำทั่วไป —
   chispasWord:'เหรียญ', gemasWord:'อัญมณี', close:'ปิด', cancel:'ยกเลิก', settings:'ตั้งค่า',
+  quitTitle:'ออกจากแมตช์?', quitBody:'ถ้าออกตอนนี้ ความคืบหน้าในแมตช์นี้จะหายไป',
+  quitYes:'ออก', quitNo:'เล่นต่อ',
+  prLocalH:'อุปกรณ์นี้',
   langWord:'ภาษา', redeemTitle:'ใช้โค้ด', backHome:'กลับหน้าแรก', soonWord:'เร็ว ๆ นี้',
   mRecolecta:'เก็บอัญมณี', mSuelo:'พื้นหด',
   // — โรงรถ —
@@ -154,6 +157,10 @@ shell: {
   setGfx:'กราฟิกและประสิทธิภาพ', setQuality:'คุณภาพ', setQualitySub:'ตรวจจับเครื่องของคุณเอง',
   setQualityOpts:['อัตโนมัติ','ต่ำ','กลาง','สูง'], setRedFx:'ลดเอฟเฟกต์', setRedFxSub:'อนุภาคและการสั่นน้อยลง',
   setFs:'เต็มจอ', setFsSub:'ซ่อนแถบของเบราว์เซอร์', setFsFail:'เบราว์เซอร์ไม่อนุญาตให้เต็มจอ',
+  fsExit:'ออกจากเต็มหน้าจอ',
+  pwaTit:'เอาไปไว้บนหน้าจอเลย', pwaBody:'เพิ่ม BallTrials ไปที่หน้าจอโฮม แล้วแตะครั้งเดียวก็เล่นได้เลย',
+  pwaYes:'เพิ่ม', pwaNo:'ไว้ก่อน',
+  pwaIosTit:'เพิ่มไปยังโฮมสกรีน', pwaIosBody:'แตะ <b>แชร์</b> ด้านล่าง แล้วเลือก <b>เพิ่มไปยังโฮมสกรีน</b>', pwaIosOk:'เข้าใจแล้ว',
   setAudio:'เสียง', setSound:'เสียง', setSoundSub:'เพลงและเอฟเฟกต์',
   setA11y:'การเข้าถึง', setCb:'โหมดตาบอดสี', setCbSub:'เพิ่มจากการใช้รูปทรงและตัวเลข',
   setCbOpts:['ปิด','Prot','Deut','Trit'],

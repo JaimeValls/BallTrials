@@ -47,6 +47,9 @@ shell: {
   teamNames:['الأحمر','الأخضر','الأزرق','الأصفر'],
   // — العملات والعام —
   chispasWord:'عملات', gemasWord:'جواهر', close:'إغلاق', cancel:'إلغاء', settings:'الإعدادات',
+  quitTitle:'هل تريد ترك المباراة؟', quitBody:'إذا خرجت الآن ستفقد تقدمك في هذه المباراة.',
+  quitYes:'ترك', quitNo:'متابعة اللعب',
+  prLocalH:'هذا الجهاز',
   langWord:'اللغة', redeemTitle:'استخدام رمز', backHome:'العودة إلى الرئيسية', soonWord:'قريبًا',
   mRecolecta:'الجمع', mSuelo:'الأرضية المتقلّصة',
   // — الكراج —
@@ -161,6 +164,10 @@ shell: {
   setGfx:'الرسوم والأداء', setQuality:'الجودة', setQualitySub:'تكتشف جهازك تلقائيًا',
   setQualityOpts:['تلقائي','منخفضة','متوسطة','عالية'], setRedFx:'مؤثرات مخفّفة', setRedFxSub:'جسيمات واهتزازات أقل',
   setFs:'ملء الشاشة', setFsSub:'يخفي أشرطة المتصفّح', setFsFail:'متصفّحك لم يسمح بملء الشاشة',
+  fsExit:'إنهاء ملء الشاشة',
+  pwaTit:'ضعها على شاشتك', pwaBody:'أضف BallTrials إلى شاشتك الرئيسية وادخل اللعبة بلمسة واحدة.',
+  pwaYes:'إضافة', pwaNo:'ليس الآن',
+  pwaIosTit:'إضافة إلى الشاشة الرئيسية', pwaIosBody:'المس <b>مشاركة</b> في الأسفل ثم اختر <b>إضافة إلى الشاشة الرئيسية</b>.', pwaIosOk:'فهمت',
   setAudio:'الصوت', setSound:'الصوت', setSoundSub:'الموسيقى والمؤثرات',
   setA11y:'سهولة الوصول', setCb:'وضع عمى الألوان', setCbSub:'إضافةً إلى الترميز بالشكل والرقم',
   setCbOpts:['إيقاف','Prot','Deut','Trit'],

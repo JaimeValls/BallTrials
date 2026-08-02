@@ -40,6 +40,9 @@ shell: {
   teamNames:['レッド','グリーン','ブルー','イエロー'],
   // — 通貨・共通 —
   chispasWord:'コイン', gemasWord:'ジェム', close:'閉じる', cancel:'キャンセル', settings:'設定',
+  quitTitle:'マッチをやめる？', quitBody:'今やめると、このマッチの進行はなくなるよ。',
+  quitYes:'やめる', quitNo:'つづける',
+  prLocalH:'この端末',
   langWord:'言語', redeemTitle:'コードを使う', backHome:'ホームに戻る', soonWord:'近日',
   mRecolecta:'コレクト', mSuelo:'縮む床',
   // — ガレージ —
@@ -154,6 +157,10 @@ shell: {
   setGfx:'グラフィックと動作', setQuality:'画質', setQualitySub:'端末を自動で判定します',
   setQualityOpts:['自動','低','中','高'], setRedFx:'エフェクト控えめ', setRedFxSub:'粒子と画面ゆれを減らす',
   setFs:'全画面', setFsSub:'ブラウザのバーを隠す', setFsFail:'ブラウザが全画面を許可しませんでした',
+  fsExit:'フルスクリーンを終了',
+  pwaTit:'ホーム画面に置こう', pwaBody:'BallTrials をホーム画面に追加すれば、ワンタップですぐ遊べるよ。',
+  pwaYes:'追加する', pwaNo:'あとで',
+  pwaIosTit:'ホーム画面に追加', pwaIosBody:'下の <b>共有</b> をタップして、<b>ホーム画面に追加</b> をえらんでね。', pwaIosOk:'わかった',
   setAudio:'サウンド', setSound:'音', setSoundSub:'音楽と効果音',
   setA11y:'アクセシビリティ', setCb:'色覚サポート', setCbSub:'形＋番号の表示に加えて',
   setCbOpts:['オフ','Prot','Deut','Trit'],

@@ -41,6 +41,9 @@ shell: {
   teamNames:['Rot','Grün','Blau','Gelb'],
   // — Währungen und Allgemeines —
   chispasWord:'Münzen', gemasWord:'Gems', close:'Schließen', cancel:'Abbrechen', settings:'Einstellungen',
+  quitTitle:'Match verlassen?', quitBody:'Wenn du jetzt gehst, ist dein Fortschritt in diesem Match weg.',
+  quitYes:'Verlassen', quitNo:'Weiterspielen',
+  prLocalH:'Dieses Gerät',
   langWord:'Sprache', redeemTitle:'Code einlösen', backHome:'Zurück zum Start', soonWord:'bald',
   mRecolecta:'SAMMELN', mSuelo:'SCHRUMPFENDER BODEN',
   // — Garage —
@@ -155,6 +158,10 @@ shell: {
   setGfx:'Grafik und Leistung', setQuality:'Qualität', setQualitySub:'erkennt dein Gerät von allein',
   setQualityOpts:['Auto','Niedrig','Mittel','Hoch'], setRedFx:'Weniger Effekte', setRedFxSub:'weniger Partikel und Wackeln',
   setFs:'Vollbild', setFsSub:'blendet die Browserleisten aus', setFsFail:'Dein Browser hat Vollbild abgelehnt',
+  fsExit:'Vollbild beenden',
+  pwaTit:'Pack es auf deinen Bildschirm', pwaBody:'Füge BallTrials zu deinem Home-Bildschirm hinzu und spiel mit einem Tippen los.',
+  pwaYes:'Hinzufügen', pwaNo:'Jetzt nicht',
+  pwaIosTit:'Zum Home-Bildschirm', pwaIosBody:'Tippe unten auf <b>Teilen</b> und wähle <b>Zum Home-Bildschirm</b>.', pwaIosOk:'Alles klar',
   setAudio:'Audio', setSound:'Ton', setSoundSub:'Musik und Effekte',
   setA11y:'Barrierefreiheit', setCb:'Farbenblind-Modus', setCbSub:'zusätzlich zur Form+Zahl-Kodierung',
   setCbOpts:['Aus','Prot','Deut','Trit'],

@@ -39,6 +39,9 @@ shell: {
   teamNames:['Rood','Groen','Blauw','Geel'],
   // — valuta en algemeen —
   chispasWord:'Munten', gemasWord:'Edelstenen', close:'Sluiten', cancel:'Annuleren', settings:'Instellingen',
+  quitTitle:'Match verlaten?', quitBody:'Als je nu stopt, ben je je voortgang in deze match kwijt.',
+  quitYes:'Verlaten', quitNo:'Blijf spelen',
+  prLocalH:'Dit apparaat',
   langWord:'Taal', redeemTitle:'Code inwisselen', backHome:'Terug naar start', soonWord:'binnenkort',
   mRecolecta:'VERZAMELEN', mSuelo:'KRIMPENDE VLOER',
   // — Garage —
@@ -153,6 +156,10 @@ shell: {
   setGfx:'Grafisch en prestaties', setQuality:'Kwaliteit', setQualitySub:'herkent je apparaat vanzelf',
   setQualityOpts:['Auto','Laag','Gemiddeld','Hoog'], setRedFx:'Minder effecten', setRedFxSub:'minder deeltjes en geschud',
   setFs:'Volledig scherm', setFsSub:'verbergt de browserbalken', setFsFail:'Je browser stond volledig scherm niet toe',
+  fsExit:'Volledig scherm sluiten',
+  pwaTit:'Zet hem op je scherm', pwaBody:'Voeg BallTrials toe aan je beginscherm en speel met één tik.',
+  pwaYes:'Toevoegen', pwaNo:'Nu niet',
+  pwaIosTit:'Zet op beginscherm', pwaIosBody:'Tik onderaan op <b>Deel</b> en kies <b>Zet op beginscherm</b>.', pwaIosOk:'Begrepen',
   setAudio:'Audio', setSound:'Geluid', setSoundSub:'muziek en effecten',
   setA11y:'Toegankelijkheid', setCb:'Kleurenblindmodus', setCbSub:'bovenop de vorm+nummer-codering',
   setCbOpts:['Uit','Prot','Deut','Trit'],

@@ -41,6 +41,9 @@ shell: {
   teamNames:['紅隊','綠隊','藍隊','黃隊'],
   // — 貨幣與通用 —
   chispasWord:'金幣', gemasWord:'寶石', close:'關閉', cancel:'取消', settings:'設定',
+  quitTitle:'要退出比賽嗎？', quitBody:'現在退出，這場比賽的進度就沒了。',
+  quitYes:'退出', quitNo:'繼續玩',
+  prLocalH:'這台裝置',
   langWord:'語言', redeemTitle:'兌換序號', backHome:'回到首頁', soonWord:'快了',
   mRecolecta:'收集戰', mSuelo:'崩塌地板',
   // — 車庫 —
@@ -155,6 +158,10 @@ shell: {
   setGfx:'畫面與效能', setQuality:'品質', setQualitySub:'自動辨識你的裝置',
   setQualityOpts:['自動','低','中','高'], setRedFx:'減弱特效', setRedFxSub:'減少粒子和震動',
   setFs:'全螢幕', setFsSub:'把瀏覽器的工具列藏起來', setFsFail:'你的瀏覽器不允許全螢幕',
+  fsExit:'結束全螢幕',
+  pwaTit:'把它放到你的螢幕上', pwaBody:'把 BallTrials 加入主畫面，一點就能開玩。',
+  pwaYes:'加入', pwaNo:'以後再說',
+  pwaIosTit:'加入主畫面', pwaIosBody:'點下面的 <b>分享</b>，然後選擇 <b>加入主畫面</b>。', pwaIosOk:'知道了',
   setAudio:'聲音', setSound:'聲音', setSoundSub:'音樂和音效',
   setA11y:'無障礙', setCb:'色盲模式', setCbSub:'在形狀+編號之外再加一層',
   setCbOpts:['關閉','Prot','Deut','Trit'],

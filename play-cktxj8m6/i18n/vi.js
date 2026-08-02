@@ -39,6 +39,9 @@ shell: {
   teamNames:['Đỏ','Xanh lá','Xanh dương','Vàng'],
   // — tiền tệ và dùng chung —
   chispasWord:'Xu', gemasWord:'Đá quý', close:'Đóng', cancel:'Hủy', settings:'Cài đặt',
+  quitTitle:'Thoát trận đấu?', quitBody:'Nếu thoát bây giờ, bạn sẽ mất tiến độ của trận này.',
+  quitYes:'Thoát', quitNo:'Chơi tiếp',
+  prLocalH:'Thiết bị này',
   langWord:'Ngôn ngữ', redeemTitle:'Nhập mã', backHome:'Về trang chính', soonWord:'sắp có',
   mRecolecta:'THU GOM', mSuelo:'SÀN CO LẠI',
   // — Nhà xe —
@@ -153,6 +156,10 @@ shell: {
   setGfx:'Đồ họa và hiệu năng', setQuality:'Chất lượng', setQualitySub:'tự nhận diện thiết bị của bạn',
   setQualityOpts:['Tự động','Thấp','Trung bình','Cao'], setRedFx:'Giảm hiệu ứng', setRedFxSub:'ít hạt và ít rung hơn',
   setFs:'Toàn màn hình', setFsSub:'ẩn các thanh của trình duyệt', setFsFail:'Trình duyệt không cho bật toàn màn hình',
+  fsExit:'Thoát toàn màn hình',
+  pwaTit:'Đặt lên màn hình của bạn', pwaBody:'Thêm BallTrials vào Màn hình chính và vào chơi chỉ với một chạm.',
+  pwaYes:'Thêm', pwaNo:'Để sau',
+  pwaIosTit:'Thêm vào MH chính', pwaIosBody:'Chạm <b>Chia sẻ</b> ở dưới rồi chọn <b>Thêm vào MH chính</b>.', pwaIosOk:'Đã hiểu',
   setAudio:'Âm thanh', setSound:'Âm thanh', setSoundSub:'nhạc và hiệu ứng',
   setA11y:'Trợ năng', setCb:'Chế độ mù màu', setCbSub:'bổ sung cho mã hóa bằng hình dạng và số',
   setCbOpts:['Tắt','Prot','Deut','Trit'],

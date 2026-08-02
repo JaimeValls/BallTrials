@@ -41,6 +41,9 @@ shell: {
   teamNames:['Czerwoni','Zieloni','Niebiescy','Żółci'],
   // — waluty i wspólne —
   chispasWord:'Monety', gemasWord:'Klejnoty', close:'Zamknij', cancel:'Anuluj', settings:'Ustawienia',
+  quitTitle:'Opuścić mecz?', quitBody:'Jeśli teraz wyjdziesz, stracisz postęp w tym meczu.',
+  quitYes:'Opuść', quitNo:'Graj dalej',
+  prLocalH:'To urządzenie',
   langWord:'Język', redeemTitle:'Wpisz kod', backHome:'Powrót na start', soonWord:'wkrótce',
   mRecolecta:'ZBIERANIE', mSuelo:'KURCZĄCA SIĘ PODŁOGA',
   // — Garaż —
@@ -155,6 +158,10 @@ shell: {
   setGfx:'Grafika i wydajność', setQuality:'Jakość', setQualitySub:'sama wykrywa twoje urządzenie',
   setQualityOpts:['Auto','Niska','Średnia','Wysoka'], setRedFx:'Mniej efektów', setRedFxSub:'mniej cząstek i wstrząsów',
   setFs:'Pełny ekran', setFsSub:'chowa paski przeglądarki', setFsFail:'Przeglądarka nie pozwoliła na pełny ekran',
+  fsExit:'Wyjdź z pełnego ekranu',
+  pwaTit:'Wrzuć go na swój ekran', pwaBody:'Dodaj BallTrials do ekranu początkowego i graj jednym dotknięciem.',
+  pwaYes:'Dodaj', pwaNo:'Nie teraz',
+  pwaIosTit:'Do ekranu początkowego', pwaIosBody:'Dotknij <b>Udostępnij</b> na dole i wybierz <b>Do ekranu początkowego</b>.', pwaIosOk:'Jasne',
   setAudio:'Dźwięk', setSound:'Dźwięk', setSoundSub:'muzyka i efekty',
   setA11y:'Dostępność', setCb:'Tryb dla daltonistów', setCbSub:'oprócz kodowania kształtem i numerem',
   setCbOpts:['Wył.','Prot','Deut','Trit'],

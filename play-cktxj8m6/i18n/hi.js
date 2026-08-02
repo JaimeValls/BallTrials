@@ -40,6 +40,9 @@ shell: {
   teamNames:['लाल','हरी','नीली','पीली'],
   // — मुद्राएँ और सामान्य —
   chispasWord:'सिक्के', gemasWord:'रत्न', close:'बंद करें', cancel:'रद्द करें', settings:'सेटिंग्स',
+  quitTitle:'मैच छोड़ें?', quitBody:'अभी छोड़ा तो इस मैच की प्रगति चली जाएगी।',
+  quitYes:'छोड़ें', quitNo:'खेलते रहें',
+  prLocalH:'यह डिवाइस',
   langWord:'भाषा', redeemTitle:'कोड भुनाएँ', backHome:'होम पर वापस', soonWord:'जल्द',
   mRecolecta:'संग्रह', mSuelo:'सिकुड़ता फ़र्श',
   // — गैराज —
@@ -154,6 +157,10 @@ shell: {
   setGfx:'ग्राफ़िक्स और प्रदर्शन', setQuality:'क्वालिटी', setQualitySub:'आपका डिवाइस ख़ुद पहचानती है',
   setQualityOpts:['ऑटो','कम','मध्यम','ज़्यादा'], setRedFx:'कम असर', setRedFxSub:'कम कण और कम हिलना',
   setFs:'पूरी स्क्रीन', setFsSub:'ब्राउज़र की पट्टियाँ छिपाता है', setFsFail:'आपके ब्राउज़र ने पूरी स्क्रीन नहीं दी',
+  fsExit:'फ़ुल स्क्रीन से बाहर',
+  pwaTit:'इसे अपनी स्क्रीन पर रखो', pwaBody:'BallTrials को होम स्क्रीन में जोड़ो और एक टैप में खेलना शुरू करो।',
+  pwaYes:'जोड़ें', pwaNo:'अभी नहीं',
+  pwaIosTit:'होम स्क्रीन में जोड़ें', pwaIosBody:'नीचे <b>शेयर करें</b> दबाओ, फिर <b>होम स्क्रीन में जोड़ें</b> चुनो।', pwaIosOk:'समझ गया',
   setAudio:'ऑडियो', setSound:'आवाज़', setSoundSub:'संगीत और असर',
   setA11y:'सुगम्यता', setCb:'वर्णांध मोड', setCbSub:'आकार+नंबर कोडिंग के अलावा',
   setCbOpts:['बंद','Prot','Deut','Trit'],

@@ -40,6 +40,9 @@ shell: {
   teamNames:['红队','绿队','蓝队','黄队'],
   // — 货币与通用 —
   chispasWord:'金币', gemasWord:'宝石', close:'关闭', cancel:'取消', settings:'设置',
+  quitTitle:'要退出比赛吗？', quitBody:'现在退出，这场比赛的进度就没了。',
+  quitYes:'退出', quitNo:'继续玩',
+  prLocalH:'这台设备',
   langWord:'语言', redeemTitle:'兑换码', backHome:'回到主页', soonWord:'快了',
   mRecolecta:'收集战', mSuelo:'塌缩地板',
   // — 车库 —
@@ -154,6 +157,10 @@ shell: {
   setGfx:'画面与性能', setQuality:'画质', setQualitySub:'自动识别你的设备',
   setQualityOpts:['自动','低','中','高'], setRedFx:'减弱特效', setRedFxSub:'减少粒子和震屏',
   setFs:'全屏', setFsSub:'隐藏浏览器的工具栏', setFsFail:'你的浏览器不允许全屏',
+  fsExit:'退出全屏',
+  pwaTit:'把它放到你的屏幕上', pwaBody:'把 BallTrials 添加到主屏幕，一点就能开玩。',
+  pwaYes:'添加', pwaNo:'以后再说',
+  pwaIosTit:'添加到主屏幕', pwaIosBody:'点下面的 <b>共享</b>，然后选择 <b>添加到主屏幕</b>。', pwaIosOk:'知道了',
   setAudio:'声音', setSound:'声音', setSoundSub:'音乐和音效',
   setA11y:'无障碍', setCb:'色盲模式', setCbSub:'在形状+编号之外再加一层',
   setCbOpts:['关闭','Prot','Deut','Trit'],

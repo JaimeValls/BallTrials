@@ -40,6 +40,9 @@ shell: {
   teamNames:['레드','그린','블루','옐로'],
   // — 재화와 공통 —
   chispasWord:'코인', gemasWord:'젬', close:'닫기', cancel:'취소', settings:'설정',
+  quitTitle:'경기를 나갈까요?', quitBody:'지금 나가면 이 경기의 진행 상황이 사라져요.',
+  quitYes:'나가기', quitNo:'계속하기',
+  prLocalH:'이 기기',
   langWord:'언어', redeemTitle:'코드 사용', backHome:'홈으로', soonWord:'곧',
   mRecolecta:'수집전', mSuelo:'줄어드는 바닥',
   // — 차고 —
@@ -154,6 +157,10 @@ shell: {
   setGfx:'그래픽과 성능', setQuality:'품질', setQualitySub:'기기를 알아서 감지해요',
   setQualityOpts:['자동','낮음','중간','높음'], setRedFx:'효과 줄이기', setRedFxSub:'입자와 화면 흔들림 감소',
   setFs:'전체 화면', setFsSub:'브라우저 바를 숨겨요', setFsFail:'브라우저가 전체 화면을 허용하지 않았어요',
+  fsExit:'전체 화면 끝내기',
+  pwaTit:'홈 화면에 두자', pwaBody:'BallTrials를 홈 화면에 추가하면 한 번만 눌러도 바로 플레이할 수 있어.',
+  pwaYes:'추가', pwaNo:'나중에',
+  pwaIosTit:'홈 화면에 추가', pwaIosBody:'아래 <b>공유</b>를 누르고 <b>홈 화면에 추가</b>를 선택해.', pwaIosOk:'알겠어',
   setAudio:'사운드', setSound:'소리', setSoundSub:'음악과 효과음',
   setA11y:'접근성', setCb:'색각 보조 모드', setCbSub:'모양+번호 표기에 더해서',
   setCbOpts:['끔','Prot','Deut','Trit'],

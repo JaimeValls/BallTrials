@@ -39,6 +39,9 @@ shell: {
   teamNames:['Vermelho','Verde','Azul','Amarelo'],
   // — moedas e comuns —
   chispasWord:'Moedas', gemasWord:'Gemas', close:'Fechar', cancel:'Cancelar', settings:'Ajustes',
+  quitTitle:'Sair da partida?', quitBody:'Se sair agora, perde o progresso desta partida.',
+  quitYes:'Sair', quitNo:'Continuar a jogar',
+  prLocalH:'Este dispositivo',
   langWord:'Idioma', redeemTitle:'Resgatar código', backHome:'Voltar ao início', soonWord:'logo',
   mRecolecta:'COLETA', mSuelo:'CHÃO QUE ENCOLHE',
   // — Garagem —
@@ -153,6 +156,10 @@ shell: {
   setGfx:'Gráficos e desempenho', setQuality:'Qualidade', setQualitySub:'detecta seu aparelho sozinho',
   setQualityOpts:['Auto','Baixa','Média','Alta'], setRedFx:'Efeitos reduzidos', setRedFxSub:'menos partículas e tremidas',
   setFs:'Tela cheia', setFsSub:'esconde as barras do navegador', setFsFail:'Seu navegador não permitiu tela cheia',
+  fsExit:'Sair da tela cheia',
+  pwaTit:'Coloque na sua tela', pwaBody:'Adicione o BallTrials à Tela de Início e entre no jogo com um toque.',
+  pwaYes:'Adicionar', pwaNo:'Agora não',
+  pwaIosTit:'Adicionar à Tela de Início', pwaIosBody:'Toque em <b>Compartilhar</b> embaixo e escolha <b>Adicionar à Tela de Início</b>.', pwaIosOk:'Entendi',
   setAudio:'Áudio', setSound:'Som', setSoundSub:'música e efeitos',
   setA11y:'Acessibilidade', setCb:'Modo daltônico', setCbSub:'além do código de forma+número',
   setCbOpts:['Off','Prot','Deut','Trit'],

@@ -41,6 +41,9 @@ shell: {
   teamNames:['Merah','Hijau','Biru','Kuning'],
   // — mata wang dan umum —
   chispasWord:'Syiling', gemasWord:'Permata', close:'Tutup', cancel:'Batal', settings:'Tetapan',
+  quitTitle:'Keluar dari perlawanan?', quitBody:'Kalau keluar sekarang, kemajuan dalam perlawanan ini hilang.',
+  quitYes:'Keluar', quitNo:'Terus main',
+  prLocalH:'Peranti ini',
   langWord:'Bahasa', redeemTitle:'Tebus kod', backHome:'Kembali ke laman utama', soonWord:'nanti',
   mRecolecta:'KUTIPAN', mSuelo:'LANTAI MENGECUT',
   // — Garaj —
@@ -155,6 +158,10 @@ shell: {
   setGfx:'Grafik dan prestasi', setQuality:'Kualiti', setQualitySub:'mengesan peranti awak sendiri',
   setQualityOpts:['Auto','Rendah','Sederhana','Tinggi'], setRedFx:'Kesan dikurangkan', setRedFxSub:'kurang zarah dan goncangan',
   setFs:'Skrin penuh', setFsSub:'menyembunyikan bar pelayar', setFsFail:'Pelayar awak tidak membenarkan skrin penuh',
+  fsExit:'Keluar skrin penuh',
+  pwaTit:'Letak pada skrin kamu', pwaBody:'Tambah BallTrials ke Skrin Utama dan terus main dengan satu sentuhan.',
+  pwaYes:'Tambah', pwaNo:'Nanti dulu',
+  pwaIosTit:'Tambah ke Skrin Utama', pwaIosBody:'Sentuh <b>Kongsi</b> di bawah, kemudian pilih <b>Tambah ke Skrin Utama</b>.', pwaIosOk:'Faham',
   setAudio:'Audio', setSound:'Bunyi', setSoundSub:'muzik dan kesan',
   setA11y:'Kebolehcapaian', setCb:'Mod buta warna', setCbSub:'sebagai tambahan kepada kod bentuk+nombor',
   setCbOpts:['Mati','Prot','Deut','Trit'],
