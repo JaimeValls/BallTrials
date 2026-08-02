@@ -34,7 +34,18 @@ const TXT = {
 //   "3º / 3rd / 第3名" escrito en cuatro sitios ya habia dado dos vocabularios del mismo dato.
 const T = l => (window.BTI18N ? BTI18N.tabla(l, 'veredicto', TXT[l] || TXT.en) : (TXT[l] || TXT.en));
 const ORD = (n, l) => (window.BTI18N ? BTI18N.ord(n, l) : n + '.');
-const MEDAL = { 1:'🏆', 2:'🥈', 3:'🥉' };
+//+AG 2-ago: la medalla del cartel de meta era EMOJI DEL SISTEMA (🏆🥈🥉) pegado a un numerote de
+//   56-104 px — el sitio mas mirado del juego entero. En Windows salen con cinta AZUL, un color que
+//   no existe en la paleta, y en cada movil se dibujan distinto. Ahora es la misma pieza de arte que
+//   ya usa Resultados (arte/ui/medalla-*.webp, encargo 31): asi el puesto se lee IGUAL en meta y en
+//   la pantalla siguiente, que es de lo que iba doc 60.
+//   ⚠ LA RUTA ES ../../ Y NO arte/: este modulo lo carga el motor, cuyo documento vive en
+//     motor/<modo>/index.html (tanto suelto como dentro del iframe del shell). Desde ahi, subir dos
+//     carpetas es prototipo/. Comprobado en captura real del cartel, en embed.
+//   ⚠ EL ?v= NO ES DECORACION: sin el, la CDN sirve la imagen vieja 7 dias. Mismo numero que el
+//     ART_V del shell (juego.html): las dos pintan EL MISMO fichero.
+const MEDAL = { 1:'oro', 2:'plata', 3:'bronce' };
+const MEDAL_IMG = p => MEDAL[p] ? '<img src="../../arte/ui/medalla-' + MEDAL[p] + '.webp?v=2" alt="">' : '';
 
 const CSS = `
   /*+AG mismo velo ÍNDIGO y misma Fredoka que el cartel de arranque: empezar y terminar son el mismo ritual
@@ -66,7 +77,15 @@ const CSS = `
      vecinas, y aquí la palabra más larga es "¡GANASTE!" a 100 px (docs/56 §3bis.1). */
   #btFin .p{ font-size:clamp(56px,17vw,104px); font-weight:900; letter-spacing:.02em; line-height:1.02;
     color:#fff; -webkit-text-stroke:.11em #241a3f; paint-order:stroke fill;
-    text-shadow:0 3px 0 #241a3f66, 0 6px 30px #000b; animation:btFinPop .42s cubic-bezier(.2,1.5,.4,1) both; }
+    text-shadow:0 3px 0 #241a3f66, 0 6px 30px #000b; animation:btFinPop .42s cubic-bezier(.2,1.5,.4,1) both;
+    display:flex; align-items:center; justify-content:center; gap:.08em; }
+  /*+AG la medalla se dimensiona en EM, NUNCA en px (leccion de docs/57, la misma que .r-place img del
+     shell): al lado de un "2o" de 56-104 px, una imagen de 22 px se ve como una pegatina perdida. En em
+     crece con el numerote en cualquier idioma y en cualquier ancho, porque el cuerpo es un clamp con vw.
+     El .86em es exactamente el que ya usa Resultados: la misma pieza se ve del mismo tamano relativo en
+     las dos pantallas seguidas. */
+  #btFin .p img{ width:.86em; height:.86em; object-fit:contain; flex:0 0 auto;
+    filter:drop-shadow(0 3px 8px #0009); }
   #btFin.win .p{ color:#ffd23f; text-shadow:0 6px 34px #fbb91566, 0 4px 22px #000a; font-size:clamp(40px,12vw,74px); }
   @keyframes btFinPop{ 0%{ transform:scale(.55); opacity:0; } 100%{ transform:scale(1); opacity:1; } }
   /*+AG doc 60 regla 10: son 3-4 palabras de rótulo ("¡En el podio!", "Campeón de la carrera"), no una
@@ -106,7 +125,11 @@ export function cantarPuesto({ place, total, lang = 'en', ms = 1700 } = {}, onDo
     const h = build();
     h.classList.toggle('win', won);
     h.querySelector('.k').textContent = won ? '' : t.kicker;
-    h.querySelector('.p').textContent = won ? t.won : (ORD(p, lang) + (MEDAL[p] ? ' ' + MEDAL[p] : ''));
+    //+AG el ordinal entra por textContent y la medalla por insertAdjacentHTML: asi el texto traducido
+    //   (20 diccionarios) NUNCA se interpreta como HTML, y el <img> se puede meter igual.
+    const pn = h.querySelector('.p');
+    pn.textContent = won ? t.won : ORD(p, lang);
+    if (!won) pn.insertAdjacentHTML('beforeend', MEDAL_IMG(p));
     h.querySelector('.s').textContent = won ? t.wonSub : (p <= 3 ? t.podium : t.again);
     h.classList.add('on');
     //+AG reinicia la animación del numerote aunque el nodo se reutilice entre partidas

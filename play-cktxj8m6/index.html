@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-02 7a3ce74"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-02 ba7edb4"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -544,10 +544,29 @@
      se negocia, el cuerpo no. */
   .sh-cat{ font-size:var(--fs-2); font-weight:800; letter-spacing:.04em; text-transform:uppercase; color:var(--qc,#96a0c2); }
   .sh-buy{ margin-top:3px; border:0; border-radius:12px; padding:9px 8px; font-family:inherit; font-weight:900; font-size:var(--fs-3); cursor:pointer; width:100%; color:#3a2400; background:linear-gradient(#ffe27a,#ff9a3d); box-shadow:0 3px 0 #b45a10; display:flex; gap:4px; align-items:center; justify-content:center; }
-  .sh-buy.gem{ color:#052a30; background:linear-gradient(#8fe9f4,#18c7d6); box-shadow:0 3px 0 #0e8a9c; }
+  /*+AG 2-ago (remate del encargo 29): el boton de PAGAR CON GEMAS seguia CIAN con la gema ya verde.
+     O sea: el jugador ve un rombo VERDE en la cabecera, en el precio y dentro del propio boton... y el
+     boton que se las cobra era azul. La moneda manda sobre el boton, no al reves.
+     El verde sale del ARTE (arte/ui/moneda-gema.webp muestreado): claro #26ec35, medio #0eb61d, canto
+     #039e13. Se construye igual que el CTA amarillo de arriba (claro arriba -> medio abajo -> canto
+     mas oscuro), no se inventa una familia nueva.
+     ⚠ NO se toca `.pg-ok` ni `.se-cta`: son cian y NO cobran gemas (la puerta parental y el Pase
+       "pronto"). Verde = gemas; cian sigue siendo cian donde no hay gemas de por medio.
+     ⚠ EL VECINO PELIGROSO ES `.sh-pack .money` (#5bc46a->#2fa049), el boton de DINERO DE VERDAD: en la
+       seccion GEMAS los dos se ven en la misma lista, uno encima del otro. Se miraron juntos en captura
+       y el primer verde que probe (#5cf168->#12b52a, un verde de mando) se confundia con el. Por eso
+       este sale CLAVADO del arte: es el ESMERALDA electrico de la piedra, mucho mas saturado que el
+       verde HIERBA apagado del dinero. Ademas cada uno lleva su etiqueta (rombo vs precio en euros).
+       Si algun dia se retoca uno de los dos, se vuelven a mirar JUNTOS: por separado los dos aprueban. */
+  .sh-buy.gem{ background:linear-gradient(#33ee41,#0eb61d); box-shadow:0 3px 0 #056d10; }
   .sh-buy:disabled{ filter:grayscale(.55) brightness(.82); box-shadow:none; cursor:default; }
   .sh-buy.owned{ background:var(--plate-b); color:#96a0c2; box-shadow:none; cursor:default; }
-  .sh-feat{ border-radius:20px; padding:17px; background:linear-gradient(160deg,#4a2a86,#291a5a); border:1px solid #ffffff22; box-shadow:0 12px 30px #0007; margin-bottom:12px; }
+  /*+AG 2-ago (docs/60, un solo violeta de placa hero): esta plancha llevaba un TERCER violeta propio
+     (160deg,#4a2a86->#291a5a) que no era el de nadie mas. La decision ya estaba tomada — "las placas
+     hero van en el violeta de .se-hero; las placas de kit, en marino" — asi que hereda el gradiente
+     EXACTO de .se-hero (150deg,#5a2c86->#2a1a58): el destacado de la Tienda y el hero del Pase son el
+     mismo objeto visto en dos pantallas, y ahora se pintan igual. `.se-hero` no se toca. */
+  .sh-feat{ border-radius:20px; padding:17px; background:linear-gradient(150deg,#5a2c86,#2a1a58); border:1px solid #ffffff22; box-shadow:0 12px 30px #0007; margin-bottom:12px; }
   .sh-feat .fl{ font-size:var(--fs-2); letter-spacing:.16em; text-transform:uppercase; color:var(--gold2); font-weight:800; }
   .sh-feat h3{ margin:3px 0 0; font-size:var(--fs-5); }
   .sh-feat ul{ margin:9px 0 12px; padding-left:20px; color:#d6dbf4; font-size:var(--fs-3); line-height:1.65; }
@@ -1496,12 +1515,18 @@
   .sh-buy, .sh-buy.gem, .se-cta, .r-again, .se-tier.cur, .se-rk-tab.on{
     color:#fff; -webkit-text-stroke:2.4px #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f55; }
   /*+AG el trazo de los botones cian se tiñe de su propia sombra (verde azulado) en vez de heredar el
-     indigo: un contorno indigo sobre cian se lee como suciedad, no como canto. */
-  .sh-buy.gem, .se-cta{ -webkit-text-stroke-color:#0b4a55; text-shadow:0 2px 0 #0b4a5555; }
+     indigo: un contorno indigo sobre cian se lee como suciedad, no como canto.
+     ⚠ 2-ago: `.sh-buy.gem` SALE de esta regla. Ya no es cian, es el verde de la gema, y la propia
+       piedra lleva TINTA INDIGO (#160A38, muestreada del arte): dejarle el contorno verde azulado
+       seria pintar el boton con un ink que no tiene ni la moneda ni ningun otro CTA del juego. Vuelve
+       al indigo del kit (#241a3f, la regla de aqui arriba), que es lo que hace el amarillo. */
+  .se-cta{ -webkit-text-stroke-color:#0b4a55; text-shadow:0 2px 0 #0b4a5555; }
   /*+AG deshabilitado: se apaga pero CONSERVA el grosor (misma razon que .gd-btn.prim:disabled). Antes
      `box-shadow:none` lo dejaba plano y se leia como "esto no es un boton" en vez de "hoy no puedes". */
   .sh-buy:disabled{ box-shadow:0 3px 0 #6b4a2a; }
-  .sh-buy.gem:disabled{ box-shadow:0 3px 0 #2a5c66; }
+  /*+AG el canto apagado del boton de gemas sigue a su canto encendido (#0a7a18) como el del amarillo
+     sigue al suyo: se desatura hacia el gris, no se apaga a negro. */
+  .sh-buy.gem:disabled{ box-shadow:0 3px 0 #2c5c33; }
 
   /*+AG ⚠ BUG REAL, no estilo: el precio ANTIGUO no se tachaba. La regla era `.sh-price .was`, pero el
      <span class="was"> vive dentro del BOTON (.sh-buy), no dentro de .sh-price, asi que el selector no
@@ -2181,9 +2206,23 @@
      generar codigo y traer la partida son caminos alternativos, y se quedan en placa.
      No pisa a ningun otro amarillo: el `.se-cta` de "Invitar al juego" vive en la sub-pestaña AMIGOS,
      que nunca se ve a la vez que esta. */
-  #prAccCreate{ background:linear-gradient(#ffe14d 12%,#ffb42a); border-color:transparent;
+  /*+AG 2-ago: y ADEMAS manda por forma (docs/56 regla 6: "el CTA es mas grande y va solo"). Fila
+     entera y 52 px de alto, ENCIMA de la fila de sus tres alternativas — antes se repartia la primera
+     fila con "Ya tengo cuenta", asi que el jugador veia cuatro botones del mismo tamano y solo el
+     color decia cual era el que importaba. */
+  #prAccCreate{ width:100%; min-height:52px; margin-top:7px; font-size:var(--fs-4);
+    background:linear-gradient(#ffe14d 12%,#ffb42a); border-color:transparent;
     box-shadow:0 4px 0 #b45a10, 0 7px 16px #ffb42a3d, inset 0 2px 0 #ffffff8c;
     color:#fff; -webkit-text-stroke:2.2px #241a3f; paint-order:stroke fill; text-shadow:0 1px 0 #241a3f55; }
+  /*+AG las TRES alternativas, iguales entre si en su fila. El cuerpo baja al suelo del canon (11 px,
+     regla 9, NO por debajo) porque a un tercio de fila "Continuar con Google" a 13 px se parte en TRES
+     renglones y la fila se iba a 69 px; a 11 px son dos y la fila cabe en los 44 px del minimo tactil.
+     Ademas el escalon de cuerpo refuerza lo que ya dice el layout: el grande es el CTA.
+     ⚠ EL ALTO ESTA CONTADO AL PIXEL, no elegido a ojo: con el padding heredado (9 px) los dos
+       renglones daban 47,5 px y la sub-pestaña —que ya desbordaba— habria empeorado 5 px. Con 7 px
+       la caja natural queda en 43,5 y manda el min-height:44 de la regla del canon, o sea que el AREA
+       DE TOQUE no se toca y el desborde vuelve a donde estaba. */
+  .pr-accalt .pr-inv{ font-size:var(--fs-2); padding:7px 6px; line-height:1.25; }
   #prAccCreate:active{ transform:translateY(3px); box-shadow:0 1px 0 #b45a10, inset 0 2px 0 #ffffff8c; }
   /*+AG los dos se apagan mientras la peticion va y vuelve (`crear.disabled=true`). Sin esto el boton
      seguia igual de encendido y parecia que no habia pasado nada al pulsarlo. */
@@ -2823,11 +2862,20 @@
           <input id="prAccPass" type="password" autocomplete="new-password" placeholder="contraseña (6 o más)" data-tph="prAccPassPh"
                  style="flex:1 1 100%;min-width:0;background:#101a2c;border:2px solid #2b3d5c;border-radius:11px;color:#eaf1ff;font:700 15px/1 inherit;padding:9px 10px">
         </div>
-        <div class="pr-slots" style="gap:7px;margin-top:7px">
-          <button class="pr-inv" id="prAccCreate" style="flex:1" data-t="prAccCreate">Guardar mi cuenta</button>
+        <!--+AG 2-ago (docs/56 regla 6, peticion del auditor UX): el CTA COMPARTIA REJILLA con sus
+             alternativas. "Guardar mi cuenta" iba a media fila, del mismo tamano que "Ya tengo cuenta"
+             y con el mismo aire que Google y Facebook: cuatro cajas iguales donde solo una es la
+             accion que convierte a un invitado. Un CTA dominante no se reparte el ancho con nadie.
+             Ahora manda por FORMA (fila entera, 54 px) y las tres alternativas quedan iguales ENTRE SI
+             en la fila de abajo, que es exactamente lo que son: tres caminos del mismo rango.
+             ⚠ EL ALTO ESTABA CONTADO: esta sub-pestaña ya desbordaba (93 px a 360x640, 193 a 360x540)
+               y el desborde NO podia empeorar por hacer el CTA mas grande. Por eso las tres
+               alternativas bajan al suelo de 11 px y aprietan su padding: lo que gana el CTA a lo
+               alto lo devuelve la fila de abajo. Medido antes/despues en el mismo navegador:
+               93 -> 93 px a 360x640, 193 -> 193 a 360x540, 0 -> 0 a 375x812. -->
+        <button class="pr-inv" id="prAccCreate" data-t="prAccCreate">Guardar mi cuenta</button>
+        <div class="pr-slots pr-accalt" style="gap:7px;margin-top:7px">
           <button class="pr-inv" id="prAccLogin" style="flex:1" data-t="prAccLogin">Ya tengo cuenta</button>
-        </div>
-        <div class="pr-slots" style="gap:7px;margin-top:7px">
           <button class="pr-inv" id="prAccGoogle" style="flex:1" data-t="prAccGoogle">Continuar con Google</button>
           <button class="pr-inv" id="prAccMeta" style="flex:1" data-t="prAccMeta">Continuar con Facebook</button>
         </div>
@@ -2941,7 +2989,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=7a3ce74"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=ba7edb4"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -4919,7 +4967,11 @@ function renderStandingsTable(teamP, topN){
     const row=document.createElement('div'); row.className='rrow'+(e.me?' meRow':'');
     row.innerHTML='<span class="rp">'+ord(e.place,LANG)+'</span><span class="rdisc" style="background:'+e.color+'"></span>'+
       (e.win?'<span class="rcrown">'+uiIco('corona-campeon','sm')+'</span>':'')+
-      '<span class="rn">'+esc(e.name)+'</span><span class="rd '+deltaCls(dl)+'">🏆 '+deltaTxt(dl)+'</span>';
+      //+AG 2-ago: la copa de esta fila era el ULTIMO emoji del sistema de Resultados. Dos lineas mas
+      //   arriba, la corona del ganador ya se pinta con arte (uiIco); aqui seguia un 🏆 que en Windows
+      //   sale con otro dibujo y otro oro. Ahora es la MISMA copa dibujada que la banda de copas y que
+      //   el Garaje — coinIco('copa'), el patron de la casa.
+      '<span class="rn">'+esc(e.name)+'</span><span class="rd '+deltaCls(dl)+'">'+coinIco('copa','sm')+' '+deltaTxt(dl)+'</span>';
     tblEl.appendChild(row); });
   more.hidden = !cut;
   more.textContent = S().rSeeAll(lastStandings.length);
