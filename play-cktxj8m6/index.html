@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-02 3313508"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-02 cf71c53"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -2233,7 +2233,11 @@
      glifos de fuente: cambian de grosor y de forma en cada telefono y no pertenecen a la marca — el
      suspenso automatico nº1 del liston. Pasan al SVG de trazo de la casa, el mismo que ya llevan los
      iconos de seccion de Ajustes y el (i): viewBox de 24, trazo 2.2, `currentColor` para que hereden
-     el color del boton (blanco sobre placa, tinta oscura sobre el amarillo del CTA). */
+     el color del boton (blanco sobre placa, tinta oscura sobre el amarillo del CTA).
+     La pieza cubre ahora SEIS galones mas, que eran el resto del ✓ del sistema repartido por 20
+     diccionarios: "Pase activo" en la Tienda, los cuatro avisos de exito de Perfil > Cuenta
+     (codigo copiado, sesion cerrada, cuenta guardada, hola de nuevo) y el toast de Google. Todos
+     salen de la misma fabrica de `ckSvg()`, asi que hay UN dibujo y no siete copias del path. */
   /*+AG 18 px y no 16: el glifo que habia iba a `font-size:var(--fs-5)` (20 px) y a 16 la cruz quedaba
      pequeña dentro de un boton de 44. Con 18 y el trazo a 2,6 (el mismo del (i)) el aspa pesa lo que
      pesaba el glifo y se lee igual de lejos. Mirado en la captura de MODOS y de AJUSTES, no calculado. */
@@ -2246,8 +2250,15 @@
      contenedor en flex, el texto y esa imagen se vuelven dos items y el `gap` les mete 7 px de aire
      que hoy no tienen — o sea que arreglar el ✓ habria descolocado el precio. Solo se pone flex en el
      unico estado que lleva el galon. */
-  .gd-btn .ck{ width:1em; height:1em; flex:0 0 auto; display:block; }
+  .gd-btn .ck, .sh-buy .ck{ width:1em; height:1em; flex:0 0 auto; display:block; }
   .gd-btn.prim.wico{ display:flex; align-items:center; justify-content:center; gap:7px; }
+  /*+AG los otros cinco galones viven DENTRO de una linea de texto corriente (los avisos verdes de
+     Perfil > Cuenta y el toast de "estas dentro con Google"), no en un boton flex. Ahi el svg tiene
+     que comportarse como una letra mas: `inline-block` para que respete el interlineado y bajado
+     .12em porque un cuadrado de 1em centrado en la caja de texto queda ALTO respecto a la altura de
+     x — se ve en cuanto la frase parte en dos lineas. El aire lo pone el margen y no un espacio en
+     la cadena, que es justo lo que se acaba de quitar del diccionario. */
+  .sc-note .ck, .toast .ck{ width:1em; height:1em; display:inline-block; vertical-align:-.12em; margin-right:.3em; }
 </style>
 
 <!--+AG doc 34 Fase B: #app = la "columna telefono" que contiene TODAS las pantallas y overlays (portrait) -->
@@ -2989,7 +3000,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=3313508"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=cf71c53"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -3914,7 +3925,7 @@ const MORE={
     bundleItems:['Tanque (Común)','Estela Arcoíris','✦ +300 Monedas'],
     paseNm:'Pase de Batalla', paseSeason:'Temporada',
     paseBullets:['50 peldaños con recompensas <b>visibles antes de comprar</b>','Vía <b>gratis</b> para todos + vía <b>premium</b>','Solo cosmética y comodidad, <b>nunca poder</b>'],
-    paseOn:'✓ Pase activo', paseBuy:g=>'Activar premium · '+g+' ◆', tPase:'¡Pase activado!',
+    paseOn:'Pase activo', paseBuy:g=>'Activar premium · '+g+' ◆', tPase:'¡Pase activado!',
     tCosm:n=>'¡'+n+' conseguido!', tBundle:'¡Pack de Temporada conseguido!',
     cosmNames:{sk_llamas:'Llamas',sk_galaxia:'Galaxia',es_arcoiris:'Estela Arcoíris',ce_fuegos:'Fuegos',em_gg:'¡GG!',ma_corona:'Marco Corona'},
     cosmCats:{Skin:'Skin',Estela:'Estela','Celebración':'Celebración',Emote:'Emote',Marco:'Marco'},
@@ -3946,15 +3957,15 @@ const MORE={
     prMoveOk:'¡Partida traída! Reiniciando…', prMoveGenOk:'Código listo. Apúntalo antes de cerrar.',
     prMoveBad:'Ese código no vale o ya se usó.', prMoveSame:'Ese código es de esta misma partida.',
     prMoveOff:'Sin conexión: inténtalo cuando vuelva la red.', prMoveEmpty:'Escribe el código primero.',
-    prMoveCopied:'✓ Código copiado. Pégalo en el otro móvil.', prMoveCopyManual:'Código seleccionado: mantén pulsado y elige Copiar.',
+    prMoveCopied:'Código copiado. Pégalo en el otro móvil.', prMoveCopyManual:'Código seleccionado: mantén pulsado y elige Copiar.',
     prAccH:'Tu cuenta', prAccGuest:'Estás jugando <b>como invitado</b>', prAccSaved:'Cuenta guardada:',
     prAccSavedG:'Estás dentro con <b>Google</b>:',
     prAccNote:'Tu partida ya se guarda en el servidor, pero <b>solo este móvil sabe que es tuya</b>. Guarda tu cuenta y podrás entrar desde cualquier sitio.',
     prAccNoteOk:'Tu partida está <b>a salvo en tu cuenta</b>. Entra desde cualquier móvil y la tendrás ahí, tal y como la dejaste.',
     prAccCreate:'Guardar mi cuenta', prAccLogin:'Ya tengo cuenta', prAccGoogle:'Continuar con Google', prAccMeta:'Continuar con Facebook',
     prAccMailPh:'correo@ejemplo.com', prAccPassPh:'contraseña (6 o más)',
-    prAccOut:'Cerrar sesión', prAccOutAsk:'¿Cerrar sesión? Este móvil volverá a empezar como invitado. Tu partida queda guardada en tu cuenta y vuelve al entrar.', prAccOutOk:'✓ Sesión cerrada. Volviendo a empezar…',
-    prAccOkNew:'✓ Cuenta guardada. Ya puedes entrar desde otro móvil.', prAccOkIn:'✓ ¡Hola de nuevo! Trayendo tu partida…',
+    prAccOut:'Cerrar sesión', prAccOutAsk:'¿Cerrar sesión? Este móvil volverá a empezar como invitado. Tu partida queda guardada en tu cuenta y vuelve al entrar.', prAccOutOk:'Sesión cerrada. Volviendo a empezar…',
+    prAccOkNew:'Cuenta guardada. Ya puedes entrar desde otro móvil.', prAccOkIn:'¡Hola de nuevo! Trayendo tu partida…',
     prAccBadMail:'Ese correo no parece válido.', prAccBadPass:'La contraseña necesita 6 caracteres o más.',
     prAccTaken:'Ese correo ya tiene cuenta. Usa "Ya tengo cuenta".', prAccBadLogin:'Correo o contraseña incorrectos.',
     prAccOff:'Sin conexión: inténtalo cuando vuelva la red.', prAccOther:'Entrar con otra cuenta',
@@ -3979,7 +3990,7 @@ const MORE={
     welGoogle:'Continuar con Google', welSkip:'Jugar como invitado',
     welWait:'Abriendo Google…',
     welFail:'Google no se ha podido abrir. Sigues como invitado y tu partida se guarda igual; podrás hacerlo luego desde Perfil.',
-    tGoogleIn:'Estás dentro con tu cuenta de Google ✓',
+    tGoogleIn:'Estás dentro con tu cuenta de Google',
     tGoogleNew:'¡Listo! Tu partida ya viaja contigo con Google',
     tProvNo:p=>'No se ha podido entrar con '+p+'. Sigues como invitado.',
     quizStart:'¿Qué te gusta más?', quizRun:'Al correr, ¿cómo?', quizPush:'Al empujar, ¿cómo?',
@@ -4075,7 +4086,7 @@ const MORE={
     bundleItems:['Tank (Common)','Rainbow Trail','✦ +300 Coins'],
     paseNm:'Battle Pass', paseSeason:'Season',
     paseBullets:['50 rungs with rewards <b>visible before you buy</b>','A <b>free</b> track for everyone + a <b>premium</b> track','Cosmetics and comfort only, <b>never power</b>'],
-    paseOn:'✓ Pass active', paseBuy:g=>'Activate premium · '+g+' ◆', tPase:'Pass activated!',
+    paseOn:'Pass active', paseBuy:g=>'Activate premium · '+g+' ◆', tPase:'Pass activated!',
     tCosm:n=>n+' unlocked!', tBundle:'Season Pack unlocked!',
     cosmNames:{sk_llamas:'Flames',sk_galaxia:'Galaxy',es_arcoiris:'Rainbow Trail',ce_fuegos:'Fireworks',em_gg:'GG!',ma_corona:'Crown Frame'},
     cosmCats:{Skin:'Skin',Estela:'Trail','Celebración':'Celebration',Emote:'Emote',Marco:'Frame'},
@@ -4107,15 +4118,15 @@ const MORE={
     prMoveOk:'Game moved! Restarting…', prMoveGenOk:'Code ready. Write it down before closing.',
     prMoveBad:'That code is not valid or was already used.', prMoveSame:'That code belongs to this same game.',
     prMoveOff:'No connection: try again when you are back online.', prMoveEmpty:'Type the code first.',
-    prMoveCopied:'✓ Code copied. Paste it on the other phone.', prMoveCopyManual:'Code selected: long-press and choose Copy.',
+    prMoveCopied:'Code copied. Paste it on the other phone.', prMoveCopyManual:'Code selected: long-press and choose Copy.',
     prAccH:'Your account', prAccGuest:'You are playing <b>as a guest</b>', prAccSaved:'Account saved:',
     prAccSavedG:'You are signed in with <b>Google</b>:',
     prAccNote:'Your game is already saved on the server, but <b>only this phone knows it is yours</b>. Save your account and you can log in from anywhere.',
     prAccNoteOk:'Your game is <b>safe in your account</b>. Log in from any phone and it will be there, exactly as you left it.',
     prAccCreate:'Save my account', prAccLogin:'I already have one', prAccGoogle:'Continue with Google', prAccMeta:'Continue with Facebook',
     prAccMailPh:'email@example.com', prAccPassPh:'password (6 or more)',
-    prAccOut:'Log out', prAccOutAsk:'Log out? This phone starts again as a guest. Your game stays in your account and comes back when you log in.', prAccOutOk:'✓ Logged out. Starting over…',
-    prAccOkNew:'✓ Account saved. You can now log in from another phone.', prAccOkIn:'✓ Welcome back! Bringing your game…',
+    prAccOut:'Log out', prAccOutAsk:'Log out? This phone starts again as a guest. Your game stays in your account and comes back when you log in.', prAccOutOk:'Logged out. Starting over…',
+    prAccOkNew:'Account saved. Log in from any phone.', prAccOkIn:'Welcome back! Bringing your game…',
     prAccBadMail:'That email does not look valid.', prAccBadPass:'The password needs 6 characters or more.',
     prAccTaken:'That email already has an account. Use "I already have one".', prAccBadLogin:'Wrong email or password.',
     prAccOff:'No connection: try again when you are back online.', prAccOther:'Log in with another account',
@@ -4140,7 +4151,7 @@ const MORE={
     welGoogle:'Continue with Google', welSkip:'Play as a guest',
     welWait:'Opening Google…',
     welFail:'Google could not be opened. You carry on as a guest and your game is still saved; you can do this later from Profile.',
-    tGoogleIn:'You are signed in with your Google account ✓',
+    tGoogleIn:'You are signed in with Google',
     tGoogleNew:'Done! Your game now travels with you via Google',
     tProvNo:p=>'Could not sign in with '+p+'. You carry on as a guest.',
     quizStart:'What do you like most?', quizRun:'When running, how?', quizPush:'When pushing, how?',
@@ -5012,9 +5023,25 @@ el('results').addEventListener('click', e=>{ if(!e.target.closest('.r-actions') 
 //   vale que la pantalla se desplace: nadie se pierde nada por no deslizar.
 el('rMore').addEventListener('click', ()=>{ tblExpanded=true; renderStandingsTable(tblTeamP,0); });
 
+// ===== el galón, dibujado (docs/60 pieza 24) =====
+//+AG el ✓ (U+2713) que confirmaba las cosas vivía DENTRO de la cadena traducida, o sea el mismo glifo
+//   del sistema copiado en 20 diccionarios: cambia de grosor y de forma según la fuente que tenga el
+//   teléfono y no se parece a nada más del juego. Aquí se dibuja UNA vez y lo usan los siete sitios
+//   que lo llevan; el diccionario se queda solo con la palabra, que es lo que se traduce.
+//   `currentColor` es lo que hace que herede el color de quien lo pinta sin tocar nada: gris de placa
+//   en "Pase activo", verde de acierto en los avisos de Cuenta, blanco en el toast.
+const ckSvg=w=>'<svg class="ck" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="'+w+'" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.6 L10 17.4 L19 6.8"/></g></svg>';
+//+AG dos trazos y no uno, medido y no elegido: al lado de una palabra de peso 900 (los botones) un
+//   2.6 se queda fino y parece de otra mano — ahí va 3.4, el mismo criterio que ya se aplicó en la
+//   ficha de bola. En texto pequeño corriente el galón acompaña, no manda: 2.6, el trazo del (i).
+const ckTxt=t=>ckSvg(2.6)+'<span>'+t+'</span>';
+
 // ===== toast "próximamente" (stubs de secciones aún no construidas) =====
 let toastT=0;
-function toast(msg){ const e2=el('toast'); e2.textContent=msg; e2.classList.add('on'); clearTimeout(toastT); toastT=setTimeout(()=>e2.classList.remove('on'),1700); }
+//+AG `ck` opcional: solo los avisos que CONFIRMAN algo llevan galón. El resto de los toast siguen
+//   por textContent, que es lo que toca para un texto que viene del diccionario y no es marcado.
+function toast(msg, ck){ const e2=el('toast'); if(ck) e2.innerHTML=ckTxt(msg); else e2.textContent=msg;
+  e2.classList.add('on'); clearTimeout(toastT); toastT=setTimeout(()=>e2.classList.remove('on'),1700); }
 //+AG data-soonk: la etiqueta del toast sale del diccionario (antes era data-soon con el texto español fijo dentro
 //   del atributo, que salia en español con el juego en ingles)
 document.querySelectorAll('[data-soonk]').forEach(x=>x.addEventListener('click',()=>toast((S()[x.dataset.soonk]||'')+S().soon)));
@@ -5225,7 +5252,7 @@ function openDetail(k){ applyShell(); const A=ARCHS[k], b=owned(k), q=QUAL[A.q],
       //+AG trazo 3.4 y no 2.2 como los iconos de seccion: aqui el galon convive con una palabra de peso
       //   900, y a 1em (16 px reales) un 2.2 sobre viewBox de 24 se queda en 1,5 px — al lado de unos
       //   palos de letra de 2,5 px parecia dibujado por otra mano. Se vio en la captura de la ficha.
-      prim.innerHTML='<svg class="ck" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.6 L10 17.4 L19 6.8"/></g></svg><span></span>';
+      prim.innerHTML=ckSvg(3.4)+'<span></span>';
       prim.lastChild.textContent=S().equippedBtn; }
     else { prim.classList.remove('wico'); prim.textContent=S().equipBtn; }
     prim.disabled=isEq;
@@ -5434,7 +5461,11 @@ function paseEl(){ const s=S(), d=document.createElement('div'); d.innerHTML=`<d
   <ul>${s.paseBullets.map(x=>`<li>${x}</li>`).join('')}</ul>
   <button class="sh-buy gem" id="buyPase"></button></div>`;
   const b=d.querySelector('#buyPase');
-  if(SAVE.pase){ b.className='sh-buy owned'; b.textContent=s.paseOn; b.disabled=true; }
+  //+AG el galón de "Pase activo" se dibuja (docs/60 pieza 24) y va DELANTE de la palabra, como el de
+  //   "Equipada": es la marca de "esto ya es tuyo" y se lee antes que el texto. `.sh-buy` ya viene en
+  //   flex con su gap, así que aquí no hace falta clase de maquetación ninguna. Trazo 3.4 porque el
+  //   botón va en peso 900. El texto entra por textContent: del diccionario NO se interpreta marcado.
+  if(SAVE.pase){ b.className='sh-buy owned'; b.innerHTML=ckSvg(3.4)+'<span></span>'; b.lastChild.textContent=s.paseOn; b.disabled=true; }
   else { setCoin(b, s.paseBuy(PASE.g)); b.disabled=SAVE.gemas<PASE.g; b.onclick=()=>{ if(SAVE.gemas>=PASE.g){ dinero('gemas', -PASE.g, 'pase'); SAVE.pase=true; persist(); toast(S().tPase); renderTienda(); } }; }
   return d;
 }
@@ -5519,7 +5550,7 @@ function wireCuenta(){
       if(!confirm(S().prAccOutAsk)) return;
       salir.disabled=true;
       try{ if(nube()) await nube().salir(); }catch(e){ console.warn('[cuenta] salir', e); }
-      di(S().prAccOutOk,true);
+      di(ckTxt(S().prAccOutOk),true);
       try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
       setTimeout(()=>location.reload(), 700);
     };
@@ -5535,7 +5566,7 @@ function wireCuenta(){
       const d=validar(); if(!d) return;
       if(!nube()) return di(S().prAccOff,false);
       crear.disabled=true; di('…');
-      try{ await nube().crearCuentaEmail(d); di(S().prAccOkNew,true); pinta(); }
+      try{ await nube().crearCuentaEmail(d); di(ckTxt(S().prAccOkNew),true); pinta(); }
       catch(e){ const m=String(e&&e.cuerpo&&(e.cuerpo.msg||e.cuerpo.message)||'');
         di(/already been registered|already registered/i.test(m) ? S().prAccTaken
           : /at least 6|password/i.test(m) ? S().prAccBadPass : S().prAccOff, false);
@@ -5549,7 +5580,7 @@ function wireCuenta(){
       entrar.disabled=true; di('…');
       try{
         await nube().entrarConEmail(d);
-        di(S().prAccOkIn,true);
+        di(ckTxt(S().prAccOkIn),true);
         //+AG al entrar con OTRA cuenta, el save de este movil ya no es el que toca. Se borra el
         //   local y se recarga: el arranque ve el dispositivo "fresco" y se trae de la nube el
         //   progreso del dueno del correo, por el mismo camino ya probado.
@@ -5626,14 +5657,16 @@ function wireTraspaso(){
       //   8 caracteres a mano en un movil es justo donde se abandona. Si el navegador no deja
       //   copiar sin un toque propio (pasa en algunos iOS al venir de una espera de red), el
       //   boton Copiar de al lado si funciona, porque ese toque es su propio gesto.
-      di(await copiar(c) ? S().prMoveCopied : S().prMoveGenOk, true);
+      //+AG el galón solo cuando de verdad se copió: si no se pudo, el mensaje es una instrucción
+      //   ("apúntalo antes de cerrar"), no una confirmación, y un ✓ delante diría lo contrario.
+      di(await copiar(c) ? ckTxt(S().prMoveCopied) : S().prMoveGenOk, true);
     }
     catch(e){ di(S().prMoveOff,false); console.warn('[traspaso] generar', e); }
     finally{ gen.disabled=false; }
   };
 
   cop.onclick=async()=>{ const c=out.textContent.trim();
-    di(await copiar(c) ? S().prMoveCopied : S().prMoveCopyManual, true); };
+    di(await copiar(c) ? ckTxt(S().prMoveCopied) : S().prMoveCopyManual, true); };
 
   //+AG pegar en el otro movil: se limpia lo que venga (espacios, saltos) y se formatea igual
   //   que al teclearlo, asi da igual como llegue el codigo.
@@ -6550,7 +6583,9 @@ else if((FRESH || _pend) && !SAVE.onboarded && _onbParam!=='0'){
         }
         if(est.google){
           const recien = !!(vuelta && vuelta.user_id);
-          setTimeout(()=>toast(recien ? S().tGoogleNew : S().tGoogleIn), recien ? 400 : 1100);
+          //+AG el galón (docs/60 pieza 24) solo en el aviso de "ya estabas dentro": ahí confirma un
+          //   estado que el jugador no ha pedido comprobar. El de recién llegado es una bienvenida.
+          setTimeout(()=>recien ? toast(S().tGoogleNew) : toast(S().tGoogleIn, true), recien ? 400 : 1100);
         }
       }catch(e){ /* el aviso es un lujo: si falla, el juego ni se entera */ }
 
