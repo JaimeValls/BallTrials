@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-02 266d6f0"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-02 f1683e3"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -310,6 +310,18 @@
      desde que el motor te lo canta en meta, aqui es un resumen. Los ~110 px que suelta se los queda la
      clasificacion, que es lo que de verdad se venia recortando. */
   .r-youlbl{ font-size:var(--fs-2); letter-spacing:.16em; text-transform:uppercase; color:var(--muted); font-weight:800; margin-top:8px; }
+  /*+AG 2-ago · PRIMERO LO TUYO. La banda del CAMPEON estaba arriba del todo, asi que lo primero que
+     leia el jugador —ganase o perdiese— era el nombre y el color de OTRO. Cuando pierdes, lo primero
+     que ves es quien te gano; cuando ganas, la misma frase dos veces en 200 px.
+     No se toca el HTML (la separacion en dos bloques la pidio Jaime el 27-jul y resolvio una confusion
+     real: "no queda claro quien gana y por que"). Lo que cambia es el ORDEN de lectura.
+     ⚠ Y SI EL CAMPEON ERES TU, la banda desaparece: repite lo que ya dicen el numerote y su subtitulo,
+     y de paso devuelve 56 px de alto justo en la pantalla que no cabia. */
+  .r-card .r-youlbl{ order:1; margin-top:0; }
+  .r-card .r-place{ order:2; }
+  .r-card .r-sub{ order:3; }
+  .r-card .r-winner{ order:4; margin-top:9px; padding:7px 13px 7px 7px; }
+  .r-card .r-winner.mine{ display:none; }
   .r-place{ font-size:clamp(34px,10vw,48px); font-weight:900; letter-spacing:-.03em; line-height:1; margin-top:1px; text-shadow:0 4px 22px #000a;
     display:flex; align-items:center; justify-content:center; gap:6px; }
   /*+AG la medalla del puesto se dimensiona en EM, no en px: al lado de un "1º" de 48 px, los 22 px del
@@ -317,20 +329,49 @@
      idioma y en cualquier ancho de pantalla (el font-size es un clamp con vw). */
   .r-place img{ width:.86em; height:.86em; object-fit:contain; flex:0 0 auto;
     filter:drop-shadow(0 3px 8px #0009); }
+  /*+AG 2-ago · EN PODIO EL NUMEROTE VA DORADO. Ver el porque en showResults: era blanco tanto si
+     quedabas primero como ultimo, y el confeti de la victoria vive en la meta, o sea en otra pantalla.
+     El dorado es el que esta pantalla ya usa para "eres tu quien gana" (.r-winner.mine), no uno nuevo.
+     El trazo oscuro entra con el, porque un dorado sobre violeta sin contorno pierde el filo. */
+  .r-place.podio{ color:var(--gold2); -webkit-text-stroke:2.6px #241a3f; paint-order:stroke fill;
+    text-shadow:0 4px 22px #000a, 0 0 26px #fbb91566; }
   .r-sub{ font-size:var(--fs-3); color:#c9cff0; font-weight:700; }
-  .r-rewards{ width:100%; max-width:430px; display:flex; flex-direction:column; gap:10px; margin-top:14px; }
-  .r-reward{ display:flex; align-items:center; gap:12px; background:var(--plate-a); border:1px solid var(--line); border-radius:16px; padding:12px 15px; opacity:0; transform:translateY(8px); transition:opacity .32s, transform .32s; }
+  /*+AG 2-ago · LA TIRA DE BOTIN. Tres fichas en fila, no tres filas apiladas. Ver el porque en el
+     marcado: 226 px de pantalla para tres numeros, y era la causa medida del desborde.
+     `flex:1 1 0` con `min-width:0` para que las tres se repartan el ancho y ninguna empuje a las otras
+     cuando el numero crece (un "+1200" no puede descolocar la fila). */
+  .r-loot{ width:100%; max-width:430px; display:flex; align-items:stretch; gap:8px; margin-top:11px; }
+  .r-cups, .r-reward{ flex:1 1 0; min-width:0; display:flex; flex-direction:column; align-items:center;
+    justify-content:center; gap:1px; border-radius:15px; padding:9px 5px; text-align:center; }
+  /*+AG Copas va MAS ANCHA a proposito: es la moneda que mueve la temporada y la unica que se puede
+     perder, asi que manda sobre las otras dos. Es la jerarquia que no existia cuando las tres tarjetas
+     eran identicas. */
+  .r-cups{ flex:1.3 1 0; }
+  .r-reward{ background:var(--plate-a); border:1px solid var(--line); opacity:0; transform:translateY(8px); transition:opacity .32s, transform .32s; }
   .r-reward.in{ opacity:1; transform:none; }
-  .r-reward .ic{ width:34px; height:34px; border-radius:50%; display:grid; place-items:center; font-size:var(--fs-4); color:#1a1330; }
+  .r-reward .ic{ width:30px; height:30px; border-radius:50%; display:grid; place-items:center; font-size:var(--fs-4); color:#1a1330; }
+  /*+AG el ORDEN dentro de la ficha: icono, cifra, etiqueta. Se hace con `order` y no moviendo el HTML
+     porque el texto va envuelto en su propio bloque y el JS escribe dentro por id. */
+  .r-cups .ic, .r-reward .ic{ order:1; }
+  .r-cups .cv, .r-reward .val, .r-xpbar{ order:2; }
+  .r-cups .txt, .r-reward .txt{ order:3; min-width:0; }
+  /*+AG el nombre de la bola se va de la ficha: la etiqueta ya dice COPAS y la bola equipada se ve en
+     media pantalla del juego. En una ficha de 100 px de ancho, un nombre propio parte la palabra. */
+  .r-cups .cn{ display:none; }
   /*+AG 1-ago: Resultados es la pantalla donde MAS se mira la moneda (es el premio de la partida) y era
      un glifo ✦ dentro de un disco pintado a mano. Ahora es la moneda de verdad, sin disco: la pieza ya
      trae su volumen y su brillo, y el disco competia con ella. El halo dorado se mantiene, en el <img>. */
   .r-reward .ic.chispa{ background:none; }
   .r-reward .ic.chispa .cico{ width:30px; height:30px; filter:drop-shadow(0 0 7px #fbb91588); }
-  .r-reward .ic.xp{ background:var(--plate-b); color:#fff; }
+  /*+AG el icono de NIVEL reusa el aro dorado del encargo 32 con el numero dentro, igual que la cabecera
+     de la portada. El `109.4%` es el mismo de alla y por la misma razon: el dibujo trae aire en su
+     lienzo (objeto de 234 px en 256) y a 100% el oro se quedaria por dentro del borde. */
+  .r-reward .ic.xp{ background:url(arte/ui/nivel-marco.webp?v=1) center/109.4% no-repeat; color:#fff; }
+  .r-reward .ic.xp b{ color:#fff; font-size:var(--fs-3); font-weight:900;
+    -webkit-text-stroke:1.6px #241a3f; paint-order:stroke fill; margin-bottom:1px; }
   .r-reward .lbl2{ font-size:var(--fs-2); color:var(--muted); font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
-  .r-reward .val{ margin-left:auto; font-size:var(--fs-6); font-weight:900; font-variant-numeric:tabular-nums; color:var(--gold2); }
-  .r-xpbar{ height:11px; border-radius:8px; background:var(--plate-b); overflow:hidden; margin-top:5px; }
+  .r-reward .val{ margin-left:0; font-size:var(--fs-4); font-weight:900; font-variant-numeric:tabular-nums; color:var(--gold2); }
+  .r-xpbar{ width:100%; height:6px; border-radius:8px; background:var(--plate-b); overflow:hidden; margin:3px 0 1px; }
   .r-xpfill{ height:100%; width:0%; background:linear-gradient(90deg,var(--gold2),var(--gold)); transition:width 1s cubic-bezier(.2,.7,.2,1); }
   .r-actions{ width:100%; max-width:430px; display:flex; flex-direction:column; gap:9px; margin-top:14px; }
   .r-again{ border:0; border-radius:18px; padding:17px; font-family:inherit; font-weight:900; font-size:var(--fs-5); color:#3a2400; background:linear-gradient(#ffe27a,#ff9a3d); box-shadow:0 5px 0 #b45a10; cursor:pointer; }
@@ -1319,9 +1360,19 @@
   .r-home.ico{ flex:0 0 auto; width:58px; padding:0; display:grid; place-items:center; }
   .r-home.ico svg{ width:24px; height:24px; display:block; }
   /*+AG "ver todos": solo aparece cuando la clasificacion NO cabe entera (mas de RTBL_MAX filas) */
-  .r-more{ width:100%; max-width:430px; border:1px dashed #ffffff2e; background:var(--plate-a); color:#c9cff0;
-    font-family:inherit; font-weight:800; font-size:var(--fs-3); border-radius:12px; padding:8px; cursor:pointer; margin-top:6px; }
-  .r-more:active{ transform:scale(.98); }
+  /*+AG 2-ago, dos arreglos que vienen de la auditoria de UX:
+     · EL BORDE DEJA DE SER DISCONTINUO. En este juego el discontinuo significa "aqui no hay nada
+       todavia": lo llevan el hueco de amigo del riel, el hueco de equipo del Perfil y la fila de club
+       vacia. Justo lo contrario de lo que este boton tiene que decir, que es "hay cuatro filas mas
+       escondidas, tocame". Se le da el canto de placa del kit, que es el idioma de "esto se pulsa".
+     · MIDE 44 px. Estaba en 35 y era el unico pulsable de la pantalla por debajo del minimo tactil;
+       sus vecinos ("Jugar otra" y el de salir) pasan de 58. */
+  .r-more{ width:100%; max-width:430px; border:1px solid #ffffff30;
+    background:linear-gradient(#282059,#161139); color:#dfe4ff;
+    box-shadow:0 3px 0 #0d0726, inset 0 1px 0 #ffffff24;
+    font-family:inherit; font-weight:800; font-size:var(--fs-3); border-radius:12px; padding:12px 8px;
+    cursor:pointer; margin-top:6px; transition:transform .08s, box-shadow .08s; }
+  .r-more:active{ transform:translateY(2px); box-shadow:0 1px 0 #0d0726, inset 0 1px 0 #ffffff24; }
   /*+AG separador "…" entre el podio y tu fila cuando la tabla va recortada */
   .rgap{ text-align:center; color:var(--muted); font-weight:900; font-size:var(--fs-3); line-height:.8; letter-spacing:.2em; }
   /*+AG feedback Jaime 2026-07-24 ("se pierde parte de abajo"): en una pantalla corta el resumen es mas alto
@@ -1332,20 +1383,30 @@
   /*+AG `margin-top:auto` (antes 14px): con Resultados en UNA pantalla, si el botin es corto las acciones se
      quedaban flotando a media altura con medio movil vacio debajo. Auto las manda al fondo del flex y el aire
      sobrante queda ARRIBA, entre el contenido, en vez de debajo del boton. */
+  /*+AG 2-ago · EL AIRE SE REPARTE, no se amontona debajo. Con el botin en una tira y la tabla entrando
+     entera, en un movil alto sobraban ~400 px SEGUIDOS entre la ultima fila y el boton: el contenido se
+     quedaba pegado al borde de arriba y el hueco parecia un fallo de carga, no un diseño.
+     Con `margin-top:auto` en los DOS extremos, el sobrante se parte entre arriba y abajo y el bloque
+     queda centrado. En un movil bajo no hay sobrante que repartir, asi que no cambia nada — que es la
+     gracia: un solo mecanismo para las dos alturas, sin media consulta. */
+  #results .r-card{ margin-top:auto; }
   #results .r-actions{ position:sticky; bottom:0; z-index:2; margin-top:auto;
     padding:12px 0 calc(16px + env(safe-area-inset-bottom));
     background:linear-gradient(#08071a00, #08071ae6 32%, #08071a 62%); }
-  .r-cups{ width:100%; max-width:430px; display:flex; align-items:center; gap:12px; background:#fbb9150f; border:1px solid #fbb91544; border-radius:16px; padding:12px 15px; margin-top:12px;
+  /*+AG 2-ago: esta regla ya NO da el ancho ni la direccion — eso lo pone `.r-loot` (ver la tira de botin
+     arriba). Aqui se queda solo lo que hace que Copas sea Copas: el tinte y el borde dorados. */
+  .r-cups{ background:#fbb91514; border:1px solid #fbb91566;
     opacity:0; transform:translateY(8px); transition:opacity .32s, transform .32s; box-shadow:0 0 18px #fbb91518; }
   .r-cups.in{ opacity:1; transform:none; }
   /*+AG 1-ago: mismo trato que la Chispa de al lado — la copa dibujada sustituye al emoji, y el disco
      dorado se retira para no competir con ella (el emoji sí lo necesitaba para tener peso). */
-  .r-cups .ic{ width:34px; height:34px; border-radius:50%; display:grid; place-items:center; font-size:var(--fs-5); background:none; }
+  .r-cups .ic{ width:30px; height:30px; border-radius:50%; display:grid; place-items:center; font-size:var(--fs-5); background:none; }
   .r-cups .ic .cico{ width:30px; height:30px; filter:drop-shadow(0 0 7px #fbb91588); }
-  .r-cups .cn{ font-size:var(--fs-3); font-weight:900; }
-  .r-cups .cw{ font-size:var(--fs-2); color:var(--muted); font-weight:800; text-transform:uppercase; letter-spacing:.05em; margin-top:2px; }
-  .r-cups .cv{ margin-left:auto; font-size:var(--fs-5); font-weight:900; font-variant-numeric:tabular-nums; color:var(--gold2); }
-  .r-cups .cv .cd{ font-size:var(--fs-3); font-weight:800; margin-left:4px; }
+  .r-cups .cw{ font-size:var(--fs-2); color:var(--muted); font-weight:800; text-transform:uppercase; letter-spacing:.05em; }
+  /*+AG Copas lleva la cifra mas grande de la tira: es la que manda. Y el delta (+6 / -4) baja de tamaño
+     porque a la misma talla los dos numeros se leian como uno solo de cuatro cifras. */
+  .r-cups .cv{ margin-left:0; font-size:var(--fs-5); font-weight:900; font-variant-numeric:tabular-nums; color:var(--gold2); }
+  .r-cups .cv .cd{ font-size:var(--fs-2); font-weight:800; margin-left:3px; }
   .r-cups .cv .cd.up{ color:#6fe08f; } .r-cups .cv .cd.dn{ color:#ff8b9a; } .r-cups .cv .cd.fl{ color:var(--muted); }
   /*+AG cabecera de la tabla: deja claro que lo de abajo es la CLASIFICACION de la partida que acabas de jugar */
   .rtbl-h{ width:100%; max-width:430px; font-size:var(--fs-2); letter-spacing:.16em; text-transform:uppercase;
@@ -2672,10 +2733,23 @@
     <div class="r-sub" id="rSub"></div>
   </div>
   <!--+AG COPAS de LA BOLA jugada (doc 37): son botín igual que las Chispas, solo que se pueden perder -->
-  <div class="r-cups" id="rCups"><div class="ic"><img class="cico" src="arte/ui/moneda-copa.webp?v=2" alt=""></div><div><div class="cn" id="rCupsName">Cohete</div><div class="cw" id="rCupsWhy">Copas</div></div><div class="cv" id="rCupsVal">0<span class="cd" id="rCupsDelta"></span></div></div>
-  <div class="r-rewards">
-    <div class="r-reward" id="rRewChispa"><div class="ic chispa"><img class="cico" src="arte/ui/moneda-chispa.webp?v=2" alt=""></div><div><div class="lbl2" data-t="chispasWord">Chispas</div><div class="lbl2" id="rChispaWhy" style="text-transform:none;color:#8fe0a8;margin-top:2px"></div></div><div class="val" id="rChispaVal">+0</div></div>
-    <div class="r-reward" id="rRewXp"><div class="ic xp"><svg viewBox="0 0 64 64" aria-hidden="true"><path fill="#ffcf3a" stroke="#1c1c24" stroke-width="4" stroke-linejoin="round" d="M32 6 L40.5 24.5 L60 26.5 L45 39.5 L49.5 59 L32 48.5 L14.5 59 L19 39.5 L4 26.5 L23.5 24.5 Z"/></svg></div><div style="flex:1"><div class="lbl2"><span data-t="lvl">Nivel</span> <span id="rLvlNum">1</span></div><div class="r-xpbar"><div class="r-xpfill" id="rXpFill"></div></div></div></div>
+  <!--+AG 2-ago · EL BOTIN EN UNA TIRA, NO EN TRES FILAS. Las tres tarjetas (Copas, Monedas, Nivel) eran
+       identicas, del mismo alto y apiladas: 226 px de pantalla para decir tres numeros, sin que ninguna
+       mandara. Y ese aire era la causa MEDIDA de que la pantalla no cupiera — se salia 60 px en un movil
+       de 360x640 y 160 px en uno de 360x540, donde la clasificacion entera quedaba tapada por el boton.
+       Ahora es una fila de tres fichas: icono, cifra y etiqueta. Copas va mas ancha y con su borde dorado
+       porque es la moneda que mueve la temporada; las otras dos son iguales entre si.
+       ⚠ SE CONSERVAN TODAS LAS CLASES E IDs (.r-cups, .r-reward, #rCupsName, #rChispaWhy...) aunque
+       alguno ya no se vea: el JS de la animacion y del relleno los busca por nombre, y renombrarlos
+       "de paso" es como se rompen las pantallas sin que nadie se entere. -->
+  <div class="r-loot">
+    <div class="r-cups" id="rCups"><div class="ic"><img class="cico" src="arte/ui/moneda-copa.webp?v=2" alt=""></div><div class="cv" id="rCupsVal">0<span class="cd" id="rCupsDelta"></span></div><div class="txt"><div class="cn" id="rCupsName">Cohete</div><div class="cw" id="rCupsWhy">Copas</div></div></div>
+    <div class="r-reward" id="rRewChispa"><div class="ic chispa"><img class="cico" src="arte/ui/moneda-chispa.webp?v=2" alt=""></div><div class="val" id="rChispaVal">+0</div><div class="txt"><div class="lbl2" data-t="chispasWord">Monedas</div><div class="lbl2" id="rChispaWhy" style="text-transform:none;color:#8fe0a8"></div></div></div>
+    <!--+AG el icono de NIVEL era una estrella SVG de UN SOLO COLOR PLANO, al lado de una copa y una moneda
+         dibujadas con tinta, brillo y luz de borde: el suspenso automatico de "relleno plano". No hace
+         falta encargar nada — el aro dorado del encargo 32 ya existe y es exactamente una insignia de
+         nivel. Se reusa aqui con el numero dentro, igual que en la cabecera de la portada. -->
+    <div class="r-reward" id="rRewXp"><div class="ic xp"><b id="rLvlNum">1</b></div><div class="r-xpbar"><div class="r-xpfill" id="rXpFill"></div></div><div class="txt"><div class="lbl2" data-t="lvl">Nivel</div></div></div>
   </div>
   <!--+AG tabla de puestos REALES de la partida (viene del motor). Si no cabe entera, se muestra el podio +
        TU fila y el resto queda tras un tap (regla Supercell: reducir la info, no obligar a deslizar). -->
@@ -3085,7 +3159,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=266d6f0"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=f1683e3"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -4651,6 +4725,17 @@ function buildStandings(rows, seedNum, winnerTeam){
 //+AG marca la fila GANADORA = la que el motor corono en pista (winnerTeam), no "la primera de la tabla": en algun
 //   modo el criterio que ordena la tabla (el que paga copas) puede no coincidir con el que corona. Si no llega
 //   winnerTeam, gana el 1o. Asi el disco, el nombre de arriba y la corona de la tabla dicen SIEMPRE lo mismo.
+//+AG 2-ago · EL DISCO DE COLOR DE UNA FILA NO ES UNA MANCHA PLANA. Lo cazo supercell-arte auditando
+//   Resultados: el disco del CAMPEON (#rDisc) lleva dos capas —brillo arriba-izquierda y sombra abajo—
+//   y los discos de las FILAS, en la misma pantalla y para el mismo tipo de cosa (un competidor), eran
+//   un color solido. La misma clase de objeto resuelta con dos acabados a 20 px de distancia.
+//   Aqui se les dan las mismas dos capas, con la MISMA direccion de luz que el resto del pack.
+//   ⚠ Sigue siendo una primitiva, no un dibujo: a 18 px una bola de verdad no se lee mejor que un
+//   punto de color, asi que la pieza correcta a dibujar seria el disco GRANDE del campeon, no estos.
+function discBg(color){
+  return 'radial-gradient(circle at 35% 28%, #ffffff70, #ffffff00 55%),'
+       + 'radial-gradient(circle at 50% 105%, #00000066, #00000000 62%),' + color;
+}
 function markWinner(rows, winnerTeam){
   let w = winnerTeam!=null ? rows.find(r=>r.teamIdx===winnerTeam) : null;
   if(!w) w = rows[0];
@@ -4983,6 +5068,14 @@ function showResults(place, rew, leveled, colArg, teamP, d){
     el('rPlace').innerHTML=ord(place,LANG)+medalIco(place,'big');
     el('rSub').textContent=won?s.wonSub:(place<=3?s.podium:s.againSub);
   }
+  //+AG 2-ago · GANAR Y PERDER TIENEN QUE VERSE DISTINTO. Lo cazaron los dos auditores: el numerote salia
+  //   BLANCO igual si quedabas primero que si quedabas ultimo, y como el confeti vive en la meta (en el
+  //   motor, otra pantalla), esta se quedaba sin ninguna señal de victoria. En podio pasa a dorado, que
+  //   es el color que esta pantalla YA usa para "eres tu quien gana" en la banda de campeon: no se
+  //   inventa un lenguaje nuevo, se aplica el que hay.
+  //   La clase la pone el JS y no el CSS porque el criterio de podio cambia entre modos (en equipos son
+  //   4 puestos y podio es ganar; en individual son 8 y podio es el 1-3).
+  el('rPlace').classList.toggle('podio', teamP ? teamP===1 : place<=3);
   el('rTableH').textContent = teamP ? s.tblTeams : s.tblSolo;
   const rewChispa=el('rRewChispa'), rewXp=el('rRewXp');
   rewChispa.classList.remove('in'); rewXp.classList.remove('in');
@@ -5040,7 +5133,13 @@ function fitStandings(){
   anim.forEach(x=>x.classList.add('in'));
   //+AG se prueba de mas a menos: primero la tabla entera; si no cabe, se van quitando puestos de la cabeza
   //   hasta que quepa. En un movil normal no recorta nada; en uno muy pequeño deja el podio y tu fila.
-  for(const top of [0, RTBL_TOP, 3, 2, 1]){
+  //+AG 2-ago: se añade el escalon -1 al final = TABLA ENTERA PLEGADA, solo queda "Ver los 8". El suelo
+  //   anterior era topN=1 (podio + tu fila) y en un movil de 360x540 seguia sin caber: la pantalla se
+  //   pasaba a scroll y la clasificacion quedaba TAPADA por la barra de "Jugar otra", o sea que el
+  //   jugador no veia ni una fila y encima no sabia que habia algo debajo. Plegada no se pierde nada:
+  //   el boton sigue ahi y la abre. Es la regla de la casa —reducir la informacion, no obligar a
+  //   deslizar— llevada hasta el ultimo escalon.
+  for(const top of [0, RTBL_TOP, 3, 2, 1, -1]){
     renderStandingsTable(tblTeamP, top);
     if(r.scrollHeight<=r.clientHeight+2) break;
   }
@@ -5050,6 +5149,12 @@ function renderStandingsTable(teamP, topN){
   const tblEl=el('rTable'), more=el('rMore'); tblEl.innerHTML='';
   if(!lastStandings){ more.hidden=true; return; }
   const DELTAS = teamP ? TEAM_DELTA : PLACE_DELTA;
+  //+AG topN < 0 = plegada del todo (el ultimo escalon de fitStandings). Se sale antes de pintar filas,
+  //   pero dejando el boton VISIBLE y la cabecera puesta: si no, la clasificacion desapareceria sin
+  //   decir que existe, que es peor que recortarla.
+  if(topN < 0 && !tblExpanded){
+    more.hidden = false; more.textContent = S().rSeeAll(lastStandings.length); return;
+  }
   const cut = !!topN && !tblExpanded && lastStandings.length>topN+1;
   let shown = lastStandings;
   if(cut){ const top=lastStandings.slice(0,topN);
@@ -5061,7 +5166,7 @@ function renderStandingsTable(teamP, topN){
     if(!e){ const g=document.createElement('div'); g.className='rgap'; g.textContent='···'; tblEl.appendChild(g); return; }
     const dl=DELTAS[Math.min(DELTAS.length-1, e.place-1)];
     const row=document.createElement('div'); row.className='rrow'+(e.me?' meRow':'');
-    row.innerHTML='<span class="rp">'+ord(e.place,LANG)+'</span><span class="rdisc" style="background:'+e.color+'"></span>'+
+    row.innerHTML='<span class="rp">'+ord(e.place,LANG)+'</span><span class="rdisc" style="background:'+discBg(e.color)+'"></span>'+
       (e.win?'<span class="rcrown">'+uiIco('corona-campeon','sm')+'</span>':'')+
       //+AG 2-ago: la copa de esta fila era el ULTIMO emoji del sistema de Resultados. Dos lineas mas
       //   arriba, la corona del ganador ya se pinta con arte (uiIco); aqui seguia un 🏆 que en Windows
@@ -6084,7 +6189,7 @@ function paintRanking(){ applyShell(); const s=S();
     let vTxt,vCls='';
     if(rkTab==='diario'){ vTxt=deltaTxt(r.v); vCls=r.v>0?' up':(r.v<0?' dn':''); } else vTxt=coinIco('copa','sm')+' '+nfmt(r.v);
     const disc = r.arch ? '<img class="rdisc" src="'+ballArt(r.arch)+'" alt="" loading="lazy">'
-                        : '<span class="rdisc" style="background:'+r.color+'"></span>';
+                        : '<span class="rdisc" style="background:'+discBg(r.color)+'"></span>';
     row.innerHTML='<span class="kp">'+(medals[i]||'#'+(i+1))+'</span>'+disc+
       //+AG 1-ago: el marcador de franja era 🎟️ —un TICKET, o sea la moneda muerta—. Marca quién está
       //   dentro de la franja, no qué se cobra: pasa a 🎁, que es lo que dice el cartel de arriba.
