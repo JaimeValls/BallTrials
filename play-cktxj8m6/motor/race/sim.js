@@ -330,6 +330,13 @@ class Sim{
     //+AG doc 62: paneo horizontal de la cámara y bola-héroe del cierre. Fuera del cierre individual valen
     //   0 / -1 SIEMPRE → el render (que los capa al mapa) pinta exactamente la cámara de antes.
     this.cam_x=0; this.heroIdx=-1; this.heroF=null;
+    //+AG doc 62: los dos encuadres van como DATO y no como export nuevo, y esto costó un susto en producción.
+    //   El render los necesita (destino del salto del héroe, tamaño de la copa). Se sacaron con un `import
+    //   { HERO_SCALE, CELEB_SCALE }` y la CDN sirvió unos minutos el sim.js VIEJO con el index.html nuevo:
+    //   "does not provide an export named 'CELEB_SCALE'" y la Carrera no arrancaba en absoluto. Un export
+    //   que falta REVIENTA el módulo entero; un campo que falta se lee como undefined y solo se usa cuando
+    //   hay héroe —que un sim.js viejo nunca declara—, así que el desajuste degrada a la cámara de antes.
+    this.hero_scale=HERO_SCALE; this.celeb_scale=CELEB_SCALE;
     this.super=0;
     //+AG eventos: cola de acciones (jugador/bots, pueden dispararse fuera del step, patrón _pev del cazador)
     //   e histórico acumulado con la forma del motor (this.events, lo consume ?capture=1 vía runToEnd/sfxmap).

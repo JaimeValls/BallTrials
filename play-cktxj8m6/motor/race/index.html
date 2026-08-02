@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-02 ba7edb4">
+<meta name="bt-build" content="2026-08-02 0ffba31">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>YouBall · La Gran Carrera (WebGL)</title>
 <style>
@@ -221,7 +221,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=ba7edb4"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=0ffba31"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -236,7 +236,10 @@ import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, createS
 import { archLook } from '../chassis/ballmat.mjs';   //+AG doc 41 bloque G: material de la bola-heroe
 import { attachSquash } from '../chassis/squash.mjs';
 import { Sim, RNG, TEAMS, SHORT_COLORS, BALL_R, WIDTH, GATE_Y, GATE_H, TOP, FPS,
-         DIR, N_BALLS, CAM_SCALE, CELEB_SCALE, HERO_SCALE, ASPA_R, ASPA_THICK, PLAT_HW, PLAT_HH } from './sim.js';   //+AG extras de la capa de agencia
+         DIR, N_BALLS, CAM_SCALE, ASPA_R, ASPA_THICK, PLAT_HW, PLAT_HH } from './sim.js';   //+AG extras de la capa de agencia
+//+AG doc 62: los encuadres del cierre (sim.hero_scale / sim.celeb_scale) se leen del OBJETO sim, no por
+//   import. Un export que la CDN aún no ha refrescado tumba el módulo entero y la partida no arranca (pasó
+//   en producción el 2-ago); un campo que falta degrada a la cámara de siempre. Ver la nota en sim.js.
 import { EmoBook, PRIO } from '../chassis/emotions.mjs';
 import { archFace } from '../chassis/facegen.mjs';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
 import { itemTexture } from '../chassis/itemgen.mjs';
@@ -609,7 +612,7 @@ function sync(dt, a=1){
   const hero = sim.heroIdx>=0 ? sim.balls[sim.heroIdx] : null;
   let heroDx = 0;
   if(hero){ const k=1-Math.pow(1-Math.min(1,Math.max(0,(fF-sim.heroF)/20)),3);
-    const lim=Math.max(0, XH-(HERO_SCALE/2)*(colW/colH));
+    const lim=Math.max(0, XH-(sim.hero_scale/2)*(colW/colH));
     heroDx=(Math.max(-lim,Math.min(lim,hero.x))-hero.x)*k;
     //+AG doc 62: las SALPICADURAS DE LLEGADA (1,5 u de disco plano) se pintan para verse a 13 u de encuadre;
     //   en el plano corto ocupaban un tercio del ancho justo detrás del héroe y leían como manchurrón. Se
@@ -727,7 +730,7 @@ function sync(dt, a=1){
     //   acortar el encuadre (13u → 8u) la copa crecía un 60% y se salía por arriba, y el confeti —repartido por
     //   el ancho de la PISTA— se veía a la mitad de denso. Con camS=CELEB_SCALE y camX=0 (torneo) sale la misma
     //   copa y el mismo confeti de siempre, pixel a pixel.
-    const trK=hero?camS/CELEB_SCALE:1, cW=hero?camS*(colW/colH)*1.15:WIDTH*1.1;
+    const trK=hero?camS/sim.celeb_scale:1, cW=hero?camS*(colW/colH)*1.15:WIDTH*1.1;
     trophy.scale.setScalar(Math.max(0,ts)*trK*(1+0.05*Math.sin(simNowF*0.005)));
     trophy.position.set(camX, camY+camS*0.28, 2);
     // CONFETI GRANDE que CAE hasta la zona de las bolas (pool de 56, no lluvia de puntitos)
