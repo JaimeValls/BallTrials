@@ -60,6 +60,16 @@ const Q_QUAKE=5.5, QUAKE_CLAMP=15.0;
 const CHECK_W=30, CHECK_D=0.5;
 const FLOOR_MIN_V=1.70, FLOOR_HUG=3.2, FLOOR_PUSH=5.0, FLOOR_START_DELAY=18, FLOOR_ANCHOR_K=2;
 const WIN_HOLD=135, FINISH_SCALE=20.0, CAM_FOCUS_ZONE=16.0, CELEB_SCALE=13.0;   //+AG v0.11 celebración más larga (~4.5s) para ver el baile
+//+AG doc 62 EL PLANO DEL HÉROE (2026-08-02, lo levantó Jaime jugando: «cuando termino la carrera, si gano, la
+//   cámara no se centra en mí, se queda enfocando al medio del mapa; y si no he ganado yo, debería centrarse en
+//   el ganador si hay tiempo todavía»). La celebración encuadraba SIEMPRE el centro del mapa (cam_x clavado a 0)
+//   con la copa gigante en medio, y la bola que gana se congela DONDE cruza: en móvil el plano de celebración
+//   solo abarca |x|<3.0 de los 4.5 de pista, así que ganar pegado a un muro = ganar fuera de plano. Medido en
+//   195 carreras (tools/../medida): el protagonista salía cortado o entero fuera en el 79% de las victorias
+//   del jugador y en el 68% de las ajenas. Es decir, el momento premio no se veía 3 de cada 4 veces.
+//   HÉROE = la bola que manda en el cierre: TÚ si has ganado, el GANADOR si no. Solo INDIVIDUAL; el torneo
+//   (vídeos del canal) se queda con la celebración de siempre, byte a byte (heroIdx=-1, cam_x=0).
+const HERO_SCALE=8.0, HERO_LIFT=1.2, HERO_BOTTOM=-0.6;   // encuadre, altura sobre el héroe y suelo del plano
 const SPAWN_DY=2.5, PER_ROW=4;
 //+AG constantes de la capa de agencia
 //+AG v0.9 CONTROL POR ZONAS (reemplaza agresivo/defensivo/equilibrado): el jugador elige a qué ZONA ir
@@ -317,6 +327,9 @@ class Sim{
     //+AG v0.13 estado vivo de las plataformas: x (posición del vaivén) y vx (u/s, para el arrastre). Se recalcula por frame.
     this.plats=this.map.plats.map(p=>({y:p.y,cx:p.cx,amp:p.amp,period:p.period,off:p.off,hw:p.hw,x:p.cx,vx:0}));
     this.cam=TOP-CAM_SCALE/2; this.cam_scale=CAM_SCALE;
+    //+AG doc 62: paneo horizontal de la cámara y bola-héroe del cierre. Fuera del cierre individual valen
+    //   0 / -1 SIEMPRE → el render (que los capa al mapa) pinta exactamente la cámara de antes.
+    this.cam_x=0; this.heroIdx=-1; this.heroF=null;
     this.super=0;
     //+AG eventos: cola de acciones (jugador/bots, pueden dispararse fuera del step, patrón _pev del cazador)
     //   e histórico acumulado con la forma del motor (this.events, lo consume ?capture=1 vía runToEnd/sfxmap).
@@ -626,8 +639,21 @@ class Sim{
     // cámara
     const running=this.aliveBalls().map(b=>b.y).sort((a,b)=>a-b), leadY=running.length?running[0]:GATE_Y;
     const py=this.player.rank!==null?GATE_Y+3:this.player.y;
-    let ty,tscale;
-    if(this.decision_frame!==null&&this.player.rank!==null){ ty=GATE_Y+CELEB_SCALE*0.32; tscale=CELEB_SCALE; }   // celebración plena solo cuando el jugador ya llegó
+    let ty,tscale,tx=0;
+    //+AG doc 62 EL PLANO DEL HÉROE (individual): el cierre lo protagoniza TU bola si has ganado y la del GANADOR
+    //   si no. La cámara se le va encima (encuadre más corto) y le sigue en HORIZONTAL, que es lo que faltaba:
+    //   antes iba clavada al centro del mapa y quien ganaba pegado a un muro celebraba fuera de plano.
+    if(this.decision_frame!==null&&this.player.rank!==null&&this.individual){
+      const hero=this.player.team===this.winner_team ? this.player
+                 : (this.byTeam[this.winner_team].find(b=>b.rank!==null) || this.player);
+      this.heroIdx=this.balls.indexOf(hero); if(this.heroF===null) this.heroF=f;
+      tx=hero.x; tscale=HERO_SCALE;
+      //+AG el suelo del plano se mide contra la escala VIVA, no contra la final: el centro baja al 0.12 por frame
+      //   y el zoom cierra al 0.08, así que durante el viaje la cámara iba por delante del encuadre y el borde
+      //   de abajo se metía medio segundo por debajo de la losa del suelo (se veía el telón por debajo).
+      ty=Math.max(hero.y+HERO_LIFT, this.cam_scale/2+HERO_BOTTOM);
+    }
+    else if(this.decision_frame!==null&&this.player.rank!==null){ ty=GATE_Y+CELEB_SCALE*0.32; tscale=CELEB_SCALE; }   // celebración plena solo cuando el jugador ya llegó
     //+AG INDIVIDUAL: en cuanto hay ganador (aunque tú sigas cayendo) la cámara ENCUADRA LA META, no tu bola arriba.
     //   Antes se quedaba contigo a media caída y el ganador cruzaba/celebraba fuera de plano → "me dice que ganó
     //   rosa pero no veo bolas rosas bailando" (Jaime 2026-07-23). Con esto ves a la ganadora cruzar y bailar
@@ -636,6 +662,7 @@ class Sim{
     else { const foc=Math.min(py,leadY+6); if(foc<GATE_Y+CAM_FOCUS_ZONE){ ty=GATE_Y+FINISH_SCALE/2-3.0; tscale=FINISH_SCALE; }
       else { ty=Math.min(Math.max(py,CAM_SCALE/2-1.0),TOP-CAM_SCALE/2); tscale=CAM_SCALE; } }
     this.cam+=(ty-this.cam)*0.12; this.cam_scale+=(tscale-this.cam_scale)*0.08;
+    this.cam_x+=(tx-this.cam_x)*0.12;   //+AG doc 62: mismo suavizado que el vertical (tx=0 salvo plano del héroe)
     if(this.quakeFlash>0)this.quakeFlash--;
     // fin: la carrera se decide cuando un EQUIPO completa (arriba). Backstop por si nadie completa a 3600.
     if(f>=3600 && this.decision_frame===null){ let best=0,bc=-1; for(let t=0;t<this.nTeams;t++) if(this.team_done[t]>bc){bc=this.team_done[t];best=t;} this.winner_team=best; this.decision_frame=f; this.endHold=WIN_HOLD; }   //+AG generalizado a nTeams (default t<4)
@@ -653,6 +680,6 @@ class Sim{
 }
 
 //+AG exports del módulo: la superficie del motor (race/sim.js del canal) + los extras de la capa de agencia
-export { Sim, RNG, TEAMS, SHORT_COLORS, GATE_H, FPS, WIDTH, GATE_Y, BALL_R, CAM_SCALE, TOP,
-         DIR, N_BALLS, XHALF, ASPA_R, ASPA_THICK, ASPA_W, PLAT_HW, PLAT_HH, TILE_HP,
+export { Sim, RNG, TEAMS, SHORT_COLORS, GATE_H, FPS, WIDTH, GATE_Y, BALL_R, CAM_SCALE, CELEB_SCALE, TOP,
+         DIR, N_BALLS, XHALF, HERO_SCALE, ASPA_R, ASPA_THICK, ASPA_W, PLAT_HW, PLAT_HH, TILE_HP,
          NITRO_CD, SHIELD_DUR, SHIELD_CD, STAR_DUR };

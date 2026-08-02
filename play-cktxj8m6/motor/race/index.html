@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-01 8f0d016">
+<meta name="bt-build" content="2026-08-02 7a3ce74">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>YouBall · La Gran Carrera (WebGL)</title>
 <style>
@@ -221,7 +221,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=8f0d016"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=7a3ce74"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -236,7 +236,7 @@ import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, createS
 import { archLook } from '../chassis/ballmat.mjs';   //+AG doc 41 bloque G: material de la bola-heroe
 import { attachSquash } from '../chassis/squash.mjs';
 import { Sim, RNG, TEAMS, SHORT_COLORS, BALL_R, WIDTH, GATE_Y, GATE_H, TOP, FPS,
-         DIR, N_BALLS, CAM_SCALE, ASPA_R, ASPA_THICK, PLAT_HW, PLAT_HH } from './sim.js';   //+AG extras de la capa de agencia
+         DIR, N_BALLS, CAM_SCALE, CELEB_SCALE, HERO_SCALE, ASPA_R, ASPA_THICK, PLAT_HW, PLAT_HH } from './sim.js';   //+AG extras de la capa de agencia
 import { EmoBook, PRIO } from '../chassis/emotions.mjs';
 import { archFace } from '../chassis/facegen.mjs';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
 import { itemTexture } from '../chassis/itemgen.mjs';
@@ -394,7 +394,7 @@ for(let i=0;i<56;i++){ const c=sat(TEAMS[i%4].color);
 
 // estáticos por-semilla (pegs, bumpers, boosts, power-ups)
 // px/py/prevCam/prevScale = ESTADO PREVIO de la sim para INTERPOLAR el render (60 fps sobre sim a 30 Hz)
-let sim, emo, px, py, prevCam, prevScale, lastOv, ballObjs, mapGroup, puMeshes, gateMeshes=[], shake=0, seed=1;
+let sim, emo, px, py, prevCam, prevScale, prevCamX, lastOv, ballObjs, mapGroup, puMeshes, gateMeshes=[], shake=0, seed=1;
 let pegFx=null, quakeUntil=-999;   // look nuevo: flash de peg por impacto + ventana de Sacudida (mundo cálido)
 //+AG estado de la capa de agencia: meshes vivos de aspas/plataformas + snapshots para interpolar (patron px/py),
 //   fase de partida (menu/intro/play, patron cazador), jingle de victoria una sola vez, throttle de bump en vivo.
@@ -458,12 +458,13 @@ function platMesh(){
   return g;
 }
 const stainGeo=new THREE.CircleGeometry(0.5, 20);   // decals persistentes (llegadas, roturas); viven en mapGroup → se limpian solos
+let stainFin=[];   //+AG doc 62: las salpicaduras DE LLEGADA (las de meta), aparte, para poder bajarlas en el plano del héroe
 function addStain(x,y,rgb,op,sc,z){ const m=new THREE.Mesh(stainGeo,   // STAIN_K: la variante "más color" las hace más opacas y grandes → el mapa se pinta más
   new THREE.MeshBasicMaterial({color:new THREE.Color(rgb[0],rgb[1],rgb[2]), toneMapped:false, transparent:true, opacity:Math.min(1,op*STAIN_K), depthWrite:false}));
-  m.position.set(x,y,z); const s=sc*(VIVID?1.2:1); m.scale.set(s,s,1); mapGroup.add(m); }
+  m.position.set(x,y,z); const s=sc*(VIVID?1.2:1); m.scale.set(s,s,1); m.userData.op0=m.material.opacity; mapGroup.add(m); return m; }
 function buildMapMeshes(){
   if(mapGroup) scene.remove(mapGroup);
-  mapGroup=new THREE.Group(); scene.add(mapGroup);
+  mapGroup=new THREE.Group(); scene.add(mapGroup); stainFin=[];   //+AG las salpicaduras viven en mapGroup: al reconstruirlo, su lista también
   // pegs (instanced). Look nuevo: tintes grafito variados por instancia (sembrados por seed, deterministas)
   // + ~1/9 de latón cálido → muere el "campo de puntos grises"; el impacto los enciende del color del equipo.
   const pegGeo=new THREE.SphereGeometry(PEG_R,10,8);
@@ -508,7 +509,7 @@ function buildMapMeshes(){
 function buildSim(s){
   sim=new Sim(s, indOpts);   //+AG indOpts=null → torneo (el constructor coacciona a {}); {individual:true,n:8} → individual
   emo=new EmoBook(sim.balls.length, s);
-  px=sim.balls.map(b=>b.x); py=sim.balls.map(b=>b.y); prevCam=sim.cam; prevScale=sim.cam_scale;
+  px=sim.balls.map(b=>b.x); py=sim.balls.map(b=>b.y); prevCam=sim.cam; prevScale=sim.cam_scale; prevCamX=sim.cam_x;
   lastOv=sim.balls.map(()=>-999);
   //+AG snapshots de aspas/plats para interpolar + reset de estado de agencia por ronda
   prevAspaU=sim.aspas.map(a=>({ux:a.ux,uy:a.uy})); prevPlatX=sim.plats.map(p=>p.x);
@@ -544,7 +545,7 @@ function react(ev){
   for(const fi of ev.finishes){ const tc=sat(PAL[fi.team].color); P.burst(0,GATE_Y,0.2,tc,16,4.0);   //+AG PAL activa · la cara de llegada la pone el AMBIENTE (excitada/celebra), no una feliz-dormida
     // SALPICADURA persistente del color del equipo sobre la zona de meta: el mapa acumula la historia
     // de la carrera (12 llegadas). Escala determinista por id; vive en mapGroup → se limpia al reiniciar.
-    if(NEW_LOOK){ const b=sim.balls[fi.id]; addStain(b.x, GATE_Y+0.5, tc, 0.30, 0.75+((fi.id*37)%10)*0.06, -0.26); } }
+    if(NEW_LOOK){ const b=sim.balls[fi.id]; stainFin.push(addStain(b.x, GATE_Y+0.5, tc, 0.30, 0.75+((fi.id*37)%10)*0.06, -0.26)); } }
   if(ev.quake!==null && ev.quake!==undefined){ shake=Math.max(shake,0.35); quakeUntil=f+22;   // ventana "mundo cálido" (raíles+fondo) de la Sacudida
     for(const b of sim.aliveBalls()) emo.fire(b.id,'susto',PRIO.susto,16,f);        // La Sacudida -> susto a todas
     for(let i=0;i<120;i++){const a=Math.random()*6.283,sp=3+Math.random()*7;const c=sat(TEAMS[(Math.random()*4)|0].color);
@@ -570,7 +571,7 @@ function react(ev){
 // La sim NO cambia (mismas seeds/casting/QA/audio); el render muestrea entre el estado previo y el actual.
 function stepOnce(){
   for(let i=0;i<sim.balls.length;i++){ const b=sim.balls[i]; px[i]=b.x; py[i]=b.y; }
-  prevCam=sim.cam; prevScale=sim.cam_scale;
+  prevCam=sim.cam; prevScale=sim.cam_scale; prevCamX=sim.cam_x;
   //+AG snapshot de aspas (orientacion) y plataformas (x) para interpolar a 60fps (mismo patron px/py)
   for(let i=0;i<sim.aspas.length;i++){ prevAspaU[i].ux=sim.aspas[i].ux; prevAspaU[i].uy=sim.aspas[i].uy; }
   for(let i=0;i<sim.plats.length;i++) prevPlatX[i]=sim.plats[i].x;
@@ -596,7 +597,24 @@ function overtakes(){
 function sync(dt, a=1){
   const celebrating = sim.winner_team!==null && sim.decision_frame!==null;
   const f=sim.f, fF=Math.max(0,sim.f-1+a), simNowF=fF*(1000/FPS);
-  const camY=prevCam+(sim.cam-prevCam)*a, camS=prevScale+(sim.cam_scale-prevScale)*a;
+  const camY=prevCam+(sim.cam-prevCam)*a, camS=prevScale+(sim.cam_scale-prevScale)*a, camX=camXAt(a);
+  //+AG doc 62 EL PLANO DEL HÉROE (individual): la bola que protagoniza el cierre (TÚ si ganas, el GANADOR si no).
+  //   La cámara ya se le va encima, pero se congela DONDE cruzó y contra un muro no hay paneo que la centre (el
+  //   plano no puede salirse del mapa). Así que el héroe se acerca SALTANDO al centro del plano en ~0.7 s: ya
+  //   está dando botes de 1.4u, y el arrastre lateral lo pinta el mismo squash, así que lee como "sale al
+  //   escenario". Es SOLO PINTURA: la sim no se entera (b.x no se toca) → determinismo y hashes intactos.
+  //   El destino se calcula con el encuadre FINAL (HERO_SCALE), no con el de este frame: mientras la cámara
+  //   se acerca, su centro aún se está moviendo, y perseguirlo frame a frame mandaba al héroe de más y lo
+  //   traía de vuelta. Con el destino fijo, sale del muro al centro de una y no vuelve.
+  const hero = sim.heroIdx>=0 ? sim.balls[sim.heroIdx] : null;
+  let heroDx = 0;
+  if(hero){ const k=1-Math.pow(1-Math.min(1,Math.max(0,(fF-sim.heroF)/20)),3);
+    const lim=Math.max(0, XH-(HERO_SCALE/2)*(colW/colH));
+    heroDx=(Math.max(-lim,Math.min(lim,hero.x))-hero.x)*k;
+    //+AG doc 62: las SALPICADURAS DE LLEGADA (1,5 u de disco plano) se pintan para verse a 13 u de encuadre;
+    //   en el plano corto ocupaban un tercio del ancho justo detrás del héroe y leían como manchurrón. Se
+    //   bajan al 20% mientras dura el plano (ya han contado la historia de la carrera durante toda la bajada).
+    for(const m of stainFin) m.material.opacity=m.userData.op0*(1-0.8*k); }
   for(let i=0;i<sim.map.powerups.length;i++){ if(puMeshes[i]) puMeshes[i].visible=!sim.map.powerups[i].taken; }
   // BARRERAS: pieza dañada PARPADEA cada vez más rápido y vira a naranja/rojo (telegrafía la rotura);
   // al romperse, se oculta y lanza astillas calientes + de acero + chispas del color de quien la rompe.
@@ -677,7 +695,7 @@ function sync(dt, a=1){
       else { const nArr=sim.byTeam[b.team].filter(x=>x.rank!==null).length; amp = nArr>=2 ? 0.55 : 0.12; }
       jumpY = Math.abs(Math.sin((fF-o.finishF)*0.18))*amp;
     }
-    const bx=px[i]+(b.x-px[i])*a, by=py[i]+(b.y-py[i])*a;   // posición INTERPOLADA entre frame previo y actual (60 fps)
+    const bx=px[i]+(b.x-px[i])*a+(b===hero?heroDx:0), by=py[i]+(b.y-py[i])*a;   // posición INTERPOLADA entre frame previo y actual (60 fps) · +heroDx = salto al centro del plano (doc 62)
     o.g.position.set(bx,by+jumpY,0.5+BALL_R*(sc-1));
     o.g.scale.setScalar(sc*scl);
     o.sqUpdate(bx, by+jumpY, dt);   // VINILO v2: squash direccional + tilt + cara viva + viento + estrellas
@@ -705,16 +723,21 @@ function sync(dt, a=1){
     trophy.visible=true;
     if(sim.winner_team!=null){ const wc=PAL[sim.winner_team].color; trophy.material.color.setRGB(wc[0],wc[1],wc[2]); }   // copa del color del ganador (PAL activa)
     const ts=Math.min(1,(fF-sim.decision_frame)/10);   // pop al decidirse
-    trophy.scale.setScalar(Math.max(0,ts)*(1+0.05*Math.sin(simNowF*0.005)));
-    trophy.position.set(0, camY+camS*0.28, 2);
+    //+AG doc 62: en el plano del héroe la copa y el confeti se miden en PANTALLA, no en mundo. Sin esto, al
+    //   acortar el encuadre (13u → 8u) la copa crecía un 60% y se salía por arriba, y el confeti —repartido por
+    //   el ancho de la PISTA— se veía a la mitad de denso. Con camS=CELEB_SCALE y camX=0 (torneo) sale la misma
+    //   copa y el mismo confeti de siempre, pixel a pixel.
+    const trK=hero?camS/CELEB_SCALE:1, cW=hero?camS*(colW/colH)*1.15:WIDTH*1.1;
+    trophy.scale.setScalar(Math.max(0,ts)*trK*(1+0.05*Math.sin(simNowF*0.005)));
+    trophy.position.set(camX, camY+camS*0.28, 2);
     // CONFETI GRANDE que CAE hasta la zona de las bolas (pool de 56, no lluvia de puntitos)
     const top=camY+camS*0.55, bot=camY-camS*0.55, t=simNowF*0.001;
     for(const m of confetti){ const u=m.userData;
-      if(!confettiInit){ m.position.set((Math.random()-0.5)*WIDTH*1.1, bot+Math.random()*(top-bot), 1.5); m.visible=true; }
+      if(!confettiInit){ m.position.set(camX+(Math.random()-0.5)*cW, bot+Math.random()*(top-bot), 1.5); m.visible=true; }
       m.position.y += u.vy*dt;
       m.position.x += Math.sin(t*u.swF+u.ph)*u.swA*dt*3;
       m.rotation.set(u.sx*t, u.sy*t, u.ph+t*2);          // flutter (gira en 3 ejes, DoubleSide)
-      if(m.position.y < bot){ m.position.y = top; m.position.x=(Math.random()-0.5)*WIDTH*1.1; }
+      if(m.position.y < bot){ m.position.y = top; m.position.x=camX+(Math.random()-0.5)*cW; }
     }
     confettiInit=true;
   } else { trophy.visible=false; if(confettiInit){ for(const m of confetti) m.visible=false; confettiInit=false; } }
@@ -771,11 +794,19 @@ function updatePanels(){
     d.style.top=(Math.max(0,Math.min(1,frac))*100)+'%';
   }
 }
+//+AG doc 62: la X de la cámara, INTERPOLADA y CAPADA AL MAPA. El tope lo pone el render y no la sim porque
+//   depende del ASPECTO de la columna (el mismo plano del héroe encuadra 3.7u de ancho en un móvil y 7 en
+//   escritorio): así el paneo se acerca al héroe todo lo que puede sin enseñar nunca el otro lado del muro.
+//   Fuera del cierre individual sim.cam_x=0 → devuelve 0 = la cámara de siempre, sin tocar un pixel.
+function camXAt(a){
+  const cs=prevScale+(sim.cam_scale-prevScale)*a, lim=Math.max(0, XH-(cs/2)*(colW/colH));
+  return Math.max(-lim, Math.min(lim, prevCamX+(sim.cam_x-prevCamX)*a));
+}
 function frameCamera(dt, a=1){ shake=Math.max(0,shake-dt*1.5);
   const cy=prevCam+(sim.cam-prevCam)*a, cs=prevScale+(sim.cam_scale-prevScale)*a;   // cámara INTERPOLADA (60 fps)
-  const aspect=colW/colH, half=cs/2;                   // fit por ALTO (descenso), con el aspecto de la COLUMNA
+  const aspect=colW/colH, half=cs/2, cx=camXAt(a);     // fit por ALTO (descenso), con el aspecto de la COLUMNA
   cam.left=-half*aspect; cam.right=half*aspect; cam.top=half; cam.bottom=-half; cam.updateProjectionMatrix();
-  cam.position.set((Math.random()-.5)*shake, cy+(Math.random()-.5)*shake, 60); cam.lookAt(0,cy,0);
+  cam.position.set(cx+(Math.random()-.5)*shake, cy+(Math.random()-.5)*shake, 60); cam.lookAt(cx,cy,0);
 }
 
 // PREVIEW: la sim avanza a 30 Hz con acumulador y el render INTERPOLA con alpha=acc/STEP →
