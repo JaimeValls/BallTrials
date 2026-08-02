@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-02 cf71c53"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-02 81cccca"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -2259,6 +2259,41 @@
      x — se ve en cuanto la frase parte en dos lineas. El aire lo pone el margen y no un espacio en
      la cadena, que es justo lo que se acaba de quitar del diccionario. */
   .sc-note .ck, .toast .ck{ width:1em; height:1em; display:inline-block; vertical-align:-.12em; margin-right:.3em; }
+
+  /* ══ 25 · LA CABECERA QUE NO SE SALE (Garaje y Tienda) ════════════════════════════════════════
+     __fitCheck suspendia dos pantallas a 320 px: `gGemas` fuera +20 y `shGemas` +13 (y +14 en
+     Tienda > Bolas). Es deuda ANTERIOR a este trabajo —se reproduce igual sobre el juego.html de
+     HEAD— y es LA MISMA enfermedad que docs/56 curo en la portada: tres inquilinos en una fila de
+     una sola linea. Alli sobraba el selector de idioma y se saco; aqui los tres hacen falta (el
+     VOLVER, el titulo y las dos monedas), asi que lo que tiene que ceder es la FILA.
+     ⚠ EL FALLO ES MAS GORDO DE LO QUE DECIA EL BANCO, Y SOLO SE VE CON SALDO DE VERDAD. Con la
+     cuenta recien nacida (saldo "0") las pastillas son estrechas y __fitCheck da VERDE hasta sobre
+     el codigo sin arreglar. Con 12.500 monedas —una cuenta normal a los pocos dias— la fila del
+     Garaje pide 362 px dentro de una caja de 315 y `gGemas` se va 67 px fuera, no 20. O sea que el
+     numero del banco es el suelo del fallo, no su tamaño: lo que crece con la partida es el ancho
+     de la cifra, y por eso esto empeora solo con el tiempo.
+     ⚠ POR QUE NO SE ARREGLA APRETANDO LAS PASTILLAS, que era la salida obvia: quitarles el padding
+     da ~10 px de los ~70 que faltan, o sea que no llega ni de lejos — y ademas la pieza 17 las dejo
+     en 44 px tocables de verdad con el icono desbordando (canon 4 de docs/56). No se tocan.
+     ⚠ Y POR QUE NO SE ENCOGE EL VOLVER A ICONO POR DEBAJO DE 360, que fue mi primer arreglo: da 23
+     px, tampoco llega, y encima obligaba a un breakpoint que MIENTE. Medido: a 375 px —el movil de
+     referencia, no un caso raro— con ese mismo saldo la fila TAMBIEN se pasa, asi que un @media a
+     359 dejaba el fallo vivo justo donde mas se mira. El ancho de la pantalla no es el problema.
+     LO QUE SE HACE, y cabe en tres declaraciones: la fila puede ENVOLVER. Cuando los tres no caben,
+     las monedas bajan solas a una segunda linea y vuelven a subir en cuanto caben. Sin breakpoint,
+     sin ocultar nada y sin tocar ninguna pieza aprobada: vale igual para los 20 idiomas ("BOUTIQUE"
+     mide 110 px), para un saldo de seis cifras y para el movil que salga el año que viene. Es la
+     invariante hecha cierta POR CONSTRUCCION en vez de afinada para los datos de hoy. */
+  .g-top{ flex-wrap:wrap; row-gap:2px; }
+  /*+AG las monedas NO se encogen: son el bloque que tiene que viajar entero a la otra linea. Sin
+     esto, flex les recorta el ancho antes de envolver y la cifra se parte por la mitad. */
+  .g-top .h-coins{ flex:0 0 auto; }
+  /*+AG y la valvula del titulo. Con la fila envolviendo casi nunca llega a actuar —el titulo se
+     queda solo con el VOLVER y le sobra sitio—, pero si algun dia un idioma trae un titulo mas
+     ancho que la pantalla entera, se recorta con puntos suspensivos en vez de empujar nada fuera.
+     El `min-width:0` no es decorativo: sin el, un hijo flex nunca baja de su tamaño min-content y
+     el text-overflow no llega a dispararse. */
+  .g-title{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 </style>
 
 <!--+AG doc 34 Fase B: #app = la "columna telefono" que contiene TODAS las pantallas y overlays (portrait) -->
@@ -3000,7 +3035,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=cf71c53"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=81cccca"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
