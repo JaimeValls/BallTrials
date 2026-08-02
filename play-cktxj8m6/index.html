@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-02 9ebbeab"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-02 da5637b"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -2331,6 +2331,85 @@
      seguia igual de encendido y parecia que no habia pasado nada al pulsarlo. */
   .pr-code button:disabled, .pr-inv:disabled{ filter:saturate(.35); opacity:.6; }
 
+  /* ══ 23b · LA PLACA DE IDENTIDAD DE PERFIL > CUENTA (2-ago) ═════════════════════════════════════
+     Jaime, mirando esta pantalla: "no parece muy profesional". Tenia razon y el icono era el sintoma.
+     Lo que se cambia y por que:
+       · UN PUNTO DE COLOR NO PRUEBA NADA. El estado era un circulo de 11 px y una linea corrida
+         ("Estas dentro con Google: correo@..."). En la pantalla a la que se viene EXPRESAMENTE a
+         comprobar con que cuenta juegas, lo que lo prueba es el logotipo del proveedor. El chip
+         blanco de 38 px con la marca es la pieza; el punto se queda solo para el invitado, que no
+         tiene marca que enseñar.
+       · EL CORREO ES EL DATO y ahora tiene su renglon, en 900 y en blanco. Antes iba de coletilla
+         detras de una frase, al mismo cuerpo, y habia que leer la frase entera para encontrarlo.
+       · El ✓ de la derecha sale de ckSvg(), el mismo dibujo que el resto del juego (canon 24).
+     ⚠ Y EL INVITADO NO LLEVA PLACA (`.slim`), que era mi primera version y estaba mal MEDIDA.
+       Con la placa entera en los dos estados, la sub-pestaña pasaba de desbordar 93 px a desbordar
+       116 a 360x640 (y de 193 a 216 a 360x540): 23 px de regresion en una pantalla que YA no cabia.
+       Y no compensa, porque una placa de identidad esta para PROBAR una identidad y un invitado no
+       tiene ninguna que probar: la suya es la unica linea de esta pantalla que no necesita marca.
+       Asi que el invitado se queda con el punto naranja y su linea, exactamente como estaba, y el
+       jugador con cuenta —que es quien viene aqui a comprobar algo, y cuyo estado tiene 207 px de
+       sobra— se lleva la placa. Los dos estados no se ven nunca a la vez: entre uno y otro hay una
+       vuelta de Google y una recarga de pagina. */
+  .pr-acc-id{ display:flex; align-items:center; gap:11px; background:var(--plate-a); border:1px solid var(--line);
+    border-radius:14px; padding:9px 11px; box-shadow:inset 0 1px 0 #ffffff14; }
+  .pr-acc-mk{ width:38px; height:38px; flex:0 0 auto; border-radius:50%; background:#fff; display:flex;
+    align-items:center; justify-content:center; box-shadow:0 2px 0 #0d0726, inset 0 -1px 0 #00000018; }
+  .pr-acc-mk svg{ width:21px; height:21px; display:block; }
+  /*+AG el invitado no tiene marca, asi que lleva la silueta de la casa (trazo 2.2, viewBox 24, como
+     todos los iconos de seccion) en gris sobre el mismo chip blanco. Nada de emoji. */
+  .pr-acc-mk.guest svg{ width:23px; height:23px; color:#7b83a8; }
+  /*+AG el invitado: el punto naranja y su linea, sin placa ni chip. Milimetricamente lo que habia
+     antes de esta pieza, para no meter ni un pixel de alto en la sub-pestaña mas apretada del juego. */
+  .pr-acc-id.slim{ background:none; border:0; box-shadow:none; padding:0; gap:11px; }
+  .pr-acc-id.slim .pr-acc-mk{ width:11px; height:11px; background:#eb9b4b; box-shadow:none; }
+  .pr-acc-id.slim .pr-acc-mk svg{ display:none; }
+  .pr-acc-tx{ flex:1; min-width:0; }
+  .pr-acc-k{ font-size:var(--fs-2); font-weight:800; color:var(--muted); line-height:1.25; }
+  .pr-acc-k b{ color:#d6dbf4; }
+  /*+AG un correo no se parte por la mitad ni empuja la placa: si no cabe, se recorta con puntos
+     suspensivos. `min-width:0` en el padre es lo que deja que el ellipsis funcione dentro de un flex. */
+  .pr-acc-v{ font-size:var(--fs-3); font-weight:900; color:#fff; line-height:1.3; margin-top:1px;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .pr-acc-ok{ flex:0 0 auto; color:#8fe0a8; display:flex; }
+  .pr-acc-ok svg{ width:22px; height:22px; }
+  /*+AG ⚠ `hidden` NO BASTA cuando el elemento tiene un display de autor. El `[hidden]{display:none}`
+     vive en la hoja del NAVEGADOR, asi que cualquier regla nuestra con `display:flex` le gana y el
+     elemento sigue viendose. Cazado en la captura, no razonando: el invitado veia "Entrar con otra
+     cuenta" y "Cerrar sesion", que son justo los dos botones que no puede usar. Las dos piezas que
+     se ocultan por atributo y llevan display propio se lo declaran aqui. */
+  .pr-acc-ok[hidden], .pr-accout[hidden]{ display:none; }
+
+  /*+AG EL BOTON DE GOOGLE, CON SU MARCA. Es la misma pastilla blanca que ya usa la bienvenida
+     (`.wel-g`), a la escala de esta fila: si la primera pantalla del juego te ofrece Google en blanco
+     con su logotipo y la de Cuenta te lo ofrecia en una placa morada con solo texto, son dos ofertas
+     distintas para el jugador. Blanco sobre fondo oscuro, ademas, es como Google pide que se pinte.
+     ⚠ NO le pongas el amarillo del CTA ni le quites el blanco: el unico CTA dominante de esta
+       pantalla es "Guardar mi cuenta" (canon 6 de docs/56) y esto es una alternativa. Manda por
+       CONTRASTE de material (blanco entre placas moradas), no por tamaño. */
+  .pr-g{ display:flex; align-items:center; justify-content:center; gap:7px; min-height:44px;
+    border:0; border-radius:13px; padding:7px 8px; cursor:pointer; font-family:inherit;
+    font-weight:900; font-size:var(--fs-2); line-height:1.25; color:#20242c; background:#fff;
+    box-shadow:0 3px 0 #b9bfcb; transition:transform .08s, box-shadow .08s; }
+  .pr-g:active{ transform:translateY(2px); box-shadow:0 1px 0 #b9bfcb; }
+  .pr-g:disabled{ filter:saturate(.35); opacity:.6; }
+  .pr-g-mk{ width:17px; height:17px; flex:0 0 auto; }
+
+  /*+AG CERRAR SESION no es una accion mas: deja este movil como invitado. No se pinta en rojo (seria
+     alarma, y no lo es: la partida vuelve al entrar), pero si se separa de su vecina con un canto
+     calido para que el pulgar no la confunda con "Entrar con otra cuenta", que esta pegada. */
+  .pr-out{ border-color:#eb6b6b55; color:#f0b9b9; }
+  .pr-accout .pr-inv{ font-size:var(--fs-2); padding:7px 6px; line-height:1.25; }
+
+  /*+AG los dos botones de la hoja de confirmar. El que confirma manda por color, el que cancela se
+     queda en placa: el orden es cancelar-primero porque el pulgar derecho cae en el de la derecha y
+     ese tiene que ser el deliberado, no el accidental. */
+  .ask-btns{ display:flex; gap:9px; margin-top:13px; }
+  .ask-btns .pr-inv{ flex:1; min-height:46px; font-size:var(--fs-3); }
+  .ask-si{ background:linear-gradient(#ff8a6b,#e0503a); border-color:transparent; color:#fff;
+    box-shadow:0 3px 0 #8c2b1c, inset 0 1px 0 #ffffff3d; }
+  .ask-si:active{ box-shadow:0 1px 0 #8c2b1c, inset 0 1px 0 #ffffff3d; }
+
   /* ══ 24 · LA ✕ Y EL ✓, DIBUJADOS · docs/60 canon (los iconos se dibujan) ═══════════════════════
      Quedaban cinco cierres con la ✕ del sistema (U+2715) y el boton de "Equipada" con un ✓. Son
      glifos de fuente: cambian de grosor y de forma en cada telefono y no pertenecen a la marca — el
@@ -2666,6 +2745,41 @@
     <div class="infotx" id="infoTx" data-fit="scroll"></div>
   </div>
 </div>
+
+<!--+AG ===== HOJA DE CONFIRMAR (2-ago) =====
+     Existe para matar el `confirm()` del navegador. "Cerrar sesion" abria el dialogo GRIS DEL SISTEMA,
+     con el dominio escrito arriba ("balltrials.com dice:") y los botones de Chrome: lo mas parecido a
+     un error que puede ver un jugador dentro de un juego, y justo en la accion mas delicada de la
+     pantalla de Cuenta. Es la misma especie que el `<select>` del navegador que ya se desterro.
+     Se REUSA `.sheetwrap`/`.sheet` igual que hizo #infoSheet (bloque 2103): mismo componente, misma
+     animacion, mismo velo. No trae ni una cadena nueva al diccionario -- titulo, cuerpo y los dos
+     botones salen de claves que ya estan traducidas a los 20 idiomas. -->
+<div class="sheetwrap" id="askSheet" aria-hidden="true">
+  <div class="sheetback" id="askBack"></div>
+  <div class="sheet">
+    <div class="shead">
+      <div class="stit" id="askTit"></div>
+      <button class="sclose" id="askClose" data-tt="close" title="Cerrar"><svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6.8 6.8 L17.2 17.2"/><path d="M17.2 6.8 L6.8 17.2"/></g></svg></button>
+    </div>
+    <div class="infotx" id="askTx" data-fit="scroll"></div>
+    <div class="ask-btns"><button class="pr-inv" id="askNo"></button><button class="pr-inv ask-si" id="askSi"></button></div>
+  </div>
+</div>
+
+<!--+AG ===== MARCAS DE PROVEEDOR, UNA SOLA COPIA =====
+     El logotipo de Google lo enseñan DOS pantallas (la bienvenida y Perfil > Cuenta). Es una marca
+     registrada con una paleta fija: dibujarla dos veces es firmar que algun dia se separen y que una
+     de las dos deje de ser el logo oficial. Vive aqui una vez y las dos la piden con <use>.
+     ⚠ Los colores van CLAVADOS en el path, no heredan `currentColor` como el resto de iconos de la
+       casa: teñir el logo de Google lo invalida, y esa es justo la excepcion a la regla del canon. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="mk-google" viewBox="0 0 48 48">
+    <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.6 2.6 30.2.5 24 .5 14.6.5 6.5 5.9 2.6 13.7l7.8 6.1C12.3 14 17.6 9.5 24 9.5z"/>
+    <path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.7 6.9l7.6 5.9c4.4-4.1 6.8-10.1 6.8-17.3z"/>
+    <path fill="#FBBC05" d="M10.4 28.2c-.5-1.5-.8-3-.8-4.7s.3-3.2.8-4.7l-7.8-6.1C.9 15.9 0 19.8 0 23.5s.9 7.6 2.6 10.8l7.8-6.1z"/>
+    <path fill="#34A853" d="M24 47.5c6.2 0 11.5-2.1 15.3-5.6l-7.6-5.9c-2.1 1.4-4.8 2.3-7.7 2.3-6.4 0-11.7-4.5-13.6-10.4l-7.8 6.1C6.5 41.1 14.6 47.5 24 47.5z"/>
+  </symbol>
+</svg>
 
 <div id="wrap">
   <div id="stage">
@@ -3019,9 +3133,26 @@
          Meta sigue apagado hasta que existan sus credenciales y las paginas legales (docs/43). -->
     <div class="sc-block" data-sub="cuenta">
       <div class="sc-h"><svg class="sc-ico" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="7.2" r="3.7"/><path d="M12 10.9 V19.6"/><path d="M12 14.6 H15.7"/><path d="M12 17.3 H15"/></g></svg><span data-t="prAccH">Tu cuenta</span><button class="ibtn" id="prAccInfo" data-info="prAccNote" data-info-tit="prAccH" data-tp="infoWord" title="Info"><svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 10.8 V17"/><path d="M12 6.9 V7.2"/></g></svg></button></div>
-      <div class="pr-toggle" style="align-items:center">
-        <div id="prAccDot" style="width:11px;height:11px;border-radius:50%;background:#eb9b4b;flex:0 0 auto"></div>
-        <div class="tx" id="prAccState" data-t="prAccGuest">Estás jugando como invitado</div>
+      <!--+AG PLACA DE IDENTIDAD (2-ago, peticion de Jaime: "no parece profesional").
+           Lo que habia era un punto de color de 11 px y una linea de texto corrida. Un punto verde no
+           PRUEBA nada: en la pantalla a la que el jugador viene justamente a comprobar con que cuenta
+           esta, lo que lo prueba es la MARCA. Y el juego ya tenia el logotipo bueno de Google a una
+           pantalla de distancia (la bienvenida) sin usarlo aqui.
+           Tres piezas, que es como lo resuelven Brawl y Clash en su pantalla de cuenta:
+             · el chip blanco con la marca del proveedor a la izquierda (o la silueta del invitado),
+             · el estado en pequeño arriba y el CORREO en grande debajo -- antes iban en la misma
+               linea corrida y el correo, que es el dato, se leia como una coletilla,
+             · el ✓ verde a la derecha, del mismo ckSvg() que el resto del juego.
+           Cero cadenas nuevas: usa prAccGuest / prAccSaved / prAccSavedG, que ya existen. -->
+      <!--+AG arranca en `slim` (invitado) porque es el estado por defecto: si arrancara con la placa,
+           quien no tiene cuenta veria el chip blanco un instante antes de que pinta() lo quitara. -->
+      <div class="pr-acc-id slim" id="prAccId">
+        <span class="pr-acc-mk" id="prAccMk"></span>
+        <div class="pr-acc-tx">
+          <div class="pr-acc-k" id="prAccState" data-t="prAccGuest">Estás jugando como invitado</div>
+          <div class="pr-acc-v" id="prAccWho" hidden></div>
+        </div>
+        <span class="pr-acc-ok" id="prAccOk" hidden></span>
       </div>
       <!--+AG docs/60 canon 14 (remate del 2-ago): la nota de 18 palabras que iba aqui debajo se va a la
            hoja de la (i) de arriba. Lo que dice el ESTADO (el punto de color + "Estás jugando como
@@ -3050,20 +3181,37 @@
                alto lo devuelve la fila de abajo. Medido antes/despues en el mismo navegador:
                93 -> 93 px a 360x640, 193 -> 193 a 360x540, 0 -> 0 a 375x812. -->
         <button class="pr-inv" id="prAccCreate" data-t="prAccCreate">Guardar mi cuenta</button>
+        <!--+AG 2-ago: FACEBOOK FUERA, y Google con su marca.
+             Facebook estaba cableado y pintado, pero el proveedor esta APAGADO en el servidor (Meta
+             exige verificacion de empresa, docs/43): pulsarlo fallaba siempre. Un boton que promete
+             algo que el juego no puede cumplir hace mas daño que no tenerlo, y ponerle encima el
+             logotipo azul oficial habria hecho que un boton roto pareciera MAS de fiar. Vuelve, con
+             su marca, el dia que el proveedor este encendido. Decision de Jaime, 2026-08-02.
+             ⚠ La clave `prAccMeta` SE QUEDA en los 20 diccionarios a proposito: esta traducida y
+               volver a pedir 20 traducciones para reponer el boton es un coste absurdo. El cableado
+               tambien sobrevive (el bucle de abajo salta el boton que no existe con su `if(goog)`).
+             El hueco que deja Facebook es justo lo que le hacia falta a Google para caber con su
+             logotipo al lado del texto en vez de a tres renglones. -->
         <div class="pr-slots pr-accalt" style="gap:7px;margin-top:7px">
           <button class="pr-inv" id="prAccLogin" style="flex:1" data-t="prAccLogin">Ya tengo cuenta</button>
-          <button class="pr-inv" id="prAccGoogle" style="flex:1" data-t="prAccGoogle">Continuar con Google</button>
-          <button class="pr-inv" id="prAccMeta" style="flex:1" data-t="prAccMeta">Continuar con Facebook</button>
+          <button class="pr-g" id="prAccGoogle" style="flex:1"><svg class="pr-g-mk" viewBox="0 0 48 48" aria-hidden="true"><use href="#mk-google"/></svg><span data-t="prAccGoogle">Continuar con Google</span></button>
         </div>
       </div>
       <!--+AG con la cuenta ya guardada el formulario se esconde, pero hay un caso real: el
            movil de un hermano o de la madre. Este enlace lo vuelve a abrir para entrar con otra. -->
-      <button id="prAccOther" class="sc-soon" hidden data-t="prAccOther"
-              style="background:none;border:0;font-family:inherit;text-decoration:underline;cursor:pointer;padding:6px 0">Entrar con otra cuenta</button>
+      <!--+AG 2-ago: ERA UN ENLACE SUBRAYADO, o sea una pagina web metida dentro de un juego.
+           Fondo transparente, `text-decoration:underline` y 26 px de alto (medido): ni parecia de la
+           casa ni llegaba al minimo tactil de 44 px del canon. Brawl no tiene un solo enlace
+           subrayado en toda su interfaz -- alli todo lo que se toca es un boton con placa. Pasa a
+           `.pr-inv`, que es el idioma que ya hablan sus vecinos, y comparte fila con Cerrar sesion:
+           son las dos salidas de la pantalla y estan al mismo rango. -->
+      <div class="pr-slots pr-accout" id="prAccOuts" hidden style="gap:7px;margin-top:7px">
+        <button id="prAccOther" class="pr-inv" style="flex:1" data-t="prAccOther">Entrar con otra cuenta</button>
       <!--+AG salir SOLO existe con la cuenta guardada: cerrar la sesion de un invitado seria
            tirar su partida sin vuelta atras (no hay correo con el que volver a entrar). Por eso
            comparte el mismo hidden que el enlace de arriba y no se pinta nunca en invitado. -->
-      <button id="prAccOut" class="pr-inv" hidden data-t="prAccOut" style="width:100%;margin-top:4px">Cerrar sesión</button>
+        <button id="prAccOut" class="pr-inv pr-out" data-t="prAccOut" style="flex:1">Cerrar sesión</button>
+      </div>
       <div class="sc-note" id="prAccMsg" style="min-height:1.2em"></div>
     </div>
 
@@ -3122,7 +3270,10 @@
     <div class="wel-t" data-t="welT"></div>
     <div class="wel-sub" data-th="welSub"></div>
     <button class="wel-g" id="welGoogle">
-      <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.6 2.6 30.2.5 24 .5 14.6.5 6.5 5.9 2.6 13.7l7.8 6.1C12.3 14 17.6 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.7 6.9l7.6 5.9c4.4-4.1 6.8-10.1 6.8-17.3z"/><path fill="#FBBC05" d="M10.4 28.2c-.5-1.5-.8-3-.8-4.7s.3-3.2.8-4.7l-7.8-6.1C.9 15.9 0 19.8 0 23.5s.9 7.6 2.6 10.8l7.8-6.1z"/><path fill="#34A853" d="M24 47.5c6.2 0 11.5-2.1 15.3-5.6l-7.6-5.9c-2.1 1.4-4.8 2.3-7.7 2.3-6.4 0-11.7-4.5-13.6-10.4l-7.8 6.1C6.5 41.1 14.6 47.5 24 47.5z"/></svg>
+      <!--+AG 2-ago: el logotipo estaba COPIADO aqui path a path. Ahora lo pide al sprite `#mk-google`,
+           que es la unica copia del fichero, para que esta pantalla y Perfil > Cuenta no puedan
+           separarse nunca (son la misma marca registrada ofrecida dos veces). -->
+      <svg viewBox="0 0 48 48" aria-hidden="true"><use href="#mk-google"/></svg>
       <span data-t="welGoogle"></span>
     </button>
     <button class="wel-inv" id="welSkip" data-t="welSkip"></button>
@@ -3165,7 +3316,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=9ebbeab"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=da5637b"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -5726,7 +5877,16 @@ function openPerfil(){ showScreen('perfil'); applyShell(); el('prChispas').textC
 //+AG docs/42 Fase 2 + docs/23 §3: el invitado se convierte en cuenta SIN perder nada, porque
 //   es la MISMA cuenta de servidor (mismo user_id): no hay migracion que pueda salir mal.
 function wireCuenta(){
-  const dot=el('prAccDot'), est=el('prAccState'), form=el('prAccForm'), msg=el('prAccMsg');
+  const est=el('prAccState'), form=el('prAccForm'), msg=el('prAccMsg');
+  //+AG las tres piezas de la placa de identidad (bloque 23b del CSS).
+  const idp=el('prAccId'), mk=el('prAccMk'), who=el('prAccWho'), okmk=el('prAccOk'), outs=el('prAccOuts');
+  //+AG la marca del proveedor sale del sprite (<use>), no de una copia del path: el logotipo de
+  //   Google vive una sola vez en el fichero y lo comparten esta pantalla y la bienvenida.
+  const MK_GOOGLE='<svg viewBox="0 0 48 48" aria-hidden="true"><use href="#mk-google"/></svg>';
+  //+AG cuenta guardada con CORREO: no hay marca de terceros que enseñar, asi que va el sobre de la
+  //   casa (viewBox 24, trazo 2.2, como todos los iconos de seccion). Y el invitado, la silueta.
+  const MK_MAIL='<svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.9" y="5.2" width="18.2" height="13.6" rx="2.6"/><path d="M3.6 7.2 L12 13.1 L20.4 7.2"/></g></svg>';
+  const MK_GUEST='<svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.4" r="3.9"/><path d="M4.7 20.1 C5.7 16.3 8.5 14.4 12 14.4 C15.5 14.4 18.3 16.3 19.3 20.1"/></g></svg>';
   const mail=el('prAccMail'), pass=el('prAccPass'), crear=el('prAccCreate'), entrar=el('prAccLogin');
   if(!crear) return;
   const di=(t,bien)=>{ msg.innerHTML=t; msg.style.color = bien===undefined?'':(bien?'#8fe0a8':'#eb6b6b'); };
@@ -5739,14 +5899,33 @@ function wireCuenta(){
     //+AG con Google la cuenta esta guardada aunque el correo aun no se haya leido del servidor:
     //   exigir email dejaba a un jugador con Google enlazado viendose como "invitado".
     const guardada = !!(e && !e.anonimo && (e.email || e.google));
-    if(guardada){ dot.style.background='#8fe0a8'; est.innerHTML=(e.google?S().prAccSavedG:S().prAccSaved)+' <b>'+(e.email||'Google')+'</b>'; form.style.display='none'; otra.hidden=false; }
-    else { dot.style.background='#eb9b4b'; est.innerHTML=S().prAccGuest; form.style.display=''; otra.hidden=true; }
+    if(guardada){
+      //+AG la frase va arriba en pequeño y el CORREO abajo en grande, que es el dato que se viene a
+      //   comprobar. Las dos claves acaban en dos puntos porque antes la frase y el correo iban en la
+      //   MISMA linea corrida; ahora sobran, y se quitan tambien los de ancho completo del chino.
+      idp.className='pr-acc-id';
+      mk.className='pr-acc-mk'+(e.google?'':' guest'); mk.innerHTML=e.google?MK_GOOGLE:MK_MAIL;
+      est.innerHTML=(e.google?S().prAccSavedG:S().prAccSaved).replace(/[:：]\s*$/,'');
+      who.hidden=false; who.textContent=e.email||'Google';
+      okmk.hidden=false; okmk.innerHTML=ckSvg(2.8);
+      form.style.display='none'; outs.hidden=false; otra.hidden=false;
+    } else {
+      //+AG invitado: sin placa (`.slim`) y sin marca, que es lo que habia antes de esta pieza. El
+      //   por que esta en el bloque 23b del CSS: la placa costaba 23 px en la pantalla mas apretada
+      //   y un invitado no tiene identidad que probar.
+      idp.className='pr-acc-id slim';
+      mk.className='pr-acc-mk'; mk.innerHTML='';
+      est.innerHTML=S().prAccGuest; who.hidden=true; who.textContent='';
+      okmk.hidden=true; okmk.innerHTML='';
+      form.style.display=''; outs.hidden=true;
+    }
     //+AG docs/60 canon 14: la nota ya no se pinta en pantalla, vive detras de la (i) de la cabecera.
     //   Lo que sigue siendo dinamico es CUAL de las dos abre: con la cuenta guardada, "solo este movil
     //   sabe que es tuya" seria mentira justo debajo de "estas dentro con Google".
     const info=el('prAccInfo'); if(info) info.dataset.info = guardada ? 'prAccNoteOk' : 'prAccNote';
-    //+AG salir solo con la cuenta guardada: el invitado no tiene por donde volver.
-    if(salir) salir.hidden=!guardada; };
+    //+AG salir solo con la cuenta guardada: el invitado no tiene por donde volver. Ahora lo decide
+    //   la FILA entera (`outs`, arriba), que es la que contiene los dos botones de salida.
+  };
   pinta();
   if(otra && !otra._wired){ otra._wired=true; otra.onclick=()=>{ form.style.display=''; otra.hidden=true; mail.value=''; pass.value=''; mail.focus(); }; }
 
@@ -5756,7 +5935,9 @@ function wireCuenta(){
   //   "Ya tengo cuenta" (docs/42 §13).
   if(salir && !salir._wired){ salir._wired=true;
     salir.onclick=async()=>{
-      if(!confirm(S().prAccOutAsk)) return;
+      //+AG 2-ago: era `confirm()`, o sea la caja gris del navegador con "balltrials.com dice:" encima.
+      //   Ahora pregunta la hoja del juego (ask()), que es el mismo componente de "Vas a jugar".
+      if(!await ask(S().prAccOut, S().prAccOutAsk, S().prAccOut)) return;
       salir.disabled=true;
       try{ if(nube()) await nube().salir(); }catch(e){ console.warn('[cuenta] salir', e); }
       di(ckTxt(S().prAccOutOk),true);
@@ -6297,6 +6478,29 @@ function openInfo(bodyKey, titKey, titIx){ const s=S(), b=s[bodyKey]; if(typeof 
   el('infoTx').innerHTML=coinify(b);
   const w=el('infoSheet'); w.classList.add('on'); w.setAttribute('aria-hidden','false'); }
 function closeInfo(){ const w=el('infoSheet'); w.classList.remove('on'); w.setAttribute('aria-hidden','true'); }
+
+//+AG PREGUNTAR DENTRO DEL JUEGO, no con el dialogo del navegador (2-ago).
+//   `confirm()` abre la caja GRIS DEL SISTEMA, con "balltrials.com dice:" escrito arriba y los
+//   botones de Chrome. Dentro de un juego eso no se lee como una pregunta, se lee como un error --
+//   y estaba en "Cerrar sesion", la accion mas delicada de Perfil > Cuenta. Misma familia que el
+//   `<select>` del navegador que ya se desterro de la interfaz.
+//   Devuelve una promesa de si/no, asi que en quien llama es un cambio de una linea:
+//     if(!confirm(txt)) return;   ->   if(!await ask(tit, txt, sí)) return;
+//   ⚠ SE CIERRA SIEMPRE RESOLVIENDO. Si el velo o la ✕ cerraran la hoja sin resolver, quien la
+//     abrio se quedaria esperando para siempre con su boton deshabilitado: cerrar es decir que NO.
+let askResolve=null;
+function ask(tit, cuerpo, si){
+  el('askTit').textContent = tit || '';
+  el('askTx').innerHTML = coinify(cuerpo || '');
+  el('askNo').textContent = S().cancel;
+  el('askSi').textContent = si || S().cancel;
+  const w=el('askSheet'); w.classList.add('on'); w.setAttribute('aria-hidden','false');
+  return new Promise(r=>{ askResolve=r; });
+}
+function askCierra(v){ const w=el('askSheet'); w.classList.remove('on'); w.setAttribute('aria-hidden','true');
+  const r=askResolve; askResolve=null; if(r) r(!!v); }
+el('askBack').onclick=()=>askCierra(false); el('askClose').onclick=()=>askCierra(false);
+el('askNo').onclick=()=>askCierra(false);   el('askSi').onclick=()=>askCierra(true);
 el('infoBack').onclick=closeInfo; el('infoClose').onclick=closeInfo;
 //+AG delegado y no un onclick por boton: las (i) de Temporada y Perfil viven en HTML estatico, pero
 //   nada impide que mañana alguna se pinte desde JS. Con el delegado, poner una (i) nueva es escribir
