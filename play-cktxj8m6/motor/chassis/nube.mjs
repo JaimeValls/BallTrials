@@ -123,7 +123,7 @@ export function crearNube(opts = {}) {
       if (typeof captchaOpt === 'function') return (await captchaOpt()) || null;
       if (captchaOpt && typeof captchaOpt.token === 'function') return (await captchaOpt.token()) || null;
       if (captchaPorDefecto === undefined) {
-        const m = await import('./captcha.mjs?v=ce0c08b');
+        const m = await import('./captcha.mjs?v=6e0a65e');
         captchaPorDefecto = m.crearCaptcha();
       }
       return (await captchaPorDefecto.token()) || null;

@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-02 ce0c08b"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-02 6e0a65e"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -1606,29 +1606,47 @@
      de 340 px (auditoria de los 20 idiomas) con este razonamiento escrito — el numero dentro del
      anillo ya dice que es un nivel, asi lo hace Brawl Stars. Lo que se hace aqui es dejar de tener dos
      diseños segun el ancho, y de paso el canon pide menos texto en todas partes (regla 5). */
-  .h-lvl{ width:34px; height:34px; padding:0; gap:0; border-radius:50%; flex:0 0 auto;
-    background:linear-gradient(var(--nav-1),var(--nav-2)); border:1px solid #ffffff30;
-    box-shadow:0 3px 0 #0d0726, inset 0 1px 0 #ffffff2e; transition:transform .08s, box-shadow .08s; }
+  /*+AG ⚠⚠ ESTE BLOQUE SE HA REPUESTO UNA VEZ (2-ago). Se integro el encargo 32 —el aro dorado
+     dibujado— y un merge de la sesion paralela devolvio estas lineas a su version anterior: el dibujo
+     seguia en el repo, la regla que lo pintaba no. En produccion volvio a salir la placa lisa. No dio
+     conflicto de git ni error de nada; se vio MIRANDO EL DOM de produccion. Si vuelve a aparecer aqui
+     un `linear-gradient` en vez del `url(...)`, es esto otra vez.
+
+     ⚠ EL `background-size` NO ES 100% Y NO ES UN DESCUIDO. El dibujo trae aire alrededor: el objeto
+     mide 234 px en un lienzo de 256 (medido en la entrega). A 100% el oro se quedaria un 9% por
+     dentro del borde del elemento y el CANTO —que sigue la caja, no la silueta— asomaria por fuera
+     como un halo oscuro mas grande que la insignia. A 109,4% (256/234) coinciden.
+     El borde de 1 px se va: el dibujo ya trae su propio contorno de tinta. */
+  .h-lvl{ width:40px; height:40px; padding:0; gap:0; border-radius:50%; flex:0 0 auto;
+    justify-content:center; border:0;
+    background:url(arte/ui/nivel-marco.webp?v=1) center/109.4% no-repeat;
+    box-shadow:0 3px 0 #0d0726; transition:transform .08s, box-shadow .08s; }
   .h-lvl .cap{ display:none; }
-  /*+AG el anillo llena la insignia y su disco interior deja ver 3 px de oro alrededor. El `inset 0 0 0
-     3px` de la regla original se queda fuera a proposito: ahi tapaba el oro con el color del fondo.
-     ⚠ EL COLOR DEL ARO VACIO SE ELIGIO MIDIENDO, no a ojo, y el primer intento fallo. El jugador NUEVO
-     esta a 0 XP: o sea que el anillo entero es la parte vacia, y ese —no el 62% de la demo— es el
-     estado en el que arranca el 100% de las instalaciones. En blanco al 15% (lo que habia) se fundia
-     con la placa; en ranura OSCURA (lo que probe despues) tambien, porque el fondo de la placa ya es
-     casi negro por abajo. Las dos veces salia un disco liso con un numero, sin pista de que aquello
-     fuera un medidor. Se monto la insignia cuatro veces seguidas con cuatro tonos y se capturo la
-     tira: gana el violeta claro, el unico que a 0% dibuja un ARO. El oro que llegue despues se le
-     superpone con mas contraste todavia. */
-  .h-lvlnum{ width:100%; height:100%; box-shadow:none;
-    background:conic-gradient(var(--gold2) var(--lvlpct,30%), #3a3470 0); }
-  .h-lvlnum b{ width:26px; height:26px; background:#191046; color:#fff; font-size:var(--fs-4);
+  /*+AG DENTRO DEL ARO NO VA NADA. Jaime, viendolo en produccion: «tiene como un hilillo interior negro
+     o otro circulo dentro y queda mal, esta como cortado. Prefiero que no haya nada a eso».
+     Un aro de progreso dentro de un aro dibujado son dos circulos concentricos a 40 px: no se lee como
+     un medidor, se lee como un recorte mal hecho. La insignia se queda con el dibujo y el numero. El
+     progreso de nivel se sigue viendo en Resultados, con su barra, al acabar cada partida.
+     El numero va suelto sobre el hueco oscuro que ya trae el dibujo, sin disco propio: ese disco era
+     el segundo circulo de mas.
+
+     ⚠ EL `margin-bottom` SUBE EL NUMERO 1 px Y ES CENTRADO OPTICO, no un apaño. Jaime: «el 3 no esta
+     centrado». Y la CAJA lo estaba —desvio de 0,01 px medido en produccion—: lo que no lo estaba era
+     la TINTA. Una cifra se apoya en la linea base y su caja reserva ademas el hueco de las letras con
+     rabito, asi que centrar la caja deja el digito BAJO: 0,67 px a 40 px de uso, el 1,7% del diametro,
+     y dentro de un circulo eso se ve. Se probaron cinco valores capturando y midiendo la TINTA cada
+     vez; de 0,67 para arriba todos dejan el mismo residuo porque a 3x el navegador solo mueve tercios
+     de pixel. Se elige 1 px por redondo. Se comprobo ademas que la captura usaba Fredoka de verdad y
+     no una fuente de repuesto, o habria medido el centrado de otra letra. */
+  .h-lvlnum{ width:100%; height:100%; background:none; box-shadow:none; }
+  .h-lvlnum b{ width:auto; height:auto; background:none; border-radius:0; color:#fff; font-size:var(--fs-4);
+    margin-bottom:1px;
     -webkit-text-stroke:2px #241a3f; paint-order:stroke fill; }
-  /*+AG el area de toque: la insignia mide 34 y el minimo tactil son 44. Mismo halo transparente que
+  /*+AG el area de toque: la insignia mide 40 y el minimo tactil son 44. Mismo halo transparente que
      .coin y .g-back. (Hoy el nivel no abre nada, pero la fila entera se pulsa sin querer y el halo
      evita que el dedo caiga en la moneda de al lado.) */
   .h-lvl{ position:relative; }
-  .h-lvl::before{ content:''; position:absolute; inset:-6px; border-radius:999px; }
+  .h-lvl::before{ content:''; position:absolute; inset:-3px; border-radius:999px; }
 
   /*+AG 9.2 · LAS COPAS. La pildora ya se rehizo en la fase A (la copa desborda, el numero es grande y
      lleva trazo) pero su cifra se quedo DORADA mientras la moneda y la gema de al lado la tienen
@@ -1646,7 +1664,12 @@
      La diferencia es de un 15% de luminancia: no se ve, pero es exactamente el defecto que hizo nacer
      este bloque —cada componente heredando SU color— y el que garantiza que dentro de tres pantallas
      vuelva a haber cuatro estilos. Gana el token del kit, que es el que ya usan mas sitios. */
-  .h-lvl, .coin, .cupsband .cups{ background:linear-gradient(var(--nav-1),var(--nav-2)); }
+  /*+AG ⚠⚠ `.h-lvl` NO ENTRA AQUI, y esta es la SEGUNDA vez que hay que sacarlo. Esta regla vive mas
+     abajo que la de la insignia, asi que por cascada le pisa el dibujo y devuelve la placa lisa: el
+     arte entra en el repo y no se ve. Paso al integrar el encargo 32, se arreglo, y un merge de la
+     sesion paralela volvio a meterlo. La insignia ya no es una placa marino, es un aro dorado
+     DIBUJADO; el token unico manda en las otras dos y solo en esas dos. */
+  .coin, .cupsband .cups{ background:linear-gradient(var(--nav-1),var(--nav-2)); }
 
   /* ══ 10 · EL RIEL DE LA PORTADA (Noticias · Ranking · Amigos · Club) ══════════════════════════
      Los cuatro botones que Jaime nombro por su nombre. Eran cuadrados de cristal: fondo blanco al 6%,
@@ -3058,7 +3081,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=ce0c08b"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=6e0a65e"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
