@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-02 7ea7a06">
+<meta name="bt-build" content="2026-08-02 266d6f0">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>YouBall · La Gran Carrera (WebGL)</title>
 <style>
@@ -47,6 +47,12 @@
   #ctr button:active{transform:translateY(2px);box-shadow:0 1px 0 #0009}
   #ctr button .k{display:block;font-size:9px;opacity:.5;font-weight:800;margin-top:2px}
   #ctr button .cd{display:block;font-size:10px;opacity:.75;font-weight:700}
+  /*+AG encargo 34: EL ICONO DEL BOOSTER. Va en `em` (docs/57: nunca en px) para que crezca con la letra del
+     boton, que es un clamp: 1.7em sobre los 12 px de un movil de 360 = 20 px, que es el minimo al que la pieza
+     se lee segun el brief, y 25 px en pantalla grande. El vertical-align lo baja hasta sentarse en la linea
+     base de la palabra en vez de colgar de ella. */
+  #ctr button .bi{height:1.7em;width:auto;vertical-align:-.44em;margin-right:.22em;
+    filter:drop-shadow(0 1px 1px #00000066)}
   #ctr button:disabled{opacity:.35;cursor:default}
   /*+AG v0.15 los tres botones de ZONA se pulsan cientos de veces por carrera y con el pulgar sin mirar,
      asi que se les da mas dedo que a los boosters: medidos daban 44 px de alto, que es EXACTAMENTE mi
@@ -203,9 +209,14 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
   <div id="superwrap"><span id="superlbl"></span><div id="superbar"><div id="superfill"></div></div></div>
   <div><div class="lbl" id="lblBoost"></div>
     <div class="row">
-      <button id="bNit"><span class="t"></span><span class="cd" id="cdNit"></span></button>
-      <button id="bShd"><span class="t"></span><span class="cd" id="cdShd"></span></button>
-      <button id="bSup"><span class="t"></span><span class="cd" id="cdSup"></span></button>
+      <!--+AG encargo 34: el icono del booster lo pone el HTML (arte/ui/icono-*.webp), NO la cadena traducida.
+           Hasta hoy el rayo/escudo/estrella viajaba DENTRO de 'nitro'/'shield'/'super' en los 20 idiomas (ese
+           es el motivo de que aqui no quede ni un emoji que grepear), o sea que el HUD
+           —la superficie que el jugador mira el 100% de la partida— se dibujaba con el emoji del SISTEMA, uno
+           distinto en cada movil. Aqui es una imagen de la familia y sale igual en todos. -->
+      <button id="bNit"><img class="bi" src="../../arte/ui/icono-nitro.webp" alt=""><span class="t"></span><span class="cd" id="cdNit"></span></button>
+      <button id="bShd"><img class="bi" src="../../arte/ui/icono-escudo.webp" alt=""><span class="t"></span><span class="cd" id="cdShd"></span></button>
+      <button id="bSup"><img class="bi" src="../../arte/ui/icono-super.webp" alt=""><span class="t"></span><span class="cd" id="cdSup"></span></button>
     </div></div>
 </div>
 <div id="count"><div class="n" id="countN"></div><div class="you" id="countYou"></div></div>
@@ -221,7 +232,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=7ea7a06"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=266d6f0"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -232,23 +243,23 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 </script>
 
 <script type="module">
-import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createItemPops, createBloom, frameOrtho, buildHud, updateHud } from '../chassis/gfx.mjs?v=7ea7a06';
-import { archLook } from '../chassis/ballmat.mjs?v=7ea7a06';   //+AG doc 41 bloque G: material de la bola-heroe
-import { attachSquash } from '../chassis/squash.mjs?v=7ea7a06';
+import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createItemPops, createBloom, frameOrtho, buildHud, updateHud } from '../chassis/gfx.mjs?v=266d6f0';
+import { archLook } from '../chassis/ballmat.mjs?v=266d6f0';   //+AG doc 41 bloque G: material de la bola-heroe
+import { attachSquash } from '../chassis/squash.mjs?v=266d6f0';
 import { Sim, RNG, TEAMS, SHORT_COLORS, BALL_R, WIDTH, GATE_Y, GATE_H, TOP, FPS,
-         DIR, N_BALLS, CAM_SCALE, ASPA_R, ASPA_THICK, PLAT_HW, PLAT_HH } from './sim.js?v=7ea7a06';   //+AG extras de la capa de agencia
+         DIR, N_BALLS, CAM_SCALE, ASPA_R, ASPA_THICK, PLAT_HW, PLAT_HH } from './sim.js?v=266d6f0';   //+AG extras de la capa de agencia
 //+AG doc 62: los encuadres del cierre (sim.hero_scale / sim.celeb_scale) se leen del OBJETO sim, no por
 //   import. Un export que la CDN aún no ha refrescado tumba el módulo entero y la partida no arranca (pasó
 //   en producción el 2-ago); un campo que falta degrada a la cámara de siempre. Ver la nota en sim.js.
-import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=7ea7a06';
-import { archFace } from '../chassis/facegen.mjs?v=7ea7a06';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
-import { itemTexture } from '../chassis/itemgen.mjs?v=7ea7a06';
-import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=7ea7a06';
-import { buildSfxBuffer } from './sfxmap.mjs?v=7ea7a06';
-import { runToEnd } from '../chassis/simrun.mjs?v=7ea7a06';
-import { createCoach } from '../chassis/coach.mjs?v=7ea7a06';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
-import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=7ea7a06';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
-import { cantarPuesto } from '../chassis/veredicto.mjs?v=7ea7a06';   //+AG cartel de META: "en qué puesto has quedado", antes de soltar el resultado al shell
+import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=266d6f0';
+import { archFace } from '../chassis/facegen.mjs?v=266d6f0';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
+import { itemTexture } from '../chassis/itemgen.mjs?v=266d6f0';
+import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=266d6f0';
+import { buildSfxBuffer } from './sfxmap.mjs?v=266d6f0';
+import { runToEnd } from '../chassis/simrun.mjs?v=266d6f0';
+import { createCoach } from '../chassis/coach.mjs?v=266d6f0';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=266d6f0';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
+import { cantarPuesto } from '../chassis/veredicto.mjs?v=266d6f0';   //+AG cartel de META: "en qué puesto has quedado", antes de soltar el resultado al shell
 
 window.addEventListener('error', e => { document.getElementById('err').style.display='grid'; console.error(e.error||e.message); });
 
@@ -1031,15 +1042,15 @@ if(EMBED){
 // ============================================================================
 const el=id=>document.getElementById(id);
 const I18N={
-  en:{name:'The Great Race', sub:'Your ball rolls down on its own. You choose its <b>direction</b> and drop your <b>boosters</b>. Can you beat the other 11?', hint:'Steer: <kbd>◀</kbd> left · <kbd>●</kbd> center · <kbd>▶</kbd> right &nbsp;·&nbsp; Boosters: <kbd>A</kbd> nitro · <kbd>S</kbd> shield.<br>On phone or tablet, use the buttons below.', play:'▶ Play', again:'▶ Play again', atts:'Direction', boosts:'Boosters', att:['◀ Left','● Center','Right ▶'], nitro:'⚡ Nitro', shield:'🛡 Shield', ready:'ready', superLbl:'SUPER', pos:(o,N)=>`You're <b>${o}</b> <small>of ${N}</small>`, fin:o=>`You finished <b>${o}</b>`, podium:'Podium! Was it your steering, your nitro… or luck?', retry:'Again. Steer toward the gaps to overtake, or save your shield for the quakes.', you:'YOU', super:'⭐ Super', go:'GO!', youIntro:'This is you'},
-  es:{name:'La Gran Carrera', sub:'Tu bola baja sola por la pista. Tú eliges su <b>dirección</b> y sueltas tus <b>boosters</b>. ¿Llegas antes que las otras 11?', hint:'Dirígete: <kbd>◀</kbd> izquierda · <kbd>●</kbd> centro · <kbd>▶</kbd> derecha &nbsp;·&nbsp; Boosters: <kbd>A</kbd> nitro · <kbd>S</kbd> escudo.<br>En móvil o tablet, usa los botones de abajo.', play:'▶ Jugar', again:'▶ Jugar otra', atts:'Dirección', boosts:'Boosters', att:['◀ Izquierda','● Centro','Derecha ▶'], nitro:'⚡ Nitro', shield:'🛡 Escudo', ready:'listo', superLbl:'SÚPER', pos:(o,N)=>`Vas <b>${o}</b> <small>de ${N}</small>`, fin:o=>`Llegaste <b>${o}</b>`, podium:'¡Podio! ¿Fue por tu manejo, tu nitro… o por suerte?', retry:'Otra. Dirígete a los huecos para adelantar, o guarda el escudo para las sacudidas.', you:'TÚ', super:'⭐ Súper', go:'¡YA!', youIntro:'Este eres tú'},
-  pt:{name:'A Grande Corrida', sub:'Sua bola desce sozinha. Você escolhe a <b>direção</b> e solta seus <b>boosters</b>. Consegue chegar antes das outras 11?', hint:'Direção: <kbd>◀</kbd> esquerda · <kbd>●</kbd> centro · <kbd>▶</kbd> direita &nbsp;·&nbsp; Boosters: <kbd>A</kbd> nitro · <kbd>S</kbd> escudo.<br>No celular ou tablet, use os botões abaixo.', play:'▶ Jogar', again:'▶ Jogar de novo', atts:'Direção', boosts:'Boosters', att:['◀ Esquerda','● Centro','Direita ▶'], nitro:'⚡ Nitro', shield:'🛡 Escudo', ready:'pronto', superLbl:'SUPER', pos:(o,N)=>`Você está em <b>${o}</b> <small>de ${N}</small>`, fin:o=>`Você chegou em <b>${o}</b>`, podium:'Pódio! Foi sua pilotagem, seu nitro… ou sorte?', retry:'De novo. Vá para os vãos para ultrapassar, ou guarde o escudo para os tremores.', you:'VOCÊ', super:'⭐ Super', go:'JÁ!', youIntro:'Este é você'},
-  fr:{name:'La Grande Course', sub:'Ta bille descend toute seule. Tu choisis sa <b>direction</b> et lâches tes <b>boosters</b>. Peux-tu battre les 11 autres ?', hint:'Dirige : <kbd>◀</kbd> gauche · <kbd>●</kbd> centre · <kbd>▶</kbd> droite &nbsp;·&nbsp; Boosters : <kbd>A</kbd> nitro · <kbd>S</kbd> bouclier.<br>Sur mobile ou tablette, utilise les boutons ci-dessous.', play:'▶ Jouer', again:'▶ Rejouer', atts:'Direction', boosts:'Boosters', att:['◀ Gauche','● Centre','Droite ▶'], nitro:'⚡ Nitro', shield:'🛡 Bouclier', ready:'prêt', superLbl:'SUPER', pos:(o,N)=>`Tu es <b>${o}</b> <small>sur ${N}</small>`, fin:o=>`Tu finis <b>${o}</b>`, podium:'Podium ! Grâce à ton pilotage, ton nitro… ou à la chance ?', retry:'Encore. Dirige-toi vers les trous pour doubler, ou garde ton bouclier pour les secousses.', you:'TOI', super:'⭐ Super', go:'GO !', youIntro:'C’est toi'},
-  de:{name:'Das große Rennen', sub:'Deine Kugel rollt von allein. Du wählst ihre <b>Richtung</b> und setzt deine <b>Booster</b> ein. Schlägst du die anderen 11?', hint:'Lenken: <kbd>◀</kbd> links · <kbd>●</kbd> Mitte · <kbd>▶</kbd> rechts &nbsp;·&nbsp; Booster: <kbd>A</kbd> Nitro · <kbd>S</kbd> Schild.<br>Auf Handy oder Tablet die Tasten unten nutzen.', play:'▶ Spielen', again:'▶ Nochmal', atts:'Richtung', boosts:'Booster', att:['◀ Links','● Mitte','Rechts ▶'], nitro:'⚡ Nitro', shield:'🛡 Schild', ready:'bereit', superLbl:'SUPER', pos:(o,N)=>`Du bist <b>${o}</b> <small>von ${N}</small>`, fin:o=>`Du wurdest <b>${o}</b>`, podium:'Podium! War es dein Lenken, dein Nitro… oder Glück?', retry:'Nochmal. Lenke in die Lücken zum Überholen, oder spar dein Schild für die Beben.', you:'DU', super:'⭐ Super', go:'LOS!', youIntro:'Das bist du'},
-  it:{name:'La Grande Corsa', sub:'La tua pallina scende da sola. Scegli la sua <b>direzione</b> e lanci i tuoi <b>booster</b>. Batti le altre 11?', hint:'Sterza: <kbd>◀</kbd> sinistra · <kbd>●</kbd> centro · <kbd>▶</kbd> destra &nbsp;·&nbsp; Booster: <kbd>A</kbd> nitro · <kbd>S</kbd> scudo.<br>Su telefono o tablet usa i pulsanti qui sotto.', play:'▶ Gioca', again:'▶ Rigioca', atts:'Direzione', boosts:'Booster', att:['◀ Sinistra','● Centro','Destra ▶'], nitro:'⚡ Nitro', shield:'🛡 Scudo', ready:'pronto', superLbl:'SUPER', pos:(o,N)=>`Sei <b>${o}</b> <small>su ${N}</small>`, fin:o=>`Sei arrivato <b>${o}</b>`, podium:'Podio! È stata la tua guida, il nitro… o la fortuna?', retry:'Ancora. Sterza verso i varchi per sorpassare, o tieni lo scudo per le scosse.', you:'TU', super:'⭐ Super', go:'VIA!', youIntro:'Questo sei tu'},
-  ja:{name:'ザ・グレートレース', sub:'ボールは自分で転がり落ちる。<b>方向</b>を選び、<b>ブースター</b>を放て。他の11個に勝てるか？', hint:'方向: <kbd>◀</kbd> 左 · <kbd>●</kbd> 中央 · <kbd>▶</kbd> 右 &nbsp;·&nbsp; ブースター: <kbd>A</kbd> ニトロ · <kbd>S</kbd> シールド。<br>スマホ・タブレットは下のボタンで。', play:'▶ プレイ', again:'▶ もう一回', atts:'方向', boosts:'ブースター', att:['◀ 左','● 中央','右 ▶'], nitro:'⚡ ニトロ', shield:'🛡 シールド', ready:'OK', superLbl:'スーパー', pos:(o,N)=>`<b>${o}</b> <small>/ ${N}</small>`, fin:o=>`結果 <b>${o}</b>`, podium:'表彰台！ 操作？ ニトロ？ それとも運？', retry:'もう一回。すき間へ寄せて追い抜くか、シールドを地震にとっておこう。', you:'あなた', super:'⭐ スーパー', go:'スタート!', youIntro:'これが君だ'},
-  ko:{name:'그레이트 레이스', sub:'공은 스스로 굴러 내려가요. <b>방향</b>을 고르고 <b>부스터</b>를 써요. 나머지 11개를 이길 수 있나요?', hint:'방향: <kbd>◀</kbd> 왼쪽 · <kbd>●</kbd> 가운데 · <kbd>▶</kbd> 오른쪽 &nbsp;·&nbsp; 부스터: <kbd>A</kbd> 니트로 · <kbd>S</kbd> 실드.<br>휴대폰·태블릿은 아래 버튼을 사용하세요.', play:'▶ 플레이', again:'▶ 다시하기', atts:'방향', boosts:'부스터', att:['◀ 왼쪽','● 가운데','오른쪽 ▶'], nitro:'⚡ 니트로', shield:'🛡 실드', ready:'준비', superLbl:'슈퍼', pos:(o,N)=>`<b>${o}</b> <small>/ ${N}</small>`, fin:o=>`결과 <b>${o}</b>`, podium:'포디움! 조작? 니트로? 아니면 운?', retry:'다시. 빈틈으로 방향을 틀어 추월하거나, 지진에 대비해 실드를 아껴요.', you:'나', super:'⭐ 슈퍼', go:'출발!', youIntro:'이게 너야'},
-  zh:{name:'超级弹珠赛', sub:'你的弹珠会自己往下滚。你只需选择它的<b>方向</b>并释放<b>加速道具</b>。能赢过其他 11 个吗？', hint:'方向：<kbd>◀</kbd> 左 · <kbd>●</kbd> 中 · <kbd>▶</kbd> 右 &nbsp;·&nbsp; 道具：<kbd>A</kbd> 氮气 · <kbd>S</kbd> 护盾。<br>手机或平板请用下方按钮。', play:'▶ 开始', again:'▶ 再玩一次', atts:'方向', boosts:'道具', att:['◀ 左','● 中','右 ▶'], nitro:'⚡ 氮气', shield:'🛡 护盾', ready:'就绪', superLbl:'超级', pos:(o,N)=>`<b>${o}</b> <small>/ ${N}</small>`, fin:o=>`结果 <b>${o}</b>`, podium:'登上领奖台！是靠操控、氮气……还是运气？', retry:'再来。往空档转向超车，或把护盾留给地震。', you:'你', super:'⭐ 超级', go:'出发!', youIntro:'这是你'},
+  en:{name:'The Great Race', sub:'Your ball rolls down on its own. You choose its <b>direction</b> and drop your <b>boosters</b>. Can you beat the other 11?', hint:'Steer: <kbd>◀</kbd> left · <kbd>●</kbd> center · <kbd>▶</kbd> right &nbsp;·&nbsp; Boosters: <kbd>A</kbd> nitro · <kbd>S</kbd> shield.<br>On phone or tablet, use the buttons below.', play:'▶ Play', again:'▶ Play again', atts:'Direction', boosts:'Boosters', att:['◀ Left','● Center','Right ▶'], nitro:'Nitro', shield:'Shield', ready:'ready', superLbl:'SUPER', pos:(o,N)=>`You're <b>${o}</b> <small>of ${N}</small>`, fin:o=>`You finished <b>${o}</b>`, podium:'Podium! Was it your steering, your nitro… or luck?', retry:'Again. Steer toward the gaps to overtake, or save your shield for the quakes.', you:'YOU', super:'Super', go:'GO!', youIntro:'This is you'},
+  es:{name:'La Gran Carrera', sub:'Tu bola baja sola por la pista. Tú eliges su <b>dirección</b> y sueltas tus <b>boosters</b>. ¿Llegas antes que las otras 11?', hint:'Dirígete: <kbd>◀</kbd> izquierda · <kbd>●</kbd> centro · <kbd>▶</kbd> derecha &nbsp;·&nbsp; Boosters: <kbd>A</kbd> nitro · <kbd>S</kbd> escudo.<br>En móvil o tablet, usa los botones de abajo.', play:'▶ Jugar', again:'▶ Jugar otra', atts:'Dirección', boosts:'Boosters', att:['◀ Izquierda','● Centro','Derecha ▶'], nitro:'Nitro', shield:'Escudo', ready:'listo', superLbl:'SÚPER', pos:(o,N)=>`Vas <b>${o}</b> <small>de ${N}</small>`, fin:o=>`Llegaste <b>${o}</b>`, podium:'¡Podio! ¿Fue por tu manejo, tu nitro… o por suerte?', retry:'Otra. Dirígete a los huecos para adelantar, o guarda el escudo para las sacudidas.', you:'TÚ', super:'Súper', go:'¡YA!', youIntro:'Este eres tú'},
+  pt:{name:'A Grande Corrida', sub:'Sua bola desce sozinha. Você escolhe a <b>direção</b> e solta seus <b>boosters</b>. Consegue chegar antes das outras 11?', hint:'Direção: <kbd>◀</kbd> esquerda · <kbd>●</kbd> centro · <kbd>▶</kbd> direita &nbsp;·&nbsp; Boosters: <kbd>A</kbd> nitro · <kbd>S</kbd> escudo.<br>No celular ou tablet, use os botões abaixo.', play:'▶ Jogar', again:'▶ Jogar de novo', atts:'Direção', boosts:'Boosters', att:['◀ Esquerda','● Centro','Direita ▶'], nitro:'Nitro', shield:'Escudo', ready:'pronto', superLbl:'SUPER', pos:(o,N)=>`Você está em <b>${o}</b> <small>de ${N}</small>`, fin:o=>`Você chegou em <b>${o}</b>`, podium:'Pódio! Foi sua pilotagem, seu nitro… ou sorte?', retry:'De novo. Vá para os vãos para ultrapassar, ou guarde o escudo para os tremores.', you:'VOCÊ', super:'Super', go:'JÁ!', youIntro:'Este é você'},
+  fr:{name:'La Grande Course', sub:'Ta bille descend toute seule. Tu choisis sa <b>direction</b> et lâches tes <b>boosters</b>. Peux-tu battre les 11 autres ?', hint:'Dirige : <kbd>◀</kbd> gauche · <kbd>●</kbd> centre · <kbd>▶</kbd> droite &nbsp;·&nbsp; Boosters : <kbd>A</kbd> nitro · <kbd>S</kbd> bouclier.<br>Sur mobile ou tablette, utilise les boutons ci-dessous.', play:'▶ Jouer', again:'▶ Rejouer', atts:'Direction', boosts:'Boosters', att:['◀ Gauche','● Centre','Droite ▶'], nitro:'Nitro', shield:'Bouclier', ready:'prêt', superLbl:'SUPER', pos:(o,N)=>`Tu es <b>${o}</b> <small>sur ${N}</small>`, fin:o=>`Tu finis <b>${o}</b>`, podium:'Podium ! Grâce à ton pilotage, ton nitro… ou à la chance ?', retry:'Encore. Dirige-toi vers les trous pour doubler, ou garde ton bouclier pour les secousses.', you:'TOI', super:'Super', go:'GO !', youIntro:'C’est toi'},
+  de:{name:'Das große Rennen', sub:'Deine Kugel rollt von allein. Du wählst ihre <b>Richtung</b> und setzt deine <b>Booster</b> ein. Schlägst du die anderen 11?', hint:'Lenken: <kbd>◀</kbd> links · <kbd>●</kbd> Mitte · <kbd>▶</kbd> rechts &nbsp;·&nbsp; Booster: <kbd>A</kbd> Nitro · <kbd>S</kbd> Schild.<br>Auf Handy oder Tablet die Tasten unten nutzen.', play:'▶ Spielen', again:'▶ Nochmal', atts:'Richtung', boosts:'Booster', att:['◀ Links','● Mitte','Rechts ▶'], nitro:'Nitro', shield:'Schild', ready:'bereit', superLbl:'SUPER', pos:(o,N)=>`Du bist <b>${o}</b> <small>von ${N}</small>`, fin:o=>`Du wurdest <b>${o}</b>`, podium:'Podium! War es dein Lenken, dein Nitro… oder Glück?', retry:'Nochmal. Lenke in die Lücken zum Überholen, oder spar dein Schild für die Beben.', you:'DU', super:'Super', go:'LOS!', youIntro:'Das bist du'},
+  it:{name:'La Grande Corsa', sub:'La tua pallina scende da sola. Scegli la sua <b>direzione</b> e lanci i tuoi <b>booster</b>. Batti le altre 11?', hint:'Sterza: <kbd>◀</kbd> sinistra · <kbd>●</kbd> centro · <kbd>▶</kbd> destra &nbsp;·&nbsp; Booster: <kbd>A</kbd> nitro · <kbd>S</kbd> scudo.<br>Su telefono o tablet usa i pulsanti qui sotto.', play:'▶ Gioca', again:'▶ Rigioca', atts:'Direzione', boosts:'Booster', att:['◀ Sinistra','● Centro','Destra ▶'], nitro:'Nitro', shield:'Scudo', ready:'pronto', superLbl:'SUPER', pos:(o,N)=>`Sei <b>${o}</b> <small>su ${N}</small>`, fin:o=>`Sei arrivato <b>${o}</b>`, podium:'Podio! È stata la tua guida, il nitro… o la fortuna?', retry:'Ancora. Sterza verso i varchi per sorpassare, o tieni lo scudo per le scosse.', you:'TU', super:'Super', go:'VIA!', youIntro:'Questo sei tu'},
+  ja:{name:'ザ・グレートレース', sub:'ボールは自分で転がり落ちる。<b>方向</b>を選び、<b>ブースター</b>を放て。他の11個に勝てるか？', hint:'方向: <kbd>◀</kbd> 左 · <kbd>●</kbd> 中央 · <kbd>▶</kbd> 右 &nbsp;·&nbsp; ブースター: <kbd>A</kbd> ニトロ · <kbd>S</kbd> シールド。<br>スマホ・タブレットは下のボタンで。', play:'▶ プレイ', again:'▶ もう一回', atts:'方向', boosts:'ブースター', att:['◀ 左','● 中央','右 ▶'], nitro:'ニトロ', shield:'シールド', ready:'OK', superLbl:'スーパー', pos:(o,N)=>`<b>${o}</b> <small>/ ${N}</small>`, fin:o=>`結果 <b>${o}</b>`, podium:'表彰台！ 操作？ ニトロ？ それとも運？', retry:'もう一回。すき間へ寄せて追い抜くか、シールドを地震にとっておこう。', you:'あなた', super:'スーパー', go:'スタート!', youIntro:'これが君だ'},
+  ko:{name:'그레이트 레이스', sub:'공은 스스로 굴러 내려가요. <b>방향</b>을 고르고 <b>부스터</b>를 써요. 나머지 11개를 이길 수 있나요?', hint:'방향: <kbd>◀</kbd> 왼쪽 · <kbd>●</kbd> 가운데 · <kbd>▶</kbd> 오른쪽 &nbsp;·&nbsp; 부스터: <kbd>A</kbd> 니트로 · <kbd>S</kbd> 실드.<br>휴대폰·태블릿은 아래 버튼을 사용하세요.', play:'▶ 플레이', again:'▶ 다시하기', atts:'방향', boosts:'부스터', att:['◀ 왼쪽','● 가운데','오른쪽 ▶'], nitro:'니트로', shield:'실드', ready:'준비', superLbl:'슈퍼', pos:(o,N)=>`<b>${o}</b> <small>/ ${N}</small>`, fin:o=>`결과 <b>${o}</b>`, podium:'포디움! 조작? 니트로? 아니면 운?', retry:'다시. 빈틈으로 방향을 틀어 추월하거나, 지진에 대비해 실드를 아껴요.', you:'나', super:'슈퍼', go:'출발!', youIntro:'이게 너야'},
+  zh:{name:'超级弹珠赛', sub:'你的弹珠会自己往下滚。你只需选择它的<b>方向</b>并释放<b>加速道具</b>。能赢过其他 11 个吗？', hint:'方向：<kbd>◀</kbd> 左 · <kbd>●</kbd> 中 · <kbd>▶</kbd> 右 &nbsp;·&nbsp; 道具：<kbd>A</kbd> 氮气 · <kbd>S</kbd> 护盾。<br>手机或平板请用下方按钮。', play:'▶ 开始', again:'▶ 再玩一次', atts:'方向', boosts:'道具', att:['◀ 左','● 中','右 ▶'], nitro:'氮气', shield:'护盾', ready:'就绪', superLbl:'超级', pos:(o,N)=>`<b>${o}</b> <small>/ ${N}</small>`, fin:o=>`结果 <b>${o}</b>`, podium:'登上领奖台！是靠操控、氮气……还是运气？', retry:'再来。往空档转向超车，或把护盾留给地震。', you:'你', super:'超级', go:'出发!', youIntro:'这是你'},
 };
 //+AG doc 49: el catalogo de idiomas y el ordinal se mudaron a i18n/idiomas.js, que comparten el shell y los
 //   3 motores. Estaban escritos en cuatro sitios y ya habian dado dos vocabularios del mismo dato.
@@ -1285,23 +1296,23 @@ else { el('ov').classList.remove('hide'); loop(); }   //+AG standalone: portada 
 // ============================================================================
 if(TUTORIAL)(function(){
   const CI={
-    en:{ title:'HOW TO PLAY', sub:'Safe track: no blades, no quakes. Follow the steps and learn the controls.', exit:'✕ Exit', done:'Tutorial complete! 🎓',
+    en:{ title:'HOW TO PLAY', sub:'Safe track: no blades, no quakes. Follow the steps and learn the controls.', exit:'✕ Exit', done:'Tutorial complete!',
       steps:[ 'Press ◀ LEFT: your ball drifts to that side',
         'Now press RIGHT ▶',
         'Press ● CENTER to fall free between the pegs',
         'Roll over a floor ARROW: it launches you down',
-        'Press ⚡ NITRO: an instant burst of speed',
-        'Press 🛡 SHIELD: bounce without losing your rhythm',
-        'SUPER bar full, on the house! Press ⭐ SUPER',
+        'Press NITRO: an instant burst of speed',
+        'Press SHIELD: bounce without losing your rhythm',
+        'SUPER bar full, on the house! Press SUPER',
         'That\'s it! Drop all the way to the FINISH line' ] },
-    es:{ title:'CÓMO JUGAR', sub:'Pista segura: sin aspas ni sacudidas. Sigue los pasos y aprende los controles.', exit:'✕ Salir', done:'¡Tutorial completado! 🎓',
+    es:{ title:'CÓMO JUGAR', sub:'Pista segura: sin aspas ni sacudidas. Sigue los pasos y aprende los controles.', exit:'✕ Salir', done:'¡Tutorial completado!',
       steps:[ 'Pulsa ◀ IZQUIERDA: tu bola deriva hacia ese lado',
         'Ahora pulsa DERECHA ▶',
         'Pulsa ● CENTRO para caer libre entre los clavos',
         'Pasa por una FLECHA del suelo: te dispara hacia abajo',
-        'Pulsa ⚡ NITRO: un acelerón al instante',
-        'Pulsa 🛡 ESCUDO: rebotas sin perder el ritmo',
-        '¡Barra de SÚPER llena de regalo! Pulsa ⭐ SÚPER',
+        'Pulsa NITRO: un acelerón al instante',
+        'Pulsa ESCUDO: rebotas sin perder el ritmo',
+        '¡Barra de SÚPER llena de regalo! Pulsa SÚPER',
         '¡Ya está! Baja hasta la META para terminar' ] },
   };
   //+AG doc 49: los otros 18 idiomas del tutorial llegan en el paquete. createCoach lee i18n[lang()] en

@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-02 7ea7a06"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-02 266d6f0"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -725,6 +725,10 @@
   .onb-opts{ display:flex; flex-direction:column; gap:10px; }
   .onb-opt{ border:1px solid var(--line); background:var(--plate-a); color:#eef2ff; font-family:inherit; font-weight:800; font-size:var(--fs-4); border-radius:16px; padding:15px 16px; cursor:pointer; display:flex; align-items:center; gap:12px; text-align:left; }
   .onb-opt:active{ transform:scale(.98); } .onb-opt .em{ font-size:var(--fs-6); }
+  /*+AG encargo 34: el icono de la respuesta ya no es un emoji del sistema sino una pieza de la familia
+     (arte/ui/quiz-*.webp). 28 px es el tamano de uso que fija el brief, y el flex:0 0 auto evita que el
+     boton lo estruje cuando la respuesta traducida es larga (el aleman y el ruso son los que aprietan). */
+  .onb-opt img.em{ width:28px; height:28px; object-fit:contain; flex:0 0 auto; }
   .onb-cards{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:14px 0; }
   .onb-b{ border:2px solid var(--line); background:var(--plate-a); border-radius:16px; padding:13px 8px; text-align:center; cursor:pointer; font-family:inherit; color:#eef2ff; position:relative; }
   .onb-b:active{ transform:scale(.97); } .onb-b.sel{ border-color:var(--gold2); box-shadow:0 0 0 2px #ffd23f55, 0 8px 20px #0006; background:var(--plate-b); }
@@ -3081,7 +3085,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=7ea7a06"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=266d6f0"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -5784,17 +5788,22 @@ function wireTraspaso(){
 
 // ===== ONBOARDING (doc 05 §3): quiz de 2 preguntas (arbol) -> arquetipo recomendado -> confirmar -> primera bola Comun -> Garaje =====
 //+AG el quiz guarda CLAVES; la pregunta y las opciones salen del diccionario (antes iba a pelo en español)
+//+AG encargo 34: las 7 respuestas llevaban EMOJI DEL SISTEMA (corredor, explosion, escudo, flecha, espiral,
+//   ladrillos, iman — aqui ya no queda ninguno que grepear) y esta es la primerisima
+//   pantalla de un jugador nuevo: siete glifos que se dibujan distinto en cada movil dando la primera
+//   impresion del juego. Ahora cada respuesta trae la CLAVE de su icono (arte/ui/quiz-*.webp, encargo 34)
+//   y la pinta el render de abajo. La clave que se guarda (`t`, `arch`) no cambia: el quiz sigue igual.
 const QUIZ={
   start:{ q:'quizStart', opts:[
-    {em:'🏃', t:'run', go:'run'}, {em:'💥', t:'push', go:'push'}, {em:'🛡️', t:'survive', arch:'bunker'} ] },
+    {ic:'quiz-correr', t:'run', go:'run'}, {ic:'quiz-empujar', t:'push', go:'push'}, {ic:'quiz-sobrevivir', t:'survive', arch:'bunker'} ] },
   run:{ q:'quizRun', opts:[
-    {em:'➡️', t:'straight', arch:'cohete'}, {em:'🌀', t:'chaos', arch:'pinball'} ] },
+    {ic:'quiz-recto', t:'straight', arch:'cohete'}, {ic:'quiz-caos', t:'chaos', arch:'pinball'} ] },
   push:{ q:'quizPush', opts:[
-    {em:'🧱', t:'plant', arch:'tanque'}, {em:'🧲', t:'stick', arch:'lapa'} ] },
+    {ic:'quiz-plantarse', t:'plant', arch:'tanque'}, {ic:'quiz-pegarse', t:'stick', arch:'lapa'} ] },
 };
 let onbRec='cohete', onbSel='cohete';
 function onbQuizStep(node){ const s=S(), n=QUIZ[node]; el('onbQ').textContent=s[n.q]||n.q; const box=el('onbOpts'); box.innerHTML='';
-  n.opts.forEach(o=>{ const b=document.createElement('button'); b.className='onb-opt'; b.innerHTML=`<span class="em">${o.em}</span>${(s.quizOpts||{})[o.t]||o.t}`;
+  n.opts.forEach(o=>{ const b=document.createElement('button'); b.className='onb-opt'; b.innerHTML=`<img class="em" src="arte/ui/${o.ic}.webp" alt="">${(s.quizOpts||{})[o.t]||o.t}`;
     b.onclick=()=>{ if(o.arch){ onbRec=onbSel=o.arch; onbPickStep(); } else onbQuizStep(o.go); }; box.appendChild(b); }); }
 function onbPickStep(){ el('onbQuiz').style.display='none'; el('onbPick').style.display='';
   const box=el('onbCards'); box.innerHTML='';

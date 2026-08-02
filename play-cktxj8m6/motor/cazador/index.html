@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-02 7ea7a06">
+<meta name="bt-build" content="2026-08-02 266d6f0">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <!--+AG el HTML se sirve en INGLES (defecto del juego); ?lang=es lo traduce por JS (applyLang) -->
 <title>YouBall · The Hunter (WebGL)</title>
@@ -42,6 +42,11 @@
   #controls button:active{transform:translateY(2px);box-shadow:0 1px 0 #0009}
   #controls button .k{display:block;font-size:9px;opacity:.5;font-weight:800;margin-top:2px}
   #controls button .cd{display:block;font-size:10px;opacity:.75;font-weight:700}
+  /*+AG encargo 34: EL ICONO DEL BOOSTER (mismo token que la Carrera; los 3 motores son ficheros
+     independientes, asi que el token se copia). En `em` para que crezca con la letra del boton:
+     1.7em sobre los 12 px de un movil de 360 = 20 px, el minimo al que la pieza se lee. */
+  #controls button .bi{height:1.7em;width:auto;vertical-align:-.44em;margin-right:.22em;
+    filter:drop-shadow(0 1px 1px #00000066)}
   #controls button:disabled{opacity:.35;cursor:default}
   /*+AG doc 61: ACUSE DE RECIBO. Aunque la bola ya gira en 0,4 s, 0,4 s mirando una bola que aún no ha
      girado se leen como "no me ha oído". El botón contesta en el MISMO frame del dedo. */
@@ -170,9 +175,12 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
     </div></div>
   <div><div class="lbl" id="lblBoost">Boosters</div>
     <div class="row">
-      <button id="bDash"><span class="t">⚡ Dash</span><span class="cd" id="cdDash"></span></button>
-      <button id="bShd"><span class="t">🛡 Shield</span><span class="cd" id="cdShd"></span></button>
-      <button id="bSup"><span class="t">⭐ Decoy</span><span class="cd" id="cdSup"></span></button>
+      <!--+AG encargo 34: el icono lo pone el HTML (arte/ui/icono-*.webp), NO la cadena traducida: el rayo, el
+           escudo y la estrella viajaban dentro de boosts[] en los 20 idiomas y los dibujaba el emoji del
+           sistema, distinto en cada movil (por eso aqui ya no queda ni un emoji que grepear). -->
+      <button id="bDash"><img class="bi" src="../../arte/ui/icono-nitro.webp" alt=""><span class="t">Dash</span><span class="cd" id="cdDash"></span></button>
+      <button id="bShd"><img class="bi" src="../../arte/ui/icono-escudo.webp" alt=""><span class="t">Shield</span><span class="cd" id="cdShd"></span></button>
+      <button id="bSup"><img class="bi" src="../../arte/ui/icono-super.webp" alt=""><span class="t">Decoy</span><span class="cd" id="cdSup"></span></button>
     </div></div>
 </div>
 <!--+AG viñeta de peligro (te fijan) + cuenta atras con "este eres tu" -->
@@ -190,7 +198,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=7ea7a06"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=266d6f0"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -201,19 +209,19 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 </script>
 
 <script type="module">
-import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, makeFacePlane, createItemPool, createItemPops, createStarBurst, createWindTrail, createBloom, frameOrtho } from '../chassis/gfx.mjs?v=7ea7a06';
-import { archLook } from '../chassis/ballmat.mjs?v=7ea7a06';   //+AG doc 41 bloque G: material de la bola-heroe
-import { attachSquash } from '../chassis/squash.mjs?v=7ea7a06';
-import { Sim, RNG, TEAMS, BALL_R, ARENA_W, ARENA_H, FPS, AGENCIA } from './sim.js?v=7ea7a06';
-import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=7ea7a06';
-import { archFace } from '../chassis/facegen.mjs?v=7ea7a06';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
-import { createCelebration } from '../chassis/celebration.mjs?v=7ea7a06';
-import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=7ea7a06';
-import { buildSfxBuffer } from './sfxmap.mjs?v=7ea7a06';
-import { createCoach } from '../chassis/coach.mjs?v=7ea7a06';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
-import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=7ea7a06';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
-import { cantarPuesto } from '../chassis/veredicto.mjs?v=7ea7a06';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
-import { runToEnd } from '../chassis/simrun.mjs?v=7ea7a06';
+import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, makeFacePlane, createItemPool, createItemPops, createStarBurst, createWindTrail, createBloom, frameOrtho } from '../chassis/gfx.mjs?v=266d6f0';
+import { archLook } from '../chassis/ballmat.mjs?v=266d6f0';   //+AG doc 41 bloque G: material de la bola-heroe
+import { attachSquash } from '../chassis/squash.mjs?v=266d6f0';
+import { Sim, RNG, TEAMS, BALL_R, ARENA_W, ARENA_H, FPS, AGENCIA } from './sim.js?v=266d6f0';
+import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=266d6f0';
+import { archFace } from '../chassis/facegen.mjs?v=266d6f0';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
+import { createCelebration } from '../chassis/celebration.mjs?v=266d6f0';
+import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=266d6f0';
+import { buildSfxBuffer } from './sfxmap.mjs?v=266d6f0';
+import { createCoach } from '../chassis/coach.mjs?v=266d6f0';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=266d6f0';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
+import { cantarPuesto } from '../chassis/veredicto.mjs?v=266d6f0';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
+import { runToEnd } from '../chassis/simrun.mjs?v=266d6f0';
 
 window.addEventListener('error', e => { document.getElementById('err').style.display='grid'; console.error(e.error||e.message); });
 
@@ -879,7 +887,7 @@ const I18N={
     keys:'1 2 3 = intent &nbsp;·&nbsp; A/S/D = dash/shield/decoy &nbsp;·&nbsp; R = new round',
     you:'YOU', youIntro:'This is you', go:'GO!', ready:'READY',
     lblIntent:'Your intent', intents:['Into the pack','Grab a booster','Escape at all costs'],
-    lblBoost:'Boosters', boosts:['⚡ Dash','🛡 Shield','⭐ Decoy'],
+    lblBoost:'Boosters', boosts:['Dash','Shield','Decoy'],
     specWin:'YOU SURVIVED!', specLose:'CAUGHT!',
     specWinSub:'Last ball standing · you won the round',
     specSub:(p,n)=>`Now spectating · ${p} of ${n}`,
@@ -891,7 +899,7 @@ const I18N={
     keys:'1 2 3 = intención &nbsp;·&nbsp; A/S/D = dash/escudo/señuelo &nbsp;·&nbsp; R = otra ronda',
     you:'TÚ', youIntro:'Este eres tú', go:'¡YA!', ready:'¡YA!',
     lblIntent:'Tu intención', intents:['Ir al tumulto','A por un booster','Escapar como sea'],
-    lblBoost:'Boosters', boosts:['⚡ Dash','🛡 Escudo','⭐ Señuelo'],
+    lblBoost:'Boosters', boosts:['Dash','Escudo','Señuelo'],
     specWin:'¡SOBREVIVISTE!', specLose:'TE CAZARON',
     specWinSub:'Última bola en pie · ganaste la ronda',
     specSub:(p,n)=>`Ahora eres espectador · puesto ${p} de ${n}`,
@@ -1061,21 +1069,21 @@ else loop();
 // ============================================================================
 if(TUTORIAL)(function(){
   const CI={
-    en:{ done:'Tutorial complete! 🎓', exit:'✕ Exit',
+    en:{ done:'Tutorial complete!', exit:'✕ Exit',
       steps:[ 'Press 1 — INTO THE PACK: in the crowd you\'re harder to pick',
         'Press 2 — GRAB A BOOSTER: your ball goes for the nearest orb. Catch one!',
         'Press 3 — ESCAPE: get away from danger',
-        'Press ⚡ DASH (A): a burst to shake the hunter off',
-        'Press 🛡 SHIELD (S): survive one grab',
-        'DECOY bar full, on the house! Press ⭐ DECOY (D): the hunter picks someone else',
+        'Press DASH (A): a burst to shake the hunter off',
+        'Press SHIELD (S): survive one grab',
+        'DECOY bar full, on the house! Press DECOY (D): the hunter picks someone else',
         'That\'s the HUNTER. Today it\'s asleep — watch it 10s and remember its lock mark' ] },
-    es:{ done:'¡Tutorial completado! 🎓', exit:'✕ Salir',
+    es:{ done:'¡Tutorial completado!', exit:'✕ Salir',
       steps:[ 'Pulsa 1 — AL TUMULTO: en el montón es más difícil que te fijen',
         'Pulsa 2 — A POR UN BOOSTER: tu bola va al orbe más cercano. ¡Coge uno!',
         'Pulsa 3 — ESCAPAR: aléjate del peligro',
-        'Pulsa ⚡ DASH (A): un acelerón para zafarte del cazador',
-        'Pulsa 🛡 ESCUDO (S): aguantas un zarpazo',
-        '¡Barra del SEÑUELO llena de regalo! Pulsa ⭐ SEÑUELO (D): el cazador fija a otro',
+        'Pulsa DASH (A): un acelerón para zafarte del cazador',
+        'Pulsa ESCUDO (S): aguantas un zarpazo',
+        '¡Barra del SEÑUELO llena de regalo! Pulsa SEÑUELO (D): el cazador fija a otro',
         'Ese es el CAZADOR. Hoy está dormido — obsérvalo 10s y recuerda su marca de fijado' ] },
   };
   //+AG doc 49: los otros 18 idiomas del tutorial llegan en el paquete. createCoach lee i18n[lang()] en

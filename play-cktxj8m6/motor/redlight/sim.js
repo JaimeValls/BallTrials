@@ -266,7 +266,7 @@ export class Sim {
     //   Flag ausente → todo idéntico a la fuente (no consume RNG).
     this.tutorial = !!opts.tutorial;
     //+AG tutorial (feedback Jaime 2026-07-25): el COACH manda sobre el SEMÁFORO mientras enseña. Sin esto la
-    //   lección y la luz se contradicen: "pulsa ⚡ NITRO" cayendo justo en ROJO, que es cuando NO puedes moverte.
+    //   lección y la luz se contradicen: "pulsa NITRO" cayendo justo en ROJO, que es cuando NO puedes moverte.
     //   'green' = verde sostenido (correr, embestir, carril, boosters) · 'red' = rojo YA (la lección de quedarse
     //   quieto, que así ocurre cuando el cartel lo dice y no cuando toque) · null = horario normal.
     //   Solo existe con this.tutorial: en partida real la rama ni se evalúa (cero cambio de determinismo).

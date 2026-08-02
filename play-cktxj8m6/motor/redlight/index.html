@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-02 7ea7a06">
+<meta name="bt-build" content="2026-08-02 266d6f0">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <!--+AG el HTML se sirve en INGLES (defecto del juego); ?lang=es lo traduce por JS (applyLang) -->
 <title>YouBall · Red Light Rush (WebGL) · The Marble Games</title>
@@ -76,6 +76,21 @@
   #controls button:active{transform:translateY(2px);box-shadow:0 2px 0 #0009}
   #controls button .k{display:block;font-size:9px;opacity:.55;font-weight:800;margin-top:3px;letter-spacing:.08em}
   #controls button .cd{display:block;font-size:11px;opacity:.8;font-weight:800}
+  /*+AG encargo 34: EL ICONO DEL BOOSTER, encima de la palabra. En `em` (docs/57: nunca en px) para que crezca
+     con la letra del boton, que es un clamp: 2.2em sobre los 10 px de un movil de 360 = 22 px, dentro del
+     20-24 px al que el brief exige que la pieza se lea. */
+  #controls button .bi{display:block;height:2.2em;width:auto;margin:0 auto 3px;
+    filter:drop-shadow(0 1px 1px #00000066)}
+  /* con el icono puesto, los 5 botones de la fila de accion tenian su contenido a 3 alturas distintas
+     (CORRER arriba del todo, FRENAZO en medio, los boosters mas abajo) porque el alto lo manda CORRER y
+     cada uno empezaba en su padding. Centrado, la fila vuelve a leerse como una fila. */
+  #controls .row:not(#laneRow) button{display:flex;flex-direction:column;align-items:center;justify-content:center}
+  /* el FANTASMA es blanco-azulado y su boton es BLANCO cuando esta disponible: sin separarlo, la silueta se
+     funde con la placa. Se le refuerza el contorno con la misma sombra doble que usa la insignia de liga. */
+  /* ⚠ el selector lleva `#controls button` delante A PROPOSITO: la regla de arriba es `#controls button .bi`
+     (id + etiqueta + clase) y le gana en especificidad a un `#bGhost .bi` suelto — la misma trampa que ya
+     costo una version muerta en la Carrera (ver la nota de #ctr #bL). */
+  #controls button#bGhost .bi{filter:drop-shadow(0 0 1px #160a38cc) drop-shadow(0 1px 2px #00000055)}
   /*+AG carriles (intención, estilo intenciones del Cazador): el activo lleva .on */
   #laneRow button{flex:1;padding:9px 4px;font-size:clamp(11px,2.9vw,14px);background:rgba(30,24,42,.82)}
   #laneRow button.on{background:linear-gradient(#9b8cff,#6f5be6);box-shadow:0 3px 0 #4133a0, inset 0 1px 0 #fff5}
@@ -228,9 +243,16 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
   <div class="row">
     <button id="bRun"><span class="t">RUN</span><span class="k">HOLD · space/↑</span></button>
     <button id="bBrake"><span class="t">BRAKE</span><span class="cd" id="cdBrake">F</span></button>
-    <button id="bNitro"><span class="t">⚡ NITRO</span><span class="cd" id="cdNitro">A</span></button>
-    <button id="bGhost"><span class="t">👻 GHOST</span><span class="cd" id="cdGhost">S</span></button>
-    <button id="bSup"><span class="t">⭐ SUPER</span><span class="cd" id="cdSup">0%</span></button>
+    <!--+AG encargo 34: el icono lo pone el HTML (arte/ui/icono-*.webp), NO la cadena traducida. El rayo, el
+         fantasma y la estrella viajaban dentro de nitro/ghost/sup en los 20 idiomas y los dibujaba el emoji
+         del SISTEMA (por eso aqui ya no queda ni un emoji que grepear), distinto en
+         cada movil, en la superficie que el jugador mira el 100% de la partida. Aqui el icono va ENCIMA de la
+         palabra y no al lado como en los otros dos motores: estos botones miden 45 px de ancho (son 5 en una
+         fila) y "NITRO" ya ocupa 37 de ellos — al lado, la palabra se partia. Arriba sobra sitio: el alto de la
+         fila lo manda CORRER (79 px) y estos solo usaban 37. -->
+    <button id="bNitro"><img class="bi" src="../../arte/ui/icono-nitro.webp" alt=""><span class="t">NITRO</span><span class="cd" id="cdNitro">A</span></button>
+    <button id="bGhost"><img class="bi" src="../../arte/ui/icono-fantasma-booster.webp" alt=""><span class="t">GHOST</span><span class="cd" id="cdGhost">S</span></button>
+    <button id="bSup"><img class="bi" src="../../arte/ui/icono-super.webp" alt=""><span class="t">SUPER</span><span class="cd" id="cdSup">0%</span></button>
   </div>
 </div>
 <div id="count"><div class="n" id="countN"></div><div class="you" id="countYou">This is you</div></div>
@@ -246,7 +268,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=7ea7a06"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=266d6f0"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -257,22 +279,22 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 </script>
 
 <script type="module">
-import { THREE, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createBloom, frameOrtho, BLOOM } from '../chassis/gfx.mjs?v=7ea7a06';
-import { archLook } from '../chassis/ballmat.mjs?v=7ea7a06';   //+AG doc 41 bloque G: material de la bola-heroe
-import { attachSquash } from '../chassis/squash.mjs?v=7ea7a06';
-import { createCelebration } from '../chassis/celebration.mjs?v=7ea7a06';
-import { createKillfeed } from '../chassis/killfeed.mjs?v=7ea7a06';
-import { createCensusBoard } from '../chassis/censusboard.mjs?v=7ea7a06';
-import { createCupoGauge } from '../chassis/cupogauge.mjs?v=7ea7a06';
-import { createKillTags } from '../chassis/killtag.mjs?v=7ea7a06';
-import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=7ea7a06';
-import { archFace } from '../chassis/facegen.mjs?v=7ea7a06';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
-import { Sim, TEAMS, SHORT_COLORS, SHORT_COLORS_6, BALL_R, FPS, FIELD_W, FIELD_L, XL, XR, SPAWN_Y, GATE_Y, SAFE_Y } from './sim.js?v=7ea7a06';
-import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=7ea7a06';
-import { buildSfxBuffer } from './sfxmap.mjs?v=7ea7a06';
-import { createCoach } from '../chassis/coach.mjs?v=7ea7a06';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
-import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=7ea7a06';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
-import { cantarPuesto } from '../chassis/veredicto.mjs?v=7ea7a06';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
+import { THREE, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createBloom, frameOrtho, BLOOM } from '../chassis/gfx.mjs?v=266d6f0';
+import { archLook } from '../chassis/ballmat.mjs?v=266d6f0';   //+AG doc 41 bloque G: material de la bola-heroe
+import { attachSquash } from '../chassis/squash.mjs?v=266d6f0';
+import { createCelebration } from '../chassis/celebration.mjs?v=266d6f0';
+import { createKillfeed } from '../chassis/killfeed.mjs?v=266d6f0';
+import { createCensusBoard } from '../chassis/censusboard.mjs?v=266d6f0';
+import { createCupoGauge } from '../chassis/cupogauge.mjs?v=266d6f0';
+import { createKillTags } from '../chassis/killtag.mjs?v=266d6f0';
+import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=266d6f0';
+import { archFace } from '../chassis/facegen.mjs?v=266d6f0';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
+import { Sim, TEAMS, SHORT_COLORS, SHORT_COLORS_6, BALL_R, FPS, FIELD_W, FIELD_L, XL, XR, SPAWN_Y, GATE_Y, SAFE_Y } from './sim.js?v=266d6f0';
+import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=266d6f0';
+import { buildSfxBuffer } from './sfxmap.mjs?v=266d6f0';
+import { createCoach } from '../chassis/coach.mjs?v=266d6f0';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=266d6f0';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
+import { cantarPuesto } from '../chassis/veredicto.mjs?v=266d6f0';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
 
 window.addEventListener('error', e => { document.getElementById('err').style.display='grid'; console.error(e.error||e.message); });
 
@@ -1475,7 +1497,7 @@ const I18N={
     keys:'HOLD RUN on green &nbsp;·&nbsp; ←/→ or 1/2/3 = lane &nbsp;·&nbsp; F = brake &nbsp;·&nbsp; A/S/D = nitro/ghost/super &nbsp;·&nbsp; R = new round',
     you:'YOU', youIntro:'This is you', go:'GO!', on:'ON!', ready:'READY',
     lanes:['◀ LEFT','● CENTER','RIGHT ▶'], run:'RUN', runHold:'HOLD · space/↑',
-    brake:'BRAKE', nitro:'⚡ NITRO', ghost:'👻 GHOST', sup:'⭐ SUPER',
+    brake:'BRAKE', nitro:'NITRO', ghost:'GHOST', sup:'SUPER',
     specWin:'YOU WON!', specLose:"YOU'RE OUT",
     specWinSub:n=>`You crossed the finish · 1st of ${n}`,
     specSub:(p,n)=>`Now spectating · ${p} of ${n}`,
@@ -1486,7 +1508,7 @@ const I18N={
     keys:'MANTÉN CORRER en verde &nbsp;·&nbsp; ←/→ o 1/2/3 = carril &nbsp;·&nbsp; F = frenazo &nbsp;·&nbsp; A/S/D = nitro/fantasma/súper &nbsp;·&nbsp; R = otra ronda',
     you:'TÚ', youIntro:'Este eres tú', go:'¡YA!', on:'¡ON!', ready:'¡YA!',
     lanes:['◀ IZQUIERDA','● CENTRO','DERECHA ▶'], run:'CORRER', runHold:'MANTÉN · espacio/↑',
-    brake:'FRENAZO', nitro:'⚡ NITRO', ghost:'👻 FANT.', sup:'⭐ SÚPER',
+    brake:'FRENAZO', nitro:'NITRO', ghost:'FANT.', sup:'SÚPER',
     specWin:'¡GANASTE!', specLose:'TE ELIMINARON',
     specWinSub:n=>`Cruzaste la meta · 1º de ${n}`,
     specSub:(p,n)=>`Ahora eres espectador · puesto ${p} de ${n}`,
@@ -1611,25 +1633,25 @@ else {
 // ============================================================================
 if(TUTORIAL)(function(){
   const CI={
-    en:{ done:'Tutorial complete! 🎓', exit:'✕ Exit',
+    en:{ done:'Tutorial complete!', exit:'✕ Exit',
       steps:[ 'HOLD RUN while the light is GREEN',
         'Ram the BARRIER on green until it breaks, then cross it',
         'RED! Let go and stop (today nobody shoots… in a real match, they do)',
         'Coming in hot? Press BRAKE (F) for an emergency stop',
         'The WALL has a GAP: switch LANE to the open side',
-        'Press ⚡ NITRO on green: a sprint',
-        'Press 👻 GHOST: you pass through walls for a moment',
-        'SUPER bar full, on the house! Press ⭐ SUPER',
+        'Press NITRO on green: a sprint',
+        'Press GHOST: you pass through walls for a moment',
+        'SUPER bar full, on the house! Press SUPER',
         'Cross the FINISH line!' ] },
-    es:{ done:'¡Tutorial completado! 🎓', exit:'✕ Salir',
+    es:{ done:'¡Tutorial completado!', exit:'✕ Salir',
       steps:[ 'MANTÉN CORRER mientras la luz esté en VERDE',
         'Embiste la BARRERA en verde hasta romperla y crúzala',
         '¡ROJO! Suelta y quédate quieto (hoy nadie dispara… en la partida real, sí)',
         '¿Vas lanzado? Pulsa FRENAZO (F) para clavarte',
         'El MURO tiene un HUECO: cambia de CARRIL al lado abierto',
-        'Pulsa ⚡ NITRO en verde: un sprint',
-        'Pulsa 👻 FANTASMA: atraviesas muros un instante',
-        '¡Barra de SÚPER llena de regalo! Pulsa ⭐ SÚPER',
+        'Pulsa NITRO en verde: un sprint',
+        'Pulsa FANTASMA: atraviesas muros un instante',
+        '¡Barra de SÚPER llena de regalo! Pulsa SÚPER',
         '¡Cruza la META!' ] },
   };
   //+AG doc 49: los otros 18 idiomas del tutorial llegan en el paquete. createCoach lee i18n[lang()] en
