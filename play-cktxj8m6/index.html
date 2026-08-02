@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-02 2928e1a"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-02 be8192a"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG ICONO EN LA PANTALLA DE INICIO (docs/40 §6). Jaime: "la gente esta acostumbrada a clicar en el
@@ -1023,11 +1023,39 @@
     rectangulo que el motor lee cada frame y las dos animaciones se sumaban. */
   .hero #hBall{ width:262px; height:262px; display:block; margin:0 auto; }
   .hero canvas{ width:164px; height:164px; filter:drop-shadow(0 16px 24px #0009); animation:breathe 3.1s ease-in-out infinite; }
-  .hero .ballname{ display:flex; align-items:center; gap:7px; font-size:var(--fs-6); font-weight:900; letter-spacing:-.01em; margin-top:4px; text-shadow:0 3px 14px #000a; }
-  .hero .ballcups{ display:flex; align-items:center; justify-content:center; gap:5px; font-size:var(--fs-3); font-weight:900; color:var(--gold2); font-variant-numeric:tabular-nums; text-shadow:0 2px 8px #fbb91544; }
-  /*+AG 26-jul: iba en ORO y en mayusculas, compitiendo con el lenguaje de recompensa (que es el que tiene
-     que destacar). Es una pista, no un premio: gris apagado y sin gritar. */
-  .hero .balltag{ font-size:var(--fs-2); letter-spacing:.06em; font-weight:700; color:var(--muted); text-align:center; }
+  /*+AG 2-ago · EL PROTAGONISTA SE PRESENTA COMO EN BRAWL: nombre grande y trofeos en placa, y NADA MAS.
+     Jaime: «yo haría Bunker y las copas más grandes». El nombre sube de 24 a 30 (--fs-7) y estrena el
+     trio del canon (blanco + trazo + sombra corta, docs/56 regla 1) — le faltaba, siendo el rotulo mas
+     protagonista de la app: era la unica cosa a 24 px sin contorno sobre un fondo que ademas se mueve
+     (las bolas del ambiente le pasan por detras). El `letter-spacing` sale de -.01em por lo de siempre:
+     el trazo engorda las letras hacia fuera y partir de apretado las funde (docs/56 §3bis.1). */
+  /*+AG ⚠ EL CLAMP NO ES PRUDENCIA, ES UNA MEDIDA: a 30 px fijos el nombre mas largo del catalogo en
+     ALEMAN («Napfschnecke») ocupa 191 px y en un movil de 320 el hueco del heroe son 180 — se salia por
+     los dos lados sin que `__fitCheck()` cantara nada, porque no se sale de la PANTALLA, solo del hueco.
+     Con `8vw` cae a 25,6 px en ese movil (163 px, cabe) y se queda en los 30 de tope a partir de 375,
+     que es donde se juzgo el tamaño. Medido en de/ru/pl/tr, no calculado. */
+  .hero .ballname{ display:flex; align-items:center; gap:7px; font-size:clamp(24px,8vw,var(--fs-7)); font-weight:900; letter-spacing:.005em; margin-top:4px;
+    color:#fff; -webkit-text-stroke:var(--stroke-7) #241a3f; paint-order:stroke fill; text-shadow:0 3px 0 #241a3f6b, 0 4px 18px #000a; }
+  /*+AG LAS COPAS PASAN A SER UN OBJETO, no una linea de texto. De 13 px a 20 (--fs-5) y montadas en la
+     MISMA placa que las pildoras de moneda de la cabecera (.coin): mismo marino, mismo canto, mismo
+     icono desbordando por arriba y por abajo. No es un adorno nuevo — es que en la app "cifra que te
+     pertenece" ya se dibuja asi en un sitio, y aqui se pintaba a pelo sobre el fondo. Sobre violeta con
+     bolas pasando por detras, un numero dorado suelto no tenia de donde agarrarse.
+     El icono va en `em` y no en px, misma razon que .r-place img: si mañana el numero cambia de cuerpo,
+     la copa le sigue sola en vez de quedarse de pegatina. */
+  .hero .ballcups{ display:inline-flex; align-items:center; justify-content:center; gap:6px; height:30px; padding:0 14px 0 6px;
+    background:linear-gradient(var(--nav-1),var(--nav-2)); border:1px solid #ffffff30; border-radius:999px;
+    box-shadow:0 3px 0 #0d0726, inset 0 1px 0 #ffffff2e;
+    font-size:var(--fs-5); font-weight:900; color:var(--gold2); font-variant-numeric:tabular-nums; text-shadow:0 2px 8px #fbb91544; }
+  .hero .ballcups .cico{ width:1.55em; height:1.55em; margin:-7px 0; filter:drop-shadow(0 2px 3px #000a); }
+  /*+AG 2-ago · AQUI VIVIA "Tu bola equipada · toca para ver la colección" y se va, a peticion de Jaime:
+     «ese texto no tiene sentido ponerlo, en los juegos de móvil no se pone texto ahí». Tiene razon y
+     ademas es la misma poda de docs/47 §1 (dos sitios diciendo lo mismo): la puerta a la coleccion es
+     la pestaña GARAJE de abajo, que esta siempre visible y ya lleva su aviso. La bola sigue siendo
+     tocable (#heroTap, con su `:active` que la hunde), que es la afford que usa Brawl: el personaje se
+     toca porque es el personaje, no porque un rotulo lo diga.
+     Las claves `heroTag` de los 20 i18n se quedan sin borrar A PROPOSITO: son inertes sin nodo que las
+     lea, y borrarlas son 20 ficheros tocados por un texto que puede volver. */
   .homebottom{ padding:4px 12px 10px; display:flex; flex-direction:column; gap:8px; z-index:5; }
   .passband{ display:flex; align-items:center; gap:9px; width:max-content; max-width:100%;
     background:linear-gradient(90deg,#2b1d5e,#3a2470); border:1px solid #ffffff26; border-radius:13px; padding:7px 13px 7px 9px; cursor:pointer;
@@ -1290,7 +1318,12 @@
     box-shadow:0 2px 6px #000a; animation:howpulse 1.1s ease-in-out infinite; }
   @keyframes howpulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.22); } }
   /*+AG REJILLA de modos (selector, tiles 2 columnas estilo eventos de Brawl) */
-  #selector{ background:radial-gradient(130% 90% at 50% 8%, #5a2ec2 0%, var(--bg-mid) 45%, var(--bg-lo) 100%); }
+  /*+AG 2-ago (rework Brawl): MODOS era la UNICA de las seis pantallas grandes sin la capa de doodles
+     (Garaje, Tienda, Temporada, Perfil y Ranking si la llevan desde docs/60). Era un degradado liso, y
+     por eso el aire de arriba se leia como un hueco muerto y no como respiracion. Mismo asset, mismo
+     tamaño de repeticion que las otras cinco: no se inventa nada, se le da lo que ya tenian todas. */
+  #selector{ background:url(arte/fondo/doodles.webp) repeat top left/340px 340px,
+    radial-gradient(130% 90% at 50% 8%, #5a2ec2 0%, var(--bg-mid) 45%, var(--bg-lo) 100%); }
   #selector .selhead{ display:flex; align-items:center; gap:10px; padding:14px 16px 8px; }
   #selector .selhead h1{ margin:0; font-size:var(--fs-5); font-weight:900; letter-spacing:.02em; }
   .modegrid{ flex:1; min-height:0; overflow-y:auto; padding:8px 14px 18px;
@@ -1340,9 +1373,18 @@
      que vuelva a recortar, y se ancla ARRIBA para que lo que se tire sea el vacio de abajo y no la
      accion. Leccion: "sin recortar" no es un objetivo, es una consecuencia de que la foto sea buena. */
   .tile.tancha .tart img{ object-position:top; }
-  .tile.tancha .thead{ min-height:56px; padding:8px 12px; gap:10px; }
-  .tile.tancha .ticon .msvg{ width:34px; height:34px; }
-  .tile.tancha .tname{ font-size:var(--fs-5); }
+  /*+AG 2-ago: salvo el Cazador. Su arena es NEGRA por diseño, y anclada arriba la carta ancha salia
+     medio vacia con el depredador solo en un rincon. Bajando el encuadre entran las bolas huyendo y la
+     mira rosa, que es de lo que va el modo. Visto en captura, no calculado. */
+  .tile.tancha[data-mode="cazador"] .tart img{ object-position:center 62%; }
+  .tile.tancha .thead{ min-height:64px; padding:8px 12px; gap:11px; }
+  /*+AG 2-ago · Y AQUI ESTA EL PRECIO DE LA INSIGNIA GRANDE, que solo se vio montandola: en la carta
+     ESTRECHA el disco a 54 px dejaba a "LA GRAN CARRERA" con 86 px de texto, partia en TRES lineas y la
+     banda se comia la imagen — que es lo que hace apetecible la carta. Por eso el disco base es 44 y
+     solo la carta ANCHA, que tiene sitio de sobra, se lo puede permitir a 64. */
+  .tile.tancha .ticon{ width:64px; height:64px; margin:-11px 0 -11px -4px; }
+  .tile.tancha .ticon .msvg{ width:50px; height:50px; }
+  .tile.tancha .tname{ font-size:var(--fs-5); -webkit-text-stroke:var(--stroke-5) #241a3f; }
   .tile.tancha .tsub{ font-size:var(--fs-3); }
   /* BANDAS TODAS IGUALES. A 15 px "LA GRAN CARRERA" y "SUELO MENGUANTE" parten en DOS lineas y las
      otras no, asi que las bandas median 45 y 60 y las imagenes 146 y 130: la rejilla salia desigual
@@ -1379,16 +1421,82 @@
      no se inventa ni uno. Van con alfa sobre el azul oscuro solido, asi el blanco del nombre sigue
      leyendose en las cinco (medido el contraste, no supuesto). Las BLOQUEADAS no reciben color: se
      quedan en gris por el fallback de var(), que es lo que significa estar apagado. */
-  .tile[data-mode="redlight"]{ --mc:#FF8C1F; --mcb:#FF8C1F5c; }   /* la pista es salmon y la franja ambar */
-  .tile[data-mode="race"]    { --mc:#2E85FF; --mcb:#2E85FF5c; }   /* campo azul noche con carriles cian */
-  .tile[data-mode="cazador"] { --mc:#F22E33; --mcb:#F22E335c; }   /* el depredador y el liston de peligro */
-  .tile .thead{ position:relative; z-index:2; flex:0 0 auto; display:flex; align-items:center; gap:7px;
-    padding:6px 9px; background-color:#161139; border-bottom:1px solid #ffffff14;
-    background-image:linear-gradient(180deg, var(--mcb,#1b1547), #16113900); }
-  .tile .ticon{ font-size:var(--fs-6); line-height:1; flex:0 0 auto; filter:drop-shadow(0 2px 4px #0009); }
-  .tile .ticon .msvg{ width:26px; height:26px; }
+  .tile[data-mode="redlight"]{ --mc:#FF8C1F; }   /* la pista es salmon y la franja ambar */
+  .tile[data-mode="race"]    { --mc:#2E85FF; }   /* campo azul noche con carriles cian */
+  .tile[data-mode="cazador"] { --mc:#F22E33; }   /* el depredador y el liston de peligro */
+  /*+AG 2-ago · EL COLOR, AHORA DE VERDAD. `--mcb` era el mismo color con alfa `5c` (36%) en degradado
+     hacia transparente SOBRE `#161139`, y el resultado no era el color del modo: era casi negro. Medido
+     el pixel en la captura, no deducido — Luz Roja salia rgb(42,26,35) (marron) y El Cazador
+     rgb(77,24,56) (granate). El concepto de docs/46 (un color propio por modo) era el bueno; la receta
+     lo mataba. En la referencia de Brawl la banda es COLOR PLANO Y SATURADO, y por eso su rejilla no
+     parece una plantilla repetida. `--mcb` se va entero: no queda nadie usandolo.
+     El blanco del nombre sobre naranja saturado NO se sostiene solo — se sostiene con el trazo, que es
+     justo lo que hace la referencia y lo que pide docs/56 regla 1. Los dos cambios son uno solo. */
+  .tile .thead{ position:relative; z-index:2; flex:0 0 auto; display:flex; align-items:center; gap:9px;
+    padding:6px 9px; overflow:visible; box-shadow:0 2px 0 #00000038;
+    background:linear-gradient(180deg, color-mix(in srgb, var(--mc,#282059) 84%, #fff) 0%, var(--mc,#282059) 100%); }
+  /*+AG LA INSIGNIA. El SVG dorado vendorizado NO se toca: todo-oro y silueta que diferencia es regla del
+     brand designer (docs/39), y ese mismo icono vive en balltrials.com y en la tarjeta del torneo. Lo
+     que estaba mal era el TRATAMIENTO: 26 px, plano y encerrado dentro de la banda. Ahora va montado en
+     su disco marino y CRUZA el borde de la banda por arriba y por abajo.
+     Ese desborde no es un capricho: en la captura de Brawl no hay una sola carta que sea un rectangulo
+     limpio (a todas les asoma la pila de mapas por la esquina). Esta es nuestra manera de romper el
+     rectangulo con una pieza que ya tenemos, en vez de inventar un adorno que no significa nada. */
+  .tile .ticon{ position:relative; z-index:3; flex:0 0 auto; width:44px; height:44px;
+    margin:-7px 0 -7px -2px; display:grid; place-items:center; line-height:1;
+    border-radius:50%; background:radial-gradient(circle at 34% 26%, #2e2760, #14112e 78%);
+    border:2px solid #0a0918; box-shadow:0 4px 10px #0009, inset 0 2px 0 #ffffff1f; }
+  .tile .ticon .msvg{ width:34px; height:34px; filter:drop-shadow(0 2px 3px #0009); }
   .tile .ttxt{ min-width:0; display:flex; flex-direction:column; gap:1px; }
-  .tile .tname{ min-width:0; font-size:var(--fs-4); font-weight:900; letter-spacing:-.01em; line-height:1.08; }
+  /*+AG 2-ago · EL TRAZO QUE FALTABA. En esta misma pantalla el titulo "MODOS" llevaba el trio del canon
+     (blanco + trazo + sombra corta, docs/56 regla 1) y el nombre de las cinco cartas, dos dedos mas
+     abajo, no llevaba nada: MODOS es de docs/46 (26-jul) y el canon es de docs/56 (1-ago), asi que se
+     quedo fuera del pase. Sobre color saturado el trazo no es adorno, es lo que hace que el blanco no
+     dependa del fondo.
+     ⚠ Y EL ESPACIADO SUBE A LA VEZ, no despues: el contorno engorda cada letra hacia fuera y dos que
+     ya se rozaban se funden (docs/56 §3bis.1 — en la portada se llego a leer "INDMDUAL"). Estaba en
+     -.01em, o sea APRETADO, que es el peor sitio del que partir. */
+  /*+AG EL TRAZO SE ARREGLA, EL CUERPO SE QUEDA EN 15 Y ESTO ES UNA EXCEPCION DOCUMENTADA.
+     El director de arte canto dos cosas del nombre: que 1,4 px sobre 15 es un trazo del 9,3%, por
+     debajo del suelo del 11% (docs/60 regla 11), y que 15 px no esta en la escala 9/11/13/16/20/24
+     (regla 8). Proponia 16 + 1,8 y arreglaba las dos de una.
+     La primera se arregla y punto: 1,8 sobre 15 son el 12%, por encima del suelo.
+     La segunda NO se puede: lo probe a 16 y lo mide la captura. En la carta estrecha la columna de
+     texto son 67 px (167 de carta − 18 de padding − 44 del disco − 18 de huecos − 20 de la (i)), y
+     "CAZADOR" a 16 px con trazo pide 85. El navegador hacia lo unico que podia y partia la palabra:
+     salia "EL CAZA-DOR" y "SUELO MEN-GUANTE" EN ESPAÑOL, en la pantalla de Jaime. A 15 entra.
+     Es el mismo tipo de excepcion medida que ya tiene `.sh-sec` con su clamp: la regla de la escala
+     cede cuando el ancho real no da, y se escribe por que. */
+  .tile .tname{ min-width:0; font-size:15px; font-weight:900; letter-spacing:.005em; line-height:1.1;
+    color:#fff; -webkit-text-stroke:var(--stroke-4) #241a3f; paint-order:stroke fill;
+    text-shadow:0 2px 0 #241a3f66;
+    /*+AG ⚠ LO MEDI ANTES Y DESPUES, Y LO HABIA EMPEORADO. En aleman "SCHRUMPFENDER BODEN" es UNA
+       palabra que no cabe y se cortaba a media letra contra el borde de la carta — y ya se cortaba
+       ANTES de este pase (se salia 23 px, medido con scrollWidth en el fichero de HEAD). Con el trazo
+       engordando cada letra y el icono comiendo 18 px de ancho paso a salirse 36. O sea: no lo cause,
+       pero lo empeore un 57%, y "ya estaba roto" no es una excusa para dejarlo peor.
+       El arreglo es la regla que este mismo bloque ya tenia escrita para el nombre del modo: ANTES SE
+       PARTE QUE SE CORTA. `anywhere` deja partir la palabra larga; `hyphens:auto` pone el guion en el
+       sitio bueno en los idiomas que lo saben (el aleman lo sabe). Cortar le quita al jugador justo el
+       trozo que dice de que va el modo, y eso no lo arregla ningun tamaño de letra.
+       ⚠ NO se resuelve encogiendo la letra: el suelo del canon son 11 px (docs/60) y ya vamos a 15. */
+       ⚠⚠ Y AQUI ME LA PEGUE DOS VECES SEGUIDAS, LAS DOS VISTAS EN LA CAPTURA EN ESPAÑOL. Primero puse
+       `overflow-wrap:anywhere` y salio "EL CAZA-DOR" y "SUELO MEN-GUANTE". Lo cambie a `break-word`
+       pensando que era eso... y seguia igual, porque el culpable era el OTRO: `hyphens:auto` parte
+       palabras para cuadrar mejor las lineas aunque quepan enteras, y no le importa lo que diga
+       overflow-wrap. Son dos propiedades distintas y yo estaba tocando la que no era.
+       Se queda SOLO `break-word`, que parte unicamente la palabra que no cabe de ninguna manera. El
+       aleman parte igual "SCHRUMPFENDER" (no cabe), pero sin guion; el español deja de partir
+       "CAZADOR", que si cabe. Un guion bonito en aleman no vale partir el nombre en el idioma de casa. */
+       ⚠ HACEN FALTA LAS DOS, y lo se porque probe las tres combinaciones y las medi:
+         · `break-word` solo → no parte NADA: el aleman se seguia saliendo 37 px.
+         · `anywhere` solo   → tampoco parte: se seguia saliendo 29 px.
+         · `anywhere` + `hyphens:auto` → parte, con guion y en el sitio bueno.
+       O sea que quien parte de verdad es `hyphens`, y `anywhere` es lo que le deja estrechar la
+       columna para que le haga falta. El "EL CAZA-DOR" que me asusto no lo causaba esta pareja: lo
+       causaba haber subido el cuerpo a 16 px, que dejaba la palabra sin sitio (ver arriba). A 15 px
+       el español entra entero y el guion solo aparece donde de verdad no cabe. */
+    overflow-wrap:anywhere; hyphens:auto; }
   /* la linea de "que se hace aqui": es la que convierte el rotulo en una carta que se entiende sin
      haber jugado. Una sola linea SIEMPRE: si no cabe, se corta con puntos suspensivos, nunca envuelve
      (dos lineas descuadrarian la banda y comerian imagen). */
@@ -1399,8 +1507,12 @@
   /* el color puro del modo sobre la banda daba 4.44:1 en el rojo del Cazador (medido), justo por
      debajo del minimo legible. Se aclara mezclando con blanco: sigue siendo SU color y no se inventa
      ninguno nuevo. Los bloqueados caen al gris de siempre por el fallback. */
-  .tile .tsub{ min-width:0; font-size:var(--fs-3); font-weight:800; letter-spacing:.01em;
-    color:color-mix(in srgb, var(--mc,#9aa3c7) 80%, #FFFFFF);
+  /*+AG 2-ago: la segunda linea iba EN EL COLOR DEL MODO (copiado de la carta del lobby de Brawl, donde
+     va magenta sobre placa marino). Con la banda entera ya del color del modo eso deja de tener sentido
+     — seria el color sobre si mismo — y pasa a blanco con trazo fino, que es lo que hace la referencia
+     en su carta de evento. De paso se va el color-mix que existia solo para salvar el contraste. */
+  .tile .tsub{ min-width:0; font-size:var(--fs-2); font-weight:800; letter-spacing:.01em;
+    color:#fff; opacity:.94; -webkit-text-stroke:var(--stroke-2) #241a3f; paint-order:stroke fill;
     /*+AG doc 49: DOS LINEAS, no "…". Esta linea nacio de una sola con recorte ("a 175 px de carta no
        cabe una frase"), y con 20 idiomas se vio que la premisa era falsa al reves: no cabia ni en
        INGLES a 360 px. Cortar con "…" le quita al jugador justo la palabra que dice de que va el
@@ -1427,20 +1539,93 @@
      lo justo para que se lean el depredador y las bolas; sigue siendo la escena real, no otra. */
   .tile[data-mode="cazador"] .tart img{ filter:brightness(1.15) saturate(1.08); }
   /* velo inferior: las pistas son escenas vivas y sin esto el borde de abajo queda sucio */
-  .tile .tscrim{ position:absolute; left:0; right:0; bottom:0; height:38%; z-index:1; pointer-events:none;
-    background:linear-gradient(180deg, transparent, #06050e73); }
+  /*+AG 2-ago: baja de 38% a 26%. El velo existia para limpiar el borde de abajo, pero con la banda de
+     arriba ya oscura y apagada acababa oscureciendo media pista. Con la banda en color vivo, la imagen
+     tiene que estar igual de viva o la carta se parte en dos mitades que no se hablan. */
+  .tile .tscrim{ position:absolute; left:0; right:0; bottom:0; height:26%; z-index:1; pointer-events:none;
+    background:linear-gradient(180deg, transparent, #06050e6e); }
   /* el badge va DENTRO de la imagen, nunca sobre la banda: puesto arriba del todo tapaba el nombre
      ("EL CAZAD…"). En Brawl el estado tampoco pisa el rótulo, vive fuera de él.
      +AG 26-jul (tarde): estaba en top:47px, un numero magico atado a que la banda midiera 45. Al subir
      la letra a 15/12 la banda crecio y el badge se salvo por 2 px de churro. Ahora el badge VIVE DENTRO
      de .tart (movido en el marcado de los tres modos abiertos) y se ancla a la imagen con top:6px: la
      banda puede crecer lo que quiera y esto no se rompe nunca mas. */
-  .tile .tart .tday{ position:absolute; top:6px; right:6px; z-index:3; font-size:var(--fs-2); font-weight:900; color:#3a2400;
-    background:linear-gradient(#ffe27a,#ffb43d); border-radius:999px; padding:3px 8px; box-shadow:0 3px 10px #ffb03d77, inset 0 1px 0 #fff8; }
+  /*+AG 2-ago · LA CORONA DEL MODO DEL DIA, y por que el badge se sale de la imagen.
+     Jaime, viendo el mockup: «no entiendo por que el primero es mas grande que los demas, eso me
+     confunde». El fallo NO era el tamaño. Esa carta es mas grande porque ese modo paga +50%, y eso lo
+     decia una pastilla de 11 px flotando sobre la pista: el tamaño no se explicaba solo. Y ademas
+     competia con una imagen viva que cambia de contraste segun el modo.
+     Ahora es una TIRA de oro de ancho completo encima de la banda de color — el tercer piso que la
+     carta de Brawl tiene y la nuestra no tenia. El oro no rompe "un solo amarillo por pantalla"
+     (docs/56 regla 6): en MODOS no hay CTA (JUGAR vive en el Inicio), asi que este es el unico, y va
+     sobre una carta que si se pulsa.
+     ⚠ EL FILO OSCURO NO ES DECORATIVO, lo pidio el caso peor: el modo del dia ROTA entre los tres, y
+     sobre el naranja de Luz Roja el oro y la banda quedaban pegados sin frontera. Sobre el azul y el
+     rojo no pasaba. Probados los tres antes de dejarlo (docs/46 §6, la misma leccion). */
+  .tile .tbar{ flex:0 0 auto; height:29px; display:flex; align-items:center; gap:7px; padding:0 7px 0 11px;
+    position:relative; z-index:4; overflow:hidden;
+    background:linear-gradient(180deg,#ffe27a 0%,#ffc247 55%,#ffab2e 100%);
+    border-bottom:2px solid #1a1024; box-shadow:0 3px 8px #ffb03d3d; }
+  .tile .tbar .tday{ min-width:0; font-size:var(--fs-3); font-weight:900; letter-spacing:.05em;
+    color:#3a2400; text-shadow:0 1px 0 #ffffff5c; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  /*+AG la (i) hace un trabajo de verdad: abre el CÓMO JUGAR de ese modo (startTutorial). Un boton que
+     no lleva a ningun sitio es peor que no ponerlo — en la referencia la (i) tambien explica el modo. */
+  /*+AG LA (i) SALE DE LA FILA Y SE VA A LA ESQUINA, y esto lo decidio una medida, no el gusto.
+     Siendo un hijo mas del flex, la (i) le robaba 29 px (20 de ancho + 9 de hueco) a la columna del
+     nombre, que en una carta de 167 se queda en 67 px. "CAZADOR" a 15 px con trazo pide 78, asi que
+     el navegador partia la palabra y salia "EL CAZA-DOR" EN ESPAÑOL. Persegui ese guion cambiando el
+     cuerpo de letra y las reglas de corte, y ninguna de las dos era la causa: la causa era que a la
+     palabra le faltaba sitio. Sacandola de la fila la columna sube a 96 px y entra con aire.
+     En la esquina, ademas, es donde la pone Brawl (arriba a la derecha de la tira). */
+  .tile .tinfo{ position:absolute; top:6px; right:7px; z-index:5; width:20px; height:20px; min-width:20px;
+    border-radius:50%; flex:0 0 auto;
+    padding:0; border:1px solid #00000033; background:linear-gradient(#4d9bff,#1f6fe0); color:#fff;
+    font-family:inherit; font-size:11px; font-weight:900; font-style:italic; line-height:1;
+    display:grid; place-items:center; cursor:pointer; }
+  /*+AG EL DEDO PIDE 44 Y EL DIBUJO PIDE 20. Nacio a 19 px, que es menos de la mitad del minimo tactil
+     de la casa (docs/60 regla 14) — y la ✕ de esta MISMA pantalla mide 44, o sea que el estandar
+     estaba a dos dedos. Pero un boton de 44 px de ancho dentro de una carta de 167 le robaria 24 px al
+     nombre del modo, que es lo que mas importa de la carta. Asi que el dibujo se queda en 20 y el
+     DEDO se agranda con un halo transparente de 44x44 que no ocupa sitio en la fila.
+     ⚠⚠ EL `position:relative` DE ARRIBA ES OBLIGATORIO Y NO ES ADORNO: sin el, este ::before se ancla
+     al primer antepasado posicionado y se convierte en una lamina invisible sobre media pantalla que
+     se traga los toques de todo lo que haya debajo. Ese fallo exacto ya paso en este juego y dejo
+     Ajustes sin poder deslizarse. Si algun dia alguien quita el relative, esto vuelve.
+     ⚠ Y OJO AL MEDIRLO: el elemento seguira midiendo 20 px en el DOM. Los 44 son el halo. Quien
+     audite con getBoundingClientRect va a leer 20 y va a querer "arreglarlo" otra vez. */
+  .tile .tinfo::before{ content:''; position:absolute; left:50%; top:50%; width:44px; height:44px;
+    transform:translate(-50%,-50%); border-radius:50%; }
+  .tile .tinfo:active{ transform:scale(.9); }
+  /*+AG la (i) vive SIEMPRE en la banda de color, tambien en la carta del dia. En el mockup iba dentro
+     de la corona dorada solo en esa carta, y eso obligaba a moverla de sitio por JS al rotar el modo
+     del dia: un boton que cambia de padre segun el dia es una fuente de fallos a cambio de nada. Con
+     un sitio fijo, las tres cartas abiertas la tienen en el mismo punto y la corona queda solo para el
+     +50%, que es su unico trabajo. */
+  .tile .thead .tinfo{ box-shadow:0 2px 5px #0006; }
+  /*+AG el hueco que la (i) deja de ocupar en la fila hay que reservarlo igual, o la PRIMERA linea del
+     nombre se le mete debajo. Se reserva solo 26 px (los 20 del boton + aire), que sigue siendo 3 px
+     menos de lo que costaba como hijo del flex, y sobre todo lo pagan TODAS las lineas por igual en
+     vez de partir la palabra. Medido: con esto el nombre no se solapa con la (i) en ningun idioma. */
+  /*+AG ⚠ SOLO LAS CARTAS QUE TIENEN (i). Lo puse en `.tile` a secas y la captura enseño "RECO-LECTA" y
+     "SUELO MEN-GUANTE" partidas en el movil alto: las dos bloqueadas NO llevan (i) (no hay modo que
+     explicar todavia), asi que les estaba reservando 26 px para un boton que no existe y pagandolo con
+     el nombre partido. Con `[data-mode]` el hueco lo reservan solo las tres abiertas, que son las que
+     lo usan. */
+  .tile[data-mode] .ttxt{ padding-right:26px; }
   .tile.locked{ border-color:#ffffff14; }
-  .tile.locked .thead{ background:linear-gradient(180deg,#171536,#12102c); }
-  .tile.locked .ticon{ filter:grayscale(1) brightness(.85); }
-  .tile.locked .tname{ color:#c3c8e0; }
+  /*+AG 2-ago: la banda apagada sube de #171536 a un marino claro. Antes caia al gris por el fallback de
+     var(--mc) y con las otras tres ya en color plano y vivo, ese casi-negro las dejaba en agujeros. Se
+     apagan por SATURACION (marino sin color de modo), no por oscuridad. */
+  /*+AG ⚠ y el marino sale del TOKEN, no de un hex nuevo. La primera version puso `#4a4677→#302c56` a
+     ojo, y el director de arte midio que `#302C56` cae a distancia 52 del `--card:#2B1666`, que
+     docs/60 reserva EXPRESAMENTE para la web y no para el juego. `lint-arte` no lo caza (su umbral es
+     110): otro banco verde sobre algo que esta mal. La regla 12 dice un solo marino de placa,
+     `--nav-1 → --nav-2`, asi que se aclara EL TOKEN en vez de inventar un cuarto azul. */
+  .tile.locked .thead{ background:linear-gradient(180deg,
+    color-mix(in srgb, var(--nav-1) 74%, #fff) 0%, var(--nav-1) 100%); }
+  /* el gris va al DIBUJO, no al disco: el disco ya es marino y agrisarlo entero lo volvia una mancha. */
+  .tile.locked .ticon .msvg{ filter:grayscale(.85) brightness(.92) drop-shadow(0 2px 3px #0009); }
+  .tile.locked .tname{ color:#e6e9f7; }
   /* BLOQUEADO no es VACIO: los dos modos sin motor ya tienen su carta (encargo 10, hecha a juego con
      las capturas reales) y se ENSEÑA, apagada en gris con el candado encima. Es el patron de la casa
      — lo que no tienes se ve, atenuado, para que apetezca — y de paso mata los dos agujeros negros
@@ -1456,6 +1641,50 @@
      a su sitio (.tcond de siempre) el dia que el modo exista. Mientras, la etiqueta dice la verdad: viene, no esta.
      Va en DORADO tenue y no en gris: es una promesa (apetece), no un requisito (frustra). */
   .tile .tcond.soon{ color:#ffd489; background:#ffbf4a1a; border-color:#ffbf4a3d; letter-spacing:.04em; }
+  /*+AG 2-ago · LAS CARTAS SE MONTABAN UNAS ENCIMA DE OTRAS EN MOVIL CORTO, Y VENIA DE PRODUCCION.
+     Visto MIRANDO la captura a 360x540, no en el banco: `__fitCheck()` daba [] limpio en los cinco
+     tamaños mientras la rejilla estaba rota. Es la enesima vez que el banco verde certifica una
+     pantalla que no se sostiene — mide lo que se sale de la PANTALLA, y esto se sale de la REJILLA.
+     La causa, medida en el DOM a 360x540: la fila valia 154 px y la carta 199, porque el alto de la
+     carta lo fijaba `aspect-ratio` y el de la fila lo fijaba su CONTENIDO. Dos autoridades distintas
+     para la misma medida, y la carta se comia a la de abajo (redlight acababa en 274 y race empezaba
+     en 228: 46 px de solape). A 375x640 pasaba lo mismo, mas suave. Solo se salvaba el movil alto.
+     El arreglo quita la discusion en vez de ajustar numeros: por debajo de 700 manda LA REJILLA. Las
+     tres filas se reparten el alto que hay (la del modo del dia, 1,28 veces las otras) y la carta se
+     estira a su fila. Asi caben SIEMPRE, midan lo que midan, y no hay ningun alto magico que revisar
+     cuando aparezca un movil nuevo. Por encima de 700 no se toca nada: ahi sobra sitio y manda la
+     proporcion elegida, que es la que Jaime ha visto y aprobado. */
+  @media (max-height:699px){
+    .modegrid{ align-content:stretch; grid-template-rows:1.28fr 1fr 1fr; }
+    .modegrid .tile, .modegrid .tile.tancha{ aspect-ratio:auto; min-height:0; }
+    /*+AG ⚠ Y AQUI LA BANDA SE COMIA LA CARTA, que es justo lo contrario de lo que buscaba el rework.
+       Medido por el auditor de UX a 360x540: la banda ocupaba 90,5 px de una carta de 129 (el 70%) y
+       a la imagen le quedaban 36,8 px — un filo de dientes del Cazador y nada mas. La causa es que en
+       una carta baja se juntan las dos cosas que en una alta no molestan: el nombre partiendo en dos
+       lineas y el subtitulo ocupando otras dos.
+       No se arregla cortando el nombre (esta hoja lleva escrito desde docs/46 que antes se parte que
+       se corta) ni escondiendo el subtitulo, que es la linea que explica de que va el modo. Se
+       arregla apretando la letra al escalon de abajo del canon y dejando el subtitulo en UNA linea:
+       en un movil de 540 el subtitulo entra entero de todas formas. La imagen recupera la mitad de la
+       carta, que es lo que vende el modo. */
+    .modegrid .tile:not(.tancha) .thead{ min-height:0; padding:5px 8px; gap:7px; }
+    .modegrid .tile:not(.tancha) .tname{ font-size:var(--fs-3); -webkit-text-stroke:var(--stroke-3) #241a3f; }
+    /*+AG el subtitulo SE QUEDA EN DOS LINEAS. Lo baje a una para recuperar altura y la captura en
+       aleman lo canto: salia "Lauf und…" y "Flieh vorm…", o sea justo la palabra que dice de que va el
+       modo cortada, que es el fallo que docs/49 ya documento y arreglo una vez. Con el nombre a 13 px
+       y sin min-height la banda se queda en el 41% aunque el subtitulo ocupe dos lineas: la altura ya
+       la habian devuelto los otros tres cambios, esta cuarta poda no hacia falta. */
+    .modegrid .tile:not(.tancha) .ticon{ width:38px; height:38px; margin:-6px 0 -6px -1px; }
+    .modegrid .tile:not(.tancha) .ticon .msvg{ width:29px; height:29px; }
+    /*+AG aqui la reserva de 26 px para la (i) SE QUITA, y tambien por una medida: en movil corto
+       estrechar la columna hace que el nombre parta en mas lineas, y cada linea de mas engorda la
+       banda y le quita imagen a la carta — la banda se iba al 63% (medido), que es volver al problema
+       que este mismo bloque acaba de arreglar. Aqui el nombre va a 13 px y su primera linea es corta
+       ("EL", "LA GRAN", "DER"), asi que no llega a la esquina donde vive la (i). No es una apuesta:
+       se mide el solape real entre la (i) y el nombre en los 5 idiomas y sale 0. */
+    .modegrid .tile:not(.tancha) .ttxt{ padding-right:0; }
+    .modegrid .tile:not(.tancha) .tinfo{ width:18px; height:18px; min-width:18px; top:4px; right:5px; }
+  }
   /*+AG COPAS POR BOLA (doc 37): tarjeta de copas de la bola + tabla de 8 puestos en Resultados */
   /*+AG doc 60: 20 px de aire arriba pasan a 16. Es la devolucion EXACTA de los 4 px que costo subir dos
      etiquetas de Resultados al suelo de 11 px (la de campeon iba a 9,5 y la cabecera de la tabla a 10).
@@ -2074,10 +2303,17 @@
        la captura real de Brawl. El que cierre esa deuda tiene que decidir primero cual de los dos
        numeros manda, y eso es una decision de arte, no un barrido de CSS. */
   :root{
-    --fs-1:9px; --fs-2:11px; --fs-3:13px; --fs-4:16px; --fs-5:20px; --fs-6:24px;
+    /*+AG 2-ago: la escala llega hasta --fs-7. Existe por el NOMBRE DEL HEROE de la portada, que es el
+       unico rotulo de la app que hace de titular de personaje (Jaime: «yo haria Bunker y las copas mas
+       grandes»). No es un tamaño suelto: se le da nombre y su --stroke-7 emparejado para que el
+       siguiente que necesite un titular no vuelva a inventarse un px a mano, que es la deuda que
+       docs/60 vino a cerrar. Como .h-modename, el titular lo usa de TECHO de un clamp y no a pelo: los
+       nombres de bola son de una palabra, pero una palabra alemana no es una palabra española (medido
+       abajo, en .ballname). La escala pone el maximo; el ancho de pantalla pone el resto. */
+    --fs-1:9px; --fs-2:11px; --fs-3:13px; --fs-4:16px; --fs-5:20px; --fs-6:24px; --fs-7:30px;
     --nav-1:#282059; --nav-2:#161139;
     --plate-a:#ffffff0d; --plate-b:#ffffff18;
-    --stroke-1:1px; --stroke-2:1.2px; --stroke-3:1.4px; --stroke-4:1.8px; --stroke-5:2.2px; --stroke-6:2.6px; }
+    --stroke-1:1px; --stroke-2:1.2px; --stroke-3:1.4px; --stroke-4:1.8px; --stroke-5:2.2px; --stroke-6:2.6px; --stroke-7:3.2px; }
 
   /*+AG 14 · LA PESTAÑA UNICA. Habia TRES familias para el mismo papel —.subtab (Temporada, Perfil),
      .rktab (Ranking), .sh-sec (Tienda) y .se-rk-tab (el ranking de dentro del Pase)— con cuatro
@@ -2330,8 +2566,11 @@
   /*+AG el badge de dia de MODOS: es el GEMELO de `.mday` de la portada, y era la unica pieza de esa
      pareja sin barrer (la portada se arreglo en docs/56 y esta se quedo con el ⭐ del sistema). Mismo
      arreglo, misma factura: el ⭐ sale de la cadena traducida y lo pinta el ::before. */
-  .tile .tart .tday{ display:inline-flex; align-items:center; gap:4px; }
-  .tile .tart .tday::before{ content:''; flex:0 0 auto; width:11px; height:11px;
+  /*+AG 2-ago: el badge se mudo de encima de la imagen a la corona dorada (`.tbar`), asi que el selector
+     que le daba la estrella tenia que mudarse con el. Si no, la estrella se queda en un `.tart .tday`
+     que ya no existe y el badge pierde su icono en silencio. */
+  .tile .tbar .tday{ display:inline-flex; align-items:center; gap:6px; }
+  .tile .tbar .tday::before{ content:''; flex:0 0 auto; width:15px; height:15px;
     background:var(--ico-star-ink) no-repeat center/contain; }
   /*+AG la estrella de XP de Resultados. El circulo se queda (es la familia de `.r-reward .ic`), lo que
      cambia es lo de dentro: SVG en el marcado, no un glifo del sistema. */
@@ -2708,7 +2947,6 @@
         </div>
         <div class="ballname" id="hBallName">🚀 Cohete</div>
         <div class="ballcups" id="hBallCups">🏆 0</div>
-        <div class="balltag" data-t="heroTag">Tu bola equipada · toca para ver la colección</div>
       </div>
     </div>
     <div class="homebottom">
@@ -2775,24 +3013,28 @@
          salen del motor de verdad (captura headless del canvas con el HUD oculto), no son ilustración:
          lo que promete la carta es exactamente lo que sale al jugar. -->
     <!-- LUZ ROJA -->
+    <!--+AG 2-ago: la carta pasa de DOS pisos a TRES, como la de Brawl. Arriba la corona dorada del modo
+         del dia (`.tbar`, oculta en los otros dos y encendida por paintSelector), debajo la banda de
+         color con la insignia y el nombre, y abajo la imagen a sangre. El badge del dia ya NO vive
+         dentro de `.tart`: pisaba la pista y su tamaño no explicaba por que esa carta es mas grande. -->
     <div class="tile" data-mode="redlight">
-      <div class="thead"><div class="ticon">🚦</div><div class="ttxt"><div class="tname" data-mname="redlight">LUZ ROJA</div><div class="tsub" data-t="subRedlight">Corre y frena</div></div></div>
-      <div class="tart"><img src="arte/modos/redlight.webp" alt="" loading="lazy">
-        <div class="tday" data-t="dayBadge" style="display:none">DÍA · +50%</div></div>
+      <div class="tbar" style="display:none"><span class="tday" data-t="dayBadge">DÍA · +50%</span></div>
+      <div class="thead"><div class="ticon">🚦</div><div class="ttxt"><div class="tname" data-mname="redlight">LUZ ROJA</div><div class="tsub" data-t="subRedlight">Corre y frena</div></div><button class="tinfo" data-tt="howTo" data-tp="howTo" title="Cómo jugar" aria-label="Cómo jugar">i</button></div>
+      <div class="tart"><img src="arte/modos/redlight.webp" alt="" loading="lazy"></div>
       <div class="tscrim"></div>
     </div>
     <!-- LA GRAN CARRERA -->
     <div class="tile" data-mode="race">
-      <div class="thead"><div class="ticon">🏁</div><div class="ttxt"><div class="tname" data-mname="race">LA GRAN CARRERA</div><div class="tsub" data-t="subRace">Llega el primero</div></div></div>
-      <div class="tart"><img src="arte/modos/race.webp" alt="" loading="lazy">
-        <div class="tday" data-t="dayBadge" style="display:none">DÍA · +50%</div></div>
+      <div class="tbar" style="display:none"><span class="tday" data-t="dayBadge">DÍA · +50%</span></div>
+      <div class="thead"><div class="ticon">🏁</div><div class="ttxt"><div class="tname" data-mname="race">LA GRAN CARRERA</div><div class="tsub" data-t="subRace">Llega el primero</div></div><button class="tinfo" data-tt="howTo" data-tp="howTo" title="Cómo jugar" aria-label="Cómo jugar">i</button></div>
+      <div class="tart"><img src="arte/modos/race.webp" alt="" loading="lazy"></div>
       <div class="tscrim"></div>
     </div>
     <!-- EL CAZADOR -->
     <div class="tile" data-mode="cazador">
-      <div class="thead"><div class="ticon">🎯</div><div class="ttxt"><div class="tname" data-mname="cazador">EL CAZADOR</div><div class="tsub" data-t="subCazador">Huye del monstruo</div></div></div>
-      <div class="tart"><img src="arte/modos/cazador.webp" alt="" loading="lazy">
-        <div class="tday" data-t="dayBadge" style="display:none">DÍA · +50%</div></div>
+      <div class="tbar" style="display:none"><span class="tday" data-t="dayBadge">DÍA · +50%</span></div>
+      <div class="thead"><div class="ticon">🎯</div><div class="ttxt"><div class="tname" data-mname="cazador">EL CAZADOR</div><div class="tsub" data-t="subCazador">Huye del monstruo</div></div><button class="tinfo" data-tt="howTo" data-tp="howTo" title="Cómo jugar" aria-label="Cómo jugar">i</button></div>
+      <div class="tart"><img src="arte/modos/cazador.webp" alt="" loading="lazy"></div>
       <div class="tscrim"></div>
     </div>
     <!-- RECOLECTA (bloqueado decorativo) -->
@@ -3532,7 +3774,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=2928e1a"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=be8192a"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -7126,8 +7368,18 @@ function paintSelector(){ applyShell();
     //+AG el modo del dia se lleva la carta ANCHA (.hero): es el que paga +50%, y de paso cierra la
     //   rejilla de 5 en 3 filas completas. Va aqui y no en el marcado porque el modo del dia rota.
     t.classList.toggle('tancha', t.dataset.mode===dayMode());
-    const d=t.querySelector('.tday'); if(d) d.style.display = t.dataset.mode===dayMode() ? '' : 'none'; });
+    //+AG 2-ago: lo que se enciende ya no es el badge suelto sino la CORONA entera (`.tbar`), que es el
+    //   piso de arriba de la carta. Se toca el style.display y no el atributo `hidden`: `.tile .tbar`
+    //   trae `display:flex` propio, y contra un display de autor el `hidden` no oculta nada (esa
+    //   trampa ya costo un fallo real en esta hoja).
+    const bar=t.querySelector('.tbar'); if(bar) bar.style.display = t.dataset.mode===dayMode() ? '' : 'none'; });
 }
+//+AG la (i) de cada carta abre el CÓMO JUGAR de ESE modo, no del modo elegido: estas mirando la carta
+//   del Cazador, la (i) te enseña el Cazador. stopPropagation es obligatorio — la carta entera es un
+//   boton que selecciona el modo y te devuelve al inicio, asi que sin esto la (i) haria las dos cosas
+//   y el tutorial arrancaria con la Home ya cambiada debajo.
+document.querySelectorAll('.tile[data-mode] .tinfo').forEach(b=>{ b.onclick=e=>{
+  e.stopPropagation(); startTutorial(b.closest('[data-mode]').dataset.mode); }; });
 document.querySelectorAll('.tile[data-mode]').forEach(t=>{ t.onclick=()=>{   // tocar un tile = SELECCIONA y vuelve (no arranca; regla de oro)
   SAVE.mode=t.dataset.mode; persist(); goHome(); }; });
 //+AG el toast decia "Se desbloquea en el Nivel 5" para dos modos QUE NO EXISTEN: promesa con fecha que no se
