@@ -19,7 +19,8 @@
 //   · UN SOLO LENGUAJE DE "PÚLSAME": el CTA usa el mismo oro del motor (#bSup.ready / #ovBtn), no inventa brillos.
 //   · CABE EN EL MÓVIL SIN DESLIZAR: todo el cartel se mide en vh/vw y el texto se recorta con line-clamp.
 
-import { createSynth, makeRng, peakGain } from './synth.mjs?v=6dbad2a';
+import { createSynth, makeRng, peakGain } from './synth.mjs?v=66b38e7';
+import { PAUSA } from './pausa.mjs?v=66b38e7';   //+AG "el mundo no se mueve": el cartel tampoco se auto-arranca (ver tick)
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────
 //  TEXTOS · en+es con fallback a INGLÉS, igual que el SHELL y que los motores de Cazador/Luz Roja
@@ -253,6 +254,13 @@ export function createArranque(cfg){
   function tick(prev){
     if(!visible || started) return;
     const now = performance.now(), dt = Math.min(0.1, (now - prev)/1000);
+    //+AG ⚠ ESTE RELOJ NO ES EL DEL MOTOR: va por su cuenta con performance.now y su propio rAF, así que la
+    //   pausa del shell (chassis/pausa.mjs) no lo tocaba. Y el caso pasa de verdad: tocas JUGAR, sale el
+    //   cartel del modo, das atrás en el acto... y a los 5 s la ronda arrancaba SOLA por debajo de la hoja
+    //   de "¿Abandonar la partida?". Congelado, la cuenta de auto-arranque se queda donde estaba y sigue al
+    //   volver. El tap sí puede arrancar la ronda estando congelado, pero es imposible: los toques van a la
+    //   hoja, que vive en el documento del shell y tapa el iframe entero.
+    if(PAUSA.on){ rafId = requestAnimationFrame(()=>tick(now)); return; }
     left -= dt;
     if(autoSec > 0){
       drain.style.width = Math.max(0, (left/autoSec)*100).toFixed(2) + '%';

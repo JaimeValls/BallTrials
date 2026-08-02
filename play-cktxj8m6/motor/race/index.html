@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-02 6dbad2a">
+<meta name="bt-build" content="2026-08-02 66b38e7">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>YouBall · La Gran Carrera (WebGL)</title>
 <style>
@@ -232,7 +232,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=6dbad2a"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=66b38e7"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -243,23 +243,24 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 </script>
 
 <script type="module">
-import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createItemPops, createBloom, frameOrtho, buildHud, updateHud } from '../chassis/gfx.mjs?v=6dbad2a';
-import { archLook } from '../chassis/ballmat.mjs?v=6dbad2a';   //+AG doc 41 bloque G: material de la bola-heroe
-import { attachSquash } from '../chassis/squash.mjs?v=6dbad2a';
+import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createItemPops, createBloom, frameOrtho, buildHud, updateHud } from '../chassis/gfx.mjs?v=66b38e7';
+import { archLook } from '../chassis/ballmat.mjs?v=66b38e7';   //+AG doc 41 bloque G: material de la bola-heroe
+import { attachSquash } from '../chassis/squash.mjs?v=66b38e7';
 import { Sim, RNG, TEAMS, SHORT_COLORS, BALL_R, WIDTH, GATE_Y, GATE_H, TOP, FPS,
-         DIR, N_BALLS, CAM_SCALE, ASPA_R, ASPA_THICK, PLAT_HW, PLAT_HH } from './sim.js?v=6dbad2a';   //+AG extras de la capa de agencia
+         DIR, N_BALLS, CAM_SCALE, ASPA_R, ASPA_THICK, PLAT_HW, PLAT_HH } from './sim.js?v=66b38e7';   //+AG extras de la capa de agencia
 //+AG doc 62: los encuadres del cierre (sim.hero_scale / sim.celeb_scale) se leen del OBJETO sim, no por
 //   import. Un export que la CDN aún no ha refrescado tumba el módulo entero y la partida no arranca (pasó
 //   en producción el 2-ago); un campo que falta degrada a la cámara de siempre. Ver la nota en sim.js.
-import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=6dbad2a';
-import { archFace } from '../chassis/facegen.mjs?v=6dbad2a';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
-import { itemTexture } from '../chassis/itemgen.mjs?v=6dbad2a';
-import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=6dbad2a';
-import { buildSfxBuffer } from './sfxmap.mjs?v=6dbad2a';
-import { runToEnd } from '../chassis/simrun.mjs?v=6dbad2a';
-import { createCoach } from '../chassis/coach.mjs?v=6dbad2a';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
-import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=6dbad2a';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
-import { cantarPuesto } from '../chassis/veredicto.mjs?v=6dbad2a';   //+AG cartel de META: "en qué puesto has quedado", antes de soltar el resultado al shell
+import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=66b38e7';
+import { archFace } from '../chassis/facegen.mjs?v=66b38e7';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
+import { itemTexture } from '../chassis/itemgen.mjs?v=66b38e7';
+import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=66b38e7';
+import { buildSfxBuffer } from './sfxmap.mjs?v=66b38e7';
+import { runToEnd } from '../chassis/simrun.mjs?v=66b38e7';
+import { createCoach } from '../chassis/coach.mjs?v=66b38e7';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=66b38e7';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
+import { createPausa } from '../chassis/pausa.mjs?v=66b38e7';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
+import { cantarPuesto } from '../chassis/veredicto.mjs?v=66b38e7';   //+AG cartel de META: "en qué puesto has quedado", antes de soltar el resultado al shell
 
 window.addEventListener('error', e => { document.getElementById('err').style.display='grid'; console.error(e.error||e.message); });
 
@@ -856,8 +857,24 @@ function goFlash(){ const n=document.getElementById('countN');
   n.textContent=T().go; n.style.color='#7cff9a'; n.style.transform='scale(1)'; n.style.opacity='1';
   clearTimeout(goT); goT=setTimeout(()=>document.getElementById('count').classList.remove('show'), GO_HOLD); }
 let goT=0;
+//+AG LA PARTIDA SE PARA CUANDO EL SHELL PREGUNTA ENCIMA (docs/65 §abierto 1 → docs/66). Toda la maquinaria
+//   —el canal con el shell, la cuenta de vuelta y el porqué— vive en chassis/pausa.mjs, la MISMA para los 3
+//   modos. Aquí solo se dice quién es "estar en juego", cuál es el "¡YA!" de este motor y sus beeps.
+const pausa = createPausa({
+  enJuego: ()=> phase==='play',
+  goFlash,
+  sfx: o=>{ if(sfxOn && audio.unlocked) sfxCountdown(audio, o); },
+  //+AG al volver se consume el reloj otra vez por si acaso (si la pestaña estuvo oculta, el rAF no corrió y
+  //   este getDelta se lleva el atraso). `acc` NO se toca: siempre está por debajo de un paso, así que la
+  //   ronda sigue en la misma fase del paso y no hay ni ráfaga ni salto de interpolación.
+  alSeguir: ()=>{ clock.getDelta(); },
+});
 function loop(){
   const dt=Math.min(clock.getDelta(),0.05);
+  //+AG EL RELOJ SE CONSUME ARRIBA Y LA PAUSA SE PREGUNTA DESPUÉS: así, congelado, cada frame vacía su dt y
+  //   no queda atraso que soltar al volver (que es lo que teletransporta las bolas). No se renderiza: el
+  //   lienzo conserva el último fotograma y la imagen se queda clavada.
+  if(pausa.congelada(dt)){ requestAnimationFrame(loop); return; }
   //+AG fases de agencia: menu (overlay encima, escena viva detras) e intro (cuenta atras, sim EN PAUSA)
   if(phase!=='play'){
     sync(dt,1); P.update(dt); itemPops.update(dt); stars.update(dt); wind.update(dt); updatePanels();
@@ -893,6 +910,10 @@ window.__cap = {
   },
   done(){ return sim.done; }, info(){ return { fps:CAP_FPS, frame:sim.f, cap:capK, done:sim.done, seed:sim.seed, winner:sim.winner_team }; },
 };
+//+AG ventana de SOLO LECTURA para verificar desde fuera (tools/prueba-pausa-partida.mjs), hermana de __cap y
+//   gemela de la que el Cazador ya tenía (doc 61). Sin ella, comprobar que la partida se PARA de verdad
+//   —y que al volver no da un salto— exige mirar una pantalla con los ojos. No lo usa nada del juego.
+window.__test = { get sim(){ return sim; }, get phase(){ return phase; }, get pausa(){ return pausa.estado; } };
 
 addEventListener('resize',()=>{ layout(); });
 //+AG teclado del juego: 1/2/3 (o flechas) = zona · A/S/D = nitro/escudo/super · R = otra ronda.

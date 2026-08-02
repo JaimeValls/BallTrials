@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-02 6dbad2a"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-02 66b38e7"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG ICONO EN LA PANTALLA DE INICIO (docs/40 §6). Jaime: "la gente esta acostumbrada a clicar en el
@@ -3491,7 +3491,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=6dbad2a"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=66b38e7"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -5337,10 +5337,32 @@ function openFrame(src){
   if(window.BT_MUSIC) BT_MUSIC.off();
 }
 function closeGameFrame(){ if(gameFrameEl){ gameFrameEl.remove(); gameFrameEl=null;
+  partidaPausada=false;                    //+AG la partida que viene nace corriendo (docs/66)
   if(window.BT_MUSIC) BT_MUSIC.on(); } }   //+AG se vuelve al shell (Resultados o Home) -> vuelve su musica
+//+AG ══ LA PARTIDA SE PARA CUANDO PREGUNTAMOS ENCIMA (docs/66) ══════════════════════════════════════
+//   Hasta hoy el atras en partida abria "¿Abandonar la partida?" y la carrera SEGUIA CORRIENDO detras: si
+//   el atras te pillaba a diez metros de la meta, perdias terreno por leer una pregunta que no habias
+//   pedido. El motor no escuchaba nada, asi que hubo que abrir un canal: el shell manda 'bt:pausa' /
+//   'bt:sigue' al iframe y los tres motores lo atienden en chassis/pausa.mjs (ahi esta el porque entero,
+//   la cuenta de vuelta y la garantia de que no hay teleport).
+//   ⚠ LA REGLA NO ES "AL ABRIR LA HOJA DE ABANDONAR": es "hay una capa POR ENCIMA de la partida". Se
+//     decide con la MISMA verdad que el atras —las capas abiertas del DOM, ver ATRAS_CAPAS— y no con una
+//     bandera que ponga quien abre. Asi, el dia que algo mas se abra sobre una partida viva (una hoja de
+//     info, un aviso), la partida ya se para sin tocar esto. Hoy la unica es la de abandonar.
+let partidaPausada=false;
+function pausaPartida(quieta){
+  if(!gameFrameEl || !gameFrameEl.contentWindow){ partidaPausada=false; return; }
+  if(quieta===partidaPausada) return;                 // ni un postMessage por cada clic: solo en los cambios
+  partidaPausada=quieta;
+  try{ gameFrameEl.contentWindow.postMessage({ type: quieta?'bt:pausa':'bt:sigue' }, '*'); }catch(e){}
+}
 window.addEventListener('message', e=>{
-  const d=e.data; if(!d || (d.type!=='bt:matchEnd' && d.type!=='bt:tutorialEnd')) return;
+  const d=e.data; if(!d || (d.type!=='bt:matchEnd' && d.type!=='bt:tutorialEnd' && d.type!=='bt:motorListo')) return;
   if(!gameFrameEl || e.source!==gameFrameEl.contentWindow) return;   //+AG solo el iframe del juego, ignora mensajes espurios
+  //+AG EL SALUDO DEL MOTOR. Entre crear el iframe y que su modulo exista pasan cientos de ms, y un
+  //   postMessage lanzado en ese hueco se pierde en el documento vacio: quien toca JUGAR y da atras en el
+  //   acto se habria quedado con la partida corriendo bajo la hoja. Al saludar, se le repite el estado.
+  if(d.type==='bt:motorListo'){ if(partidaPausada){ try{ gameFrameEl.contentWindow.postMessage({type:'bt:pausa'},'*'); }catch(e){} } return; }
   if(d.type==='bt:tutorialEnd'){ onTutorialEnd(d); return; }
   if(curTutorial) return;   //+AG cinturon y tirantes: un matchEnd durante el tutorial NO paga economia
   onMatchEnd(d);
@@ -7293,6 +7315,12 @@ function preguntaAbandonar(){
 function atrasAbiertas(){ return ATRAS_CAPAS.filter(c=>{ try{ return !!c.abierta(); }catch(e){ return false; } }); }
 function atrasSync(){
   const hoy = atrasAbiertas();
+  //+AG docs/66: y de paso, LA PARTIDA SE PARA si le ha quedado algo encima. Va aqui y no en
+  //   preguntaAbandonar() a proposito: este es el sitio del juego que ya sabe la verdad de "que capas hay
+  //   abiertas y en que orden", y corre despues de cada toque. Atado a la puerta unica de la hoja, una capa
+  //   nueva sobre una partida viva queda cubierta el dia que se escriba (que es como se arreglo el aviso
+  //   del icono en docs/65: en la puerta, no en la llamada).
+  { const iP = hoy.findIndex(c=>c.id==='partida'); pausaPartida(iP>0); }   // iP>0 = hay algo POR ENCIMA
   for(let i=PILA.length; i<hoy.length; i++) history.pushState({ bt:i+1 }, '');   // capa nueva = una entrada
   const sobran = PILA.length - hoy.length;                                       // capas que se han ido = entradas a devolver
   PILA.length=0; for(const c of hoy) PILA.push(c.id);
