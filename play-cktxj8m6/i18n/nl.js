@@ -135,7 +135,7 @@ shell: {
   sSoonInviteGame:'Uitnodigen voor het spel', sSoonPremium:'Premium pass',
   // — Onboarding —
   onbH1:'Hoi! We kiezen je eerste bal', onbH2:'Je aanbevolen bal (je mag een andere kiezen)',
-  onbGo:'Deze! Naar de Garage', onbSkip:'Overslaan',
+  onbGo:'Deze! Naar de Garage', onbSkip:'Overslaan', onbRecTag:'voor jou',
   // — Welkom —
   welH:'BallTrials', welT:'Zullen we je spel bewaren?',
   welSub:'Met je Google-account verlies je niets als je van telefoon wisselt. <b>Kan ook later</b>: het staat altijd in het Profiel.',

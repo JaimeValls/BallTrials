@@ -137,7 +137,7 @@ shell: {
   sSoonInviteGame:'邀請進遊戲', sSoonPremium:'付費通行證',
   // — 新手引導 —
   onbH1:'你好！先來挑第一顆彈珠', onbH2:'為你推薦的彈珠（也可以挑別的）',
-  onbGo:'就它了！去車庫', onbSkip:'略過',
+  onbGo:'就它了！去車庫', onbSkip:'略過', onbRecTag:'為你推薦',
   // — 歡迎 —
   welH:'BallTrials', welT:'要把遊戲存起來嗎？',
   welSub:'用 Google 帳號，換手機也不會弄丟東西。<b>之後再弄也行</b>：它一直都在「個人檔案」裡。',

@@ -137,7 +137,7 @@ shell: {
   sSoonInviteGame:'Jemput ke permainan', sSoonPremium:'Pas premium',
   // — Permulaan —
   onbH1:'Hai! Jom pilih bola pertama awak', onbH2:'Bola yang disyorkan untuk awak (boleh pilih yang lain)',
-  onbGo:'Yang ini! Ke Garaj', onbSkip:'Langkau',
+  onbGo:'Yang ini! Ke Garaj', onbSkip:'Langkau', onbRecTag:'untuk awak',
   // — Selamat datang —
   welH:'BallTrials', welT:'Nak simpan permainan awak?',
   welSub:'Dengan akaun Google awak tidak hilang apa-apa apabila tukar telefon. <b>Boleh buat nanti</b>: ia sentiasa ada dalam Profil.',

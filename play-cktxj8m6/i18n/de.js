@@ -137,7 +137,7 @@ shell: {
   sSoonInviteGame:'Zum Spiel einladen', sSoonPremium:'Premium-Pass',
   // — Onboarding —
   onbH1:'Hi! Such dir deine erste Kugel aus', onbH2:'Deine empfohlene Kugel (du darfst eine andere nehmen)',
-  onbGo:'Die hier! Ab in die Garage', onbSkip:'Überspringen',
+  onbGo:'Die hier! Ab in die Garage', onbSkip:'Überspringen', onbRecTag:'für dich',
   // — Willkommen —
   welH:'BallTrials', welT:'Sollen wir dein Spiel sichern?',
   welSub:'Mit deinem Google-Konto verlierst du beim Handywechsel nichts. <b>Geht auch später</b>: es steht immer im Profil.',

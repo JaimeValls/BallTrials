@@ -135,7 +135,7 @@ shell: {
   sSoonInviteGame:'Ajak ke game', sSoonPremium:'Pass premium',
   // — Perkenalan —
   onbH1:'Hai! Ayo pilih bola pertamamu', onbH2:'Bola yang disarankan untukmu (boleh pilih yang lain)',
-  onbGo:'Yang ini! Ke Garasi', onbSkip:'Lewati',
+  onbGo:'Yang ini! Ke Garasi', onbSkip:'Lewati', onbRecTag:'untukmu',
   // — Selamat datang —
   welH:'BallTrials', welT:'Simpan game-mu?',
   welSub:'Dengan akun Google kamu tidak kehilangan apa pun saat ganti HP. <b>Bisa nanti juga</b>: selalu ada di Profil.',

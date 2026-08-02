@@ -135,7 +135,7 @@ shell: {
   sSoonInviteGame:'Convidar para o jogo', sSoonPremium:'Passe premium',
   // — Onboarding —
   onbH1:'Oi! Vamos escolher sua primeira bola', onbH2:'Sua bola recomendada (pode escolher outra)',
-  onbGo:'Essa! Para a Garagem', onbSkip:'Pular',
+  onbGo:'Essa! Para a Garagem', onbSkip:'Pular', onbRecTag:'para você',
   // — Boas-vindas —
   welH:'BallTrials', welT:'Vamos salvar seu jogo?',
   welSub:'Com sua conta do Google você não perde nada ao trocar de celular. <b>Pode fazer depois</b>: está sempre no Perfil.',

@@ -135,7 +135,7 @@ shell: {
   sSoonInviteGame:'Oyuna davet et', sSoonPremium:'Premium pass',
   // — Karşılama —
   onbH1:'Selam! İlk topunu seçelim', onbH2:'Sana önerilen top (başkasını da seçebilirsin)',
-  onbGo:'Bu olsun! Garaja', onbSkip:'Atla',
+  onbGo:'Bu olsun! Garaja', onbSkip:'Atla', onbRecTag:'sana özel',
   // — Hoş geldin —
   welH:'BallTrials', welT:'Oyununu kaydedelim mi?',
   welSub:'Google hesabınla telefon değiştirince hiçbir şey kaybetmezsin. <b>Sonra da yapabilirsin</b>: her zaman Profil\'de duruyor.',

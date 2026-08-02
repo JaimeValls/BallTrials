@@ -136,7 +136,7 @@ shell: {
   sSoonInviteGame:'邀请进游戏', sSoonPremium:'高级通行证',
   // — 新手引导 —
   onbH1:'你好！先来挑第一颗弹珠', onbH2:'为你推荐的弹珠（也可以挑别的）',
-  onbGo:'就它了！去车库', onbSkip:'跳过',
+  onbGo:'就它了！去车库', onbSkip:'跳过', onbRecTag:'为你推荐',
   // — 欢迎 —
   welH:'BallTrials', welT:'要把游戏存起来吗？',
   welSub:'用 Google 账号，换手机也不会丢东西。<b>之后再弄也行</b>：它一直在「资料」里。',

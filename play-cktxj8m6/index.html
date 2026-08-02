@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-02 cbd3856"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-02 d84768d"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--
@@ -773,7 +773,13 @@
   .onb-cards{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:14px 0; }
   .onb-b{ border:2px solid var(--line); background:var(--plate-a); border-radius:16px; padding:13px 8px; text-align:center; cursor:pointer; font-family:inherit; color:#eef2ff; position:relative; }
   .onb-b:active{ transform:scale(.97); } .onb-b.sel{ border-color:var(--gold2); box-shadow:0 0 0 2px #ffd23f55, 0 8px 20px #0006; background:var(--plate-b); }
-  .onb-b.rec::after{ content:'✨ para ti'; position:absolute; top:-9px; left:50%; transform:translateX(-50%); background:var(--gold2); color:#3a2400; font-size:var(--fs-1); font-weight:900; padding:2px 8px; border-radius:999px; white-space:nowrap; }
+  /*+AG docs/60: la chapa de "recomendado" era un ::after con un emoji del sistema y el texto en espanol
+     METIDO EN EL CSS, asi que salia en espanol en los otros 19 idiomas. Ahora es un elemento real: el
+     destello se DIBUJA (recSvg, misma gramatica que los iconos de la casa) y el texto viaja por el
+     diccionario (clave onbRecTag). Los valores son los mismos que tenia el ::after para que el pixel no
+     se mueva; lo unico nuevo es el flex, que hace falta para poner el icono al lado de la palabra. */
+  .onb-rec{ position:absolute; top:-9px; left:50%; transform:translateX(-50%); background:var(--gold2); color:#3a2400; font-size:var(--fs-1); font-weight:900; padding:2px 8px; border-radius:999px; white-space:nowrap; display:inline-flex; align-items:center; gap:3px; }
+  .onb-b .onb-rec svg{ width:10px; height:10px; display:block; }
   .onb-b .gi{ font-size:var(--fs-6); } .onb-b img.gi{ width:52px; height:52px; object-fit:contain; margin:0 auto; animation:none; } .onb-b .nm{ font-weight:800; font-size:var(--fs-3); margin-top:3px; } .onb-b .ds{ font-size:var(--fs-2); color:var(--muted); margin-top:2px; line-height:1.3; }
   .onb-go{ width:100%; border:0; border-radius:18px; padding:16px; font-family:inherit; font-weight:900; font-size:var(--fs-5); color:#3a2400; background:linear-gradient(#ffe27a,#ff9a3d); box-shadow:0 5px 0 #b45a10; cursor:pointer; } .onb-go:active{ transform:translateY(2px); box-shadow:0 3px 0 #b45a10; }
   .onb-skip{ display:block; margin:13px auto 0; background:none; border:0; color:var(--muted); font-family:inherit; font-weight:700; font-size:var(--fs-3); cursor:pointer; text-decoration:underline; }
@@ -3159,7 +3165,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=cbd3856"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=d84768d"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -4148,7 +4154,7 @@ const MORE={
     sSoonInviteGame:'Invitar al juego', sSoonPremium:'Pase premium',
     // — Onboarding —
     onbH1:'¡Hola! Vamos a elegir tu primera bola', onbH2:'Tu bola recomendada (puedes elegir otra)',
-    onbGo:'¡Es esta! Al Garaje', onbSkip:'Saltar',
+    onbGo:'¡Es esta! Al Garaje', onbSkip:'Saltar', onbRecTag:'para ti',
     // — Bienvenida (se OFRECE Google; jugar de invitado cuesta un toque) —
     welH:'BallTrials', welT:'¿Guardamos tu partida?',
     welSub:'Con tu cuenta de Google no pierdes nada al cambiar de móvil. <b>Puedes hacerlo luego</b>: está siempre en Perfil.',
@@ -4309,7 +4315,7 @@ const MORE={
     sSoonInviteGame:'Invite to the game', sSoonPremium:'Premium pass',
     // — Onboarding —
     onbH1:'Hi! Let’s pick your first ball', onbH2:'Your recommended ball (you can pick another)',
-    onbGo:'This one! To the Garage', onbSkip:'Skip',
+    onbGo:'This one! To the Garage', onbSkip:'Skip', onbRecTag:'for you',
     // — Welcome (Google is OFFERED; playing as a guest is one tap) —
     welH:'BallTrials', welT:'Shall we save your game?',
     welSub:'With your Google account you lose nothing when you change phone. <b>You can do it later</b>: it is always in Profile.',
@@ -5919,6 +5925,9 @@ const QUIZ={
   push:{ q:'quizPush', opts:[
     {ic:'quiz-plantarse', t:'plant', arch:'tanque'}, {ic:'quiz-pegarse', t:'stick', arch:'lapa'} ] },
 };
+//+AG docs/60: el destello de la chapa "recomendado" se dibuja aqui (viewBox 24, trazo 2.2, cabos redondos,
+//   currentColor) para que herede el color de la chapa y no dependa de la fuente de emojis del movil.
+const recSvg='<svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.2 L13.6 10.4 L19.8 12 L13.6 13.6 L12 19.8 L10.4 13.6 L4.2 12 L10.4 10.4 Z"/></g></svg>';
 let onbRec='cohete', onbSel='cohete';
 function onbQuizStep(node){ const s=S(), n=QUIZ[node]; el('onbQ').textContent=s[n.q]||n.q; const box=el('onbOpts'); box.innerHTML='';
   n.opts.forEach(o=>{ const b=document.createElement('button'); b.className='onb-opt'; b.innerHTML=`<img class="em" src="arte/ui/${o.ic}.webp" alt="">${(s.quizOpts||{})[o.t]||o.t}`;
@@ -5930,6 +5939,11 @@ function onbPickStep(){ el('onbQuiz').style.display='none'; el('onbPick').style.
   ['cohete','tanque','pinball','lapa','bunker'].forEach(k=>{ const A=ARCHS[k]; const b=document.createElement('button');
     b.className='onb-b'+(k===onbRec?' rec':'')+(k===onbSel?' sel':'');
     b.innerHTML=`<img class="gi" src="${ballArt(k)}" alt=""><div class="nm">${archName(k)}</div><div class="ds">${archBest(k)}</div>`;
+    //+AG docs/60: la chapa se monta como hijo real (antes era un ::after con el texto en espanol dentro del
+    //   CSS). El icono es dibujo nuestro y la palabra sale del diccionario, y va por textContent como todo
+    //   lo traducido para que una traduccion no pueda inyectar marcado.
+    if(k===onbRec){ const r=document.createElement('span'); r.className='onb-rec'; r.innerHTML=recSvg;
+      const sp=document.createElement('span'); sp.textContent=S().onbRecTag; r.appendChild(sp); b.appendChild(r); }
     b.onclick=()=>{ onbSel=k; onbPickStep(); }; box.appendChild(b); }); }
 function onbFinish(){ SAVE.balls=[{arch:onbSel,lvl:1,xp:0,copas:0}]; SAVE.equipped=0; SAVE.onboarded=true; persist(); onbPendiente(false);
   //+AG docs/53: que bola elige la gente de las 5 fundadoras, y si sigue la recomendacion del quiz

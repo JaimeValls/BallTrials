@@ -136,7 +136,7 @@ shell: {
   sSoonInviteGame:'게임에 초대', sSoonPremium:'프리미엄 패스',
   // — 처음 설정 —
   onbH1:'반가워요! 첫 공을 골라봐요', onbH2:'추천 공이에요 (다른 걸 골라도 돼요)',
-  onbGo:'이걸로! 차고로 가기', onbSkip:'건너뛰기',
+  onbGo:'이걸로! 차고로 가기', onbSkip:'건너뛰기', onbRecTag:'추천',
   // — 환영 —
   welH:'BallTrials', welT:'게임을 저장할까요?',
   welSub:'Google 계정이 있으면 폰을 바꿔도 아무것도 잃지 않아요. <b>나중에 해도 돼요</b>: 언제나 프로필에 있어요.',

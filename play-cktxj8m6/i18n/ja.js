@@ -136,7 +136,7 @@ shell: {
   sSoonInviteGame:'ゲームに招待', sSoonPremium:'プレミアムパス',
   // — 最初の設定 —
   onbH1:'ようこそ！ 最初のボールを選ぼう', onbH2:'おすすめのボール（別のを選んでもOK）',
-  onbGo:'これにする！ ガレージへ', onbSkip:'スキップ',
+  onbGo:'これにする！ ガレージへ', onbSkip:'スキップ', onbRecTag:'おすすめ',
   // — ウェルカム —
   welH:'BallTrials', welT:'ゲームを保存しておく？',
   welSub:'Googleアカウントがあれば、スマホを替えても何も失いません。<b>あとからでもできます</b>: いつでもプロフィールにあります。',

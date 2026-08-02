@@ -135,7 +135,7 @@ shell: {
   sSoonInviteGame:'Mời vào game', sSoonPremium:'Vé cao cấp',
   // — Bắt đầu —
   onbH1:'Chào bạn! Chọn quả bóng đầu tiên nào', onbH2:'Quả bóng gợi ý cho bạn (chọn quả khác cũng được)',
-  onbGo:'Quả này! Ra Nhà xe', onbSkip:'Bỏ qua',
+  onbGo:'Quả này! Ra Nhà xe', onbSkip:'Bỏ qua', onbRecTag:'dành cho bạn',
   // — Chào mừng —
   welH:'BallTrials', welT:'Lưu game của bạn nhé?',
   welSub:'Có tài khoản Google thì đổi điện thoại cũng không mất gì. <b>Làm sau cũng được</b>: nó luôn nằm trong Hồ sơ.',
