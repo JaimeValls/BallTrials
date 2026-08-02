@@ -41,6 +41,23 @@ const CSS = `
   @keyframes coachTap{
     0%,100%{ transform:translate(-50%,4px) scale(1); }
     50%    { transform:translate(-50%,-12px) scale(1.32); } }
+  /*+AG la mano colgada DEBAJO del control no siempre cabe: el caso real es el botón CORRER de Luz Roja, pegado al
+     borde inferior de la pantalla, donde a 360x640 la caja de la mano se salía casi entera del viewport y el
+     jugador no veía lo que le estaban señalando. Cuando no cabe, la mano se cuelga ENCIMA y se gira 180° para que
+     el dedo siga apuntando al botón, igual que el bocadillo ya se despega con .nub-off cuando no cabe. La regla
+     es general para los TRES modos: hoy solo la dispara Luz Roja, pero cualquier control pegado al borde de abajo
+     (o una pantalla más baja) la necesita en la Carrera y en el Cazador exactamente igual.
+     El giro va en el SVG hijo y NO en el contenedor: la propiedad transform del #coachHand es de coachTap
+     (translate + scale en cada fotograma) y un transform propio la machacaría. Por eso la variante girada estrena
+     su PROPIA animación, espejada en vertical: mismos scale, misma duración y misma curva, con el origen abajo
+     para que la punta del dedo —que girada cae en el borde INFERIOR de la caja— se quede clavada donde estaba
+     mientras crece, y con los desplazamientos verticales cambiados de signo para que el gesto de tap siga yendo
+     HACIA el botón (aquí, hacia abajo). */
+  #coachHand.flip{ transform-origin:50% 100%; animation:coachTapFlip .85s ease-in-out infinite; }
+  #coachHand.flip svg{ transform:rotate(180deg); }
+  @keyframes coachTapFlip{
+    0%,100%{ transform:translate(-50%,-4px) scale(1); }
+    50%    { transform:translate(-50%,12px) scale(1.32); } }
   /*+AG doc 60 F4: el bocadillo del coach lleva el TRÍO de marca (blanco + trazo indigo .11em = 11 % del
      cuerpo + sombra corta, con paint-order:stroke fill obligatorio), el mismo token que los HUD y los
      carteles. NO se pone en mayúsculas a propósito: aquí el texto es una FRASE ("Pulsa ◀ IZQUIERDA: tu
@@ -76,6 +93,10 @@ const HAND = '<svg viewBox="0 0 24 24" aria-hidden="true">'
   + '<path d="M17.5 11.8 V11 a1.6 1.6 0 0 1 3.2 0 V15.6 a5.6 5.6 0 0 1-5.6 5.6 H13 a6.2 6.2 0 0 1-4.4-1.8 '
   +   'L4.5 15.1 a1.9 1.9 0 0 1 2.7-2.7 L9.7 14.9"/>'
   + '</g></svg>';
+
+//+AG la altura de la caja de la mano, que es la de #coachHand en el CSS de arriba: la necesita el JS para saber si
+//   la mano cabe colgada debajo del control o hay que colgarla encima girada. Si un día cambia el CSS, cambia aquí.
+const HAND_H = 46;
 
 // cfg:
 //   mode        'race' | 'redlight' | 'cazador' — viaja en el bt:tutorialEnd que recibe el shell
@@ -133,11 +154,24 @@ export function createCoach(cfg){
       veil.style.display = hand.style.display = cueHidden ? 'none' : 'block';
       veil.style.left = (r.left - pad) + 'px'; veil.style.top = (r.top - pad) + 'px';
       veil.style.width = (r.width + pad*2) + 'px'; veil.style.height = (r.height + pad*2) + 'px';
-      hand.style.left = (r.left + r.width/2) + 'px'; hand.style.top = (r.bottom - 6) + 'px';
+      //+AG ¿cabe la mano colgada debajo del botón? Con el CORRER de Luz Roja, pegado al borde inferior, no cabía y
+      //   se salía casi entera de la pantalla. Si no cabe, se cuelga ENCIMA (la clase .flip la gira 180° y espeja
+      //   su animación, así que el dedo apunta hacia abajo, al botón) y la punta cae 6 px por dentro del borde
+      //   superior del control, espejo exacto de los 6 px de siempre por dentro del inferior.
+      //   Se decide EN CADA FRAME y con toggle, no con add: place() corre desde tick() y el botón señalado puede
+      //   cambiar entre fotogramas (en Luz Roja el target es una función que alterna de lado), así que la mano
+      //   tiene que poder volver a su sitio de abajo sin quedarse girada.
+      const flip = (r.bottom - 6 + HAND_H) > innerHeight;
+      hand.classList.toggle('flip', flip);
+      hand.style.left = (r.left + r.width/2) + 'px';
+      hand.style.top = (flip ? r.top + 6 - HAND_H : r.bottom - 6) + 'px';
       // el cartel se ancla ENCIMA del control señalado (texto y botón en la misma zona de la vista); se queda
       // aunque la mano ya se haya ido, porque la lección sigue viva hasta que la Sim diga que está hecha.
+      //+AG con la mano girada encima, el cartel y la mano se pisaban: ese hueco de 20 px lo ocupa ahora la mano
+      //   entera, así que en el caso girado el cartel sube su altura y el orden vertical queda cartel → mano →
+      //   botón. Colgada debajo la mano no estorba, y ahí el anclaje no se toca.
       bn.classList.remove('nub-off');
-      bn.style.bottom = Math.max(8, innerHeight - r.top + 20) + 'px'; bn.style.top = 'auto';
+      bn.style.bottom = Math.max(8, innerHeight - r.top + 20 + (flip ? HAND_H : 0)) + 'px'; bn.style.top = 'auto';
     } else {
       veil.style.display = hand.style.display = 'none';
       bn.classList.add('nub-off');
