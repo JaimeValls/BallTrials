@@ -280,20 +280,26 @@ export function startAmbient(canvas){
         sfx('boing', 0.6);
       }
 
-      // tarjetas del contenido (AABB)
+      //+AG ⚠⚠ LA EXCLUSION DEL CONTENIDO ES UNA ELIPSE, NO UNA CAJA (3-ago-2026, Jaime viendo su
+      //   portada: «parece que las bolas se chocan con una línea horizontal, como una especie de
+      //   cuadrado encima de la bola»). Y tenia toda la razon: era un cuadrado. El rectangulo del DOM
+      //   se usaba tal cual, asi que su borde de arriba es un TECHO PLANO de 262 px de ancho a 80 px
+      //   por encima de la cabeza del heroe; las bolas se posaban en el y se veia la linea invisible
+      //   dibujada por ellas. Arreglarlo bajando el techo o resbalando mas no sirve: mientras la
+      //   superficie sea plana, la linea se ve. La elipse inscrita en esa misma caja protege lo mismo
+      //   (el dibujo y su rotulo) y NO TIENE ARRIBA: cada bola que la toca resbala por el hombro y
+      //   sigue cayendo. La caja se sigue declarando en el HTML con [data-solid], que es donde se ve;
+      //   lo unico que cambia es la forma con la que se choca.
       for (const rc of rects){
-        const cx = Math.max(rc.x0, Math.min(b.x, rc.x1));
-        const cy = Math.max(rc.y0, Math.min(b.y, rc.y1));
-        const dx = b.x - cx, dy = b.y - cy, d2 = dx * dx + dy * dy;
-        if (d2 < R * R){
-          let nx, ny, d = Math.sqrt(d2);
-          if (d > 1e-4){ nx = dx / d; ny = dy / d; }
-          else {                                        // centro dentro del AABB: empuja por el lado más cercano
-            const dl = b.x - rc.x0, dr = rc.x1 - b.x, dbm = b.y - rc.y0, dtp = rc.y1 - b.y;
-            const m = Math.min(dl, dr, dbm, dtp);
-            nx = m === dl ? -1 : m === dr ? 1 : 0; ny = m === dbm ? -1 : m === dtp ? 1 : 0; d = 0;
-          }
-          b.x = cx + nx * R; b.y = cy + ny * R;
+        // se le suma R al radio: asi el contacto se resuelve como punto-contra-elipse
+        const ex = (rc.x1 - rc.x0) / 2 + R, ey = (rc.y1 - rc.y0) / 2 + R;
+        const ecx = (rc.x0 + rc.x1) / 2, ecy = (rc.y0 + rc.y1) / 2;
+        const ux = (b.x - ecx) / ex, uy = (b.y - ecy) / ey, u2 = ux * ux + uy * uy;
+        if (u2 < 1 && u2 > 1e-9){
+          const s = 1 / Math.sqrt(u2);
+          b.x = ecx + (b.x - ecx) * s; b.y = ecy + (b.y - ecy) * s;   // al borde de la elipse, por el radio
+          let nx = ux / ex, ny = uy / ey;                              // la normal de una elipse es su gradiente
+          const nl = Math.hypot(nx, ny) || 1; nx /= nl; ny /= nl;
           const vn = b.vx * nx + b.vy * ny;
           if (vn < 0){
             //+AG ⚠ POR ARRIBA NO REBOTA (1.0 = aterrizaje muerto), Y LA RAZON ESTA MEDIDA. Con el 1,4
@@ -306,18 +312,14 @@ export function startAmbient(canvas){
             b.vx -= reb * vn * nx; b.vy -= reb * vn * ny;
             hit(b, nx, ny, -vn, 'thud');
           }
-          if (ny > 0.7){                                 // encima de una tarjeta: rueda...
+          if (ny > 0.7){                                 // justo en la cima de la elipse: la unica zona plana
             b.vx *= 0.995;
-            // ...y la superficie es sutilmente "convexa": deriva hacia el borde más cercano
-            // y acaba cayendo → nada se queda aparcado para siempre (movimiento perpetuo).
-            //+AG ⚠ 3-ago-2026: "acaba cayendo" era verdad y aun asi estaba MAL. Con 1,1 la bola sale
-            //   rodando a medio metro por segundo y la tarjeta del heroe mide 7,1 de ancha: MEDIDO, se
-            //   quedaba hasta 5 s paseandose por encima de la cabeza del protagonista, que es la mitad
-            //   de las "cosas raras" que se ven en la portada. Con 4,5 cruza y cae en algo mas de un
-            //   segundo. No es una constante mas suelta: la vigila el banco, que mira cuanto aguanta
-            //   una bola posada en una tarjeta y se pone rojo pasados 3 s.
-            const mid = (rc.x0 + rc.x1) / 2;
-            b.vx += (b.x >= mid ? 1 : -1) * 4.5 * DT_STEP;
+            // ...y ahi se le da un empujon al hombro mas cercano, que es por donde va a resbalar.
+            //+AG ⚠ 3-ago-2026: con 1,1 la bola salia rodando a medio metro por segundo y se quedaba
+            //   hasta 5 s paseandose por encima de la cabeza del protagonista. Con 4,5 sale enseguida.
+            //   No es una constante mas suelta: la vigila el banco, que mira cuanto aguanta una bola
+            //   posada en una tarjeta y se pone rojo pasados 3 s.
+            b.vx += (b.x >= ecx ? 1 : -1) * 4.5 * DT_STEP;
           }
         }
       }

@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-03 02d4b27"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-03 f55ae74"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG ICONO EN LA PANTALLA DE INICIO (docs/40 §6). Jaime: "la gente esta acostumbrada a clicar en el
@@ -470,7 +470,12 @@
   /*+AG 3-ago · el mismo galon de la tarjeta del Garaje, pero DENTRO de la ficha y en flujo (no
      absoluto): aqui va debajo del nombre, donde se lee como un estado del personaje y no tapa nada.
      `hidden` de serie; lo enciende openDetail solo cuando la bola es la equipada. */
-  .gd-eqtag{ align-self:center; background:var(--gold2); color:#3a2400; font-size:var(--fs-1);
+  /*+AG el cuerpo es --fs-2 (11 px), NO --fs-1 (9 px) como el galon de la tarjeta: docs/60 pone el
+     suelo de legibilidad de la app en 11 px y esto es TEXTO que se lee, no un adorno. En la tarjeta
+     del Garaje el galon va en absoluto sobre una miniatura y ahi el 9 pasa; aqui esta en flujo, a
+     media ficha y en el sitio donde el ojo aterriza despues del nombre. Crece de alto, no de fila:
+     vive en su propia linea, asi que el nombre no se parte ni se desplaza. */
+  .gd-eqtag{ align-self:center; background:var(--gold2); color:#3a2400; font-size:var(--fs-2);
     font-weight:900; padding:2px 10px; border-radius:999px; letter-spacing:.06em; text-transform:uppercase;
     margin-top:1px; }
   .gd-eqtag[hidden]{ display:none; }
@@ -4078,7 +4083,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=02d4b27"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=f55ae74"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
