@@ -104,7 +104,7 @@ shell: {
   rungFree:'無料', rungPrem:'プレミアム',
   // — プロフィール —
   prPlayer:'プレイヤー', prAlias:'ニックネーム', infoWord:'情報', prPriv:'プロフィールは初期状態で非公開',
-  prBalls:'ボール', prTrophies:'トロフィー', prBest:'ベスト順位',
+  prBalls:'ボール', prTrophies:'トロフィー', prWins:'勝利数',
   prShowNote:'子ども用アカウントでは、ショーケース（記録・コレクション・自己ベスト）は<b>非公開</b>。確認済みのおとなが開いたときだけ表示されます。',
   prFriendsH:'フレンド', prFriendsSoon:'操作 · 近日', prYourCode:'あなたのコード:', prCopy:'コピー',
   prAddCode:'コードで追加',

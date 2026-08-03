@@ -103,7 +103,7 @@ shell: {
   rungFree:'miễn phí', rungPrem:'cao cấp',
   // — Hồ sơ —
   prPlayer:'Người chơi', prAlias:'biệt danh', infoWord:'Thông tin', prPriv:'Hồ sơ mặc định riêng tư',
-  prBalls:'Bóng', prTrophies:'Cúp', prBest:'Vị trí tốt nhất',
+  prBalls:'Bóng', prTrophies:'Cúp', prWins:'Chiến thắng',
   prShowNote:'Ở tài khoản trẻ em, tủ trưng bày (thống kê, bộ sưu tập, kỷ lục) là <b>riêng tư</b> trừ khi người lớn đã xác minh mở ra.',
   prFriendsH:'Bạn bè', prFriendsSoon:'thao tác · sắp có', prYourCode:'Mã của bạn:', prCopy:'Sao chép',
   prAddCode:'Thêm bằng mã',

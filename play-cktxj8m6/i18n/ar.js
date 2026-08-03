@@ -111,7 +111,7 @@ shell: {
   rungFree:'مجاني', rungPrem:'مميّز',
   // — الملف الشخصي —
   prPlayer:'اللاعب', prAlias:'اسم مستعار', infoWord:'معلومات', prPriv:'الملف خاص افتراضيًا',
-  prBalls:'الكرات', prTrophies:'الجوائز', prBest:'أفضل مركز',
+  prBalls:'الكرات', prTrophies:'الجوائز', prWins:'انتصارات',
   prShowNote:'في حسابات الأطفال تكون الواجهة (الإحصاءات والمجموعة والأرقام القياسية) <b>خاصة</b> ما لم يفتحها بالغ موثّق.',
   prFriendsH:'الأصدقاء', prFriendsSoon:'الإجراءات · قريبًا', prYourCode:'رمزك:', prCopy:'نسخ',
   prAddCode:'إضافة برمز',

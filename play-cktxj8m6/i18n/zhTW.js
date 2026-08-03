@@ -105,7 +105,7 @@ shell: {
   rungFree:'免費', rungPrem:'付費',
   // — 個人檔案 —
   prPlayer:'玩家', prAlias:'暱稱', infoWord:'說明', prPriv:'個人檔案預設不公開',
-  prBalls:'彈珠', prTrophies:'獎盃', prBest:'最佳名次',
+  prBalls:'彈珠', prTrophies:'獎盃', prWins:'勝場',
   prShowNote:'在兒童帳號裡，展示櫃（數據、收藏、紀錄）預設<b>不公開</b>，除非已驗證的大人把它打開。',
   prFriendsH:'好友', prFriendsSoon:'操作 · 快了', prYourCode:'你的序號：', prCopy:'複製',
   prAddCode:'用序號加入',

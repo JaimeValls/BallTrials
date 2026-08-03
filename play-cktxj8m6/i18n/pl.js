@@ -105,7 +105,7 @@ shell: {
   rungFree:'darmowe', rungPrem:'premium',
   // — Profil —
   prPlayer:'Gracz', prAlias:'pseudonim', infoWord:'Info', prPriv:'Profil domyślnie prywatny',
-  prBalls:'Kule', prTrophies:'Trofea', prBest:'Najlepsze miejsce',
+  prBalls:'Kule', prTrophies:'Trofea', prWins:'Zwycięstwa',
   prShowNote:'Na kontach dzieci gablota (statystyki, kolekcja, rekordy) jest <b>prywatna</b>, dopóki nie otworzy jej zweryfikowany dorosły.',
   prFriendsH:'Znajomi', prFriendsSoon:'akcje · wkrótce', prYourCode:'Twój kod:', prCopy:'Kopiuj',
   prAddCode:'Dodaj przez kod',

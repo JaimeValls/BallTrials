@@ -105,7 +105,7 @@ shell: {
   rungFree:'percuma', rungPrem:'premium',
   // — Profil —
   prPlayer:'Pemain', prAlias:'nama samaran', infoWord:'Info', prPriv:'Profil peribadi secara lalai',
-  prBalls:'Bola', prTrophies:'Trofi', prBest:'Kedudukan terbaik',
+  prBalls:'Bola', prTrophies:'Trofi', prWins:'Kemenangan',
   prShowNote:'Pada akaun kanak-kanak, pameran (statistik, koleksi, rekod) adalah <b>peribadi</b> melainkan dibuka oleh orang dewasa yang disahkan.',
   prFriendsH:'Rakan', prFriendsSoon:'tindakan · nanti', prYourCode:'Kod awak:', prCopy:'Salin',
   prAddCode:'Tambah melalui kod',

@@ -103,7 +103,7 @@ shell: {
   rungFree:'ücretsiz', rungPrem:'premium',
   // — Profil —
   prPlayer:'Oyuncu', prAlias:'takma ad', infoWord:'Bilgi', prPriv:'Profil varsayılan olarak gizli',
-  prBalls:'Toplar', prTrophies:'Kupalar', prBest:'En iyi sıra',
+  prBalls:'Toplar', prTrophies:'Kupalar', prWins:'Galibiyet',
   prShowNote:'Çocuk hesaplarında vitrin (istatistikler, koleksiyon, rekorlar) <b>gizlidir</b>, doğrulanmış bir yetişkin açmadıkça.',
   prFriendsH:'Arkadaşlar', prFriendsSoon:'işlemler · yakında', prYourCode:'Kodun:', prCopy:'Kopyala',
   prAddCode:'Kodla ekle',

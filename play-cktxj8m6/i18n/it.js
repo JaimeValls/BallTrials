@@ -103,7 +103,7 @@ shell: {
   rungFree:'gratis', rungPrem:'premium',
   // — Profilo —
   prPlayer:'Giocatore', prAlias:'soprannome', infoWord:'Info', prPriv:'Profilo privato di default',
-  prBalls:'Palline', prTrophies:'Trofei', prBest:'Miglior posto',
+  prBalls:'Palline', prTrophies:'Trofei', prWins:'Vittorie',
   prShowNote:'Sugli account dei bambini la vetrina (statistiche, collezione, record) è <b>privata</b> finché non la apre un adulto verificato.',
   prFriendsH:'Amici', prFriendsSoon:'azioni · presto', prYourCode:'Il tuo codice:', prCopy:'Copia',
   prAddCode:'Aggiungi con codice',

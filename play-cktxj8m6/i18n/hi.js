@@ -104,7 +104,7 @@ shell: {
   rungFree:'मुफ़्त', rungPrem:'प्रीमियम',
   // — प्रोफ़ाइल —
   prPlayer:'खिलाड़ी', prAlias:'उपनाम', infoWord:'जानकारी', prPriv:'प्रोफ़ाइल डिफ़ॉल्ट रूप से निजी',
-  prBalls:'गेंदें', prTrophies:'ट्रॉफ़ियाँ', prBest:'सबसे अच्छा स्थान',
+  prBalls:'गेंदें', prTrophies:'ट्रॉफ़ियाँ', prWins:'जीत',
   prShowNote:'बच्चों के खातों में शोकेस (आँकड़े, संग्रह, रिकॉर्ड) <b>निजी</b> रहता है जब तक कोई सत्यापित बड़ा उसे न खोले।',
   prFriendsH:'दोस्त', prFriendsSoon:'क्रियाएँ · जल्द', prYourCode:'आपका कोड:', prCopy:'कॉपी करें',
   prAddCode:'कोड से जोड़ें',

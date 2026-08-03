@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-03 1b7be34"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-03 3f6a5c4"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG ICONO EN LA PANTALLA DE INICIO (docs/40 §6). Jaime: "la gente esta acostumbrada a clicar en el
@@ -819,6 +819,14 @@
   .pr-id{ display:flex; align-items:center; gap:14px; } .pr-av{ width:66px; height:66px; } .pr-id .who{ flex:1; } .pr-id .al{ font-size:var(--fs-5); font-weight:900; } .pr-id .lv{ font-size:var(--fs-3); color:#cfd4f0; font-weight:700; margin-top:2px; }
   .pr-priv{ display:inline-flex; align-items:center; gap:5px; font-size:var(--fs-2); font-weight:800; color:#8fe0a8; background:#18c7d611; border:1px solid #18c7d633; border-radius:999px; padding:3px 9px; margin-top:6px; }
   .pr-show{ display:flex; gap:8px; margin-top:12px; } .pr-chip{ flex:1; text-align:center; background:var(--plate-a); border:1px solid var(--line); border-radius:12px; padding:9px 4px; } .pr-chip .v{ font-size:var(--fs-4); font-weight:900; } .pr-chip .k{ font-size:var(--fs-1); color:var(--muted); font-weight:800; text-transform:uppercase; letter-spacing:.04em; margin-top:2px; }
+  /*+AG 3-ago, Jaime: «yo cambiaría las estadísticas a el icono del trofeo». La copa DIBUJADA al lado de
+     la cifra, y la cifra en oro: es el mismo objeto que ya pinta la píldora de la portada y la ficha de
+     Resultados (.cups b y .r-cups .cv son este mismo gold2), así que el escaparate deja de ser el único
+     sitio donde tus copas salían en blanco y sin copa. El icono va en `em` y no en px por la razón de
+     siempre en esta casa (.r-place img, .hero .ballcups .cico): si mañana la cifra cambia de cuerpo, la
+     copa le sigue sola en vez de quedarse de pegatina. El -.1em la sienta en la línea del número. */
+  .pr-chip .v.oro{ color:var(--gold2); display:flex; align-items:center; justify-content:center; gap:.22em; }
+  .pr-chip .v .cico{ width:1.15em; height:1.15em; margin-top:-.1em; }
   .pr-code{ display:flex; align-items:center; gap:9px; background:#0006; border:1px solid var(--line); border-radius:12px; padding:10px 13px; } .pr-code .cd{ font-weight:900; letter-spacing:.13em; font-size:var(--fs-4); color:var(--gold2); }
   .pr-code button, .pr-inv{ border:1px solid var(--line); background:var(--plate-a); color:#c9cff0; font-family:inherit; font-weight:800; font-size:var(--fs-3); border-radius:10px; padding:7px 11px; cursor:pointer; } .pr-code button{ margin-left:auto; }
   /*+AG el hueco de VALOR de .pr-code cuando lo que va dentro no es un codigo (el nombre del jugador, el
@@ -3823,9 +3831,11 @@
         <!--+AG 3-ago · ESTOS DOS NUMEROS ESTABAN ESCRITOS A MANO (un "0" y un "-" en el HTML, de cuando
              esta pantalla era la maqueta de doc 13). Jaime: «esto no parece que vaya trofeos y best
              place». Ahora los rellena openPerfil(): TROFEOS es el MISMO total de copas que la pildora
-             de la portada (totalCopas(), doc 37) y MEJOR PUESTO sale de SAVE.mejorPuesto. -->
+             de la portada (totalCopas(), doc 37), con su copa dibujada al lado; y el tercer hueco pasa
+             de "mejor puesto" a VICTORIAS, tambien a peticion suya: «cuántas veces has quedado
+             primero». El `0` y el `Victorias` de aqui son solo el valor hasta la primera pintada. -->
         <div class="pr-chip"><div class="v" id="prCups">0</div><div class="k" data-t="prTrophies">Trofeos</div></div>
-        <div class="pr-chip"><div class="v" id="prBestV">-</div><div class="k" data-t="prBest">Mejor puesto</div></div>
+        <div class="pr-chip"><div class="v" id="prWinsV">0</div><div class="k" data-t="prWins">Victorias</div></div>
       </div>
     </div>
 
@@ -4087,7 +4097,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=1b7be34"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=3f6a5c4"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -5057,7 +5067,7 @@ const MORE={
     rungFree:'gratis', rungPrem:'premium',
     // — Perfil —
     prPlayer:'Jugador', prAlias:'alias', infoWord:'Info', prPriv:'Perfil privado por defecto',
-    prBalls:'Bolas', prTrophies:'Trofeos', prBest:'Mejor puesto',
+    prBalls:'Bolas', prTrophies:'Trofeos', prWins:'Victorias',
     prShowNote:'En cuentas de menores el escaparate (stats, colección, récords) es <b>privado</b> salvo que lo abra un adulto verificado.',
     prFriendsH:'Amigos', prFriendsSoon:'acciones · pronto', prYourCode:'Tu código:', prCopy:'Copiar',
     prAddCode:'Añadir por código',
@@ -5232,7 +5242,7 @@ const MORE={
     rungFree:'free', rungPrem:'premium',
     // — Profile —
     prPlayer:'Player', prAlias:'nickname', infoWord:'Info', prPriv:'Private profile by default',
-    prBalls:'Balls', prTrophies:'Trophies', prBest:'Best place',
+    prBalls:'Balls', prTrophies:'Trophies', prWins:'Wins',
     prShowNote:'On kids’ accounts the showcase (stats, collection, records) is <b>private</b> unless a verified adult opens it.',
     prFriendsH:'Friends', prFriendsSoon:'actions · soon', prYourCode:'Your code:', prCopy:'Copy',
     prAddCode:'Add by code',
@@ -5579,13 +5589,16 @@ if(Array.isArray(SAVE.balls)) SAVE.balls.forEach(b=>{ if(typeof b.copas!=='numbe
 if(!SAVE.mode || !['race','cazador','redlight'].includes(SAVE.mode)) SAVE.mode='race';
 if(SAVE.fmt!=='individual' && SAVE.fmt!=='equipos') SAVE.fmt='individual';
 if(typeof SAVE.dayBonusDay!=='string') SAVE.dayBonusDay='';
-//+AG 3-ago · MEJOR PUESTO (doc 13 §1: el escaparate luce récords). El escaparate de Perfil enseñaba
-//   "-" fijo porque este dato NO SE GUARDABA EN NINGUNA PARTE: la partida sabe tu puesto, lo pinta en
-//   Resultados y lo tira. Ahora se queda el mejor de todos los tiempos, y lo apunta applyCupsForResult.
-//   0 = todavia no has acabado ninguna partida (se sigue pintando "-"): un save recien creado no puede
-//   presumir de un 8o que no ha corrido. Idempotente: un save ya migrado pasa sin tocarse. Viaja gratis
-//   a la nube y al codigo de transferencia, que serializan el SAVE entero (sincro.mjs, serializeProfile).
-if(typeof SAVE.mejorPuesto!=='number' || !(SAVE.mejorPuesto>=1)) SAVE.mejorPuesto=0;
+//+AG 3-ago · VICTORIAS (doc 13 §1: el escaparate luce récords). Ese hueco enseñaba un "-" fijo y
+//   estrenó "mejor puesto" esta misma tarde; Jaime, viendolo: «el best placed diría cuántas victorias
+//   has tenido, cuántas veces has quedado primero». Un puesto medio no es una gesta, ganar sí. El dato
+//   NO SE GUARDABA de ninguna de las dos formas: la partida sabe si has ganado, lo canta en Resultados
+//   y lo tira. Lo apunta applyCupsForResult. Empieza en 0 para todo el mundo: las partidas ganadas
+//   ANTES de hoy no dejaron rastro en ningun sitio, asi que no hay nada que recuperar. Idempotente.
+//   Viaja gratis a la nube y al codigo de transferencia, que serializan el SAVE entero.
+//   ⚠ `SAVE.mejorPuesto` de esta mañana se retira: nadie lo lee ya. Un save que lo lleve lo arrastra
+//   como campo huerfano y no molesta a nada; no se borra para no tocar saves que hoy estan en la calle.
+if(typeof SAVE.victorias!=='number' || !(SAVE.victorias>=0)) SAVE.victorias=0;
 if(!SAVE.tutorialDone || typeof SAVE.tutorialDone!=='object' || Array.isArray(SAVE.tutorialDone)) SAVE.tutorialDone={};   //+AG CÓMO JUGAR: {race:true,...} por modo completado
 function persist(){ try{ localStorage.setItem(SAVE_KEY,JSON.stringify(SAVE)); }catch(e){} }
 function xpForLevel(lv){ return 80+lv*40; }
@@ -6038,15 +6051,16 @@ let lastCups=null, lastStandings=null, lastTeamMode=false;
 //+AG la tabla ya NO se inventa: sale de d.standings / d.teamStandings (las bolas que corrieron de verdad).
 function applyCupsForResult(res, ball, place, d){
   lastTeamMode = res.teamPlace!=null;
-  //+AG 3-ago · AQUI SE APUNTA EL MEJOR PUESTO para el escaparate de Perfil. Este es el sitio y no
+  //+AG 3-ago · AQUI SE CUENTAN LAS VICTORIAS del escaparate de Perfil. Este es el sitio y no
   //   showResults porque por aqui pasan LOS DOS caminos de fin de partida (el de los motores y el
   //   finishRace del 2D heredado) y los dos hacen persist() justo despues; showResults ademas se
-  //   repinta al volver a la pantalla, y un recuento no puede depender de cuantas veces se pinte algo.
-  //   ⚠ SE GUARDA EL PUESTO INDIVIDUAL, tambien en EQUIPOS (donde la pantalla corona el puesto del
-  //   EQUIPO, 1..4): el escaparate dice "tu mejor puesto", y mezclar un 1o de 4 equipos con un 1o de
-  //   8 bolas en el mismo numero seria comparar dos cosas distintas. El individual existe siempre.
-  //   Va ANTES del `if(!ball)` de abajo: quedar primero cuenta aunque corrieras sin bola equipada.
-  if(place>=1 && (!SAVE.mejorPuesto || place<SAVE.mejorPuesto)) SAVE.mejorPuesto=place;
+  //   repinta al volver a la pantalla, y un CONTADOR que sube no puede depender de cuantas veces se
+  //   pinte algo — ahi cada visita a Resultados habria sumado una victoria de regalo.
+  //   ⚠ GANAR ES GANAR LA PARTIDA, y en EQUIPOS eso es que gane TU EQUIPO (teamPlace 1 de 4), no ser
+  //   el 1o de las 12 bolas: es el mismo criterio con el que esa pantalla te dice "¡Tu equipo ganó!",
+  //   y dos sitios del juego no pueden discrepar sobre si acabas de ganar. En individual, 1o de 8.
+  //   Va ANTES del `if(!ball)` de abajo: ganar cuenta aunque corrieras sin bola equipada.
+  if(res.teamPlace!=null ? res.teamPlace===1 : place===1) SAVE.victorias=(SAVE.victorias||0)+1;
   //+AG el orden importa: la clasificacion se construye SIEMPRE (aunque no haya bola equipada y no haya copas)
   lastStandings = lastTeamMode ? buildTeamStandings(d&&d.teamStandings, d&&d.winnerTeam)
                                : buildStandings(d&&d.standings, d&&d.seed, d&&d.winnerTeam);
@@ -6806,10 +6820,13 @@ function openTemporada(){ showScreen('temporada'); applyShell(); el('seChispas')
 function openPerfil(){ showScreen('perfil'); applyShell(); el('prChispas').textContent=SAVE.chispas; el('prGemas').textContent=SAVE.gemas; el('prLvl').textContent=SAVE.level; el('prColl').textContent=SAVE.balls.length; drawPreviewBall(el('prAv'), TEAMS[0].color);
   //+AG 3-ago · el escaparate deja de ser una maqueta. TROFEOS = totalCopas(), la MISMA cuenta que pinta
   //   la pildora dorada de la portada (#hCups): dos sitios que dicen "tus trofeos" no pueden salir de
-  //   dos sitios distintos. MEJOR PUESTO va por ord() —el mismo "1º/2º" de Resultados y en el idioma
-  //   activo— y sigue siendo "-" mientras no haya ninguna partida acabada (SAVE.mejorPuesto === 0).
-  el('prCups').textContent=nfmt(totalCopas());
-  el('prBestV').textContent=SAVE.mejorPuesto ? ord(SAVE.mejorPuesto, LANG) : '-';
+  //   dos sitios distintos. Y VICTORIAS = SAVE.victorias, que cuenta applyCupsForResult al acabar.
+  //   ⚠ innerHTML y no textContent porque entra un <img>: es la misma razon por la que existe
+  //   setCoin() unas pantallas mas arriba. Lo que se concatena son cadenas NUESTRAS (el <img> lo
+  //   genera coinIco y el numero sale de nfmt), nunca texto del jugador: no hay nada que escapar.
+  el('prCups').innerHTML=coinIco('copa')+nfmt(totalCopas());
+  el('prCups').classList.add('oro');
+  el('prWinsV').textContent=nfmt(SAVE.victorias||0);
   const sw=el('prConsent'); sw.onclick=()=>{ const on=sw.classList.toggle('on'); sw.setAttribute('aria-checked',on?'true':'false'); toast(on?S().tChanOn:S().tChanOff); };
   wireCuenta(); wireTraspaso(); wireEsteDispositivo(); }
 

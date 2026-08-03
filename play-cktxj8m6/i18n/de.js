@@ -105,7 +105,7 @@ shell: {
   rungFree:'gratis', rungPrem:'premium',
   // — Profil —
   prPlayer:'Spieler', prAlias:'Spitzname', infoWord:'Info', prPriv:'Profil standardmäßig privat',
-  prBalls:'Kugeln', prTrophies:'Trophäen', prBest:'Bester Platz',
+  prBalls:'Kugeln', prTrophies:'Trophäen', prWins:'Siege',
   prShowNote:'Auf Kinderkonten ist die Vitrine (Statistiken, Sammlung, Rekorde) <b>privat</b>, solange kein verifizierter Erwachsener sie öffnet.',
   prFriendsH:'Freunde', prFriendsSoon:'Aktionen · bald', prYourCode:'Dein Code:', prCopy:'Kopieren',
   prAddCode:'Per Code hinzufügen',

@@ -104,7 +104,7 @@ shell: {
   rungFree:'무료', rungPrem:'프리미엄',
   // — 프로필 —
   prPlayer:'플레이어', prAlias:'별명', infoWord:'정보', prPriv:'프로필은 기본적으로 비공개',
-  prBalls:'공', prTrophies:'트로피', prBest:'최고 순위',
+  prBalls:'공', prTrophies:'트로피', prWins:'승리',
   prShowNote:'어린이 계정에서는 전시장(기록, 컬렉션, 최고 기록)이 <b>비공개</b>예요. 인증된 어른이 열어야 보입니다.',
   prFriendsH:'친구', prFriendsSoon:'동작 · 곧', prYourCode:'내 코드:', prCopy:'복사',
   prAddCode:'코드로 추가',

@@ -104,7 +104,7 @@ shell: {
   rungFree:'免费', rungPrem:'高级',
   // — 个人资料 —
   prPlayer:'玩家', prAlias:'昵称', infoWord:'说明', prPriv:'资料默认不公开',
-  prBalls:'弹珠', prTrophies:'奖杯', prBest:'最佳名次',
+  prBalls:'弹珠', prTrophies:'奖杯', prWins:'胜场',
   prShowNote:'在儿童账号里，展示柜（数据、收藏、纪录）默认<b>不公开</b>，除非已验证的成年人打开它。',
   prFriendsH:'好友', prFriendsSoon:'操作 · 快了', prYourCode:'你的代码：', prCopy:'复制',
   prAddCode:'用代码添加',

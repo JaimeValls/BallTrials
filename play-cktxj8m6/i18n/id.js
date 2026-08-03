@@ -103,7 +103,7 @@ shell: {
   rungFree:'gratis', rungPrem:'premium',
   // — Profil —
   prPlayer:'Pemain', prAlias:'nama panggilan', infoWord:'Info', prPriv:'Profil privat secara bawaan',
-  prBalls:'Bola', prTrophies:'Trofi', prBest:'Posisi terbaik',
+  prBalls:'Bola', prTrophies:'Trofi', prWins:'Kemenangan',
   prShowNote:'Di akun anak, etalase (statistik, koleksi, rekor) bersifat <b>privat</b> kecuali dibuka oleh orang dewasa yang terverifikasi.',
   prFriendsH:'Teman', prFriendsSoon:'aksi · segera', prYourCode:'Kodemu:', prCopy:'Salin',
   prAddCode:'Tambah lewat kode',

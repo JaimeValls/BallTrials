@@ -105,7 +105,7 @@ shell: {
   rungFree:'бесплатно', rungPrem:'премиум',
   // — Профиль —
   prPlayer:'Игрок', prAlias:'прозвище', infoWord:'Инфо', prPriv:'Профиль скрыт по умолчанию',
-  prBalls:'Шары', prTrophies:'Трофеи', prBest:'Лучшее место',
+  prBalls:'Шары', prTrophies:'Трофеи', prWins:'Победы',
   prShowNote:'На детских аккаунтах витрина (статистика, коллекция, рекорды) <b>скрыта</b>, пока её не откроет проверенный взрослый.',
   prFriendsH:'Друзья', prFriendsSoon:'действия · скоро', prYourCode:'Твой код:', prCopy:'Копировать',
   prAddCode:'Добавить по коду',

@@ -103,7 +103,7 @@ shell: {
   rungFree:'gratis', rungPrem:'premium',
   // — Profiel —
   prPlayer:'Speler', prAlias:'bijnaam', infoWord:'Info', prPriv:'Profiel standaard privé',
-  prBalls:'Ballen', prTrophies:'Trofeeën', prBest:'Beste plek',
+  prBalls:'Ballen', prTrophies:'Trofeeën', prWins:'Zeges',
   prShowNote:'Op kinderaccounts is de vitrine (statistieken, collectie, records) <b>privé</b> tenzij een geverifieerde volwassene hem opent.',
   prFriendsH:'Vrienden', prFriendsSoon:'acties · binnenkort', prYourCode:'Jouw code:', prCopy:'Kopiëren',
   prAddCode:'Toevoegen met code',
