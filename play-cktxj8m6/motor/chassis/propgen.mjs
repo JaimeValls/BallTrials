@@ -40,7 +40,7 @@ import * as THREE from 'three';
 //   instalada. La escribe tools/partir-props.py mirando la carpeta del arte, y por eso vive ALLI y
 //   no aqui: quien fabrica esas capas es esa herramienta, asi que la lista se actualiza sola en el
 //   mismo gesto en el que se instala el arte. Ver arte/props/capas.mjs para el por que largo.
-import { CAPAS_PROP } from '../../arte/props/capas.mjs?v=689c6e8';
+import { CAPAS_PROP } from '../../arte/props/capas.mjs?v=32fe509';
 
 const TEX = 256;                 // lienzo del sprite
 const SPAN = 3.2;                // el plano mide 3.2R -> 1R = 40 px de textura
@@ -198,10 +198,11 @@ export const PROP_KEYS = Object.keys(DRAW);
 //   solo que alli se tapo y aqui no, porque los props no se piden desde el HTML sino desde aqui.
 //   REGLA: si sustituyes el .webp de un prop YA DESPLEGADO, sube este numero. Uno solo vale para las
 //   tres capas — se despliegan juntas y no merece la pena llevarles la cuenta por separado.
-//   v3 -> v6 el 3-ago: el prop de Pinball cambio tres veces en un dia (sombrero de vaquero ->
-//   bumper central -> dos en la coronilla -> los DOS CASCOS laterales). Fichero sustituido =
+//   v3 -> v7 el 3-ago: el prop de Pinball cambio tres veces en un dia (sombrero de vaquero ->
+//   bumper central -> dos en la coronilla -> cascos laterales -> cascos con el MODELO LISO).
+//   Fichero sustituido =
 //   numero nuevo, o produccion seguiria sirviendo el anterior una semana.
-const PROP_V = '?v=6';
+const PROP_V = '?v=7';
 //
 //  La ruta se resuelve contra import.meta.url y no contra la pagina: los tres modos viven en
 //  motor/<modo>/index.html pero la pagina de previsualizacion cuelga de otro sitio, y con una
@@ -270,11 +271,12 @@ const PLACE = {
   cohete:   { dx: 0.00, dy: -0.60, k: 1.49 },   // el casco del Aviador, mucho mas grande
   tanque:   { dx: 0.00, dy:  0.00, k: 1.00 },
   chispa:   { dx: 0.00, dy:  0.04, k: 1.00 },
-  //+AG LOS DOS CASCOS (3-ago). La pieza viene compuesta a su tamano final, asi que aqui no hay
-  //   nada que escalar ni mover. Van a los LADOS y no en la coronilla porque es lo que pidio Jaime
-  //   con estas palabras: «seria como unos cascos, como unos auriculares, como un Walkman... lo
-  //   tiene en los laterales y por eso rebota mas, parecido al tanque». Yo habia suspendido dos
-  //   rondas de conceptos justo por «parecer auriculares»: ESA ERA LA IDEA, y no la entendi.
+  //+AG LOS DOS CASCOS (3-ago). Compuestos ya a su tamano final, asi que aqui 1.00 y 0.00.
+  //   Van a los LADOS porque es lo que pidio Jaime: «seria como unos cascos, como unos auriculares,
+  //   como un Walkman... lo tiene en los laterales y por eso rebota mas, parecido al tanque». Yo
+  //   habia suspendido dos rondas de conceptos justo por «parecer auriculares»: ESA ERA LA IDEA.
+  //   Y el MODELO es el del concepto D (cupula lisa + aro + tornillo), no el del 37: la falda
+  //   acanalada de aquel, puesta de lado, «parece una concha mas que unos auriculares».
   pinball:  { dx: 0.00, dy: 0.00, k: 1.00 },
   lapa:     { dx: 0.00, dy:  0.02, k: 1.00, rot: 180, pivY: 0.896 },   // EL IMAN: girado 180 EN SU SITIO
   burbuja:  { dx: 0.00, dy:  0.00, k: 1.00 },
