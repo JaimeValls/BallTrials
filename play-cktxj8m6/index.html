@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-03 99ccfb4"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-03 f4e19ee"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG ICONO EN LA PANTALLA DE INICIO (docs/40 §6). Jaime: "la gente esta acostumbrada a clicar en el
@@ -1658,8 +1658,28 @@
      Ajustes sin poder deslizarse. Si algun dia alguien quita el relative, esto vuelve.
      ⚠ Y OJO AL MEDIRLO: el elemento seguira midiendo 20 px en el DOM. Los 44 son el halo. Quien
      audite con getBoundingClientRect va a leer 20 y va a querer "arreglarlo" otra vez. */
-  .tile .tinfo::before{ content:''; position:absolute; left:50%; top:50%; width:44px; height:44px;
-    transform:translate(-50%,-50%); border-radius:50%; }
+  /*+AG 3-ago: EL HALO ESTABA CENTRADO Y LA CARTA SE COMIA MEDIO. banco-homogeneidad daba 38 px en las
+     tres (i) de MODOS aun con el halo de 44 puesto, y la causa no era el halo: es que `.tile` lleva
+     `overflow:hidden` (lo necesita, la banda de color se recorta contra sus esquinas de 18 px). El
+     centro de la (i) vive a 17 px del borde de arriba y a 18 del de la derecha, asi que un halo
+     CENTRADO de 44 saca 5-6 px fuera de la carta... y lo que sale de una caja recortada no recoge el
+     dedo. Palpado con elementFromPoint, el alcance real era: izquierda 22 · abajo 21 · ARRIBA 16
+     (corta `.tile`, o `.tbar` en la carta del dia) · DERECHA 16 (corta `.tile`). O sea 39x38.
+     El arreglo no es un halo mas grande —lo de fuera se tira igual— sino el MISMO halo de 44
+     EMPUJADO HACIA DENTRO de la carta, que es donde hay sitio: se ancla su esquina superior derecha
+     a 15 px del centro del boton y el resto cae hacia abajo y hacia la izquierda. A 44x44 clavados
+     el area medida salia 44x44 exactos, o sea con CERO margen contra el umbral del banco (43,5), asi
+     que el halo se pone a 46: alcance izquierda 31 · abajo 31 · arriba 15 · derecha 14, o sea 46x47
+     de area de toque. Los 15 de arriba y los 14 de la derecha son el borde de la carta, no el halo.
+     ⚠ EL HALO PASA A SER CUADRADO, Y ESO TAMBIEN LO DECIDIO UNA MEDIDA. Con `border-radius:50%` y el
+     circulo descentrado, el palpado en cruz (que sale del centro del BOTON, no del halo) cruza la
+     circunferencia por una cuerda, no por el diametro: sqrt(22²-7²) = 20,9 px en vez de 22, y el ancho
+     se quedaba en 41. Un halo invisible no tiene por que ser redondo.
+     ⚠ Lo que se paga: la zona de toque de la (i) se mete 7 px mas sobre el nombre del modo por la
+     izquierda y 10 por abajo (antes 22 y 21, ahora 31). Ya se metia — el halo nunca cupo dentro del
+     boton — y a cambio arriba y a la derecha devuelve 7 px que la carta tiraba a la basura. Medido: el
+     centro de la carta sigue respondiendo a la CARTA, que es lo unico que no se podia romper. */
+  .tile .tinfo::before{ content:''; position:absolute; top:-6px; right:-6px; width:46px; height:46px; }
   .tile .tinfo:active{ transform:scale(.9); }
   /*+AG la (i) vive SIEMPRE en la banda de color, tambien en la carta del dia. En el mockup iba dentro
      de la corona dorada solo en esa carta, y eso obligaba a moverla de sitio por JS al rotar el modo
@@ -4029,7 +4049,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=99ccfb4"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=f4e19ee"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
