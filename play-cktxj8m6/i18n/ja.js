@@ -283,7 +283,7 @@ redlightCoach: {
 },
 
 arranque: {
-  kicker:'モード', ready:'準備OK！', auto:n=>`${n}で自動スタート`, tapHint:'タップで音が出ます',
+  kicker:'モード', ready:'準備OK！', auto:n=>`${n}で自動スタート`, tapHint:'タップで音が出ます', escHint:'Escで退出',
   name:{ race:'ザ・グレートレース', cazador:'ハンター', redlight:'レッドライト' },
   goal:{ race:'コースを下って、誰よりも早くゴールへ。',
          cazador:'ハンターをかわせ。最後まで残ったボールの勝ち。',

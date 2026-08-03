@@ -8,7 +8,7 @@
 //      ktags.spawn(team, num, x, y, dx, dy)  // (dx,dy) = dirección de deriva (se normaliza; 0,0 => sube)
 //      ktags.update(dt) cada frame · ktags.reset() al (re)empezar ronda.
 import * as THREE from 'three';
-import { sat } from './gfx.mjs?v=cfc5692';
+import { sat } from './gfx.mjs?v=99ccfb4';
 
 const CW = 256, CH = 112, LIFE = 1.2, FADE_AT = 0.7;
 

@@ -282,7 +282,7 @@ redlightCoach: {
 },
 
 arranque: {
-  kicker:'MODO', ready:'PRONTO!', auto:n=>`começa sozinha em ${n}`, tapHint:'toque para ter som',
+  kicker:'MODO', ready:'PRONTO!', auto:n=>`começa sozinha em ${n}`, tapHint:'toque para ter som', escHint:'Esc para sair',
   name:{ race:'A Grande Corrida', cazador:'O Caçador', redlight:'Luz Vermelha' },
   goal:{ race:'Desça a pista e chegue à META antes de todo mundo.',
          cazador:'Escape do CAÇADOR. Ganha a última bola de pé.',

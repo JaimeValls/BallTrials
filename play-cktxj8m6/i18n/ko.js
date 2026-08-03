@@ -283,7 +283,7 @@ redlightCoach: {
 },
 
 arranque: {
-  kicker:'모드', ready:'준비 완료!', auto:n=>`${n} 뒤 자동 시작`, tapHint:'터치하면 소리가 나와요',
+  kicker:'모드', ready:'준비 완료!', auto:n=>`${n} 뒤 자동 시작`, tapHint:'터치하면 소리가 나와요', escHint:'Esc로 나가기',
   name:{ race:'그레이트 레이스', cazador:'헌터', redlight:'레드 라이트' },
   goal:{ race:'트랙을 내려가 누구보다 먼저 결승선에 도착하세요.',
          cazador:'헌터를 피하세요. 마지막까지 남은 공이 이깁니다.',

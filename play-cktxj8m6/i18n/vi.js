@@ -282,7 +282,7 @@ redlightCoach: {
 },
 
 arranque: {
-  kicker:'CHẾ ĐỘ', ready:'SẴN SÀNG!', auto:n=>`tự bắt đầu sau ${n}`, tapHint:'chạm để có âm thanh',
+  kicker:'CHẾ ĐỘ', ready:'SẴN SÀNG!', auto:n=>`tự bắt đầu sau ${n}`, tapHint:'chạm để có âm thanh', escHint:'Esc để thoát',
   name:{ race:'Cuộc Đua Lớn', cazador:'Thợ Săn', redlight:'Đèn Đỏ' },
   goal:{ race:'Lăn xuống đường đua và tới VẠCH ĐÍCH trước mọi người.',
          cazador:'Né THỢ SĂN. Quả bóng cuối cùng còn trụ sẽ thắng.',

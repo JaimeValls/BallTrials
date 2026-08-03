@@ -284,7 +284,7 @@ redlightCoach: {
 },
 
 arranque: {
-  kicker:'模式', ready:'就緒！', auto:n=>`${n} 後自動開始`, tapHint:'點一下就有聲音',
+  kicker:'模式', ready:'就緒！', auto:n=>`${n} 後自動開始`, tapHint:'點一下就有聲音', escHint:'按 Esc 離開',
   name:{ race:'超級彈珠賽', cazador:'獵人', redlight:'紅燈停' },
   goal:{ race:'順著賽道滾下去，搶在所有人前面衝過終點。',
          cazador:'閃開獵人。最後一顆還站著的彈珠獲勝。',

@@ -284,7 +284,7 @@ redlightCoach: {
 },
 
 arranque: {
-  kicker:'MOD', ready:'SEDIA!', auto:n=>`bermula sendiri dalam ${n}`, tapHint:'sentuh untuk bunyi',
+  kicker:'MOD', ready:'SEDIA!', auto:n=>`bermula sendiri dalam ${n}`, tapHint:'sentuh untuk bunyi', escHint:'Esc untuk keluar',
   name:{ race:'Perlumbaan Agung', cazador:'Sang Pemburu', redlight:'Lampu Merah' },
   goal:{ race:'Turun di litar dan sampai ke GARISAN PENAMAT sebelum orang lain.',
          cazador:'Elak SANG PEMBURU. Bola terakhir yang bertahan menang.',

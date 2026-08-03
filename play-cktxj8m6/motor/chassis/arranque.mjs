@@ -19,8 +19,8 @@
 //   · UN SOLO LENGUAJE DE "PÚLSAME": el CTA usa el mismo oro del motor (#bSup.ready / #ovBtn), no inventa brillos.
 //   · CABE EN EL MÓVIL SIN DESLIZAR: todo el cartel se mide en vh/vw y el texto se recorta con line-clamp.
 
-import { createSynth, makeRng, peakGain } from './synth.mjs?v=cfc5692';
-import { PAUSA } from './pausa.mjs?v=cfc5692';   //+AG "el mundo no se mueve": el cartel tampoco se auto-arranca (ver tick)
+import { createSynth, makeRng, peakGain } from './synth.mjs?v=99ccfb4';
+import { PAUSA } from './pausa.mjs?v=99ccfb4';   //+AG "el mundo no se mueve": el cartel tampoco se auto-arranca (ver tick)
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────
 //  TEXTOS · en+es con fallback a INGLÉS, igual que el SHELL y que los motores de Cazador/Luz Roja
@@ -28,12 +28,15 @@ import { PAUSA } from './pausa.mjs?v=cfc5692';   //+AG "el mundo no se mueve": e
 //  El OBJETIVO es una frase, en imperativo, sin jerga: es lo único que lee quien no ha hecho el tutorial.
 // ─────────────────────────────────────────────────────────────────────────────────────────────────
 const TXT = {
-  en: { kicker:'MODE', ready:'READY!', auto:n=>`starts on its own in ${n}`, tapHint:'tap for sound',
+  //+AG escHint (3-ago-2026): «Esc para salir». Solo se pinta donde hay teclado (lo decide refresh()) y
+  //   solo en este cartel, que es el momento en que el jugador esta leyendo y no jugando. Existe porque
+  //   docs/71 dio a Escape el papel de atras del ordenador y nadie se lo estaba contando a nadie.
+  en: { kicker:'MODE', ready:'READY!', auto:n=>`starts on its own in ${n}`, tapHint:'tap for sound', escHint:'Esc to quit',
     name:{ race:'The Great Race', cazador:'The Hunter', redlight:'Red Light' },
     goal:{ race:'Roll down and reach the FINISH before anyone else.',
            cazador:'Dodge the HUNTER. Last ball standing wins.',
            redlight:'Run on GREEN, freeze on RED. Get caught moving and you are out.' } },
-  es: { kicker:'MODO', ready:'¡LISTO!', auto:n=>`empieza sola en ${n}`, tapHint:'toca para tener sonido',
+  es: { kicker:'MODO', ready:'¡LISTO!', auto:n=>`empieza sola en ${n}`, tapHint:'toca para tener sonido', escHint:'Esc para salir',
     name:{ race:'La Gran Carrera', cazador:'El Cazador', redlight:'Luz Roja' },
     goal:{ race:'Baja por la pista y llega a la META antes que nadie.',
            cazador:'Esquiva al CAZADOR. Gana la última bola en pie.',
@@ -112,6 +115,19 @@ const CSS = `
   #btRdy .cta .drain{ position:absolute; inset:0; right:auto; width:100%; background:rgba(255,255,255,.42);
     pointer-events:none; }
   #btRdy .sub{ margin-top:1.6vh; font-size:clamp(11px,1.6vh,13px); font-weight:400; color:#8a92b8; min-height:1.4em }   /*+AG doc 60 regla 9: el suelo son 11 px, no 10 */
+  /*+AG el aviso de Esc (docs/71). Mismo tamaño y misma familia que .sub —es su hermano pequeño, no una
+     pieza nueva— pero un punto más apagado: es lo MENOS importante del cartel y no puede competir con el
+     objetivo del modo ni con el botón. Va en minúsculas a propósito y eso NO contradice la regla de los
+     rótulos en mayúsculas (docs/60 regla 9 pide MAYÚSCULAS para el rótulo pequeño, aislado y PRINCIPAL de
+     una pieza; esto es un pie de ayuda debajo de otro pie). Nace vacío: sin teclado no se escribe nada y
+     la regla de vacío se lleva también su margen, así que en un móvil el cartel queda EXACTAMENTE igual
+     que antes — medido, no supuesto.
+     ⚠ NI UNA COMILLA INVERTIDA EN ESTE COMENTARIO: todo este CSS vive dentro de una plantilla de texto, así
+     que una sola comilla invertida la CIERRA a media hoja de estilos y tumba el módulo entero con un
+     "Unexpected token" que apunta a una línea de comentario. Pasado hoy mismo: el cartel dejó de existir y
+     el motor arrancó sin él. */
+  #btRdy .esc{ margin-top:.7vh; font-size:clamp(11px,1.5vh,12px); font-weight:400; color:#6f7699; }
+  #btRdy .esc:empty{ display:none; margin-top:0 }
   /*+AG BANDA DEL MODO durante la cuenta atrás: el nombre sigue en pantalla mientras corre el 3-2-1, así que
      "¿qué estoy jugando?" tiene respuesta hasta el ¡YA!. Vive DENTRO de #count (los 3 motores lo tienen), así
      que aparece y desaparece con la cuenta atrás sin lógica extra.
@@ -205,7 +221,7 @@ export function createArranque(cfg){
   const st = document.createElement('style'); st.textContent = CSS; document.head.appendChild(st);
   const card = document.createElement('div'); card.id = 'btRdy';
   card.innerHTML = `<div class="ico"></div><div class="kick"></div><div class="name"></div><div class="goal"></div>`
-    + `<button class="cta" type="button"><span class="drain"></span><span class="w"></span></button><div class="sub"></div>`;
+    + `<button class="cta" type="button"><span class="drain"></span><span class="w"></span></button><div class="sub"></div><div class="esc"></div>`;
   document.body.appendChild(card);
   const $ = s => card.querySelector(s);
   const drain = $('.drain');
@@ -223,6 +239,15 @@ export function createArranque(cfg){
     $('.name').textContent = (cfg.title && cfg.title()) || t.name[mode] || mode;
     $('.goal').innerHTML  = (cfg.goal && cfg.goal()) || t.goal[mode] || '';
     $('.w').textContent   = t.ready;
+    //+AG el aviso de Esc SOLO donde hay teclado. `any-pointer:fine` = "existe algún puntero fino" (ratón o
+    //   trackpad), que es lo más cerca que se puede estar de preguntar "¿hay teclado?" desde una página: no
+    //   hay media query de teclado. Un móvil no lo cumple y no ve el aviso; un portátil táctil SÍ lo cumple,
+    //   y eso es lo que se quiere (tiene teclas). Se lee aquí y no una vez al cargar porque un portátil
+    //   convertible puede cambiar de modo, y esto cuesta lo mismo que leerlo de una variable.
+    //   ⚠ El respaldo es NO ENSEÑARLO: si el navegador no entiende la consulta, mejor callarse que pedirle
+    //   a alguien con un dedo que pulse una tecla que no tiene.
+    let teclado = false; try{ teclado = matchMedia('(any-pointer:fine)').matches; }catch(e){}
+    $('.esc').textContent = teclado ? (t.escHint || '') : '';
     paintSub();
   }
   //+AG solo se escribe el DOM cuando el texto CAMBIA (una vez por segundo, no 60): esto corre en el bucle de rAF

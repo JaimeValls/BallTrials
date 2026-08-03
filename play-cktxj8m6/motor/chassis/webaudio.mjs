@@ -1,11 +1,11 @@
 // YouBall · reproductor Web Audio para el PREVIEW EN VIVO (solo navegador). Toca EL MISMO buffer de SFX que el
 // render (generado por <modo>/sfxmap.mjs) + la música del modo por debajo, arrancados a la vez que la partida.
 // Ambos son deterministas a 30 FPS → van sincronizados. NO toca el camino de render (audio.mjs→WAV sigue igual).
-//   import { createWebAudio } from '../chassis/webaudio.mjs?v=cfc5692';
+//   import { createWebAudio } from '../chassis/webaudio.mjs?v=99ccfb4';
 //   const audio = createWebAudio({ musicUrl: '/_music/race.wav' });
 //   btn.onclick = async () => { await audio.unlock(); restart(); };   // gesto del usuario
 //   // al (re)arrancar la partida en f=0:  audio.start(sfxFloat32, SR);
-import { peakGain } from './synth.mjs?v=cfc5692';
+import { peakGain } from './synth.mjs?v=99ccfb4';
 
 //+AG PLAYLIST POR MODO (doc 14 §1: varias canciones por contexto, elegidas al azar). Se tira el dado UNA vez, al
 //   cargar la página, no por ronda: cada partida abre un iframe nuevo → página nueva → tirada nueva, así que "una
