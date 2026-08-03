@@ -40,7 +40,7 @@ import * as THREE from 'three';
 //   instalada. La escribe tools/partir-props.py mirando la carpeta del arte, y por eso vive ALLI y
 //   no aqui: quien fabrica esas capas es esa herramienta, asi que la lista se actualiza sola en el
 //   mismo gesto en el que se instala el arte. Ver arte/props/capas.mjs para el por que largo.
-import { CAPAS_PROP } from '../../arte/props/capas.mjs?v=780b34b';
+import { CAPAS_PROP } from '../../arte/props/capas.mjs?v=7334418';
 
 const TEX = 256;                 // lienzo del sprite
 const SPAN = 3.2;                // el plano mide 3.2R -> 1R = 40 px de textura
@@ -202,7 +202,10 @@ export const PROP_KEYS = Object.keys(DRAW);
 //   bumper central -> dos en la coronilla -> cascos laterales -> cascos con el MODELO LISO).
 //   Fichero sustituido =
 //   numero nuevo, o produccion seguiria sirviendo el anterior una semana.
-const PROP_V = '?v=7';
+//   v7 -> v8 el 3-ago: las dos mascaras emisivas (pinball y volcan) pasan a llevar ALFA. Es
+//   sustitucion de fichero ya desplegado, asi que sin subir esto la CDN seguiria sirviendo la
+//   version sin alfa y el cuadrado negro seguiria ahi una semana mas.
+const PROP_V = '?v=8';
 //
 //  La ruta se resuelve contra import.meta.url y no contra la pagina: los tres modos viven en
 //  motor/<modo>/index.html pero la pagina de previsualizacion cuelga de otro sitio, y con una
@@ -211,11 +214,24 @@ const ART = k => new URL(`../../arte/props/prop-${k}.webp${PROP_V}`, import.meta
 //+AG doc 55: la capa que se MUEVE, si la hay. La escribe tools/partir-props.py separando las islas
 //   del alfa de la pieza entregada; no es arte nuevo, es la misma pieza partida en dos.
 const ART_FX = k => new URL(`../../arte/props/prop-${k}-fx.webp${PROP_V}`, import.meta.url).href;
-//+AG doc 55 capa 2: lo que se ENCIENDE. Es la misma pieza con todo en negro menos lo caliente, y
-//   se pinta como un plano ADITIVO encima: donde la mascara es negra no suma nada, donde es clara
-//   ilumina. Se hace con un plano y no con el shader del cuerpo a proposito — lo que brilla es el
-//   ACCESORIO (las estrellas del sombrero del Mago), no la bola, y el cuerpo lleva el color del
-//   equipo, que no se puede tocar.
+//+AG doc 55 capa 2: lo que se ENCIENDE. Es la misma pieza BLANCA, con lo caliente marcado en el
+//   ALFA, y se pinta como un plano ADITIVO encima: donde el alfa es cero no suma nada, donde es
+//   opaco ilumina. Se hace con un plano y no con el shader del cuerpo a proposito — lo que brilla
+//   es el ACCESORIO (el aro de Pinball, la veta del Mago), no la bola, y el cuerpo lleva el color
+//   del equipo, que no se puede tocar.
+//   ⚠⚠ LA MASCARA TIENE QUE LLEVAR ALFA, Y ESTO NO ES UNA PREFERENCIA DE FORMATO (3-ago-2026).
+//   Nacio en gris SIN alfa —negro lo apagado, blanco lo caliente— y eso pintaba UN CUADRADO NEGRO
+//   alrededor de la bola en los menus. Jaime, mirando su portada: «cuando la bola pinball salta,
+//   aparece un cuadro oscuro alrededor de ella». El motivo, medido: `AdditiveBlending` en three es
+//   (SrcAlpha, One) y eso se aplica TAMBIEN al canal alfa, o sea `A_out = A_src² + A_dst`. Con la
+//   mascara sin alfa, el 98% negro del lienzo traia A_src=1: no sumaba NI UNA LUZ, pero SI sumaba
+//   alfa. Y el lienzo de las bolas vivas de los menus es transparente (`vivas.mjs`, alpha:true),
+//   asi que ese alfa de mas se compone sobre la pagina como NEGRO — un cuadrado del tamaño del
+//   plano (3.2R = el 69% de la celda) latiendo al ritmo de `emHz`. En partida no se veia porque
+//   alli el fondo de la escena ya es opaco.
+//   Con el alfa puesto la LUZ ES LA MISMA (antes rgb=L y A=1 -> suma L·op; ahora rgb=1 y A=L ->
+//   suma L·op, identico) y el cuadrado desaparece porque fuera del aro A_src ya es 0.
+//   Medido en `#hBall` sobre fondo plano: de 2..10 sobre 128 de oscurecimiento a 0.
 const ART_EM = k => new URL(`../../arte/props/prop-${k}-em.webp${PROP_V}`, import.meta.url).href;
 
 const cache = new Map();
