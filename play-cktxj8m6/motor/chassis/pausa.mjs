@@ -134,6 +134,22 @@ export function createPausa(cfg = {}){
     if(d.type === 'bt:pausa') pausa();
     else if(d.type === 'bt:sigue') sigue();
   });
+  //+AG 3-ago-2026 · ESCAPE = EL ATRÁS DEL ORDENADOR, y va aquí por dos razones. La primera es que en un
+  //   ordenador NO HABÍA NINGUNA FORMA de salir de una partida desde dentro del juego: el gestor de capas
+  //   (docs/65) engancha el atrás del móvil, y en escritorio eso no existe. La segunda es que este fichero
+  //   ya es el canal entre el motor y el shell, y las teclas se las come el iframe: un listener en el shell
+  //   no ve JAMÁS un Escape pulsado mientras el foco está en la pista.
+  //   ⚠ NO ES UNA PAUSA, y la diferencia importa (Jaime, 3-ago: «el juego será multijugador, así que no se
+  //   puede pausar»). Esto no para nada por su cuenta: solo le dice al shell «el jugador ha pedido salir»,
+  //   y el shell abre la misma hoja de «¿Abandonar la partida?» que ya abre el atrás del móvil. La partida
+  //   se queda quieta mientras la pregunta está encima porque eso ya lo hacía antes (docs/66), no por esto.
+  //   El día que la partida sea de varios, esa hoja dejará de parar nada y este aviso seguirá valiendo.
+  //   El guardia de `window.parent` es el mismo de arriba: abierto suelto (vídeo, preview, captura) no hace
+  //   nada, que es justo lo que se quiere en una grabación.
+  addEventListener('keydown', e => {
+    if(e.key !== 'Escape' || window.parent === window) return;
+    try{ parent.postMessage({ type: 'bt:atras' }, '*'); }catch(err){}
+  });
   //+AG Y EL SALUDO, que no es cortesía: entre que el shell crea el iframe y este módulo existe pasan cientos
   //   de milisegundos, y en ese hueco un postMessage se pierde en el documento vacío. Si el jugador toca
   //   JUGAR y da atrás en el acto, el shell habría pedido la pausa a nadie. Al saludar, el shell le repite

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-03 ade307c">
+<meta name="bt-build" content="2026-08-03 cfc5692">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <!--+AG el HTML se sirve en INGLES (defecto del juego); ?lang=es lo traduce por JS (applyLang) -->
 <title>YouBall · Red Light Rush (WebGL) · The Marble Games</title>
@@ -268,7 +268,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=ade307c"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=cfc5692"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -279,23 +279,23 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 </script>
 
 <script type="module">
-import { THREE, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createBloom, frameOrtho, BLOOM } from '../chassis/gfx.mjs?v=ade307c';
-import { archLook } from '../chassis/ballmat.mjs?v=ade307c';   //+AG doc 41 bloque G: material de la bola-heroe
-import { attachSquash } from '../chassis/squash.mjs?v=ade307c';
-import { createCelebration } from '../chassis/celebration.mjs?v=ade307c';
-import { createKillfeed } from '../chassis/killfeed.mjs?v=ade307c';
-import { createCensusBoard } from '../chassis/censusboard.mjs?v=ade307c';
-import { createCupoGauge } from '../chassis/cupogauge.mjs?v=ade307c';
-import { createKillTags } from '../chassis/killtag.mjs?v=ade307c';
-import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=ade307c';
-import { archFace } from '../chassis/facegen.mjs?v=ade307c';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
-import { Sim, TEAMS, SHORT_COLORS, SHORT_COLORS_6, BALL_R, FPS, FIELD_W, FIELD_L, XL, XR, SPAWN_Y, GATE_Y, SAFE_Y } from './sim.js?v=ade307c';
-import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=ade307c';
-import { buildSfxBuffer } from './sfxmap.mjs?v=ade307c';
-import { createCoach } from '../chassis/coach.mjs?v=ade307c';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
-import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=ade307c';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
-import { createPausa } from '../chassis/pausa.mjs?v=ade307c';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
-import { cantarPuesto } from '../chassis/veredicto.mjs?v=ade307c';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
+import { THREE, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createBloom, frameOrtho, BLOOM } from '../chassis/gfx.mjs?v=cfc5692';
+import { archLook } from '../chassis/ballmat.mjs?v=cfc5692';   //+AG doc 41 bloque G: material de la bola-heroe
+import { attachSquash } from '../chassis/squash.mjs?v=cfc5692';
+import { createCelebration } from '../chassis/celebration.mjs?v=cfc5692';
+import { createKillfeed } from '../chassis/killfeed.mjs?v=cfc5692';
+import { createCensusBoard } from '../chassis/censusboard.mjs?v=cfc5692';
+import { createCupoGauge } from '../chassis/cupogauge.mjs?v=cfc5692';
+import { createKillTags } from '../chassis/killtag.mjs?v=cfc5692';
+import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=cfc5692';
+import { archFace } from '../chassis/facegen.mjs?v=cfc5692';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
+import { Sim, TEAMS, SHORT_COLORS, SHORT_COLORS_6, BALL_R, FPS, FIELD_W, FIELD_L, XL, XR, SPAWN_Y, GATE_Y, SAFE_Y } from './sim.js?v=cfc5692';
+import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=cfc5692';
+import { buildSfxBuffer } from './sfxmap.mjs?v=cfc5692';
+import { createCoach } from '../chassis/coach.mjs?v=cfc5692';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=cfc5692';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
+import { createPausa } from '../chassis/pausa.mjs?v=cfc5692';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
+import { cantarPuesto } from '../chassis/veredicto.mjs?v=cfc5692';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
 
 window.addEventListener('error', e => { document.getElementById('err').style.display='grid'; console.error(e.error||e.message); });
 

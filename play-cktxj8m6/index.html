@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-03 ade307c"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-03 cfc5692"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG ICONO EN LA PANTALLA DE INICIO (docs/40 §6). Jaime: "la gente esta acostumbrada a clicar en el
@@ -4029,7 +4029,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=ade307c"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=cfc5692"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -5906,8 +5906,12 @@ function pausaPartida(quieta){
   try{ gameFrameEl.contentWindow.postMessage({ type: quieta?'bt:pausa':'bt:sigue' }, '*'); }catch(e){}
 }
 window.addEventListener('message', e=>{
-  const d=e.data; if(!d || (d.type!=='bt:matchEnd' && d.type!=='bt:tutorialEnd' && d.type!=='bt:motorListo')) return;
+  const d=e.data; if(!d || (d.type!=='bt:matchEnd' && d.type!=='bt:tutorialEnd' && d.type!=='bt:motorListo' && d.type!=='bt:atras')) return;
   if(!gameFrameEl || e.source!==gameFrameEl.contentWindow) return;   //+AG solo el iframe del juego, ignora mensajes espurios
+  //+AG 3-ago-2026: el Escape pulsado DENTRO de la pista. Lo manda chassis/pausa.mjs porque las teclas se
+  //   las come el iframe y aqui no llegan. No abre la hoja a mano: llama al mismo atras que el del movil,
+  //   asi que quien decide que pasa sigue siendo ATRAS_CAPAS y no hay dos caminos que puedan divergir.
+  if(d.type==='bt:atras'){ atrasPorTecla(); return; }
   //+AG EL SALUDO DEL MOTOR. Entre crear el iframe y que su modulo exista pasan cientos de ms, y un
   //   postMessage lanzado en ese hueco se pierde en el documento vacio: quien toca JUGAR y da atras en el
   //   acto se habria quedado con la partida corriendo bajo la hoja. Al saludar, se le repite el estado.
@@ -8030,6 +8034,27 @@ addEventListener('popstate', ()=>{
 //   tocar ninguna de las treinta puertas — y una puerta nueva queda cubierta el dia que se escriba.
 //   El fin de partida llega por postMessage y no por un toque, pero ahi la cuenta no cambia (se va la
 //   partida, entra Resultados: una capa por una), asi que el historial ya esta bien sin hacer nada.
+//+AG 3-ago-2026 · ESCAPE ES EL ATRÁS DEL ORDENADOR. En un movil el atras lo pone el sistema; en un
+//   ordenador no hay ninguno a mano, y eso dejaba UNA pantalla sin salida de verdad: dentro de una partida
+//   no hay boton para irse (Jaime tumbo la ✕ del HUD: «el juego sera multijugador, asi que no se puede
+//   pausar»), asi que quien juega en un ordenador se quedaba dentro hasta terminar.
+//   ⚠ NO DUPLICA LA LOGICA: llama a history.back() y deja que trabaje el mismo gestor de siempre, o sea
+//   que Escape cierra EXACTAMENTE lo que cierra el atras —la capa de mas arriba— y hereda gratis sus casos
+//   raros (la partida pregunta antes de abandonarse, la ✕ no cierra en cascada, el quiz retrocede una
+//   pregunta). Dos caminos distintos para la misma tecla acabarian divergiendo el primer dia.
+//   ⚠ Y SI NO HAY NINGUNA CAPA ABIERTA, NO HACE NADA. Un history.back() desde la portada limpia se lleva al
+//   jugador FUERA DEL SITIO, y eso en el movil es correcto (lo pidio el, es su boton) pero con una tecla no:
+//   nadie pulsa Escape en un menu esperando cerrar la pestaña.
+//+AG SOBRE LA PANTALLA COMPLETA DEL NAVEGADOR, que es el unico roce conocido y se deja a proposito: si el
+//   jugador ha entrado en pantalla completa con el boton de la portada, el navegador se queda con el primer
+//   Escape para salir de ella y lo normal es que ni nos llegue el keydown. Si algun navegador nos lo pasa
+//   igualmente, saldra la pregunta y "seguir jugando" la quita: molesto, no destructivo. No se pone guardia
+//   por document.fullscreenElement porque entonces en pantalla completa NO habria salida ninguna, que es
+//   peor, y porque "este Escape se lo acaba de comer el navegador" no se puede saber de forma fiable.
+//   ⚠ En el juego instalado como icono esto ni aplica: el manifiesto pide `display: fullscreen`, o sea que
+//   no hay pantalla completa del navegador de la que salir — y ese es justo el caso sin ninguna salida.
+function atrasPorTecla(){ if(PILA.length) history.back(); }
+addEventListener('keydown', e=>{ if(e.key==='Escape') atrasPorTecla(); });
 addEventListener('click',   ()=>setTimeout(atrasSync,0), true);
 addEventListener('keydown', ()=>setTimeout(atrasSync,0), true);
 atrasSync();
