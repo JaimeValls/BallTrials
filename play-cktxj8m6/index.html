@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-02 1687de6"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-03 7715590"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG ICONO EN LA PANTALLA DE INICIO (docs/40 §6). Jaime: "la gente esta acostumbrada a clicar en el
@@ -1778,6 +1778,16 @@
     background:var(--plate-a); border:1px solid #ffffff2e; border-radius:12px; padding:9px 4px; cursor:pointer; }
   .rktab.on{ color:#3a2400; background:linear-gradient(#ffe27a,#ffb43d); border-color:transparent; box-shadow:0 4px 12px #ffb03d44; }
   .rktab:active{ transform:scale(.97); }
+  /*+AG ⚠ 3-ago · EN MOVIL ESTRECHO LA LETRA ENCOGE, o "Por bola" parte en dos lineas. Medido a 320 px:
+     en italiano ("Per pallina") y en aleman ("Pro Kugel") la pestaña pasa de 44 a 53 px de alto, y las
+     otras dos se quedan flotando con aire de mas dentro de la misma caja — se lee como un accidente,
+     no como diseño. `__fitCheck` no lo caza porque NO es un desbordamiento: la fila entera crece a la
+     vez. Es el mismo ajuste que ya lleva `.h-tabs .tab` por debajo de 375 px.
+     ⚠ LA REGLA NO VA AQUI, VA AL FINAL DEL <style>. Se escribio en este sitio y no se aplicaba: mas
+     abajo hay dos reglas que vuelven a fijar el padding de `.rktab` (`.subtab, .rktab, .sh-sec`), y
+     entre reglas de la misma especificidad gana la ULTIMA — una media query no añade especificidad
+     ninguna. Medido en el DOM: pedia 12 px y el navegador devolvia 11. Buscala por «PESTAÑAS DEL
+     RANKING EN MOVIL ESTRECHO». */
   /* selector de tipo estilo Brawl Stars: tiles con retrato, scroll lateral, flechas si hay overflow, seleccion = borde blanco */
   .rkpick{ display:none; align-items:stretch; gap:5px; padding:0 8px 8px; }
   .rkpick.on{ display:flex; }
@@ -1797,7 +1807,20 @@
   .rktile:active{ transform:scale(.96); }
   .rkprize{ margin:0 13px 8px; text-align:center; font-size:var(--fs-3); font-weight:800; color:#ffd9a0; line-height:1.4;
     background:linear-gradient(90deg,#3a2a10cc,#4a3410cc); border:1px dashed #fbb91566; border-radius:12px; padding:8px 12px; }
-  .rkme{ font-size:var(--fs-3); color:var(--muted); font-weight:800; text-align:center; padding:0 13px 8px; }
+  /*+AG ⚠ 3-ago · TU PUESTO PESABA MENOS QUE CUALQUIER TEXTO SECUNDARIO. En un ranking lo primero que
+     quiere ver el jugador es DONDE ESTA EL, y esto salia en 13 px y en el gris de las notas al pie,
+     con tu fila real al fondo de una lista de 51: para verte habia que deslizar 2200 px.
+     Ahora es una PLACA PULSABLE que te lleva a tu fila de un toque. No hace falta texto nuevo —y por
+     tanto no hace falta traducir nada a 20 idiomas— porque la frase que ya dice «Tu puesto: #51 de
+     51» es exactamente la etiqueta del boton.
+     ⚠ El `.rkme b{color:gold2}` de antes era CSS MUERTO: la frase se construye en el diccionario sin
+     ninguna etiqueta `<b>` dentro, asi que esa regla no se disparaba nunca. Se queda por si algun dia
+     el diccionario la trae, pero el peso ya no depende de ella. */
+  .rkme{ font-size:var(--fs-4); color:#e7ebff; font-weight:900; text-align:center; margin:0 13px 8px;
+    background:linear-gradient(#282059,#161139); border:1px solid #ffffff30;
+    box-shadow:0 3px 0 #0d0726, inset 0 1px 0 #ffffff24; border-radius:12px; padding:9px 12px;
+    cursor:pointer; transition:transform .08s, box-shadow .08s; }
+  .rkme:active{ transform:translateY(2px); box-shadow:0 1px 0 #0d0726, inset 0 1px 0 #ffffff24; }
   .rkme b{ color:var(--gold2); }
   .rklist{ flex:1; min-height:0; overflow-y:auto; padding:0 13px 14px; display:flex; flex-direction:column; gap:5px; }
   /*+AG EL COLCHON, EN LAS CINCO LISTAS QUE DESLIZAN (ver --zafe arriba). Va aqui abajo del todo a proposito:
@@ -1922,8 +1945,15 @@
      se separan con un `border-bottom`. Al darles canto, la sombra solida se sumaba a esa linea y cada
      fila de Ajustes quedaba subrayada en negro — parecia un error de maquetacion, no un boton. Una
      fila de lista no es una tarjeta: lo que se toca ahi es el control de la derecha, no la fila. */
-  .rkrow, .g-card, .sc-block{ box-shadow:0 2px 0 #0d0726, inset 0 1px 0 #ffffff18; }
-  .rkrow:active, .g-card:active{ transform:translateY(1px); box-shadow:0 1px 0 #0d0726, inset 0 1px 0 #ffffff18; }
+  /*+AG ⚠ 3-ago · `.rkrow` SALE DE AQUI. Esta pieza da el canto corto de "esto se puede tocar", y sus
+     dos compañeras lo cumplen: la tarjeta del Garaje abre la ficha de esa bola y el bloque de seccion
+     despliega. Las filas del Ranking NO tienen ni un `onclick` —comprobado con grep sobre todo el
+     fichero— y aun asi se hundian al pulsarlas igual que la tarjeta del Garaje. Son 51 filas por tres
+     pestañas prometiendo algo que no pasa, en una de las pantallas mas visitadas.
+     Se les quita la promesa en vez de inventarles un destino: adonde deberia llevar tocar la fila de
+     un rival es una decision de producto, no de CSS. Cuando se decida, vuelve aqui. */
+  .g-card, .sc-block{ box-shadow:0 2px 0 #0d0726, inset 0 1px 0 #ffffff18; }
+  .g-card:active{ transform:translateY(1px); box-shadow:0 1px 0 #0d0726, inset 0 1px 0 #ffffff18; }
 
   /*+AG 5 · LOS BOTONES DE OPCION de Ajustes (Bajo/Medio/Alto, Auto/Baja/Media/Alta, el daltonismo).
      ⚠ La primera version de este bloque apuntaba a `.seg`, una clase QUE NO EXISTE en el juego: me la
@@ -2877,6 +2907,18 @@
      El `min-width:0` no es decorativo: sin el, un hijo flex nunca baja de su tamaño min-content y
      el text-overflow no llega a dispararse. */
   .g-title{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  /*+AG PESTAÑAS DEL RANKING A 320 px: NO ARREGLADO, y queda dicho aqui para que nadie lo intente
+     otra vez por el mismo camino. En italiano («Per pallina»), aleman («Pro Kugel») y turco («Topa
+     gore») la pestaña parte en dos lineas y la fila pasa de 44 a 52 px.
+     Probe cuatro combinaciones de letra y padding midiendo los cuatro idiomas cada vez, y ninguna
+     gana las dos cosas: o el texto entra en una linea y el alto cae a 43 px —un pixel por debajo del
+     minimo tactil, y en TODOS los idiomas, español incluido— o el alto se respeta y el italiano se
+     sigue partiendo. Encoger mas la letra deja de leerse a esa anchura.
+     LA VIA LIMPIA es la que propuso el auditor y NO es CSS: acortar la palabra en esos tres
+     diccionarios («Pallina», «Kugel», «Topa»), que dentro de la pantalla de Ranking se entiende igual.
+     Son tres cadenas, pero tocar traducciones sin poder comprobarlas con alguien que hable el idioma
+     es decision de Jaime, no mia. */
 </style>
 
 <!--+AG doc 34 Fase B: #app = la "columna telefono" que contiene TODAS las pantallas y overlays (portrait) -->
@@ -3774,7 +3816,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=1687de6"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=7715590"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -7212,7 +7254,16 @@ el('rkArrL').onclick=()=>{ const st=el('rkStrip'); st.scrollLeft-=Math.max(120,s
 el('rkArrR').onclick=()=>{ const st=el('rkStrip'); st.scrollLeft+=Math.max(120,st.clientWidth*0.7); };
 el('rkStrip').onscroll=updateRkArrows;
 function openRanking(){ rkBallFilt=(equippedBall()||{}).arch||ARCH_KEYS[0]; showScreen('ranking'); paintRanking(); }
-document.querySelectorAll('#ranking .rktab').forEach(b=>b.onclick=()=>{ rkTab=b.dataset.rktab; paintRanking(); });
+//+AG ⚠ 3-ago · AL CAMBIAR DE PESTAÑA, LA LISTA VUELVE ARRIBA. El `scrollTop` es un numero y se
+//   conservaba aunque el contenido cambiara entero: si habias bajado al fondo de Global y tocabas
+//   Diario, aterrizabas a mitad de OTRA tabla, sin ver el podio y sin entender por que.
+document.querySelectorAll('#ranking .rktab').forEach(b=>b.onclick=()=>{ rkTab=b.dataset.rktab; paintRanking(); el('rkList').scrollTop=0; });
+//+AG ⚠ 3-ago · TOCAR "TU PUESTO" TE LLEVA A TU FILA. Con 51 filas, verte a ti mismo eran 2200 px de
+//   deslizar y no habia ningun atajo; y es lo primero que quiere ver cualquiera al abrir un ranking.
+//   No lleva texto nuevo (y por tanto no hay que traducir nada): la frase que ya dice «Tu puesto: #51
+//   de 51» ES la etiqueta del boton, y el CSS le ha dado el canto para que se lea como pulsable.
+el('rkMe').onclick=()=>{ const f=el('rkList').querySelector('.meRow');
+  if(f) f.scrollIntoView({ block:'center', behavior:'smooth' }); };
 //+AG el VOLVER del Ranking (#rkBack) se fue con la decision del 2-ago; su goHome() lo sigue dando la
 //   pestaña "Jugar" de la barra de abajo, que ya estaba enganchada por [data-nav=jugar] mas abajo.
 
