@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-03 fc9c665"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-03 ee0aaa6"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG ICONO EN LA PANTALLA DE INICIO (docs/40 §6). Jaime: "la gente esta acostumbrada a clicar en el
@@ -2995,7 +2995,21 @@
       <div class="ricon lock" id="rrClub"><img class="rico" src="arte/ui/ui-club.webp" alt=""><span class="rl" data-t="rClub">Club</span><img class="lk" src="arte/ui/ui-candado.webp" alt=""></div>
     </div>
     <div class="hero">
-      <div class="herotap" id="heroTap" role="button" tabindex="0">
+      <!--+AG 3-ago · EL PROTAGONISTA APARTA AL FONDO. Jaime, viendo su portada: las bolas del ambiente
+           le pasaban por encima a la bola equipada, una casi tocandole la cabeza. En Brawl el fondo
+           nunca cruza al personaje: si lo cruza, deja de haber un protagonista y hay seis bolas.
+           No hace falta inventar nada — `data-solid` YA existe en arte/ambient.mjs y ya lo aprobo el
+           director-de-arte para el numerote de Resultados («que ninguna bola se aparque encima»). El
+           ambiente lee estos rectangulos del DOM y rebota en ellos, asi que la exclusion se declara
+           donde se ve y no en la fisica. Va en `.herotap` ENTERO —bola, nombre y copas— porque el
+           rotulo se ensucia igual que el dibujo.
+           ⚠ TIENE UN PRECIO Y ESTA MEDIDO, no supuesto: con el centro cerrado, el fondo se agrupa mas
+           a la izquierda (donde estan sus pegs). Comparadas capturas del mismo segundo con y sin el
+           atributo, y probado tambien con el obstaculo SOLO en la bola (`#hBall`, mas bajo) por si
+           dejando paso por debajo se repartia mejor: da igual, el racimo sale con las dos. Se elige el
+           bloque entero porque protege ademas el nombre y las copas, que desde el 3-ago son la mitad
+           del protagonista. El racimo se deshace solo; no es un atasco permanente. -->
+      <div class="herotap" id="heroTap" role="button" tabindex="0" data-solid>
         <div class="platform">
           <div class="shadow"></div>
           <!--+AG la PROTAGONISTA de la Home tambien es la bola viva, no su retrato (Jaime, 31-jul:
@@ -3835,7 +3849,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=fc9c665"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=ee0aaa6"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
