@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-03 042f69e"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-03 6acb13c"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG ICONO EN LA PANTALLA DE INICIO (docs/40 §6). Jaime: "la gente esta acostumbrada a clicar en el
@@ -784,7 +784,13 @@
   .se-bar{ height:9px; border-radius:6px; background:var(--plate-b); overflow:hidden; margin-top:5px; } .se-bar .fill{ height:100%; background:linear-gradient(90deg,var(--gold2),var(--gold)); }
   .se-pase-hd{ display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
   .se-pase-hd .pg{ font-weight:900; font-size:var(--fs-4); } .se-pase-hd .pg small{ color:var(--muted); font-weight:800; }
-  .se-vias{ display:flex; gap:13px; font-size:var(--fs-2); font-weight:800; margin:3px 0 9px; } .se-vias .g{ color:#8fe0a8; } .se-vias .p{ color:#b39bff; }
+  /*+AG ⚠ 3-ago, misma regla de Jaime («algo pequeño en minusculas tiende a quedar mal»): esta leyenda
+     era lo UNICO en minusculas de su bloque, y encima nombra las dos cosas que dos filas mas abajo ya
+     van en mayusculas (los peldaños ponen GRATIS y PREMIUM). Es una leyenda: tiene que leerse igual
+     que aquello que etiqueta. El .06em es el de las etiquetas cortas del canon, no el .07 de los CTA:
+     aqui no hay trazo que separar, solo mayusculas que airear. */
+  .se-vias{ display:flex; gap:13px; font-size:var(--fs-2); font-weight:800; margin:3px 0 9px;
+    text-transform:uppercase; letter-spacing:.06em; } .se-vias .g{ color:#8fe0a8; } .se-vias .p{ color:#b39bff; }
   .se-track{ display:flex; gap:8px; overflow-x:auto; padding:2px 1px 9px; -webkit-overflow-scrolling:touch; }
   .se-rung{ flex:0 0 auto; width:64px; display:flex; flex-direction:column; align-items:center; gap:4px; }
   /*+AG docs/60 regla 9: el numero del peldaño y su etiqueta iban a 9 px — son 30 textos de la escalera
@@ -2214,7 +2220,17 @@
   /*+AG la etiqueta deja el gris y pasa a blanco con trazo. El trazo va FINO (1.4 px) a proposito: a
      9 px de cuerpo un contorno de los gordos se come el hueco de las letras y la palabra se emborrona.
      Medido mirando la captura, no calculado. */
+  /*+AG ⚠ 3-ago, Jaime mirando la portada: «el play, garaje, shop y todos esos se ven bien porque estan
+     en mayusculas. Sin embargo, arriba a la derecha pones friends, club y tal y lo pones en minusculas
+     […] cada vez que pones algo pequeño en minusculas tiende a quedar mal». Tenia razon y estaba a la
+     vista en la MISMA pantalla: el riel de la derecha (Noticias · Ranking · Amigos · Club) es
+     EXACTAMENTE el mismo patron que el nav de abajo —icono grande con una palabra debajo— y el nav
+     lleva `text-transform:uppercase` desde siempre. Eran los cuatro unicos de ese patron sin el.
+     El `letter-spacing` sube de .02 a .06em POR LAS MAYUSCULAS y POR EL TRAZO (canon 1.1 + la regla
+     que ya esta escrita arriba): una caja alta y sin bajadas necesita mas aire que una minuscula.
+     No llega al .07em de los CTA porque estos van a 9 px dentro de un azulejo de 48. */
   .ricon .rl{ font-size:var(--fs-1); color:#fff; -webkit-text-stroke:.25em #241a3f; paint-order:stroke fill;
+    text-transform:uppercase; letter-spacing:.06em;
     text-shadow:0 1px 0 #241a3f66; }
   /*+AG los bloqueados (Amigos, Club) siguen apagados: el canon les da grosor porque son botones, y la
      opacidad sigue diciendo "todavia no". Las dos cosas a la vez, como .sh-buy:disabled. */
@@ -2791,6 +2807,17 @@
     box-shadow:0 3px 0 #0d0726, inset 0 1px 0 #ffffff24; border-radius:13px;
     transition:transform .08s, box-shadow .08s; }
   .pr-code button:active, .pr-inv:active{ transform:translateY(2px); box-shadow:0 1px 0 #0d0726, inset 0 1px 0 #ffffff24; }
+  /*+AG ⚠ 3-ago, la MISMA regla de Jaime aplicada donde mas se notaba despues del riel: la pantalla de
+     Cuenta tenia sus tres cabeceras y sus cuatro pestañas en mayusculas y luego CINCO botones en
+     minusculas debajo (Ya tengo cuenta · Generar codigo · Traer mi partida · Cambiar · Cerrar sesion).
+     Son botones, o sea canon 1.1, y eran el unico sitio de la pantalla que no lo cumplia.
+     ⚠ NO ENTRA EL DE GOOGLE, y no es un olvido: es `.pr-g`, no `.pr-inv`. Su rotulo y su tipografia
+       los fija la marca de Google —es la condicion para poder poner su logo— y ponerlo en mayusculas
+       seria saltarsela. Que se vea distinto al de al lado es correcto ahi.
+     ⚠ SIN `letter-spacing` a proposito, al reves que en `.ricon .rl`: estos NO llevan trazo, asi que
+       no hay contorno que funda las letras, y la fila de tres a 11 px ya iba contada al pixel (el
+       comentario de #prAccCreate lo deja escrito). Ancho que no hace falta, ancho que no se gasta. */
+  .pr-inv, .pr-code button{ text-transform:uppercase; }
   /*+AG UN SOLO AMARILLO, Y ES ESTE (canon 6 de docs/56: maximo un CTA dominante por pantalla).
      La accion primaria de PERFIL > CUENTA es guardar la cuenta: es la que convierte a un invitado y la
      unica que el jugador se arrepiente de no haber pulsado. "Ya tengo cuenta", Google, Facebook,
@@ -3957,7 +3984,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=042f69e"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=6acb13c"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
