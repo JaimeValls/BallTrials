@@ -19,16 +19,22 @@ import { EmoBook } from '../motor/chassis/emotions.mjs';
 const sfx = () => {};   // el sonido lo manda el juego, no el fondo
 
 // ── presupuesto / configuración ───────────────────────────────────────────────
-const MOBILE = matchMedia('(max-width: 760px)').matches;
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 //+AG doc 41 bloque E: CALIBRADO PARA VERTICAL. La web corre esto en una pantalla ancha; en el
 //   movil del juego (430x860) el mismo mundo daba bolas gigantes que tapaban a la protagonista y
-//   se comian el texto. Subir WORLD_H encoge TODO a la vez (bolas, pegs, pendulo) porque estan en
-//   unidades de mundo, y de paso las hace caer mas despacio: queda de fondo, que es su trabajo.
-const PORTRAIT = innerHeight > innerWidth;
-const CAP = PORTRAIT ? 5 : (MOBILE ? 7 : 14);   // población máxima
-const WORLD_H = PORTRAIT ? 22 : 12;             // alto del mundo en unidades (el ancho sigue al aspect)
-const R = MOBILE ? 0.40 : 0.45;        // radio de bola
+//   se comian el texto. El mundo se mide en unidades, asi que cambiar su tamaño encoge TODO a la vez
+//   (bolas, pegs, pendulo) y de paso las hace caer mas despacio: queda de fondo, que es su trabajo.
+//+AG ⚠ 3-ago-2026 · EL MUNDO SE MIDE CON EL LIENZO, NO CON LA VENTANA. Jaime, mirando su portada:
+//   «las bolas se atascan... en PC las bolas son muy grandes y en movil no». Lo segundo salia de aqui:
+//   MOBILE y PORTRAIT le preguntaban a la VENTANA (matchMedia + innerHeight>innerWidth) cuando el
+//   lienzo es SIEMPRE la columna de movil — MEDIDO: en una ventana de 1440x900 el canvas es 460x900.
+//   En escritorio la ventana es apaisada, asi que salia el mundo "de web" (alto 12 en vez de 22) y la
+//   bola medía 67,5 px contra los 29,5 del movil: un 129% mas grande. Y encima CAP subia a 14 bolas
+//   dentro de esa misma columna, que es lo que se ve amontonado.
+//   Ahora hay UNA regla, y de ella sale todo lo demas: la bola ocupa siempre el mismo trozo del lado
+//   corto del lienzo. Cualquier aparato, cualquier ventana, el mismo fondo.
+const R = 0.40;              // radio de bola en unidades de mundo: la vara de medir de todo lo demas
+const DIAM_FRAC = 0.0787;    // el DIAMETRO de la bola = 7,87% del lado corto del lienzo (son los 29,5 px del movil de siempre)
 const GRAV = -15;
 const TEAMS = [                        // colores canónicos de competidor (docs/16)
   [0.910, 0.212, 0.184],  // rojo    #E8362F
@@ -60,10 +66,22 @@ export function startAmbient(canvas){
 
   const parts = createParticles(scene);
 
-  let W = 20;                                          // ancho del mundo (se fija en resize)
+  //+AG el mundo entero sale del LIENZO: `u` son las unidades de mundo que mide un pixel para que la
+  //   bola caiga siempre en DIAM_FRAC del lado corto. El ancho y el alto del mundo son lo que midan
+  //   el ancho y el alto del canvas en esas unidades — nadie mas decide el tamaño de nada.
+  let W = 10.16, WORLD_H = 22;                         // valores del movil; resize() pone los de verdad
+  function medirMundo(){
+    const u = 2 * R / (DIAM_FRAC * Math.min(cw(), ch()));
+    W = cw() * u; WORLD_H = ch() * u;
+  }
+  medirMundo();
+  //+AG poblacion por SUPERFICIE del mundo, tomando el movil de referencia (10,16 x 22 → 5 bolas).
+  //   Antes eran 14 en escritorio: la misma columna con casi el triple de bolas dentro.
+  const CAP = Math.max(4, Math.min(12, Math.round(5 * W * WORLD_H / (10.16 * 22))));   // población máxima
+
   function resize(){
     renderer.setSize(cw(), ch(), false);
-    W = WORLD_H * cw() / ch();
+    medirMundo();
     cam.left = -W / 2; cam.right = W / 2; cam.top = WORLD_H / 2; cam.bottom = -WORLD_H / 2;
     cam.updateProjectionMatrix();
     layoutObstacles();
@@ -88,10 +106,13 @@ export function startAmbient(canvas){
   // fracciones del viewport (fx: 0=izquierda 1=derecha; fy: 0=arriba 1=abajo)
   peg(0.06, 0.30, 0.26); peg(0.13, 0.52, 0.30); peg(0.05, 0.74, 0.26);
   peg(0.94, 0.34, 0.26); peg(0.87, 0.58, 0.30); peg(0.95, 0.80, 0.26);
-  if (!MOBILE){ peg(0.20, 0.16, 0.22); peg(0.80, 0.14, 0.22); }
+  //+AG estos dos van ARRIBA, y arriba de una columna de movil esta el heroe: solo en lienzo apaisado
+  //   (la web). Antes se montaban por !MOBILE, o sea por el ancho de la VENTANA, y aparecian justo en
+  //   la portada de escritorio, que es donde Jaime vio el amontonamiento.
+  if (cw() > ch()){ peg(0.20, 0.16, 0.22); peg(0.80, 0.14, 0.22); }
 
-  // trampolín (segmento horizontal que impulsa hacia arriba)
-  const tramp = { fx: 0.5, fy: 0.965, half: MOBILE ? 1.3 : 2.0, x: 0, y: 0 };
+  // trampolín (segmento horizontal que impulsa hacia arriba); su medio ancho se fija con el mundo
+  const tramp = { fx: 0.5, fy: 0.965, half: 1.3, x: 0, y: 0 };
   const trampMesh = new THREE.Mesh(new THREE.BoxGeometry(1, 0.22, 0.5),
     new THREE.MeshStandardMaterial({ color: 0xfbb915, roughness: 0.35, metalness: 0,
       emissive: 0xfbb915, emissiveIntensity: 0.35 }));
@@ -99,6 +120,7 @@ export function startAmbient(canvas){
 
   // péndulo lento (bola kinemática colgando; empuja con suavidad)
   const pend = { pfx: 0.86, pfy: 0.05, arm: 2.6, r: 0.55, x: 0, y: 0, vx: 0, vy: 0, px: 0, py: 0 };
+  let pendOn = true;                     // false = no cabe en este lienzo (ver layoutObstacles)
   const pendMesh = new THREE.Mesh(new THREE.SphereGeometry(pend.r, 28, 20),
     new THREE.MeshStandardMaterial({ color: 0x8a5cf0, roughness: 0.35, metalness: 0,
       emissive: 0x6a3ae0, emissiveIntensity: 0.5 }));
@@ -106,12 +128,33 @@ export function startAmbient(canvas){
     new THREE.MeshBasicMaterial({ color: 0xcdb9f2, transparent: true, opacity: 0.5 }));
   scene.add(pendMesh); scene.add(pendLine);
 
+  //+AG ⚠⚠ AQUI ESTABA EL ATASCO, Y NO ES UNA SOSPECHA: ESTA MEDIDO (tools/prueba-bolas-fondo.mjs).
+  //   Los obstaculos se colocan en FRACCIONES del ancho, asi que en una columna estrecha acaban pegados
+  //   a la pared dejando un pasillo de 0,05-0,35 unidades... con una bola de 0,80 de diametro. La bola
+  //   NO CABE, pero la fisica la mete igual: el peg la empuja hacia fuera, la pared la clava hacia
+  //   dentro, y se queda vibrando ahi para siempre (medido: 5 de 9 bolas clavadas 8 s seguidas en PC,
+  //   1 de 5 en movil). La regla nueva no tiene termino medio: o por el pasillo pasa una bola con
+  //   holgura, o el peg se hunde hasta la pared y deja de haber pasillo — con el centro en la pared,
+  //   toda bola queda por dentro del peg y el unico empujon posible es hacia el centro.
+  const PASO = 2 * R * 1.5;              // lo que necesita una bola para pasar de verdad, no de milagro
+  function sinPasilloTrampa(x, r){
+    if (x < 0 && (x - r) - (-W / 2) < PASO) return -W / 2;
+    if (x > 0 && (W / 2) - (x + r) < PASO) return  W / 2;
+    return x;
+  }
+
   function layoutObstacles(){
-    for (const p of pegs){ p.x = (p.fx - 0.5) * W; p.y = (0.5 - p.fy) * WORLD_H; p.m.position.set(p.x, p.y, -0.5); p.m.scale.set(p.r, p.r, p.r); }
+    for (const p of pegs){ p.x = sinPasilloTrampa((p.fx - 0.5) * W, p.r); p.y = (0.5 - p.fy) * WORLD_H; p.m.position.set(p.x, p.y, -0.5); p.m.scale.set(p.r, p.r, p.r); }
+    tramp.half = W * 0.128;              // el 1,3 de siempre en el mundo del movil, proporcional en cualquier otro
     tramp.x = (tramp.fx - 0.5) * W; tramp.y = (0.5 - tramp.fy) * WORLD_H;
     trampMesh.position.set(tramp.x, tramp.y, -0.5); trampMesh.scale.x = tramp.half * 2;
     pend.px = (pend.pfx - 0.5) * W; pend.py = (0.5 - pend.pfy) * WORLD_H;
     pend.x = pend.px; pend.y = pend.py - pend.arm; pend.vx = 0; pend.vy = 0;   // sin salto en el 1er frame
+    //+AG el pendulo atrapaba igual, y ademas se veia: en la columna de movil su bola se sale 1,08 (movil)
+    //   y 1,64 (PC) unidades POR FUERA de la pared derecha, o sea que barre justo el pasillo que le queda
+    //   a las bolas y de paso cruza la interfaz. Si no cabe entero con holgura, NO SE MONTA: es adorno.
+    pendOn = Math.abs(pend.px) + Math.sin(0.85) * pend.arm + pend.r + PASO <= W / 2;
+    pendMesh.visible = pendLine.visible = pendOn;
   }
 
   // ── colliders del DOM: las bolas rebotan en las tarjetas ([data-solid]) ─────
@@ -138,16 +181,19 @@ export function startAmbient(canvas){
   const book = new EmoBook(CAP, 20260702);
   let nextColor = Math.floor(Math.random() * TEAMS.length);
   let frame = 0;
+  let rescates = 0;                      // bolas devueltas arriba por llevar un segundo sin moverse
+  const donde = [];                      // y en que punto de la pantalla se quedaron clavadas
 
   function spawn(x, y, vx, vy){
     if (balls.length >= CAP){                           // recicla la más antigua
       const b = balls.shift(); balls.push(b);
       b.x = x; b.y = y; b.vx = vx; b.vy = vy; b.sq = 0;
+      b.rec = 0; b.qf = frame;                          // el vigilante empieza a contarle de cero
       pop(x, y, b.col); return b;
     }
     const color = TEAMS[nextColor++ % TEAMS.length];
     const mesh = makeBall(scene, { color }, R);
-    const b = { x, y, vx, vy, sq: 0, id: balls.length, col: sat(color), ...mesh };
+    const b = { x, y, vx, vy, sq: 0, id: balls.length, col: sat(color), rec: 0, qf: frame, ...mesh };
     balls.push(b); pop(x, y, b.col);
     return b;
   }
@@ -158,9 +204,14 @@ export function startAmbient(canvas){
   }
 
   // población inicial (repartida por la pantalla, cayendo ya) + goteo para reponer
-  const N0 = MOBILE ? 4 : 8;
+  //+AG ⚠ el reparto iba en unidades FIJAS (±9 de ancho, y entre 1 y 9) heredadas del mundo ancho de la
+  //   web. En la columna del juego el mundo mide 10,16 de ancho: media poblacion nacia FUERA de las
+  //   paredes y el primer frame la clavaba de golpe contra el canto, todas juntas. Va en fracciones del
+  //   mundo real, que es lo unico que vale cuando el mundo lo mide el lienzo.
+  const N0 = Math.max(3, CAP - 1);
   for (let i = 0; i < N0; i++){
-    spawn((Math.random() - 0.5) * 18, 1 + Math.random() * 8, (Math.random() - 0.5) * 2.5, -Math.random() * 2);
+    spawn((Math.random() - 0.5) * W * 0.82, WORLD_H * (0.05 + Math.random() * 0.4),
+          (Math.random() - 0.5) * 2.5, -Math.random() * 2);
   }
   let dripT = 0.8;
 
@@ -174,16 +225,19 @@ export function startAmbient(canvas){
   // ── física ──────────────────────────────────────────────────────────────────
   const DT_STEP = 1 / 60;
   function step(dt){
-    // péndulo kinemático
-    const ang = Math.sin(performance.now() * 0.00045) * 0.85;
-    const npx = pend.px + Math.sin(ang) * pend.arm, npy = pend.py - Math.cos(ang) * pend.arm;
-    pend.vx = (npx - pend.x) / dt; pend.vy = (npy - pend.y) / dt;
-    pend.x = npx; pend.y = npy;
-    pendMesh.position.set(pend.x, pend.y, -0.4);
-    pendLine.position.set((pend.px + pend.x) / 2, (pend.py + pend.y) / 2, -0.6);
-    pendLine.scale.y = pend.arm; pendLine.rotation.z = ang;
+    // péndulo kinemático (solo si cabe en este lienzo)
+    if (pendOn){
+      const ang = Math.sin(performance.now() * 0.00045) * 0.85;
+      const npx = pend.px + Math.sin(ang) * pend.arm, npy = pend.py - Math.cos(ang) * pend.arm;
+      pend.vx = (npx - pend.x) / dt; pend.vy = (npy - pend.y) / dt;
+      pend.x = npx; pend.y = npy;
+      pendMesh.position.set(pend.x, pend.y, -0.4);
+      pendLine.position.set((pend.px + pend.x) / 2, (pend.py + pend.y) / 2, -0.6);
+      pendLine.scale.y = pend.arm; pendLine.rotation.z = ang;
+    }
 
     for (const b of balls){
+      const ox = b.x, oy = b.y;          // para el cuentakilometros del vigilante (ver el bucle)
       b.vy += GRAV * dt;
       b.vx *= 0.999;
       if (b.vy < -18) b.vy = -18;
@@ -205,7 +259,7 @@ export function startAmbient(canvas){
       }
 
       // péndulo (empuja con su velocidad)
-      {
+      if (pendOn){
         const dx = b.x - pend.x, dy = b.y - pend.y, rr = R + pend.r, d2 = dx * dx + dy * dy;
         if (d2 < rr * rr && d2 > 1e-6){
           const d = Math.sqrt(d2), nx = dx / d, ny = dy / d;
@@ -242,23 +296,39 @@ export function startAmbient(canvas){
           b.x = cx + nx * R; b.y = cy + ny * R;
           const vn = b.vx * nx + b.vy * ny;
           if (vn < 0){
-            b.vx -= 1.4 * vn * nx; b.vy -= 1.4 * vn * ny;
+            //+AG ⚠ POR ARRIBA NO REBOTA (1.0 = aterrizaje muerto), Y LA RAZON ESTA MEDIDA. Con el 1,4
+            //   de los lados, la bola que cae sobre el techo del heroe da botes EN EL SITIO; y como la
+            //   deriva que la echa del borde solo actua mientras toca, botando casi no la empuja: 3 s
+            //   dando saltitos encima de la cabeza del protagonista. Aterrizando muerta toca todos los
+            //   frames, la deriva actua siempre y cruza y cae en poco mas de un segundo. De lado sigue
+            //   rebotando como antes: ahi el rebote es lo que la aparta de la tarjeta.
+            const reb = ny > 0.7 ? 1.0 : 1.4;
+            b.vx -= reb * vn * nx; b.vy -= reb * vn * ny;
             hit(b, nx, ny, -vn, 'thud');
           }
           if (ny > 0.7){                                 // encima de una tarjeta: rueda...
             b.vx *= 0.995;
             // ...y la superficie es sutilmente "convexa": deriva hacia el borde más cercano
             // y acaba cayendo → nada se queda aparcado para siempre (movimiento perpetuo).
+            //+AG ⚠ 3-ago-2026: "acaba cayendo" era verdad y aun asi estaba MAL. Con 1,1 la bola sale
+            //   rodando a medio metro por segundo y la tarjeta del heroe mide 7,1 de ancha: MEDIDO, se
+            //   quedaba hasta 5 s paseandose por encima de la cabeza del protagonista, que es la mitad
+            //   de las "cosas raras" que se ven en la portada. Con 4,5 cruza y cae en algo mas de un
+            //   segundo. No es una constante mas suelta: la vigila el banco, que mira cuanto aguanta
+            //   una bola posada en una tarjeta y se pone rojo pasados 3 s.
             const mid = (rc.x0 + rc.x1) / 2;
-            b.vx += (b.x >= mid ? 1 : -1) * 1.1 * DT_STEP;
+            b.vx += (b.x >= mid ? 1 : -1) * 4.5 * DT_STEP;
           }
         }
       }
 
+      b.rec += Math.hypot(b.x - ox, b.y - oy);       // ⚠ ANTES del sumidero: si no, el salto de reciclar
+                                                     //   se contaria como camino andado y taparia el atasco
       // sumidero: recicla por abajo
       if (b.y < -WORLD_H / 2 - 2){
         b.x = (Math.random() - 0.5) * W * 0.92; b.y = WORLD_H / 2 + 1.5;
         b.vx = (Math.random() - 0.5) * 2.5; b.vy = 0; b.sq = 0;
+        b.rec = 0; b.qf = frame;         // vuelve a nacer: el vigilante le cuenta desde cero
       }
     }
 
@@ -322,6 +392,39 @@ export function startAmbient(canvas){
       dripT -= DT;
       if (dripT <= 0 && balls.length < CAP){ topSpawn(); dripT = 1.6 + Math.random() * 2.2; }
     }
+    //+AG ⚠ LA RED DE SEGURIDAD, Y POR QUE SE CUENTA. Los pasillos imposibles ya no existen, pero una
+    //   bola tambien se puede quedar clavada por cosas que no dependen de esta fisica: una tarjeta
+    //   [data-solid] que llegue casi hasta el canto, un apilamiento contra el suelo, una pantalla que
+    //   cambia de tamaño. Esto es DECORADO: una bola congelada en la portada se ve fatal, asi que se
+    //   mira quien lleva tres segundos sin andar y se le devuelve arriba. Ahora bien, tapar el sintoma sin
+    //   que se entere nadie es como se pierden los fallos: cada rescate SE CUENTA y sale en debug(), y
+    //   el banco (tools/prueba-bolas-fondo.mjs) se pone ROJO si hay uno. La red salva al jugador, no al
+    //   codigo.
+    //   Cada bola lleva SU reloj (qf) y no el del mundo: con un reloj global, una bola que acaba de
+    //   nacer arriba llegaba al control habiendo caido cuatro dedos y se "rescataba" sola.
+    //+AG ⚠ SE MIDE EL CAMINO ANDADO, NO LA DISTANCIA ENTRE DOS FOTOS, Y LAS DOS COSAS ESTAN MEDIDAS.
+    //   Primer intento (1 s entre fotos): 11 rescates en 25 s a bolas que iban rodando tan tranquilas
+    //   por encima de una tarjeta. Segundo (3 s entre fotos): seguia cazando a una que pasaba a 3,7 de
+    //   velocidad y que casualmente volvio cerca de donde estaba. Una foto cada X segundos no distingue
+    //   "no se ha movido" de "ha ido y ha vuelto". El cuentakilometros si: una bola clavada no anda
+    //   camino ninguno, pase lo que pase alrededor.
+    for (const b of balls){
+      if (frame - b.qf < 180) continue;             // 3 s: por debajo de eso, no es un atasco, es una pausa
+      if (b.rec < 1.2){                             // menos de bola y media de camino en tres segundos
+        rescates++;
+        //+AG el SITIO del atasco, no solo la cuenta: "hay 2 rescates" no se puede arreglar, "se clavan
+        //   en el 0,86 de ancho y el 0,58 de alto" se va y se mira que hay ahi. Se guardan en fraccion
+        //   de pantalla, que es como se buscan las cosas mirando la Home.
+        donde.push({ fx: +((b.x / W) + 0.5).toFixed(3), fy: +(0.5 - (b.y / WORLD_H)).toFixed(3),
+                     vx: +b.vx.toFixed(2), vy: +b.vy.toFixed(2),
+                     vecinas: balls.filter(o => o !== b && Math.hypot(o.x - b.x, o.y - b.y) < R * 2.4).length });
+        if (donde.length > 12) donde.shift();
+        b.x = (Math.random() - 0.5) * W * 0.82; b.y = WORLD_H / 2 + 1.5;
+        b.vx = (Math.random() - 0.5) * 2.5; b.vy = 0; b.sq = 0;
+        pop(b.x, b.y, b.col);
+      }
+      b.rec = 0; b.qf = frame;                      // empieza otro tramo
+    }
     for (const b of balls){
       b.sq *= Math.exp(-7 * DT);
       b.g.position.set(b.x, b.y, 0);
@@ -343,5 +446,15 @@ export function startAmbient(canvas){
     running = false; ro.disconnect(); off.forEach(f => f());
     scene.traverse(o => { o.geometry && o.geometry.dispose(); o.material && (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => m.dispose()); });
     renderer.dispose();
-  } };
+  },
+  //+AG SONDA DE MEDIDA (la lee tools/prueba-bolas-fondo.mjs). Nace de un fallo que se veia a simple
+  //   vista y no se podia medir: "las bolas se atascan y en PC son el doble de grandes". De fuera solo
+  //   se ve un canvas pintado; el tamano real de una bola y si lleva 10 s sin moverse viven aqui dentro.
+  //   No calcula nada nuevo — asoma el estado tal cual — asi que no puede mentir sobre lo que pasa.
+  debug(){ return { W, WORLD_H, R, CAP, cw: cw(), ch: ch(), rescates, donde: donde.slice(),
+    rects: rects.map(r => ({ x0: +r.x0.toFixed(2), x1: +r.x1.toFixed(2), y0: +r.y0.toFixed(2), y1: +r.y1.toFixed(2) })),
+    pxPorUnidad: ch() / WORLD_H,                        // con esto, diametro en pantalla = 2*R*pxPorUnidad
+    balls: balls.map(b => ({ x: b.x, y: b.y, vx: b.vx, vy: b.vy })),
+    pegs: pegs.map(p => ({ x: p.x, y: p.y, r: p.r })),
+    pend: { x: pend.x, y: pend.y, r: pend.r, px: pend.px, arm: pend.arm, on: pendOn } }; } };
 }
