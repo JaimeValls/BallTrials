@@ -19,6 +19,7 @@ export const CAPAS_PROP = {
   chispa:  { fx: true },
   lapa:    { fx: true },
   meteoro: { fx: true },
+  pinball: { em: true },
   volcan:  { em: true },
   yunque:  { fx: true },
 };
