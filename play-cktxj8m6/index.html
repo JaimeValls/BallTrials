@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-03 7715590"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-03 fc9c665"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG ICONO EN LA PANTALLA DE INICIO (docs/40 §6). Jaime: "la gente esta acostumbrada a clicar en el
@@ -1172,6 +1172,13 @@
        el sitio donde los dos azules se veian uno al lado del otro. */
     background:linear-gradient(var(--nav-1),var(--nav-2)); border:1px solid #ffffff26; border-bottom:0; border-radius:26px 26px 0 0;
     box-shadow:0 -14px 40px #000b, inset 0 1px 0 #ffffff1f; padding:14px 16px 18px;
+    /*+AG 2-ago: la hoja no tenia NINGUN tope de alto — el que lo ponia era cada contenido por su cuenta
+       (52vh la lista de idiomas, 56vh el texto de informacion), y por eso ninguno sabia cuanto sitio
+       habia de verdad. El tope se sube aqui, UNA vez: 88% del alto de la pantalla (el 12% que queda es
+       el velo, la parte que dice "esto es una hoja y detras sigue habiendo juego"). Va en % y no en vh
+       a proposito: en pantalla ancha `#app` se topa en 940 px y es MAS BAJO que el viewport, asi que un
+       vh habria medido una pantalla que no es la del juego. */
+    max-height:88%;
     display:flex; flex-direction:column; gap:11px; }
   .sheetwrap.on .sheet{ animation:sheetin .34s cubic-bezier(.2,1.1,.4,1) both; }
   @keyframes sheetin{ 0%{ transform:translateY(100%) scaleY(1.08); } 70%{ transform:translateY(-6px) scaleY(.96); } 100%{ transform:translateY(0) scaleY(1); } }
@@ -1193,7 +1200,16 @@
      (VB Jaime: "very unprofessional"). Un juego que se pinta todo su chrome no puede dejar un widget
      del sistema operativo encima. Se oculta con lo MISMO que ya usa .rkstrip (el riel del ranking) en
      este fichero: se sigue deslizando, solo desaparece la barra. */
-  .langgrid{ display:grid; grid-template-columns:1fr 1fr; gap:7px; max-height:52vh; overflow-y:auto;
+  /*+AG ⚠ 2-ago · EL 52vh SE VA, y con el la razon por la que Jaime tenia que deslizar en el PC teniendo
+     media pantalla vacia por encima: «cuando se alarga en PC sobra mucho espacio por arriba y me veo en
+     la necesidad [de deslizar]». Medido en su ventana (475 de ancho, 917 de alto util): la lista entera
+     mide 509 px y el tope le daba 477 — se cortaba por 32 px, o sea POR UNA FILA, con 300 px de hueco
+     muerto encima. Un tope en `vh` no sabe cuanto sitio hay; solo sabe un porcentaje.
+     Ahora el tope lo pone la HOJA (`.sheet`, max-height:88%) y la lista se queda con lo que sobre
+     (`flex` + `min-height:0`, que es lo que deja encoger a un hijo de flex con overflow). O sea: si la
+     coleccion cabe, no se desliza; si no cabe, se desliza igual que antes. En un movil de 812 la lista
+     tambien deja de cortarse, que era el mismo fallo mas pequeño. */
+  .langgrid{ display:grid; grid-template-columns:1fr 1fr; gap:7px; flex:1 1 auto; min-height:0; overflow-y:auto;
     padding:2px 2px 4px; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
   .langgrid::-webkit-scrollbar{ display:none; }
   /*+AG auditoria supercell-ux/arte: las pastillas eran PLANAS (box-shadow:none medido) y por eso se
@@ -2514,7 +2530,10 @@
      1200 y no 68 porque ahora tambien tiene que salir ENCIMA DE LA PARTIDA, y el iframe del motor se
      monta con z-index:1000. Una pregunta de si/no es lo mas modal que tiene el juego: si aparece, manda. */
   #askSheet{ z-index:1200; }
-  .sheet .infotx{ font-size:var(--fs-3); line-height:1.55; color:#d6dcf7; max-height:56vh;
+  /*+AG 2-ago: mismo arreglo que la lista de idiomas y por la misma razon — el 56vh era el otro sitio
+     donde un contenido se ponia su propio tope sin saber cuanto sitio habia. El tope lo pone ya la hoja
+     (max-height:88%); aqui solo se declara que este bloque es el que encoge y el que desliza. */
+  .sheet .infotx{ font-size:var(--fs-3); line-height:1.55; color:#d6dcf7; flex:1 1 auto; min-height:0;
     overflow-y:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; padding:2px 2px 6px; }
   .sheet .infotx::-webkit-scrollbar{ display:none; }
   .sheet .infotx b{ color:#fff; }
@@ -3816,7 +3835,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=7715590"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=fc9c665"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
