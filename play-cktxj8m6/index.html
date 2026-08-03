@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-03 7334418"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-03 2364570"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG ICONO EN LA PANTALLA DE INICIO (docs/40 §6). Jaime: "la gente esta acostumbrada a clicar en el
@@ -3591,8 +3591,20 @@
        visible en las cinco, sus cinco pestañas alcanzables por elementFromPoint y navegando de verdad.
        Aqui ademas "Jugar" es #garTabJugar, que llama a goHome() igual que llamaba este boton.
        ⚠ SI ALGUN DIA UNA PANTALLA DE ESTAS PIERDE LA BARRA DE ABAJO, se queda sin salida: el VOLVER
-       tendria que volver a la vez, no despues. -->
+       tendria que volver a la vez, no despues.
+       ⚠⚠ ESA DECISION SE REVIERTE EL 3-AGO, Y ES DE JAIME OTRA VEZ. Se queda escrita arriba porque el
+       razonamiento no era falso —la pestaña encendida SI dice donde estas—, pero delante del juego
+       montado no le vale: «en el garaje de bolas no hay boton de volver al menu principal». O sea que
+       una pestaña llamada JUGAR, con su bandera, no se lee como "salir de aqui" aunque lleve al menu:
+       se lee como EMPEZAR UNA PARTIDA. Se le ofrecieron las tres salidas (dejarlo, el ‹ solo en el
+       Garaje, o el ‹ en las cinco) y eligio LAS CINCO, que ademas es la unica que no reabre la
+       inhomogeneidad que el mismo mando quitar. Asi que ahora el ‹ va en Garaje, Tienda, Temporada y
+       Perfil —el Ranking ya lo tenia desde docs/71— y el Inicio no lo lleva porque ES el destino.
+       La forma, el sitio y el porque de ‹ frente a ✕ estan escritos una sola vez, en el CSS de `.sback`.
+       Y no hace falta medir si la cabecera aguanta el boton de mas: `.g-top` ENVUELVE por construccion
+       (bloque de docs/60 en el CSS), asi que cuando los tres no caben las monedas bajan solas de linea. -->
   <div class="g-top">
+    <button class="sback" id="gBack" data-tt="back" data-tp="back" title="Atrás" aria-label="Atrás"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5 L8 12 L14.5 18.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     <div class="g-title" data-t="tGaraje">Garaje</div>
     <div class="h-coins" style="margin-left:auto">
       <div class="coin chispa"><img class="cico" src="arte/ui/moneda-chispa.webp?v=2" alt=""><span id="gChispas">0</span></div>
@@ -3655,8 +3667,10 @@
 <!-- ===== TIENDA (secciones, cero azar, puerta parental, doc 12) ===== -->
 <div id="tienda" class="scr">
   <div class="g-top">
-    <!--+AG sin VOLVER, misma decision que el Garaje (ver el comentario largo alli). La salida es
-         #shTabJugar en la barra de abajo, que ya llamaba a goHome() exactamente igual. -->
+    <!--+AG el ‹ VUELVE el 3-ago por peticion de Jaime, a las cuatro pantallas de pestaña a la vez: el
+         porque entero esta en el comentario largo del Garaje. La otra salida sigue existiendo y sigue
+         siendo la misma: #shTabJugar en la barra de abajo, que llama a goHome() exactamente igual. -->
+    <button class="sback" id="shBack" data-tt="back" data-tp="back" title="Atrás" aria-label="Atrás"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5 L8 12 L14.5 18.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     <div class="g-title" data-t="tTienda">Tienda</div>
     <div class="h-coins" style="margin-left:auto">
       <div class="coin chispa"><img class="cico" src="arte/ui/moneda-chispa.webp?v=2" alt=""><span id="shChispas">0</span></div>
@@ -3694,6 +3708,8 @@
 <!-- ===== TEMPORADA (Liga + Pase + Rankings + tema, doc 10) · placeholder fiel ===== -->
 <div id="temporada" class="scr">
   <div class="g-top">
+    <!--+AG el ‹ del 3-ago (peticion de Jaime, las cuatro a la vez): el porque en el Garaje. -->
+    <button class="sback" id="seBack" data-tt="back" data-tp="back" title="Atrás" aria-label="Atrás"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5 L8 12 L14.5 18.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     <div class="g-title" data-t="tTemp">Temporada</div>
     <div class="h-coins" style="margin-left:auto">
       <div class="coin chispa"><img class="cico" src="arte/ui/moneda-chispa.webp?v=2" alt=""><span id="seChispas">0</span></div>
@@ -3759,6 +3775,8 @@
 <!-- ===== PERFIL (identidad, amigos, referidos, emotes, consentimiento, doc 13) · placeholder fiel ===== -->
 <div id="perfil" class="scr">
   <div class="g-top">
+    <!--+AG el ‹ del 3-ago (peticion de Jaime, las cuatro a la vez): el porque en el Garaje. -->
+    <button class="sback" id="prBack" data-tt="back" data-tp="back" title="Atrás" aria-label="Atrás"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5 L8 12 L14.5 18.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     <div class="g-title" data-t="tPerfil">Perfil</div>
     <div class="h-coins" style="margin-left:auto">
       <div class="coin chispa"><img class="cico" src="arte/ui/moneda-chispa.webp?v=2" alt=""><span id="prChispas">0</span></div>
@@ -4060,7 +4078,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=7334418"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=2364570"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -6480,10 +6498,17 @@ function openDetail(k){ applyShell(); const A=ARCHS[k], b=owned(k), q=QUAL[A.q],
       prim.textContent=S().equipBtn; prim.disabled=false;
       //+AG EQUIPAR CIERRA LA FICHA (VB Jaime 26-jul). Antes se re-abria la ficha con el boton ya apagado
       //   ("✓ Equipada") y el jugador se quedaba parado: habia hecho lo que venia a hacer y la pantalla no
-      //   se movia, con la unica salida en la ✕ de arriba a la derecha, que no mira nadie. Ahora se comporta
-      //   como elegir personaje en Brawl Stars: eliges y te devuelve al Garaje, donde YA VES tu bola puesta.
-      //   El toast confirma; renderGaraje() antes de cerrar para que al aterrizar la marca ya este pintada.
-      prim.onclick=()=>{ SAVE.equipped=idx; persist(); renderGaraje(); closeDetail(); toast(S().tEquipped); };
+      //   se movia, con la unica salida en la ✕ de arriba a la derecha, que no mira nadie.
+      //+AG ⚠ 3-ago, Jaime: «cuando seleccionas equipar una bola no deberia mandarte al garaje, deberia
+      //   mandarte al menu principal. Has elegido la bola, te la has equipado, no quieres ir al garaje.»
+      //   Ese medio paso (cerrar la ficha y aterrizar OTRA VEZ en la rejilla de 12 bolas) era el resto de
+      //   la version vieja: el jugador ya ha terminado su recado y la pantalla le devuelve al catalogo,
+      //   que es justo lo que ya no necesita. Ahora equipar termina el viaje entero — goHome(), que es el
+      //   UNICO punto de retorno al menu — y ahi ve su bola nueva GRANDE de protagonista en la portada,
+      //   con el boton de JUGAR delante, que es lo siguiente que quiere hacer. El toast confirma la accion
+      //   por encima ya del menu. renderGaraje() se queda porque la rejilla tiene que llevar el galon
+      //   puesto para cuando vuelva, y va ANTES de cerrar para que no se vea repintar.
+      prim.onclick=()=>{ SAVE.equipped=idx; persist(); renderGaraje(); closeDetail(); goHome(); toast(S().tEquipped); };
     }
     ghost.style.display='none'; }
   //+AG doc 40: el boton grande brilla solo si se puede pulsar Y no hay ya otra cosa brillando en la ficha
@@ -7843,7 +7868,11 @@ document.querySelectorAll('.subtabs').forEach(grp=>{
     body.scrollTop=0;
   }));
 });
-el('homeGarTab').onclick=openGaraje; el('garTabJugar').onclick=goHome;   //+AG #gBack se fue el 2-ago: la salida es garTabJugar
+el('homeGarTab').onclick=openGaraje; el('garTabJugar').onclick=goHome;
+//+AG EL ‹ DE LAS CUATRO PANTALLAS DE PESTAÑA (3-ago, peticion de Jaime; el porque, en el marcado del
+//   Garaje). Los cuatro hacen exactamente lo mismo que su pestaña "Jugar" y que el ‹ del Ranking:
+//   goHome(), que es el UNICO punto de retorno al menu (ahi vive el aviso del icono de docs/65).
+['gBack','shBack','seBack','prBack'].forEach(id=>{ const b=el(id); if(b) b.onclick=goHome; });
 el('gdBack').onclick=closeDetail;
 el('gDetail').addEventListener('click',e=>{ if(e.target.id==='gDetail') closeDetail(); });
 el('homeShopTab').onclick=openTienda; el('garShopTab').onclick=openTienda;
@@ -8239,7 +8268,10 @@ atrasSync();
   //   existe y el CTA de verdad es .playbig, y asi se habrian quedado mudos 12 pulsables (los rieles de la
   //   portada, la bola-heroe, la banda del Pase, la tarjeta de modo, las casillas del Pase y la hoja de JUGAR).
   const SEL_CONFIRM = '.playbig, .sfmt, .sh-buy, .r-again, .onb-go, .gd-btn.prim, .se-cta';       // ARRANCA/COMPRA algo
-  const SEL_BACK    = '.gd-close, .gd-btn.back, .gd-btn.ghost, #setClose, .sclose, .sheetback, .onb-skip';   // cierra/vuelve
+  //+AG `.sback` entra el 3-ago con los cuatro ‹ nuevos: si docs/71 dice que las salidas hablan un solo
+  //   idioma, tambien SUENAN igual. Hasta hoy los dos que habia (#rkBack, #selBack) caian en SEL_TAP por
+  //   ser <button> y hacian el clic de una pestaña cualquiera, no el sonido de volver.
+  const SEL_BACK    = '.gd-close, .gd-btn.back, .gd-btn.ghost, #setClose, .sclose, .sback, .sheetback, .onb-skip';   // cierra/vuelve
   const SEL_NO      = '[disabled], .locked, .ricon.lock, .sc-soon, .soontag';                     // no se puede (todavia)
   //+AG las tarjetas GRANDES que te llevan a otra pantalla no suenan como una pestaña: llevan el swish de ABRIR.
   //   Jaime reporto que la tarjeta de cambiar modo "no sonaba"; medido, si sonaba — pero con el clic de 55 ms
