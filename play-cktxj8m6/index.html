@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-03 b81cd26"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-03 1763a13"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG ICONO EN LA PANTALLA DE INICIO (docs/40 §6). Jaime: "la gente esta acostumbrada a clicar en el
@@ -168,11 +168,16 @@
        COMO FUNCIONA: todos los iconos de sistema se dibujan en un viewBox de 24, asi que UN solo
        stroke-width ya es proporcional — el grosor en pantalla escala solo con el tamano de uso. La regla
        es por tanto un unico numero, y este token es su unica fuente. 3 = 12,5% del lado del icono.
-       DE DONDE SALE EL 3: de las capturas de Brawl (`arte/referencia/brawl/`). Alli las barras de la
-       hamburguesa miden ~22% del alto de su bloque, pero son formas MACIZAS; traducido a un icono de
-       linea con detalle (el de amigos tiene cuatro curvas juntas) ese 22% empasta. 3 es lo mas gordo que
-       aguantan TODOS los glifos sin fundirse — se comprobo mirando, no solo midiendo, que es como se
-       cazo el empastado de los codos del icono de pantalla completa. */
+       DE DONDE SALE EL 3, medido en pixeles sobre `arte/referencia/brawl/home.jpg` (no estimado a ojo):
+       la barra de la hamburguesa de Brawl mide 8,59 px, el hueco 4,24 y el bloque de tres 34,26 — o sea
+       la barra es el 25,1% del bloque y el hueco es la MITAD de la barra. Lo nuestro va al 16,5%.
+       ⚠ PERO NO SE PUEDE COPIAR ESE 25%, y se probo: subiendo el token a 4 la cabecera mejora —se
+       parece mas a Brawl— pero el icono de AMIGOS se vuelve un borron (sus dos figuras se funden) y el
+       regalo de INVITA Y GANA pierde el lazo. La razon es que los glifos de Brawl son SILUETAS MACIZAS
+       y los nuestros son de LINEA: una linea al 25% se come su propio hueco interior. 3 es lo mas gordo
+       que aguantan TODOS, comprobado MIRANDO cuatro pantallas capturadas.
+       O sea que el camino para tener el peso de Brawl de verdad NO es subir este numero: es redibujar
+       los glifos como siluetas macizas, y eso es un encargo de arte, no una linea de CSS. */
     --tz-ico:3; }
   /*+AG las texturas de la web (el mismo PNG, pasado a webp): la tribuna hace de horizonte en la Home y
      los doodles dan grano a las pantallas de contenido. Reutilizar el asset es lo que garantiza que
@@ -3922,7 +3927,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=b81cd26"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=1763a13"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
