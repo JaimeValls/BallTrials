@@ -40,7 +40,7 @@ import * as THREE from 'three';
 //   instalada. La escribe tools/partir-props.py mirando la carpeta del arte, y por eso vive ALLI y
 //   no aqui: quien fabrica esas capas es esa herramienta, asi que la lista se actualiza sola en el
 //   mismo gesto en el que se instala el arte. Ver arte/props/capas.mjs para el por que largo.
-import { CAPAS_PROP } from '../../arte/props/capas.mjs?v=edadccb';
+import { CAPAS_PROP } from '../../arte/props/capas.mjs?v=13a794a';
 
 const TEX = 256;                 // lienzo del sprite
 const SPAN = 3.2;                // el plano mide 3.2R -> 1R = 40 px de textura
@@ -198,9 +198,10 @@ export const PROP_KEYS = Object.keys(DRAW);
 //   solo que alli se tapo y aqui no, porque los props no se piden desde el HTML sino desde aqui.
 //   REGLA: si sustituyes el .webp de un prop YA DESPLEGADO, sube este numero. Uno solo vale para las
 //   tres capas — se despliegan juntas y no merece la pena llevarles la cuenta por separado.
-//   v3 -> v4 el 3-ago: el prop de Pinball pasa del sombrero de vaquero al bumper. Fichero
-//   sustituido = numero nuevo, o produccion seguiria sirviendo el sombrero una semana.
-const PROP_V = '?v=4';
+//   v3 -> v4 -> v5 el 3-ago: el prop de Pinball pasa del sombrero de vaquero al bumper, y del
+//   bumper unico a los DOS de la coronilla. Fichero sustituido = numero nuevo, o produccion
+//   seguiria sirviendo el anterior una semana.
+const PROP_V = '?v=5';
 //
 //  La ruta se resuelve contra import.meta.url y no contra la pagina: los tres modos viven en
 //  motor/<modo>/index.html pero la pagina de previsualizacion cuelga de otro sitio, y con una
@@ -269,13 +270,11 @@ const PLACE = {
   cohete:   { dx: 0.00, dy: -0.60, k: 1.49 },   // el casco del Aviador, mucho mas grande
   tanque:   { dx: 0.00, dy:  0.00, k: 1.00 },
   chispa:   { dx: 0.00, dy:  0.04, k: 1.00 },
-  //+AG EL BUMPER (3-ago, encargo 37), reencajado por lo mismo que el Espartano: la pieza llego
-  //   con semiancho 0.50R y a la altura donde apoya su falda la esfera mide 0.73R, o sea la falda
-  //   era MAS ESTRECHA que la bola y el bumper flotaba con un dedo de aire debajo. A k=1.40 la
-  //   falda abraza la coronilla. El dy compensa la subida que trae el escalado: sin el, el techo
-  //   se metia en la banda de 1.35R-1.55R del anillo YOU y la punta salia cortada. Con estos dos
-  //   numeros el techo queda en 1.314R, justo por debajo del tope.
-  pinball:  { dx: 0.00, dy: -0.38, k: 1.40 },
+  //+AG LOS DOS BUMPERS (3-ago). La pieza ya viene compuesta a su tamano final en el lienzo, asi
+  //   que aqui no hay nada que escalar ni mover: 1.00 y 0.00. El reencaje del bumper unico (k=1.40)
+  //   murio con el; se deja dicho porque el diagnostico sigue valiendo para cualquier pieza nueva:
+  //   si el semiancho de la pieza en su base es menor que el de la esfera a esa altura, flota.
+  pinball:  { dx: 0.00, dy: 0.00, k: 1.00 },
   lapa:     { dx: 0.00, dy:  0.02, k: 1.00, rot: 180, pivY: 0.896 },   // EL IMAN: girado 180 EN SU SITIO
   burbuja:  { dx: 0.00, dy:  0.00, k: 1.00 },
   meteoro:  { dx: 0.00, dy:  0.20, k: 1.00 },
