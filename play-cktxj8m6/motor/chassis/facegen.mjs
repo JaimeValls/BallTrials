@@ -292,7 +292,17 @@ export const HERO_FACE = {
   cohete:  { brow:'angry', browT:2.7, browY:17, browSl:0.75, rx:0.92, ry:0.80, pup:0.86, glow:0.70, iris:IRIS_AZUL,  mouth:'smirk',     mw:1.6 },
   tanque:  { brow:'flat',  browT:2.9, browY:19,              rx:0.94, ry:0.60, pup:0.84, glow:0.62, iris:'#8FA36B',  mouth:'neutral',   mw:2.1 },
   chispa:  { brow:'angry', browT:2.6, browY:16, browSl:0.65, rx:0.92, ry:0.82, pup:0.86, glow:0.72, iris:IRIS_AZUL,  mouth:'big_smile', mw:1.35 },
-  pinball: { brow:'angry', browT:2.6, browY:16, browSl:0.65, eye_r:'happy', rx:0.92, ry:0.82, pup:0.86, glow:0.72, iris:IRIS_AZUL, mouth:'big_smile', mw:1.25 },
+  //+AG 3-ago · PINBALL PIERDE EL GUIÑO. Llevaba `eye_r:'happy'` —el ojo derecho cerrado en arco—
+  //   y era la UNICA de las doce con un ojo cerrado. Venia de la paridad con su retrato de Tienda
+  //   (doc 51), que efectivamente guiña. Jaime, viendo su ficha: «tiene un ojo cerrado».
+  //   Se quita por dos razones, no por gusto: (1) ya se aprendio una vez que un ojo cerrado en un
+  //   menu no se lee como picardia sino como bola DORMIDA —es lo que obligo a cambiar 'feliz' por
+  //   'neutral' en chassis/vivas.mjs, y alli esta contado—; y (2) la paridad que lo justificaba
+  //   ya no existe: ese retrato lleva la banda blanca de bola de billar, un diseño que murio con
+  //   el rework a los cascos, y los menus montan la bola REAL del motor, no el retrato.
+  //   Si algun dia se quiere picardia en esta bola, va por EMOCION (el preset `chuleria` ya la
+  //   tiene) y dura lo que dura el gesto, no clavada en la cara de reposo.
+  pinball: { brow:'angry', browT:2.6, browY:16, browSl:0.65, rx:0.92, ry:0.82, pup:0.86, glow:0.72, iris:IRIS_AZUL, mouth:'big_smile', mw:1.25 },
   lapa:    { brow:'angry', browT:2.8, browY:18, browSl:0.85, rx:0.92, ry:0.74, pup:0.84, glow:0.66, iris:IRIS_AZUL,  mouth:'neutral',   mw:1.8 },
   burbuja: { brow:'none',                                    rx:1.0,  ry:1.02, pup:1.0,  glow:1.0,  iris:IRIS_HIELO, mouth:'open_o',    mw:0.9 },
   meteoro: { brow:'angry', browT:2.7, browY:17, browSl:0.75, rx:0.92, ry:0.78, pup:0.86, glow:0.68, iris:IRIS_AZUL,  mouth:'smirk',     mw:1.55 },
@@ -306,7 +316,10 @@ export const HERO_FACE = {
 //
 //  · REPOSO (neutral/blink) → el modificador ENTERO. Es la cara de la ficha, la que vende la bola.
 //    Excepto en 'blink', donde las claves del OJO se caen: con `eye:'blink'` puesto, el
-//    `eye_r:'happy'` de Pinball dejaria un ojo guiñando y el otro cerrado a la vez.
+//    `eye_l:'happy'` de Estrella dejaria un ojo guiñando y el otro cerrado a la vez.
+//    (El ejemplo era Pinball hasta el 3-ago; perdio su guiño, ver arriba. Estrella es ya la UNICA
+//    de las doce con un ojo cerrado en reposo, asi que si algun dia tambien se le quita, esta
+//    excepcion se queda sin caso y se puede simplificar.)
 //
 //  · TODO LO DEMAS (concentrada, susto, extasis, KO…) → solo el PESO de la ceja: grosor, caida y
 //    pendiente. Ni la forma de la ceja, ni la boca, ni los ojos.
