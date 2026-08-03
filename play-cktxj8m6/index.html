@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-03 6acb13c"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-03 ade307c"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG ICONO EN LA PANTALLA DE INICIO (docs/40 §6). Jaime: "la gente esta acostumbrada a clicar en el
@@ -1215,6 +1215,26 @@
   .sheet .stit{ font-size:var(--fs-3); font-weight:900; letter-spacing:.18em; color:var(--gold2); text-transform:uppercase; }
   .sclose{ position:relative; margin-left:auto; width:36px; height:36px; border-radius:50%; background:var(--plate-a); border:1px solid #ffffff2e; color:#fff; font-size:var(--fs-4); cursor:pointer; display:grid; place-items:center; }
   .sclose::before{ content:''; position:absolute; inset:-5px; border-radius:50%; }   /*+AG toque de 44 px sin engordar el dibujo */
+  /*+AG 3-ago-2026 · EL ATRÁS, la hermana izquierda de la ✕. Nace de una peticion de Jaime: «en algunos
+     sitios usamos cerrar y en otros volver; tenemos que unificar los lenguajes». La regla que queda
+     escrita, y que vale para toda pantalla nueva:
+       ✕ (.sclose)  = esto se abrio ENCIMA de lo que mirabas y al cerrarse te devuelve exactamente ahi.
+                      Va arriba a la DERECHA (por eso .sclose lleva margin-left:auto).
+       ‹ (.sback)   = esto SUSTITUYO a la pantalla anterior y te lleva a otro sitio.
+                      Va arriba a la IZQUIERDA, o sea SIN margin-left:auto y primero en el DOM.
+     Nunca las dos en la misma cabecera: obligarian al jugador a decidir cual de las dos hace lo que
+     quiere. La unica convivencia legitima es la hoja de pregunta, donde la ✕ es la salida y los dos
+     botones de texto son la DECISION, que no es lo mismo.
+     ⚠ La forma no la elijo yo: docs/57 (tabla del kit) declara canonico para el VOLVER una «placa
+     redonda con galon, tamaño tactil» y nombra este mismo id `#rkBack`. Es la forma que ya llevan las
+     otras dos salidas de este tipo (el galon de Resultados y el de la ficha de bola), asi que .sback
+     hereda el mismo gradiente y el mismo hundido en el bloque del kit de mas abajo.
+     ⚠ position:relative NO es decorativo: sin el, el halo tactil de ::before (que existe para llegar a
+     los 44 px sin engordar el dibujo) se ancla al primer padre posicionado y se convierte en una lamina
+     invisible por encima de media pantalla que se come los toques de todo lo que hay debajo. */
+  .sback{ position:relative; width:36px; height:36px; border-radius:50%; background:var(--plate-a); border:1px solid #ffffff2e; color:#fff; cursor:pointer; display:grid; place-items:center; }
+  .sback::before{ content:''; position:absolute; inset:-5px; border-radius:50%; }
+  .sback svg{ width:20px; height:20px; display:block; }
   /*+AG REJILLA DE IDIOMAS (doc 49). DOS columnas porque 20 filas de una en una no caben en una hoja
      inferior (20 x 44 px = 880). Con dos columnas son ~10 filas y entra casi entero; el resto desliza
      dentro de la lista, que es lo correcto para una coleccion. 52vh de tope: por debajo del titulo y
@@ -1962,7 +1982,12 @@
      colgadas dos correcciones medidas — el halo de +5 px (pieza 18) y el min-height:44px (pieza 19).
      Borrarla dejaria esas tres notas sin sujeto. Si algun dia vuelve un VOLVER a una pantalla, esta
      es la forma que tiene que tener; si se decide que no vuelve nunca, se retira ENTERA con sus tres
-     notas y las de las lineas 1548, 1617, 1742, 1959 y 2191. */
+     notas y las de las lineas 1548, 1617, 1742, 1959 y 2191.
+     ⚠ 3-ago-2026, Y AQUI ESTA LA RESPUESTA A ESE «si algun dia vuelve»: SI HA VUELTO, a Modos y a
+     Ranking, pero NO con esta forma rectangular. Ha vuelto como `.sback`, la placa REDONDA con galon,
+     que es lo que la tabla del kit de docs/57 pide literalmente para el VOLVER («placa redonda con
+     galon, tamaño tactil») nombrando incluso este `#rkBack`. Un rectangulo con la palabra dentro
+     obligaria ademas a traducir «VOLVER» a 20 lenguas en el sitio mas estrecho de la cabecera. */
   .g-back{ background:linear-gradient(var(--nav-1),var(--nav-2)); border:1px solid #ffffff30; color:#dfe4ff;
     box-shadow:0 3px 0 #0d0726, inset 0 1px 0 #ffffff24; border-radius:13px; padding:8px 14px 8px 11px;
     display:inline-flex; align-items:center; gap:5px; transition:transform .08s, box-shadow .08s; }
@@ -1970,9 +1995,9 @@
   .g-back:active{ transform:translateY(2px); box-shadow:0 1px 0 #0d0726, inset 0 1px 0 #ffffff24; }
   /*+AG las dos salidas REDONDAS (la ✕ del selector de modos y el galon de Resultados) hablan el mismo
      idioma que .g-back aunque no compartan clase: son la misma funcion con otra forma. */
-  .sclose, .r-home.ico, .gd-close{ background:linear-gradient(var(--nav-1),var(--nav-2)); border:1px solid #ffffff30;
+  .sclose, .sback, .r-home.ico, .gd-close{ background:linear-gradient(var(--nav-1),var(--nav-2)); border:1px solid #ffffff30;
     color:#dfe4ff; box-shadow:0 3px 0 #0d0726, inset 0 1px 0 #ffffff24; transition:transform .08s, box-shadow .08s; }
-  .sclose:active, .r-home.ico:active, .gd-close:active{ transform:translateY(2px); box-shadow:0 1px 0 #0d0726, inset 0 1px 0 #ffffff24; }
+  .sclose:active, .sback:active, .r-home.ico:active, .gd-close:active{ transform:translateY(2px); box-shadow:0 1px 0 #0d0726, inset 0 1px 0 #ffffff24; }
 
   /*+AG 3 · LA BARRA DE 5 PESTAÑAS de abajo. Va en las cinco pantallas, asi que es el elemento mas
      repetido del juego — y estaba entero sin idioma.
@@ -3215,8 +3240,14 @@
        el ESTADO (la carta elegida se marca) y con el flujo (JUGAR vive en el inicio, no aqui). Si algun
        dia hay que ensenarla, va como coach-mark de un solo uso reusando el patron de COMO JUGAR. -->
   <div class="selhead">
+    <!--+AG 3-ago-2026: era una ✕ cuyo rotulo decia «Volver al inicio». El dibujo prometia una cosa
+         (cerrar esto y quedarte donde estabas) y la palabra otra (irte al Inicio), y lo que hacia era
+         lo segundo. Modos no se abre ENCIMA de nada: sustituye a la pantalla anterior y te deja en el
+         Inicio, asi que le toca el galon ‹ arriba a la izquierda. La regla completa esta en `.sback`.
+         El id pasa de selClose a selBack a proposito: un id que dice «close» en un boton que vuelve es
+         la misma mentira, solo que escrita para quien lea el codigo dentro de seis meses. -->
+    <button class="sback" id="selBack" data-tt="back" data-tp="back" title="Atrás" aria-label="Atrás"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5 L8 12 L14.5 18.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     <h1 data-t="selTitle">MODOS</h1>
-    <button class="sclose" id="selClose" data-tt="backHome" title="Volver al inicio"><svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6.8 6.8 L17.2 17.2"/><path d="M17.2 6.8 L6.8 17.2"/></g></svg></button>
   </div>
   <div class="modegrid" id="modegrid">
     <!--+AG carta v3: BANDA (icono pequeño + nombre) + IMAGEN REAL de la pista de ese modo. Los stills
@@ -3271,6 +3302,16 @@
          `.h-tabs` visible (360x640: y=577, alto 63) con las cinco pestañas alcanzables, y pulsando
          "Jugar" [data-nav=jugar] se llega a #home — el mismo destino que daba este boton, y el mismo
          sitio donde vive el riel por el que has entrado. Las otras cuatro llevan a su pantalla. -->
+    <!--+AG 3-ago-2026: EL ATRAS VUELVE, Y SOLO A ESTA. Jaime: «en algunos menús o secciones no hay
+         volver o retroceder; creo que un ejemplo es el ranking». Tenia razon y el comentario de abajo
+         explica por que se fue y por que ahora vuelve solo aqui: las otras cuatro pantallas con barra
+         de abajo (Garaje, Tienda, Temporada, Perfil) SON una de las cinco pestañas y salen con su
+         pestaña ENCENDIDA, o sea que la barra te dice donde estas y por donde se sale. El Ranking no
+         es pestaña de nadie: se entra por el riel de la portada y por la banda de copas, y la barra
+         sale con las cinco apagadas. Ahi el jugador no tiene ninguna marca de donde esta, y ese es el
+         caso exacto que pide un ‹ propio. Va arriba a la IZQUIERDA porque lleva a otro sitio (el
+         Inicio) y no cierra nada encima: la regla entera esta escrita en el CSS de `.sback`. -->
+    <button class="sback" id="rkBack" data-tt="back" data-tp="back" title="Atrás" aria-label="Atrás"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5 L8 12 L14.5 18.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     <div class="g-title"><img class="cico" src="arte/ui/moneda-copa.webp?v=2" alt=""> <span data-t="rRanking">Ranking</span></div>
   </div>
   <!--+AG doc 60 fase F2: los cuatro bloques de cabecera del Ranking pasan a vivir DENTRO de una placa
@@ -3975,7 +4016,11 @@
     <h3 data-t="cdTitle">Canjear código</h3>
     <p data-th="cdIntro"></p>
     <input class="pg-in" id="codeIn" inputmode="text" autocomplete="off" placeholder="BT-VERANO" data-tp="cdLabel" aria-label="Código" style="letter-spacing:.1em">
-    <div class="pg-btns"><button class="pg-no" id="codeNo" data-t="close">Cerrar</button><button class="pg-ok" id="codeOk" data-t="cdBtn">Canjear</button></div>
+    <!--+AG 3-ago-2026: este boton decia «Cerrar» y el mismo boton de la puerta de padres decia
+         «Cancelar». Son la misma funcion (irse de un dialogo que pide una decision sin tomarla) y
+         ahora dicen la misma palabra. La regla que queda: en un dialogo con decision, el boton que no
+         hace nada se llama CANCELAR; «cerrar» es la palabra de la ✕, no la de un boton de texto. -->
+    <div class="pg-btns"><button class="pg-no" id="codeNo" data-t="cancel">Cancelar</button><button class="pg-ok" id="codeOk" data-t="cdBtn">Canjear</button></div>
     <div class="code-msg" id="codeMsg"></div>
   </div>
 </div>
@@ -3984,7 +4029,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=6acb13c"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=ade307c"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -6926,10 +6971,32 @@ const QUIZ={
 //   currentColor) para que herede el color de la chapa y no dependa de la fuente de emojis del movil.
 const recSvg='<svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.2 L13.6 10.4 L19.8 12 L13.6 13.6 L12 19.8 L10.4 13.6 L4.2 12 L10.4 10.4 Z"/></g></svg>';
 let onbRec='cohete', onbSel='cohete';
+//+AG 3-ago-2026 · EL CAMINO ANDADO, para que el atras del movil retroceda una pregunta. Antes el quiz no
+//   estaba en la lista de capas del atras, asi que el atras se saltaba a la capa de abajo y acababa
+//   sacando de la web a un jugador que esta en su PRIMERA pantalla. Se apunta el camino y no se calcula
+//   al reves porque el quiz es un arbol: a "elige tu bola" se llega por dos ramas distintas, y sin el
+//   camino no hay forma de saber por cual se vino.
+const onbRuta=[];
+//+AG en la primera pregunta NO HACE NADA a proposito, y eso es una decision, no un olvido: no hay paso
+//   anterior al que volver, y las dos alternativas son peores. Saltarse el quiz marcaria la partida como
+//   "ya iniciado" para siempre por un gesto sin querer, y dejar caer el atras a la capa de abajo es
+//   justamente el fallo que esto viene a arreglar. Al no cerrarse nada, el reconciliador vuelve a apilar
+//   la entrada y el jugador se queda donde estaba, que es lo que hace cualquier juego serio.
+function onbAtras(){
+  if(onbRuta.length < 2) return;
+  onbRuta.pop();                                  // el paso en el que estoy
+  const previo = onbRuta.pop();                   // el anterior; onbQuizStep lo vuelve a apuntar solo
+  el('onbPick').style.display='none'; el('onbQuiz').style.display='';
+  onbQuizStep(previo);
+}
 function onbQuizStep(node){ const s=S(), n=QUIZ[node]; el('onbQ').textContent=s[n.q]||n.q; const box=el('onbOpts'); box.innerHTML='';
+  if(onbRuta[onbRuta.length-1] !== node) onbRuta.push(node);
   n.opts.forEach(o=>{ const b=document.createElement('button'); b.className='onb-opt'; b.innerHTML=`<img class="em" src="arte/ui/${o.ic}.webp" alt="">${(s.quizOpts||{})[o.t]||o.t}`;
     b.onclick=()=>{ if(o.arch){ onbRec=onbSel=o.arch; onbPickStep(); } else onbQuizStep(o.go); }; box.appendChild(b); }); }
 function onbPickStep(){ el('onbQuiz').style.display='none'; el('onbPick').style.display='';
+  //+AG se apunta una sola vez: esta funcion se vuelve a llamar en cada toque de carta para repintar la
+  //   seleccion, y apuntar en cada repintado dejaria el camino lleno de "elige tu bola" repetidos.
+  if(onbRuta[onbRuta.length-1] !== 'pick') onbRuta.push('pick');
   const box=el('onbCards'); box.innerHTML='';
   //+AG doc 39: la primera bola GRATIS se elige entre las 5 fundadoras (el quiz apunta a ellas); el resto del
   //   roster de 12 se descubre en Garaje/Tienda. Pendiente de balance: pinball/lapa/bunker gratis aquí vs su precio.
@@ -6947,7 +7014,7 @@ function onbFinish(){ SAVE.balls=[{arch:onbSel,lvl:1,xp:0,copas:0}]; SAVE.equipp
   apunta('ball_get', { arch:onbSel, via:'onboarding', recomendada:onbSel===onbRec });
   el('onb').classList.remove('on'); toast(S().tFirstBall(archName(onbSel))); openGaraje(); }
 function onbSkipFn(){ SAVE.onboarded=true; persist(); onbPendiente(false); el('onb').classList.remove('on'); goHome(); }
-function startOnboarding(){ applyShell(); onbRec=onbSel='cohete'; el('onbQuiz').style.display=''; el('onbPick').style.display='none'; onbQuizStep('start'); el('onb').classList.add('on'); }
+function startOnboarding(){ applyShell(); onbRec=onbSel='cohete'; onbRuta.length=0; el('onbQuiz').style.display=''; el('onbPick').style.display='none'; onbQuizStep('start'); el('onb').classList.add('on'); }
 
 // ===== BIENVENIDA: se OFRECE Google antes del quiz, y saltarla cuesta un toque =====
 //+AG Peticion de Jaime (2026-07-27): "al entrar por primera vez te tiene que intentar loguear con
@@ -7629,7 +7696,12 @@ document.querySelectorAll('.tile[data-mode]').forEach(t=>{ t.onclick=()=>{   // 
 //+AG el toast decia "Se desbloquea en el Nivel 5" para dos modos QUE NO EXISTEN: promesa con fecha que no se
 //   puede cumplir. Ahora dice lo unico cierto — se esta construyendo. Cuando el modo tenga motor, vuelve lockLvl().
 document.querySelectorAll('.tile[data-soonmode]').forEach(t=>{ t.onclick=()=>toast(S().modeSoonToast(modeTitle(t.dataset.soonmode))); });
-el('selClose').onclick=goHome;
+el('selBack').onclick=goHome;
+//+AG 3-ago-2026: el Ranking recupera su salida propia. Va a goHome() y no a un history.back() porque
+//   al Ranking se entra SIEMPRE desde el Inicio (el riel de la portada y la banda de copas son sus dos
+//   unicas puertas), asi que "atras" y "al Inicio" son el mismo sitio, y goHome() lo deja ademas
+//   repintado. El reconciliador del historial se encarga solo de devolver la entrada que sobra.
+el('rkBack').onclick=goHome;
 el('modecompact').onclick=openSelector;
 el('modecompact').addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openSelector(); } });
 //+AG "CAMBIAR" ya no es un boton propio (VB Jaime 2026-07-27): es la etiqueta .mcgo y la abre la tarjeta.
@@ -7877,10 +7949,22 @@ let atrasComiendo = 0;     // entradas devueltas por nosotros: su popstate es un
 //   fichero): el atras cierra la de encima del todo, que es la unica que el jugador esta mirando.
 const ATRAS_CAPAS = [
   { id:'ask',      abierta:()=>el('askSheet').classList.contains('on'),  cierra:()=>askCierra(false) },   // cerrar es decir que NO, como el velo
+  //+AG 3-ago-2026 · LAS TRES CAPAS QUE FALTABAN, y las tres se comprobaron con el navegador de verdad
+  //   antes de tocar nada. Ninguna estaba en esta lista, asi que el atras las ignoraba y cerraba lo que
+  //   hubiera DEBAJO: con el cartel de compra abierto, un atras te devolvia al Inicio dejando el cartel
+  //   flotando encima, y el segundo te sacaba de la web con el cartel todavia puesto. Con la bienvenida
+  //   abierta bastaba UN atras para irte del sitio. Son la primera pantalla que ve un jugador nuevo y la
+  //   pantalla donde alguien esta a punto de pagar: los dos peores sitios posibles para eso.
+  //   ⚠ EL ORDEN DE ESTA LISTA ES EL ORDEN DE APILADO EN PANTALLA, no el del fichero: la bienvenida (71)
+  //   y el quiz (70) van por encima de todo menos de la hoja de pregunta (1200), y el cartel de compra
+  //   (55) va con el canje, que es su mismo piso.
+  { id:'bienvenida', abierta:()=>el('wel').classList.contains('on'),     cierra:welSkipFn },   // el atras = "jugar como invitado", que es lo mismo que ofrece el boton
+  { id:'quiz',       abierta:()=>el('onb').classList.contains('on'),     cierra:onbAtras },    // vuelve UNA pregunta, no se salta el quiz entero
   { id:'info',     abierta:()=>el('infoSheet').classList.contains('on'), cierra:closeInfo },
   { id:'idioma',   abierta:()=>el('langSheet').classList.contains('on'), cierra:closeLangSheet },
   { id:'formato',  abierta:()=>el('fmtSheet').classList.contains('on'),  cierra:closeSheet },
   { id:'canje',    abierta:()=>el('code').style.display==='flex',        cierra:closeCode },
+  { id:'compra',   abierta:()=>el('parent').classList.contains('on'),    cierra:()=>el('parent').classList.remove('on') },
   { id:'ajustes',  abierta:()=>el('settings').classList.contains('on'),  cierra:closeSettings },
   { id:'ficha',    abierta:()=>el('gDetail').classList.contains('on'),   cierra:closeDetail },
   //+AG LA PARTIDA NO SE CIERRA SOLA: SE PREGUNTA (decision de Jaime, 2-ago, mirando a Clash Royale —
