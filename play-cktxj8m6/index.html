@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-03 13a794a"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-03 b81cd26"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG ICONO EN LA PANTALLA DE INICIO (docs/40 §6). Jaime: "la gente esta acostumbrada a clicar en el
@@ -158,7 +158,22 @@
      packs de la Tienda (.sh-pack .amt small) sin valor de respaldo, asi que ese texto salia del color
      heredado en vez de verde. Se toma el mismo verde del boton de comprar que tiene justo al lado. */
   :root{ --gold:#fbb915; --gold2:#ffd23f; --cyan:#18c7d6; --line:#ffffff1a; --red:#e0293d; --green:#5bc46a;
-    --bg-hi:#6d3ae0; --bg:#5024b5; --bg-mid:#3a1a8f; --bg-lo:#241159; }
+    --bg-hi:#6d3ae0; --bg:#5024b5; --bg-mid:#3a1a8f; --bg-lo:#241159;
+    /*+AG 3-ago · EL TRAZO DEL ICONO, que hasta hoy no tenia regla ninguna (docs/70). La letra si la tenia
+       (--bstroke, proporcional al cuerpo) y por eso es homogenea; los iconos nacieron cada uno con el
+       grosor que le puso quien lo dibujo: 2,2 en las hojas, 2,6 en cerrar/atras, 7+2,6 a dos capas en el
+       de pantalla completa, y los que son .webp con el trazo horneado dentro. Jaime lo vio de un vistazo
+       ("en algunos sitios hay un pixel, en otros hay grosor, no hay reglas") ANTES que los dos auditores,
+       que daban verde porque no tenian contra que medir.
+       COMO FUNCIONA: todos los iconos de sistema se dibujan en un viewBox de 24, asi que UN solo
+       stroke-width ya es proporcional — el grosor en pantalla escala solo con el tamano de uso. La regla
+       es por tanto un unico numero, y este token es su unica fuente. 3 = 12,5% del lado del icono.
+       DE DONDE SALE EL 3: de las capturas de Brawl (`arte/referencia/brawl/`). Alli las barras de la
+       hamburguesa miden ~22% del alto de su bloque, pero son formas MACIZAS; traducido a un icono de
+       linea con detalle (el de amigos tiene cuatro curvas juntas) ese 22% empasta. 3 es lo mas gordo que
+       aguantan TODOS los glifos sin fundirse — se comprobo mirando, no solo midiendo, que es como se
+       cazo el empastado de los codos del icono de pantalla completa. */
+    --tz-ico:3; }
   /*+AG las texturas de la web (el mismo PNG, pasado a webp): la tribuna hace de horizonte en la Home y
      los doodles dan grano a las pantallas de contenido. Reutilizar el asset es lo que garantiza que
      peguen. La OPACIDAD va horneada en el alfa del propio archivo (40% y 5,5%): asi son capas de
@@ -2951,6 +2966,51 @@
      diccionarios («Pallina», «Kugel», «Topa»), que dentro de la pantalla de Ranking se entiende igual.
      Son tres cadenas, pero tocar traducciones sin poder comprobarlas con alguien que hable el idioma
      es decision de Jaime, no mia. */
+
+  /* ══ 24 · EL TRAZO DEL ICONO TIENE REGLA, Y LA CABECERA DEJA DE TENER DOS AMARILLOS ═════════════
+     3-ago, a raiz de la bronca de Jaime: «veo trazos poco consistentes, en algunos sitios hay un
+     pixel, en otros hay grosor, mira el icono de expandir; el boton de ajustes es una mierda igual,
+     no hay trazo». Tenia razon y era medible: 19 iconos a 2,2 · 18 a 2,6 · el de pantalla completa a
+     dos capas (7 oscuro + 2,6 blanco) · y los .webp con el trazo horneado dentro. Cuatro sistemas.
+
+     ⚠ Y AL PEDIRLE LAS CAPTURAS DE BRAWL SALIO ALGO PEOR: no estaban en el repo. `docs/56` no era la
+     referencia, era una TRANSCRIPCION escrita mirandola aquel dia — y tiene un error que nos ha
+     costado la cabecera entera. Dice «Ajustes = hamburguesa AMARILLA arriba a la derecha». En la
+     captura real la hamburguesa de Brawl esta sobre PLACA GRIS OSCURA; el amarillo lo llevan PLAY y
+     los botones de contenido, nadie mas. De aquel error nacio nuestro boton de Ajustes amarillo, y
+     detras el de pantalla completa (que reusa `.h-ic` entero) — o sea DOS amarillos en la fila de
+     arriba peleandose con JUGAR, que es justo lo que prohibe la regla 6 del propio canon. Ya se
+     habia notado el sintoma (el 1-ago se bajo Ajustes de 46 a 40 px «porque se comia la mirada»)
+     pero se trato el tamano en vez de la causa. Las capturas ahora viven en `arte/referencia/brawl/`.
+
+     LAS DOS REGLAS QUE SALEN DE LA CAPTURA REAL:
+     1. Icono de sistema (atras, cerrar, info, hamburguesa, pantalla completa) = BLANCO sobre placa
+        oscura, un unico grosor. Brawl no pone ningun icono monocromo sobre amarillo.
+     2. Un unico stroke-width para todos, via --tz-ico. Como todos se dibujan en viewBox 24, ese
+        numero unico YA es proporcional: el grosor en pantalla escala solo con el tamano de uso.
+
+     El selector va por `[fill="none"]`, que es lo que llevan TODOS los iconos de linea y no lleva
+     ninguna otra cosa: los triangulos de JUGAR (.tri) pintan en viewBox 64 y cogen su fill del CSS,
+     asi que se quedan fuera solos, sin lista de excepciones que mantener. */
+  #app svg [fill="none"]{ stroke-width:var(--tz-ico); }
+
+  /*+AG la cabecera pasa a la placa marino de las pildoras de moneda (.coin): mismo degradado, mismo
+     canto, mismo bisel. No es un color nuevo, es el que ya tenia al lado. */
+  .h-ic, .h-ic.h-fs{ background:linear-gradient(var(--nav-1),var(--nav-2));
+    border:1px solid #ffffff30; box-shadow:0 3px 0 #0d0726, inset 0 1px 0 #ffffff2e; }
+  .h-ic:active, .h-ic.h-fs:active{ box-shadow:0 1px 0 #0d0726, inset 0 1px 0 #ffffff2e; }
+  /*+AG y el icono de Ajustes vuelve a ser las TRES BARRAS de CSS que el HTML ya trae. El .webp se
+     retira: horneaba su propio trazo dentro del dibujo, o sea era el quinto sistema de grosor y el
+     unico que no podia obedecer a --tz-ico. Ahora es blanco macizo como en la referencia.
+     El alto de barra sale del MISMO token: --tz-ico esta en unidades de un viewBox de 24 y el glifo
+     ocupa 21 px, asi que 3/24 * 21 px es exactamente el grosor que tendria dibujado en SVG.
+     ⚠ Y NO hace falta ningun `background-image:none` para retirar el .webp: el atajo `background` de
+     aqui arriba ya lo borra entero. Lo puse «por si acaso» y me borro MI PROPIO degradado —el
+     marino tambien es un background-image— dejando la hamburguesa sobre un cuadro blanco. Se vio en
+     la primera captura, no en el codigo: es exactamente la trampa del atajo que ya avisa el bloque
+     del boton de pantalla completa, pagada por segunda vez y en el sentido contrario. */
+  .h-ic .bar{ display:block; width:21px; height:calc(var(--tz-ico) / 24 * 21px);
+    border-radius:99px; background:#fff; }
 </style>
 
 <!--+AG doc 34 Fase B: #app = la "columna telefono" que contiene TODAS las pantallas y overlays (portrait) -->
@@ -3862,7 +3922,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=13a794a"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=b81cd26"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -6983,13 +7043,15 @@ const FS_USADO='bt_fs_usado';
 //   unidades (7 px) con el contorno bajado a 5,4, que deja hueco de sobra entre las cuatro.
 const FS_D_IN =['M2 8V2h6','M22 8V2h-6','M2 16v6h6','M22 16v6h-6'];    // codos en las ESQUINAS  = entrar
 const FS_D_OUT=['M8 2v6H2','M16 2v6h6','M8 22v-6H2','M16 22v-6h6'];    // codos hacia el CENTRO = salir
-//+AG el trazo se pinta DOS veces —gordo y oscuro debajo, fino y blanco encima— porque es el unico modo de
-//   darle a un trazo SVG el contorno que llevan las barras de #hSet (ahi lo hace un box-shadow, que dentro
-//   de un SVG no existe). Mismo lenguaje, distinta herramienta.
+//+AG 3-ago: SE VA EL DOBLE TRAZO. Este icono se pintaba dos veces —uno gordo oscuro debajo y uno fino
+//   blanco encima— para imitar a mano el contorno que entonces llevaban las barras de #hSet. Era el unico
+//   glifo del juego dibujado asi, y por eso era el que Jaime senalo primero: al lado de cualquier otro
+//   icono cantaba. Con el boton ya en placa oscura (pieza 24) el contorno no pinta nada: blanco macizo
+//   sobre marino se lee solo, igual que en la captura de Brawl. Un solo grupo, y el grosor lo pone
+//   --tz-ico como en los otros 37 iconos.
 const fsIcono = (d) => '<svg viewBox="0 0 24 24" aria-hidden="true">'
-  + [['#241a3f','7'],['#fff','2.6']].map(([col,w]) =>
-      '<g fill="none" stroke="'+col+'" stroke-width="'+w+'" stroke-linecap="round" stroke-linejoin="round">'
-      + d.map(p=>'<path d="'+p+'"/>').join('') + '</g>').join('') + '</svg>';
+  + '<g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round">'
+  + d.map(p=>'<path d="'+p+'"/>').join('') + '</g></svg>';
 //+AG ⚠ EL CENTINELA NO ES PARANOIA: renderHome() CORRE ANTES QUE ESTE BLOQUE. El selector de idioma se
 //   construye a mitad del fichero con un IIFE que llama a applyLang() -> relangScreens() -> renderHome(),
 //   y eso pasa mientras el script todavia se esta ejecutando, ~1.600 lineas antes de que existan FS_OK,
