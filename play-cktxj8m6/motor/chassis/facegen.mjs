@@ -309,17 +309,19 @@ export const HERO_FACE = {
   bunker:  { brow:'angry', browT:2.6, browY:17, browSl:0.75, rx:0.92, ry:0.80, pup:0.86, glow:0.70, iris:IRIS_AZUL,  mouth:'smile',     mw:1.35 },
   volcan:  { brow:'angry', browT:2.8, browY:16, browSl:0.85, rx:0.92, ry:0.78, pup:0.82, glow:0.66, iris:'#E8622E',  mouth:'open_big',  mw:1.7 },
   yunque:  { brow:'flat',  browT:2.9, browY:19,              rx:0.94, ry:0.62, pup:0.84, glow:0.60, iris:'#7E93B8',  mouth:'neutral',   mw:2.1 },
-  fantasma:{ brow:'up',    browT:2.2, browY:13,              eye_l:'happy', rx:0.92, ry:0.84, pup:0.86, glow:0.76, iris:'#A98BE8', mouth:'smirk', mw:1.6 },
-  estrella:{ brow:'up',    browT:2.3, browY:13,              eye_l:'happy', rx:0.92, ry:0.84, pup:0.86, glow:0.76, iris:IRIS_AZUL, mouth:'big_smile', mw:1.35 },
+  fantasma:{ brow:'up',    browT:2.2, browY:13,                             rx:0.92, ry:0.84, pup:0.86, glow:0.76, iris:'#A98BE8', mouth:'smirk', mw:1.6 },
+  estrella:{ brow:'up',    browT:2.3, browY:13,                             rx:0.92, ry:0.84, pup:0.86, glow:0.76, iris:IRIS_AZUL, mouth:'big_smile', mw:1.35 },
 };
 // CUANTO del modificador entra, segun lo que este haciendo la bola. Esto es la parte pensada:
 //
 //  · REPOSO (neutral/blink) → el modificador ENTERO. Es la cara de la ficha, la que vende la bola.
-//    Excepto en 'blink', donde las claves del OJO se caen: con `eye:'blink'` puesto, el
-//    `eye_l:'happy'` de Estrella dejaria un ojo guiñando y el otro cerrado a la vez.
-//    (El ejemplo era Pinball hasta el 3-ago; perdio su guiño, ver arriba. Estrella es ya la UNICA
-//    de las doce con un ojo cerrado en reposo, asi que si algun dia tambien se le quita, esta
-//    excepcion se queda sin caso y se puede simplificar.)
+//    Excepto en 'blink', donde las claves del OJO se caen: con `eye:'blink'` puesto, un
+//    `eye_l:'happy'` dejaria un ojo guiñando y el otro cerrado a la vez.
+//    ⚠ HOY ESA EXCEPCION NO TIENE NINGUN CASO VIVO y aun asi se queda. El 3-ago desaparecieron los
+//    tres guiños que habia (Pinball, Fantasma y Estrella): «tiene un ojo cerrado» y luego «arregla
+//    esos tmb». La excepcion sigue aqui como red para el dia que alguien vuelva a poner un eye_l o
+//    un eye_r — sin ella el fallo no da error, solo una cara rara en el parpadeo, que es el tipo de
+//    cosa que tarda semanas en verse.
 //
 //  · TODO LO DEMAS (concentrada, susto, extasis, KO…) → solo el PESO de la ceja: grosor, caida y
 //    pendiente. Ni la forma de la ceja, ni la boca, ni los ojos.

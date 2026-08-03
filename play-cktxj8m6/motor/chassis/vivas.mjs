@@ -24,17 +24,17 @@
 //  blanco. Es la misma leccion que ya costo la pagina de previsualizacion.
 //
 //  COMO SE USA desde el shell:
-//     import { vivas } from './motor/chassis/vivas.mjs?v=39079c3';
+//     import { vivas } from './motor/chassis/vivas.mjs?v=042f69e';
 //     ... pinta `<div class="gi" data-viva="cohete"></div>` en vez del <img> ...
 //     vivas.sincroniza();      // despues de cada render de la pantalla
 //     vivas.para();            // al salir de la pantalla (deja de gastar bateria)
 //  `data-viva-off="1"` en el elemento = bola no comprada: se pinta en gris.
 // ============================================================================
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
-import { makeBallVinyl } from './gfx.mjs?v=39079c3';
-import { archLook } from './ballmat.mjs?v=39079c3';
-import { archFace } from './facegen.mjs?v=39079c3';
-import { attachSquash } from './squash.mjs?v=39079c3';
+import { makeBallVinyl } from './gfx.mjs?v=042f69e';
+import { archLook } from './ballmat.mjs?v=042f69e';
+import { archFace } from './facegen.mjs?v=042f69e';
+import { attachSquash } from './squash.mjs?v=042f69e';
 
 // El mundo de cada celda. HW es el SEMIANCHO de la camara en radios de bola: cuanto MENOR, mas
 // grande sale la bola... y antes lo elegi mirando solo la bola. Error: lo que decide el encuadre no

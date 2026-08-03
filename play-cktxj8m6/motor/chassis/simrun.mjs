@@ -1,7 +1,7 @@
 // YouBall · acumulador de eventos de simulación, browser-safe (sin Node). La sim devuelve los eventos de CADA frame
 // en step() y los resetea en el siguiente → para sonar (o medir) hace falta acumularlos a lo largo de toda la partida.
 // Lo usan IGUAL el render (audio.mjs en Node) y el preview en vivo (index.html en navegador) → MISMOS eventos.
-//   import { accumulateEvents } from '../chassis/simrun.mjs?v=39079c3';
+//   import { accumulateEvents } from '../chassis/simrun.mjs?v=042f69e';
 //   const run = accumulateEvents(new Sim(seed));   // { events, f, decision_frame, winner_team, seed }
 
 // TOBOGÁN: la sim RESETEA los eventos en cada step() y los devuelve → hay que acumular el retorno frame a frame.
