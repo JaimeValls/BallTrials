@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-03 32fe509"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-03 1886b29"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG ICONO EN LA PANTALLA DE INICIO (docs/40 §6). Jaime: "la gente esta acostumbrada a clicar en el
@@ -2052,6 +2052,12 @@
      getComputedStyle devolvia color rgb(58,36,0) con el kit pidiendo #fff. */
   .se-cta.oro{ background:linear-gradient(#ffe27a,#ff9a3d); box-shadow:0 3px 0 #b45a10;
     color:#fff; -webkit-text-stroke-color:#241a3f; text-shadow:0 2px 0 #241a3f55; }
+  /*+AG ⚠ Y EL MISMO AIRE PARA "JUGAR OTRA", que era el tercer sitio con el fallo el mismo dia. Jaime
+     lo miro en captura: «jugar otra, no me gusta». 5 px de trazo sobre un cuerpo de 20 y
+     `letter-spacing:normal`: la "Ju" se comia la "ga". Regla que sale de aqui y vale para siempre: si
+     un boton entra en la regla del kit de arriba (la del trazo), entra TAMBIEN en esta. Mayusculas
+     por CSS, como sus vecinos y como el `.se-cta`. */
+  .r-again{ letter-spacing:.07em; text-transform:uppercase; }
   /*+AG deshabilitado: se apaga pero CONSERVA el grosor (misma razon que .gd-btn.prim:disabled). Antes
      `box-shadow:none` lo dejaba plano y se leia como "esto no es un boton" en vez de "hoy no puedes". */
   .sh-buy:disabled{ box-shadow:0 3px 0 #6b4a2a; }
@@ -2795,7 +2801,12 @@
      entera y 52 px de alto, ENCIMA de la fila de sus tres alternativas — antes se repartia la primera
      fila con "Ya tengo cuenta", asi que el jugador veia cuatro botones del mismo tamano y solo el
      color decia cual era el que importaba. */
+  /*+AG ⚠ 3-ago, veredicto de Jaime en captura: «guardar mi cuenta, no me gusta tanto, no se lee muy
+     bien». El trazo son 4 px sobre un cuerpo de 16 y no tenia `letter-spacing`, asi que las dos
+     ultimas palabras salian cosidas: "micuenta". Mismo remedio y mismo .07em que `.se-cta` y
+     `.r-again`, y las mayusculas del canon 1.1 las pone el CSS, no el diccionario. */
   #prAccCreate{ width:100%; min-height:52px; margin-top:7px; font-size:var(--fs-4);
+    letter-spacing:.07em; text-transform:uppercase;
     background:linear-gradient(#ffe14d 12%,#ffb42a); border-color:transparent;
     box-shadow:0 4px 0 #b45a10, 0 7px 16px #ffb42a3d, inset 0 2px 0 #ffffff8c;
     color:#fff; -webkit-text-stroke:.25em #241a3f; paint-order:stroke fill; text-shadow:0 1px 0 #241a3f55; }
@@ -3467,7 +3478,7 @@
        tenía el "Continuar ▸" del paso 1 (que ya no existe). Sigue habiendo un solo .ready por pantalla. -->
   <div class="r-actions">
     <div class="r-arow">
-      <button class="r-again ready" id="rAgain" data-t="again">▶ Jugar otra</button>
+      <button class="r-again ready" id="rAgain" data-t="again">Jugar otra ▶</button>
       <button class="r-home ico" id="rHome" data-tt="back" title="Atrás" aria-label="Atrás"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5 L8 12 L14.5 18.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     </div>
   </div>
@@ -3946,7 +3957,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=32fe509"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=1886b29"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -5244,6 +5255,17 @@ function applyShell(){ const s=S();
   //   caracter. Solo en ese caso se pasa a innerHTML: los demas siguen por textContent, porque cambiar
   //   TODOS de golpe haria que cualquier cadena con un `<` se interpretara como etiqueta.
   document.querySelectorAll('[data-t]').forEach(e=>{ const v=s[e.dataset.t]; if(typeof v==='string') setCoin(e,v); });
+  //+AG 3-ago, Jaime mirando Resultados: «tendría que poner JUGAR OTRA y luego el icono de play». El ▶
+  //   viene PEGADO DELANTE del rótulo en los 20 diccionarios (`again:'▶ Jugar otra'`), así que se
+  //   mueve aquí y NO en los 20 ficheros: el ▶ no es una palabra que nadie tradujo, es el icono de
+  //   play metido dentro de la cadena — el mismo criterio que `coinify()` unas líneas más arriba, que
+  //   convierte el ✦ de la cadena en la moneda dibujada. Tocar 20 diccionarios para mover un glifo es
+  //   20 sitios donde se puede mutilar un acento o un árabe, y ninguno de ellos es la decisión.
+  //   Va DESPUÉS del bucle de data-t a propósito: ese bucle reescribe el textContent limpio en cada
+  //   cambio de idioma, así que esto siempre parte del original y no acumula flechas.
+  //   ⚠ Solo a "Jugar otra". El ▶ de JUGAR (portada) se queda delante: Jaime lo ha visto y le vale.
+  const _ag=document.getElementById('rAgain');
+  if(_ag) _ag.textContent=_ag.textContent.replace(/^\s*▶\s*/,'').trim()+' ▶';
   //+AG data-th = el texto lleva <b>/<small> (notas legales, hero de Temporada…); data-tt = title; data-tp = aria-label
   document.querySelectorAll('[data-th]').forEach(e=>{ const v=s[e.dataset.th]; if(typeof v==='string') e.innerHTML=coinify(v); });
   document.querySelectorAll('[data-tt]').forEach(e=>{ const v=s[e.dataset.tt]; if(typeof v==='string') e.title=v; });
