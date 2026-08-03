@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-03 f55ae74"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-03 1b7be34"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG ICONO EN LA PANTALLA DE INICIO (docs/40 §6). Jaime: "la gente esta acostumbrada a clicar en el
@@ -3820,8 +3820,12 @@
       </div>
       <div class="pr-show">
         <div class="pr-chip"><div class="v" id="prColl">1</div><div class="k" data-t="prBalls">Bolas</div></div>
-        <div class="pr-chip"><div class="v">0</div><div class="k" data-t="prTrophies">Trofeos</div></div>
-        <div class="pr-chip"><div class="v">-</div><div class="k" data-t="prBest">Mejor puesto</div></div>
+        <!--+AG 3-ago · ESTOS DOS NUMEROS ESTABAN ESCRITOS A MANO (un "0" y un "-" en el HTML, de cuando
+             esta pantalla era la maqueta de doc 13). Jaime: «esto no parece que vaya trofeos y best
+             place». Ahora los rellena openPerfil(): TROFEOS es el MISMO total de copas que la pildora
+             de la portada (totalCopas(), doc 37) y MEJOR PUESTO sale de SAVE.mejorPuesto. -->
+        <div class="pr-chip"><div class="v" id="prCups">0</div><div class="k" data-t="prTrophies">Trofeos</div></div>
+        <div class="pr-chip"><div class="v" id="prBestV">-</div><div class="k" data-t="prBest">Mejor puesto</div></div>
       </div>
     </div>
 
@@ -4083,7 +4087,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=f55ae74"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=1b7be34"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -5575,6 +5579,13 @@ if(Array.isArray(SAVE.balls)) SAVE.balls.forEach(b=>{ if(typeof b.copas!=='numbe
 if(!SAVE.mode || !['race','cazador','redlight'].includes(SAVE.mode)) SAVE.mode='race';
 if(SAVE.fmt!=='individual' && SAVE.fmt!=='equipos') SAVE.fmt='individual';
 if(typeof SAVE.dayBonusDay!=='string') SAVE.dayBonusDay='';
+//+AG 3-ago · MEJOR PUESTO (doc 13 §1: el escaparate luce récords). El escaparate de Perfil enseñaba
+//   "-" fijo porque este dato NO SE GUARDABA EN NINGUNA PARTE: la partida sabe tu puesto, lo pinta en
+//   Resultados y lo tira. Ahora se queda el mejor de todos los tiempos, y lo apunta applyCupsForResult.
+//   0 = todavia no has acabado ninguna partida (se sigue pintando "-"): un save recien creado no puede
+//   presumir de un 8o que no ha corrido. Idempotente: un save ya migrado pasa sin tocarse. Viaja gratis
+//   a la nube y al codigo de transferencia, que serializan el SAVE entero (sincro.mjs, serializeProfile).
+if(typeof SAVE.mejorPuesto!=='number' || !(SAVE.mejorPuesto>=1)) SAVE.mejorPuesto=0;
 if(!SAVE.tutorialDone || typeof SAVE.tutorialDone!=='object' || Array.isArray(SAVE.tutorialDone)) SAVE.tutorialDone={};   //+AG CÓMO JUGAR: {race:true,...} por modo completado
 function persist(){ try{ localStorage.setItem(SAVE_KEY,JSON.stringify(SAVE)); }catch(e){} }
 function xpForLevel(lv){ return 80+lv*40; }
@@ -6027,6 +6038,15 @@ let lastCups=null, lastStandings=null, lastTeamMode=false;
 //+AG la tabla ya NO se inventa: sale de d.standings / d.teamStandings (las bolas que corrieron de verdad).
 function applyCupsForResult(res, ball, place, d){
   lastTeamMode = res.teamPlace!=null;
+  //+AG 3-ago · AQUI SE APUNTA EL MEJOR PUESTO para el escaparate de Perfil. Este es el sitio y no
+  //   showResults porque por aqui pasan LOS DOS caminos de fin de partida (el de los motores y el
+  //   finishRace del 2D heredado) y los dos hacen persist() justo despues; showResults ademas se
+  //   repinta al volver a la pantalla, y un recuento no puede depender de cuantas veces se pinte algo.
+  //   ⚠ SE GUARDA EL PUESTO INDIVIDUAL, tambien en EQUIPOS (donde la pantalla corona el puesto del
+  //   EQUIPO, 1..4): el escaparate dice "tu mejor puesto", y mezclar un 1o de 4 equipos con un 1o de
+  //   8 bolas en el mismo numero seria comparar dos cosas distintas. El individual existe siempre.
+  //   Va ANTES del `if(!ball)` de abajo: quedar primero cuenta aunque corrieras sin bola equipada.
+  if(place>=1 && (!SAVE.mejorPuesto || place<SAVE.mejorPuesto)) SAVE.mejorPuesto=place;
   //+AG el orden importa: la clasificacion se construye SIEMPRE (aunque no haya bola equipada y no haya copas)
   lastStandings = lastTeamMode ? buildTeamStandings(d&&d.teamStandings, d&&d.winnerTeam)
                                : buildStandings(d&&d.standings, d&&d.seed, d&&d.winnerTeam);
@@ -6784,6 +6804,12 @@ function syncLigaBadge(){ const cur=document.querySelector('.se-tier.cur img.em'
   if(cur && b) b.src=cur.getAttribute('src'); }
 function openTemporada(){ showScreen('temporada'); applyShell(); el('seChispas').textContent=SAVE.chispas; el('seGemas').textContent=SAVE.gemas; drawPreviewBall(el('seChamp'), TEAMS[3].color); buildPaseTrack(); syncLigaBadge(); }
 function openPerfil(){ showScreen('perfil'); applyShell(); el('prChispas').textContent=SAVE.chispas; el('prGemas').textContent=SAVE.gemas; el('prLvl').textContent=SAVE.level; el('prColl').textContent=SAVE.balls.length; drawPreviewBall(el('prAv'), TEAMS[0].color);
+  //+AG 3-ago · el escaparate deja de ser una maqueta. TROFEOS = totalCopas(), la MISMA cuenta que pinta
+  //   la pildora dorada de la portada (#hCups): dos sitios que dicen "tus trofeos" no pueden salir de
+  //   dos sitios distintos. MEJOR PUESTO va por ord() —el mismo "1º/2º" de Resultados y en el idioma
+  //   activo— y sigue siendo "-" mientras no haya ninguna partida acabada (SAVE.mejorPuesto === 0).
+  el('prCups').textContent=nfmt(totalCopas());
+  el('prBestV').textContent=SAVE.mejorPuesto ? ord(SAVE.mejorPuesto, LANG) : '-';
   const sw=el('prConsent'); sw.onclick=()=>{ const on=sw.classList.toggle('on'); sw.setAttribute('aria-checked',on?'true':'false'); toast(on?S().tChanOn:S().tChanOff); };
   wireCuenta(); wireTraspaso(); wireEsteDispositivo(); }
 
