@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-03 f4e19ee"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-03 780b34b"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG ICONO EN LA PANTALLA DE INICIO (docs/40 §6). Jaime: "la gente esta acostumbrada a clicar en el
@@ -3118,6 +3118,17 @@
      del boton de pantalla completa, pagada por segunda vez y en el sentido contrario. */
   .h-ic .bar{ display:block; width:21px; height:calc(var(--tz-ico) / 24 * 21px);
     border-radius:99px; background:#fff; }
+  /*+AG ⚠ 3-ago, noche · EL COLOR DEL BOTON, que hasta hoy no hacia falta y ahora SI. El icono de
+     pantalla completa traia su blanco escrito dentro del SVG (`stroke="#fff"`); el macizo del
+     encargo 39 usa `fill="currentColor"`, o sea que el color ya NO viaja con el dibujo: lo tiene que
+     poner el contenedor. Y `.h-ic` nunca declaro ninguno, asi que heredaba el negro del documento:
+     medido, `getComputedStyle(#hFs).color` devolvia rgb(0,0,0) y el icono salia NEGRO SOBRE PLACA
+     NEGRA, invisible. El banco de glifos daba verde —la pieza tiene su masa y su hueco correctos— y
+     el fallo solo se veia MIRANDO la captura.
+     ⚠ ESTO SE REPITE EN LAS 17 PIEZAS QUE FALTAN: cada sitio donde se monte un icono macizo tiene
+     que tener `color` definido. Donde ya lo habia (las cabeceras de bloque `.sc-h`, que son
+     amarillas) la pieza entro bien a la primera. */
+  .h-ic{ color:#fff; }
 </style>
 
 <!--+AG doc 34 Fase B: #app = la "columna telefono" que contiene TODAS las pantallas y overlays (portrait) -->
@@ -3702,7 +3713,7 @@
     </div>
 
     <div class="sc-block on" data-sub="liga">
-      <div class="sc-h"><svg class="sc-ico" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.2 3.6 H15.8 V9.2 A3.8 3.8 0 0 1 8.2 9.2 Z"/><path d="M8.2 5.6 H5.6 V7.1 a2.9 2.9 0 0 0 2.9 2.9"/><path d="M15.8 5.6 H18.4 V7.1 a2.9 2.9 0 0 1-2.9 2.9"/><path d="M12 13 V16.8"/><path d="M9.2 20.4 H14.8"/></g></svg><span data-t="seLeague">Liga</span><button class="ibtn" data-info="seFloor" data-info-tit="seLeague" data-tp="infoWord" title="Info"><svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 10.8 V17"/><path d="M12 6.9 V7.2"/></g></svg></button></div>
+      <div class="sc-h"><svg class="sc-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 3h10v5c0 2.8-1.6 4.7-4 5.4V17h3.5c.8 0 1.5.7 1.5 1.5V21h-12v-2.5c0-.8.7-1.5 1.5-1.5H11v-3.6C8.6 12.7 7 10.8 7 8zm-3 2h3v6c-2 0-3-1.7-3-3.5zm13 0h3v2.5c0 1.8-1 3.5-3 3.5z"/></svg><span data-t="seLeague">Liga</span><button class="ibtn" data-info="seFloor" data-info-tit="seLeague" data-tp="infoWord" title="Info"><svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 10.8 V17"/><path d="M12 6.9 V7.2"/></g></svg></button></div>
       <div class="se-league-top">
         <!--+AG la insignia grande NO se fija aqui: la copia syncLigaBadge() del escalon que lleve
              .cur, para que no puedan contradecirse (antes era un 🥇 clavado). -->
@@ -3792,7 +3803,7 @@
     </div>
 
     <div class="sc-block" data-sub="amigos">
-      <div class="sc-h"><svg class="sc-ico" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9.2" cy="8" r="3.4"/><path d="M3.4 19.8 a5.8 5.8 0 0 1 11.6 0"/><path d="M16.2 5 a3.4 3.4 0 0 1 0 6"/><path d="M17.6 14.4 a5.8 5.8 0 0 1 3 5.4"/></g></svg><span data-t="prFriendsH">Amigos</span><span class="sc-soon" data-t="prFriendsSoon">pronto</span><button class="ibtn" data-info="prFriendsNote" data-info-tit="prFriendsH" data-tp="infoWord" title="Info"><svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 10.8 V17"/><path d="M12 6.9 V7.2"/></g></svg></button></div>
+      <div class="sc-h"><svg class="sc-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.7 4a2.8 2.8 0 1 1 0 5.6 2.8 2.8 0 0 1 0-5.6m-8 1.3a3.4 3.4 0 1 1 0 6.8 3.4 3.4 0 0 1 0-6.8m7.8 7.2c3.1 0 5.3 2.7 5.3 6.1V21h-7.1c.4-.9.6-1.9.6-2.9 0-2.2-.8-4.3-2.4-5.8.9-.5 2.1-.8 3.6-.8M8.7 13.5c3.6 0 6.4 3.1 6.4 7V21H2.3v-.5c0-3.9 2.8-7 6.4-7"/></svg><span data-t="prFriendsH">Amigos</span><span class="sc-soon" data-t="prFriendsSoon">pronto</span><button class="ibtn" data-info="prFriendsNote" data-info-tit="prFriendsH" data-tp="infoWord" title="Info"><svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 10.8 V17"/><path d="M12 6.9 V7.2"/></g></svg></button></div>
       <div class="pr-code"><span data-t="prYourCode">Tu código:</span><span class="cd">BT-7Q4K2</span><button data-soonk="sSoonCopy" data-t="prCopy">Copiar</button></div>
       <div class="pr-slots"><div class="s" data-soonk="sSoonInvite" data-tp="sSoonInvite">+</div><div class="s" data-soonk="sSoonInvite" data-tp="sSoonInvite">+</div><div class="s" data-soonk="sSoonInvite" data-tp="sSoonInvite">+</div><button class="pr-inv" data-soonk="sSoonAddCode" data-t="prAddCode">Añadir por código</button></div>
     </div>
@@ -4049,7 +4060,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=f4e19ee"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=780b34b"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -7213,9 +7224,11 @@ const FS_D_OUT=['M8 2v6H2','M16 2v6h6','M8 22v-6H2','M16 22v-6h6'];    // codos 
 //   icono cantaba. Con el boton ya en placa oscura (pieza 24) el contorno no pinta nada: blanco macizo
 //   sobre marino se lee solo, igual que en la captura de Brawl. Un solo grupo, y el grosor lo pone
 //   --tz-ico como en los otros 37 iconos.
-const fsIcono = (d) => '<svg viewBox="0 0 24 24" aria-hidden="true">'
-  + '<g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round">'
-  + d.map(p=>'<path d="'+p+'"/>').join('') + '</g></svg>';
+const FS_IN_FILL='M2 2h7v3H5v4H2zm13 0h7v7h-3V5h-4zM2 15h3v4h4v3H2zm17 0h3v7h-7v-3h4z';
+const fsIcono = (d) => d===FS_D_IN
+  ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="'+FS_IN_FILL+'"/></svg>'
+  : '<svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round">'
+    + d.map(p=>'<path d="'+p+'"/>').join('') + '</g></svg>';
 //+AG ⚠ EL CENTINELA NO ES PARANOIA: renderHome() CORRE ANTES QUE ESTE BLOQUE. El selector de idioma se
 //   construye a mitad del fichero con un IIFE que llama a applyLang() -> relangScreens() -> renderHome(),
 //   y eso pasa mientras el script todavia se esta ejecutando, ~1.600 lineas antes de que existan FS_OK,
