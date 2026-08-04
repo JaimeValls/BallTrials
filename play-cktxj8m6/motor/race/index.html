@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-04 3c100d3">
+<meta name="bt-build" content="2026-08-04 62f566e">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>YouBall · La Gran Carrera (WebGL)</title>
 <style>
@@ -73,6 +73,16 @@
     background:linear-gradient(100deg,#fff0,#ffffff66 46%,#fff0);transform:skewX(-18deg);
     animation:readySweep 3.2s ease-in-out infinite;pointer-events:none}
   @keyframes readySweep{0%{left:-45%}26%,100%{left:132%}}
+  /*+AG v0.16 EL BOTON ACUSA EL PULSADO. El nitro se apaga en el mismo instante en que se pulsa (se pone
+     `disabled` y pasa a contar el enfriamiento), asi que lo unico que veia el jugador al pulsar era el boton
+     APAGANDOSE — el gesto se leia como "no ha pasado nada" incluso cuando si pasaba. Este fogonazo de 0,26 s
+     va POR ENCIMA del disabled y le da al dedo su acuse de recibo. ⚠ el selector es `#ctr #bNit.fired`:
+     `#ctr button:disabled` (id+etiqueta+pseudoclase) le gana a un `#bNit.fired` suelto, que es la misma
+     trampa de especificidad del bloque de arriba. */
+  #ctr #bNit.fired{opacity:1;animation:nitroFired .26s ease-out}
+  @keyframes nitroFired{
+    0%{transform:scale(1.14);filter:brightness(2.4);box-shadow:0 0 0 0 #6fe4ff, 0 0 22px #6fe4ff}
+    100%{transform:scale(1);filter:brightness(1);box-shadow:0 0 0 14px #6fe4ff00, 0 0 0 #6fe4ff00}}
   @keyframes readyGlow{0%,100%{filter:drop-shadow(0 0 0 #ffd23f00)}50%{filter:drop-shadow(0 0 10px #ffd23fcc)}}
   @media (prefers-reduced-motion:reduce){#bSup.ready,#bSup.ready::after{animation:none}}
   #superwrap{display:flex;align-items:center;gap:8px}
@@ -232,7 +242,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=3c100d3"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=62f566e"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -243,24 +253,24 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 </script>
 
 <script type="module">
-import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createItemPops, createBloom, frameOrtho, buildHud, updateHud } from '../chassis/gfx.mjs?v=3c100d3';
-import { archLook } from '../chassis/ballmat.mjs?v=3c100d3';   //+AG doc 41 bloque G: material de la bola-heroe
-import { attachSquash } from '../chassis/squash.mjs?v=3c100d3';
+import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createItemPops, createBloom, frameOrtho, buildHud, updateHud } from '../chassis/gfx.mjs?v=62f566e';
+import { archLook } from '../chassis/ballmat.mjs?v=62f566e';   //+AG doc 41 bloque G: material de la bola-heroe
+import { attachSquash } from '../chassis/squash.mjs?v=62f566e';
 import { Sim, RNG, TEAMS, SHORT_COLORS, BALL_R, WIDTH, GATE_Y, GATE_H, TOP, FPS,
-         DIR, N_BALLS, CAM_SCALE, ASPA_R, ASPA_THICK, PLAT_HW, PLAT_HH } from './sim.js?v=3c100d3';   //+AG extras de la capa de agencia
+         DIR, N_BALLS, CAM_SCALE, ASPA_R, ASPA_THICK, PLAT_HW, PLAT_HH } from './sim.js?v=62f566e';   //+AG extras de la capa de agencia
 //+AG doc 62: los encuadres del cierre (sim.hero_scale / sim.celeb_scale) se leen del OBJETO sim, no por
 //   import. Un export que la CDN aún no ha refrescado tumba el módulo entero y la partida no arranca (pasó
 //   en producción el 2-ago); un campo que falta degrada a la cámara de siempre. Ver la nota en sim.js.
-import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=3c100d3';
-import { archFace } from '../chassis/facegen.mjs?v=3c100d3';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
-import { itemTexture } from '../chassis/itemgen.mjs?v=3c100d3';
-import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=3c100d3';
-import { buildSfxBuffer } from './sfxmap.mjs?v=3c100d3';
-import { runToEnd } from '../chassis/simrun.mjs?v=3c100d3';
-import { createCoach } from '../chassis/coach.mjs?v=3c100d3';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
-import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=3c100d3';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
-import { createPausa } from '../chassis/pausa.mjs?v=3c100d3';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
-import { cantarPuesto } from '../chassis/veredicto.mjs?v=3c100d3';   //+AG cartel de META: "en qué puesto has quedado", antes de soltar el resultado al shell
+import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=62f566e';
+import { archFace } from '../chassis/facegen.mjs?v=62f566e';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
+import { itemTexture } from '../chassis/itemgen.mjs?v=62f566e';
+import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=62f566e';
+import { buildSfxBuffer } from './sfxmap.mjs?v=62f566e';
+import { runToEnd } from '../chassis/simrun.mjs?v=62f566e';
+import { createCoach } from '../chassis/coach.mjs?v=62f566e';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=62f566e';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
+import { createPausa } from '../chassis/pausa.mjs?v=62f566e';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
+import { cantarPuesto } from '../chassis/veredicto.mjs?v=62f566e';   //+AG cartel de META: "en qué puesto has quedado", antes de soltar el resultado al shell
 
 window.addEventListener('error', e => { document.getElementById('err').style.display='grid'; console.error(e.error||e.message); });
 
@@ -567,9 +577,25 @@ function react(ev){
       P.emit((Math.random()-.5)*WIDTH, sim.cam+(Math.random()-.5)*sim.scale*0.4, 0.2, c[0],c[1],c[2], Math.cos(a)*sp, Math.sin(a)*sp, 0, 0.6+Math.random()*0.5);}
     P.ring(0, sim.cam, [1,0.6,0.3], 0.7);
   }
-  //+AG eventos de agencia: nitro (chispas cian, la estela ya sale sola con b.turbo), escudo (onda cian),
+  //+AG eventos de agencia: nitro (el DESTELLO, abajo), escudo (onda cian),
   //   super=estrella (burst dorado + chuleria; el parpadeo dorado ya lo pinta sync con b.star)
-  for(const e of (ev.nitro||[])){ const o=ballObjs[e.id]; if(o){ o.excite=Math.max(o.excite,0.25); P.burst(o.g.position.x,o.g.position.y,0.2,[0.2,0.85,1.0],10,3.5); } }
+  //+AG v0.16 EL DESTELLO DEL NITRO (4-ago-2026, Jaime: «cuando se pulsa nitro la bola tiene que soltar un
+  //   destello de algo mas visible»). Tenia razon tambien aqui: el nitro pintaba 10 chispas y nada mas, o sea
+  //   MENOS que recoger un item del suelo (18) y muchisimo menos que romper una compuerta (38 + onda + shake).
+  //   El booster que mas se pulsa era el efecto mas timido del juego. Ahora es lo mas ruidoso despues del
+  //   super: DOS ondas (la blanca es el golpe, la cian es la velocidad), nucleo blanco + chispas cian, la bola
+  //   acusa el punetazo con squash, la cara se concentra el nitro entero y la pantalla tiembla un pelin.
+  //   El temblor y el efecto GRANDE son solo para TU bola (e.id===0): con los bots usando nitro 2-3 veces por
+  //   carrera, darselo a las ocho convertiria la pista en una verbena y tu aceleron dejaria de destacar.
+  for(const e of (ev.nitro||[])){ const o=ballObjs[e.id]; if(!o) continue;
+    const nx=o.g.position.x, ny=o.g.position.y, mio=(e.id===0);
+    o.excite=Math.max(o.excite,mio?0.9:0.5); o.squash=Math.max(o.squash,mio?0.72:0.5);
+    P.ring(nx,ny,[1,1,1], mio?1.0:0.55);                                   // onda BLANCA = el golpe del encendido
+    P.ring(nx,ny,[0.33,0.85,1.0], mio?0.85:0.45);                          // onda CIAN = velocidad (el idioma del motor)
+    P.burst(nx,ny,0.2,[1,1,1], mio?14:6, 6.2);                             // nucleo blanco
+    P.burst(nx,ny,0.2,[0.2,0.85,1.0], mio?26:12, 5.0);                     // chispas cian
+    emo.fire(e.id,'concentrada',PRIO.concentrada,26,f);                    // la cara se concentra el nitro entero (24f)
+    if(mio) shake=Math.max(shake,0.13); }                                  // temblor corto: se nota, no molesta
   for(const e of (ev.shieldup||[])){ const o=ballObjs[e.id]; if(o) P.ring(o.g.position.x,o.g.position.y,[0.33,0.85,1.0],0.8); }
   for(const e of (ev.super||[])){ const o=ballObjs[e.id]; if(o){ o.squash=0.6; P.burst(o.g.position.x,o.g.position.y,0.2,[1,0.9,0.4],22,5.0); P.ring(o.g.position.x,o.g.position.y,[1,0.85,0.3],0.9); emo.fire(e.id,'chuleria',PRIO.chuleria,50,f); } }
   //+AG doc 55 capa 5: el ACCESORIO reacciona al evento. Solo tu bola (la unica con arch), y solo
@@ -722,7 +748,9 @@ function sync(dt, a=1){
     if(b.star>0){ const fl=0.5+0.5*Math.sin(fF*0.8); o.mat.emissive.setRGB(0.5+fl*0.5,0.5+fl*0.45,fl*0.3); o.mat.emissiveIntensity=0.9; }
     else { o.mat.emissive.setRGB(o.col[0],o.col[1],o.col[2]); o.mat.emissiveIntensity=0.40; }  // = gominola del chasis (no pisar el material)
     // estela de VELOCIDAD compartida (turbo/relevo/boost). La ESTRELLA no la lleva (es invencibilidad → ya parpadea arriba).
-    if(b.turbo>0||b.in_boost) P.trail(bx,by,b.vx,b.vy);
+    //+AG v0.16 el NITRO lleva estela DOBLE: la misma cola cian, pintada dos veces por frame. Un pad de impulso
+    //   y un nitro no pueden verse igual cuando uno de los dos es el botón que el jugador gasta y espera.
+    if(b.turbo>0||b.in_boost){ P.trail(bx,by,b.vx,b.vy); if(b.turbo>0) P.trail(bx,by,b.vx,b.vy); }
     // EMOCIONES (ojos ABIERTOS, NUNCA dormida): en carrera = concentrada/alerta; al llegar = excitada/celebra
     if(b.rank!==null){                                   // ya en meta
       const nArr=sim.byTeam[b.team].filter(x=>x.rank!==null).length;
@@ -1203,7 +1231,12 @@ function pintaLang(){ const t=T(); el('lang').value=LANG;
 })();
 const dirBtns={[DIR.LEFT]:el('bL'),[DIR.CENTER]:el('bC'),[DIR.RIGHT]:el('bR')};
 function setDir(d){ if(!sim||sim.player.rank!==null) return; sim.player.dir=d; for(const k in dirBtns) dirBtns[k].classList.toggle('on',+k===d); }
-function useNitro(){ if(sim&&phase==='play') sim.fireNitro(sim.player); }
+//+AG v0.16 el fogonazo del boton SOLO si el nitro ha prendido de verdad (fireNitro devuelve false en
+//   enfriamiento o en meta): un boton que destella cuando no ha hecho nada miente, y esa mentira es
+//   justo la queja de la que sale toda esta version.
+function useNitro(){ if(sim&&phase==='play'&&sim.fireNitro(sim.player)){ const n=el('bNit');
+  n.classList.remove('fired'); void n.offsetWidth; n.classList.add('fired');   // reinicia la animacion si se repite
+  setTimeout(()=>n.classList.remove('fired'),280); } }
 function useShield(){ if(sim&&phase==='play') sim.fireShield(sim.player); }
 function useSuper(){ if(sim&&phase==='play'&&sim.super>=1&&sim.fireSuper(sim.player)) sim.super=0; }   // super = estrella, consume la barra
 //+AG v0.15 LA ZONA SE CAMBIA AL TOCAR, NO AL SOLTAR. Los tres botones iban con `onclick`, y en un movil

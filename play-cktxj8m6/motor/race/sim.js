@@ -52,7 +52,33 @@ const SHORT_COLORS=[
 const PEG_R=0.22, PEG_SKIP=0.06, CLEAR_TOP=6.0;
 const BUMP_R=0.55, J_BUMP=6.2, V_CLAMP=15.0;
 const A_BOOST=0.85, BOOST_R=0.95, V_BOOST_CLAMP=14.0;
-const TURBO_DUR=36, TURBO_V=14.0, TURBO_CLAMP=16.0;
+const TURBO_DUR=24, TURBO_V=17.0, TURBO_CLAMP=17.8;
+//+AG v0.16 EL NITRO ERA UN PLACEBO (4-ago-2026, lo levantó Jaime jugando: «pulsas nitro, coge cierta
+//   velocidad, pero en cuanto golpea algo se para y se siente uno decepción. Tiene que pasar algo, más
+//   recompensa por un booster»). Otra vez era literal, y medido salió PEOR de lo que él decía
+//   (tools/banco-nitro.mjs, 300 semillas, la misma semilla con y sin pulsarlo):
+//     · adelantaba 1,7u de una pista de 68 ⇒ el 2,5% de la carrera. Invisible.
+//     · el primer golpe que le comía >25% de la velocidad llegaba a los 8 frames (0,27 s) de un nitro
+//       de 1,2 s, y le dejaba con el 48%. Solo el 5% de los nitros llegaban vivos al final.
+//     · y lo peor: el puesto medio EMPEORABA al pulsarlo (5,07 con nitro contra 4,85 sin él) y las
+//       victorias bajaban del 9,7% al 6,0%. El booster era una TRAMPA, no una recompensa.
+//   LA CAUSA, que es de una pieza: TURBO_CLAMP valía 16.0 y VTERM vale 16.0, y el clamp de terminal
+//   del substep se aplicaba con VTERM pasara lo que pasara. O sea que **el techo del nitro ERA el techo
+//   de la caída normal**: pulsarlo no te dejaba ir más rápido que una bola que simplemente cae, solo te
+//   ahorraba la espera. Y esa espera te la comía el primer peg, porque durante el nitro la bola rebotaba
+//   con la misma goma (PEG_REST 0.47), perdía lo mismo por rozamiento y un peg podía relanzarla hasta
+//   3.2 u/s HACIA ARRIBA. El empuje se pasaba el resto del nitro recuperando lo perdido.
+//   EL CAMBIO, en una frase: mientras el nitro arde la bola deja de ser un pinball y pasa a ser un
+//   PROYECTIL. Rompe su propio techo, ara los pegs en vez de rebotar en ellos, y nada la lanza hacia
+//   arriba. Los seis mandos se eligieron midiendo (ver docs/73), no a ojo.
+const NITRO_KICK=3.6;      // PUÑETAZO al pulsar: impulso instantáneo hacia abajo (antes no pasaba NADA al pulsar)
+const NITRO_THR=4.0;       // empuje sostenido por frame mientras arde (antes 0.8): recupera un frenazo en 6 frames
+const NITRO_VT=17.5;       // terminal PROPIA del nitro (VTERM normal = 16.0): por fin vas más rápido que cayendo
+const NITRO_DRAG=0.34;     // arrastre de aire durante el nitro (VYDRAG normal = 0.62): llega al techo de verdad
+const NITRO_REST=0.12;     // rebote en peg durante el nitro (PEG_REST = 0.47): ARA el peg, no rebota en él
+const NITRO_FRIC=0.35;     // multiplicador del rozamiento tangencial durante el nitro
+const NITRO_VYCAP=0.6;     // nada te lanza hacia ARRIBA mientras arde (PEG_VY_CAP normal = 3.2)
+const BOT_NITRO_P=0.008;   // ganas por frame de que un bot pulse su nitro, x su pericia (antes 0.0026 = 1 uso/carrera)
 const GIANT_DUR=45, GIANT_SCALE=1.6;
 const STAR_DUR=120, STAR_MASS=12.0, STAR_V=15.0, STAR_CLAMP=18.0;
 const RELAY_DUR=45;
@@ -368,7 +394,18 @@ class Sim{
   _botThink(b){ const r=b._seedr;
     // el bot elige zona con su rng sembrado y cambia cada ~2-4s → se reparte por la pista, determinista
     if(this.f>=b._nextDir){ const k=r(); b.dir=k<0.33?DIR.LEFT:k<0.66?DIR.CENTER:DIR.RIGHT; b._nextDir=this.f+60+Math.floor(r()*90); }
-    if(b.nitroCd===0&&r()<b._skill*0.0026) this.fireNitro(b);
+    //+AG v0.16 LOS BOTS TAMBIÉN CORREN. Con 0.0026/frame un bot tardaba entre 320 y 855 frames en decidirse
+    //   y la carrera dura ~870: o sea que usaba su nitro UNA vez, y los flojos ninguna. Mientras, el jugador
+    //   puede pulsarlo 6 veces (enfriamiento 140f). Esa asimetría no se notaba cuando el nitro no hacía nada;
+    //   con el nitro de v0.16 convertía el botón en un botón de GANAR: medido, un jugador que lo pulsa cada
+    //   vez que puede ganaba el 62,0% de las carreras de 8. Con los bots a 0.008 (unos 2-3 nitros por bot y
+    //   carrera) se queda en el 30,2%, apenas por encima del 27,4% de antes de tocar nada: el nitro se nota
+    //   MUCHÍSIMO más y el equilibrio casi no se mueve. La pericia del bot decide lo PRONTO que reacciona,
+    //   no si se acuerda. El RNG se consume igual (r() se llama pase lo que pase) ⇒ el reparto de zonas de
+    //   los bots no se mueve. EL PRECIO, que es real y hay que saberlo: quien NO pulsa nunca el nitro baja
+    //   del 9,0% de victorias al 2,4%. Un booster que de verdad recompensa castiga de verdad al que lo
+    //   ignora; por eso el paso del nitro en el tutorial pasa a ser importante, no decorativo.
+    if(b.nitroCd===0&&r()<b._skill*BOT_NITRO_P) this.fireNitro(b);
     if(b.shieldCd===0&&r()<b._skill*0.0018) this.fireShield(b);
   }
   //+AG doc 39 #1: BST → duración de los boosters del JUGADOR (nitro/escudo/súper); el cooldown NO cambia (no rompe
@@ -376,7 +413,16 @@ class Sim{
   //+AG doc 39 RASGO Volcán: se apila SOBRE el bst de los stats (son cosas distintas: el stat es la bola, el rasgo
   //   es su identidad de Épica). Sin rasgo el factor es 1 → la línea vale exactamente lo que valía.
   _bst(b){ return b.isPlayer?this.pmul.bst*(this.trait==='volcan'?VOLCAN_BST:1):1; }
-  fireNitro(b){ if(b.nitroCd>0||b.rank!==null) return false; b.turbo=Math.round(TURBO_DUR*this._bst(b)); b.nitroCd=NITRO_CD; this._pev.push({t:'nitro',id:b.id}); return true; }   //+AG evento
+  //+AG v0.16 ENCENDER EL NITRO. Antes `fireNitro` solo ponía un contador y la bola empezaba a acelerar despacio:
+  //   al pulsar NO PASABA NADA en el frame del dedo, y eso es medio problema de «se espera algo más». Ahora el
+  //   encendido mete un impulso instantáneo hacia abajo (NITRO_KICK) — el puñetazo — y a partir de ahí manda el
+  //   empuje sostenido. Es un += (impulso), nunca un setear velocidad. Lo comparten los tres orígenes del turbo
+  //   (botón, ítem turbo, relevo) a propósito: un turbo es un turbo, y dos fuerzas distintas con el mismo destello
+  //   se leen como que el juego a veces falla.
+  //   El clamp del final NO es decorativo: el ítem turbo se recoge en el post-step, o sea DESPUÉS de los topes
+  //   del substep, y sin él un pico de un frame se colaba por encima de STAR_CLAMP (medido: 21,1 u/s).
+  _igniteTurbo(b,frames){ b.turbo=frames; b.vy-=NITRO_KICK; if(b.vy>NITRO_VYCAP) b.vy=NITRO_VYCAP; this._clamp(b,TURBO_CLAMP); }
+  fireNitro(b){ if(b.nitroCd>0||b.rank!==null) return false; this._igniteTurbo(b,Math.round(TURBO_DUR*this._bst(b))); b.nitroCd=NITRO_CD; this._pev.push({t:'nitro',id:b.id}); return true; }   //+AG evento
   fireShield(b){ if(b.shieldCd>0||b.rank!==null) return false; b.shield=Math.round(SHIELD_DUR*this._bst(b)); b.shieldCd=SHIELD_CD; this._pev.push({t:'shieldup',id:b.id}); return true; }   //+AG evento
   // SÚPER = Estrella (efecto del motor): dorada, grande, PESADA e invencible → arrolla a las demás. Se gana con la barra.
   //+AG doc 39 RASGO Estrella: +1 s de SÚPER (solo el súper; nitro y escudo no cambian). Va DESPUÉS del redondeo
@@ -519,7 +565,9 @@ class Sim{
       for(const bo of M.boosts){ if(hyp(b.x-bo.x,b.y-bo.y)<BOOST_R){ b.vx+=A_BOOST*bo.cx; b.vy+=A_BOOST*bo.cy; this._clamp(b,Math.max(V_BOOST_CLAMP,hyp(b.vx,b.vy))); hitBoost=true; break; } }
       if(hitBoost&&!b.in_boost) ev.boost.push({f,id:b.id});   //+AG evento en flanco de entrada (como el motor)
       b.in_boost=hitBoost;
-      if(b.turbo>0){ b.turbo--; if(hyp(b.vx,b.vy)<TURBO_V) b.vy-=0.8; this._clamp(b,TURBO_CLAMP); }
+      //+AG v0.16 el empuje del nitro: más fuerte (NITRO_THR) y con el techo de empuje mucho más arriba
+      //   (TURBO_V 14→17), así que tras un golpe RECUPERA en ~3 frames en vez de gastarse el nitro entero.
+      if(b.turbo>0){ b.turbo--; if(hyp(b.vx,b.vy)<TURBO_V) b.vy-=NITRO_THR; this._clamp(b,TURBO_CLAMP); }
       if(b.giant>0){ b.giant--; if(b.giant===0){ b.scale=1.0; b.m=1.0; } }
       if(b.star>0){ b.star--; if(hyp(b.vx,b.vy)<STAR_V) b.vy-=1.0; this._clamp(b,STAR_CLAMP); if(b.star===0){ b.scale=1.0; b.m=1.0; } }
     }
@@ -531,7 +579,12 @@ class Sim{
       for(const b of ab){ if(b.rank!==null) continue;
         //+AG doc 39 #1: ACE → aceleración de caída (G) del jugador; VEL → su velocidad terminal (menos drag = tope
         //   mayor). Solo balls[0] en individual-con-stats (pmul=NEUTRAL fuera de eso → línea idéntica a la fuente).
-        const _g=b.isPlayer?G*this.pmul.ace:G, _vyd=b.isPlayer?VYDRAG/this.pmul.vel:VYDRAG, _vt=b.isPlayer?VTERM*this.pmul.vel:VTERM;
+        let _g=b.isPlayer?G*this.pmul.ace:G, _vyd=b.isPlayer?VYDRAG/this.pmul.vel:VYDRAG, _vt=b.isPlayer?VTERM*this.pmul.vel:VTERM;
+        //+AG v0.16 EL NITRO ROMPE SU PROPIO TECHO. Este clamp de terminal se aplicaba con VTERM SIEMPRE, así
+        //   que el nitro no podía hacerte ir más rápido que una bola que solo cae: era su techo, no su motor.
+        //   Mientras arde, la terminal sube a NITRO_VT y el arrastre de aire baja ⇒ la bola alcanza de verdad
+        //   una velocidad que nadie más tiene. Sigue POR DEBAJO de STAR_CLAMP: el súper sigue siendo el rey.
+        if(b.turbo>0){ _vyd=NITRO_DRAG; _vt=Math.max(_vt,NITRO_VT); }
         b.vy-=_g*DT; b.vy-=_vyd*b.vy*DT; if(b.vy<-_vt)b.vy=-_vt; b.vx*=VXDRAG; b.x+=b.vx*DT; b.y+=b.vy*DT;
         const r=BALL_R*b.scale*b.sqz;
         //+AG v0.7 muro: rebote amortiguado (WALL_REST) y SIN empujón continuo al centro (era un parche que
@@ -548,12 +601,17 @@ class Sim{
         for(let bk=bi-1;bk<=bi+1;bk++){ const arr=M.pegBuckets.get(bk); if(!arr) continue;
           for(const [px,py] of arr){ let dx=b.x-px,dy=b.y-py,d=hyp(dx,dy),mind=r+PEG_R;
             if(d>0&&d<mind){ const nx=dx/d,ny=dy/d,ov=Math.max(0,mind-d-SLOP); b.x+=nx*ov; b.y+=ny*ov;
-              const vn=b.vx*nx+b.vy*ny; if(vn<0){ const j=-(1+PEG_REST)*vn; b.vx+=j*nx; b.vy+=j*ny;
+              //+AG v0.16 EL NITRO ARA EL PEG. Con la goma normal (PEG_REST 0.47) el primer peg se comía medio
+              //   nitro a los 0,27 s. Durante el nitro la bola rebota casi nada (NITRO_REST) y roza mucho menos:
+              //   el peg la DESVÍA de lado, pero no la para. Es lo contrario de subir el rebote — un pinball más
+              //   elástico es justo la sensación de la que se queja Jaime; un proyectil ARA.
+              const _nz=b.turbo>0, _pr=_nz?NITRO_REST:PEG_REST;
+              const vn=b.vx*nx+b.vy*ny; if(vn<0){ const j=-(1+_pr)*vn; b.vx+=j*nx; b.vy+=j*ny;
                 //+AG doc 39 #1: RES → aguante del jugador = menos pérdida tangencial por rozamiento en los pegs (más res
                 //   = conserva más momento, "pesa/aguanta"). Solo balls[0]; pmul.res=1 fuera de individual-con-stats.
-                const _fr=b.isPlayer?FRICTION*(2-this.pmul.res):FRICTION;
+                const _fr=(b.isPlayer?FRICTION*(2-this.pmul.res):FRICTION)*(_nz?NITRO_FRIC:1);
                 const tx=-ny,ty=nx,vt=b.vx*tx+b.vy*ty, jt=Math.max(-_fr*j,Math.min(_fr*j,vt)); b.vx-=jt*tx; b.vy-=jt*ty;
-                if(b.vy>PEG_VY_CAP)b.vy=PEG_VY_CAP; } } }   //+AG v0.7 clamp de rebote hacia arriba → sin "pogo loco"
+                const _cap=_nz?NITRO_VYCAP:PEG_VY_CAP; if(b.vy>_cap)b.vy=_cap; } } }   //+AG v0.7 clamp de rebote hacia arriba → sin "pogo loco"
         }
       }
       //+AG v0.12/v0.13 ASPAS y PLATAFORMAS: tras pegs, antes de bola-bola (el clamp global al final del substep capa la vel → V5 a salvo)
@@ -583,6 +641,11 @@ class Sim{
       //+AG v0.8 tope GLOBAL de rapidez = STAR_CLAMP (puerta V5 "velocidad imposible"): nada supera la velocidad
       //   máx legítima (la Estrella). Solo recorta el raro pico bumper+caída libre (~19); el juego normal no lo nota.
       for(const b of ab){ if(b.rank!==null) continue; const sp=hyp(b.vx,b.vy); if(sp>STAR_CLAMP){ const k=STAR_CLAMP/sp; b.vx*=k; b.vy*=k; } }
+      //+AG v0.16 NADA TE LANZA HACIA ARRIBA MIENTRAS EL NITRO ARDE. Va aquí, al final del substep, para que
+      //   valga para TODO lo que puede relanzarte (peg, bumper, aspa, plataforma, otra bola) y no solo para los
+      //   pegs: si un bumper te sube 4 u/s a mitad de nitro, el aceleron ya se ha perdido y vuelve la decepción.
+      //   Es un tope, hermano de PEG_VY_CAP y del clamp global de arriba: recorta, nunca coloca ni empuja.
+      for(const b of ab){ if(b.rank!==null) continue; if(b.turbo>0&&b.vy>NITRO_VYCAP) b.vy=NITRO_VYCAP; }
     }
     // barreras: presión y rotura
     if(this.decision_frame===null){
@@ -612,9 +675,9 @@ class Sim{
           else if(sp<2.5){ b.vx+=ux*2.5; } break; } }
       for(const p of M.powerups){ if(!p.taken&&hyp(b.x-p.x,b.y-p.y)<BALL_R+0.4){ p.taken=true;
         ev.pickup.push({f,id:b.id,team:b.team,type:p.type,x:p.x,y:p.y});   //+AG evento (forma del motor)
-        if(p.type==='turbo'){ b.turbo=TURBO_DUR; this.fireEmo(b,'sorpresa',4,12); }
+        if(p.type==='turbo'){ this._igniteTurbo(b,TURBO_DUR); this.fireEmo(b,'sorpresa',4,12); }
         else if(p.type==='giant'){ b.giant=GIANT_DUR; b.scale=GIANT_SCALE; b.m=2.0; this.fireEmo(b,'chuleria',6,50); }
-        else if(p.type==='relay'){ for(const m of this.byTeam[b.team]) if(m.id!==b.id&&m.rank===null){ m.turbo=RELAY_DUR; this.fireEmo(m,'sorpresa',4,12); } this.fireEmo(b,'sorpresa',4,12);
+        else if(p.type==='relay'){ for(const m of this.byTeam[b.team]) if(m.id!==b.id&&m.rank===null){ this._igniteTurbo(m,RELAY_DUR); this.fireEmo(m,'sorpresa',4,12); } this.fireEmo(b,'sorpresa',4,12);
           ev.relay.push({f,id:b.id,team:b.team,x:p.x,y:p.y}); }   //+AG evento (forma del motor)
         else if(p.type==='star'){ b.star=STAR_DUR; b.m=STAR_MASS; b.scale=1.15; this.fireEmo(b,'chuleria',6,50); } break; } }
       if(b.y<GATE_Y){ this.placed++; b.rank=this.placed; b.cheer=70; b.finF=f; this.team_done[b.team]++;
