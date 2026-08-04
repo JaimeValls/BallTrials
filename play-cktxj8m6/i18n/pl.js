@@ -259,10 +259,10 @@ cazadorCoach: {
 
 redlight: {
   menu:'← Menu',
-  keys:'TRZYMAJ BIEG na zielonym &nbsp;·&nbsp; ←/→ albo 1/2/3 = pas &nbsp;·&nbsp; F = hamulec &nbsp;·&nbsp; A/S/D = nitro/duch/super &nbsp;·&nbsp; R = nowa runda',
+  keys:'spacja/↑ = biegnij &nbsp;·&nbsp; ↓ = stój &nbsp;·&nbsp; ←/→ albo 1/2/3 = pas &nbsp;·&nbsp; F = hamulec &nbsp;·&nbsp; A/S/D = nitro/duch/super &nbsp;·&nbsp; R = nowa runda',
   you:'TY', youIntro:'To ty', go:'START!', on:'ZIELONE!', ready:'GOTOWE',
-  lanes:['◀ LEWO','● ŚRODEK','PRAWO ▶'], run:'BIEGNIJ', runHold:'TRZYMAJ · spacja/↑',
-  brake:'HAMULEC', nitro:'NITRO', ghost:'DUCH', sup:'SUPER',
+  lanes:['◀ LEWO','● ŚRODEK','PRAWO ▶'], run:'BIEGNIJ', runHold:'spacja/↑',
+  stop:'STÓJ', brake:'HAMULEC', nitro:'NITRO', ghost:'DUCH', sup:'SUPER',
   specWin:'WYGRANA!', specLose:'ODPADASZ',
   specWinSub:n=>`Przekroczyłeś metę · 1. z ${n}`,
   specSub:(p,n)=>`Teraz oglądasz · ${p} z ${n}`,
@@ -272,10 +272,10 @@ redlight: {
 },
 redlightCoach: {
   done:'Samouczek ukończony!', exit:'✕ Wyjdź',
-  steps:[ 'TRZYMAJ BIEG, dopóki światło jest ZIELONE',
+  steps:[ 'Naciśnij BIEGNIJ: silnik zostaje włączony, dopóki nie powiesz inaczej',
     'Taranuj BARIERĘ na zielonym, aż pęknie, i przejedź przez nią',
-    'CZERWONE! Puść i stój w miejscu (dziś nikt nie strzela… w prawdziwym meczu tak)',
-    'Rozpędzony? Naciśnij HAMULEC (F), żeby stanąć jak wryty',
+    'CZERWONE! Naciśnij STÓJ i stój w miejscu (dziś nikt nie strzela… w prawdziwym meczu tak)',
+    'Wciąż się ślizgasz? Naciśnij STÓJ jeszcze raz, żeby stanąć jak wryty',
     'W MURZE jest LUKA: zmień PAS na otwartą stronę',
     'Naciśnij NITRO na zielonym: sprint',
     'Naciśnij DUCHA: na chwilę przenikasz przez mury',

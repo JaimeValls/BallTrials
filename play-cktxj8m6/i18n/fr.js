@@ -257,10 +257,10 @@ cazadorCoach: {
 
 redlight: {
   menu:'← Menu',
-  keys:'MAINTIENS COURIR au vert &nbsp;·&nbsp; ←/→ ou 1/2/3 = voie &nbsp;·&nbsp; F = frein &nbsp;·&nbsp; A/S/D = nitro/fantôme/super &nbsp;·&nbsp; R = nouvelle manche',
+  keys:'espace/↑ = courir &nbsp;·&nbsp; ↓ = stop &nbsp;·&nbsp; ←/→ ou 1/2/3 = voie &nbsp;·&nbsp; F = freinage &nbsp;·&nbsp; A/S/D = nitro/fantôme/super &nbsp;·&nbsp; R = nouvelle manche',
   you:'TOI', youIntro:'C\'est toi', go:'PARTEZ !', on:'VERT !', ready:'PRÊT',
-  lanes:['◀ GAUCHE','● CENTRE','DROITE ▶'], run:'COURIR', runHold:'MAINTIENS · espace/↑',
-  brake:'FREIN', nitro:'NITRO', ghost:'FANTÔME', sup:'SUPER',
+  lanes:['◀ GAUCHE','● CENTRE','DROITE ▶'], run:'COURIR', runHold:'espace/↑',
+  stop:'STOP', brake:'FREIN', nitro:'NITRO', ghost:'FANTÔME', sup:'SUPER',
   specWin:'GAGNÉ !', specLose:'TU ES ÉLIMINÉ',
   specWinSub:n=>`Tu as franchi l'arrivée · 1er sur ${n}`,
   specSub:(p,n)=>`Tu regardes maintenant · ${p} sur ${n}`,
@@ -270,10 +270,10 @@ redlight: {
 },
 redlightCoach: {
   done:'Tutoriel terminé !', exit:'✕ Quitter',
-  steps:[ 'MAINTIENS COURIR tant que le feu est VERT',
+  steps:[ 'Appuie sur COURIR : ton moteur reste allumé jusqu\'à ce que tu dises le contraire',
     'Défonce la BARRIÈRE au vert jusqu\'à la casser, puis franchis-la',
-    'ROUGE ! Lâche et ne bouge plus (aujourd\'hui personne ne tire… en vraie partie, si)',
-    'Tu arrives lancé ? Appuie sur FREIN (F) pour un arrêt d\'urgence',
+    'ROUGE ! Appuie sur STOP et ne bouge plus (aujourd\'hui personne ne tire… en vraie partie, si)',
+    'Tu glisses encore ? Réappuie sur STOP pour freiner à fond',
     'Le MUR a un TROU : change de VOIE vers le côté ouvert',
     'Appuie sur NITRO au vert : un sprint',
     'Appuie sur FANTÔME : tu traverses les murs un instant',

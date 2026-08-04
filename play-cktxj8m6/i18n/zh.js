@@ -258,10 +258,10 @@ cazadorCoach: {
 
 redlight: {
   menu:'← 菜单',
-  keys:'绿灯时按住「跑」 &nbsp;·&nbsp; ←/→ 或 1/2/3 = 跑道 &nbsp;·&nbsp; F = 急刹 &nbsp;·&nbsp; A/S/D = 氮气/幽灵/超级 &nbsp;·&nbsp; R = 新一轮',
+  keys:'空格/↑ = 跑 &nbsp;·&nbsp; ↓ = 停 &nbsp;·&nbsp; ←/→ 或 1/2/3 = 跑道 &nbsp;·&nbsp; F = 急刹 &nbsp;·&nbsp; A/S/D = 氮气/幽灵/超级 &nbsp;·&nbsp; R = 新一轮',
   you:'你', youIntro:'这是你', go:'出发！', on:'绿灯！', ready:'就绪',
-  lanes:['◀ 左','● 中','右 ▶'], run:'跑', runHold:'按住 · 空格/↑',
-  brake:'急刹', nitro:'氮气', ghost:'幽灵', sup:'超级',
+  lanes:['◀ 左','● 中','右 ▶'], run:'跑', runHold:'空格/↑',
+  stop:'停', brake:'急刹', nitro:'氮气', ghost:'幽灵', sup:'超级',
   specWin:'你赢了！', specLose:'你出局了',
   specWinSub:n=>`你冲过终点 · ${n} 人中第 1`,
   specSub:(p,n)=>`现在是观战 · ${p} / ${n}`,
@@ -271,10 +271,10 @@ redlight: {
 },
 redlightCoach: {
   done:'教程完成！', exit:'✕ 退出',
-  steps:[ '灯是绿的时候，一直按住「跑」',
+  steps:[ '按「跑」，引擎会一直开着，直到你另外下令',
     '绿灯时撞路障，把它撞碎再穿过去',
-    '红灯！松手，站着别动（今天没人开枪……真打起来是会开枪的）',
-    '冲得太快？按急刹（F）钉在原地',
+    '红灯！按「停」，站着别动（今天没人开枪……真打起来是会开枪的）',
+    '还在滑？再按一次「停」来个急刹',
     '墙上有个缺口：把跑道换到开着的那一侧',
     '绿灯时按 氮气：冲一段',
     '按 幽灵：短暂地穿过墙',

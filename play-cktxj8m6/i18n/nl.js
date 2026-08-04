@@ -257,10 +257,10 @@ cazadorCoach: {
 
 redlight: {
   menu:'← Menu',
-  keys:'HOUD RENNEN vast bij groen &nbsp;·&nbsp; ←/→ of 1/2/3 = baan &nbsp;·&nbsp; F = rem &nbsp;·&nbsp; A/S/D = nitro/spook/super &nbsp;·&nbsp; R = nieuwe ronde',
+  keys:'spatie/↑ = rennen &nbsp;·&nbsp; ↓ = stoppen &nbsp;·&nbsp; ←/→ of 1/2/3 = baan &nbsp;·&nbsp; F = noodrem &nbsp;·&nbsp; A/S/D = nitro/spook/super &nbsp;·&nbsp; R = nieuwe ronde',
   you:'JIJ', youIntro:'Dit ben jij', go:'GO!', on:'GROEN!', ready:'KLAAR',
-  lanes:['◀ LINKS','● MIDDEN','RECHTS ▶'], run:'RENNEN', runHold:'VASTHOUDEN · spatie/↑',
-  brake:'REM', nitro:'NITRO', ghost:'SPOOK', sup:'SUPER',
+  lanes:['◀ LINKS','● MIDDEN','RECHTS ▶'], run:'RENNEN', runHold:'spatie/↑',
+  stop:'STOP', brake:'REM', nitro:'NITRO', ghost:'SPOOK', sup:'SUPER',
   specWin:'GEWONNEN!', specLose:'JE LIGT ERUIT',
   specWinSub:n=>`Je bent over de finish · 1e van ${n}`,
   specSub:(p,n)=>`Je kijkt nu toe · ${p} van ${n}`,
@@ -270,10 +270,10 @@ redlight: {
 },
 redlightCoach: {
   done:'Tutorial voltooid!', exit:'✕ Stoppen',
-  steps:[ 'HOUD RENNEN vast zolang het licht GROEN is',
+  steps:[ 'Druk op RENNEN: je motor blijft aan tot jij iets anders zegt',
     'Ram de BARRIÈRE bij groen tot hij breekt, en ga erdoorheen',
-    'ROOD! Loslaten en stilstaan (vandaag schiet niemand… in een echte wedstrijd wel)',
-    'Kom je hard aan? Druk op REM (F) voor een noodstop',
+    'ROOD! Druk op STOP en sta helemaal stil (vandaag schiet niemand… in een echte wedstrijd wel)',
+    'Glijd je nog door? Druk nog eens op STOP en je staat op slag stil',
     'De MUUR heeft een GAT: wissel van BAAN naar de open kant',
     'Druk op NITRO bij groen: een sprint',
     'Druk op SPOOK: je gaat even dwars door muren',

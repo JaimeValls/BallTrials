@@ -259,10 +259,10 @@ cazadorCoach: {
 
 redlight: {
   menu:'← Menu',
-  keys:'TAHAN LARI ketika hijau &nbsp;·&nbsp; ←/→ atau 1/2/3 = lorong &nbsp;·&nbsp; F = brek &nbsp;·&nbsp; A/S/D = nitro/hantu/super &nbsp;·&nbsp; R = pusingan baharu',
+  keys:'space/↑ = lari &nbsp;·&nbsp; ↓ = berhenti &nbsp;·&nbsp; ←/→ atau 1/2/3 = lorong &nbsp;·&nbsp; F = brek kecemasan &nbsp;·&nbsp; A/S/D = nitro/hantu/super &nbsp;·&nbsp; R = pusingan baharu',
   you:'AWAK', youIntro:'Ini awak', go:'MULA!', on:'HIJAU!', ready:'SEDIA',
-  lanes:['◀ KIRI','● TENGAH','KANAN ▶'], run:'LARI', runHold:'TAHAN · space/↑',
-  brake:'BREK', nitro:'NITRO', ghost:'HANTU', sup:'SUPER',
+  lanes:['◀ KIRI','● TENGAH','KANAN ▶'], run:'LARI', runHold:'space/↑',
+  stop:'STOP', brake:'BREK', nitro:'NITRO', ghost:'HANTU', sup:'SUPER',
   specWin:'AWAK MENANG!', specLose:'AWAK TERSINGKIR',
   specWinSub:n=>`Awak melintasi garisan penamat · ke-1 daripada ${n}`,
   specSub:(p,n)=>`Sekarang awak menonton · ${p} daripada ${n}`,
@@ -272,10 +272,10 @@ redlight: {
 },
 redlightCoach: {
   done:'Tutorial selesai!', exit:'✕ Keluar',
-  steps:[ 'TAHAN LARI selagi lampu HIJAU',
+  steps:[ 'Tekan LARI: enjin awak kekal hidup sehingga awak kata sebaliknya',
     'Rempuh PENGHADANG ketika hijau sehingga pecah, kemudian lintasinya',
-    'MERAH! Lepaskan dan berdiri diam (hari ini tiada sesiapa menembak… dalam perlawanan sebenar, ada)',
-    'Datang terlalu laju? Tekan BREK (F) untuk berhenti kecemasan',
+    'MERAH! Tekan STOP dan berdiri diam (hari ini tiada sesiapa menembak… dalam perlawanan sebenar, ada)',
+    'Masih meluncur? Tekan STOP sekali lagi untuk brek kecemasan',
     'DINDING itu ada CELAH: tukar LORONG ke sebelah yang terbuka',
     'Tekan NITRO ketika hijau: satu pecutan',
     'Tekan HANTU: awak menembusi dinding sekejap',

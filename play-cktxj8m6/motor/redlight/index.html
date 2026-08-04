@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-03 3f6a5c4">
+<meta name="bt-build" content="2026-08-04 3c100d3">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <!--+AG el HTML se sirve en INGLES (defecto del juego); ?lang=es lo traduce por JS (applyLang) -->
 <title>YouBall · Red Light Rush (WebGL) · The Marble Games</title>
@@ -67,7 +67,12 @@
   #cta .bell{display:inline-block;transform-origin:50% 16%}
   #cta .sp{font-size:.56em;filter:drop-shadow(0 0 8px rgba(255,215,90,.95))}
   /*+AG CONTROLES del jugador (port del Cazador): fila de CARRILES (intención, arriba) + fila de acciones con
-     CORRER dominante (mantener), FRENAZO y los 3 boosters (Nitro/Fantasma/Súper) con recarga .cd. Touch-first. */
+     CORRER y PARAR dominantes y los 3 boosters (Nitro/Fantasma/Súper) con recarga .cd. Touch-first.
+     ⚠ doc 73 (2026-08-04, VB Jaime): SE ACABÓ EL MANTENER PULSADO. CORRER era un `hold` —el dedo clavado en el
+     botón toda la carrera— y eso hacía el modo incómodo de manejar: para tocar un carril o un booster había que
+     soltar CORRER (= frenar sin querer) o jugar con dos dedos, y el `hold` además es frágil (si se pierde el
+     `pointerup` te quedas corriendo; costó un fallo real esta misma mañana). Ahora son DOS ESTADOS: CORRER
+     enciende el motor y se queda encendido, PARAR lo apaga. El pulgar queda libre para el resto del HUD. */
   #controls{position:fixed;left:50%;bottom:calc(12px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:6;display:flex;flex-direction:column;gap:7px;
     width:min(560px,94vw);font-family:'Segoe UI Rounded','Nunito',system-ui,sans-serif;user-select:none;touch-action:none}
   #controls .row{display:flex;gap:8px}
@@ -94,18 +99,40 @@
   /*+AG carriles (intención, estilo intenciones del Cazador): el activo lleva .on */
   #laneRow button{flex:1;padding:9px 4px;font-size:clamp(11px,2.9vw,14px);background:rgba(30,24,42,.82)}
   #laneRow button.on{background:linear-gradient(#9b8cff,#6f5be6);box-shadow:0 3px 0 #4133a0, inset 0 1px 0 #fff5}
-  #bRun{flex:2.6;padding:18px 6px;font-size:clamp(16px,4.4vw,23px);background:linear-gradient(#3ad07a,#1f9a56);box-shadow:0 4px 0 #14663a, inset 0 1px 0 #ffffff30}
-  #bRun.hold{background:linear-gradient(#5aec97,#2bb869);box-shadow:0 2px 0 #14663a,0 0 22px #3ad07acc, inset 0 1px 0 #ffffff40;transform:translateY(2px)}
-  #bRun.red{background:linear-gradient(#ff6b5a,#e23a2a);box-shadow:0 4px 0 #8a2016, inset 0 1px 0 #ffffff30}
-  #bRun.red.hold{background:linear-gradient(#ff8a78,#ff4a34);box-shadow:0 2px 0 #8a2016,0 0 26px #ff4a34ee, inset 0 1px 0 #ffffff40}
-  #bBrake,#bNitro,#bGhost,#bSup{flex:1;padding:12px 3px;font-size:clamp(10px,2.7vw,14px);background:rgba(30,24,42,.82)}
+  /*+AG doc 73: los DOS MANDOS del modo, del mismo tamaño y uno al lado del otro. El ancho sale de repartir lo que
+     tenía CORRER solo (2.6) más el hueco del FRENAZO (1) entre los dos → la fila no crece ni un píxel y los
+     boosters conservan su ancho. `nowrap` porque en alemán/holandés la palabra es larga (RENNEN/STOPPEN) y si
+     parte en dos líneas SUBE el alto del HUD, que es lo único que no cabe en un móvil de 360×640. */
+  #bRun,#bStop{flex:1.9;padding:18px 4px;font-size:clamp(14px,3.8vw,21px);white-space:nowrap}
+  #bRun{background:linear-gradient(#2c6f4c,#1d4d36);box-shadow:0 4px 0 #143526, inset 0 1px 0 #ffffff18}
+  /* ENCENDIDO = el estado, no el dedo: mientras el motor va, CORRER se queda vivo aunque no lo estés tocando.
+     Es la única señal de "estoy corriendo" que tiene el jugador ahora que no hay dedo puesto, así que el apagado
+     es DE VERDAD apagado (verde sucio, hundido) y el encendido canta. */
+  #bRun.on{background:linear-gradient(#5aec97,#2bb869);box-shadow:0 4px 0 #14663a,0 0 22px #3ad07acc, inset 0 1px 0 #ffffff40}
+  /* corriendo EN ROJO: el motor sigue dado en zona prohibida. Se pinta rojo, pero APAGADO y sin halo, y no
+     es un capricho: medido en captura, con el rojo brillante de antes los DOS mandos grandes gritaban a la
+     vez sobre un fondo que el semáforo ya tiñe entero de rojo, y el jugador tenía dos alarmas y ninguna
+     instrucción. Aquí el rojo de CORRER dice «esto que estás haciendo es peligroso» y el que canta es
+     PARAR, que es la tecla que hay que tocar. Ese rojo vivo lo lleva UNO solo. */
+  #bRun.on.red{background:linear-gradient(#a83a2e,#7a1f16);box-shadow:0 4px 0 #4d1109, inset 0 1px 0 #ffffff20}
+  #bStop{background:linear-gradient(#5b2130,#3a1220);box-shadow:0 4px 0 #2a0c16, inset 0 1px 0 #ffffff18}
+  #bStop.on{background:linear-gradient(#ef4a58,#9e0f22);box-shadow:0 4px 0 #66091a, inset 0 1px 0 #ffffff2a}
+  /* AVISO: en cuanto el semáforo se pone ámbar (o ya rojo) y TÚ sigues corriendo, el que late es PARAR — se le
+     dice al jugador lo que TIENE QUE HACER, no lo que no debe. Late sin barrido: el barrido de brillo es del
+     SÚPER y en este juego solo lo lleva uno (regla Supercell: si avisan todos, no avisa ninguno). */
+  #bStop.urge{background:linear-gradient(#ff8f80,#f0402c);box-shadow:0 4px 0 #8a2016,0 0 26px #ffffff55, inset 0 1px 0 #ffffff55;
+    animation:urgeGlow 0.62s ease-in-out infinite}
+  /* el latido es de TAMAÑO, no solo de halo: cuando el semáforo se pone rojo el juego tiñe la pantalla
+     entera de rojo, y un halo rojo sobre fondo rojo no se ve. Lo que sí se ve siempre es que algo se mueva. */
+  @keyframes urgeGlow{0%,100%{transform:scale(1);filter:drop-shadow(0 0 0 #ffffff00)}
+                      50%{transform:scale(1.045);filter:drop-shadow(0 0 12px #ffffffaa)}}
+  @media (prefers-reduced-motion:reduce){#bStop.urge{animation:none}}
+  #bNitro,#bGhost,#bSup{flex:1;padding:12px 3px;font-size:clamp(10px,2.7vw,14px);background:rgba(30,24,42,.82)}
   /*+AG CADA BOTÓN DEL COLOR DE SU SIGNIFICADO (VB Jaime 2026-07-25). En este modo el color YA es la mecánica
-     (semáforo), así que los controles hablan el mismo idioma: CORRER verde y rojo cuando el semáforo se pone rojo
-     (arriba), FRENAZO rojo de luz de freno = "párate", NITRO cian = la estela de velocidad del motor, FANTASMA
-     blanco = intangible (en pista la bola se vuelve translúcida), SÚPER oro = acción, la convención del juego.
-     El rojo del FRENAZO es más profundo que el rojo-naranja del aviso de CORRER: significan lo mismo ("para"),
-     pero el aviso tiene que seguir cantando por encima de un botón pequeño que está rojo siempre. */
-  #bBrake.ready{background:linear-gradient(#ef4a58,#9e0f22);box-shadow:0 4px 0 #66091a, inset 0 1px 0 #ffffff2a}
+     (semáforo), así que los controles hablan el mismo idioma: CORRER verde, PARAR rojo de luz de freno, NITRO
+     cian = la estela de velocidad del motor, FANTASMA blanco = intangible (en pista la bola se vuelve
+     translúcida), SÚPER oro = acción, la convención del juego. Los dos mandos grandes se apagan cuando NO son
+     tu estado: en todo momento hay exactamente uno encendido, y de un vistazo sabes si tu motor va o no. */
   #bNitro.ready{background:linear-gradient(#59e0ff,#1f9ec8);box-shadow:0 4px 0 #0f5e7c, inset 0 1px 0 #ffffff30}
   #bNitro.act{background:linear-gradient(#a8f2ff,#3fc2ea);color:#032230;box-shadow:0 2px 0 #0f5e7c,0 0 20px #59e0ffcc, inset 0 1px 0 #ffffff50}
   /*+AG el FANTASMA era lila y el CARRIL activo también (#laneRow button.on): dos violetas para cosas que no tienen
@@ -188,22 +215,21 @@
   /* doc 60 regla 9 · SUELO DE 11 px: ningun texto informativo del HUD baja de ahi. Los 10 y 9 px de este
      HUD venian de cuando el HUD era una herramienta de preview en pantalla grande. */
   #controls button .k{font-size:11px}
-  #bBrake,#bNitro,#bGhost,#bSup{font-size:clamp(11px,2.7vw,14px)}   /* el minimo era 10 px */
+  #bNitro,#bGhost,#bSup{font-size:clamp(11px,2.7vw,14px)}   /* el minimo era 10 px */
   /* doc 60 regla 10 · MAYUSCULAS POR CSS, nunca editando los 20 diccionarios de i18n (en arabe/CJK el
      transform es inocuo). Los botones de este modo ya venian en mayusculas escritas a mano; con el
      transform lo siguen estando cuando el paquete de idioma los traduce. La frase larga de
      #spectator .sub se queda en Sentence case. */
   #controls button, #count .you, #spectator .big, #specExit{text-transform:uppercase}
-  /* ATAJOS DE TECLADO. Medido: los sufijos «←/1», «MANTÉN · espacio/↑», las letras F/A/S de recarga y la
+  /* ATAJOS DE TECLADO. Medido: los sufijos «←/1», las teclas de CORRER/PARAR, las letras F/A/S de recarga y la
      leyenda de teclas de la esquina se pintan SIEMPRE — lo unico que los apagaba era ?capture=1 —, o sea
      que en el movil de verdad (embed del shell) el jugador ve teclas que no tiene. NO se borran: en
      escritorio se juega con el teclado y ayudan. Se apagan donde no hay teclado (puntero grueso = dedo).
-     ⚠ #bRun SE QUEDA FUERA A PROPOSITO: su .k no es solo teclas, es «MANTÉN · espacio/↑», y MANTÉN es la
-       instruccion que hace jugable el boton principal del modo. Apagarlo en el movil se llevaria por
-       delante lo unico que dice que hay que dejar el dedo puesto. Para separarlo hay que partir la clave
-       de i18n `runHold` en dos (instruccion + teclas) en los 20 diccionarios: queda pendiente, no se
-       apana aqui. Lo mismo con las letras F/A/S que el JS escribe en .cd cuando el booster esta listo. */
-  @media (pointer:coarse){ #controls button:not(#bRun) .k, .keys{display:none} }
+     ✔ doc 73: #bRun YA NO es una excepcion. Su .k decia «MANTÉN · espacio/↑» —instruccion y teclas mezcladas—
+       y por eso no se podia apagar en el movil sin llevarse por delante la unica pista de que habia que dejar
+       el dedo puesto. Ya no hay dedo puesto que explicar: su .k son solo teclas, como los demas, y se apaga
+       donde no hay teclado. Se cierra la deuda que este comentario dejaba escrita. */
+  @media (pointer:coarse){ #controls button .k, .keys{display:none} }
 </style>
 </head>
 <body>
@@ -231,7 +257,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 <div id="pips"></div>
 <div id="cta"><b class="sp">✨</b><span class="ic"><b class="thumb">👍</b><b class="bell">🔔</b></span><b class="sp">✨</b></div>
 <div id="mini"></div>
-<div class="keys" id="keys">HOLD RUN on green &nbsp;·&nbsp; ←/→ or 1/2/3 = lane &nbsp;·&nbsp; F = brake &nbsp;·&nbsp; A/S/D = nitro/ghost/super &nbsp;·&nbsp; R = new round</div>
+<div class="keys" id="keys">space/↑ = run &nbsp;·&nbsp; ↓ = stop &nbsp;·&nbsp; ←/→ or 1/2/3 = lane &nbsp;·&nbsp; F = slam the brakes &nbsp;·&nbsp; A/S/D = nitro/ghost/super &nbsp;·&nbsp; R = new round</div>
 <!--+AG etiqueta TÚ (DOM proyectado sobre tu bola) + controles + cuenta atras + cartel espectador -->
 <div id="youlbl">YOU</div>
 <div id="controls">
@@ -241,8 +267,10 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
     <button id="bLaneR"><span class="t">RIGHT ▶</span><span class="k">→/3</span></button>
   </div>
   <div class="row">
-    <button id="bRun"><span class="t">RUN</span><span class="k">HOLD · space/↑</span></button>
-    <button id="bBrake"><span class="t">BRAKE</span><span class="cd" id="cdBrake">F</span></button>
+    <!--+AG doc 73: CORRER y PARAR, dos estados. El .cd de PARAR es el FRENAZO: cuando esta cargado, un segundo
+         toque en PARAR clava la bola en seco (antes era un boton propio). -->
+    <button id="bRun"><span class="t">RUN</span><span class="k">space/↑</span></button>
+    <button id="bStop"><span class="t">STOP</span><span class="cd" id="cdStop">F</span></button>
     <!--+AG encargo 34: el icono lo pone el HTML (arte/ui/icono-*.webp), NO la cadena traducida. El rayo, el
          fantasma y la estrella viajaban dentro de nitro/ghost/sup en los 20 idiomas y los dibujaba el emoji
          del SISTEMA (por eso aqui ya no queda ni un emoji que grepear), distinto en
@@ -268,7 +296,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=3f6a5c4"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=3c100d3"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -279,23 +307,23 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 </script>
 
 <script type="module">
-import { THREE, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createBloom, frameOrtho, BLOOM } from '../chassis/gfx.mjs?v=3f6a5c4';
-import { archLook } from '../chassis/ballmat.mjs?v=3f6a5c4';   //+AG doc 41 bloque G: material de la bola-heroe
-import { attachSquash } from '../chassis/squash.mjs?v=3f6a5c4';
-import { createCelebration } from '../chassis/celebration.mjs?v=3f6a5c4';
-import { createKillfeed } from '../chassis/killfeed.mjs?v=3f6a5c4';
-import { createCensusBoard } from '../chassis/censusboard.mjs?v=3f6a5c4';
-import { createCupoGauge } from '../chassis/cupogauge.mjs?v=3f6a5c4';
-import { createKillTags } from '../chassis/killtag.mjs?v=3f6a5c4';
-import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=3f6a5c4';
-import { archFace } from '../chassis/facegen.mjs?v=3f6a5c4';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
-import { Sim, TEAMS, SHORT_COLORS, SHORT_COLORS_6, BALL_R, FPS, FIELD_W, FIELD_L, XL, XR, SPAWN_Y, GATE_Y, SAFE_Y } from './sim.js?v=3f6a5c4';
-import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=3f6a5c4';
-import { buildSfxBuffer } from './sfxmap.mjs?v=3f6a5c4';
-import { createCoach } from '../chassis/coach.mjs?v=3f6a5c4';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
-import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=3f6a5c4';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
-import { createPausa } from '../chassis/pausa.mjs?v=3f6a5c4';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
-import { cantarPuesto } from '../chassis/veredicto.mjs?v=3f6a5c4';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
+import { THREE, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createBloom, frameOrtho, BLOOM } from '../chassis/gfx.mjs?v=3c100d3';
+import { archLook } from '../chassis/ballmat.mjs?v=3c100d3';   //+AG doc 41 bloque G: material de la bola-heroe
+import { attachSquash } from '../chassis/squash.mjs?v=3c100d3';
+import { createCelebration } from '../chassis/celebration.mjs?v=3c100d3';
+import { createKillfeed } from '../chassis/killfeed.mjs?v=3c100d3';
+import { createCensusBoard } from '../chassis/censusboard.mjs?v=3c100d3';
+import { createCupoGauge } from '../chassis/cupogauge.mjs?v=3c100d3';
+import { createKillTags } from '../chassis/killtag.mjs?v=3c100d3';
+import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=3c100d3';
+import { archFace } from '../chassis/facegen.mjs?v=3c100d3';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
+import { Sim, TEAMS, SHORT_COLORS, SHORT_COLORS_6, BALL_R, FPS, FIELD_W, FIELD_L, XL, XR, SPAWN_Y, GATE_Y, SAFE_Y } from './sim.js?v=3c100d3';
+import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=3c100d3';
+import { buildSfxBuffer } from './sfxmap.mjs?v=3c100d3';
+import { createCoach } from '../chassis/coach.mjs?v=3c100d3';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=3c100d3';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
+import { createPausa } from '../chassis/pausa.mjs?v=3c100d3';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
+import { cantarPuesto } from '../chassis/veredicto.mjs?v=3c100d3';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
 
 window.addEventListener('error', e => { document.getElementById('err').style.display='grid'; console.error(e.error||e.message); });
 
@@ -646,13 +674,14 @@ const youRing = new THREE.Mesh(new THREE.RingGeometry(BALL_R*1.32, BALL_R*1.56, 
 youRing.renderOrder=8; youRing.visible=false; scene.add(youRing);
 const youLbl = document.getElementById('youlbl');
 const _v3 = new THREE.Vector3();
-//+AG estado de la capa de agencia (intro/espectador). runHeld = CORRER pulsado (se vuelca a sim.playerRun cada paso).
+//+AG estado de la capa de agencia (intro/espectador). running = motor ENCENDIDO (se vuelca a sim.playerRun cada
+//   paso). Desde doc 73 es un ESTADO fijado por los botones CORRER/PARAR, no un dedo mantenido.
 //+AG ARRANQUE (feedback Jaime 2026-07-26): la partida ya no abre de golpe en 3-2-1. Antes va la fase 'ready' (el
 //   cartel del modo de chassis/arranque.mjs, que es donde se desbloquea el audio) y luego la cuenta atrás, más
 //   lenta por cifra (1,15 s) y CON sonido. El "¡YA!" no congela la sim: se pinta encima de la partida ya en marcha.
 const DIGITS=3, DIGIT=1.15, GO_HOLD=550;
 let phase='intro', introT=0, introRingT=-1; const INTRO_DUR=DIGITS*DIGIT;
-let runHeld=false, prevPlayerRank=null, ended=false;
+let running=false, prevPlayerRank=null, ended=false;
 //+AG tutorial v2: el COACH congela el mundo mientras pide una acción y lo suelta en cuanto el jugador toca.
 //   Solo lo activa el coach (?tutorial=1); en partida normal es false y el bucle va exactamente igual.
 let coachPaused=false;
@@ -717,7 +746,7 @@ function buildSim(s){
   buildArena(); buildHud();
   //+AG reset de la capa de agencia por ronda. La sim NO avanza durante la intro (3-2-1) → la música y el motor del
   //   jugador se sueltan en el "¡YA!" (loop). startAudio se llama allí, no aquí, para que vaya sincronizado.
-  phase='intro'; introT=0; introRingT=-1; prevPlayerRank=null; ended=false; runHeld=false;
+  phase='intro'; introT=0; introRingT=-1; prevPlayerRank=null; ended=false; running=false;
   superVal=0; redEntryMoving=false; ghostOn=false; setLane('center');   //+AG reset de carril/boosters por ronda (ballObjs nuevos → material fantasma fuera solo)
   hideSpectator(); updateControls();
   window.dbg={ get sim(){return sim;}, get boulderM(){return boulderM;}, get audio(){return audio;}, get soundOn(){return musicOn||sfxOn;}, get scene(){return scene;}, get cam(){return cam;},
@@ -803,7 +832,7 @@ function react(ev){ const f=sim.f;
 function stepOnce(){
   for(let i=0;i<sim.balls.length;i++){ const b=sim.balls[i]; px[i]=b.x; py[i]=b.y; }
   for(let i=0;i<sim.geo.boulders.length;i++) prevBoulderX[i]=sim.boulderX(i);
-  sim.playerRun(runHeld);   //+AG vuelca CORRER (mantener pulsado) a la sim ANTES del paso: motor ON mientras esté pulsado
+  sim.playerRun(running);   //+AG vuelca el estado del motor a la sim ANTES del paso: ON hasta que se pulse PARAR
   const wasDecided = sim.decision_frame!==null;   //+AG detectar la resolución en ESTE paso (fanfarria + espectador en vivo)
   const ev=sim.step(); if(ev) react(ev);
   //+AG SFX EN VIVO + estado del jugador (espectador). Con un jugador el futuro no se puede precalcular.
@@ -815,8 +844,8 @@ function stepOnce(){
     //   · goteo por correr en verde: +0.0012/frame (~0.036/s) — llena solo, pero MUY despacio
     if(phase==='play' && sim.decision_frame===null && p.rank===null && !p.safe){
       const sp=Math.hypot(p.vx,p.vy);
-      if(sim.color==='green' && runHeld && sp>0.8) superVal=Math.min(1,superVal+0.0012);
-      if(sim.color==='green' && runHeld){ let ov=0;
+      if(sim.color==='green' && running && sp>0.8) superVal=Math.min(1,superVal+0.0012);
+      if(sim.color==='green' && running){ let ov=0;
         for(const b of sim.balls){ if(b.id===0||b.rank!==null||b.safe) continue;
           if(py[b.id]>py[0] && b.y<p.y) ov++; }
         if(ov) superVal=Math.min(1,superVal+0.05*ov); }
@@ -1236,7 +1265,13 @@ function loop(){ const dt=Math.min(clock.getDelta(),0.05);
     introCamera(introT); if(phase==='intro') introUI(introT);
     celeb.update(false, cam, dt, null); census.update(dt, cam, sim.balls, rlCensus); ktags.update(dt); renderFrame();
     if(phase==='intro' && introT>=INTRO_DUR){ phase='play'; acc=0; clock.getDelta(); goFlash();
-      if(sim) sim.playerEngage();   //+AG desde el "¡YA!" manda el input: no pulsar CORRER = frenar
+      if(sim) sim.playerEngage();   //+AG desde el "¡YA!" manda el input: el motor va donde lo dejen CORRER/PARAR
+      //+AG doc 73: el "¡YA!" SIGNIFICA YA. Con el mantener pulsado, quien no tenía el dedo puesto se quedaba
+      //   clavado en la línea de salida sin entender por qué; ahora la salida es lo que promete el nombre del
+      //   modo —se sale corriendo y la gracia es decidir CUÁNDO parar—, y el semáforo arranca siempre en verde.
+      //   En el TUTORIAL no: allí el primer paso es justamente aprender el botón, y si el motor ya estuviera
+      //   encendido la lección se daría por aprendida sola.
+      if(!TUTORIAL) setRun(true);
       startAudio(); }               //+AG suelta la música (loop) sincronizada con f=0
     requestAnimationFrame(loop); return;
   }
@@ -1356,16 +1391,25 @@ function showSpectator(win){
 document.getElementById('specExit').onclick=()=>{ ended=true; emitEnd(); };
 function hideSpectator(){ document.getElementById('spectator').classList.remove('show'); document.getElementById('controls').classList.remove('dead'); }
 
-//+AG CONTROLES: CORRER (mantener) domina; FRENAZO (recarga ~3s, tecla F); carriles ←/→ o 1/2/3; boosters
-//   A/S/D = Nitro/Fantasma/Súper (mismo trío de teclas que el Cazador; el frenazo cede la S al Fantasma).
-//   Touch-first (pointer) + teclado (espacio/↑ = correr).
-const bRun=document.getElementById('bRun'), bBrake=document.getElementById('bBrake'), cdBrake=document.getElementById('cdBrake');
+//+AG CONTROLES (doc 73): CORRER y PARAR, dos ESTADOS; carriles ←/→ o 1/2/3; boosters A/S/D = Nitro/Fantasma/
+//   Súper (mismo trío de teclas que el Cazador). Touch-first (pointer) + teclado (espacio/↑ = correr, ↓/F = parar).
+const bRun=document.getElementById('bRun'), bStop=document.getElementById('bStop'), cdStop=document.getElementById('cdStop');
 const bLaneL=document.getElementById('bLaneL'), bLaneC=document.getElementById('bLaneC'), bLaneR=document.getElementById('bLaneR');
 const bNitro=document.getElementById('bNitro'), bGhost=document.getElementById('bGhost'), bSup=document.getElementById('bSup');
 const cdNitro=document.getElementById('cdNitro'), cdGhost=document.getElementById('cdGhost'), cdSup=document.getElementById('cdSup');
 const LANES=['left','center','right'];
-function setRun(on){ runHeld=on && phase==='play'; bRun.classList.toggle('hold', runHeld); }
-function doBrake(){ if(sim && phase==='play' && sim.playerBrake()) bBrake.classList.remove('ready'); }
+//+AG doc 73: el ESTADO del motor. No hay dedo que lo sostenga, así que lo sostiene esta variable y los dos
+//   botones se pintan siempre en espejo: uno encendido, el otro apagado.
+function setRun(on){ running=on && phase==='play';
+  bRun.classList.toggle('on', running); bStop.classList.toggle('on', !running && phase==='play'); }
+function doBrake(){ return !!(sim && phase==='play' && sim.playerBrake()); }
+//+AG PARAR: primer toque APAGA el motor (sueltas el gas y patinas por fricción, exactamente lo que hacía
+//   levantar el dedo). Si ya estabas parando, el segundo toque es el FRENAZO —clavarse en seco— siempre que
+//   esté cargado. Un solo botón para una sola intención («¡para!»), con la escalera de pánico natural: le doy,
+//   veo que sigo deslizándome, le doy otra vez. Así el frenazo NO se gasta sin querer al levantar el pie, que
+//   es lo que pasaría si el primer toque ya lo consumiera.
+function doStop(){ if(!sim || phase!=='play') return;
+  if(running) setRun(false); else doBrake(); }
 //+AG carril: la INTENCIÓN cambia al instante (vale hasta en la intro); la bola tarda lo que tarde la física
 function setLane(k){ if(!sim || !sim.playerLane(k)) return;
   bLaneL.classList.toggle('on', k==='left'); bLaneC.classList.toggle('on', k==='center'); bLaneR.classList.toggle('on', k==='right'); }
@@ -1374,13 +1418,17 @@ function doNitro(){ if(sim && phase==='play') sim.playerNitro(); }
 function doGhost(){ if(sim && phase==='play') sim.playerGhost(); }
 function doSuper(){ if(sim && phase==='play' && superVal>=1 && sim.playerSuper()){ superVal=0;
   const p=sim.balls[0]; flashAt(p.x,p.y,0xffd34d,1.5,0.85); P.ring(p.x,p.y,[1,0.83,0.3],0.8); } }   // flash DORADO al soltarlo (oro=acción)
-// CORRER: pointer (mantener). pointerdown captura para recibir el up aunque salga del botón.
-bRun.addEventListener('pointerdown',e=>{ e.preventDefault(); bRun.setPointerCapture?.(e.pointerId); setRun(true); });
-bRun.addEventListener('pointerup',  e=>{ e.preventDefault(); setRun(false); });
-bRun.addEventListener('pointercancel',()=>setRun(false));
-bRun.addEventListener('pointerleave',()=>{ if(!bRun.hasPointerCapture) setRun(false); });
+//+AG doc 73: TODO EL MANTENER PULSADO SE VA, y con él sus averías. El `hold` necesitaba capturar el puntero,
+//   recordar qué dedo empezó a correr y una red de seguridad en window/blur/visibilitychange por si el
+//   `pointerup` se perdía — y aun así se quedaba pegado (fallo real del 2026-08-04: `hasPointerCapture` es un
+//   MÉTODO, siempre truthy, así que la red nunca saltaba). Un estado que se cambia con dos toques no puede
+//   quedarse pegado: no hay nada que soltar. Los dos van con `pointerdown` (en móvil `click` solo dispara al
+//   LEVANTAR el dedo y se cancela si el dedo se desliza un pelo; jugando eso se siente como un botón que te
+//   ignora) y ambos son gratis, así que un roce accidental no cuesta recurso.
+bRun.addEventListener('pointerdown',e=>{ e.preventDefault(); if(phase==='play') setRun(true); });
+bStop.addEventListener('pointerdown',e=>{ e.preventDefault(); doStop(); });
 bRun.addEventListener('contextmenu',e=>e.preventDefault());
-bBrake.addEventListener('pointerdown',e=>{ e.preventDefault(); doBrake(); });
+bStop.addEventListener('contextmenu',e=>e.preventDefault());
 bLaneL.addEventListener('pointerdown',e=>{ e.preventDefault(); setLane('left'); });
 bLaneC.addEventListener('pointerdown',e=>{ e.preventDefault(); setLane('center'); });
 bLaneR.addEventListener('pointerdown',e=>{ e.preventDefault(); setLane('right'); });
@@ -1391,10 +1439,17 @@ function updateControls(){
   if(!sim){ return; } const p=sim.balls[0], f=sim.f, dead=p.rank!==null||sim.decision_frame!==null||phase!=='play';
   // CORRER se pinta ROJO en fase roja del semáforo (aviso de "si corres ahora, te delatas")
   bRun.classList.toggle('red', sim.color==='red' && sim.decision_frame===null && phase==='play');
-  bRun.disabled=dead; if(dead){ runHeld=false; bRun.classList.remove('hold'); }
-  const bd=Math.max(0, sim.pIn.brakeCd - f), ready=!dead && bd<=0;
-  bBrake.disabled=dead; bBrake.classList.toggle('ready', ready);
-  cdBrake.textContent = dead ? '' : (bd>0 ? Math.ceil(bd/30)+'s' : 'F');
+  bRun.disabled=dead; if(dead){ running=false; bRun.classList.remove('on'); bStop.classList.remove('on','urge'); }
+  //+AG doc 73: el AVISO vive en PARAR. En cuanto el semáforo se pone ámbar (mismo cálculo que el farol y el
+  //   anillo del HUD: verde y a menos de WARN frames del corte) o ya está rojo, y TÚ sigues corriendo, PARAR
+  //   late. Es el único momento en que el HUD te pide algo, y te pide la acción, no la abstinencia.
+  const alerta = sim.decision_frame===null && phase==='play' &&
+    (sim.color==='red' || (sim.color==='green' && sim.phaseEnd-f<=18));
+  bStop.disabled=dead; bStop.classList.toggle('urge', !dead && running && alerta);
+  //+AG el .cd de PARAR es el FRENAZO: la palabra cuando está cargado (segundo toque = clavarse), el segundero
+  //   mientras recarga. PARAR sin frenazo sigue valiendo: apagar el motor es gratis y no tiene recarga.
+  const bd=Math.max(0, sim.pIn.brakeCd - f);
+  cdStop.textContent = dead ? '' : (bd>0 ? Math.ceil(bd/30)+'s' : T().brake);
   //+AG boosters (patrón Cazador): recarga en segundos en .cd; activo = .act; cargado = .ready
   const nd=Math.max(0,sim.pIn.nitroCd-f), gd=Math.max(0,sim.pIn.ghostCd-f);
   const nAct=f<sim.pIn.nitroUntil, gAct=f<sim.pIn.ghostUntil, sAct=f<sim.pIn.superUntil;
@@ -1409,8 +1464,12 @@ function updateControls(){
 }
 addEventListener('keydown',e=>{
   if(e.repeat){ return; }
+  //+AG doc 73: el teclado habla el mismo idioma que los botones — ESPACIO/↑ enciende el motor y ↓ lo apaga.
+  //   Ya NO hay `keyup`: soltar la tecla no para (era el mismo `hold` con otra ropa). F sigue siendo el
+  //   FRENAZO directo: en escritorio hay teclas de sobra y no hace falta la escalera de dos toques del móvil.
   if(e.key===' '||e.key==='ArrowUp'){ e.preventDefault(); setRun(true); return; }
-  if(e.key==='f'||e.key==='F'){ doBrake(); return; }
+  if(e.key==='ArrowDown'){ e.preventDefault(); doStop(); return; }
+  if(e.key==='f'||e.key==='F'){ setRun(false); doBrake(); return; }
   if(e.key==='a'||e.key==='A'){ doNitro(); return; }
   if(e.key==='s'||e.key==='S'){ doGhost(); return; }
   if(e.key==='d'||e.key==='D'){ doSuper(); return; }
@@ -1423,7 +1482,6 @@ addEventListener('keydown',e=>{
     if(playing){ e.preventDefault(); shiftLane(e.key==='ArrowLeft'?-1:1); return; }
     if(e.key==='ArrowRight'){ seed++; buildSim(seed); } else { seed=Math.max(1,seed-1); buildSim(seed); } return; }
   if(e.key==='r'||e.key==='R')buildSim(seed); });
-addEventListener('keyup',e=>{ if(e.key===' '||e.key==='ArrowUp'){ setRun(false); } });
 
 // ---- AUDIO (preview): música del modo por Web Audio. 4 variantes que el dueño generó (Suno) rotadas por
 // semilla. SIN SFX todavía (sfxmap.mjs es el siguiente bloque); solo la música + el sello rojo/verde (§3). ----
@@ -1519,10 +1577,10 @@ function exFlash(){ exEl.classList.add('hit'); requestAnimationFrame(()=>request
 // ============================================================================
 const I18N={
   en:{ menu:'← Menu',
-    keys:'HOLD RUN on green &nbsp;·&nbsp; ←/→ or 1/2/3 = lane &nbsp;·&nbsp; F = brake &nbsp;·&nbsp; A/S/D = nitro/ghost/super &nbsp;·&nbsp; R = new round',
+    keys:'space/↑ = run &nbsp;·&nbsp; ↓ = stop &nbsp;·&nbsp; ←/→ or 1/2/3 = lane &nbsp;·&nbsp; F = slam the brakes &nbsp;·&nbsp; A/S/D = nitro/ghost/super &nbsp;·&nbsp; R = new round',
     you:'YOU', youIntro:'This is you', go:'GO!', on:'ON!', ready:'READY',
-    lanes:['◀ LEFT','● CENTER','RIGHT ▶'], run:'RUN', runHold:'HOLD · space/↑',
-    brake:'BRAKE', nitro:'NITRO', ghost:'GHOST', sup:'SUPER',
+    lanes:['◀ LEFT','● CENTER','RIGHT ▶'], run:'RUN', runHold:'space/↑',
+    stop:'STOP', brake:'BRAKE', nitro:'NITRO', ghost:'GHOST', sup:'SUPER',
     specWin:'YOU WON!', specLose:"YOU'RE OUT",
     specWinSub:n=>`You crossed the finish · 1st of ${n}`,
     specSub:(p,n)=>`Now spectating · ${p} of ${n}`,
@@ -1530,10 +1588,10 @@ const I18N={
     specExit:'▸ SEE RESULTS', sound:'Turn sound on',
     err:'The 3D modules failed to load from the CDN. Open this with internet access.' },
   es:{ menu:'← Menú',
-    keys:'MANTÉN CORRER en verde &nbsp;·&nbsp; ←/→ o 1/2/3 = carril &nbsp;·&nbsp; F = frenazo &nbsp;·&nbsp; A/S/D = nitro/fantasma/súper &nbsp;·&nbsp; R = otra ronda',
+    keys:'espacio/↑ = correr &nbsp;·&nbsp; ↓ = parar &nbsp;·&nbsp; ←/→ o 1/2/3 = carril &nbsp;·&nbsp; F = frenazo &nbsp;·&nbsp; A/S/D = nitro/fantasma/súper &nbsp;·&nbsp; R = otra ronda',
     you:'TÚ', youIntro:'Este eres tú', go:'¡YA!', on:'¡ON!', ready:'¡YA!',
-    lanes:['◀ IZQUIERDA','● CENTRO','DERECHA ▶'], run:'CORRER', runHold:'MANTÉN · espacio/↑',
-    brake:'FRENAZO', nitro:'NITRO', ghost:'FANT.', sup:'SÚPER',
+    lanes:['◀ IZQUIERDA','● CENTRO','DERECHA ▶'], run:'CORRER', runHold:'espacio/↑',
+    stop:'PARAR', brake:'FRENAZO', nitro:'NITRO', ghost:'FANT.', sup:'SÚPER',
     specWin:'¡GANASTE!', specLose:'TE ELIMINARON',
     specWinSub:n=>`Cruzaste la meta · 1º de ${n}`,
     specSub:(p,n)=>`Ahora eres espectador · puesto ${p} de ${n}`,
@@ -1574,7 +1632,7 @@ function pintaLang(){
   _id('youlbl').textContent=t.you; _id('countYou').textContent=t.youIntro;
   ['bLaneL','bLaneC','bLaneR'].forEach((id,i)=>{ _id(id).querySelector('.t').textContent=t.lanes[i]; });
   _id('bRun').querySelector('.t').textContent=t.run; _id('bRun').querySelector('.k').textContent=t.runHold;
-  _id('bBrake').querySelector('.t').textContent=t.brake; _id('bNitro').querySelector('.t').textContent=t.nitro;
+  _id('bStop').querySelector('.t').textContent=t.stop; _id('bNitro').querySelector('.t').textContent=t.nitro;
   _id('bGhost').querySelector('.t').textContent=t.ghost; _id('bSup').querySelector('.t').textContent=t.sup;
   _id('specKey').innerHTML=t.specKey; _id('specExit').textContent=t.specExit; _id('err').textContent=t.err;
   const sb=_id('snd'); if(sb) sb.title=t.sound;
@@ -1659,20 +1717,20 @@ else {
 if(TUTORIAL)(function(){
   const CI={
     en:{ done:'Tutorial complete!', exit:'✕ Exit',
-      steps:[ 'HOLD RUN while the light is GREEN',
+      steps:[ 'Press RUN: your motor stays on until you say otherwise',
         'Ram the BARRIER on green until it breaks, then cross it',
-        'RED! Let go and stop (today nobody shoots… in a real match, they do)',
-        'Coming in hot? Press BRAKE (F) for an emergency stop',
+        'RED! Press STOP and hold still (today nobody shoots… in a real match, they do)',
+        'Still sliding? Press STOP again to slam the brakes',
         'The WALL has a GAP: switch LANE to the open side',
         'Press NITRO on green: a sprint',
         'Press GHOST: you pass through walls for a moment',
         'SUPER bar full, on the house! Press SUPER',
         'Cross the FINISH line!' ] },
     es:{ done:'¡Tutorial completado!', exit:'✕ Salir',
-      steps:[ 'MANTÉN CORRER mientras la luz esté en VERDE',
+      steps:[ 'Pulsa CORRER: tu motor se queda encendido hasta que tú digas',
         'Embiste la BARRERA en verde hasta romperla y crúzala',
-        '¡ROJO! Suelta y quédate quieto (hoy nadie dispara… en la partida real, sí)',
-        '¿Vas lanzado? Pulsa FRENAZO (F) para clavarte',
+        '¡ROJO! Pulsa PARAR y quédate quieto (hoy nadie dispara… en la partida real, sí)',
+        '¿Sigues deslizándote? Pulsa PARAR otra vez y clávate',
         'El MURO tiene un HUECO: cambia de CARRIL al lado abierto',
         'Pulsa NITRO en verde: un sprint',
         'Pulsa FANTASMA: atraviesas muros un instante',
@@ -1682,7 +1740,7 @@ if(TUTORIAL)(function(){
   //+AG doc 49: los otros 18 idiomas del tutorial llegan en el paquete. createCoach lee i18n[lang()] en
   //   cada paso, asi que basta con meter la tabla dentro del MISMO objeto CI aunque ya este en marcha.
   alLlegarPack((p,l)=>{ if(p.redlightCoach) CI[l]=Object.assign({},CI.en,p.redlightCoach); });
-  //+AG condiciones leídas de la Sim: correr en verde (runHeld), quieto en rojo (velocidad ~0), frenazo/boosters
+  //+AG condiciones leídas de la Sim: motor encendido en verde (running), quieto en rojo (velocidad ~0), frenazo/boosters
   //   (ventanas pIn.*Until), carriles (pIn.lane), barrera (Y del jugador), meta (safe).
   //+AG pause:true = el mundo se congela mientras lees, y se suelta en cuanto tocas. Los pasos de MIRAR el juego
   //   (romper la barrera, aguantar el rojo, cruzar la meta) NO pausan ni tapan la pantalla: ahí la lección es ver.
@@ -1704,12 +1762,15 @@ if(TUTORIAL)(function(){
     setPaused:v=>{ coachPaused=v; },
     steps:[
       { target:'bRun',   pause:true,  enter:light('green'),
-        check:dt=>{ acc = (runHeld && sim.color==='green') ? acc+dt : acc; return acc>=2.0; } },
+        check:dt=>{ acc = (running && sim.color==='green') ? acc+dt : acc; return acc>=2.0; } },
       { target:null,     pause:false, enter:light('green'), check:()=> sim.balls[0].y>7.5 },
       //+AG el ROJO llega CUANDO LO DICE EL CARTEL (no cuando toque el horario): la lección se ve en el momento
       { target:null,     pause:false, enter:light('red'),
-        check:dt=>{ acc = (sim.color==='red' && !runHeld && spd()<0.3) ? acc+dt : 0; return acc>=1.2; } },
-      { target:'bBrake', pause:true,  linger:1.4, enter:light('green'), check:()=> sim.f<sim.pIn.brakeUntil },
+        check:dt=>{ acc = (sim.color==='red' && !running && spd()<0.3) ? acc+dt : 0; return acc>=1.2; } },
+      //+AG doc 73: el FRENAZO ya no tiene botón propio — es el SEGUNDO toque de PARAR. Este paso llega justo
+      //   después de la lección del rojo, o sea con el motor ya apagado, así que ahí un toque en PARAR es
+      //   directamente el frenazo: la mano señala el mismo botón que el jugador acaba de aprender.
+      { target:'bStop',  pause:true,  linger:1.4, enter:light('green'), check:()=> sim.f<sim.pIn.brakeUntil },
       { target:()=> gapSide()==='right' ? 'bLaneR' : 'bLaneL', pause:true, linger:1.0,
         enter:andThen('green', ()=>{ laneStart=sim.pIn.lane; laneMoved=false; }),
         check:()=>{ if(sim.pIn.lane!==laneStart) laneMoved=true; return laneMoved && sim.pIn.lane===gapSide(); } },

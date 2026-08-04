@@ -257,10 +257,10 @@ cazadorCoach: {
 
 redlight: {
   menu:'← Menü',
-  keys:'Yeşilde KOŞ\'u basılı tut &nbsp;·&nbsp; ←/→ ya da 1/2/3 = şerit &nbsp;·&nbsp; F = fren &nbsp;·&nbsp; A/S/D = nitro/hayalet/süper &nbsp;·&nbsp; R = yeni tur',
+  keys:'boşluk/↑ = koş &nbsp;·&nbsp; ↓ = dur &nbsp;·&nbsp; ←/→ ya da 1/2/3 = şerit &nbsp;·&nbsp; F = ani fren &nbsp;·&nbsp; A/S/D = nitro/hayalet/süper &nbsp;·&nbsp; R = yeni tur',
   you:'SEN', youIntro:'Bu sensin', go:'BAŞLA!', on:'YEŞİL!', ready:'HAZIR',
-  lanes:['◀ SOL','● ORTA','SAĞ ▶'], run:'KOŞ', runHold:'BASILI TUT · boşluk/↑',
-  brake:'FREN', nitro:'NITRO', ghost:'HAYALET', sup:'SÜPER',
+  lanes:['◀ SOL','● ORTA','SAĞ ▶'], run:'KOŞ', runHold:'boşluk/↑',
+  stop:'DUR', brake:'FREN', nitro:'NITRO', ghost:'HAYALET', sup:'SÜPER',
   specWin:'KAZANDIN!', specLose:'ELENDİN',
   specWinSub:n=>`Bitişi geçtin · ${n} kişide 1.`,
   specSub:(p,n)=>`Artık izliyorsun · ${p} / ${n}`,
@@ -270,10 +270,10 @@ redlight: {
 },
 redlightCoach: {
   done:'Eğitim tamam!', exit:'✕ Çık',
-  steps:[ 'Işık YEŞİL olduğu sürece KOŞ\'u basılı tut',
+  steps:[ 'KOŞ\'a bas: sen aksini söyleyene kadar motorun açık kalır',
     'Yeşilde BARİYERE kırılana kadar tosla, sonra geç',
-    'KIRMIZI! Bırak ve kıpırdama (bugün kimse ateş etmiyor… gerçek maçta ediyorlar)',
-    'Hızlı mı geliyorsun? Ani duruş için FREN\'e (F) bas',
+    'KIRMIZI! DUR\'a bas ve kıpırdama (bugün kimse ateş etmiyor… gerçek maçta ediyorlar)',
+    'Hâlâ kayıyor musun? Ani fren için DUR\'a bir daha bas',
     'DUVARDA bir BOŞLUK var: açık tarafa ŞERİT değiştir',
     'Yeşilde NITRO\'ya bas: bir sprint',
     'HAYALET\'e bas: bir anlığına duvarlardan geçersin',

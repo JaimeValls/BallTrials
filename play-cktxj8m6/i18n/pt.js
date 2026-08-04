@@ -257,10 +257,10 @@ cazadorCoach: {
 
 redlight: {
   menu:'← Menu',
-  keys:'SEGURE CORRER no verde &nbsp;·&nbsp; ←/→ ou 1/2/3 = pista &nbsp;·&nbsp; F = freio &nbsp;·&nbsp; A/S/D = nitro/fantasma/super &nbsp;·&nbsp; R = nova rodada',
+  keys:'espaço/↑ = correr &nbsp;·&nbsp; ↓ = parar &nbsp;·&nbsp; ←/→ ou 1/2/3 = pista &nbsp;·&nbsp; F = freada &nbsp;·&nbsp; A/S/D = nitro/fantasma/super &nbsp;·&nbsp; R = nova rodada',
   you:'VOCÊ', youIntro:'Este é você', go:'JÁ!', on:'JÁ!', ready:'PRONTO',
-  lanes:['◀ ESQUERDA','● CENTRO','DIREITA ▶'], run:'CORRER', runHold:'SEGURE · espaço/↑',
-  brake:'FREIO', nitro:'NITRO', ghost:'FANT.', sup:'SUPER',
+  lanes:['◀ ESQUERDA','● CENTRO','DIREITA ▶'], run:'CORRER', runHold:'espaço/↑',
+  stop:'PARAR', brake:'FREIO', nitro:'NITRO', ghost:'FANT.', sup:'SUPER',
   specWin:'VOCÊ VENCEU!', specLose:'VOCÊ CAIU FORA',
   specWinSub:n=>`Você cruzou a chegada · 1º de ${n}`,
   specSub:(p,n)=>`Agora você assiste · ${p} de ${n}`,
@@ -270,10 +270,10 @@ redlight: {
 },
 redlightCoach: {
   done:'Tutorial concluído!', exit:'✕ Sair',
-  steps:[ 'SEGURE CORRER enquanto a luz estiver VERDE',
+  steps:[ 'Toque em CORRER: seu motor fica ligado até você mandar parar',
     'Bata na BARREIRA no verde até quebrar, e atravesse',
-    'VERMELHO! Solte e fique parado (hoje ninguém atira… na partida de verdade, atiram)',
-    'Vindo com tudo? Toque em FREIO (F) para uma parada de emergência',
+    'VERMELHO! Toque em PARAR e fique imóvel (hoje ninguém atira… na partida de verdade, atiram)',
+    'Ainda deslizando? Toque em PARAR de novo para cravar',
     'O MURO tem um VÃO: mude de PISTA para o lado aberto',
     'Toque em NITRO no verde: um pique',
     'Toque em FANTASMA: você atravessa muros por um instante',

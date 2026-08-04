@@ -257,10 +257,10 @@ cazadorCoach: {
 
 redlight: {
   menu:'← Menu',
-  keys:'TAHAN LARI saat hijau &nbsp;·&nbsp; ←/→ atau 1/2/3 = jalur &nbsp;·&nbsp; F = rem &nbsp;·&nbsp; A/S/D = nitro/hantu/super &nbsp;·&nbsp; R = ronde baru',
+  keys:'spasi/↑ = lari &nbsp;·&nbsp; ↓ = berhenti &nbsp;·&nbsp; ←/→ atau 1/2/3 = jalur &nbsp;·&nbsp; F = rem mendadak &nbsp;·&nbsp; A/S/D = nitro/hantu/super &nbsp;·&nbsp; R = ronde baru',
   you:'KAMU', youIntro:'Ini kamu', go:'MULAI!', on:'HIJAU!', ready:'SIAP',
-  lanes:['◀ KIRI','● TENGAH','KANAN ▶'], run:'LARI', runHold:'TAHAN · spasi/↑',
-  brake:'REM', nitro:'NITRO', ghost:'HANTU', sup:'SUPER',
+  lanes:['◀ KIRI','● TENGAH','KANAN ▶'], run:'LARI', runHold:'spasi/↑',
+  stop:'STOP', brake:'REM', nitro:'NITRO', ghost:'HANTU', sup:'SUPER',
   specWin:'KAMU MENANG!', specLose:'KAMU TERSINGKIR',
   specWinSub:n=>`Kamu melewati garis finis · ke-1 dari ${n}`,
   specSub:(p,n)=>`Sekarang kamu menonton · ${p} dari ${n}`,
@@ -270,10 +270,10 @@ redlight: {
 },
 redlightCoach: {
   done:'Tutorial selesai!', exit:'✕ Keluar',
-  steps:[ 'TAHAN LARI selama lampunya HIJAU',
+  steps:[ 'Tekan LARI: mesinmu tetap menyala sampai kamu bilang lain',
     'Tabrak PENGHALANG saat hijau sampai pecah, lalu lewati',
-    'MERAH! Lepas dan diam di tempat (hari ini tidak ada yang menembak… di pertandingan asli, ada)',
-    'Datang terlalu kencang? Tekan REM (F) untuk berhenti mendadak',
+    'MERAH! Tekan STOP dan diam di tempat (hari ini tidak ada yang menembak… di pertandingan asli, ada)',
+    'Masih meluncur? Tekan STOP lagi untuk mengerem mendadak',
     'TEMBOKNYA punya CELAH: pindah JALUR ke sisi yang terbuka',
     'Tekan NITRO saat hijau: satu sprint',
     'Tekan HANTU: kamu menembus tembok sesaat',

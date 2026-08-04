@@ -257,10 +257,10 @@ cazadorCoach: {
 
 redlight: {
   menu:'← Menu',
-  keys:'GIỮ CHẠY khi đèn xanh &nbsp;·&nbsp; ←/→ hoặc 1/2/3 = làn &nbsp;·&nbsp; F = phanh &nbsp;·&nbsp; A/S/D = nitro/ma/siêu &nbsp;·&nbsp; R = ván mới',
+  keys:'cách/↑ = chạy &nbsp;·&nbsp; ↓ = dừng &nbsp;·&nbsp; ←/→ hoặc 1/2/3 = làn &nbsp;·&nbsp; F = phanh gấp &nbsp;·&nbsp; A/S/D = nitro/ma/siêu &nbsp;·&nbsp; R = ván mới',
   you:'BẠN', youIntro:'Đây là bạn', go:'XUẤT PHÁT!', on:'XANH!', ready:'SẴN SÀNG',
-  lanes:['◀ TRÁI','● GIỮA','PHẢI ▶'], run:'CHẠY', runHold:'GIỮ · cách/↑',
-  brake:'PHANH', nitro:'NITRO', ghost:'MA', sup:'SIÊU',
+  lanes:['◀ TRÁI','● GIỮA','PHẢI ▶'], run:'CHẠY', runHold:'cách/↑',
+  stop:'DỪNG', brake:'PHANH', nitro:'NITRO', ghost:'MA', sup:'SIÊU',
   specWin:'BẠN THẮNG!', specLose:'BẠN BỊ LOẠI',
   specWinSub:n=>`Bạn đã qua vạch đích · hạng 1 trên ${n}`,
   specSub:(p,n)=>`Giờ bạn đang xem · ${p} trên ${n}`,
@@ -270,10 +270,10 @@ redlight: {
 },
 redlightCoach: {
   done:'Xong hướng dẫn!', exit:'✕ Thoát',
-  steps:[ 'GIỮ CHẠY khi đèn còn XANH',
+  steps:[ 'Bấm CHẠY: động cơ vẫn chạy cho tới khi bạn bảo khác',
     'Húc RÀO CHẮN lúc đèn xanh cho tới khi nó vỡ, rồi băng qua',
-    'ĐỎ! Thả tay và đứng yên (hôm nay không ai bắn… trong trận thật thì có)',
-    'Đang lao nhanh? Bấm PHANH (F) để dừng khẩn cấp',
+    'ĐỎ! Bấm DỪNG và đứng yên (hôm nay không ai bắn… trong trận thật thì có)',
+    'Vẫn còn trượt? Bấm DỪNG lần nữa để phanh gấp',
     'BỨC TƯỜNG có một KHE HỞ: đổi LÀN sang phía mở',
     'Bấm NITRO khi đèn xanh: một cú nước rút',
     'Bấm MA: bạn xuyên tường trong chốc lát',

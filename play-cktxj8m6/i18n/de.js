@@ -259,10 +259,10 @@ cazadorCoach: {
 
 redlight: {
   menu:'← Menü',
-  keys:'LAUFEN HALTEN bei Grün &nbsp;·&nbsp; ←/→ oder 1/2/3 = Spur &nbsp;·&nbsp; F = Bremse &nbsp;·&nbsp; A/S/D = Nitro/Geist/Super &nbsp;·&nbsp; R = neue Runde',
+  keys:'Leer/↑ = laufen &nbsp;·&nbsp; ↓ = stoppen &nbsp;·&nbsp; ←/→ oder 1/2/3 = Spur &nbsp;·&nbsp; F = Vollbremsung &nbsp;·&nbsp; A/S/D = Nitro/Geist/Super &nbsp;·&nbsp; R = neue Runde',
   you:'DU', youIntro:'Das bist du', go:'LOS!', on:'GRÜN!', ready:'BEREIT',
-  lanes:['◀ LINKS','● MITTE','RECHTS ▶'], run:'LAUFEN', runHold:'HALTEN · Leer/↑',
-  brake:'BREMSE', nitro:'NITRO', ghost:'GEIST', sup:'SUPER',
+  lanes:['◀ LINKS','● MITTE','RECHTS ▶'], run:'LAUFEN', runHold:'Leer/↑',
+  stop:'STOPP', brake:'BREMSE', nitro:'NITRO', ghost:'GEIST', sup:'SUPER',
   specWin:'GEWONNEN!', specLose:'DU BIST RAUS',
   specWinSub:n=>`Du hast das Ziel erreicht · 1. von ${n}`,
   specSub:(p,n)=>`Du schaust jetzt zu · ${p} von ${n}`,
@@ -272,10 +272,10 @@ redlight: {
 },
 redlightCoach: {
   done:'Tutorial geschafft!', exit:'✕ Beenden',
-  steps:[ 'HALTE LAUFEN gedrückt, solange die Ampel GRÜN ist',
+  steps:[ 'Drück LAUFEN: dein Motor bleibt an, bis du etwas anderes sagst',
     'Ramm die BARRIERE bei Grün, bis sie bricht, und geh durch',
-    'ROT! Loslassen und stehen bleiben (heute schießt keiner… im echten Match schon)',
-    'Zu schnell unterwegs? Drück BREMSE (F) für eine Vollbremsung',
+    'ROT! Drück STOPP und bleib stehen (heute schießt keiner… im echten Match schon)',
+    'Rutschst du noch? Drück nochmal STOPP für die Vollbremsung',
     'Die MAUER hat eine LÜCKE: wechsle die SPUR zur offenen Seite',
     'Drück NITRO bei Grün: ein Sprint',
     'Drück GEIST: du gehst kurz durch Mauern hindurch',

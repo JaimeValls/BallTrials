@@ -257,10 +257,10 @@ cazadorCoach: {
 
 redlight: {
   menu:'← Menu',
-  keys:'TIENI PREMUTO CORRI sul verde &nbsp;·&nbsp; ←/→ o 1/2/3 = corsia &nbsp;·&nbsp; F = frenata &nbsp;·&nbsp; A/S/D = nitro/fantasma/super &nbsp;·&nbsp; R = nuovo round',
+  keys:'spazio/↑ = corri &nbsp;·&nbsp; ↓ = fermati &nbsp;·&nbsp; ←/→ o 1/2/3 = corsia &nbsp;·&nbsp; F = frenata &nbsp;·&nbsp; A/S/D = nitro/fantasma/super &nbsp;·&nbsp; R = nuovo round',
   you:'TU', youIntro:'Questo sei tu', go:'VIA!', on:'VIA!', ready:'PRONTO',
-  lanes:['◀ SINISTRA','● CENTRO','DESTRA ▶'], run:'CORRI', runHold:'TIENI · spazio/↑',
-  brake:'FRENATA', nitro:'NITRO', ghost:'FANT.', sup:'SUPER',
+  lanes:['◀ SINISTRA','● CENTRO','DESTRA ▶'], run:'CORRI', runHold:'spazio/↑',
+  stop:'FERMA', brake:'FRENATA', nitro:'NITRO', ghost:'FANT.', sup:'SUPER',
   specWin:'HAI VINTO!', specLose:'SEI FUORI',
   specWinSub:n=>`Hai tagliato il traguardo · 1º su ${n}`,
   specSub:(p,n)=>`Ora guardi · ${p} su ${n}`,
@@ -270,10 +270,10 @@ redlight: {
 },
 redlightCoach: {
   done:'Tutorial completato!', exit:'✕ Esci',
-  steps:[ 'TIENI PREMUTO CORRI mentre la luce è VERDE',
+  steps:[ 'Premi CORRI: il motore resta acceso finché non dici tu',
     'Sfonda la BARRIERA sul verde finché non si rompe, poi attraversala',
-    'ROSSO! Lascia e resta fermo (oggi non spara nessuno… nella partita vera, sì)',
-    'Arrivi lanciato? Premi FRENATA (F) per inchiodare',
+    'ROSSO! Premi FERMA e resta immobile (oggi non spara nessuno… nella partita vera, sì)',
+    'Stai ancora scivolando? Premi di nuovo FERMA per inchiodare',
     'Il MURO ha un VARCO: cambia CORSIA verso il lato aperto',
     'Premi NITRO sul verde: uno sprint',
     'Premi FANTASMA: attraversi i muri per un istante',
