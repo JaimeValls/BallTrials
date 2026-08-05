@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-05 d63db61"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-05 663c9be"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG ICONO EN LA PANTALLA DE INICIO (docs/40 §6). Jaime: "la gente esta acostumbrada a clicar en el
@@ -4097,7 +4097,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=d63db61"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=663c9be"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -5922,6 +5922,17 @@ function modeEmbedUrl(mode, fmt){
   //   de ese modo llega y no hace nada: cada motor solo reconoce los suyos.
   if(fmt!=='equipos'){ const eb=equippedBall(); if(eb){ u += '&stats=' + attrsOf(eb).join(',') + '&arch=' + encodeURIComponent(eb.arch);
     if(traitOf(eb.arch)) u += '&trait=' + encodeURIComponent(eb.arch); } }
+  //+AG ⚠ LA VERSION DEL BUILD VA EN LA URL DEL IFRAME, Y NO ES COSMETICA: ES LO QUE HACE QUE UN
+  //   DESPLIEGUE LLEGUE AL JUGADOR (2026-08-05). Los HTML del juego se sirven SIN `Cache-Control`, asi
+  //   que el navegador decide por su cuenta cuanto vale su copia; y como el iframe se abria siempre con
+  //   la MISMA direccion, quien ya habia entrado una vez se quedaba con el motor viejo y no habia
+  //   recarga que se lo cambiara. Medido: en la 2a y la 3a visita el motor NO se pedia a la red, ni una
+  //   sola vez. Le costo a Jaime tres rondas de «no lo has arreglado» sobre un arreglo que SI estaba
+  //   publicado — y a mi no me salia porque cada prueba mia abre un navegador limpio.
+  //   El sello lo inyecta el build en el <meta name="bt-build">, asi que esto se actualiza solo en cada
+  //   despliegue y no hay nada que mantener. Sin sello (repo en local) no se añade nada.
+  const sello = (document.querySelector('meta[name="bt-build"]')||{}).content;
+  if(sello) u += '&v=' + encodeURIComponent(sello.split(' ').pop());
   return u;
 }
 function startRace(mode, fmt){

@@ -1,3 +1,6 @@
 <IfModule mod_headers.c>
 Header set X-Robots-Tag "noindex, nofollow"
+<FilesMatch "\.html$">
+Header set Cache-Control "no-cache, must-revalidate"
+</FilesMatch>
 </IfModule>
