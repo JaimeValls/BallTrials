@@ -189,6 +189,33 @@ const P_FS_SETTLE = 0.35;  //+AG fracción de vThresh por debajo de la cual tu b
 const P_FS_V = 0.5;        //+AG fracción de vThresh que, ya parada y corriendo TÚ, dispara el fijado inmediato
 const P_FS_LOCK_F = 6;     //+AG frames de apuntado de la salida falsa (~0.2 s; el normal es SNIPER_LOCK_F)
 
+//+AG doc 73 · TU BOLA LA CONDUCES TU. Jaime, jugando: «a veces la bola acelera sola y a veces la bola gira
+//   sola, es como que hay un conflicto entre los controles del jugador y la IA». Era LITERAL y estaba medido:
+//   el steering de la IA se calculaba para TODAS las bolas, la del jugador incluida, y la capa de agencia solo
+//   sumaba lo suyo ENCIMA. Resultado, con el carril izquierda puesto: la IA empujaba al lado contrario el
+//   75,3% de los frames (fuerza ajena media 3,97 contra un tiron de carril de tope 12 que ademas es
+//   proporcional, o sea pequeño cerca del eje). Y con el motor APAGADO le seguian entrando 0,80 de media de
+//   lateral (picos de 7,5) y algo de avance: la bola ganaba velocidad sola en el 1,6% de los frames. El
+//   comentario de la linea de abajo llegó a prometer «sin fuerza lateral: patina libre» y no era cierto.
+//   `propia:false` = EXACTAMENTE lo de antes (no-op literal, para que la huella lo demuestre).
+//   `esquive` = cuanto de la evitacion de PELIGRO de la IA (muros, minas, bloqueadores, boulders) se le deja
+//   al jugador mientras corre. Lo demas que le metia la IA —el tiron a meta, la separacion anti-blob, el
+//   wander aleatorio y el anti-atasco— no vuelve nunca: eso no es ayuda, es otro conductor.
+//   ELEGIDO MIDIENDO 5 candidatas (`node tools/banco-control-luzroja.mjs`), y el resultado fue al reves de
+//   lo esperado: quitarle el volante a la IA mejora TODO a la vez, y las mezclas son lo PEOR de todo.
+//                              en tu carril   muertes por trampa   VICTORIAS
+//     la IA tambien conduce         33,1%           73,3%             2,0%
+//     tuya + esquive entero         33,8%           76,7%             3,3%
+//     tuya + esquive al 35%         60,2%           83,3%             4,7%   ← el tira y afloja, lo peor
+//     tuya SIN esquive              69,5%           68,0%            16,0%   ← elegida
+//   El esquive a medias es peor que los dos extremos porque deja a la bola en un tira y afloja: ni obedece
+//   ni esquiva, y se queda deambulando por el centro, que es donde estan las minas. Y el numero que de
+//   verdad lo cierra: con el mando de antes, un jugador que juega BIEN ganaba el 2% de las partidas
+//   cuando entre 8 bolas le tocaria el 12,5% por puro azar — o sea que tener las manos en el mando te
+//   PENALIZABA. `esquive` se queda como mando vivo (el banco lo barre) por si algun dia hace falta
+//   devolverle algo de ayuda; hoy vale 0 a proposito.
+export const AGENCIA = { propia: true, esquive: 0.0 };
+
 // --- LAYOUT PROGRESIVO del campo corto (48u) (v5.3, feedback del dueño). Secuencia por Y:
 //   BARRERA(7) → BLOQUEADOR(12) → 1 boulder(18) → minas dispersas(20-25) → BLOQUEADOR(27) → BARRERA(30) →
 //   minas densas(31-35) → PAR de boulders(37,39) → meta(44).
@@ -590,24 +617,32 @@ export class Sim {
         }
       }
       let ax = 0, ay = 0;
+      //+AG doc 73: acumulador PARALELO del jugador. Recoge SOLO los terminos de «no te choques» (muros,
+      //   minas, bloqueadores, boulders) para poder darle a su bola esos y nada mas. Se suma aparte y NO
+      //   toca `ax`/`ay`, asi que las bolas de la IA quedan byte a byte como estaban — que es justo lo que
+      //   prueba la huella. Solo se lleva la cuenta para balls[0] y solo con el input activo: en el torneo
+      //   y en los videos `engaged` es false y esta rama ni existe.
+      const PROP = AGENCIA.propia && b.isPlayer && this.pIn.engaged;
+      let pax = 0, pay = 0;
       // 1) atracción a meta (+Y) — se omite mientras frena (ver arriba)
       //+AG tutorial: los BOTS no tiran a meta (figurantes cerca de la salida: nadie te gana la carrera mientras
       //   aprendes); el resto de su steering (wander, separación) sigue → mismo consumo de RNG por frame.
       if (!b.braking && !(this.tutorial && !b.isPlayer)) ay += GOAL * goalBoost;
       // 2) muros laterales
-      if (XR - b.x < WALL_NEAR) ax -= WALLAV;
-      if (b.x - XL < WALL_NEAR) ax += WALLAV;
+      if (XR - b.x < WALL_NEAR){ ax -= WALLAV; if (PROP) pax -= WALLAV; }
+      if (b.x - XL < WALL_NEAR){ ax += WALLAV; if (PROP) pax += WALLAV; }
       // 3) evitación de MINAS (apartarse) + de BLOQUEADORES (dirigirse al hueco)
       const AV = TUNE.AVOID_TRAP;
       for (const p of this.pads){ const dx = b.x - p.x, dy = b.y - p.y, d = hyp(dx, dy);
-        if (d < AVOID_R && d > 1e-3){ ax += (dx / d) * AV * (1 - d / AVOID_R); ay += (dy / d) * AV * 0.4 * (1 - d / AVOID_R); } }
+        if (d < AVOID_R && d > 1e-3){ ax += (dx / d) * AV * (1 - d / AVOID_R); ay += (dy / d) * AV * 0.4 * (1 - d / AVOID_R);
+          if (PROP){ pax += (dx / d) * AV * (1 - d / AVOID_R); pay += (dy / d) * AV * 0.4 * (1 - d / AVOID_R); } } }
       // BLOQUEADOR por delante (dentro de ~5u; rango corto para NO estorbar el esquive del boulder que esté antes):
       // si la bola no está alineada con el hueco, empújala hacia él (zigzag)
       const BLK_RANGE = 5;
       for (const bl of this.blockers){ const dyB = bl.y - b.y;
         if (dyB > -1.5 && dyB < BLK_RANGE){ const [o0, o1] = blockerOpen(bl);
-          if (b.x < o0) ax += AV * 1.3 * (1 - dyB / BLK_RANGE);          // hueco a la derecha → ir a +X
-          else if (b.x > o1) ax -= AV * 1.3 * (1 - dyB / BLK_RANGE);     // hueco a la izquierda → ir a -X
+          if (b.x < o0){ ax += AV * 1.3 * (1 - dyB / BLK_RANGE); if (PROP) pax += AV * 1.3 * (1 - dyB / BLK_RANGE); }          // hueco a la derecha → ir a +X
+          else if (b.x > o1){ ax -= AV * 1.3 * (1 - dyB / BLK_RANGE); if (PROP) pax -= AV * 1.3 * (1 - dyB / BLK_RANGE); }     // hueco a la izquierda → ir a -X
         } }
       // el boulder es RÁPIDO (~V_CLAMP): lookahead más amplio + reacciona a su posición FUTURA (unos frames por
       // delante), no solo la actual, para dar tiempo real a esquivarlo (docs/44 §7.3: "se esquiva con steering
@@ -621,8 +656,10 @@ export class Sim {
         const dx = b.x - bx, dy = b.y - bo.y, d = hyp(dx, dy);
         const dxL = b.x - bxLead, dL = hyp(dxL, dy);
         const ySign = dy >= 0 ? 1 : -1;   // sale de la franja hacia donde ya está (adelante si ya cruzó el eje del boulder)
-        if (d < BAR && d > 1e-3){ const w = 1 - d / BAR; ax += (dx / d) * AV * 1.6 * w; ay += ySign * AV * (0.5 + 1.5 * wallProx) * w; }
-        if (dL < BAR && dL > 1e-3){ const w = 1 - dL / BAR; ax += (dxL / dL) * AV * 1.2 * w; } }
+        if (d < BAR && d > 1e-3){ const w = 1 - d / BAR; ax += (dx / d) * AV * 1.6 * w; ay += ySign * AV * (0.5 + 1.5 * wallProx) * w;
+          if (PROP){ pax += (dx / d) * AV * 1.6 * w; pay += ySign * AV * (0.5 + 1.5 * wallProx) * w; } }
+        if (dL < BAR && dL > 1e-3){ const w = 1 - dL / BAR; ax += (dxL / dL) * AV * 1.2 * w;
+          if (PROP) pax += (dxL / dL) * AV * 1.2 * w; } }
       // 4) separación anti-blob
       for (const o of ab){ if (o === b) continue; const dx = b.x - o.x, dy = b.y - o.y, d2 = dx * dx + dy * dy;
         if (d2 < SEP_R * SEP_R && d2 > 1e-6){ const d = Math.sqrt(d2); ax += (dx / d) * SEP * (1 - d / SEP_R); ay += (dy / d) * SEP * (1 - d / SEP_R); } }
@@ -638,7 +675,28 @@ export class Sim {
       //   igual: identidad intacta). El jugador decide CUÁNDO corre, no cuánto: manteniendo CORRER, motor ON con la
       //   MISMA fuerza GOAL / vmax que la IA (incluida su evitación lateral); al soltar, motor OFF y patina por
       //   fricción (b.braking = true, exactamente como el frenado anticipatorio de la IA). Nunca recibe el rebufo.
-      if (b.isPlayer && this.pIn.engaged){
+      //+AG doc 73: EL MANDO DEL JUGADOR NO SE SUMA AL DE LA IA, LO SUSTITUYE. `b.ax`/`b.ay` se REESCRIBEN
+      //   con lo suyo (motor + carril) más la evitación de peligro atenuada por AGENCIA.esquive. Lo que
+      //   desaparece de su bola: el tirón a meta de la IA (lo pone él con CORRER), la separación anti-blob,
+      //   el wander aleatorio —que es, literalmente, «la bola gira sola»— y el anti-atasco, que después de
+      //   5 s parado en verde le daba un empujón... justo cuando estar parado es una decisión suya.
+      //   ⚠ El wander se sigue CALCULANDO arriba aunque aquí se descarte: consume RNG, y saltárselo
+      //     desincronizaría a los bots y cambiaría la partida entera. Se calcula igual y se tira.
+      if (AGENCIA.propia && b.isPlayer && this.pIn.engaged){
+        if (this.pIn.running){
+          const m = this._pBoost();
+          //+AG el empuje se compone igual que antes (GOAL + el extra del booster + el de ACE), para que la
+          //   velocidad se sienta idéntica: lo que cambia es de dónde sale el lateral, no la potencia.
+          b.ay = GOAL + GOAL * (m - 1) + GOAL * (this.pmul.ace - 1) + pay * AGENCIA.esquive;
+          b.ax = this._pLaneAx(b) + pax * AGENCIA.esquive;
+          b.braking = false;
+          b.vmax = TUNE.V_CLAMP * m * this.pmul.vel;
+        } else {
+          //+AG PARAR de verdad: nadie te empuja. Esto es lo que el comentario de abajo prometía y no cumplía.
+          b.ax = 0; b.ay = 0; b.braking = true; b.vmax = TUNE.V_CLAMP;
+        }
+      }
+      else if (b.isPlayer && this.pIn.engaged){
         if (this.pIn.running){ if (b.braking){ b.ay += GOAL; b.braking = false; }   // insiste en avanzar: ignora el frenado anticipatorio de la IA
           const m = this._pBoost();                    //+AG NITRO/SÚPER: sobreempuje SOLO mientras corres
           if (m > 1) b.ay += GOAL * (m - 1);
