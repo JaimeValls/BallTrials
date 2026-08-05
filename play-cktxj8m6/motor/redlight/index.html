@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-05 5acdb92">
+<meta name="bt-build" content="2026-08-05 d63db61">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <!--+AG el HTML se sirve en INGLES (defecto del juego); ?lang=es lo traduce por JS (applyLang) -->
 <title>YouBall · Red Light Rush (WebGL) · The Marble Games</title>
@@ -120,6 +120,11 @@
   /* AVISO: en cuanto el semáforo se pone ámbar (o ya rojo) y TÚ sigues corriendo, el que late es PARAR — se le
      dice al jugador lo que TIENE QUE HACER, no lo que no debe. Late sin barrido: el barrido de brillo es del
      SÚPER y en este juego solo lo lleva uno (regla Supercell: si avisan todos, no avisa ninguno). */
+  /* la INVITACIÓN de salida: CORRER late en verde hasta que el jugador lo estrena. Mismo latido de
+     tamaño que el aviso de PARAR (lo que se ve sobre cualquier fondo es que algo se mueva), en el color
+     que ya tiene el botón: no se le añade un cartel al HUD, se le señala el botón que ya está ahí. */
+  #bRun.urge{background:linear-gradient(#5aec97,#2bb869);box-shadow:0 4px 0 #14663a,0 0 26px #ffffff55, inset 0 1px 0 #ffffff55;
+    animation:urgeGlow 0.62s ease-in-out infinite}
   #bStop.urge{background:linear-gradient(#ff8f80,#f0402c);box-shadow:0 4px 0 #8a2016,0 0 26px #ffffff55, inset 0 1px 0 #ffffff55;
     animation:urgeGlow 0.62s ease-in-out infinite}
   /* el latido es de TAMAÑO, no solo de halo: cuando el semáforo se pone rojo el juego tiñe la pantalla
@@ -296,7 +301,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=5acdb92"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=d63db61"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -307,23 +312,23 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 </script>
 
 <script type="module">
-import { THREE, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createBloom, frameOrtho, BLOOM } from '../chassis/gfx.mjs?v=5acdb92';
-import { archLook } from '../chassis/ballmat.mjs?v=5acdb92';   //+AG doc 41 bloque G: material de la bola-heroe
-import { attachSquash } from '../chassis/squash.mjs?v=5acdb92';
-import { createCelebration } from '../chassis/celebration.mjs?v=5acdb92';
-import { createKillfeed } from '../chassis/killfeed.mjs?v=5acdb92';
-import { createCensusBoard } from '../chassis/censusboard.mjs?v=5acdb92';
-import { createCupoGauge } from '../chassis/cupogauge.mjs?v=5acdb92';
-import { createKillTags } from '../chassis/killtag.mjs?v=5acdb92';
-import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=5acdb92';
-import { archFace } from '../chassis/facegen.mjs?v=5acdb92';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
-import { Sim, TEAMS, SHORT_COLORS, SHORT_COLORS_6, BALL_R, FPS, FIELD_W, FIELD_L, XL, XR, SPAWN_Y, GATE_Y, SAFE_Y } from './sim.js?v=5acdb92';
-import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=5acdb92';
-import { buildSfxBuffer } from './sfxmap.mjs?v=5acdb92';
-import { createCoach } from '../chassis/coach.mjs?v=5acdb92';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
-import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=5acdb92';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
-import { createPausa } from '../chassis/pausa.mjs?v=5acdb92';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
-import { cantarPuesto } from '../chassis/veredicto.mjs?v=5acdb92';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
+import { THREE, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createBloom, frameOrtho, BLOOM } from '../chassis/gfx.mjs?v=d63db61';
+import { archLook } from '../chassis/ballmat.mjs?v=d63db61';   //+AG doc 41 bloque G: material de la bola-heroe
+import { attachSquash } from '../chassis/squash.mjs?v=d63db61';
+import { createCelebration } from '../chassis/celebration.mjs?v=d63db61';
+import { createKillfeed } from '../chassis/killfeed.mjs?v=d63db61';
+import { createCensusBoard } from '../chassis/censusboard.mjs?v=d63db61';
+import { createCupoGauge } from '../chassis/cupogauge.mjs?v=d63db61';
+import { createKillTags } from '../chassis/killtag.mjs?v=d63db61';
+import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=d63db61';
+import { archFace } from '../chassis/facegen.mjs?v=d63db61';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
+import { Sim, TEAMS, SHORT_COLORS, SHORT_COLORS_6, BALL_R, FPS, FIELD_W, FIELD_L, XL, XR, SPAWN_Y, GATE_Y, SAFE_Y } from './sim.js?v=d63db61';
+import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=d63db61';
+import { buildSfxBuffer } from './sfxmap.mjs?v=d63db61';
+import { createCoach } from '../chassis/coach.mjs?v=d63db61';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=d63db61';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
+import { createPausa } from '../chassis/pausa.mjs?v=d63db61';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
+import { cantarPuesto } from '../chassis/veredicto.mjs?v=d63db61';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
 
 window.addEventListener('error', e => { document.getElementById('err').style.display='grid'; console.error(e.error||e.message); });
 
@@ -682,6 +687,10 @@ const _v3 = new THREE.Vector3();
 const DIGITS=3, DIGIT=1.15, GO_HOLD=550;
 let phase='intro', introT=0, introRingT=-1; const INTRO_DUR=DIGITS*DIGIT;
 let running=false, prevPlayerRank=null, ended=false;
+//+AG doc 73: `estrenado` = el jugador ya ha encendido el motor alguna vez EN ESTA RONDA. Mientras no lo
+//   haya hecho, CORRER late para invitar a pulsarlo. Es la respuesta buena a «me quedo clavado en la
+//   salida sin saber por qué»: se le ENSEÑA el botón, no se le pulsa por él.
+let estrenado=false;
 //+AG tutorial v2: el COACH congela el mundo mientras pide una acción y lo suelta en cuanto el jugador toca.
 //   Solo lo activa el coach (?tutorial=1); en partida normal es false y el bucle va exactamente igual.
 let coachPaused=false;
@@ -746,7 +755,7 @@ function buildSim(s){
   buildArena(); buildHud();
   //+AG reset de la capa de agencia por ronda. La sim NO avanza durante la intro (3-2-1) → la música y el motor del
   //   jugador se sueltan en el "¡YA!" (loop). startAudio se llama allí, no aquí, para que vaya sincronizado.
-  phase='intro'; introT=0; introRingT=-1; prevPlayerRank=null; ended=false; running=false;
+  phase='intro'; introT=0; introRingT=-1; prevPlayerRank=null; ended=false; running=false; estrenado=false;
   superVal=0; redEntryMoving=false; ghostOn=false; setLane('center');   //+AG reset de carril/boosters por ronda (ballObjs nuevos → material fantasma fuera solo)
   hideSpectator(); updateControls();
   window.dbg={ get sim(){return sim;}, get boulderM(){return boulderM;}, get audio(){return audio;}, get soundOn(){return musicOn||sfxOn;}, get scene(){return scene;}, get cam(){return cam;},
@@ -1266,12 +1275,17 @@ function loop(){ const dt=Math.min(clock.getDelta(),0.05);
     celeb.update(false, cam, dt, null); census.update(dt, cam, sim.balls, rlCensus); ktags.update(dt); renderFrame();
     if(phase==='intro' && introT>=INTRO_DUR){ phase='play'; acc=0; clock.getDelta(); goFlash();
       if(sim) sim.playerEngage();   //+AG desde el "¡YA!" manda el input: el motor va donde lo dejen CORRER/PARAR
-      //+AG doc 73: el "¡YA!" SIGNIFICA YA. Con el mantener pulsado, quien no tenía el dedo puesto se quedaba
-      //   clavado en la línea de salida sin entender por qué; ahora la salida es lo que promete el nombre del
-      //   modo —se sale corriendo y la gracia es decidir CUÁNDO parar—, y el semáforo arranca siempre en verde.
-      //   En el TUTORIAL no: allí el primer paso es justamente aprender el botón, y si el motor ya estuviera
-      //   encendido la lección se daría por aprendida sola.
-      if(!TUTORIAL) setRun(true);
+      //+AG doc 73 · LA PARTIDA ARRANCA PARADA, Y ESO NO SE TOCA. El 2026-08-05 probé lo contrario —que el
+      //   "¡YA!" encendiera el motor solo, porque con el mantener pulsado quien no tenía el dedo puesto se
+      //   quedaba clavado en la salida— y Jaime lo cazó a la primera: «automáticamente mi bola se pone a
+      //   correr sin que yo pulse ninguna tecla. No entiendo por qué». Tenía razón: en un modo que va de
+      //   controlar tu bola, lo primero que ve el jugador no puede ser su bola haciendo algo que él no ha
+      //   mandado — y una mecánica que hay que explicar en un chat está rota. El problema que aquello
+      //   intentaba resolver se arregla ENSEÑANDO el botón, no pulsándolo por él: ver `estrenado` abajo.
+      //+AG `setRun(false)` no es redundante aunque `running` ya sea false: es lo que PINTA el espejo de los
+      //   dos mandos. Sin esta línea la partida abría con los dos apagados —ni CORRER ni PARAR— y se rompía
+      //   la única regla de lectura del HUD: en todo momento hay exactamente uno encendido.
+      setRun(false);
       startAudio(); }               //+AG suelta la música (loop) sincronizada con f=0
     requestAnimationFrame(loop); return;
   }
@@ -1400,7 +1414,7 @@ const cdNitro=document.getElementById('cdNitro'), cdGhost=document.getElementByI
 const LANES=['left','center','right'];
 //+AG doc 73: el ESTADO del motor. No hay dedo que lo sostenga, así que lo sostiene esta variable y los dos
 //   botones se pintan siempre en espejo: uno encendido, el otro apagado.
-function setRun(on){ running=on && phase==='play';
+function setRun(on){ running=on && phase==='play'; if(running) estrenado=true;
   bRun.classList.toggle('on', running); bStop.classList.toggle('on', !running && phase==='play'); }
 function doBrake(){ return !!(sim && phase==='play' && sim.playerBrake()); }
 //+AG PARAR: primer toque APAGA el motor (sueltas el gas y patinas por fricción, exactamente lo que hacía
@@ -1446,6 +1460,10 @@ function updateControls(){
   const alerta = sim.decision_frame===null && phase==='play' &&
     (sim.color==='red' || (sim.color==='green' && sim.phaseEnd-f<=18));
   bStop.disabled=dead; bStop.classList.toggle('urge', !dead && running && alerta);
+  //+AG doc 73: mientras el jugador no haya arrancado NUNCA en esta ronda, CORRER late. Se apaga para
+  //   siempre en cuanto lo pulsa una vez: es una invitación de salida, no un aviso permanente. Los dos
+  //   latidos no pueden coincidir (uno pide arrancar y el otro parar mientras corres).
+  bRun.classList.toggle('urge', !dead && !running && !estrenado);
   //+AG el .cd de PARAR es el FRENAZO: la palabra cuando está cargado (segundo toque = clavarse), el segundero
   //   mientras recarga. PARAR sin frenazo sigue valiendo: apagar el motor es gratis y no tiene recarga.
   const bd=Math.max(0, sim.pIn.brakeCd - f);
