@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-06 37af923"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-06 b51eaf3"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -3833,7 +3833,11 @@
   </div>
   <div class="sc-body">
     <div class="se-hero">
-      <div class="tl"><div class="fl" data-t="seSeason">Temporada 1</div><h3 data-t="seTheme">Verano en la Cima</h3><div class="dd" data-th="seChampLine"></div></div>
+      <!--+AG doc 79: la linea de temporada la pinta paintTempHd() con el reloj de verdad. Ya NO lleva
+           `data-t`: si lo llevara, cualquier applyShell() posterior (cambiar de idioma, volver a la
+           pantalla) le devolveria encima el «termina en 18 dias» de la maqueta. Misma trampa que la
+           Liga (doc 78 §6). El texto de aqui es solo el relleno de antes de pintar. -->
+      <div class="tl"><div class="fl" id="seSeasonTx">Temporada 1</div><h3 data-t="seTheme">Verano en la Cima</h3><div class="dd" data-th="seChampLine"></div></div>
       <canvas class="se-champ" id="seChamp" width="112" height="112"></canvas>
     </div>
     <!--+AG doc 40: las tres secciones de Temporada ya no se apilan, se cambian con un tap -->
@@ -3875,6 +3879,11 @@
         <div class="se-tier" data-liga="diamante"><img class="em" src="arte/ui/liga-diamante.webp" alt=""><span data-ti="seTiers:3">Diamante</span></div>
         <div class="se-tier" data-liga="elite"><img class="em" src="arte/ui/liga-elite.webp" alt=""><span data-ti="seTiers:4">Élite</span></div>
       </div>
+      <!--+AG doc 79: el COFRE de la temporada que acaba de cerrar. Vacio el 97 % del tiempo: solo se
+           llena el dia que rueda la temporada, y se vacia al cogerlo. La fila la fabrica paintLiga()
+           con las clases del panel de Retos (.mi-row / .mi-cta.ready), o sea sin CSS nuevo y con el
+           mismo lenguaje de «esto se pulsa» que ya usa el juego. -->
+      <div id="seCofre"></div>
     </div>
 
     <div class="sc-block" data-sub="pase">
@@ -4226,7 +4235,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=37af923"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=b51eaf3"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -5629,7 +5638,9 @@ function relangScreens(){
     //+AG doc 78: paintLiga tambien va aqui. El nombre del escalon ("Oro II") y la frase de la barra
     //   los arma JS con la palabra traducida, asi que al cambiar de idioma con la pantalla abierta
     //   se quedarian en la lengua anterior — el mismo fallo que se cazo con el panel de retos.
-    if(el('temporada') && el('temporada').classList.contains('on')){ buildPaseTrack(); if(typeof paintLiga==='function') paintLiga(); if(typeof renderRetos==='function') renderRetos(); }
+    //+AG doc 79: y paintTempHd por lo mismo — el numero de temporada y los dias que quedan se arman con
+    //   la frase traducida, asi que sin esta linea la cabecera se quedaria en la lengua anterior.
+    if(el('temporada') && el('temporada').classList.contains('on')){ buildPaseTrack(); if(typeof paintTempHd==='function') paintTempHd(); if(typeof paintLiga==='function') paintLiga(); if(typeof renderRetos==='function') renderRetos(); }
     if(el('settings') && el('settings').classList.contains('on')) buildSettings();
   }catch(e){}
 }
@@ -5849,9 +5860,50 @@ const CAM_PASOS = (()=>{ const p=[];
     else            p.push({ t:'monedas', n:20+(i%3)*5 });   // 20-30
   }
   return p; })();
-const CAM_DIAS_TEMP = 42;   // una temporada = 6 semanas; el camino se reinicia con ella
-function tempNum(){ return Math.floor(todayNum()/CAM_DIAS_TEMP); }
+//+AG doc 79 · EL RELOJ DE TEMPORADA, uno solo. Antes cada pieza se inventaba el suyo: el camino contaba
+//   bloques de 42 dias por su cuenta y la cabecera llevaba un «termina en 18 dias» escrito a mano en los
+//   20 diccionarios que NO bajaba nunca (un jugador de hace un mes veia el mismo 18). Ahora hay una sola
+//   cuenta y de ella salen el numero de temporada, la cuenta atras, el reinicio del camino y el cofre.
+//   Duracion: 6 semanas (doc 10 §1 pide 4-6).
+//   ⚠ EL ORIGEN NO ES ARBITRARIO: es la frontera que el camino YA usaba, para que estrenar el reloj no
+//     le reinicie el Camino de Regalos a mitad a quien lo tenga empezado. tempNum() devuelve exactamente
+//     lo mismo que antes (misma clave de estado 't492'); lo unico nuevo es el numero que se ENSEÑA.
+const TEMP_DIAS = 42;
+const TEMP_T1   = 492;   // el bloque de 42 dias donde arranca la Temporada 1: 30-jul-2026 → 10-sep-2026
+function tempNum(){ return Math.floor(todayNum()/TEMP_DIAS); }    // clave de estado (no cambia nunca de formula)
+function tempIdx(){ return tempNum()-TEMP_T1+1; }                 // el numero que lee el jugador: 1, 2, 3...
+function tempDia(){ return todayNum()-tempNum()*TEMP_DIAS; }      // 0..41
+function tempQuedan(){ return TEMP_DIAS-tempDia(); }              // 42..1 — el ultimo dia dice «1», nunca «0»
 function semNum(){ return Math.floor(todayNum()/7); }
+//+AG doc 79 · EL COFRE DE LIGA (doc 10 §2.3: fijo, visible y sin sorteo). Se paga al CERRAR temporada,
+//   segun el escalon en el que la cerraste. Las Gemas son presupuesto de diseño, no una cifra medida:
+//   se recalibran con datos reales, como los numeros del doc 75.
+//   ⚠ Y NO HAY REINICIO DE LIGA: decision de Jaime del 2026-08-06. La Liga se calcula con tus copas de
+//     por vida (doc 78) y esas mismas copas regalan las Epicas a 1500/3500/6000, asi que bajarte de liga
+//     seria quitarte progreso de bolas ya ganado. La Liga es una marca de por vida; lo que reinicia cada
+//     temporada es el camino, la semanal y (cuando exista) el Pase. Corrige doc 10 §2.2.
+const LIGA_COFRE=[5,10,20,35,60];   // Gemas por escalon: Bronce, Plata, Oro, Diamante, Elite
+function tempEstado(){
+  if(!SAVE.temp || typeof SAVE.temp!=='object') SAVE.temp={};
+  const T=SAVE.temp, n=tempNum();
+  if(typeof T.n!=='number'){ T.n=n; persist(); return T; }   // primera vez: no se paga cofre retroactivo
+  //   el reloj hacia ATRAS (?dayn de pruebas, o el jugador cambia la hora del movil) no paga nada: solo
+  //   se reengancha. Cobrar por retroceder seria una maquina de fabricar Gemas.
+  if(n!==T.n){
+    if(n>T.n){ const esc=Math.max(0, Math.min(LIGA_COFRE.length-1, ligaAhora().t));
+      T.cofre={ n:T.n, esc, gemas:LIGA_COFRE[esc] }; }
+    T.n=n; persist();
+  }
+  return T;
+}
+function cofreHay(){ return !!tempEstado().cofre; }
+function cofreCoger(){
+  const T=tempEstado(); if(!T.cofre) return null;
+  const c=T.cofre; T.cofre=null;
+  dinero('gemas', c.gemas, 'cofre_liga');   //   por la puerta unica del dinero (doc 53): sin evento nuevo
+  persist();
+  return c;
+}
 //+AG RNG determinista sembrado por DIA + JUGADOR: dos jugadores no llevan las mismas misiones el mismo
 //   dia, pero recargar la pagina no te las cambia (que seria un reroll infinito gratis).
 function _misRng(sal){ let h=2166136261>>>0;
@@ -6802,7 +6854,10 @@ function refreshTabBadges(){ pintaBadge('#homeGarTab,#shTabGaraje,[data-nav="gar
 //   regalo del dia cuenta como 1 en la Tienda. Sin premio pendiente NO se pinta nada: un aviso que
 //   sale siempre deja de significar algo y el jugador aprende a no mirarlo.
 function syncBadges(){
-  pintaBadge('#hPass,[data-nav="temporada"]', misPendientes());
+  //+AG doc 79: el cofre de temporada cuenta como pendiente. Ademas esta es la llamada que se come el
+  //   arranque (renderHome → refreshTabBadges → aqui), o sea el sitio donde se detecta que la temporada
+  //   ha rodado aunque el jugador no abra Temporada.
+  pintaBadge('#hPass,[data-nav="temporada"]', misPendientes() + ((typeof cofreHay==='function' && cofreHay())?1:0));
   pintaBadge('#shTabTienda,[data-nav="tienda"]', camHay() ? 1 : 0);
 }
 
@@ -6849,7 +6904,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=37af923').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=b51eaf3').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -7298,8 +7353,48 @@ function paintLiga(){
     txt = /\d+\s*\/\s*\d+/.test(txt) ? txt.replace(/\d+\s*\/\s*\d+/, ()=>par) : (par+' → <b>'+dest+'</b>');
     sub.innerHTML=coinify(txt);
   }
+  pintaCofre();
 }
-function openTemporada(){ showScreen('temporada'); applyShell(); el('seChispas').textContent=SAVE.chispas; el('seGemas').textContent=SAVE.gemas; drawPreviewBall(el('seChamp'), TEAMS[3].color); buildPaseTrack(); paintLiga(); renderRetos(); }
+//+AG doc 79 · LA CABECERA DE TEMPORADA, viva. LA FRASE NO SE TRADUCE OTRA VEZ: se reaprovecha la que ya
+//   existe en los 20 diccionarios («Temporada 1 · termina en 18 días») y solo se le cambian los dos
+//   HUECOS numericos —el numero de temporada y los dias que quedan—, igual que se hizo con la frase de
+//   la Liga (doc 78 §5). Se buscan por PATRON y por ORDEN (1º el numero de temporada, 2º los dias), que
+//   es el orden que llevan las 20 lenguas medidas; si una no trae numeros, se queda como este.
+//   ⚠ EL ULTIMO DIA NO DICE «termina en 1 días». Medido: al meter un 1 en la frase, las 20 lenguas se
+//     quedan con su plural («1 días», «1 Tagen», «1 dni») porque el singular no existe en el diccionario
+//     y pedirlo son 20 traducciones nuevas para UN dia de cada 42. Asi que ese dia se enseña solo la
+//     mitad de delante de la frase —«Temporada 1», «第 1 赛季»—, que se lee bien en las 20. Si alguna
+//     lengua perdiera su «·», esa se queda con la frase entera: peor, pero nunca rota.
+function paintTempHd(){
+  const e=el('seSeasonTx'); if(!e) return;
+  const s=S(), raw=String(s.seSeason||SHELL.en.seSeason||''), n=tempIdx(), q=tempQuedan();
+  if(q<=1 && raw.indexOf('·')>0){ e.textContent = raw.split('·')[0].trim().replace(/\d+/, ()=>String(n)); return; }
+  let i=0;
+  e.textContent = raw.replace(/\d+/g, m=>{ i++; return i===1 ? String(n) : (i===2 ? String(q) : m); });
+}
+//+AG doc 79 · EL COFRE, pintado. Titulo y boton salen de cadenas que YA estan en los 20 idiomas
+//   (seLeague + el nombre del escalon + miCobrar): cero traducciones nuevas para estrenarlo.
+function pintaCofre(){
+  const c=el('seCofre'); if(!c) return;
+  const s=S(), T=tempEstado();
+  c.innerHTML='';
+  if(!T.cofre) return;
+  const tiers=(s.seTiers&&s.seTiers.length===5)?s.seTiers:SHELL.en.seTiers;
+  const d=document.createElement('div'); d.className='mi-row';
+  //+AG la insignia del escalon delante: sin ella la fila se leia como un renglon suelto («Liga · Oro»)
+  //   y no como un PREMIO. Es la misma imagen de la escalera de arriba, o sea cero arte nuevo, y dice
+  //   en un golpe de vista de que liga es el cofre sin depender de ninguna palabra.
+  d.innerHTML=`<img src="${uiArt('liga-'+(LIGA_KEYS[T.cofre.esc]||'bronce'))}" alt="" style="width:34px;height:34px;flex:0 0 auto;object-fit:contain">`
+            + `<div class="mi-tx"><div class="mi-t"><span>${s.seLeague||''} · ${tiers[T.cofre.esc]||''}</span>`
+            + `<b class="mi-n">+${T.cofre.gemas} ${coinIco('gema','sm')}</b></div></div>`;
+  const b=document.createElement('button'); b.className='mi-cta ready'; b.textContent=s.miCobrar;
+  b.onclick=()=>{ const co=cofreCoger(); if(!co) return;
+    if(el('seGemas')) el('seGemas').textContent=SAVE.gemas;
+    paintLiga(); syncBadges(); applyShell(); toast(s.camCogido); };
+  d.appendChild(b);
+  c.appendChild(d);
+}
+function openTemporada(){ showScreen('temporada'); applyShell(); el('seChispas').textContent=SAVE.chispas; el('seGemas').textContent=SAVE.gemas; drawPreviewBall(el('seChamp'), TEAMS[3].color); paintTempHd(); buildPaseTrack(); paintLiga(); renderRetos(); }
 //+AG doc 75 · EL PANEL DE RETOS. Pinta la semanal arriba y las 3 diarias debajo. Todo lo que decide
 //   (que retos, cuanto llevas, si esta cobrado) sale del motor de misiones; aqui solo se dibuja.
 function retoTxt(m){ const s=S(), T=MIS_TPL[m.p]||{};
@@ -8742,7 +8837,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=37af923';
+  import { startAmbient } from './arte/ambient.mjs?v=b51eaf3';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -8758,7 +8853,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=37af923').then(m => {
+  import('./arte/pista-preview.mjs?v=b51eaf3').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -8770,8 +8865,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=37af923';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=37af923';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=b51eaf3';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=b51eaf3';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -8924,7 +9019,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=37af923'), import('./motor/chassis/sincro.mjs?v=37af923')]);
+        import('./motor/chassis/nube.mjs?v=b51eaf3'), import('./motor/chassis/sincro.mjs?v=b51eaf3')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
