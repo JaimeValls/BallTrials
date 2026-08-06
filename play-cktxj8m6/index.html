@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-06 dc9d000"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-06 21828dc"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG ICONO EN LA PANTALLA DE INICIO (docs/40 §6). Jaime: "la gente esta acostumbrada a clicar en el
@@ -1003,6 +1003,14 @@
   .wel-g:active{ transform:translateY(2px); box-shadow:0 3px 0 #b9bfcb; }
   .wel-g[disabled]{ opacity:.6; }
   .wel-g svg{ width:20px; height:20px; flex:0 0 auto; }
+  /*+AG el boton de Facebook es el MISMO molde que el de Google (misma altura, mismo radio, mismo
+     hueco entre logo y texto): son dos ofertas hermanas y cualquier diferencia de tamano diria que
+     una vale mas que la otra. Lo unico que cambia es la piel, y cambia porque tiene que cambiar:
+     cada marca manda su color, blanco el de Google y #1877F2 el de Meta. */
+  .wel-f{ width:100%; margin-top:10px; border:0; border-radius:16px; padding:14px; font-family:inherit; font-weight:900; font-size:var(--fs-4); color:#fff; background:#1877F2; box-shadow:0 5px 0 #0d4fa8; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; }
+  .wel-f:active{ transform:translateY(2px); box-shadow:0 3px 0 #0d4fa8; }
+  .wel-f[disabled]{ opacity:.6; }
+  .wel-f svg{ width:20px; height:20px; flex:0 0 auto; }
   .wel-inv{ width:100%; margin-top:10px; border:2px solid var(--line); border-radius:16px; padding:13px; font-family:inherit; font-weight:800; font-size:var(--fs-4); color:#eef2ff; background:var(--plate-a); cursor:pointer; }
   .wel-inv:active{ transform:scale(.98); }
   .wel-msg{ min-height:1.2em; margin-top:9px; font-size:var(--fs-2); line-height:1.4; text-align:center; color:var(--muted); }
@@ -3542,6 +3550,12 @@
     <path fill="#FBBC05" d="M10.4 28.2c-.5-1.5-.8-3-.8-4.7s.3-3.2.8-4.7l-7.8-6.1C.9 15.9 0 19.8 0 23.5s.9 7.6 2.6 10.8l7.8-6.1z"/>
     <path fill="#34A853" d="M24 47.5c6.2 0 11.5-2.1 15.3-5.6l-7.6-5.9c-2.1 1.4-4.8 2.3-7.7 2.3-6.4 0-11.7-4.5-13.6-10.4l-7.8 6.1C6.5 41.1 14.6 47.5 24 47.5z"/>
   </symbol>
+  <!--+AG la "f" de Facebook, misma regla que arriba: una sola copia y las pantallas la piden con
+       <use>. Aqui SI va en blanco y no en su azul, porque la marca se enseña sobre el boton azul
+       de Meta (#1877F2), que es como su propia guia la pide. -->
+  <symbol id="mk-facebook" viewBox="0 0 24 24">
+    <path fill="#fff" d="M15.12 5.32H17V2.14A26.11 26.11 0 0 0 14.26 2C11.54 2 9.68 3.66 9.68 6.7v2.62H6.61v3.56h3.07V22h3.68v-9.12h3.06l.46-3.56h-3.52V7.05c0-1.03.28-1.73 1.76-1.73Z"/>
+  </symbol>
 </svg>
 
 <div id="wrap">
@@ -4108,6 +4122,10 @@
       <svg viewBox="0 0 48 48" aria-hidden="true"><use href="#mk-google"/></svg>
       <span data-t="welGoogle"></span>
     </button>
+    <button class="wel-f" id="welMeta">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#mk-facebook"/></svg>
+      <span data-t="welMeta"></span>
+    </button>
     <button class="wel-inv" id="welSkip" data-t="welSkip"></button>
     <div class="wel-msg" id="welMsg"></div>
   </div>
@@ -4164,7 +4182,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=dc9d000"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=21828dc"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -5192,8 +5210,8 @@ const MORE={
     onbGo:'¡Es esta! Al Garaje', onbSkip:'Saltar', onbRecTag:'para ti',
     // — Bienvenida (se OFRECE Google; jugar de invitado cuesta un toque) —
     welH:'BallTrials', welT:'¿Guardamos tu partida?',
-    welSub:'Con tu cuenta de Google no pierdes nada al cambiar de móvil. <b>Puedes hacerlo luego</b>: está siempre en Perfil.',
-    welGoogle:'Continuar con Google', welSkip:'Jugar como invitado',
+    welSub:'Con tu cuenta no pierdes nada al cambiar de móvil. <b>Puedes hacerlo luego</b>: está siempre en Perfil.',
+    welGoogle:'Continuar con Google', welMeta:'Continuar con Facebook', welSkip:'Jugar como invitado',
     welWait:'Abriendo Google…',
     welFail:'Google no se ha podido abrir. Sigues como invitado y tu partida se guarda igual; podrás hacerlo luego desde Perfil.',
     tGoogleIn:'Estás dentro con tu cuenta de Google',
@@ -5367,8 +5385,8 @@ const MORE={
     onbGo:'This one! To the Garage', onbSkip:'Skip', onbRecTag:'for you',
     // — Welcome (Google is OFFERED; playing as a guest is one tap) —
     welH:'BallTrials', welT:'Shall we save your game?',
-    welSub:'With your Google account you lose nothing when you change phone. <b>You can do it later</b>: it is always in Profile.',
-    welGoogle:'Continue with Google', welSkip:'Play as a guest',
+    welSub:'With an account you lose nothing when you change phone. <b>You can do it later</b>: it is always in Profile.',
+    welGoogle:'Continue with Google', welMeta:'Continue with Facebook', welSkip:'Play as a guest',
     welWait:'Opening Google…',
     welFail:'Google could not be opened. You carry on as a guest and your game is still saved; you can do this later from Profile.',
     tGoogleIn:'You are signed in with Google',
@@ -7511,7 +7529,8 @@ function startOnboarding(){ applyShell(); onbRec=onbSel='cohete'; onbRuta.length
 const ONB_PEND='bt_onb_pendiente';   // marca de "me fui a Google antes de hacer el quiz"
 function onbPendiente(v){ try{ v ? localStorage.setItem(ONB_PEND,'1') : localStorage.removeItem(ONB_PEND); }catch(e){} }
 function onbHayPendiente(){ try{ return localStorage.getItem(ONB_PEND)==='1'; }catch(e){ return false; } }
-function startWelcome(){ applyShell(); el('welMsg').textContent=''; el('welGoogle').disabled=false;
+function startWelcome(){ applyShell(); el('welMsg').textContent='';
+  el('welGoogle').disabled=false; el('welMeta').disabled=false;
   el('welBall').src=ballArt('cohete','hero'); el('wel').classList.add('on'); }
 //+AG saltar = UN toque y a lo de siempre. Nada que persistir: la bienvenida solo se pinta en el
 //   primer arranque de este aparato (FRESH), asi que no puede volver a aparecer.
@@ -7521,9 +7540,12 @@ function welSkipFn(){ el('wel').classList.remove('on'); if(SAVE.onboarded) goHom
 function esperarNube(ms){ return new Promise(res=>{ const t0=Date.now();
   (function mira(){ const n=window.BT_NUBE&&window.BT_NUBE.nube; if(n) return res(n);
     if(Date.now()-t0>ms) return res(null); setTimeout(mira,120); })(); }); }
-async function welConGoogle(){
-  const b=el('welGoogle'); if(b.disabled) return;
-  b.disabled=true; el('welMsg').textContent=S().welWait;
+//+AG los dos botones de la bienvenida hacen LO MISMO cambiando una palabra, asi que comparten
+//   funcion: duplicarla era garantizar que un arreglo se aplicase a Google y se olvidase en
+//   Facebook (que es exactamente como esta pantalla se quedo sin Facebook durante un dia).
+async function welConProveedor(prov, idBoton){
+  const b=el(idBoton); if(b.disabled) return;
+  el('welGoogle').disabled=true; el('welMeta').disabled=true; el('welMsg').textContent=S().welWait;
   const nube=await esperarNube(6000);
   let destino=null;
   if(nube){
@@ -7531,27 +7553,34 @@ async function welConGoogle(){
     //   ELEVA la cuenta anonima que ya esta jugando (mismo user_id, cero migracion); solo si el
     //   proyecto no deja enlazar se cae al login normal.
     let hayRed=true;
-    try{ destino=await nube.urlDeEnlace('google', location.href); }
-    catch(e){ hayRed=!!(e&&e.estado); console.warn('[bienvenida] enlazar google', e); }
+    try{ destino=await nube.urlDeEnlace(prov, location.href); }
+    catch(e){ hayRed=!!(e&&e.estado); console.warn('[bienvenida] enlazar '+prov, e); }
     //+AG FALLO REAL cazado el 27-jul probandolo sin red: urlDeProveedor solo PEGA una cadena, no
     //   pregunta a nadie, asi que sin conexion devolvia una URL igualmente y el juego navegaba a
     //   ella — el jugador acababa en la pantalla de error del navegador, fuera del juego y sin
     //   vuelta atras. Al login normal solo se cae si el servidor ha CONTESTADO que no (e.estado).
-    if(!destino && hayRed){ try{ destino=nube.urlDeProveedor('google', location.href); }catch(e){} }
+    if(!destino && hayRed){ try{ destino=nube.urlDeProveedor(prov, location.href); }catch(e){} }
   }
   if(!destino){
-    //+AG NUNCA un error muerto: si Google no se puede abrir (sin red, proveedor apagado), se dice
-    //   y se sigue de invitado solo. Perder el arranque por el login seria justo lo contrario de
-    //   jugar-primero.
+    //+AG NUNCA un error muerto: si el proveedor no se puede abrir (sin red, apagado), se dice y se
+    //   sigue de invitado solo. Perder el arranque por el login seria justo lo contrario de
+    //   jugar-primero. Se reabren los dos botones por si quiere probar con el otro.
     el('welMsg').textContent=S().welFail;
+    el('welGoogle').disabled=false; el('welMeta').disabled=false;
     setTimeout(()=>{ if(el('wel').classList.contains('on')) welSkipFn(); }, 2200);
     return;
   }
-  //+AG al volver de Google esta pagina se RECARGA, y para entonces ya existe el save de arranque:
-  //   FRESH sera false y sin esta marca el jugador se quedaria SIN el quiz de la primera bola.
+  //+AG por donde se ha salido, para que la vuelta con fallo nombre al proveedor bueno y el
+  //   reintento no mande a Google a quien pulso Facebook.
+  try{ sessionStorage.setItem('bt_prov', prov); }catch(e){}
+  //+AG al volver del proveedor esta pagina se RECARGA, y para entonces ya existe el save de
+  //   arranque: FRESH sera false y sin esta marca el jugador se quedaria SIN el quiz de la
+  //   primera bola.
   onbPendiente(true);
   location.href=destino;
 }
+const welConGoogle=()=>welConProveedor('google','welGoogle');
+const welConMeta  =()=>welConProveedor('facebook','welMeta');
 
 // ===== SETTINGS (doc 26): 7 grupos; persiste audio, calidad, efectos reducidos, daltonico, idioma =====
 function openSettings(){ applyShell(); buildSettings(); el('settings').classList.add('on'); }
@@ -8313,7 +8342,7 @@ el('hCupsBand').onclick=openRanking;
 if(el('hCode')) el('hCode').onclick=openCode;
 el('hSet').onclick=openSettings;
 el('onbGo').onclick=onbFinish; el('onbSkip').onclick=onbSkipFn;
-el('welGoogle').onclick=welConGoogle; el('welSkip').onclick=welSkipFn;   //+AG bienvenida: ofrecer Google / jugar ya
+el('welGoogle').onclick=welConGoogle; el('welMeta').onclick=welConMeta; el('welSkip').onclick=welSkipFn;   //+AG bienvenida: ofrecer Google / Facebook / jugar ya
 el('setClose').onclick=closeSettings;
 el('codeOk').onclick=redeemCode; el('codeNo').onclick=closeCode;
 el('codeIn').addEventListener('keydown',e=>{ if(e.key==='Enter') redeemCode(); });
