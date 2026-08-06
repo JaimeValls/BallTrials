@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-06 d07d215"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-06 65b4369"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG ICONO EN LA PANTALLA DE INICIO (docs/40 §6). Jaime: "la gente esta acostumbrada a clicar en el
@@ -4204,7 +4204,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=d07d215"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=65b4369"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -8623,11 +8623,23 @@ addEventListener('keydown', ()=>setTimeout(atrasSync,0), true);
 atrasSync();
 </script>
 
-<!--+AG doc 41 bloque E: three solo para el fondo de la Home. Mismo CDN y misma version que usan
-     los modos en motor/*/index.html, para no traerse dos copias distintas de la libreria. -->
+<!--+AG doc 41 bloque E: three solo para el fondo de la Home. Misma copia y misma version que usan
+     los modos en motor/*/index.html, para no traerse dos copias distintas de la libreria.
+     ⚠ 6-ago-2026 · THREE YA NO VIENE DE UNA CDN AJENA, VIENE DE CASA (motor/vendor/three/).
+     Jaime: «hay veces que no se carga nada en el fondo; si empiezo a dar a F5 se arregla». Era esto:
+     hasta hoy la libreria se pedia a cdn.jsdelivr.net EN CADA ARRANQUE, y si esa peticion no llegaba
+     -red mala, wifi que cambia, un bloqueador, la CDN de mal dia- este <script type="module"> entero
+     no llegaba a ejecutarse: sin BT_AMBIENT no hay fondo vivo, y sin el modulo tampoco monta la bola
+     del heroe. La Home salia entera y bonita, con el hueco de la protagonista vacio (solo su sombra),
+     exactamente como en su captura. MEDIDO con la CDN bloqueada, y la partida es aun peor: el motor
+     se queda con CERO canvas, o sea pista negra.
+     Y no se arregla solo: un modulo ES que falla al cargarse queda marcado como fallido, asi que
+     reintentar la misma URL no vuelve a pedirla. Por eso lo unico que lo curaba era el F5.
+     Ahora los 12 ficheros de three viven en el repo y viajan en el paquete (motor/ se copia entero),
+     asi que el juego no depende de ningun tercero para arrancar. -->
 <script type="importmap">
-{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-               "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }
+{ "imports": { "three": "./motor/vendor/three-0.160.0/three.module.js",
+               "three/addons/": "./motor/vendor/three-0.160.0/examples/jsm/" } }
 </script>
 <script type="module">
   import { startAmbient } from './arte/ambient.mjs';

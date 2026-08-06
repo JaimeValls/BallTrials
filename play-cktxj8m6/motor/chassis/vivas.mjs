@@ -24,17 +24,20 @@
 //  blanco. Es la misma leccion que ya costo la pagina de previsualizacion.
 //
 //  COMO SE USA desde el shell:
-//     import { vivas } from './motor/chassis/vivas.mjs?v=d07d215';
+//     import { vivas } from './motor/chassis/vivas.mjs?v=65b4369';
 //     ... pinta `<div class="gi" data-viva="cohete"></div>` en vez del <img> ...
 //     vivas.sincroniza();      // despues de cada render de la pantalla
 //     vivas.para();            // al salir de la pantalla (deja de gastar bateria)
 //  `data-viva-off="1"` en el elemento = bola no comprada: se pinta en gris.
 // ============================================================================
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
-import { makeBallVinyl } from './gfx.mjs?v=d07d215';
-import { archLook } from './ballmat.mjs?v=d07d215';
-import { archFace } from './facegen.mjs?v=d07d215';
-import { attachSquash } from './squash.mjs?v=d07d215';
+//+AG 6-ago-2026: era la URL de la CDN a pelo, y eso ya no vale. Ahora three vive en el repo
+//   (motor/vendor/three/) y quien manda es el importmap de la pagina, igual que en gfx.mjs. Si aqui
+//   se dejara la URL absoluta se cargarian DOS copias de la libreria: la local y la de fuera.
+import * as THREE from 'three';
+import { makeBallVinyl } from './gfx.mjs?v=65b4369';
+import { archLook } from './ballmat.mjs?v=65b4369';
+import { archFace } from './facegen.mjs?v=65b4369';
+import { attachSquash } from './squash.mjs?v=65b4369';
 
 // El mundo de cada celda. HW es el SEMIANCHO de la camara en radios de bola: cuanto MENOR, mas
 // grande sale la bola... y antes lo elegi mirando solo la bola. Error: lo que decide el encuadre no
