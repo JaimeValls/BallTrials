@@ -2,7 +2,7 @@
 // createSynth (add/note) de chassis/audio.mjs → byte-determinista (mismo rng). Da efectos CON NOMBRE para que
 // todos los modos suenen coherentes y NINGUNA situación quede muda: reventón, grito, impacto, whoosh, chispa,
 // explosión, metálico, ding de llegada. El "director de audio" (agente) audita qué evento de cada modo usa cuál.
-//   import { createFx } from '../chassis/sfx.mjs?v=82904ad';
+//   import { createFx } from '../chassis/sfx.mjs?v=37af923';
 //   const synth = createSynth({SR,N,buf,rng}); const fx = createFx(synth);
 // NOTA: el audio es RENDER (no sim) → aquí SÍ valen Math.pow/etc. Las amplitudes son orientativas (amp≈volumen).
 export function createFx({ add, note }){
@@ -31,6 +31,19 @@ export function createFx({ add, note }){
   function zip(t, amp = 0.4){
     add(t, 0.14, 360, 1500, amp * 0.55, 0.10, 6);                  // acelerón ascendente (whoosh con cuerpo)
     add(t + 0.02, 0.10, 1700, 2600, amp * 0.22, 0.05, 9);         // glaseado agudo (el "brillo" cian)
+  }
+  // NITRO / encendido de cohete: el HERMANO MAYOR de zip(). Existe porque el nitro de la Carrera sonaba con el
+  // bling+zip de coger un ítem del suelo, y desde el doc 74 el nitro es lo más gordo que puede hacer el jugador
+  // aparte del súper: sonaba a "he cogido algo" cuando lo que pasa es "he encendido un cohete". Mantiene a
+  // propósito el material de zip (acelerón ascendente + glaseado agudo) porque ES el mismo idioma de velocidad
+  // que la estela cian; lo que añade es lo que zip no tiene: el GOLPE de encendido y una COLA que dura lo que
+  // dura el boost (~0,8 s), para que el oído sepa cuándo se apaga sin mirar el botón.
+  function nitro(t, amp = 0.5){
+    add(t, 0.09, 150, 60, amp * 0.55, 0.30, 7);                    // THUMP de encendido = el puñetazo del botón
+    add(t, 0.30, 300, 1750, amp * 0.62, 0.22, 2.6);                // acelerón: sube más lejos y dura más que el zip
+    add(t + 0.03, 0.14, 1800, 2900, amp * 0.26, 0.06, 7);          // glaseado agudo (el brillo cian, como en zip)
+    add(t + 0.06, 0.55, 900, 420, amp * 0.20, 0.55, 1.8);          // COLA de llama: el aire que sigue saliendo
+    note(t + 0.02, 0.26, 196, amp * 0.22, { wave: 'tri', decay: 3 });   // cuerpo grave = el peso del empujón
   }
   // BOMB FALL / silbido de amenaza que CAE: telégrafo de la bomba de magma del cielo. Whoosh DESCENDENTE largo con cola de
   // ruido (aire desplazado) → avisa "algo gordo va a caer". Pensado para sonar SOLO mientras cae (1 por bomba, espaciado).
@@ -75,5 +88,5 @@ export function createFx({ add, note }){
     add(t, 0.07, 2200, 1300, amp * 0.30, 0.6, 8);                  // astillas agudas
     [1568, 1175, 880].forEach((f, i) => note(t + 0.04 + i * 0.05, 0.14, f, amp * 0.26, { wave: 'tri', decay: 6 }));  // tintineo que cae
   }
-  return { pop, scream, impact, whoosh, zip, bombFall, sparkle, explosion, clang, arriveDing, deathJingle, chomp, monsterRise, monsterSink, shatter };
+  return { pop, scream, impact, whoosh, zip, nitro, bombFall, sparkle, explosion, clang, arriveDing, deathJingle, chomp, monsterRise, monsterSink, shatter };
 }
