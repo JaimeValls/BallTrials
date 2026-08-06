@@ -8,7 +8,7 @@
 // Se ancla a la esquina leyendo el encuadre de la camara, asi vale para 16:9 (torneo) y 9:16 (shorts). El tamano
 // va por la dimension MENOR del viewport => fisicamente parecido en las dos orientaciones. Texto en INGLeS.
 import * as THREE from 'three';
-import { sat } from './gfx.mjs?v=b812e3b';
+import { sat } from './gfx.mjs?v=f74d8ee';
 
 // Traduccion de RESPALDO: los modos ya definen sus paletas en ingles, pero si a alguna se le cuela un nombre en
 // espanol el feed lo pintaria tal cual en pantalla (paso en los shorts de 2026-07-19: NARANJA/CIAN/VIOLETA).

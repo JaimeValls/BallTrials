@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-06 b812e3b"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-06 f74d8ee"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -209,7 +209,25 @@
   /*+AG doc 41 bloque E: el lienzo del fondo vivo. Detras de todo y sin robar toques: los hijos de
      #home ya se pintan encima por orden de documento, y pointer-events:none deja pasar el dedo
      (el propio ambient escucha en #home, no en el canvas, para poder ignorar la UI). */
-  #home > #ambient{ position:absolute; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; opacity:.5; }   /* va DETRAS: no compite con tu bola */
+  /*+AG ⚠ 2026-08-06 · EL LIENZO EMPIEZA BAJO LA CABECERA. Jaime: «veo un artefacto en medio de la
+     pantalla, un punto rojo en la parte central superior». Era LITERAL y era una bola del fondo vivo:
+     el trampolin de abajo (tramp.fy .965) las lanza hacia arriba y no habia nada que las parase, asi
+     que subian hasta la banda de `.h-top` y asomaban por los huecos ENTRE los botones — a 30 px se lee
+     como un punto de suciedad, no como una bola. MEDIDO con la sonda de debug() sobre produccion:
+     el 44% de los instantes en movil y el 30% en escritorio tenian una bola metida ahi.
+     ⚠ EL ARREGLO NO ES `data-solid` (que es el mecanismo que existe para apartar el fondo, docs/68):
+     `.h-top` va de canto a canto, y una caja solida SIN pasillo lateral es justo el caso de atasco que
+     avisa el comentario de la red de seguridad de ambient.mjs — las bolas se apilarian ENCIMA de ella
+     para siempre. Se recorta el LIENZO, que no añade ningun collider: el mundo se mide con el canvas
+     (medirMundo), asi que se recalcula solo y las bolas siguen naciendo fuera de cuadro y entrando por
+     arriba, igual que antes, pero ya por debajo de la cabecera.
+     Los 60 px son el alto medido de `.h-top` sin notch (10 de padding + 44 de contenido + 6); el
+     env() le suma el notch, que es lo mismo que le suma a su propio padding-top.
+     ⚠ Y EL `height` ES OBLIGATORIO, no sobra: un <canvas> sin alto en CSS cae a su alto INTRINSECO (el
+     atributo `height` que le pone renderer.setSize(cw,ch,false), o sea el alto entero de #home), asi que
+     con solo `top` el lienzo se salia 60 px POR ABAJO — medido: lienzo=60-872 sobre un home de 0-812, con
+     el trampolin del fondo fuera de cuadro. Con top+height cuadra por construccion. */
+  #home > #ambient{ position:absolute; left:0; right:0; top:calc(60px + env(safe-area-inset-top)); width:100%; height:calc(100% - 60px - env(safe-area-inset-top)); z-index:0; pointer-events:none; opacity:.5; }   /* va DETRAS: no compite con tu bola */
   #home > *:not(#ambient){ position:relative; z-index:1; }
   #home{ background:url(arte/fondo/tribuna.webp) repeat-x bottom center/auto min(24vh,210px), radial-gradient(130% 90% at 50% 10%, var(--bg-hi) 0%, var(--bg) 38%, var(--bg-mid) 68%, var(--bg-lo) 100%); overflow:hidden; }
   .h-top{ display:flex; align-items:center; gap:9px; padding:calc(10px + env(safe-area-inset-top)) 13px 6px; }
@@ -4281,7 +4299,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=b812e3b"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=f74d8ee"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -6950,7 +6968,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=b812e3b').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=f74d8ee').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -8883,7 +8901,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=b812e3b';
+  import { startAmbient } from './arte/ambient.mjs?v=f74d8ee';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -8899,7 +8917,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=b812e3b').then(m => {
+  import('./arte/pista-preview.mjs?v=f74d8ee').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -8911,8 +8929,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=b812e3b';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=b812e3b';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=f74d8ee';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=f74d8ee';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -9065,7 +9083,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=b812e3b'), import('./motor/chassis/sincro.mjs?v=b812e3b')]);
+        import('./motor/chassis/nube.mjs?v=f74d8ee'), import('./motor/chassis/sincro.mjs?v=f74d8ee')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
