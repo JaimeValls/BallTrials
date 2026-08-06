@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-06 21828dc"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-06 ca3ebb7"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG ICONO EN LA PANTALLA DE INICIO (docs/40 §6). Jaime: "la gente esta acostumbrada a clicar en el
@@ -3033,6 +3033,12 @@
   .pr-g:active{ transform:translateY(2px); box-shadow:0 1px 0 #b9bfcb; }
   .pr-g:disabled{ filter:saturate(.35); opacity:.6; }
   .pr-g-mk{ width:17px; height:17px; flex:0 0 auto; }
+  /*+AG 6-ago: FACEBOOK VUELVE. La nota de arriba lo dejo escrito -"vuelve, con su marca, el dia
+     que el proveedor este encendido"- y ese dia es hoy: la app de Meta esta publicada y el login
+     probado con un usuario real. Hereda TODO de .pr-g (mismo alto, mismo radio, misma sombra) y
+     solo se le cambia la piel, porque el color no es decoracion: cada marca manda el suyo. */
+  .pr-f{ color:#fff; background:#1877F2; box-shadow:0 3px 0 #0d4fa8; }
+  .pr-f:active{ box-shadow:0 1px 0 #0d4fa8; }
 
   /*+AG CERRAR SESION no es una accion mas: deja este movil como invitado. No se pinta en rojo (seria
      alarma, y no lo es: la partida vuelve al entrar), pero si se separa de su vecina con un canto
@@ -4002,19 +4008,25 @@
                93 -> 93 px a 360x640, 193 -> 193 a 360x540, 0 -> 0 a 375x812. -->
         <button class="pr-inv" id="prAccCreate" data-t="prAccCreate">Guardar mi cuenta</button>
         <!--+AG 2-ago: FACEBOOK FUERA, y Google con su marca.
-             Facebook estaba cableado y pintado, pero el proveedor esta APAGADO en el servidor (Meta
-             exige verificacion de empresa, docs/43): pulsarlo fallaba siempre. Un boton que promete
-             algo que el juego no puede cumplir hace mas daño que no tenerlo, y ponerle encima el
-             logotipo azul oficial habria hecho que un boton roto pareciera MAS de fiar. Vuelve, con
-             su marca, el dia que el proveedor este encendido. Decision de Jaime, 2026-08-02.
+             Facebook estaba cableado y pintado, pero el proveedor estaba APAGADO en el servidor
+             (Meta exigia verificacion de empresa, docs/43): pulsarlo fallaba siempre. Un boton que
+             promete algo que el juego no puede cumplir hace mas daño que no tenerlo, y ponerle
+             encima el logotipo azul oficial habria hecho que un boton roto pareciera MAS de fiar.
+             Vuelve, con su marca, el dia que el proveedor este encendido. Decision de Jaime, 2026-08-02.
              ⚠ La clave `prAccMeta` SE QUEDA en los 20 diccionarios a proposito: esta traducida y
-               volver a pedir 20 traducciones para reponer el boton es un coste absurdo. El cableado
-               tambien sobrevive (el bucle de abajo salta el boton que no existe con su `if(goog)`).
-             El hueco que deja Facebook es justo lo que le hacia falta a Google para caber con su
-             logotipo al lado del texto en vez de a tres renglones. -->
+               volver a pedir 20 traducciones para reponer el boton es un coste absurdo.
+             6-AGO: SE CUMPLIO LA CONDICION Y EL BOTON VUELVE. La app de Meta esta publicada (modo
+             Live, verificacion de negocio aprobada como autonomo) y el login probado de punta a
+             punta con un usuario real en Supabase. Ya no promete nada que no pueda cumplir.
+             Va en su fila, debajo, y no apretujado con "Ya tengo cuenta": los dos proveedores son
+             hermanos y tienen que medir lo mismo; meter tres botones en dos filas desiguales era
+             decir que uno vale menos. -->
         <div class="pr-slots pr-accalt" style="gap:7px;margin-top:7px">
           <button class="pr-inv" id="prAccLogin" style="flex:1" data-t="prAccLogin">Ya tengo cuenta</button>
           <button class="pr-g" id="prAccGoogle" style="flex:1"><svg class="pr-g-mk" viewBox="0 0 48 48" aria-hidden="true"><use href="#mk-google"/></svg><span data-t="prAccGoogle">Continuar con Google</span></button>
+        </div>
+        <div class="pr-slots pr-accalt" style="gap:7px;margin-top:7px">
+          <button class="pr-g pr-f" id="prAccMeta" style="flex:1"><svg class="pr-g-mk" viewBox="0 0 24 24" aria-hidden="true"><use href="#mk-facebook"/></svg><span data-t="prAccMeta">Continuar con Facebook</span></button>
         </div>
       </div>
       <!--+AG con la cuenta ya guardada el formulario se esconde, pero hay un caso real: el
@@ -4182,7 +4194,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=21828dc"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=ca3ebb7"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
