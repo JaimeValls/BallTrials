@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-06 7958b57">
+<meta name="bt-build" content="2026-08-06 82904ad">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>YouBall · La Gran Carrera (WebGL)</title>
 <style>
@@ -242,7 +242,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=7958b57"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=82904ad"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -253,24 +253,24 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 </script>
 
 <script type="module">
-import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createItemPops, createBloom, frameOrtho, buildHud, updateHud } from '../chassis/gfx.mjs?v=7958b57';
-import { archLook } from '../chassis/ballmat.mjs?v=7958b57';   //+AG doc 41 bloque G: material de la bola-heroe
-import { attachSquash } from '../chassis/squash.mjs?v=7958b57';
+import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createItemPops, createBloom, frameOrtho, buildHud, updateHud } from '../chassis/gfx.mjs?v=82904ad';
+import { archLook } from '../chassis/ballmat.mjs?v=82904ad';   //+AG doc 41 bloque G: material de la bola-heroe
+import { attachSquash } from '../chassis/squash.mjs?v=82904ad';
 import { Sim, RNG, TEAMS, SHORT_COLORS, BALL_R, WIDTH, GATE_Y, GATE_H, TOP, FPS,
-         DIR, N_BALLS, CAM_SCALE, ASPA_R, ASPA_THICK, PLAT_HW, PLAT_HH } from './sim.js?v=7958b57';   //+AG extras de la capa de agencia
+         DIR, N_BALLS, CAM_SCALE, ASPA_R, ASPA_THICK, PLAT_HW, PLAT_HH } from './sim.js?v=82904ad';   //+AG extras de la capa de agencia
 //+AG doc 62: los encuadres del cierre (sim.hero_scale / sim.celeb_scale) se leen del OBJETO sim, no por
 //   import. Un export que la CDN aún no ha refrescado tumba el módulo entero y la partida no arranca (pasó
 //   en producción el 2-ago); un campo que falta degrada a la cámara de siempre. Ver la nota en sim.js.
-import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=7958b57';
-import { archFace } from '../chassis/facegen.mjs?v=7958b57';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
-import { itemTexture } from '../chassis/itemgen.mjs?v=7958b57';
-import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=7958b57';
-import { buildSfxBuffer } from './sfxmap.mjs?v=7958b57';
-import { runToEnd } from '../chassis/simrun.mjs?v=7958b57';
-import { createCoach } from '../chassis/coach.mjs?v=7958b57';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
-import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=7958b57';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
-import { createPausa } from '../chassis/pausa.mjs?v=7958b57';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
-import { cantarPuesto } from '../chassis/veredicto.mjs?v=7958b57';   //+AG cartel de META: "en qué puesto has quedado", antes de soltar el resultado al shell
+import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=82904ad';
+import { archFace } from '../chassis/facegen.mjs?v=82904ad';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
+import { itemTexture } from '../chassis/itemgen.mjs?v=82904ad';
+import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=82904ad';
+import { buildSfxBuffer } from './sfxmap.mjs?v=82904ad';
+import { runToEnd } from '../chassis/simrun.mjs?v=82904ad';
+import { createCoach } from '../chassis/coach.mjs?v=82904ad';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=82904ad';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
+import { createPausa } from '../chassis/pausa.mjs?v=82904ad';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
+import { cantarPuesto } from '../chassis/veredicto.mjs?v=82904ad';   //+AG cartel de META: "en qué puesto has quedado", antes de soltar el resultado al shell
 
 window.addEventListener('error', e => { document.getElementById('err').style.display='grid'; console.error(e.error||e.message); });
 
@@ -582,20 +582,38 @@ function react(ev){
   //+AG v0.16 EL DESTELLO DEL NITRO (4-ago-2026, Jaime: «cuando se pulsa nitro la bola tiene que soltar un
   //   destello de algo mas visible»). Tenia razon tambien aqui: el nitro pintaba 10 chispas y nada mas, o sea
   //   MENOS que recoger un item del suelo (18) y muchisimo menos que romper una compuerta (38 + onda + shake).
-  //   El booster que mas se pulsa era el efecto mas timido del juego. Ahora es lo mas ruidoso despues del
-  //   super: DOS ondas (la blanca es el golpe, la cian es la velocidad), nucleo blanco + chispas cian, la bola
-  //   acusa el punetazo con squash, la cara se concentra el nitro entero y la pantalla tiembla un pelin.
-  //   El temblor y el efecto GRANDE son solo para TU bola (e.id===0): con los bots usando nitro 2-3 veces por
-  //   carrera, darselo a las ocho convertiria la pista en una verbena y tu aceleron dejaria de destacar.
+  //   El booster que mas se pulsa era el efecto mas timido del juego.
+  //+AG v0.17 (5-ago, Jaime viendolo): «ese circulo tan brutal y tan grande distrae mucho, no viene a cuento».
+  //   La v0.16 lo resolvia con DOS ondas de choque concentricas, y esa era la idea equivocada, no el tamano:
+  //   una onda expansiva es el idioma de una EXPLOSION —por eso la usan la Sacudida, la compuerta rota, el
+  //   escudo y el super—, y ademas es OMNIDIRECCIONAL, o sea que dice «ha pasado algo aqui» justo cuando lo
+  //   que hay que decir es «esta bola sale disparada HACIA ALLA». Encima tapaba media pista y el ojo se iba
+  //   al circulo en vez de a la bola. Fuera las dos ondas: ahora el encendido es un PENACHO DE ESCAPE que
+  //   sale hacia ATRAS (contra la marcha, como el fuego de un cohete), que es direccional, cabe alrededor de
+  //   la bola y refuerza justo lo que el nitro hace. Lo demas de la v0.16 se queda: squash, cara concentrada,
+  //   estela doble y un temblor corto.
+  //   El penacho grande y el temblor son solo para TU bola (e.id===0): con los bots usando nitro 2-3 veces
+  //   por carrera, darselo a las ocho convertiria la pista en una verbena y tu aceleron dejaria de destacar.
   for(const e of (ev.nitro||[])){ const o=ballObjs[e.id]; if(!o) continue;
-    const nx=o.g.position.x, ny=o.g.position.y, mio=(e.id===0);
+    const bb=sim.balls[e.id], nx=o.g.position.x, ny=o.g.position.y, mio=(e.id===0);
     o.excite=Math.max(o.excite,mio?0.9:0.5); o.squash=Math.max(o.squash,mio?0.72:0.5);
-    P.ring(nx,ny,[1,1,1], mio?1.0:0.55);                                   // onda BLANCA = el golpe del encendido
-    P.ring(nx,ny,[0.33,0.85,1.0], mio?0.85:0.45);                          // onda CIAN = velocidad (el idioma del motor)
-    P.burst(nx,ny,0.2,[1,1,1], mio?14:6, 6.2);                             // nucleo blanco
-    P.burst(nx,ny,0.2,[0.2,0.85,1.0], mio?26:12, 5.0);                     // chispas cian
+    //+AG el penacho apunta al reves de la MARCHA. Si la bola va casi parada (que es cuando mas se pulsa el
+    //   nitro: estas atascada) no hay direccion fiable que leer, asi que se cae hacia ARRIBA — que es el
+    //   escape correcto para una bola que va a salir hacia abajo.
+    const sp=Math.hypot(bb.vx,bb.vy);
+    const ux=sp>0.8?bb.vx/sp:0, uy=sp>0.8?bb.vy/sp:-1;
+    //+AG el penacho va DENSO y CORTO, no rapido y disperso: la primera version salia tan lenta de particulas
+    //   y tan abierta que no se veia nada, que es pasarse al otro lado de lo que pidio Jaime. Se emiten
+    //   escalonadas hacia atras (k/n) para que sea una LLAMA pegada a la bola y no una nube de puntos sueltos.
+    const chorro=(n,cr,cg,cb,vel,abre,largo)=>{ for(let k=0;k<n;k++){
+      const a=(Math.random()-0.5)*abre, ca=Math.cos(a), sa=Math.sin(a);
+      const dx=-(ux*ca-uy*sa), dy=-(ux*sa+uy*ca), v=vel*(0.35+Math.random());
+      const d=0.22+largo*(k/n)+Math.random()*0.12;
+      P.emit(nx+dx*d, ny+dy*d, 0.22, cr,cg,cb, dx*v, dy*v, 0, 0.22+Math.random()*0.20); } };
+    chorro(mio?26:9,  1,1,1,          2.6, 0.60, 0.55);                    // nucleo BLANCO, abanico estrecho
+    chorro(mio?44:15, 0.25,0.88,1.0,  2.2, 1.30, 0.95);                    // llama CIAN, mas abierta y mas larga
     emo.fire(e.id,'concentrada',PRIO.concentrada,26,f);                    // la cara se concentra el nitro entero (24f)
-    if(mio) shake=Math.max(shake,0.13); }                                  // temblor corto: se nota, no molesta
+    if(mio) shake=Math.max(shake,0.10); }                                  // temblor corto: se nota, no molesta
   for(const e of (ev.shieldup||[])){ const o=ballObjs[e.id]; if(o) P.ring(o.g.position.x,o.g.position.y,[0.33,0.85,1.0],0.8); }
   for(const e of (ev.super||[])){ const o=ballObjs[e.id]; if(o){ o.squash=0.6; P.burst(o.g.position.x,o.g.position.y,0.2,[1,0.9,0.4],22,5.0); P.ring(o.g.position.x,o.g.position.y,[1,0.85,0.3],0.9); emo.fire(e.id,'chuleria',PRIO.chuleria,50,f); } }
   //+AG doc 55 capa 5: el ACCESORIO reacciona al evento. Solo tu bola (la unica con arch), y solo
@@ -746,11 +764,25 @@ function sync(dt, a=1){
     o.sqUpdate(bx, by+jumpY, dt);   // VINILO v2: squash direccional + tilt + cara viva + viento + estrellas
     // estrella: parpadeo emisivo
     if(b.star>0){ const fl=0.5+0.5*Math.sin(fF*0.8); o.mat.emissive.setRGB(0.5+fl*0.5,0.5+fl*0.45,fl*0.3); o.mat.emissiveIntensity=0.9; }
+    //+AG v0.17 EL DESTELLO VIVE EN LA BOLA, NO ALREDEDOR. Quitada la onda expansiva (ver el evento de nitro),
+    //   hacia falta un «ha pasado algo» que NO tape la pista: la propia bola se pone al ROJO BLANCO cian en el
+    //   frame del dedo y baja a un brillo sostenido mientras el nitro arde. Es el sitio donde el ojo ya esta
+    //   mirando, cuesta cero espacio en pantalla y no compite con nada. Mismo mecanismo que usa la Estrella,
+    //   asi que el motor ya sabe pintarlo. El clamp de arriba importa: el relevo del torneo da turbo=45.
+    else if(b.turbo>0){ const ig=Math.min(1,Math.max(0,(b.turbo-16)/8));       // 1 -> 0 en los 8 primeros frames
+      const g=0.45+ig*0.55;
+      o.mat.emissive.setRGB(o.col[0]*0.25+g*0.75, o.col[1]*0.25+g*0.9, o.col[2]*0.25+g);
+      o.mat.emissiveIntensity=0.62+ig*2.30; }   // pico fuerte: la bola queda al BLANCO 3-4 frames y luego se asienta
     else { o.mat.emissive.setRGB(o.col[0],o.col[1],o.col[2]); o.mat.emissiveIntensity=0.40; }  // = gominola del chasis (no pisar el material)
     // estela de VELOCIDAD compartida (turbo/relevo/boost). La ESTRELLA no la lleva (es invencibilidad → ya parpadea arriba).
     //+AG v0.16 el NITRO lleva estela DOBLE: la misma cola cian, pintada dos veces por frame. Un pad de impulso
     //   y un nitro no pueden verse igual cuando uno de los dos es el botón que el jugador gasta y espera.
-    if(b.turbo>0||b.in_boost){ P.trail(bx,by,b.vx,b.vy); if(b.turbo>0) P.trail(bx,by,b.vx,b.vy); }
+    //+AG v0.17 y el ENCENDIDO la lleva CUÁDRUPLE los primeros 8 frames: sin la onda expansiva, lo que tiene
+    //   que decir «ha pasado algo» es una LLAMA que dura, no un puñado de puntos en un solo frame — la primera
+    //   versión sin onda emitía el penacho una sola vez y no se veía nada, que es pasarse al otro lado.
+    if(b.turbo>0||b.in_boost){ P.trail(bx,by,b.vx,b.vy);
+      if(b.turbo>0){ P.trail(bx,by,b.vx,b.vy); P.trail(bx,by,b.vx,b.vy);
+        if(b.turbo>16) P.trail(bx,by,b.vx,b.vy); } }
     // EMOCIONES (ojos ABIERTOS, NUNCA dormida): en carrera = concentrada/alerta; al llegar = excitada/celebra
     if(b.rank!==null){                                   // ya en meta
       const nArr=sim.byTeam[b.team].filter(x=>x.rank!==null).length;
