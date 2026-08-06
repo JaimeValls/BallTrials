@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-06 b51eaf3"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-06 7011ad7"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -821,21 +821,26 @@
      La barra va con la MISMA rampa que el resto de barras del juego para que "lleno" signifique lo
      mismo en toda la app. */
   .mi-row{ display:flex; align-items:center; gap:9px; background:var(--plate-a); border:1px solid var(--line);
-    border-radius:14px; padding:8px 10px; margin-bottom:6px; }
+    border-radius:14px; padding:7px 9px; margin-bottom:5px; }
   .mi-row .mi-tx{ flex:1; min-width:0; }
   /*+AG el contador va EN LA MISMA LINEA que el texto, no debajo. Medido: con el contador en linea
      propia el bloque de retos se salia 45 px por abajo en un movil de 360x640 (lo canto __fitCheck),
      y esa linea suelta no aportaba nada que la barra no dijera ya. Ahora cabe con margen. */
-  .mi-row .mi-t{ font-size:var(--fs-1); font-weight:800; line-height:1.2; display:flex; align-items:baseline; gap:6px; }
+  /*+AG ⚠ EL CUERPO ES --fs-2 (11 px), NUNCA --fs-1 (9 px). Nacio en 9 y Jaime lo canto mirando la
+     pantalla: «hay letras en minuscula, no se respeta el estilo que pedi». Es EXACTAMENTE el fallo que
+     docs/60 ya habia cazado y escrito en el galon EQUIPADA tres dias antes —el suelo del canon son 11—,
+     repetido en la pantalla de al lado. Y no lo cazo ningun banco: banco-canon.mjs mide canto y trazo de
+     los PULSABLES, no el cuerpo de letra del texto que no se pulsa. */
+  .mi-row .mi-t{ font-size:var(--fs-2); font-weight:800; line-height:1.2; display:flex; align-items:baseline; gap:6px; }
   .mi-row .mi-t span{ flex:1; min-width:0; }
   .mi-bar{ height:7px; border-radius:6px; background:#ffffff18; overflow:hidden; margin-top:5px; box-shadow:inset 0 0 0 1px #ffffff10; }
   .mi-bar i{ display:block; height:100%; border-radius:6px; background:linear-gradient(90deg,var(--gold2),#ff9a3d); transition:width .25s; }
   .mi-n{ font-size:var(--fs-2); color:var(--muted); font-weight:800; flex:0 0 auto; font-variant-numeric:tabular-nums; }
   /*+AG el premio SIEMPRE visible, tambien antes de completarlo: es la regla de "ves lo que te llevas
      antes de empezar" (docs/10 §7, cero azar). Cuando esta listo, el boton se lleva el sitio. */
-  .mi-pr{ flex:0 0 auto; display:flex; align-items:center; gap:3px; font-weight:900; font-size:var(--fs-1); white-space:nowrap; }
+  .mi-pr{ flex:0 0 auto; display:flex; align-items:center; gap:3px; font-weight:900; font-size:var(--fs-2); white-space:nowrap; }
   .mi-cta{ flex:0 0 auto; border:0; border-radius:12px; padding:9px 14px; font-family:inherit; font-weight:900;
-    font-size:var(--fs-1); color:#3a2400; background:linear-gradient(#ffe27a,#ff9a3d); box-shadow:0 3px 0 #a85a12; cursor:pointer; }
+    font-size:var(--fs-2); color:#3a2400; background:linear-gradient(#ffe27a,#ff9a3d); box-shadow:0 3px 0 #a85a12; cursor:pointer; }
   .mi-cta:active{ transform:translateY(2px); box-shadow:0 1px 0 #a85a12; }
   /*+AG cobrado = apagado y con check, NUNCA desaparece (canon 6: lo que ya no se puede tocar se
      enseña apagado, no se esconde — si desapareciera, el jugador no sabria que lo hizo). */
@@ -844,11 +849,25 @@
   .mi-ck{ flex:0 0 auto; width:22px; height:22px; border-radius:50%; display:grid; place-items:center;
     background:#2ecc71; color:#06301a; font-weight:900; font-size:13px; }
   /*+AG el reto SEMANAL es una sola fila, pero mas alta y con el borde dorado: es el que paga Gemas. */
-  .mi-sem{ border-color:#ffd23f66; background:linear-gradient(180deg,#ffd23f14,#ffffff08); padding:12px; margin-bottom:11px; }
-  .mi-sem .mi-t{ font-size:var(--fs-0); }
-  .mi-rr{ background:none; border:1px solid var(--line); color:var(--muted); border-radius:10px; padding:6px 9px;
-    font-family:inherit; font-weight:800; font-size:var(--fs-2); cursor:pointer; }
-  .mi-nota{ font-size:var(--fs-2); color:var(--muted); text-align:center; margin-top:9px; }
+  .mi-sem{ border-color:#ffd23f66; background:linear-gradient(180deg,#ffd23f14,#ffffff08); padding:10px; margin-bottom:9px; }
+  /*+AG ⚠ ESTO ESTABA EN --fs-0, QUE NO EXISTE EN LA ESCALA (--fs-1..7 = 9/11/13/16/20/24/30). Una
+     variable que no existe invalida la declaracion entera, asi que el titulo del semanal se pintaba a
+     16 px HEREDADOS DEL NAVEGADOR: ni elegido, ni gobernado, ni del canon. Y por eso a 320 px se partia
+     en cinco lineas y empujaba la pantalla 52 px fuera (medido en el codigo de produccion, ANTES de
+     tocar nada). Ahora es --fs-3, que es un tamaño de la escala y sigue mandando sobre el cuerpo. */
+  .mi-sem .mi-t{ font-size:var(--fs-3); }
+  /*+AG el ⟳ era PLANO: fondo transparente y un borde, o sea el unico pulsable del juego que no decia
+     "tocame" en el idioma de la casa. Es lo que banco-canon.mjs venia cantando (los 3 planos de
+     Temporada eran estos tres). Ahora lleva la placa marino con bisel y su canto inferior, que es la
+     regla 2 del canon (docs/56 §3) y exactamente lo que ya hace .ibtn, su hermano de tamaño. */
+  .mi-rr{ background:linear-gradient(var(--nav-1),var(--nav-2)); border:1px solid #ffffff30; color:var(--muted);
+    border-radius:10px; padding:6px 9px; font-family:inherit; font-weight:800; font-size:var(--fs-2);
+    box-shadow:0 2px 0 #0d0726, inset 0 1px 0 #ffffff24; cursor:pointer; transition:transform .08s, box-shadow .08s; }
+  .mi-rr:active{ transform:translateY(2px); box-shadow:0 0 0 #0d0726, inset 0 1px 0 #ffffff24; }
+  /*+AG peso 800 como TODAS las notas apagadas del juego: esta era la unica en 400 de todo juego.html
+     (medido: 23 en 800, 7 en 900, 4 en 700, 1 en 600, y esta). Se queda en minusculas a proposito: es
+     una frase descriptiva, y la regla de "rotulo pequeño en MAYUSCULAS" excluye las frases. */
+  .mi-nota{ font-size:var(--fs-2); font-weight:800; color:var(--muted); text-align:center; margin-top:9px; }
   /*+AG doc 75 · LA CARTA DEL CAMINO DE REGALOS (primera de Destacados). Tamaño de carta normal, NO
      un banner: la regla del canon es superficie proporcional a la informacion, y esto es un premio
      pequeño. Cuando hay algo que recoger se enciende con el borde dorado; ya recogida se queda
@@ -865,7 +884,10 @@
     background:#ffffff10; border-radius:12px; padding:8px 4px; }
   .cam-p.old{ opacity:.42; }
   .cam-p.next{ opacity:.6; }
-  .cam-p.now{ font-size:var(--fs-0); background:#ffffff1e; box-shadow:inset 0 0 0 1px #ffd23f4d; }
+  /*+AG mismo caso que el semanal: venia en el inexistente --fs-0. Se fija en --fs-4, que son los 16 px
+     que ya estaba pintando de casualidad, para que el "hoy grande" del camino no cambie de tamaño y
+     ademas quede gobernado por la escala. */
+  .cam-p.now{ font-size:var(--fs-4); background:#ffffff1e; box-shadow:inset 0 0 0 1px #ffd23f4d; }
   .cam-cta{ width:100%; }
   .cam-cta:disabled{ opacity:.5; }
   .se-track{ display:flex; gap:8px; overflow-x:auto; padding:2px 1px 9px; -webkit-overflow-scrolling:touch; }
@@ -2804,6 +2826,20 @@
     #temporada .sc-body{ gap:9px; padding-top:4px; }
     #temporada .sc-h{ margin-bottom:8px; }
   }
+  /*+AG LA LISTA DE RETOS EN PANTALLAS PEQUEÑAS. El aire entre filas es lo unico que se toca: ni una
+     letra baja del suelo de 11 px ni un tocable de los 44. Va por `max-height` Y por `max-width`
+     porque el panel se sale por los dos motivos distintos — a 360x540 por lo bajo, a 320x640 por lo
+     estrecho (ahi la frase del reto se parte en dos lineas y cada fila crece 13 px).
+     ⚠ QUEDA DEUDA MEDIDA: a 320x640 el panel sigue desbordando ~11 px en el peor sorteo de retos.
+     Venia de produccion desbordando 52 y no lo cazo nadie porque doc 75 solo se midio a 375x812.
+     Cerrarlo del todo pide FRASES MAS CORTAS (canon 5: "icono + una palabra"), o sea reescribir los
+     textos de reto en los 20 idiomas: es contenido, y lo decide Jaime. */
+  @media (max-height:560px), (max-width:340px){
+    .mi-row{ padding:6px 8px; margin-bottom:4px; }
+    .mi-sem{ padding:8px; margin-bottom:7px; }
+    .mi-bar{ margin-top:4px; }
+    .mi-nota{ margin-top:6px; }
+  }
   /*+AG las OPCIONES de Ajustes (Bajo/Medio/Alto, Auto/Baja/Media/Alta, Sí/No…) a mayusculas por CSS
      (canon 10). Por CSS y no en los 20 diccionarios: en arabe y en japones el transform es inocuo,
      un texto reescrito a mano no. Alcanza tambien a los botones de accion (Canjear, Abrir, Borrar),
@@ -4235,7 +4271,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=b51eaf3"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=7011ad7"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -6904,7 +6940,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=b51eaf3').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=7011ad7').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -8837,7 +8873,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=b51eaf3';
+  import { startAmbient } from './arte/ambient.mjs?v=7011ad7';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -8853,7 +8889,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=b51eaf3').then(m => {
+  import('./arte/pista-preview.mjs?v=7011ad7').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -8865,8 +8901,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=b51eaf3';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=b51eaf3';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=7011ad7';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=7011ad7';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -9019,7 +9055,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=b51eaf3'), import('./motor/chassis/sincro.mjs?v=b51eaf3')]);
+        import('./motor/chassis/nube.mjs?v=7011ad7'), import('./motor/chassis/sincro.mjs?v=7011ad7')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
