@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-06 f74d8ee">
+<meta name="bt-build" content="2026-08-06 aa6ce8c">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <!--+AG el HTML se sirve en INGLES (defecto del juego); ?lang=es lo traduce por JS (applyLang) -->
 <title>YouBall · The Hunter (WebGL)</title>
@@ -198,7 +198,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=f74d8ee"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=aa6ce8c"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -209,20 +209,21 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 </script>
 
 <script type="module">
-import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, makeFacePlane, createItemPool, createItemPops, createStarBurst, createWindTrail, createBloom, frameOrtho } from '../chassis/gfx.mjs?v=f74d8ee';
-import { archLook } from '../chassis/ballmat.mjs?v=f74d8ee';   //+AG doc 41 bloque G: material de la bola-heroe
-import { attachSquash } from '../chassis/squash.mjs?v=f74d8ee';
-import { Sim, RNG, TEAMS, BALL_R, ARENA_W, ARENA_H, FPS, AGENCIA } from './sim.js?v=f74d8ee';
-import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=f74d8ee';
-import { archFace } from '../chassis/facegen.mjs?v=f74d8ee';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
-import { createCelebration } from '../chassis/celebration.mjs?v=f74d8ee';
-import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=f74d8ee';
-import { buildSfxBuffer } from './sfxmap.mjs?v=f74d8ee';
-import { createCoach } from '../chassis/coach.mjs?v=f74d8ee';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
-import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=f74d8ee';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
-import { createPausa } from '../chassis/pausa.mjs?v=f74d8ee';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
-import { cantarPuesto } from '../chassis/veredicto.mjs?v=f74d8ee';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
-import { runToEnd } from '../chassis/simrun.mjs?v=f74d8ee';
+import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, makeFacePlane, createItemPool, createItemPops, createStarBurst, createWindTrail, createBloom, frameOrtho } from '../chassis/gfx.mjs?v=aa6ce8c';
+import { archLook } from '../chassis/ballmat.mjs?v=aa6ce8c';   //+AG doc 41 bloque G: material de la bola-heroe
+import { attachSquash } from '../chassis/squash.mjs?v=aa6ce8c';
+import { Sim, RNG, TEAMS, BALL_R, ARENA_W, ARENA_H, FPS, AGENCIA } from './sim.js?v=aa6ce8c';
+import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=aa6ce8c';
+import { archFace } from '../chassis/facegen.mjs?v=aa6ce8c';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
+import { createCelebration } from '../chassis/celebration.mjs?v=aa6ce8c';
+import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=aa6ce8c';
+import { crearInventario } from '../chassis/invboost.mjs?v=aa6ce8c';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
+import { buildSfxBuffer } from './sfxmap.mjs?v=aa6ce8c';
+import { createCoach } from '../chassis/coach.mjs?v=aa6ce8c';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=aa6ce8c';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
+import { createPausa } from '../chassis/pausa.mjs?v=aa6ce8c';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
+import { cantarPuesto } from '../chassis/veredicto.mjs?v=aa6ce8c';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
+import { runToEnd } from '../chassis/simrun.mjs?v=aa6ce8c';
 
 window.addEventListener('error', e => { document.getElementById('err').style.display='grid'; console.error(e.error||e.message); });
 
@@ -385,7 +386,7 @@ function buildSim(s){
   prevCamX=sim.cam[0]; prevCamY=sim.cam[1]; prevScale=sim.scale;
   document.getElementById('meta').textContent=T().meta(s, ARENA_W, ARENA_H);   //+AG texto por idioma (i18n del modo)
   document.getElementById('status').textContent='';
-  superVal=0; prevPlayerRank=null; setIntent('escapar'); hideSpectator(); ended=false;   //+AG reset de la capa de agencia por ronda
+  superVal=0; prevPlayerRank=null; setIntent('escapar'); hideSpectator(); ended=false; INV.reset();   //+AG reset de la capa de agencia por ronda (INV.reset = uso gratis nuevo)
   pCamX=null; pCamY=null;   //+AG cámara de jugador: re-engancha en la primera llamada de la ronda nueva
   phase='intro'; introT=0; introRingT=-1;   //+AG arranca la cuenta atras; la musica y la sim se sueltan en el "YA" (loop)
 }
@@ -775,14 +776,20 @@ for(const [id,k] of [['iTum','tumulto'],['iBoo','booster'],['iEsc','escapar']]){
   const b=document.getElementById(id);
   b.addEventListener('pointerdown',e=>{ if(b.disabled) return; e.preventDefault(); setIntent(k); });
 }
-bDash.onclick=()=>{ if(sim) sim.playerDash(); };
-bShd.onclick=()=>{ if(sim) sim.playerShield(); };
+//+AG 2026-08-06 · inventario: se pregunta ANTES y se descuenta DESPUÉS de que el motor confirme el
+//   disparo, para que un botón en enfriamiento no se coma una carga sin hacer nada (ver invboost.mjs).
+bDash.onclick=()=>{ if(!sim||INV.quedan('dash')<=0) return; if(sim.playerDash()) INV.consume('dash'); };
+bShd.onclick=()=>{ if(!sim||INV.quedan('escudo')<=0) return; if(sim.playerShield()) INV.consume('escudo'); };
 bSup.onclick=()=>{ if(sim && superVal>=1 && sim.playerDecoy()) superVal=0; };
 function updateControls(){
   if(!sim) return; const p=sim.balls[0], f=sim.f, dead=p.rank!==null||sim.decision_frame!==null;
   const dd=Math.max(0,p.dash_cd-f), sd=Math.max(0,p.shield_cd-f);
-  bDash.disabled=dd>0||dead; cdDash.textContent=dd>0?Math.ceil(dd/30)+'s':'';
-  bShd.disabled=sd>0||dead; cdShd.textContent=sd>0?Math.ceil(sd/30)+'s':'';
+  //+AG 2026-08-06 dos motivos distintos de no poder pulsar (recarga / sin stock) y el pie los distingue:
+  //   los segundos mientras recarga, el contador ×N cuando no. El pie vacío de antes se queda para el
+  //   caso sin inventario (tutorial, vídeo), donde no hay nada que contar.
+  const qd=INV.quedan('dash'), qs=INV.quedan('escudo');
+  bDash.disabled=dd>0||dead||qd<=0; cdDash.textContent=dd>0?Math.ceil(dd/30)+'s':(qd===Infinity?'':'×'+qd);
+  bShd.disabled=sd>0||dead||qs<=0; cdShd.textContent=sd>0?Math.ceil(sd/30)+'s':(qs===Infinity?'':'×'+qs);
   //+AG doc 61: sin ningún orbe en pista, "a por un booster" no hacía absolutamente nada y nadie te lo decía.
   //   Se apaga. Si esa YA es tu orden no se toca: la orden sigue viva y se cumple en cuanto salga un orbe
   //   (medido: solo el 3,9% del tiempo hay cero orbes, 1,4 veces por partida — no parpadea).
@@ -833,7 +840,7 @@ function emitEnd(){
   const winnerColor = (wt!=null && sim.teams[wt]) ? [...sim.teams[wt].color] : (st[0] ? st[0].color : null);
   //+AG el puesto se canta AQUÍ (cartel de fin compartido, veredicto.mjs) y el resultado se suelta DESPUÉS:
   //   mientras el cartel está en pantalla el shell no puede cerrar el iframe. En equipos manda el del EQUIPO.
-  const _fin=()=>{ try{ parent.postMessage({type:'bt:matchEnd', mode:'cazador', seed, playerPlace, teamPlace, winnerTeam:sim.winner_team, winnerColor, standings:st, teamStandings:tst, durationF:sim.f}, '*'); }catch(e){} };
+  const _fin=()=>{ try{ parent.postMessage({type:'bt:matchEnd', mode:'cazador', seed, playerPlace, teamPlace, winnerTeam:sim.winner_team, winnerColor, standings:st, teamStandings:tst, durationF:sim.f, gastados:INV.gastados()}, '*'); }catch(e){} };   //+AG 2026-08-06 gastados = lo comido del inventario (el uso gratis no cuenta)
   cantarPuesto({ place: (sim.individual===false)?teamPlace:playerPlace, total: st.length, lang:LANG }, _fin);
 }
 function showSpectator(win, place){
@@ -867,6 +874,16 @@ addEventListener('keydown',e=>{
 });
 
 const params=new URLSearchParams(location.search);
+//+AG 2026-08-06 · INVENTARIO DE BOOSTERS de este modo: DASH y ESCUDO. El súper (señuelo) no entra, se
+//   gana con su barra. Los orbes que se recogen en pista tampoco: son simétricos por diseño y los coge
+//   quien pasa por encima, bot o jugador.
+//   ⚠ va aquí, junto al resto de parámetros, aunque los onclick de arriba lo usen: son manejadores, no
+//   se ejecutan hasta que hay un dedo, y para entonces el módulo entero ya ha corrido.
+const INV = crearInventario(params, ['dash','escudo']);
+//+AG SONDA DE VERIFICACION: el motor es un modulo ES, asi que sus variables NO llegan a window y
+//   desde fuera no se puede comprobar el inventario sin esto (mismo motivo y mismo patron que el debug()
+//   de ambient.mjs). Solo LEE: no calcula nada, asi que no puede mentir sobre lo que pasa dentro.
+window.__inv = INV;
 //+AG modo EMBED (docs/34 §4): corre dentro del iframe del shell; al resolverse la ronda EMITE el resultado al
 //   padre y el shell muestra Resultados. Se emite al terminar la RONDA (sim.done), no al caer el jugador, para
 //   conservar el espectaculo 1:1 (ver docs/34, nota de Fable). NO toca la Sim ni el determinismo.

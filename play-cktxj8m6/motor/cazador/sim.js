@@ -92,7 +92,10 @@ export const AGENCIA = {
   giroF: 8,        // cuántos frames dura ese extra (0,27 s: gira en 0,40 s en vez de 0,67 s)
   fijar: true,     // fijar el orbe al pulsar en vez de recalcular el más cercano cada frame (indecisión)
 };
-const P_DASH_DUR = 16, P_DASH_CD = 90, P_SHIELD_DUR = 40, P_SHIELD_CD = 150, P_SUPER_IMMUNE = 120;
+//+AG 2026-08-06 (Jaime): el ESCUDO pasa a durar 5 s en todos los modos que lo tienen (aquí y en la
+//   Carrera). A 30 fps son 150 frames. El DASH no se toca: es el booster propio de este modo y lo que
+//   se pidió alargar fue el nitro, que aquí no existe. El súper (señuelo) tampoco se toca.
+const P_DASH_DUR = 16, P_DASH_CD = 90, P_SHIELD_DUR = 150, P_SHIELD_CD = 150, P_SUPER_IMMUNE = 120;
 
 const HUNT_R0 = 0.78, HUNT_GROW = 0.10, HUNT_R_CAP = 1.9;
 const HUNT_VMAX0 = 4.0, HUNT_VMAX_GROW = 0.30, HUNT_VMAX_CAP = 8.0;

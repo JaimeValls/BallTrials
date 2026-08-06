@@ -137,7 +137,19 @@ let GEOM_CRADLE=1.0;                                    // umbral de-cradle en m
 let UNR_SQZ=0.54, UNR_REC=0.10;                         // radio de COLISIÓN mínimo al estrujarse (render sin cambio) y ritmo de recuperación
 let UNR_DOWN=0.22;                                      //+AG v0.10 empuje de evacuación hacia abajo (≤0.22/f rampado) para una bola HELADA y ya encogida en PINZA/muro que la G baja no logra sacar del hueco
 let UNR_SPV=1.9, UNR_LONG=70, UNR_DRAIN=0.5;           //+AG v0.10 umbral de "clavada" igual (1.9) y safety-net a 70f (sin cambios). NUEVO UNR_DRAIN: al drenar stuckT en no-progreso rápido, drena a MEDIA velocidad (0.5/f) en vez de 1/f. Con G baja los rattlers oscilan JUSTO alrededor de 1.9 (a ratos por encima); con drena-1 nunca acumulaban y solo los cazaba el net tardío. Drena-0.5 deja que un rattler oscilante acumule y dispare el give TEMPRANO y GENTIL (arco de bumper genuino, rápido TODOS los frames, sigue drenando a 0).
-const NITRO_CD=140, SHIELD_DUR=52, SHIELD_CD=175;
+//+AG 2026-08-06 (Jaime): «el escudo tiene que durar más, vamos a ponerle 5 segundos por lo menos» y
+//   «el nitro dura muy poquito, yo le pondría 1 segundo y medio». A 30 fps son 150 y 45 frames.
+//   ⚠ EL NITRO DEL BOTÓN SE SEPARA DEL ÍTEM DEL SUELO. Los dos salían de TURBO_DUR, así que subirlo
+//   habría alargado también el `turbo` que se recoge en pista, que no es lo que se ha pedido y es un
+//   ítem simétrico que ya está balanceado. NITRO_DUR es del botón (jugador Y bots, que lo pulsan por
+//   la misma puerta `fireNitro` → la pista sigue siendo la misma para todos); TURBO_DUR se queda con
+//   el pickup. El súper (STAR_DUR) no se toca, como pidió.
+//   ⚠ Y LA RECARGA NO SUBE, aunque medí que un escudo de 5 s con SHIELD_CD=175 estaría puesto el 87%
+//   de la carrera: eso era cierto cuando el escudo era infinito. Con el inventario de esta misma
+//   tanda el freno ya no es la recarga sino cuántos escudos llevas, así que subir el cooldown además
+//   sería castigar dos veces lo mismo.
+const NITRO_DUR=45;        // 1,5 s · el nitro del BOTÓN
+const NITRO_CD=140, SHIELD_DUR=150, SHIELD_CD=175;   // escudo: 5 s
 //+AG v0.12 ASPAS (cruz giratoria), CANÓNICA del motor (README canal: "race v2 pendiente: compuertas + aspa").
 //   Port FIEL del MOLINILLO de gauntlet/sim.js (a su vez el patrón molinillo de Recolecta): cada brazo es una
 //   CÁPSULA y el rebote es relativo a la VELOCIDAD DE SUPERFICIE del aspa (ω×r) → el giro LANZA a la bola.
@@ -320,6 +332,10 @@ class Sim{
     this.pmul=_S?{vel:statMul(_S[0]),ace:statMul(_S[1]),pes:statMul(_S[2]),aga:statMul(_S[3]),res:statMul(_S[4]),bst:statMul(_S[5])}:NEUTRAL_MUL;
     //+AG doc 39: el RASGO de la bola equipada. Mismo doble candado y misma regla de no consumir RNG que los stats.
     this.trait=(this.individual&&TRAITS_RACE.has(opts.trait))?opts.trait:null;
+    //+AG 2026-08-06 · cuántos boosters de cada clase puede gastar un BOT en toda la carrera. Mismo doble
+    //   candado que stats/trait (solo individual) y tampoco consume RNG → el torneo y el vídeo del canal
+    //   entran con null y salen byte-idénticos. Lo fija el motor desde el shell, no se inventa aquí.
+    this.botStock=(this.individual&&typeof opts.botStock==='number'&&opts.botStock>=0)?(opts.botStock|0):null;
     this.teams=this.individual?SHORT_COLORS:TEAMS;
     this.nTeams=this.teams.length;                         // 4 torneo · 8 individual
     this.ballsPerTeam=this.individual?1:BALLS_PER_TEAM;    // 3 torneo · 1 individual (cada color = equipo de 1)
@@ -337,6 +353,11 @@ class Sim{
         isPlayer:i===0, dir:DIR.CENTER, nitro:0, nitroCd:0, shield:0, shieldCd:0, hurt:0, cheer:0, sq:0, finF:0,
         rExpr:'', rUntil:-1, rPrio:-1,   //+AG reacción emocional temporizada (como emotions.mjs del canal)
         _seedr:mulberry32((seed*131+i*17+3)>>>0), _nextDir:40+Math.floor(rng.random()*60),
+        //+AG 2026-08-06 stock de boosters del BOT (encargo de Jaime: los bots también gastan). null =
+        //   sin límite, que es el torneo y el vídeo del canal de siempre. El número YA lleva sumado el
+        //   uso gratis que tiene el jugador, para que la pista salga de la misma regla para todos.
+        //   No se reparte por pericia a propósito: un bot listo debe usarlos MEJOR, no tener MÁS.
+        _stock: this.botStock===null ? null : { n:this.botStock, s:this.botStock },
         _skill:0.45+rng.random()*0.75 });
     }
     this.player=this.balls[0];
@@ -405,9 +426,23 @@ class Sim{
     //   los bots no se mueve. EL PRECIO, que es real y hay que saberlo: quien NO pulsa nunca el nitro baja
     //   del 9,0% de victorias al 2,4%. Un booster que de verdad recompensa castiga de verdad al que lo
     //   ignora; por eso el paso del nitro en el tutorial pasa a ser importante, no decorativo.
-    if(b.nitroCd===0&&r()<b._skill*BOT_NITRO_P) this.fireNitro(b);
-    if(b.shieldCd===0&&r()<b._skill*0.0018) this.fireShield(b);
+    //+AG 2026-08-06 · LOS BOTS TAMBIÉN GASTAN (encargo de Jaime: «los bots consumen inventario igual que
+    //   tú»). Sin esto, el jugador jugaría con un recurso finito contra ocho rivales de nitro infinito,
+    //   que es exactamente la asimetría que el modelo tiene que evitar. `_stock` sale de opts.botStock y
+    //   ya trae el uso gratis sumado.
+    //   ⚠ DOBLE CANDADO, el mismo de `stats`/`trait`: si no viene botStock (torneo, vídeo del canal,
+    //   tutorial) `_stock` es null y estas dos líneas se comportan EXACTAMENTE como antes → byte-idéntico.
+    //   ⚠ EL TEST DE STOCK VA DESPUÉS DEL r(), Y ESO NO ES ESTILO: ES EL DETERMINISMO. El `&&` corta a la
+    //   izquierda, así que si `_botTiene` fuera antes, un bot sin nitro se saltaría su tirada y el RNG se
+    //   desalinearía para TODA la carrera — el mapa, las zonas y los spawns siguientes saldrían distintos.
+    //   Poniéndolo al final, `r()` se consume exactamente en los mismos frames que antes del cambio.
+    if(b.nitroCd===0&&r()<b._skill*BOT_NITRO_P&&this._botTiene(b,'n')) { this.fireNitro(b); this._botGasta(b,'n'); }
+    if(b.shieldCd===0&&r()<b._skill*0.0018&&this._botTiene(b,'s')) { this.fireShield(b); this._botGasta(b,'s'); }
   }
+  //+AG null = sin límite (torneo/vídeo). Con límite, el bot tiene los mismos usos que un jugador que no
+  //   ha comprado nada más el colchón de botStock, y su pericia NO le da más: le da usarlos antes.
+  _botTiene(b,k){ return b._stock===null || b._stock[k]>0; }
+  _botGasta(b,k){ if(b._stock!==null) b._stock[k]--; }
   //+AG doc 39 #1: BST → duración de los boosters del JUGADOR (nitro/escudo/súper); el cooldown NO cambia (no rompe
   //   el ritmo). _bst() = 1 salvo balls[0] en individual-con-stats. Redondeo → duración entera, determinista.
   //+AG doc 39 RASGO Volcán: se apila SOBRE el bst de los stats (son cosas distintas: el stat es la bola, el rasgo
@@ -422,7 +457,7 @@ class Sim{
   //   El clamp del final NO es decorativo: el ítem turbo se recoge en el post-step, o sea DESPUÉS de los topes
   //   del substep, y sin él un pico de un frame se colaba por encima de STAR_CLAMP (medido: 21,1 u/s).
   _igniteTurbo(b,frames){ b.turbo=frames; b.vy-=NITRO_KICK; if(b.vy>NITRO_VYCAP) b.vy=NITRO_VYCAP; this._clamp(b,TURBO_CLAMP); }
-  fireNitro(b){ if(b.nitroCd>0||b.rank!==null) return false; this._igniteTurbo(b,Math.round(TURBO_DUR*this._bst(b))); b.nitroCd=NITRO_CD; this._pev.push({t:'nitro',id:b.id}); return true; }   //+AG evento
+  fireNitro(b){ if(b.nitroCd>0||b.rank!==null) return false; this._igniteTurbo(b,Math.round(NITRO_DUR*this._bst(b))); b.nitroCd=NITRO_CD; this._pev.push({t:'nitro',id:b.id}); return true; }   //+AG evento · NITRO_DUR (botón), no TURBO_DUR (ítem del suelo)
   fireShield(b){ if(b.shieldCd>0||b.rank!==null) return false; b.shield=Math.round(SHIELD_DUR*this._bst(b)); b.shieldCd=SHIELD_CD; this._pev.push({t:'shieldup',id:b.id}); return true; }   //+AG evento
   // SÚPER = Estrella (efecto del motor): dorada, grande, PESADA e invencible → arrolla a las demás. Se gana con la barra.
   //+AG doc 39 RASGO Estrella: +1 s de SÚPER (solo el súper; nitro y escudo no cambian). Va DESPUÉS del redondeo
@@ -752,4 +787,4 @@ class Sim{
 //+AG exports del módulo: la superficie del motor (race/sim.js del canal) + los extras de la capa de agencia
 export { Sim, RNG, TEAMS, SHORT_COLORS, GATE_H, FPS, WIDTH, GATE_Y, BALL_R, CAM_SCALE, CELEB_SCALE, TOP,
          DIR, N_BALLS, XHALF, HERO_SCALE, ASPA_R, ASPA_THICK, ASPA_W, PLAT_HW, PLAT_HH, TILE_HP,
-         NITRO_CD, SHIELD_DUR, SHIELD_CD, STAR_DUR };
+         NITRO_DUR, NITRO_CD, SHIELD_DUR, SHIELD_CD, STAR_DUR };

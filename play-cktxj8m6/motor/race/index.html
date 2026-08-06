@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-06 f74d8ee">
+<meta name="bt-build" content="2026-08-06 aa6ce8c">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>YouBall · La Gran Carrera (WebGL)</title>
 <style>
@@ -242,7 +242,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=f74d8ee"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=aa6ce8c"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -253,24 +253,25 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 </script>
 
 <script type="module">
-import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createItemPops, createBloom, frameOrtho, buildHud, updateHud } from '../chassis/gfx.mjs?v=f74d8ee';
-import { archLook } from '../chassis/ballmat.mjs?v=f74d8ee';   //+AG doc 41 bloque G: material de la bola-heroe
-import { attachSquash } from '../chassis/squash.mjs?v=f74d8ee';
+import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createItemPops, createBloom, frameOrtho, buildHud, updateHud } from '../chassis/gfx.mjs?v=aa6ce8c';
+import { archLook } from '../chassis/ballmat.mjs?v=aa6ce8c';   //+AG doc 41 bloque G: material de la bola-heroe
+import { attachSquash } from '../chassis/squash.mjs?v=aa6ce8c';
 import { Sim, RNG, TEAMS, SHORT_COLORS, BALL_R, WIDTH, GATE_Y, GATE_H, TOP, FPS,
-         DIR, N_BALLS, CAM_SCALE, ASPA_R, ASPA_THICK, PLAT_HW, PLAT_HH } from './sim.js?v=f74d8ee';   //+AG extras de la capa de agencia
+         DIR, N_BALLS, CAM_SCALE, ASPA_R, ASPA_THICK, PLAT_HW, PLAT_HH } from './sim.js?v=aa6ce8c';   //+AG extras de la capa de agencia
 //+AG doc 62: los encuadres del cierre (sim.hero_scale / sim.celeb_scale) se leen del OBJETO sim, no por
 //   import. Un export que la CDN aún no ha refrescado tumba el módulo entero y la partida no arranca (pasó
 //   en producción el 2-ago); un campo que falta degrada a la cámara de siempre. Ver la nota en sim.js.
-import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=f74d8ee';
-import { archFace } from '../chassis/facegen.mjs?v=f74d8ee';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
-import { itemTexture } from '../chassis/itemgen.mjs?v=f74d8ee';
-import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=f74d8ee';
-import { buildSfxBuffer } from './sfxmap.mjs?v=f74d8ee';
-import { runToEnd } from '../chassis/simrun.mjs?v=f74d8ee';
-import { createCoach } from '../chassis/coach.mjs?v=f74d8ee';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
-import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=f74d8ee';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
-import { createPausa } from '../chassis/pausa.mjs?v=f74d8ee';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
-import { cantarPuesto } from '../chassis/veredicto.mjs?v=f74d8ee';   //+AG cartel de META: "en qué puesto has quedado", antes de soltar el resultado al shell
+import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=aa6ce8c';
+import { archFace } from '../chassis/facegen.mjs?v=aa6ce8c';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
+import { itemTexture } from '../chassis/itemgen.mjs?v=aa6ce8c';
+import { crearInventario } from '../chassis/invboost.mjs?v=aa6ce8c';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
+import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=aa6ce8c';
+import { buildSfxBuffer } from './sfxmap.mjs?v=aa6ce8c';
+import { runToEnd } from '../chassis/simrun.mjs?v=aa6ce8c';
+import { createCoach } from '../chassis/coach.mjs?v=aa6ce8c';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=aa6ce8c';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
+import { createPausa } from '../chassis/pausa.mjs?v=aa6ce8c';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
+import { cantarPuesto } from '../chassis/veredicto.mjs?v=aa6ce8c';   //+AG cartel de META: "en qué puesto has quedado", antes de soltar el resultado al shell
 
 window.addEventListener('error', e => { document.getElementById('err').style.display='grid'; console.error(e.error||e.message); });
 
@@ -992,6 +993,17 @@ addEventListener('keydown',e=>{ if(e.repeat) return; const k=e.key.toLowerCase()
 });
 
 const params=new URLSearchParams(location.search);
+//+AG 2026-08-06 · INVENTARIO DE BOOSTERS. La regla ("el primer uso de cada botón es gratis") y sus
+//   trampas viven en chassis/invboost.mjs, compartido por los tres modos. Aquí solo se declara CUÁLES
+//   son los boosters de este modo: nitro y escudo. El SÚPER no entra — se gana con su barra.
+const INV = crearInventario(params, ['nitro','escudo']);
+//+AG SONDA DE VERIFICACION: el motor es un modulo ES, asi que sus variables NO llegan a window y
+//   desde fuera no se puede comprobar el inventario sin esto (mismo motivo y mismo patron que el debug()
+//   de ambient.mjs). Solo LEE: no calcula nada, asi que no puede mentir sobre lo que pasa dentro.
+window.__inv = INV;
+const btQuedan = k => INV.quedan(k);
+const btConsume = k => INV.consume(k);
+const btReset = () => INV.reset();
 //+AG semilla del JUEGO: ?seed la fija (debug/replay determinista); sin ella cada ronda es NUEVA (reloj fuera de la Sim)
 const seedParam=params.get('seed');
 const newSeed=()=>seedParam?Math.max(1,+seedParam):(((Date.now()&0xffffff)>>>0)||1);
@@ -1022,6 +1034,21 @@ if(indOpts){ const _s=(params.get('stats')||'').split(',').map(Number); if(_s.le
 //+AG doc 39: ?trait=<clave> → el RASGO de la bola equipada. La Sim solo reconoce los suyos y valida la clave, así
 //   que un rasgo de otro modo (o basura) llega y no hace nada. Mismo candado que ?stats: solo INDIVIDUAL.
 if(indOpts){ const _t=params.get('trait'); if(_t) indOpts.trait=_t; }
+//+AG 2026-08-06 · si esta partida tiene inventario (`&inv`, o sea viene del shell y no es tutorial),
+//   los BOTS también juegan con stock. BOT_STOCK es su colchón por encima del uso gratis, o sea que un
+//   bot puede pulsar 1+BOT_STOCK veces cada botón en toda la carrera. Es el número que balancea el
+//   modelo entero: sube y el jugador que compra nota menos su compra; baja y la compra pesa demasiado.
+//   MEDIDO en tools/banco-inventario.mjs sobre 300 semillas, y el 1 no es un número redondo por gusto:
+//   es el ÚNICO que deja al jugador que NO compra nada ganando el 8,3% de las partidas, que es
+//   exactamente 1/12, o sea su parte justa entre doce bolas. Con stock 2 el que no compra cae al 1,3%
+//   y con stock 3 al 0,3%: ahí el modelo dejaría de ser "compras para ir MÁS", y pasaría a ser
+//   "compras para PODER competir", que es la línea que este proyecto no cruza.
+const BOT_STOCK = 1;
+//+AG «esta partida tiene inventario» = el shell mandó &inv. Se le pregunta al propio inventario y no a
+//   una variable suelta: cuando el módulo INV pasó a chassis/invboost.mjs quedó aquí un BT_INV muerto
+//   que reventaba el bloque entero con un ReferenceError — y como pasaba en la carga del módulo, los
+//   botones se quedaban sin descontar nada y sin apagarse. Lo cazó tools/prueba-motor-inventario.mjs.
+if(indOpts && !INV.ilimitado) indOpts.botStock = BOT_STOCK;
 //+AG doc 41 bloque G: ?arch=<clave> (la bola-heroe equipada) -> su MATERIAL solo para balls[0].
 //   Misma regla que ?stats: solo INDIVIDUAL, y ausente o desconocido = null = el look de siempre.
 //   Es 100% cosmetico: no toca la Sim, asi que no puede mover el balance ni un milimetro.
@@ -1270,10 +1297,20 @@ function setDir(d){ if(!sim||sim.player.rank!==null) return; sim.player.dir=d; f
 //+AG v0.16 el fogonazo del boton SOLO si el nitro ha prendido de verdad (fireNitro devuelve false en
 //   enfriamiento o en meta): un boton que destella cuando no ha hecho nada miente, y esa mentira es
 //   justo la queja de la que sale toda esta version.
-function useNitro(){ if(sim&&phase==='play'&&sim.fireNitro(sim.player)){ const n=el('bNit');
-  n.classList.remove('fired'); void n.offsetWidth; n.classList.add('fired');   // reinicia la animacion si se repite
-  setTimeout(()=>n.classList.remove('fired'),280); } }
-function useShield(){ if(sim&&phase==='play') sim.fireShield(sim.player); }
+//+AG 2026-08-06 el orden importa y es el mismo que ya exigía el fogonazo: primero se pregunta si el
+//   motor VA a disparar (enfriamiento/meta) y solo entonces se descuenta. Al revés, un nitro en
+//   enfriamiento se comería una carga sin que la bola hiciera nada — que es la peor manera posible de
+//   gastar algo que has pagado. Por eso btQuedan() se consulta antes y btConsume() después del fire.
+function useNitro(){ if(!(sim&&phase==='play')) return;
+  if(btQuedan('nitro')<=0) return;
+  if(sim.player.nitroCd>0||sim.player.rank!==null) return;
+  if(sim.fireNitro(sim.player)){ btConsume('nitro'); const n=el('bNit');
+    n.classList.remove('fired'); void n.offsetWidth; n.classList.add('fired');   // reinicia la animacion si se repite
+    setTimeout(()=>n.classList.remove('fired'),280); } }
+function useShield(){ if(!(sim&&phase==='play')) return;
+  if(btQuedan('escudo')<=0) return;
+  if(sim.player.shieldCd>0||sim.player.rank!==null) return;
+  if(sim.fireShield(sim.player)) btConsume('escudo'); }
 function useSuper(){ if(sim&&phase==='play'&&sim.super>=1&&sim.fireSuper(sim.player)) sim.super=0; }   // super = estrella, consume la barra
 //+AG v0.15 LA ZONA SE CAMBIA AL TOCAR, NO AL SOLTAR. Los tres botones iban con `onclick`, y en un movil
 //   `click` solo dispara al LEVANTAR el dedo y el navegador lo CANCELA si el dedo se desliza un poco. Jugando
@@ -1292,16 +1329,26 @@ function updateHUD(){ if(!sim) return; const t=T(), place=sim.playerPlace(), p=s
   el('pos').innerHTML=p.rank? t.fin(ord(p.rank,LANG)) : (phase==='play'? t.pos(o,NB) : '');   //+AG NB = 8 individual · 12 torneo
   el('superfill').style.width=(sim.super*100)+'%';
   const nb=el('bNit'), sb=el('bShd'), su=el('bSup'), ready=sim.super>=1&&p.rank===null;
-  nb.disabled=p.nitroCd>0||p.rank!==null; sb.disabled=p.shieldCd>0||p.rank!==null; su.disabled=!ready;
+  //+AG 2026-08-06 el botón se apaga TAMBIÉN cuando te has quedado sin: son dos motivos distintos de no
+  //   poder pulsar (esperando la recarga / no te quedan) y el pie los distingue con palabras, porque
+  //   un botón gris sin explicación se lee como "está roto".
+  const qn=btQuedan('nitro'), qs=btQuedan('escudo');
+  nb.disabled=p.nitroCd>0||p.rank!==null||qn<=0; sb.disabled=p.shieldCd>0||p.rank!==null||qs<=0; su.disabled=!ready;
   su.classList.toggle('ready',ready);
-  el('cdNit').textContent=p.nitroCd>0?Math.ceil(p.nitroCd/FPS)+'s':t.ready;
-  el('cdShd').textContent=p.shieldCd>0?Math.ceil(p.shieldCd/FPS)+'s':t.ready;
+  //+AG cuando hay inventario, el pie del botón es el CONTADOR (×3), que es el dato que importa cuando el
+  //   recurso es finito. La recarga sigue mandando mientras corre, y "sin" es el final del camino.
+  //   ⚠ el "sin stock" se dice con ×0 y no con una palabra: el juego va a 20 idiomas y el canon del
+  //   proyecto es cero idioma obligatorio (§G). Un número se lee igual en árabe que en tailandés.
+  const pie=(cd,q)=> cd>0 ? Math.ceil(cd/FPS)+'s' : (q===Infinity ? t.ready : '×'+q);
+  el('cdNit').textContent=pie(p.nitroCd,qn);
+  el('cdShd').textContent=pie(p.shieldCd,qs);
   el('cdSup').textContent=ready?(LANG==='es'?'¡'+t.superLbl+'!':t.superLbl+'!'):Math.round(sim.super*100)+'%';   //+AG solo el espanol lleva el ¡ de apertura
   for(const k in dirBtns) dirBtns[k].classList.toggle('on',+k===p.dir);
 }
 //+AG la FASE se pone ANTES de buildSim, no después: buildSim llama a startAudio() y con la fase vieja ('play', al
 //   pulsar "Jugar otra") soltaba la música encima de la cuenta atrás en vez de en el "¡YA!".
 function startRound(){ phase='intro'; introT=0; introRingT=-1; clearTimeout(goT);
+  btReset();   //+AG 2026-08-06 ronda nueva = uso gratis nuevo (el stock comprado ya lo descontó el shell al cerrar la anterior)
   seed=newSeed(); buildSim(seed); el('ov').classList.add('hide'); el('count').classList.add('show');
   //+AG los beeps se programan DE UNA VEZ con la misma cuenta que pintan los números (DIGITS/DIGIT), así caen
   //   clavados aunque un frame se retrase. Si el audio no está desbloqueado (nadie tocó "¡LISTO!") no suena nada.
@@ -1337,7 +1384,9 @@ function showEnd(){
     //+AG el cartel de META va PRIMERO y el resultado se suelta DESPUÉS: mientras el cartel esté en pantalla
     //   el shell no puede cerrar el iframe, que era justo el "flash" que se queria evitar no pintando nada.
     //   En POR EQUIPOS lo que cuenta es el puesto del EQUIPO, que es el que el jugador ha visto coronar.
-    const _fin=()=>{ try{ parent.postMessage({type:'bt:matchEnd', mode:'race', seed, playerPlace:lastPlace, teamPlace:tPlace, winnerTeam, winnerColor, standings:st, teamStandings:tst, durationF:sim.f}, '*'); }catch(e){} };
+    //+AG 2026-08-06 `gastados` = lo que esta partida se ha comido del INVENTARIO (el uso gratis no cuenta,
+    //   por eso btGastado y btUsado son dos cuentas separadas). El shell lo resta del SAVE.
+    const _fin=()=>{ try{ parent.postMessage({type:'bt:matchEnd', mode:'race', seed, playerPlace:lastPlace, teamPlace:tPlace, winnerTeam, winnerColor, standings:st, teamStandings:tst, durationF:sim.f, gastados:{...btGastado}}, '*'); }catch(e){} };
     //+AG si el cartel ya se canto EN EL CRUCE (cantarEnMeta) no se repite: se suelta el resultado ya,
     //   o se aplaza a que ese cartel cierre si aun esta en pantalla (la regla cartel→resultado se mantiene).
     if(metaSung){ if(metaCartelVivo) metaFinPend=_fin; else _fin(); }

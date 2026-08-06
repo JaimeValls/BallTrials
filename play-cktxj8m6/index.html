@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-06 f74d8ee"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-06 aa6ce8c"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -697,8 +697,16 @@
      caben las 5 de una vez y se cambian con un tap. Mismo aspecto que alli para que el juego hable
      un solo idioma de pestanas; unica diferencia, el ancho es proporcional a la etiqueta
      (flex:1 1 auto) porque "Destacados" y "Pase" no piden lo mismo. */
-  .sh-secs{ display:flex; gap:6px; padding:2px 13px 8px; }
-  .sh-sec{ flex:1 1 auto; min-width:0; white-space:nowrap; border:1px solid #ffffff2a; background:var(--plate-a); color:#c4cbe6; font-family:inherit; font-weight:900; font-size:var(--fs-3); letter-spacing:.02em; border-radius:12px; padding:8px 6px; cursor:pointer; }
+  /*+AG ⚠ 2026-08-06 · LA BARRA PASA A DOS FILAS ANTES QUE DEJAR QUE EL TEXTO SE SALGA.
+     Con `min-width:0` + `white-space:nowrap` los botones se encogían por debajo de su propio texto y la
+     palabra SE DESBORDABA de la píldora, pisando la de al lado. Y no lo cazaba nadie: `scrollWidth` del
+     contenedor seguía dando 375 = clientWidth, porque el texto desborda sin ensanchar el flex. Se vio
+     MIRANDO, con la sexta sección (Boosters) y los textos rusos: «ИЗБРАННОЕ» encima de «БУСТЕРЫ».
+     `min-width:max-content` le pone al botón un suelo del ancho de su palabra, y `flex-wrap` deja que
+     lo que no cabe baje a una segunda fila. Dos filas se leen; un texto pisado, no. Y nada de scroll
+     horizontal, que en este proyecto es un fallo, no una solución (docs/60: nada del navegador). */
+  .sh-secs{ display:flex; flex-wrap:wrap; gap:6px; padding:2px 13px 8px; }
+  .sh-sec{ flex:1 1 auto; min-width:max-content; white-space:nowrap; border:1px solid #ffffff2a; background:var(--plate-a); color:#c4cbe6; font-family:inherit; font-weight:900; font-size:var(--fs-3); letter-spacing:.02em; border-radius:12px; padding:8px 6px; cursor:pointer; }
   .sh-sec.on{ background:linear-gradient(#ffe27a,#ffb43d); color:#3a2400; border-color:transparent; box-shadow:0 3px 10px #ffb03d3d; }
   /*+AG doc 60: el font-size de esta regla se fue. La pestaña unica del kit (final del <style>) manda
      sobre ella por cascada, asi que bajar aqui a 10 px era una linea MUERTA que ademas mentia sobre
@@ -4299,7 +4307,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=f74d8ee"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=aa6ce8c"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -5255,7 +5263,10 @@ const MORE={
     unlockBtn:p=>'Desbloquear · '+p+' ✦', orPay:g=>'o pagar '+g+' ◆',
     equipBtn:'Equipar', equippedBtn:'Equipada', tEquipped:'¡Equipada!', tUnlocked:n=>'¡'+n+' desbloqueado!',
     // — Tienda —
-    shSecs:['Destacados','Bolas','Cosméticos','Gemas','Pase'],
+    shSecs:['Destacados','Boosters','Bolas','Cosméticos','Gemas','Pase'],
+    shLotes:'Lotes', shBstOwn:'Tienes', tBooster:(nombre,n)=>`+${n} ${nombre}`,
+    bstNames:{nitro:'Nitro', escudo:'Escudo', dash:'Impulso', fantasma:'Fantasma'},
+    shNoteBst:'El primer uso de cada booster es GRATIS en toda partida. Aquí compras los siguientes, con Monedas que ganas jugando. Los rivales también gastan los suyos.',
     shNoteFeat:'Escaparate que rota cada semana con el tema de temporada. Todo con precio y contenido a la vista, <b>nunca cajas sorpresa</b>.',
     shNoteBalls:'Las doce bolas se consiguen igual: <b>jugando</b> (Monedas ✦) o con <b>Gemas ◆</b> si tienes prisa. Las <b>Épicas</b> además se regalan al llegar a su hito de copas 🏆. <b>Aquí no hay nada que solo se pueda comprar.</b>',
     shNoteCosm:'Cosméticos = <b>solo estética</b>, cualquier rareza. El marco (gris→dorado) marca la rareza. Nunca tocan atributos.',
@@ -5430,7 +5441,10 @@ const MORE={
     unlockBtn:p=>'Unlock · '+p+' ✦', orPay:g=>'or pay '+g+' ◆',
     equipBtn:'Equip', equippedBtn:'Equipped', tEquipped:'Equipped!', tUnlocked:n=>n+' unlocked!',
     // — Shop —
-    shSecs:['Featured','Balls','Cosmetics','Gems','Pass'],
+    shSecs:['Featured','Boosters','Balls','Cosmetics','Gems','Pass'],
+    shLotes:'Bundles', shBstOwn:'You have', tBooster:(nombre,n)=>`+${n} ${nombre}`,
+    bstNames:{nitro:'Nitro', escudo:'Shield', dash:'Dash', fantasma:'Ghost'},
+    shNoteBst:'The first use of each booster is FREE every match. Here you buy the next ones, with Coins you earn by playing. Rivals spend theirs too.',
     shNoteFeat:'A storefront that rotates every week with the season theme. Price and contents always in plain sight, <b>never loot boxes</b>.',
     shNoteBalls:'All twelve balls work the same way: <b>play for them</b> (Coins ✦) or use <b>Gems ◆</b> if you are in a hurry. <b>Epics</b> are also a gift when you reach their cup milestone 🏆. <b>Nothing here is buy-only.</b>',
     shNoteCosm:'Cosmetics = <b>looks only</b>, any rarity. The frame (grey→gold) shows the rarity. They never touch attributes.',
@@ -5820,6 +5834,41 @@ if(Array.isArray(SAVE.balls)) SAVE.balls.forEach(b=>{ if(typeof b.copas!=='numbe
 if(!SAVE.mode || !['race','cazador','redlight'].includes(SAVE.mode)) SAVE.mode='race';
 if(SAVE.fmt!=='individual' && SAVE.fmt!=='equipos') SAVE.fmt='individual';
 if(typeof SAVE.dayBonusDay!=='string') SAVE.dayBonusDay='';
+// ============================================================================
+//+AG 2026-08-06 · INVENTARIO DE BOOSTERS (encargo de Jaime, sus palabras: «los boosters que no son de
+//   barra se usan una vez GRATIS y a partir de ese momento tienes un inventario de boosters, por lo
+//   cual hay que diseñar una tienda para comprar boosters»).
+//
+//   LA REGLA, y es la que hace que esto no sea pay-to-win a secas: EL PRIMER USO DE CADA BOTÓN ES
+//   GRATIS EN TODA PARTIDA. Nadie se queda sin botones por no pagar; lo que compras es poder pulsarlo
+//   MÁS VECES. Y los bots gastan su propio inventario por la misma regla (motor: BOT_STOCK), así que
+//   la mecánica de la pista es la misma para todos: a todo el mundo se le acaban.
+//
+//   LOS DE BARRA NO ENTRAN. El súper de los tres modos se gana jugando y no se compra nunca — es lo
+//   único que blinda que el remontón grande sea 100% mérito. Aquí solo viven los 4 de botón.
+//
+//   ⚠ EL INVENTARIO ES POR TIPO, NO POR MODO, y por eso hay tensión de verdad: el ESCUDO se gasta en
+//   la Carrera Y en el Cazador, y el NITRO en la Carrera Y en Luz Roja. Gastarte los escudos hoy en el
+//   Cazador es quedarte sin ellos mañana en la Carrera.
+const BOOSTERS = {
+  nitro:    { modos:['race','redlight'], ico:'arte/ui/icono-nitro.webp' },
+  escudo:   { modos:['race','cazador'],  ico:'arte/ui/icono-escudo.webp' },
+  dash:     { modos:['cazador'],         ico:'arte/ui/icono-nitro.webp' },
+  fantasma: { modos:['redlight'],        ico:'arte/ui/icono-fantasma-booster.webp' },
+};
+const BOOSTER_KEYS = Object.keys(BOOSTERS);
+//+AG migración idempotente: un save viejo entra con el inventario a cero y sigue jugando igual que
+//   siempre, porque el uso gratis le da el mismo botón de antes. Nadie pierde nada al actualizar.
+if(!SAVE.boosters || typeof SAVE.boosters!=='object') SAVE.boosters={};
+for(const k of BOOSTER_KEYS){ const n=SAVE.boosters[k]; if(typeof n!=='number' || !(n>=0)) SAVE.boosters[k]=0; }
+const invBooster = k => (SAVE.boosters[k]|0);
+//+AG el nombre visible sale del diccionario del shell; sin traducción cae al inglés (que SIEMPRE está,
+//   por el Object.assign de BTI18N.load) y en último extremo a la propia clave, para que una pantalla
+//   nunca salga con un hueco vacío por culpa de un idioma a medio traducir.
+const boosterName = k => { const n=(S().bstNames||{})[k]; return n || (SHELL.en.bstNames||{})[k] || k; };
+//+AG los que se usan en un modo concreto, que es lo que viaja al motor y lo que pinta la hoja de antes
+//   de jugar. Orden estable (el de BOOSTERS) para que los botones no bailen entre partidas.
+const boostersDeModo = m => BOOSTER_KEYS.filter(k => BOOSTERS[k].modos.includes(m));
 //+AG doc 78: el suelo de Liga de una partida vieja arranca en 0 (Bronce) y lo sube la primera partida
 //   que se juegue. No se calcula aqui de las copas a proposito: el suelo solo protege hacia ABAJO, asi
 //   que empezar bajo no le quita nada a nadie, y calcularlo antes de que exista LIGA_DIV seria pedirle
@@ -5883,7 +5932,20 @@ function computeRewards(place, mode){                             // "gana SIEMP
   if(place===1 && mode && mode===dayMode() && SAVE.dayBonusDay!==todayKey()){
     dayBonus=Math.round(chispas*0.5); chispas+=dayBonus; SAVE.dayBonusDay=todayKey(); }
   const xp=15+(N_BALLS-place)*3;
-  return {chispas,xp,firstWin,dayBonus,base,bonus};
+  //+AG 2026-08-06 · LOS BOOSTERS TAMBIÉN SE GANAN JUGANDO, y esto no es un extra: es la mitad que hace
+  //   honesto el modelo. Si sólo se compraran, el jugador que no paga se quedaría con su único uso
+  //   gratis PARA SIEMPRE, y la tienda dejaría de ser un atajo para convertirse en el peaje de poder
+  //   jugar con botones. Así el inventario sube solo jugando, y lo que compras es ir MÁS DEPRISA.
+  //   Escalera: podio = 1 · victoria = 2. Sale del BOOSTER del modo que se ha jugado (uno al azar de
+  //   los suyos), para que lo que ganas te sirva donde estabas jugando.
+  //   ⚠ El sorteo NO usa la semilla de la partida: es un premio de después, no física, así que no puede
+  //   desincronizar nada. Y es el único azar de toda la economía — de un premio que SIEMPRE cae, nunca
+  //   de si cae (docs/12: cero cajas misteriosas).
+  let bst=null;
+  const nB = place===1 ? 2 : (place<=3 ? 1 : 0);
+  if(nB>0 && mode){ const pool=boostersDeModo(mode);
+    if(pool.length) bst={ k: pool[Math.floor(Math.random()*pool.length)], n: nB }; }
+  return {chispas,xp,firstWin,dayBonus,base,bonus,bst};
 }
 
 // ============================================================================
@@ -6414,7 +6476,40 @@ function modeEmbedUrl(mode, fmt){
   //   despliegue y no hay nada que mantener. Sin sello (repo en local) no se añade nada.
   const sello = (document.querySelector('meta[name="bt-build"]')||{}).content;
   if(sello) u += '&v=' + encodeURIComponent(sello.split(' ').pop());
+  //+AG 2026-08-06 · EL INVENTARIO DE BOOSTERS VIAJA AL MOTOR. Formato `&inv=nitro:5,escudo:2` — solo
+  //   los del modo, para que el motor no tenga que saber quién usa qué. El motor le suma el uso GRATIS
+  //   por su cuenta (no viene en este número), y devuelve lo gastado en el bt:matchEnd.
+  //   ⚠ El TUTORIAL no pasa por aquí (tiene su propia URL sin `inv`): allí el motor cae en "todo
+  //   gratis, sin límite", que es lo que tiene que ser — enseñar el botón no puede costar stock.
+  //   ⚠ Y en EQUIPOS tampoco se manda: ese perfil es el torneo/vídeo del motor y se queda byte-idéntico,
+  //   igual que ya pasa con &stats (mismo doble candado).
+  if(fmt!=='equipos'){
+    const inv = boostersDeModo(mode).map(k => k+':'+invBooster(k)).join(',');
+    if(inv) u += '&inv=' + encodeURIComponent(inv);
+  }
   return u;
+}
+//+AG resta del inventario lo que el motor dice que se gastó. Va por la puerta del SAVE y no por
+//   `dinero()` porque un booster no es moneda: no se compra ni se vende aquí, solo se consume.
+//   Defensivo a propósito (Math.max(0,...)): el motor es un iframe y su cuenta no puede dejar el
+//   inventario en negativo pase lo que pase.
+//+AG 2026-08-06 · suma al inventario lo que la partida ha regalado (computeRewards decide CUÁNTO y de
+//   CUÁL; aquí sólo se ingresa). Separado de gastaBoosters porque son dos momentos distintos: el gasto
+//   se apunta nada más cerrar el iframe y el ingreso va con el resto del pago.
+function ganaBoosters(rew, place){
+  if(!rew || !rew.bst || !BOOSTERS[rew.bst.k]) return;
+  SAVE.boosters[rew.bst.k] = invBooster(rew.bst.k) + rew.bst.n;
+  apunta('booster_ganado', { k:rew.bst.k, n:rew.bst.n, puesto:place });
+  persist();
+}
+function gastaBoosters(g){
+  if(!g || typeof g!=='object') return;
+  let algo=false;
+  for(const k of BOOSTER_KEYS){
+    const n = g[k]|0; if(n<=0) continue;
+    SAVE.boosters[k] = Math.max(0, invBooster(k) - n); algo=true;
+  }
+  if(algo){ apunta('boosters_gastados', g); persist(); }   //+AG docs/53: se apunta para poder balancear con datos
 }
 function startRace(mode, fmt){
   mode = MODE_SRC[mode] ? mode : 'race';   // sin modo valido -> Carrera
@@ -6509,6 +6604,9 @@ function onMatchEnd(d){
   //   mientras se pinta Resultados. En EQUIPOS solo hay 4 puestos, así que "podio" ahí es ganar.
   if(window.BT_MUSIC) BT_MUSIC.tema(((curFmt==='equipos'?(d.teamPlace||1)===1:place<=3)) ? 'victoria' : 'resultado');
   closeGameFrame();
+  //+AG 2026-08-06 · lo que la partida se ha comido del inventario. ANTES de pagar el premio, para que
+  //   si algo peta aquí el jugador no se quede con el cobro hecho y el stock intacto (sería un grifo).
+  gastaBoosters(d.gastados);
   const rew=computeRewards(place, curMode);   //+AG el modo importa: bonus del MODO DEL DIA (+50% 1a victoria)
   //+AG doc 75 · DUPLICADOR: dobla las Monedas de la partida y gasta una carga. Va aqui, sobre `rew`,
   //   para que el numero que se PAGA y el que se PINTA en Resultados sean el mismo — si se doblara solo
@@ -6516,6 +6614,7 @@ function onMatchEnd(d){
   rew.dup = dupActivo() && dupConsume();
   if(rew.dup){ rew.dupExtra = rew.chispas; rew.chispas *= 2; }
   dinero('chispas', rew.chispas, 'partida'); SAVE.xp+=rew.xp; SAVE.played++;
+  ganaBoosters(rew, place);   //+AG 2026-08-06 los boosters que da la partida (podio 1 · victoria 2)
   //+AG doc 75 · MISIONES: una sola llamada con lo que la partida ya sabe. `monedas` son las de ESTA
   //   partida (con el duplicador ya aplicado: si te doblan el premio, la mision de juntar monedas
   //   avanza el doble, que es lo que el jugador ve).
@@ -6968,7 +7067,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=f74d8ee').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=aa6ce8c').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -7180,9 +7279,41 @@ const CM={
   fuegos:cosmSvg('<path d="M12 3.2 V6.4"/><path d="M12 17.6 V20.8"/><path d="M3.2 12 H6.4"/><path d="M17.6 12 H20.8"/><path d="M5.8 5.8 L8 8"/><path d="M16 16 L18.2 18.2"/><path d="M18.2 5.8 L16 8"/><path d="M8 16 L5.8 18.2"/><circle cx="12" cy="12" r="2.6"/>'),
   emote:cosmSvg('<path d="M6.4 4 H17.6 A2.4 2.4 0 0 1 20 6.4 V13.6 A2.4 2.4 0 0 1 17.6 16 H11.2 L7 19.8 L7.6 16 H6.4 A2.4 2.4 0 0 1 4 13.6 V6.4 A2.4 2.4 0 0 1 6.4 4 Z"/><path d="M9.4 9.6 H9.42"/><path d="M14.6 9.6 H14.62"/><path d="M9.6 12.4 a3.2 3.2 0 0 0 4.8 0"/>'),
   corona:cosmSvg('<path d="M3.4 8.4 L6.6 16.6 H17.4 L20.6 8.4 L16.2 11.4 L12 5.8 L7.8 11.4 Z"/><path d="M6.6 19.4 H17.4"/>') };
+// ============================================================================
+//+AG 2026-08-06 · UNA SOLA REGLA DE CAMBIO: 1 GEMA = 12 MONEDAS.
+//   Antes cada cosa tenía su cambio implícito y no cuadraban entre sí: las bolas iban de 12,5 (Común)
+//   a 20,1 monedas por gema (Legendaria), y la oferta del día llegó a dar 72 — o sea que comprar
+//   monedas y pagar con ellas salía CINCO veces más barato que pulsar el botón de gemas, y la escalera
+//   de precios nacía de adorno (ver el comentario de CHISPA_DEAL, que ya bajó por esto mismo).
+//   Con un cambio único, cualquier precio nuevo se calcula solo y no puede volver a abrirse un agujero.
+const CAMBIO = 12;                       // monedas por gema
+const enMonedas = g => Math.round(g*CAMBIO);
+//+AG 2026-08-06 · LOS COSMÉTICOS YA SE PAGAN CON MONEDAS (encargo de Jaime: «la hard currency solo para
+//   acelerar la compra de skins»). Hasta hoy eran SOLO gemas, o sea la única cosa del juego que no se
+//   podía conseguir jugando — justo lo contrario de lo que él quería. Ahora llevan los dos precios,
+//   igual que las bolas: Monedas si te llegan, Gemas si tienes prisa.
 const COSM=[ {id:'sk_llamas',nm:'Llamas',cat:'Skin',rar:1,ic:CM.llama,g:150}, {id:'sk_galaxia',nm:'Galaxia',cat:'Skin',rar:3,ic:CM.galaxia,g:450},
   {id:'es_arcoiris',nm:'Estela Arcoíris',cat:'Estela',rar:2,ic:CM.estela,g:250}, {id:'ce_fuegos',nm:'Fuegos',cat:'Celebración',rar:2,ic:CM.fuegos,g:250},
   {id:'em_gg',nm:'¡GG!',cat:'Emote',rar:0,ic:CM.emote,g:60}, {id:'ma_corona',nm:'Marco Corona',cat:'Marco',rar:4,ic:CM.corona,g:800} ];
+for(const c of COSM) c.m = enMonedas(c.g);   //+AG el precio en Monedas SALE del de Gemas: un cosmético nuevo lo hereda por construcción
+// ── LOS BOOSTERS DE LA TIENDA ───────────────────────────────────────────────
+//+AG PRECIO: 12 monedas = 1 gema = 1 booster. Y el 12 NO es redondo por gusto, es el suelo que marca
+//   el banco (tools/banco-inventario.mjs): cada booster extra le RENTA al jugador 2,95 monedas de
+//   premio, así que por debajo de 3 el booster se pagaría solo y montaría un grifo infinito (compro
+//   para farmear, farmeo para comprar). A 12 la cuenta sale al revés y tiene que salir así: gastarte
+//   un booster te cuesta más de lo que te devuelve esa partida. Lo compras para GANAR una partida que
+//   te importa, no para hacer caja — que es exactamente lo que impide que la economía se desfonde.
+const BOOSTER_PRECIO = 12;
+//+AG los lotes son la única "oferta" y el descuento es visible: comprar de 40 en 40 sale a 9 en vez de
+//   a 12 (−25%). Cero azar, cero caja misteriosa: ves lo que llevas y lo que cuesta (docs/12).
+const BOOSTER_LOTES = [ {n:5,m:55}, {n:15,m:150}, {n:40,m:360} ];
+//+AG 2026-08-06 · PAQUETES DE MONEDAS (encargo de Jaime, punto 10). Se pagan con GEMAS, que es lo que
+//   ya se compra con dinero real: así el dinero llega a las monedas por la cadena estándar (€ → gemas
+//   → monedas) sin inventarse productos nuevos en Paddle, que es un paso de panel y no de código.
+//   ⚠ SIN TOPE DIARIO, a diferencia de la oferta del día: esa es un CHOLLO (mejor cambio que este) y
+//   por eso está limitada a una al día; estos van al cambio oficial de CAMBIO, así que no hay nada que
+//   racionar — comprar aquí nunca es mejor negocio que jugar, solo es más rápido.
+const MON_PACKS = [ {g:25}, {g:100}, {g:300}, {g:800} ].map(p=>({ ...p, m:enMonedas(p.g) }));
 //+AG `items` aqui ya no se pinta (la Tienda usa s.bundleItems, que esta traducido a los 20 idiomas);
 //   se deja al dia igualmente para que nadie lo lea y se crea que la moneda sigue llamandose Chispas.
 //+AG docs/60 F5 (2-ago): los dos primeros renglones llevaban un escudo y un arcoiris del sistema. Se QUITAN, no se cambian
@@ -7205,16 +7336,19 @@ const PASE={nm:'Pase de Batalla',g:900};
 //   oferta sigue siendo el mejor cambio del juego, que es lo que tiene que ser.
 const CHISPA_DEAL={g:25,c:750};
 const dealDone=()=>SAVE.dealDay===todayKey();
-const SECS=['destacados','bolas','cosmeticos','gemas','pase'];   //+AG las etiquetas visibles salen de S().shSecs (i18n)
+//+AG 2026-08-06 · BOOSTERS entra como sección propia, y va la SEGUNDA a propósito: es lo que se compra
+//   a menudo y con lo que se gana jugando, así que pedirle al jugador que pase por delante de Bolas y
+//   Cosméticos cada vez sería esconder el consumible detrás del escaparate caro.
+const SECS=['destacados','boosters','bolas','cosmeticos','gemas','pase'];   //+AG las etiquetas visibles salen de S().shSecs (i18n)
 //+AG docs/60 F3: la nota larga de cada seccion. Vive aqui y no dentro de cada render* porque la (i)
 //   que la abre esta en la CABECERA de la pantalla, fuera del cuerpo que se repinta.
-const SH_NOTA={destacados:'shNoteFeat',bolas:'shNoteBalls',cosmeticos:'shNoteCosm',gemas:'shNoteGems',pase:null};
+const SH_NOTA={destacados:'shNoteFeat',boosters:'shNoteBst',bolas:'shNoteBalls',cosmeticos:'shNoteCosm',gemas:'shNoteGems',pase:null};
 let shSec='destacados';
 const hasCosm=id=>SAVE.cosmetics.includes(id);
 function openTienda(){ showScreen('tienda'); applyShell(); renderTienda(); }
 function renderTienda(){ el('shChispas').textContent=SAVE.chispas; el('shGemas').textContent=SAVE.gemas;
   const secs=el('shSecs'); secs.innerHTML=''; SECS.forEach((k,ix)=>{ const b=document.createElement('button'); b.className='sh-sec'+(shSec===k?' on':''); b.textContent=S().shSecs[ix]; b.onclick=()=>{ shSec=k; renderTienda(); }; secs.appendChild(b); });
-  const body=el('shBody'); body.innerHTML=''; body.appendChild({destacados:featEl,bolas:bolasEl,cosmeticos:cosmEl,gemas:gemasEl,pase:paseEl}[shSec]());
+  const body=el('shBody'); body.innerHTML=''; body.appendChild({destacados:featEl,boosters:boostersEl,bolas:bolasEl,cosmeticos:cosmEl,gemas:gemasEl,pase:paseEl}[shSec]());
   //+AG docs/60 F3: la (i) de la cabecera cuenta LA SECCION QUE SE ESTA VIENDO. El Pase no tiene
   //   nota propia (su tarjeta ya lo explica con sus bullets), asi que ahi la (i) se esconde en vez
   //   de abrir una hoja vacia: un boton que no hace nada es peor que ningun boton.
@@ -7311,9 +7445,56 @@ function cosmEl(){ const s=S(), d=document.createElement('div'); d.innerHTML='';
   COSM.forEach(c=>{ const q=QUAL[c.rar], have=hasCosm(c.id); const it=document.createElement('div'); it.className='sh-item'; it.style.setProperty('--qc',q.c);
     it.innerHTML=`<div class="sh-ic">${c.ic}</div><div class="sh-nm">${cosmName(c)}</div><div class="sh-cat">${cosmCat(c)} · ${qualName(c.rar)}</div>`;
     const btn=document.createElement('button'); if(have){ btn.className='sh-buy owned'; btn.textContent=s.ownedCosm; btn.disabled=true; }
-    else { btn.className='sh-buy gem'; btn.innerHTML=`${c.g} ${coinIco('gema','sm')}`; btn.disabled=SAVE.gemas<c.g; btn.onclick=()=>buyCosm(c); }
+    //+AG 2026-08-06 los dos precios, EXACTAMENTE como las bolas (misma regla, mismo botón, mismo orden):
+    //   paga en Monedas si te llegan y en Gemas si no. Nunca cobra Gemas teniendo Monedas suficientes,
+    //   que sería cobrar de más. Y el botón se pinta del color de LO QUE VA A COBRAR (verde = Gemas),
+    //   que es la regla del canon que ya se aplicó a la pestaña de Bolas.
+    else { const conGemas = SAVE.chispas<c.m;
+      btn.className='sh-buy'+(conGemas?' gem':'');
+      btn.innerHTML=`${nfmt(c.m)} ${coinIco('chispa','sm')} / ${nfmt(c.g)} ${coinIco('gema','sm')}`;
+      btn.disabled=SAVE.chispas<c.m&&SAVE.gemas<c.g;
+      btn.onclick=()=>buyCosm(c, conGemas); }
     it.appendChild(btn); g.appendChild(it); });
   d.appendChild(g); return d;
+}
+//+AG 2026-08-06 · LA SECCIÓN DE BOOSTERS. Lo que se vende son USOS: el primero de cada partida es
+//   gratis y estos son los siguientes (ver chassis/invboost.mjs). Cada tarjeta dice CUÁNTOS llevas,
+//   porque un inventario que no se ve no es un inventario.
+function boostersEl(){ const s=S(), d=document.createElement('div');
+  const g=document.createElement('div'); g.className='sh-grid';
+  BOOSTER_KEYS.forEach(k=>{ const B=BOOSTERS[k], it=document.createElement('div'); it.className='sh-item';
+    //+AG el subtítulo dice EN QUÉ MODOS se gasta, que es la información que hace interesante la compra:
+    //   el escudo vale en dos modos y el fantasma en uno, y eso cambia lo que te conviene.
+    const modos = B.modos.map(m=>modeTitle(m)).join(' · ');
+    it.innerHTML=`<div class="sh-ic"><img class="cico" src="${B.ico}" alt="" style="width:38px;height:38px"></div>`+
+      `<div class="sh-nm">${boosterName(k)}</div><div class="sh-cat">${modos}</div>`+
+      `<div class="sh-cat" style="color:var(--gold2);font-weight:900">×${invBooster(k)}</div>`;
+    const btn=document.createElement('button'); btn.className='sh-buy';
+    btn.innerHTML=`${BOOSTER_PRECIO} ${coinIco('chispa','sm')}`;
+    btn.disabled=SAVE.chispas<BOOSTER_PRECIO;
+    btn.onclick=()=>buyBooster(k,1);
+    it.appendChild(btn); g.appendChild(it); });
+  d.appendChild(g);
+  //+AG los lotes van DEBAJO de la rejilla y con el ahorro escrito: el descuento se ve, no se adivina.
+  //   Compran del booster que el jugador elija en el desplegable… que NO existe: los `<select>` son un
+  //   fallo en este proyecto (nada de widgets del navegador). Se resuelve con una fila por booster.
+  const h=document.createElement('div'); h.className='sh-cat'; h.style.cssText='margin:14px 2px 8px;font-weight:900;letter-spacing:.06em;text-transform:uppercase';
+  h.textContent=s.shLotes||'Lotes'; d.appendChild(h);
+  BOOSTER_LOTES.forEach(L=>{ const row=document.createElement('div'); row.className='sh-pack';
+    const ahorro=Math.round(100*(1-(L.m/(L.n*BOOSTER_PRECIO))));
+    row.innerHTML=`<div class="pg ico">${coinIco('chispa')}</div><div class="amt">×${L.n} <small>−${ahorro}%</small></div>`;
+    //+AG un botón por booster dentro de la fila: cuatro iconos, sin desplegables (docs/60: nada del navegador).
+    const wrap=document.createElement('div'); wrap.style.cssText='margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end';
+    BOOSTER_KEYS.forEach(k=>{ const b=document.createElement('button'); b.className='sh-buy';
+      b.style.cssText='width:auto;padding:9px 10px;display:flex;align-items:center;gap:5px';
+      b.title=boosterName(k)+' ×'+L.n;
+      b.innerHTML=`<img src="${BOOSTERS[k].ico}" alt="${boosterName(k)}" style="width:20px;height:20px">`;
+      b.disabled=SAVE.chispas<L.m; b.onclick=()=>buyBooster(k,L.n,L.m); wrap.appendChild(b); });
+    row.appendChild(wrap); d.appendChild(row);
+    const p=document.createElement('div'); p.className='sh-cat'; p.style.cssText='margin:-4px 2px 10px;text-align:right';
+    p.innerHTML=`${nfmt(L.m)} ${coinIco('chispa','sm')}`; d.appendChild(p);
+  });
+  return d;
 }
 function gemasEl(){ const s=S(), d=document.createElement('div'); d.innerHTML='';
   //+AG doc 45 §2: la oferta del dia va ARRIBA y con su propio marco, para que se lea como lo
@@ -7332,6 +7513,21 @@ function gemasEl(){ const s=S(), d=document.createElement('div'); d.innerHTML=''
   deal.appendChild(db); d.appendChild(deal);
   GEM_PACKS.forEach(pk=>{ const row=document.createElement('div'); row.className='sh-pack'; row.innerHTML=`<div class="pg ico">${coinIco('gema')}</div><div class="amt">${s.gemsAmt(pk.g)} ${pk.bonus?`<small>${pk.bonus}</small>`:''}</div>`;
     const btn=document.createElement('button'); btn.className='money'; btn.textContent=pk.p; btn.onclick=()=>parentalBuy(pk); row.appendChild(btn); d.appendChild(row); });
+  //+AG 2026-08-06 · PAQUETES DE MONEDAS (encargo de Jaime, punto 10). Van DEBAJO de los de gemas porque
+  //   la cadena es esa: el dinero real compra gemas y las gemas compran monedas. Al cambio oficial
+  //   (CAMBIO), así que aquí no hay chollo ninguno — el chollo es la oferta del día de arriba, y por eso
+  //   esa está limitada a una al día y estos no necesitan tope.
+  const h=document.createElement('div'); h.className='sh-cat';
+  h.style.cssText='margin:16px 2px 8px;font-weight:900;letter-spacing:.06em;text-transform:uppercase';
+  h.innerHTML=`${coinIco('chispa','sm')} ${s.chispasWord||'Monedas'}`;
+  d.appendChild(h);
+  MON_PACKS.forEach(pk=>{ const row=document.createElement('div'); row.className='sh-pack';
+    row.innerHTML=`<div class="pg ico">${coinIco('chispa')}</div><div class="amt">+${nfmt(pk.m)}</div>`;
+    const btn=document.createElement('button'); btn.className='sh-buy gem';
+    btn.style.cssText='margin-left:auto;width:auto;padding:11px 15px;white-space:nowrap';
+    btn.innerHTML=`${pk.g} ${coinIco('gema','sm')}`;
+    btn.disabled=SAVE.gemas<pk.g; btn.onclick=()=>buyMonPack(pk);
+    row.appendChild(btn); d.appendChild(row); });
   return d;
 }
 function paseEl(){ const s=S(), d=document.createElement('div'); d.innerHTML=`<div class="sh-feat"><div class="fl">${s.paseSeason}</div><h3>${s.paseNm}</h3>
@@ -7346,7 +7542,30 @@ function paseEl(){ const s=S(), d=document.createElement('div'); d.innerHTML=`<d
   else { setCoin(b, s.paseBuy(PASE.g)); b.disabled=SAVE.gemas<PASE.g; b.onclick=()=>{ if(SAVE.gemas>=PASE.g){ dinero('gemas', -PASE.g, 'pase'); SAVE.pase=true; persist(); toast(S().tPase); renderTienda(); } }; }
   return d;
 }
-function buyCosm(c){ if(SAVE.gemas<c.g) return; dinero('gemas', -c.g, 'cosmetico'); SAVE.cosmetics.push(c.id); persist(); toast(S().tCosm(cosmName(c))); renderTienda(); }
+//+AG 2026-08-06 los cosméticos ya se pagan con las dos monedas. `conGemas` lo decide quien pinta el
+//   botón, pero SE VUELVE A COMPROBAR aquí: el botón es pintura y la caja es esto. Si no llegan las
+//   monedas cae a gemas solo, así que una llamada vieja de un solo argumento sigue funcionando.
+function buyCosm(c, conGemas){
+  if(conGemas===undefined) conGemas = SAVE.chispas<c.m;
+  if(conGemas){ if(SAVE.gemas<c.g) return; dinero('gemas', -c.g, 'cosmetico'); }
+  else        { if(SAVE.chispas<c.m) return; dinero('chispas', -c.m, 'cosmetico'); }
+  SAVE.cosmetics.push(c.id); persist(); toast(S().tCosm(cosmName(c))); renderTienda(); }
+//+AG 2026-08-06 · COMPRAR BOOSTERS. `coste` sólo viene en los lotes; suelto es el precio unitario.
+//   Se cobra por la puerta única de economía (dinero(), docs/53) para que la analítica lo vea, y el
+//   inventario sube por el SAVE. Como todo lo de esta tienda: precio a la vista y cero azar.
+function buyBooster(k, n, coste){
+  if(!BOOSTERS[k]) return;
+  const total = (typeof coste==='number') ? coste : BOOSTER_PRECIO*(n||1);
+  if(SAVE.chispas < total) return;
+  dinero('chispas', -total, 'booster');
+  SAVE.boosters[k] = invBooster(k) + (n||1);
+  apunta('booster_comprado', { k, n:(n||1), m:total });
+  persist(); toast(S().tBooster ? S().tBooster(boosterName(k), n||1) : boosterName(k)+' ×'+(n||1)); renderTienda(); }
+//+AG 2026-08-06 · PAQUETES DE MONEDAS por gemas (encargo de Jaime, punto 10).
+function buyMonPack(pk){
+  if(SAVE.gemas < pk.g) return;
+  dinero('gemas', -pk.g, 'pack_monedas'); dinero('chispas', pk.m, 'pack_monedas');
+  persist(); toast(S().tGems ? '+'+nfmt(pk.m) : '+'+nfmt(pk.m)); renderTienda(); }
 //+AG doc 45 §2. El tope se comprueba AQUI y no solo en el boton: el boton es pintura, y un
 //   toque doble o una pestana vieja no pueden colar dos veces la oferta del dia.
 function buyChispaDeal(){ if(dealDone() || SAVE.gemas<CHISPA_DEAL.g) return;
@@ -8901,7 +9120,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=f74d8ee';
+  import { startAmbient } from './arte/ambient.mjs?v=aa6ce8c';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -8917,7 +9136,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=f74d8ee').then(m => {
+  import('./arte/pista-preview.mjs?v=aa6ce8c').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -8929,8 +9148,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=f74d8ee';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=f74d8ee';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=aa6ce8c';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=aa6ce8c';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -9083,7 +9302,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=f74d8ee'), import('./motor/chassis/sincro.mjs?v=f74d8ee')]);
+        import('./motor/chassis/nube.mjs?v=aa6ce8c'), import('./motor/chassis/sincro.mjs?v=aa6ce8c')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
