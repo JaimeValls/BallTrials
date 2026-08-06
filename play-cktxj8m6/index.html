@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-06 ca3ebb7"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-06 d07d215"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG ICONO EN LA PANTALLA DE INICIO (docs/40 §6). Jaime: "la gente esta acostumbrada a clicar en el
@@ -3004,7 +3004,15 @@
   .pr-acc-id.slim .pr-acc-mk{ width:11px; height:11px; background:#eb9b4b; box-shadow:none; }
   .pr-acc-id.slim .pr-acc-mk svg{ display:none; }
   .pr-acc-tx{ flex:1; min-width:0; }
-  .pr-acc-k{ font-size:var(--fs-2); font-weight:800; color:var(--muted); line-height:1.25; }
+  /*+AG 6-ago, Jaime: "las letras eran en minusculas y muy pequeñas, no parecia muy oficial · daba
+     sensacion de web cutre". Tenia razon y ademas rompia la regla de la casa: un rotulo PEQUEÑO,
+     AISLADO y que encabeza su bloque va en MAYUSCULAS por CSS (es lo que ya hacen "TU CUENTA",
+     "LLEVAR MI PARTIDA A OTRO MOVIL" y las pestañas). En minusculas y a 12 px parecia texto de
+     relleno de una web, no el estado de tu cuenta.
+     El interletrado abre la mayuscula, que apretada se lee peor, y el peso sube a 900 para que
+     aguante el tamaño pequeño. El correo de abajo NO se toca: ese es el dato y va tal cual. */
+  .pr-acc-k{ font-size:var(--fs-2); font-weight:900; color:var(--muted); line-height:1.25;
+    text-transform:uppercase; letter-spacing:.07em; }
   .pr-acc-k b{ color:#d6dbf4; }
   /*+AG un correo no se parte por la mitad ni empuja la placa: si no cabe, se recorta con puntos
      suspensivos. `min-width:0` en el padre es lo que deja que el ellipsis funcione dentro de un flex. */
@@ -3557,10 +3565,12 @@
     <path fill="#34A853" d="M24 47.5c6.2 0 11.5-2.1 15.3-5.6l-7.6-5.9c-2.1 1.4-4.8 2.3-7.7 2.3-6.4 0-11.7-4.5-13.6-10.4l-7.8 6.1C6.5 41.1 14.6 47.5 24 47.5z"/>
   </symbol>
   <!--+AG la "f" de Facebook, misma regla que arriba: una sola copia y las pantallas la piden con
-       <use>. Aqui SI va en blanco y no en su azul, porque la marca se enseña sobre el boton azul
-       de Meta (#1877F2), que es como su propia guia la pide. -->
+       <use>. La DIFERENCIA con Google es que esta marca es de UN color, y su guia la publica en dos
+       usos oficiales: blanca sobre el azul de Meta (los botones) y azul #1877F2 sobre blanco (el
+       chip de identidad). Por eso aqui SI va `currentColor` y lo elige cada sitio — no es teñir un
+       logotipo, es escoger entre sus dos versiones buenas. -->
   <symbol id="mk-facebook" viewBox="0 0 24 24">
-    <path fill="#fff" d="M15.12 5.32H17V2.14A26.11 26.11 0 0 0 14.26 2C11.54 2 9.68 3.66 9.68 6.7v2.62H6.61v3.56h3.07V22h3.68v-9.12h3.06l.46-3.56h-3.52V7.05c0-1.03.28-1.73 1.76-1.73Z"/>
+    <path fill="currentColor" d="M15.12 5.32H17V2.14A26.11 26.11 0 0 0 14.26 2C11.54 2 9.68 3.66 9.68 6.7v2.62H6.61v3.56h3.07V22h3.68v-9.12h3.06l.46-3.56h-3.52V7.05c0-1.03.28-1.73 1.76-1.73Z"/>
   </symbol>
 </svg>
 
@@ -4194,7 +4204,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=ca3ebb7"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=d07d215"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -5195,7 +5205,7 @@ const MORE={
     prMoveOff:'Sin conexión: inténtalo cuando vuelva la red.', prMoveEmpty:'Escribe el código primero.',
     prMoveCopied:'Código copiado. Pégalo en el otro móvil.', prMoveCopyManual:'Código seleccionado: mantén pulsado y elige Copiar.',
     prAccH:'Tu cuenta', prAccGuest:'Estás jugando <b>como invitado</b>', prAccSaved:'Cuenta guardada:',
-    prAccSavedG:'Estás dentro con <b>Google</b>:',
+    prAccSavedG:'Estás dentro con <b>Google</b>:', prAccSavedF:'Estás dentro con <b>Facebook</b>:',
     prAccNote:'Tu partida ya se guarda en el servidor, pero <b>solo este móvil sabe que es tuya</b>. Guarda tu cuenta y podrás entrar desde cualquier sitio.',
     prAccNoteOk:'Tu partida está <b>a salvo en tu cuenta</b>. Entra desde cualquier móvil y la tendrás ahí, tal y como la dejaste.',
     prAccCreate:'Guardar mi cuenta', prAccLogin:'Ya tengo cuenta', prAccGoogle:'Continuar con Google', prAccMeta:'Continuar con Facebook',
@@ -5370,7 +5380,7 @@ const MORE={
     prMoveOff:'No connection: try again when you are back online.', prMoveEmpty:'Type the code first.',
     prMoveCopied:'Code copied. Paste it on the other phone.', prMoveCopyManual:'Code selected: long-press and choose Copy.',
     prAccH:'Your account', prAccGuest:'You are playing <b>as a guest</b>', prAccSaved:'Account saved:',
-    prAccSavedG:'You are signed in with <b>Google</b>:',
+    prAccSavedG:'You are signed in with <b>Google</b>:', prAccSavedF:'You are signed in with <b>Facebook</b>:',
     prAccNote:'Your game is already saved on the server, but <b>only this phone knows it is yours</b>. Save your account and you can log in from anywhere.',
     prAccNoteOk:'Your game is <b>safe in your account</b>. Log in from any phone and it will be there, exactly as you left it.',
     prAccCreate:'Save my account', prAccLogin:'I already have one', prAccGoogle:'Continue with Google', prAccMeta:'Continue with Facebook',
@@ -7261,6 +7271,9 @@ function wireCuenta(){
   //+AG la marca del proveedor sale del sprite (<use>), no de una copia del path: el logotipo de
   //   Google vive una sola vez en el fichero y lo comparten esta pantalla y la bienvenida.
   const MK_GOOGLE='<svg viewBox="0 0 48 48" aria-hidden="true"><use href="#mk-google"/></svg>';
+  //+AG la "f" en el azul de Meta: en el chip BLANCO la version blanca seria invisible, y esta es la
+  //   otra version oficial de la marca (azul sobre blanco). Mismo sprite, distinto uso.
+  const MK_FB='<svg viewBox="0 0 24 24" aria-hidden="true" style="color:#1877F2"><use href="#mk-facebook"/></svg>';
   //+AG cuenta guardada con CORREO: no hay marca de terceros que enseñar, asi que va el sobre de la
   //   casa (viewBox 24, trazo 2.2, como todos los iconos de seccion). Y el invitado, la silueta.
   const MK_MAIL='<svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.9" y="5.2" width="18.2" height="13.6" rx="2.6"/><path d="M3.6 7.2 L12 13.1 L20.4 7.2"/></g></svg>';
@@ -7281,10 +7294,15 @@ function wireCuenta(){
       //+AG la frase va arriba en pequeño y el CORREO abajo en grande, que es el dato que se viene a
       //   comprobar. Las dos claves acaban en dos puntos porque antes la frase y el correo iban en la
       //   MISMA linea corrida; ahora sobran, y se quitan tambien los de ancho completo del chino.
+      //+AG TRES casos, no dos: Google, Facebook y correo. Facebook caia antes en el de correo y se
+      //   pintaba con el sobre de la casa, asi que quien acababa de entrar con Facebook no veia
+      //   Facebook por ningun lado y parecia que no habia entrado con el (Jaime, 6-ago).
+      const conMarca = e.google || e.facebook;
       idp.className='pr-acc-id';
-      mk.className='pr-acc-mk'+(e.google?'':' guest'); mk.innerHTML=e.google?MK_GOOGLE:MK_MAIL;
-      est.innerHTML=(e.google?S().prAccSavedG:S().prAccSaved).replace(/[:：]\s*$/,'');
-      who.hidden=false; who.textContent=e.email||'Google';
+      mk.className='pr-acc-mk'+(conMarca?'':' guest');
+      mk.innerHTML = e.google ? MK_GOOGLE : (e.facebook ? MK_FB : MK_MAIL);
+      est.innerHTML=(e.google?S().prAccSavedG:(e.facebook?S().prAccSavedF:S().prAccSaved)).replace(/[:：]\s*$/,'');
+      who.hidden=false; who.textContent=e.email||(e.google?'Google':(e.facebook?'Facebook':''));
       okmk.hidden=false; okmk.innerHTML=ckSvg(2.8);
       form.style.display='none'; outs.hidden=false; otra.hidden=false;
     } else {
@@ -7370,8 +7388,13 @@ function wireCuenta(){
       if(!nube()) return di(S().prAccOff,false);
       goog.disabled=true; di('…');
       let destino=null, hayRed=true;
+      //+AG mismo atajo que en la bienvenida: sabido que enlazar no vale con este proveedor, se va
+      //   derecho al login y el jugador confirma UNA vez, no dos.
+      if(vaDirecto(prov)){ try{ destino=nube().urlDeProveedor(prov, location.href); }catch(e){} }
+      else{
       try{ destino=await nube().urlDeEnlace(prov, location.href); }
       catch(e){ hayRed=!!(e&&e.estado); console.warn('[cuenta] enlazar '+prov, e); }
+      }
       //+AG sin red NO se navega: urlDeProveedor solo pega una cadena y devolveria una URL que el
       //   navegador no puede cargar, dejando al jugador en la pantalla de error, fuera del juego.
       //   Al login normal solo se cae si el servidor ha CONTESTADO que no deja enlazar (e.estado).
@@ -7539,6 +7562,11 @@ function startOnboarding(){ applyShell(); onbRec=onbSel='cohete'; onbRuta.length
 //   (docs/23 §3): esto es una OFERTA en la pantalla 0, no un muro — no hay campos, no hay que
 //   escribir nada, y el boton de invitado deja el juego EXACTAMENTE como estaba antes.
 const ONB_PEND='bt_onb_pendiente';   // marca de "me fui a Google antes de hacer el quiz"
+//+AG "con este proveedor, en este aparato, ENLAZAR no lleva a ninguna parte" (esa cuenta ya es de
+//   otro jugador). Se pone al descubrirlo y ahorra la segunda pantalla del proveedor en adelante.
+//   Se BORRA al enlazar bien, que es cuando deja de ser cierto.
+const DIRECTO='bt_directo_';
+function vaDirecto(p){ try{ return localStorage.getItem(DIRECTO+p)==='1'; }catch(e){ return false; } }
 function onbPendiente(v){ try{ v ? localStorage.setItem(ONB_PEND,'1') : localStorage.removeItem(ONB_PEND); }catch(e){} }
 function onbHayPendiente(){ try{ return localStorage.getItem(ONB_PEND)==='1'; }catch(e){ return false; } }
 function startWelcome(){ applyShell(); el('welMsg').textContent='';
@@ -7565,8 +7593,13 @@ async function welConProveedor(prov, idBoton){
     //   ELEVA la cuenta anonima que ya esta jugando (mismo user_id, cero migracion); solo si el
     //   proyecto no deja enlazar se cae al login normal.
     let hayRed=true;
+    //+AG si ya se sabe que enlazar no lleva a ninguna parte con este proveedor, se salta el intento
+    //   y se va derecho al login: es lo que quita la segunda pantalla del proveedor.
+    if(vaDirecto(prov)){ try{ destino=nube.urlDeProveedor(prov, location.href); }catch(e){} }
+    else{
     try{ destino=await nube.urlDeEnlace(prov, location.href); }
     catch(e){ hayRed=!!(e&&e.estado); console.warn('[bienvenida] enlazar '+prov, e); }
+    }
     //+AG FALLO REAL cazado el 27-jul probandolo sin red: urlDeProveedor solo PEGA una cadena, no
     //   pregunta a nadie, asi que sin conexion devolvia una URL igualmente y el juego navegaba a
     //   ella — el jugador acababa en la pantalla de error del navegador, fuera del juego y sin
@@ -8808,6 +8841,13 @@ atrasSync();
         let yaVa=null; try{ yaVa=sessionStorage.getItem('bt_prov_entrar'); }catch(e){}
         if(!yaVa && /already|linked|identity|exists/i.test(vuelta.error)){
           try{ sessionStorage.setItem('bt_prov_entrar','1'); }catch(e){}
+          //+AG DOS CONFIRMACIONES EN FACEBOOK, cazado por Jaime el 6-ago: si esa cuenta ya
+          //   pertenece a otro jugador de BallTrials, el intento de ENLAZAR muere y hay que
+          //   reintentar por el login normal — o sea, la pantalla del proveedor DOS veces. La
+          //   primera vez no hay forma de saberlo sin preguntar, pero la segunda si: se apunta en
+          //   este aparato que con este proveedor enlazar no lleva a ninguna parte, y a partir de
+          //   ahora se va derecho al login. Una sola confirmacion.
+          try{ localStorage.setItem(DIRECTO+prov,'1'); }catch(e){}
           location.href = nube.urlDeProveedor(prov, location.href);
           return;
         }
@@ -8816,6 +8856,12 @@ atrasSync();
         //   de invitado. El quiz de la primera bola ya esta puesto por la marca bt_onb_pendiente.
         console.warn('[nube] '+prov+':', vuelta.error);
         try{ toast(S().tProvNo(prov==='facebook'?'Facebook':'Google')); }catch(e){}
+      }
+      //+AG si la vuelta trajo sesion SIN error, enlazar si valia: se borra el atajo para no dejarlo
+      //   clavado por un fallo de un dia (p. ej. se borro la otra cuenta y ahora si se puede enlazar).
+      if(vuelta && !vuelta.error && vuelta.user_id){
+        let p=null; try{ p=sessionStorage.getItem('bt_prov'); }catch(e){}
+        if(p){ try{ localStorage.removeItem(DIRECTO+p); }catch(e){} }
       }
       try{ sessionStorage.removeItem('bt_prov_entrar'); sessionStorage.removeItem('bt_prov'); }catch(e){}
       if(vuelta && vuelta.user_id && vuelta.antes && !vuelta.mismo){

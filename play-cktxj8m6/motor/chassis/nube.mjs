@@ -123,7 +123,7 @@ export function crearNube(opts = {}) {
       if (typeof captchaOpt === 'function') return (await captchaOpt()) || null;
       if (captchaOpt && typeof captchaOpt.token === 'function') return (await captchaOpt.token()) || null;
       if (captchaPorDefecto === undefined) {
-        const m = await import('./captcha.mjs?v=ca3ebb7');
+        const m = await import('./captcha.mjs?v=d07d215');
         captchaPorDefecto = m.crearCaptcha();
       }
       return (await captchaPorDefecto.token()) || null;
@@ -314,8 +314,11 @@ export function crearNube(opts = {}) {
   function estadoCuenta() {
     if (!ses) return { entrado: false, anonimo: true, email: null, proveedores: [], google: false };
     const ps = Array.isArray(ses.proveedores) ? ses.proveedores : [];
+    //+AG `facebook` se saca igual que `google`: la pantalla de cuenta tiene que poder decir CON QUE
+    //   ha entrado el jugador, y sin este dato Facebook caia en el caso "correo" y se pintaba con el
+    //   sobre de la casa — daba la sensacion de no estar logueado con Facebook (Jaime, 6-ago).
     return { entrado: true, anonimo: !!ses.es_anonimo, email: ses.email || null,
-             proveedores: ps, google: ps.indexOf('google') >= 0 };
+             proveedores: ps, google: ps.indexOf('google') >= 0, facebook: ps.indexOf('facebook') >= 0 };
   }
 
   // Quien soy SEGUN EL SERVIDOR, y de paso se pone al dia la sesion guardada. Hace falta para
