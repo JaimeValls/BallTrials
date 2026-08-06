@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-06 65b4369"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-06 5d37c9e"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG ICONO EN LA PANTALLA DE INICIO (docs/40 §6). Jaime: "la gente esta acostumbrada a clicar en el
@@ -3844,12 +3844,15 @@
         <!--+AG la insignia grande NO se fija aqui: la copia syncLigaBadge() del escalon que lleve
              .cur, para que no puedan contradecirse (antes era un 🥇 clavado). -->
         <img class="se-badge" id="seBadge" src="arte/ui/liga-oro.webp" alt="">
-        <div class="se-lp"><div class="nm" data-t="seTier">Oro III</div><div class="se-bar"><div class="fill" style="width:62%"></div></div><div class="sub" data-th="seToNext"></div></div>
+        <!--+AG doc 78: los tres los pinta paintLiga() con TUS copas. Ya NO llevan `data-t`/`data-th`:
+             si los llevaran, cualquier applyShell() posterior (cambio de idioma, volver a la pantalla)
+             les devolveria el "Oro III · 620 / 1000" de la maqueta encima del dato real. -->
+        <div class="se-lp"><div class="nm" id="seTierNm">—</div><div class="se-bar"><div class="fill" id="seBarFill" style="width:0%"></div></div><div class="sub" id="seToNextTx"></div></div>
       </div>
       <div class="se-ladder">
         <div class="se-tier" data-liga="bronce"><img class="em" src="arte/ui/liga-bronce.webp" alt=""><span data-ti="seTiers:0">Bronce</span></div>
         <div class="se-tier" data-liga="plata"><img class="em" src="arte/ui/liga-plata.webp" alt=""><span data-ti="seTiers:1">Plata</span></div>
-        <div class="se-tier cur" data-liga="oro"><img class="em" src="arte/ui/liga-oro.webp" alt=""><span data-ti="seTiers:2">Oro</span></div>
+        <div class="se-tier" data-liga="oro"><img class="em" src="arte/ui/liga-oro.webp" alt=""><span data-ti="seTiers:2">Oro</span></div>
         <div class="se-tier" data-liga="diamante"><img class="em" src="arte/ui/liga-diamante.webp" alt=""><span data-ti="seTiers:3">Diamante</span></div>
         <div class="se-tier" data-liga="elite"><img class="em" src="arte/ui/liga-elite.webp" alt=""><span data-ti="seTiers:4">Élite</span></div>
       </div>
@@ -4204,7 +4207,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=65b4369"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=5d37c9e"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -5604,7 +5607,10 @@ function relangScreens(){
     //   `data-t` solo alcanza al HTML fijo. Sin esta linea el panel se quedaba EN INGLES en los 18
     //   idiomas que llegan por paquete: el panel se pinta al abrir la pantalla y el paquete aterriza
     //   despues, asi que nadie lo repintaba. Se cazo midiendo el texto en aleman, no leyendo el codigo.
-    if(el('temporada') && el('temporada').classList.contains('on')){ buildPaseTrack(); if(typeof renderRetos==='function') renderRetos(); }
+    //+AG doc 78: paintLiga tambien va aqui. El nombre del escalon ("Oro II") y la frase de la barra
+    //   los arma JS con la palabra traducida, asi que al cambiar de idioma con la pantalla abierta
+    //   se quedarian en la lengua anterior — el mismo fallo que se cazo con el panel de retos.
+    if(el('temporada') && el('temporada').classList.contains('on')){ buildPaseTrack(); if(typeof paintLiga==='function') paintLiga(); if(typeof renderRetos==='function') renderRetos(); }
     if(el('settings') && el('settings').classList.contains('on')) buildSettings();
   }catch(e){}
 }
@@ -5678,7 +5684,7 @@ const MUSIC_VOL_VIEJO = 0.20;                 // el defecto inaudible del 27-jul
 let SAVE=Object.assign({chispas:0,gemas:20,xp:0,level:1,played:0,lastWinDay:'',
     balls:[{arch:'cohete',q:0,attrs:[8,7,3,4,4,5],xp:0,pts:0,copas:0}], equipped:0, cosmetics:[], pase:false,
     onboarded:false, codes:[], settings:{audio:true, music:true, sfx:true, musicVol:MUSIC_VOL_DEF, reducedFx:false, quality:'auto', colorblind:'off'},
-    mode:'race', fmt:'individual', dayBonusDay:'', cupsToday:null, tutorialDone:{}}, //+AG colección inicial: Cohete Común (bola de arranque, doc 05 §3.3) + estado Fase D + Home v3 (modo/formato elegidos, bonus del día) + copas (doc 37)
+    mode:'race', fmt:'individual', dayBonusDay:'', cupsToday:null, tutorialDone:{}, ligaSuelo:0}, //+AG colección inicial: Cohete Común (bola de arranque, doc 05 §3.3) + estado Fase D + Home v3 (modo/formato elegidos, bonus del día) + copas (doc 37)
   (()=>{ try{ return JSON.parse(localStorage.getItem(SAVE_KEY))||{}; }catch(e){ return {}; } })());
 if(!SAVE.settings) SAVE.settings={audio:true, music:true, sfx:true, musicVol:MUSIC_VOL_DEF, reducedFx:false, quality:'auto', colorblind:'off'};   //+AG saves viejos sin settings
 //+AG musicVol es la escala DEL JUGADOR (0..1) sobre el nivel ya calibrado de cada contexto (1 = la mezcla de
@@ -5720,6 +5726,11 @@ if(Array.isArray(SAVE.balls)) SAVE.balls.forEach(b=>{ if(typeof b.copas!=='numbe
 if(!SAVE.mode || !['race','cazador','redlight'].includes(SAVE.mode)) SAVE.mode='race';
 if(SAVE.fmt!=='individual' && SAVE.fmt!=='equipos') SAVE.fmt='individual';
 if(typeof SAVE.dayBonusDay!=='string') SAVE.dayBonusDay='';
+//+AG doc 78: el suelo de Liga de una partida vieja arranca en 0 (Bronce) y lo sube la primera partida
+//   que se juegue. No se calcula aqui de las copas a proposito: el suelo solo protege hacia ABAJO, asi
+//   que empezar bajo no le quita nada a nadie, y calcularlo antes de que exista LIGA_DIV seria pedirle
+//   a una constante que aun no se ha declarado que conteste.
+if(typeof SAVE.ligaSuelo!=='number' || !(SAVE.ligaSuelo>=0)) SAVE.ligaSuelo=0;
 //+AG 3-ago · VICTORIAS (doc 13 §1: el escaparate luce récords). Ese hueco enseñaba un "-" fijo y
 //   estrenó "mejor puesto" esta misma tarde; Jaime, viendolo: «el best placed diría cuántas victorias
 //   has tenido, cuántas veces has quedado primero». Un puesto medio no es una gesta, ganar sí. El dato
@@ -6117,6 +6128,53 @@ function drawPreviewBall(cv,col){ const x=cv.getContext('2d'), S=cv.width, r=S*0
 const ARCH_COLOR=Object.fromEntries(Object.entries(window.BOLAS_CANON).map(([k,h])=>[k,canonUI(h)]));
 const equippedBall=()=>SAVE.balls[SAVE.equipped]||SAVE.balls[0];
 const totalCopas=()=>SAVE.balls.reduce((s,b)=>s+(b.copas||0),0);
+//+AG 6-ago · LA LIGA SALE DE LAS COPAS (doc 78). Hasta hoy la pantalla de Temporada era una maqueta:
+//   "Oro III", "620 / 1000" y la barra al 62% estaban escritos a mano en el HTML y en los 20
+//   diccionarios, y NADA los movia. Jaime, viendola: «¿por que va subiendo mi liga con el tiempo?».
+//   No subia: llevaba clavada desde el dia que se pinto.
+//   ⚠ LA DECISION DE DISENO, y es la que explica todo lo de abajo: la Liga NO tiene puntos propios.
+//   Es una CAPA DE NOMBRES encima del total de copas (doc 37), que es el numero que el jugador ya
+//   entiende y que ya sube y baja solo al ganar y perder. Dos contadores que miden lo mismo obligan
+//   al jugador a decidir cual de los dos es "su nivel"; ademas, una escalera con puntos propios y
+//   descenso pide rivales de verdad, y hoy los rivales son bots que elige el propio juego: bajarte
+//   de escalon seria un castigo que se ha inventado la maquina.
+//   Consecuencia buscada: el dia que haya PvP de verdad se le cambia la FUENTE a ligaDe() y ni la
+//   pantalla ni los 20 idiomas se enteran.
+const LIGA_KEYS=['bronce','plata','oro','diamante','elite'];
+//   Tres divisiones por escalon (I → II → III, la III es la mas alta, como en Brawl). Cada numero es
+//   el total de copas con el que ENTRAS en esa division. Calibrado contra lo que de verdad paga una
+//   partida (PLACE_DELTA: +8 el 1o, -6 el 8o) y contra los hitos de las Epicas (1500/3500/6000), que
+//   asi caen repartidos entre Diamante y Elite en vez de amontonarse.
+const LIGA_DIV=[[0,50,100],[150,250,350],[500,700,900],[1200,1600,2000],[2500,4000,5500]];
+//   Elite no se acaba: pasada la III sigue dando divisiones cada tanto, para que al que juega mucho
+//   le quede siempre algo a lo que subir (es el papel del Trophy Road de Brawl).
+const LIGA_ELITE_PASO=1500;
+const LIGA_ROMAN=['I','II','III','IV','V','VI','VII','VIII','IX','X'];
+//   copas → {t: escalon 0-4, d: division 0-N}
+function ligaDe(copas){
+  copas=Math.max(0, Math.floor(copas||0));
+  let t=0; for(let i=0;i<LIGA_DIV.length;i++) if(copas>=LIGA_DIV[i][0]) t=i;
+  const b=LIGA_DIV[t]; let d;
+  if(t===LIGA_DIV.length-1 && copas>=b[2]) d=2+Math.floor((copas-b[2])/LIGA_ELITE_PASO);
+  else d = copas>=b[2] ? 2 : (copas>=b[1] ? 1 : 0);
+  return {t, d};
+}
+//   copas con las que empieza una division dada (la inversa de ligaDe, para la barra)
+function ligaIni(t,d){ const b=LIGA_DIV[t];
+  if(t===LIGA_DIV.length-1 && d>=2) return b[2]+(d-2)*LIGA_ELITE_PASO;
+  return b[Math.min(2,d)]; }
+function ligaSig(t,d){ if(t===LIGA_DIV.length-1 || d<2) return {t, d:d+1}; return {t:t+1, d:0}; }
+//   El nombre SIEMPRE se arma con la palabra ya traducida del diccionario + el numero romano: asi los
+//   20 idiomas lo dicen en su lengua sin escribir ni una cadena nueva.
+function ligaNombre(t,d){ const s=S(), tiers=(s.seTiers&&s.seTiers.length===5)?s.seTiers:SHELL.en.seTiers;
+  return (tiers[t]||'')+' '+(LIGA_ROMAN[d]||String(d+1)); }
+//+AG EL SUELO PROTEGIDO de doc 10 §2.1: una vez tocas un escalon, esa temporada ya no bajas de el
+//   aunque encadenes derrotas. Existe porque las copas SI bajan (PLACE_DELTA paga negativo del 6o al
+//   8o), o sea que sin suelo un mal dia te desmonta el escalon, que es justo el castigo que doc 10
+//   descarto por brutal para un nino. Hoy el suelo es permanente porque todavia no hay reloj de
+//   temporada; cuando lo haya, es esta linea la que se reinicia (suave, doc 10 §2.2).
+const ligaAhora=()=>{ const L=ligaDe(totalCopas()), suelo=Math.max(0, SAVE.ligaSuelo|0);
+  return L.t<suelo ? {t:suelo, d:0, porSuelo:true} : L; };
 function renderHome(){ applyShell();
   el('hChispas').textContent=SAVE.chispas; el('hGemas').textContent=SAVE.gemas; el('hLvl').textContent=SAVE.level;
   document.documentElement.style.setProperty('--lvlpct', Math.round(100*SAVE.xp/xpForLevel(SAVE.level))+'%');
@@ -6378,6 +6436,13 @@ function applyCupsForResult(res, ball, place, d){
   else { const p=Math.max(1,Math.min(8,place)); delta=PLACE_DELTA[p-1]; }   // 12 bolas (carrera 2D) se mapea a la escala de 8
   const r=applyCups(ball, delta); r.delta=r.after-r.before; r.ball=ball;
   trackToday(r.delta); lastCups=r;
+  //+AG doc 78 · SUBIR DE ESCALON SE CANTA. Aqui es el sitio por lo mismo que las victorias de arriba:
+  //   por applyCupsForResult pasan LOS DOS caminos de fin de partida, y no se repinta al volver a la
+  //   pantalla (si viviera en showResults, cada visita a Resultados volveria a cantar el ascenso).
+  //   El cartel se arma con dos palabras YA traducidas del diccionario, sin estrenar cadena nueva.
+  const ligaAntes=Math.max(0, SAVE.ligaSuelo|0), ligaTras=ligaDe(totalCopas()).t;
+  if(ligaTras>ligaAntes){ SAVE.ligaSuelo=ligaTras; const sl=S(), tn=(sl.seTiers&&sl.seTiers.length===5)?sl.seTiers:SHELL.en.seTiers;
+    toast('▲ '+(sl.seLeague||'')+' · '+(tn[ligaTras]||'')); }
 }
 function finishRace(){
   const place=sim.player.rank||sim.playerPlace(), rew=computeRewards(place, 'race');
@@ -7183,7 +7248,39 @@ function buildPaseTrack(){ const t=el('seTrack'); if(!t) return; t.innerHTML='';
 //    propia escalera. Una sola fuente de verdad = la clase .cur.
 function syncLigaBadge(){ const cur=document.querySelector('.se-tier.cur img.em'), b=el('seBadge');
   if(cur && b) b.src=cur.getAttribute('src'); }
-function openTemporada(){ showScreen('temporada'); applyShell(); el('seChispas').textContent=SAVE.chispas; el('seGemas').textContent=SAVE.gemas; drawPreviewBall(el('seChamp'), TEAMS[3].color); buildPaseTrack(); syncLigaBadge(); renderRetos(); }
+//+AG doc 78 · LA PANTALLA DEJA DE MENTIR. Los cuatro datos de la tarjeta de Liga —el escalon
+//   encendido de la escalera, la insignia grande, el nombre con su division y la barra con su
+//   frase— salen de aqui, y los cuatro de la MISMA cuenta (ligaAhora), que es la unica manera de
+//   que no puedan contradecirse entre ellos.
+function paintLiga(){
+  const s=S(), tot=totalCopas(), L=ligaAhora(), nx=ligaSig(L.t,L.d);
+  document.querySelectorAll('#temporada .se-ladder .se-tier').forEach((e,i)=>e.classList.toggle('cur', i===L.t));
+  syncLigaBadge();   //   la insignia grande copia al escalon encendido: se llama DESPUES de moverlo
+  const nm=el('seTierNm'); if(nm) nm.textContent=ligaNombre(L.t,L.d);
+  const a=ligaIni(L.t,L.d), b=ligaIni(nx.t,nx.d);
+  //   si estas sostenido por el suelo, tus copas van por debajo de donde empieza tu escalon: la barra
+  //   se queda a cero en vez de pintar un porcentaje negativo.
+  const pct=Math.max(0, Math.min(100, Math.round(100*(tot-a)/Math.max(1,b-a))));
+  const fill=el('seBarFill'); if(fill) fill.style.width=pct+'%';
+  //+AG LA FRASE NO SE TRADUCE OTRA VEZ: se reaprovecha la que ya existe en los 20 diccionarios
+  //   (seToNext) y solo se le cambian los HUECOS —el par de cifras y el nombre en negrita—. Cada
+  //   lengua tiene su orden de palabras y su palabra para "puntos" (「まで」, «نقطة», "还差"), y
+  //   reescribirlas desde cero habria sido pedir 20 traducciones nuevas para no decir nada nuevo.
+  //   Se busca por PATRON (un "N / M" y un <b>…</b>), no por las cifras literales de la maqueta: si
+  //   manana alguien retraduce la frase, esto sigue funcionando mientras conserve sus dos huecos.
+  const sub=el('seToNextTx');
+  if(sub){
+    //   sostenido por el suelo, la meta que se ensena NO es la division siguiente: es volver a ganarte
+    //   el escalon que te esta protegiendo. Decirle "1 400 para Diamante II" a quien esta en 200 seria
+    //   contarle la mitad del camino.
+    const meta = L.porSuelo ? ligaIni(L.t,0) : b, dest = L.porSuelo ? ligaNombre(L.t,0) : ligaNombre(nx.t,nx.d);
+    const raw=String(s.seToNext||SHELL.en.seToNext||''), par=nfmt(tot)+' / '+nfmt(meta);
+    let txt=raw.replace(/<b>[\s\S]*?<\/b>/, ()=>'<b>'+dest+'</b>');
+    txt = /\d+\s*\/\s*\d+/.test(txt) ? txt.replace(/\d+\s*\/\s*\d+/, ()=>par) : (par+' → <b>'+dest+'</b>');
+    sub.innerHTML=coinify(txt);
+  }
+}
+function openTemporada(){ showScreen('temporada'); applyShell(); el('seChispas').textContent=SAVE.chispas; el('seGemas').textContent=SAVE.gemas; drawPreviewBall(el('seChamp'), TEAMS[3].color); buildPaseTrack(); paintLiga(); renderRetos(); }
 //+AG doc 75 · EL PANEL DE RETOS. Pinta la semanal arriba y las 3 diarias debajo. Todo lo que decide
 //   (que retos, cuanto llevas, si esta cobrado) sale del motor de misiones; aqui solo se dibuja.
 function retoTxt(m){ const s=S(), T=MIS_TPL[m.p]||{};
