@@ -1,8 +1,27 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-06 63de6c1"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-06 7958b57"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
+<!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
+     Misma copia y misma version que usan los modos en motor/*/index.html, para no traerse dos copias
+     distintas de la libreria.
+     ⚠ 6-ago-2026 · THREE VIENE DE CASA, NO DE UNA CDN AJENA (docs/77). Jaime: «hay veces que no se
+     carga nada en el fondo; si empiezo a dar a F5 se arregla». La libreria se pedia a
+     cdn.jsdelivr.net en cada arranque, y si esa peticion no llegaba no habia ni fondo ni bola de
+     heroe -y una partida se quedaba con cero canvas-. Ahora viaja en el repo.
+     ⚠⚠ Y ESTE BLOQUE VA EN EL <head>, NO AL FINAL. Estuvo abajo, junto a los <script type="module">,
+     y ASI ESTABA MAL aunque pareciera funcionar: el script clasico de esta pagina arranca ANTES
+     (linea ~4210) y llama a vivasSync(), que hace un import() dinamico. Si el navegador no ha
+     parseado todavia este mapa, ese import muere con «Failed to resolve module specifier "three"»,
+     y como un modulo ES fallido NO se vuelve a pedir, la bola del heroe y las 12 del Garaje se
+     quedan fuera hasta recargar. Es una CARRERA: en un Chromium de banco ganaba el mapa y en el
+     Chrome de Jaime ganaba el import, o sea que el banco daba verde con el fallo delante.
+     Un importmap solo vale si esta parseado antes del primer import: aqui arriba siempre lo esta. -->
+<script type="importmap">
+{ "imports": { "three": "./motor/vendor/three-0.160.0/three.module.js",
+               "three/addons/": "./motor/vendor/three-0.160.0/examples/jsm/" } }
+</script>
 <!--+AG ICONO EN LA PANTALLA DE INICIO (docs/40 §6). Jaime: "la gente esta acostumbrada a clicar en el
      icono y directamente jugar". Esto es lo unico que da icono propio y, en iPhone, pantalla sin barras.
      · El manifest vive AL LADO de este fichero (prototipo/manifest.webmanifest) y el build lo copia a la
@@ -4207,7 +4226,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=63de6c1"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=7958b57"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -6830,7 +6849,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=63de6c1').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=7958b57').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -8720,26 +8739,10 @@ addEventListener('keydown', ()=>setTimeout(atrasSync,0), true);
 atrasSync();
 </script>
 
-<!--+AG doc 41 bloque E: three solo para el fondo de la Home. Misma copia y misma version que usan
-     los modos en motor/*/index.html, para no traerse dos copias distintas de la libreria.
-     ⚠ 6-ago-2026 · THREE YA NO VIENE DE UNA CDN AJENA, VIENE DE CASA (motor/vendor/three/).
-     Jaime: «hay veces que no se carga nada en el fondo; si empiezo a dar a F5 se arregla». Era esto:
-     hasta hoy la libreria se pedia a cdn.jsdelivr.net EN CADA ARRANQUE, y si esa peticion no llegaba
-     -red mala, wifi que cambia, un bloqueador, la CDN de mal dia- este <script type="module"> entero
-     no llegaba a ejecutarse: sin BT_AMBIENT no hay fondo vivo, y sin el modulo tampoco monta la bola
-     del heroe. La Home salia entera y bonita, con el hueco de la protagonista vacio (solo su sombra),
-     exactamente como en su captura. MEDIDO con la CDN bloqueada, y la partida es aun peor: el motor
-     se queda con CERO canvas, o sea pista negra.
-     Y no se arregla solo: un modulo ES que falla al cargarse queda marcado como fallido, asi que
-     reintentar la misma URL no vuelve a pedirla. Por eso lo unico que lo curaba era el F5.
-     Ahora los 12 ficheros de three viven en el repo y viajan en el paquete (motor/ se copia entero),
-     asi que el juego no depende de ningun tercero para arrancar. -->
-<script type="importmap">
-{ "imports": { "three": "./motor/vendor/three-0.160.0/three.module.js",
-               "three/addons/": "./motor/vendor/three-0.160.0/examples/jsm/" } }
-</script>
+<!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
+     Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=63de6c1';
+  import { startAmbient } from './arte/ambient.mjs?v=7958b57';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -8755,7 +8758,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=63de6c1').then(m => {
+  import('./arte/pista-preview.mjs?v=7958b57').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -8767,8 +8770,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=63de6c1';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=63de6c1';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=7958b57';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=7958b57';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -8921,7 +8924,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=63de6c1'), import('./motor/chassis/sincro.mjs?v=63de6c1')]);
+        import('./motor/chassis/nube.mjs?v=7958b57'), import('./motor/chassis/sincro.mjs?v=7958b57')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
