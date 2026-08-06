@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-05 663c9be"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-06 dc9d000"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG ICONO EN LA PANTALLA DE INICIO (docs/40 §6). Jaime: "la gente esta acostumbrada a clicar en el
@@ -796,6 +796,59 @@
      aqui no hay trazo que separar, solo mayusculas que airear. */
   .se-vias{ display:flex; gap:13px; font-size:var(--fs-2); font-weight:800; margin:3px 0 9px;
     text-transform:uppercase; letter-spacing:.06em; } .se-vias .g{ color:#8fe0a8; } .se-vias .p{ color:#b39bff; }
+  /*+AG doc 75 · RETOS. Una fila por reto: icono de estado, texto+barra, y el premio a la derecha. El
+     patron es el de las filas que ya existen en el juego (placa, borde, radio 14), no un componente
+     nuevo — lo unico propio es la barra de progreso, que es la informacion que estas filas aportan.
+     La barra va con la MISMA rampa que el resto de barras del juego para que "lleno" signifique lo
+     mismo en toda la app. */
+  .mi-row{ display:flex; align-items:center; gap:9px; background:var(--plate-a); border:1px solid var(--line);
+    border-radius:14px; padding:8px 10px; margin-bottom:6px; }
+  .mi-row .mi-tx{ flex:1; min-width:0; }
+  /*+AG el contador va EN LA MISMA LINEA que el texto, no debajo. Medido: con el contador en linea
+     propia el bloque de retos se salia 45 px por abajo en un movil de 360x640 (lo canto __fitCheck),
+     y esa linea suelta no aportaba nada que la barra no dijera ya. Ahora cabe con margen. */
+  .mi-row .mi-t{ font-size:var(--fs-1); font-weight:800; line-height:1.2; display:flex; align-items:baseline; gap:6px; }
+  .mi-row .mi-t span{ flex:1; min-width:0; }
+  .mi-bar{ height:7px; border-radius:6px; background:#ffffff18; overflow:hidden; margin-top:5px; box-shadow:inset 0 0 0 1px #ffffff10; }
+  .mi-bar i{ display:block; height:100%; border-radius:6px; background:linear-gradient(90deg,var(--gold2),#ff9a3d); transition:width .25s; }
+  .mi-n{ font-size:var(--fs-2); color:var(--muted); font-weight:800; flex:0 0 auto; font-variant-numeric:tabular-nums; }
+  /*+AG el premio SIEMPRE visible, tambien antes de completarlo: es la regla de "ves lo que te llevas
+     antes de empezar" (docs/10 §7, cero azar). Cuando esta listo, el boton se lleva el sitio. */
+  .mi-pr{ flex:0 0 auto; display:flex; align-items:center; gap:3px; font-weight:900; font-size:var(--fs-1); white-space:nowrap; }
+  .mi-cta{ flex:0 0 auto; border:0; border-radius:12px; padding:9px 14px; font-family:inherit; font-weight:900;
+    font-size:var(--fs-1); color:#3a2400; background:linear-gradient(#ffe27a,#ff9a3d); box-shadow:0 3px 0 #a85a12; cursor:pointer; }
+  .mi-cta:active{ transform:translateY(2px); box-shadow:0 1px 0 #a85a12; }
+  /*+AG cobrado = apagado y con check, NUNCA desaparece (canon 6: lo que ya no se puede tocar se
+     enseña apagado, no se esconde — si desapareciera, el jugador no sabria que lo hizo). */
+  .mi-row.done{ opacity:.55; }
+  .mi-row.done .mi-t{ text-decoration:none; }
+  .mi-ck{ flex:0 0 auto; width:22px; height:22px; border-radius:50%; display:grid; place-items:center;
+    background:#2ecc71; color:#06301a; font-weight:900; font-size:13px; }
+  /*+AG el reto SEMANAL es una sola fila, pero mas alta y con el borde dorado: es el que paga Gemas. */
+  .mi-sem{ border-color:#ffd23f66; background:linear-gradient(180deg,#ffd23f14,#ffffff08); padding:12px; margin-bottom:11px; }
+  .mi-sem .mi-t{ font-size:var(--fs-0); }
+  .mi-rr{ background:none; border:1px solid var(--line); color:var(--muted); border-radius:10px; padding:6px 9px;
+    font-family:inherit; font-weight:800; font-size:var(--fs-2); cursor:pointer; }
+  .mi-nota{ font-size:var(--fs-2); color:var(--muted); text-align:center; margin-top:9px; }
+  /*+AG doc 75 · LA CARTA DEL CAMINO DE REGALOS (primera de Destacados). Tamaño de carta normal, NO
+     un banner: la regla del canon es superficie proporcional a la informacion, y esto es un premio
+     pequeño. Cuando hay algo que recoger se enciende con el borde dorado; ya recogida se queda
+     apagada y visible (canon 6), nunca desaparece. */
+  .cam-card{ background:var(--plate-a); border:1px solid var(--line); border-radius:18px; padding:12px; margin-bottom:12px; }
+  .cam-card.hay{ border-color:#ffd23f80; background:linear-gradient(180deg,#ffd23f1a,#ffffff08); }
+  .cam-hd{ display:flex; align-items:baseline; gap:8px; margin-bottom:9px; }
+  .cam-t{ font-size:var(--fs-2); letter-spacing:.12em; text-transform:uppercase; color:var(--gold2); font-weight:800; }
+  .cam-d{ margin-left:auto; font-size:var(--fs-2); color:var(--muted); font-weight:800; }
+  .cam-fila{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px; }
+  /*+AG los tres pasos: ayer / hoy / mañana. El de hoy es el grande; los otros dos, atenuados y mas
+     pequeños. Enseñar el de mañana es lo que hace que esto NO sea una caja sorpresa. */
+  .cam-p{ flex:1; text-align:center; font-weight:900; font-size:var(--fs-2); display:flex; align-items:center; justify-content:center; gap:3px;
+    background:#ffffff10; border-radius:12px; padding:8px 4px; }
+  .cam-p.old{ opacity:.42; }
+  .cam-p.next{ opacity:.6; }
+  .cam-p.now{ font-size:var(--fs-0); background:#ffffff1e; box-shadow:inset 0 0 0 1px #ffd23f4d; }
+  .cam-cta{ width:100%; }
+  .cam-cta:disabled{ opacity:.5; }
   .se-track{ display:flex; gap:8px; overflow-x:auto; padding:2px 1px 9px; -webkit-overflow-scrolling:touch; }
   .se-rung{ flex:0 0 auto; width:64px; display:flex; flex-direction:column; align-items:center; gap:4px; }
   /*+AG docs/60 regla 9: el numero del peldaño y su etiqueta iban a 9 px — son 30 textos de la escalera
@@ -3735,13 +3788,27 @@
       <canvas class="se-champ" id="seChamp" width="112" height="112"></canvas>
     </div>
     <!--+AG doc 40: las tres secciones de Temporada ya no se apilan, se cambian con un tap -->
+    <!--+AG doc 75: los RETOS entran como una seccion mas de Temporada, no como pantalla nueva ni como
+         sexta pestaña — el selector ya existia y esto solo le añade una opcion. Y va PRIMERA y activa
+         por defecto a proposito: Liga y Pase son placeholders «pronto», asi que los retos son lo unico
+         VIVO de esta pantalla; abrirla en una seccion que no hace nada seria enseñar el juego apagado.
+         Se llama RETOS y no MISIONES para hablar el vocabulario que el juego YA usa (la tarjeta «Reto
+         de hoy» de la portada, docs/06 «retos diarios»): una cosa, un nombre. -->
     <div class="subtabs" data-subgroup="temporada">
-      <button class="subtab on" data-subtab="liga" data-t="seTabLiga">Liga</button>
+      <button class="subtab on" data-subtab="retos" data-t="seTabRetos">Retos</button>
+      <button class="subtab" data-subtab="liga" data-t="seTabLiga">Liga</button>
       <button class="subtab" data-subtab="pase" data-t="seTabPase">Pase</button>
       <button class="subtab" data-subtab="rk" data-t="seTabRk">Ranking</button>
     </div>
 
-    <div class="sc-block on" data-sub="liga">
+    <div class="sc-block on" data-sub="retos">
+      <div class="sc-h"><svg class="sc-ico" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5 L6 8.5 L9.5 5"/><path d="M4 13 L6 15 L9.5 11.5"/><path d="M4 19.5 L6 21.5 L9.5 18"/><path d="M13 6.5 H20.5"/><path d="M13 13 H20.5"/><path d="M13 19.5 H20.5"/></g></svg><span data-t="miH">Retos</span></div>
+      <div id="miSem"></div>
+      <div id="miLista"></div>
+      <div class="mi-nota" data-t="miReset">Retos nuevos mañana</div>
+    </div>
+
+    <div class="sc-block" data-sub="liga">
       <div class="sc-h"><svg class="sc-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 3h10v5c0 2.8-1.6 4.7-4 5.4V17h3.5c.8 0 1.5.7 1.5 1.5V21h-12v-2.5c0-.8.7-1.5 1.5-1.5H11v-3.6C8.6 12.7 7 10.8 7 8zm-3 2h3v6c-2 0-3-1.7-3-3.5zm13 0h3v2.5c0 1.8-1 3.5-3 3.5z"/></svg><span data-t="seLeague">Liga</span><button class="ibtn" data-info="seFloor" data-info-tit="seLeague" data-tp="infoWord" title="Info"><svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 10.8 V17"/><path d="M12 6.9 V7.2"/></g></svg></button></div>
       <div class="se-league-top">
         <!--+AG la insignia grande NO se fija aqui: la copia syncLigaBadge() del escalon que lleve
@@ -4097,7 +4164,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=663c9be"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=dc9d000"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -4908,7 +4975,18 @@ const LANGS=BTI18N.LANGS;
 const SHELL={
   es:{ featured:'Modo destacado', play:'▶ JUGAR', you:'TÚ', lvl:'Nivel', again:'▶ Jugar otra', back:'Atrás', home:'Inicio',
     rNext:'Continuar ▸', rSeeAll:n=>'Ver los '+n+' ▾',   //+AG doc 40: paso 1 (veredicto) → paso 2 (botín)
-    seTabLiga:'Liga', seTabPase:'Pase', seTabRk:'Ranking',   //+AG doc 40: sub-pestañas (etiquetas cortas)
+    seTabLiga:'Liga', seTabPase:'Pase', seTabRk:'Ranking', seTabRetos:'Retos',   //+AG doc 40: sub-pestañas (etiquetas cortas)
+    //+AG doc 75 · RETOS, CAMINO DE REGALOS Y DUPLICADOR. Los textos de reto son funciones porque el
+    //   numero viaja dentro de la frase y en varios idiomas no va en el mismo sitio.
+    miH:'Retos', miReset:'Retos nuevos mañana', miCobrar:'Coger', miRerollT:'Cambiar este reto (1 al día)',
+    miTxt:{ partidas:n=>`Termina ${n} partidas`, podio:n=>(n>1?`Llega ${n} veces en top 3`:'Llega en top 3'),
+            ganar:n=>(n>1?`Gana ${n} partidas`:'Gana una partida'), monedas:n=>`Gana ${n} monedas`,
+            otraBola:()=>'Juega con otra bola', modo:()=>'' },
+    miModo:m=>`Juega 2 partidas de ${m}`,
+    miSem:n=>`Reto de la semana: completa ${n} retos`, miSemHecha:'¡Reto de la semana completado!',
+    camH:'Regalo del día', camDia:(i,t)=>`Día ${i} de ${t}`, camCoger:'Recoger', camManana:'Vuelve mañana',
+    camCogido:'¡Regalo recogido!', camFin:'Camino completado',
+    dupOn:n=>`Monedas ×2 · quedan ${n}`, dupGan:'¡Monedas ×2 en tus próximas partidas!',
     prTabYou:'Tú', prTabFriends:'Amigos', prTabAcc:'Cuenta', prTabMore:'Más',
     tJugar:'Jugar', tGaraje:'Garaje', tTienda:'Tienda', tTemp:'Temporada', tPerfil:'Perfil',
     won:'¡GANASTE!', champ:'Campeón', wonSub:'¡Primer puesto!', podium:'¡Podio!', againSub:'¡Otra! Cada carrera suma.',
@@ -4947,7 +5025,16 @@ const SHELL={
     teamWon:'¡Tu equipo ganó!', teamPlaceMsg:p=>'Tu equipo: '+p+'º', teamAgainSub:'¡Otra! Cada partida suma para tu equipo.' },
   en:{ featured:'Featured mode', play:'▶ PLAY', you:'YOU', lvl:'Level', again:'▶ Play again', back:'Back', home:'Home',
     rNext:'Continue ▸', rSeeAll:n=>'See all '+n+' ▾',
-    seTabLiga:'League', seTabPase:'Pass', seTabRk:'Ranking',
+    seTabLiga:'League', seTabPase:'Pass', seTabRk:'Ranking', seTabRetos:'Quests',
+    miH:'Quests', miReset:'New quests tomorrow', miCobrar:'Claim', miRerollT:'Swap this quest (1 a day)',
+    miTxt:{ partidas:n=>`Finish ${n} races`, podio:n=>(n>1?`Reach top 3 ${n} times`:'Reach top 3'),
+            ganar:n=>(n>1?`Win ${n} races`:'Win a race'), monedas:n=>`Earn ${n} coins`,
+            otraBola:()=>'Play with another ball', modo:()=>'' },
+    miModo:m=>`Play 2 races of ${m}`,
+    miSem:n=>`Weekly quest: complete ${n} quests`, miSemHecha:'Weekly quest complete!',
+    camH:'Daily gift', camDia:(i,t)=>`Day ${i} of ${t}`, camCoger:'Claim', camManana:'Come back tomorrow',
+    camCogido:'Gift claimed!', camFin:'Path complete',
+    dupOn:n=>`Coins ×2 · ${n} left`, dupGan:'Coins ×2 on your next races!',
     prTabYou:'You', prTabFriends:'Friends', prTabAcc:'Account', prTabMore:'More',
     tJugar:'Play', tGaraje:'Garage', tTienda:'Shop', tTemp:'Season', tPerfil:'Profile',
     won:'YOU WON!', champ:'Champion', wonSub:'First place!', podium:'Podium!', againSub:'Again! Every race counts.',
@@ -5473,7 +5560,11 @@ function relangScreens(){
     if(el('garaje') && el('garaje').classList.contains('on')) renderGaraje();
     if(el('tienda') && el('tienda').classList.contains('on')) renderTienda();
     if(el('ranking') && el('ranking').classList.contains('on')) paintRanking();
-    if(el('temporada') && el('temporada').classList.contains('on')) buildPaseTrack();
+    //+AG doc 75: los RETOS se pintan por JS, asi que hay que repintarlos aqui como el resto de listas —
+    //   `data-t` solo alcanza al HTML fijo. Sin esta linea el panel se quedaba EN INGLES en los 18
+    //   idiomas que llegan por paquete: el panel se pinta al abrir la pantalla y el paquete aterriza
+    //   despues, asi que nadie lo repintaba. Se cazo midiendo el texto en aleman, no leyendo el codigo.
+    if(el('temporada') && el('temporada').classList.contains('on')){ buildPaseTrack(); if(typeof renderRetos==='function') renderRetos(); }
     if(el('settings') && el('settings').classList.contains('on')) buildSettings();
   }catch(e){}
 }
@@ -5649,6 +5740,163 @@ function computeRewards(place, mode){                             // "gana SIEMP
   const xp=15+(N_BALLS-place)*3;
   return {chispas,xp,firstWin,dayBonus,base,bonus};
 }
+
+// ============================================================================
+//+AG MISIONES DIARIAS · CAMINO DE REGALOS · DUPLICADOR  (doc 75, luz verde de Jaime el 2026-08-06)
+//    Un solo sistema con tres caras: jugar paga (misiones), presentarse paga un poco (camino), y la
+//    recompensa que se "usa" sin tocar la partida (duplicador).
+//    ⚠ REGLA DE PROPORCION, escrita en el doc y respetada aqui en los numeros: el login del dia vale
+//      como maximo el 15-20% de lo que da una sesion corta jugando. Presentarse es el aperitivo.
+//    ⚠ NO HAY RACHA EN NINGUNA PARTE. Faltar un dia nunca resta ni reinicia nada: las diarias se
+//      renuevan, la semanal es acumulativa y el camino solo PAUSA. Es la diferencia con el Daily Streak
+//      de Brawl Stars (que ademas vende protegerlo), que este proyecto veta.
+// ============================================================================
+//+AG las plantillas son 8 parametrizadas, no cien misiones escritas a mano: `n` es el objetivo y el
+//   texto sale de i18n con ese numero dentro. `modo` se rellena al asignar.
+const MIS_TPL = {
+  jugar2:  { tipo:'partidas', n:2 },
+  jugar4:  { tipo:'partidas', n:4 },
+  podio:   { tipo:'podio',    n:1 },
+  podio2:  { tipo:'podio',    n:2 },
+  ganar:   { tipo:'ganar',    n:1 },
+  modo:    { tipo:'modo',     n:2 },     // + modo, se elige al asignar
+  monedas: { tipo:'monedas',  n:150 },
+  otraBola:{ tipo:'otraBola', n:1 },     // termina una partida con una bola que no sea la de siempre
+};
+const MIS_PAGA = 40;        // Monedas por diaria (banda 30-50 del doc)
+const MIS_PLENO = 50;       // remate por completar las 3
+const MIS_XP = 12;          // + XP de cuenta (cuando el Pase exista de verdad, esto alimenta su barra)
+const SEM_OBJ = 12;         // "completa 12 misiones esta semana"
+const SEM_GEMAS = 10, SEM_MONEDAS = 200;
+//+AG EL CAMINO: 20 pasos por temporada. Los hitos son Duplicadores a proposito — el premio de
+//   presentarse EMPUJA A JUGAR, porque un x2 sin partidas no vale nada.
+const CAM_PASOS = (()=>{ const p=[];
+  for(let i=1;i<=20;i++){
+    if(i===5)       p.push({ t:'dup', n:3 });
+    else if(i===10) p.push({ t:'gemas', n:10 });
+    else if(i===15) p.push({ t:'dup', n:5, gemas:15 });
+    else if(i===20) p.push({ t:'grande', gemas:25 });   // + cosmetico del tema (pendiente de arte)
+    else            p.push({ t:'monedas', n:20+(i%3)*5 });   // 20-30
+  }
+  return p; })();
+const CAM_DIAS_TEMP = 42;   // una temporada = 6 semanas; el camino se reinicia con ella
+function tempNum(){ return Math.floor(todayNum()/CAM_DIAS_TEMP); }
+function semNum(){ return Math.floor(todayNum()/7); }
+//+AG RNG determinista sembrado por DIA + JUGADOR: dos jugadores no llevan las mismas misiones el mismo
+//   dia, pero recargar la pagina no te las cambia (que seria un reroll infinito gratis).
+function _misRng(sal){ let h=2166136261>>>0;
+  const s = sal+'|'+((SAVE.profile&&SAVE.profile.playerId)||'x');
+  for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619)>>>0; }
+  return function(){ h+=0x6D2B79F5; let t=h; t=Math.imul(t^t>>>15,1|t); t=(t+Math.imul(t^t>>>7,61|t))^t; return ((t^t>>>14)>>>0)/4294967296; };
+}
+//+AG sortea 3 diarias con la regla del doc: MAXIMO UNA de modo concreto (si no, un dia entero podia
+//   pedirte tres veces el mismo modo y el empujon de variedad se convertia en un muro).
+function misSortea(sal){
+  const rng=_misRng(sal), claves=Object.keys(MIS_TPL), out=[]; let usadoModo=false;
+  const pool=claves.slice();
+  for(let i=pool.length-1;i>0;i--){ const j=Math.floor(rng()*(i+1)); const t=pool[i]; pool[i]=pool[j]; pool[j]=t; }
+  for(const k of pool){
+    if(out.length>=3) break;
+    if(k==='modo'){ if(usadoModo) continue; usadoModo=true;
+      out.push({ p:k, modo:OPEN_MODES[Math.floor(rng()*OPEN_MODES.length)], v:0, ok:false, cob:false });
+    } else out.push({ p:k, v:0, ok:false, cob:false });
+  }
+  return out;
+}
+function misObj(m){ return MIS_TPL[m.p] ? MIS_TPL[m.p].n : 1; }
+//+AG NORMALIZA Y ROTA. Se llama antes de leer nada: si ha cambiado el dia/semana/temporada, renueva lo
+//   que toque. Idempotente y sin efectos raros si el jugador cambia la hora del movil (todayNum es
+//   dia local entero; ir hacia atras no des-cobra nada ya cobrado).
+function misEstado(){
+  if(!SAVE.mis || typeof SAVE.mis!=='object') SAVE.mis={};
+  const M=SAVE.mis, hoy=todayKey(), sem='w'+semNum(), tmp='t'+tempNum();
+  if(M.d!==hoy || !Array.isArray(M.lista) || M.lista.length!==3){
+    M.d=hoy; M.lista=misSortea(hoy); M.rr=0;   // rerolls del dia a cero
+  }
+  if(!M.sem || M.sem.s!==sem) M.sem={ s:sem, v:0, cob:false };
+  if(!M.cam || M.cam.t!==tmp) M.cam={ t:tmp, paso:0, dia:'' };
+  if(typeof M.dup!=='number' || !(M.dup>=0)) M.dup=0;
+  return M;
+}
+//+AG PROGRESO. Se llama UNA vez por partida terminada, desde onMatchEnd, con lo que la partida ya sabe.
+//   No instrumenta nada dentro de la fisica (regla: no se toca la ruta caliente).
+function misProgreso(ev){
+  const M=misEstado(); let algo=false;
+  for(const m of M.lista){
+    if(m.ok) continue;
+    const T=MIS_TPL[m.p]; if(!T) continue;
+    let d=0;
+    if(T.tipo==='partidas') d=1;
+    else if(T.tipo==='podio')   d=(ev.place<=3?1:0);
+    else if(T.tipo==='ganar')   d=(ev.place===1?1:0);
+    else if(T.tipo==='modo')    d=(ev.mode===m.modo?1:0);
+    else if(T.tipo==='monedas') d=ev.monedas||0;
+    //+AG "otra bola" = distinta a la de la partida ANTERIOR, no a una "bola habitual" que habria que
+    //   inventar y explicar. Asi la mision se lee sola ("cambia de bola") y se cumple en una partida.
+    else if(T.tipo==='otraBola')d=(ev.arch && M.ub && ev.arch!==M.ub ? 1 : 0);
+    if(d>0){ m.v=Math.min(misObj(m), m.v+d); if(m.v>=misObj(m)){ m.ok=true; algo=true; } }
+  }
+  if(ev.arch) M.ub=ev.arch;   //+AG se apunta DESPUES de evaluar, o "otra bola" nunca podria cumplirse
+  return algo;
+}
+//+AG RECLAMAR: paga por la unica puerta de economia (dinero()) y apunta el evento. El jugador decide
+//   cuando, no se le cobra solo: es lo que hace que el `.ready` signifique algo.
+function misReclamar(i){
+  const M=misEstado(), m=M.lista[i];
+  if(!m || !m.ok || m.cob) return false;
+  m.cob=true;
+  dinero('chispas', MIS_PAGA, 'mision'); SAVE.xp+=MIS_XP;
+  M.sem.v=(M.sem.v||0)+1;                                   // la semanal cuenta misiones COBRADAS
+  if(M.lista.every(x=>x.cob)) dinero('chispas', MIS_PLENO, 'mision_pleno');   // remate del 3/3
+  apunta('mision_hecha', { p:m.p, modo:m.modo||null });
+  persist(); return true;
+}
+function misReclamarSem(){
+  const M=misEstado();
+  if(M.sem.cob || (M.sem.v||0) < SEM_OBJ) return false;
+  M.sem.cob=true;
+  dinero('chispas', SEM_MONEDAS, 'mision_semanal'); dinero('gemas', SEM_GEMAS, 'mision_semanal');
+  M.dup=(M.dup||0)+5;
+  apunta('mision_hecha', { p:'semanal' }); apunta('duplicador_activo', { n:5, de:'semanal' });
+  persist(); return true;
+}
+//+AG REROLL: uno gratis al dia, solo diarias, y NUNCA de pago (el doc lo veta). No se puede cambiar una
+//   ya completada: seria tirar el trabajo hecho.
+function misPuedeReroll(){ const M=misEstado(); return (M.rr||0) < 1; }
+function misReroll(i){
+  const M=misEstado(), m=M.lista[i];
+  if(!m || m.ok || !misPuedeReroll()) return false;
+  const rng=_misRng(M.d+'r'+i+(M.rr||0));
+  const otras=Object.keys(MIS_TPL).filter(k=>!M.lista.some(x=>x.p===k));
+  const k=otras.length ? otras[Math.floor(rng()*otras.length)] : m.p;
+  M.lista[i]={ p:k, modo:(k==='modo'?OPEN_MODES[Math.floor(rng()*OPEN_MODES.length)]:undefined), v:0, ok:false, cob:false };
+  M.rr=(M.rr||0)+1; persist(); return true;
+}
+//+AG EL CAMINO. Hay regalo si aun no lo has recogido HOY y quedan pasos. Faltar dias no penaliza: el
+//   paso siguiente te espera. Y no hay catch-up (un paso por dia de login), que convertiria el sistema
+//   en un dispensador y mataria el "cada dia un poquito".
+function camHay(){ const M=misEstado(); return M.cam.dia!==todayKey() && M.cam.paso < CAM_PASOS.length; }
+function camPremio(i){ return CAM_PASOS[Math.max(0, Math.min(CAM_PASOS.length-1, i))]; }
+function camRecoger(){
+  const M=misEstado(); if(!camHay()) return null;
+  const pr=CAM_PASOS[M.cam.paso];
+  if(pr.t==='monedas') dinero('chispas', pr.n, 'camino');
+  else if(pr.t==='gemas') dinero('gemas', pr.n, 'camino');
+  else if(pr.t==='dup'){ M.dup=(M.dup||0)+pr.n; apunta('duplicador_activo', { n:pr.n, de:'camino' }); if(pr.gemas) dinero('gemas', pr.gemas, 'camino'); }
+  else if(pr.t==='grande'){ dinero('gemas', pr.gemas, 'camino'); }   //+AG el cosmetico del tema entra con el arte del paso 20
+  M.cam.paso++; M.cam.dia=todayKey();
+  apunta('regalo_recogido', { paso:M.cam.paso, t:pr.t });
+  persist(); return pr;
+}
+//+AG DUPLICADOR: no es un objeto de inventario, es un contador de partidas. Se gasta solo, en el pago
+//   de Resultados, y se ve alli. Decision de Jaime: los boosters de PARTIDA (nitro/dash/escudo) NO se
+//   vuelven consumibles — son el mando, y con stock quien no tiene juega con menos botones.
+function dupActivo(){ return (misEstado().dup||0) > 0; }
+function dupConsume(){ const M=misEstado(); if(!(M.dup>0)) return false; M.dup--; return true; }
+//+AG ¿hay algo que RECLAMAR ahora mismo? Es el numero del badge (el punto rojo es "hay novedad", el
+//   numero es "hay dinero en la mesa"), y lo usan las dos pestañas.
+function misPendientes(){ const M=misEstado();
+  return M.lista.filter(m=>m.ok && !m.cob).length + (((M.sem.v||0)>=SEM_OBJ && !M.sem.cob) ? 1 : 0); }
 
 // ============================================================================
 //+AG COPAS POR BOLA (doc 37) + POBLACION DE BOTS (doc 36) · port del generador de mockups/flow.html
@@ -6029,7 +6277,16 @@ function onMatchEnd(d){
   if(window.BT_MUSIC) BT_MUSIC.tema(((curFmt==='equipos'?(d.teamPlace||1)===1:place<=3)) ? 'victoria' : 'resultado');
   closeGameFrame();
   const rew=computeRewards(place, curMode);   //+AG el modo importa: bonus del MODO DEL DIA (+50% 1a victoria)
+  //+AG doc 75 · DUPLICADOR: dobla las Monedas de la partida y gasta una carga. Va aqui, sobre `rew`,
+  //   para que el numero que se PAGA y el que se PINTA en Resultados sean el mismo — si se doblara solo
+  //   al pagar, el cartel diria una cosa y el saldo otra. No toca la partida, solo el premio de despues.
+  rew.dup = dupActivo() && dupConsume();
+  if(rew.dup){ rew.dupExtra = rew.chispas; rew.chispas *= 2; }
   dinero('chispas', rew.chispas, 'partida'); SAVE.xp+=rew.xp; SAVE.played++;
+  //+AG doc 75 · MISIONES: una sola llamada con lo que la partida ya sabe. `monedas` son las de ESTA
+  //   partida (con el duplicador ya aplicado: si te doblan el premio, la mision de juntar monedas
+  //   avanza el doble, que es lo que el jugador ve).
+  const _misOk = misProgreso({ place, mode:curMode, arch:(SAVE.balls[SAVE.equipped]||{}).arch, monedas:rew.chispas });
   let leveled=false; while(SAVE.xp>=xpForLevel(SAVE.level)){ SAVE.xp-=xpForLevel(SAVE.level); SAVE.level++; leveled=true; }
   const eb=SAVE.balls[SAVE.equipped]; if(eb){ eb.xp=(eb.xp||0)+rew.xp; }   //+AG doc 39: la XP de bola se ACUMULA (subir de nivel se paga en el Garaje con Chispas)
   //+AG COPAS de LA BOLA equipada (doc 37): en EQUIPOS puntua el puesto de equipo (1..4); en INDIVIDUAL el puesto (1..8)
@@ -6144,7 +6401,10 @@ function showResults(place, rew, leveled, colArg, teamP, d){
   const rewChispa=el('rRewChispa'), rewXp=el('rRewXp');
   rewChispa.classList.remove('in'); rewXp.classList.remove('in');
   el('rChispaVal').textContent='+0';
-  el('rChispaWhy').textContent=[rew.firstWin?s.firstWin:'', rew.dayBonus?s.dayBonusWhy:''].filter(Boolean).join(' · ');   //+AG bonus del modo del dia visible
+  //+AG doc 75: el DUPLICADOR se canta aqui, que es donde actua — no hay pantalla de inventario que
+  //   consultar. Se dice ademas cuantas partidas le quedan, para que el jugador sepa que se le gasta.
+  el('rChispaWhy').textContent=[rew.firstWin?s.firstWin:'', rew.dayBonus?s.dayBonusWhy:'',
+    rew.dup?s.dupOn((misEstado().dup||0)):''].filter(Boolean).join(' · ');   //+AG bonus del modo del dia visible
   el('rLvlNum').textContent=SAVE.level;
   const XPFROM=leveled?0:Math.max(0,SAVE.xp-rew.xp)/xpForLevel(SAVE.level), XPTO=SAVE.xp/xpForLevel(SAVE.level);
   el('rXpFill').style.transition='none'; el('rXpFill').style.width=(XPFROM*100)+'%';
@@ -6401,14 +6661,26 @@ const owned=k=>SAVE.balls.find(b=>b.arch===k);
 const totalUps=()=>SAVE.balls.reduce((s,b)=>s+(canLvlUp(b)?1:0),0);
 //+AG doc 40: el punto rojo del Garaje sale en la barra de pestañas de TODAS las pantallas, no solo en el Home
 //   (regla Supercell: el badge te dice donde mirar; antes solo lo veias si ya estabas en la portada).
-function refreshTabBadges(){ const n=totalUps();
-  document.querySelectorAll('#homeGarTab,#shTabGaraje,[data-nav="garaje"]').forEach(t=>{
+//+AG doc 75: el pintado del aviso se saca a una funcion suelta porque ahora hay TRES pestañas que
+//   pueden avisar (Garaje, Temporada, Tienda) y el aviso tiene que ser EL MISMO en las tres — un
+//   segundo dibujo de badge seria un idioma nuevo que aprender.
+function pintaBadge(sel, n){
+  document.querySelectorAll(sel).forEach(t=>{
     t.classList.toggle('badge', n>0);
     //+AG 2026-07-27: el aviso vuelve a llevar el NUMERO, como el del riel que se ha ido. Se fabrica aqui
     //   porque un ::after no puede pintar un texto que cambia.
     let b=t.querySelector('.tbadge');
     if(n>0){ if(!b){ b=document.createElement('span'); b.className='tbadge'; t.appendChild(b); } b.textContent=n; }
-    else if(b) b.remove(); }); }
+    else if(b) b.remove(); });
+}
+function refreshTabBadges(){ pintaBadge('#homeGarTab,#shTabGaraje,[data-nav="garaje"]', totalUps()); syncBadges(); }
+//+AG doc 75 · LOS AVISOS DE RETOS Y REGALO. Numero = hay premio esperando (dinero en la mesa). El
+//   regalo del dia cuenta como 1 en la Tienda. Sin premio pendiente NO se pinta nada: un aviso que
+//   sale siempre deja de significar algo y el jugador aprende a no mirarlo.
+function syncBadges(){
+  pintaBadge('#hPass,[data-nav="temporada"]', misPendientes());
+  pintaBadge('#shTabTienda,[data-nav="tienda"]', camHay() ? 1 : 0);
+}
 
 function openGaraje(){ checkHitos(); showScreen('garaje'); applyShell(); renderGaraje(); }
 function renderGaraje(){ el('gChispas').textContent=SAVE.chispas; el('gGemas').textContent=SAVE.gemas;
@@ -6709,13 +6981,57 @@ function renderTienda(){ el('shChispas').textContent=SAVE.chispas; el('shGemas')
   ib.dataset.infoIx = String(SECS.indexOf(shSec));
   vivasSync();   //+AG la seccion «Bolas» trae bolas vivas; las otras cuatro no, y sincronizar sin ninguna las apaga solo
 }
+//+AG doc 75 · EL CAMINO DE REGALOS. El premio de cada dia que entras, como PRIMERA carta de Destacados.
+//   Va aqui y no en una pantalla propia porque es el mismo ritual que el regalo diario de la Tienda que
+//   pedia Jaime: un solo sistema que construir, explicar y traducir a 20 idiomas.
+//   ⚠ SIN RACHA Y SIN RELOJ: si hoy no lo recoges no pierdes nada, el paso te espera. Por eso el texto
+//     de "ya recogido" es «vuelve mañana» y NO una cuenta atras — la cuenta atras es la que mete la
+//     ansiedad que este proyecto veta (docs/10 §7).
+function camPremioTxt(pr){ const s=S();
+  if(!pr) return '';
+  if(pr.t==='monedas') return `+${pr.n} ${coinIco('chispa','sm')}`;
+  if(pr.t==='gemas')   return `+${pr.n} ${coinIco('gema','sm')}`;
+  if(pr.t==='dup')     return `${uiIco('ui-reto','sm')} ×2` + (pr.gemas?` +${pr.gemas} ${coinIco('gema','sm')}`:'');
+  if(pr.t==='grande')  return `★ +${pr.gemas} ${coinIco('gema','sm')}`;
+  return '';
+}
+function camEl(){
+  const s=S(), M=misEstado(), d=document.createElement('div');
+  const hay=camHay(), i=M.cam.paso, total=CAM_PASOS.length;
+  const fin=i>=total;
+  //+AG los tres iconos: ayer (hecho), hoy (grande) y mañana (atenuado). El de mañana SIEMPRE visible:
+  //   ver lo que viene es la regla de "cero azar" — nunca una caja cerrada.
+  const ayer = i>0 ? camPremioTxt(CAM_PASOS[i-1]) : '';
+  const hoy  = fin ? '' : camPremioTxt(CAM_PASOS[i]);
+  const man  = (i+1<total) ? camPremioTxt(CAM_PASOS[i+1]) : '';
+  d.className='cam-card'+(hay?' hay':'');
+  d.innerHTML=`<div class="cam-hd"><span class="cam-t">${s.camH}</span><span class="cam-d">${fin?s.camFin:s.camDia(i+1,total)}</span></div>
+    <div class="cam-fila">
+      <div class="cam-p old">${ayer||'·'}</div>
+      <div class="cam-p now">${hoy||'★'}</div>
+      <div class="cam-p next">${man||'·'}</div>
+    </div>`;
+  const b=document.createElement('button');
+  b.className='sh-buy cam-cta'+(hay?' ready':'');
+  b.textContent = fin ? s.camFin : (hay ? s.camCoger : s.camManana);
+  b.disabled = !hay;
+  b.onclick=()=>{ const pr=camRecoger(); if(pr){ renderTienda(); syncBadges(); applyShell(); toast(s.camCogido); } };
+  d.appendChild(b);
+  return d;
+}
 function featEl(){ const d=document.createElement('div');
   const s=S();
-  d.innerHTML=`<div class="sh-feat"><div class="fl">${s.bundleFl}</div><h3>${s.bundleNm}</h3><ul>${s.bundleItems.map(i=>`<li>${coinify(i)}</li>`).join('')}</ul>
+  d.appendChild(camEl());   //+AG doc 75: el regalo del dia va ARRIBA del bundle — es lo unico gratis de la pantalla
+  const f=document.createElement('div');
+  f.innerHTML=`<div class="sh-feat"><div class="fl">${s.bundleFl}</div><h3>${s.bundleNm}</h3><ul>${s.bundleItems.map(i=>`<li>${coinify(i)}</li>`).join('')}</ul>
     <button class="sh-buy gem" id="buyBundle">${coinify(s.buyBtn(BUNDLE.g))} <span class="was">${BUNDLE.was} ${coinIco('gema','sm')}</span></button></div>
 `;
+  d.appendChild(f);
   const b=d.querySelector('#buyBundle'); b.disabled=SAVE.gemas<BUNDLE.g; b.onclick=buyBundle;
-  b.classList.toggle('ready', !b.disabled);   //+AG doc 40: la oferta destacada es LA accion de la Tienda; el resto de botones de compra NO brillan
+  //+AG doc 40: la oferta destacada es LA accion de la Tienda; el resto de botones de compra NO brillan.
+  //   ⚠ pero si HAY REGALO por recoger, el brillo es del regalo: es gratis y es de hoy, y dos cosas
+  //     brillando a la vez en la misma pantalla rompen la regla de "un solo `.ready` por pantalla".
+  b.classList.toggle('ready', !b.disabled && !camHay());
   return d;
 }
 //+AG la nota va por coinify: lleva ✦ y ◆ dentro de la frase y sin esto se pintaba el glifo del
@@ -6827,7 +7143,59 @@ function buildPaseTrack(){ const t=el('seTrack'); if(!t) return; t.innerHTML='';
 //    propia escalera. Una sola fuente de verdad = la clase .cur.
 function syncLigaBadge(){ const cur=document.querySelector('.se-tier.cur img.em'), b=el('seBadge');
   if(cur && b) b.src=cur.getAttribute('src'); }
-function openTemporada(){ showScreen('temporada'); applyShell(); el('seChispas').textContent=SAVE.chispas; el('seGemas').textContent=SAVE.gemas; drawPreviewBall(el('seChamp'), TEAMS[3].color); buildPaseTrack(); syncLigaBadge(); }
+function openTemporada(){ showScreen('temporada'); applyShell(); el('seChispas').textContent=SAVE.chispas; el('seGemas').textContent=SAVE.gemas; drawPreviewBall(el('seChamp'), TEAMS[3].color); buildPaseTrack(); syncLigaBadge(); renderRetos(); }
+//+AG doc 75 · EL PANEL DE RETOS. Pinta la semanal arriba y las 3 diarias debajo. Todo lo que decide
+//   (que retos, cuanto llevas, si esta cobrado) sale del motor de misiones; aqui solo se dibuja.
+function retoTxt(m){ const s=S(), T=MIS_TPL[m.p]||{};
+  const n=misObj(m);
+  if(T.tipo==='modo') return s.miModo(modeTitle(m.modo));
+  return (s.miTxt&&s.miTxt[T.tipo]) ? s.miTxt[T.tipo](n) : m.p;
+}
+function retoFila(m, i){
+  const s=S(), obj=misObj(m), pct=Math.round(100*Math.min(1, (m.v||0)/obj));
+  const d=document.createElement('div'); d.className='mi-row'+(m.cob?' done':'');
+  d.innerHTML=`${m.cob?'<div class="mi-ck">✓</div>':''}
+    <div class="mi-tx"><div class="mi-t"><span>${retoTxt(m)}</span>${m.cob?'':`<b class="mi-n">${Math.min(m.v||0,obj)}/${obj}</b>`}</div>
+      ${m.cob?'':`<div class="mi-bar"><i style="width:${pct}%"></i></div>`}</div>`;
+  if(m.cob){ /* cobrado: la fila se queda apagada, sin boton */ }
+  else if(m.ok){
+    const b=document.createElement('button'); b.className='mi-cta ready'; b.textContent=s.miCobrar;
+    //+AG el `.ready` (glow + barrido) es el lenguaje UNICO de "esto se pulsa" del juego: aqui se
+    //   reutiliza tal cual, no se inventa un brillo nuevo para los retos.
+    b.onclick=()=>{ if(misReclamar(i)){ renderRetos(); syncBadges(); applyShell(); } };
+    d.appendChild(b);
+  } else {
+    const pr=document.createElement('div'); pr.className='mi-pr'; pr.innerHTML=`+${MIS_PAGA} ${coinIco('chispa','sm')}`;
+    d.appendChild(pr);
+    //+AG el REROLL solo aparece si te queda (1 al dia) y solo en retos sin terminar: cambiar uno ya
+    //   completado seria tirar el trabajo hecho. Nunca es de pago (doc 75, veto explicito).
+    if(misPuedeReroll()){ const r=document.createElement('button'); r.className='mi-rr'; r.textContent='⟳';
+      r.title=s.miRerollT||''; r.onclick=()=>{ if(misReroll(i)){ renderRetos(); } }; d.appendChild(r); }
+  }
+  return d;
+}
+function renderRetos(){
+  const s=S(), M=misEstado(), cont=el('miLista'), semC=el('miSem');
+  if(!cont||!semC) return;
+  // ---- semanal ----
+  semC.innerHTML='';
+  const listo=(M.sem.v||0)>=SEM_OBJ;
+  const fs=document.createElement('div'); fs.className='mi-row mi-sem'+(M.sem.cob?' done':'');
+  const pct=Math.round(100*Math.min(1,(M.sem.v||0)/SEM_OBJ));
+  fs.innerHTML=`${M.sem.cob?'<div class="mi-ck">✓</div>':''}
+    <div class="mi-tx"><div class="mi-t"><span>${s.miSem(SEM_OBJ)}</span>${M.sem.cob?'':`<b class="mi-n">${Math.min(M.sem.v||0,SEM_OBJ)}/${SEM_OBJ}</b>`}</div>
+      ${M.sem.cob?'':`<div class="mi-bar"><i style="width:${pct}%"></i></div>`}</div>`;
+  if(!M.sem.cob){
+    if(listo){ const b=document.createElement('button'); b.className='mi-cta ready'; b.textContent=s.miCobrar;
+      b.onclick=()=>{ if(misReclamarSem()){ renderRetos(); syncBadges(); applyShell(); toast(s.miSemHecha); } }; fs.appendChild(b); }
+    else { const pr=document.createElement('div'); pr.className='mi-pr';
+      pr.innerHTML=`${SEM_GEMAS} ${coinIco('gema','sm')} +${SEM_MONEDAS} ${coinIco('chispa','sm')}`; fs.appendChild(pr); }
+  }
+  semC.appendChild(fs);
+  // ---- 3 diarias ----
+  cont.innerHTML='';
+  M.lista.forEach((m,i)=>cont.appendChild(retoFila(m,i)));
+}
 function openPerfil(){ showScreen('perfil'); applyShell(); el('prChispas').textContent=SAVE.chispas; el('prGemas').textContent=SAVE.gemas; el('prLvl').textContent=SAVE.level; el('prColl').textContent=SAVE.balls.length; drawPreviewBall(el('prAv'), TEAMS[0].color);
   //+AG 3-ago · el escaparate deja de ser una maqueta. TROFEOS = totalCopas(), la MISMA cuenta que pinta
   //   la pildora dorada de la portada (#hCups): dos sitios que dicen "tus trofeos" no pueden salir de
