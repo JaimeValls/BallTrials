@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 0cddb5b"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-07 7e6af1f"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -843,22 +843,31 @@
      de verdad de cada cosa y su marco de rareza, y el CTA sube de 13 a 20px.
      ⚠ EL CTA GRANDE ES SOLO DE ESTA TARJETA Y DEL REGALO. `.sh-buy` a secas lo comparten 30 y pico
      botones de Bolas/Cosmeticos/Gemas que son la MITAD de anchos, y ahi 20px parte la linea en dos. */
-  /*+AG ⚠⚠ 2026-08-07 (2ª vuelta) · LA PLANCHA DEJA DE SER UN COLOR PLANO. Jaime, viendo el pase ya
-     desplegado: «el fondo [...] es un color plano y te he pedido que fueses creativo [...] dejarlo así
-     con un color plano es cutre». Tenía razón: agrandé la letra, dibujé los contenidos y puse chapa al
-     rótulo… y dejé la plancha de detrás exactamente como estaba, un degradado de dos violetas.
-     Tres capas, y las TRES salen de cosas que ya existían en el juego — cero arte nuevo, cero espera:
-       1. `doodles.webp` al 7 %: es EL MISMO grano que llevan las seis pantallas grandes de fondo, así
-          que la tarjeta deja de ser una placa lisa sin inventarse una textura que no sea de la casa.
-       2. Los RAYOS: el mismo `conic-gradient` girando de `.cel .rayos` (la celebración), puesto detrás
-          de la bola. Es el lenguaje que el juego YA usa para decir «aquí hay un premio».
-       3. Un foco cálido detrás de la bola, para que la bola se apoye en algo y no flote.
-     ⚠ Las tres van en pseudoelementos con `z-index:0` y el contenido sube a `z-index:1`. Si no, el
-       doodle se pinta ENCIMA del texto.
-     ⚠ Y `overflow:hidden` es obligatorio con los rayos: sin él, el cuadrado de 260 px del conic se
-       sale de la tarjeta y pinta un abanico dorado por encima del regalo del día.
-     Está encargado el fondo pintado de verdad (arte/codex/40): esto es la casa, no el andamio. */
-  .sh-feat{ position:relative; overflow:hidden; border-radius:20px; padding:17px; background:linear-gradient(150deg,#5a2c86,#2a1a58); border:1px solid #ffffff22; box-shadow:0 12px 30px #0007; margin-bottom:12px; }
+  /*+AG ⚠⚠⚠ 2026-08-07 · LA SALA DEL TESORO. Éste es el fondo BUENO: `fondo-destacado.webp`, pintado
+     por Codex con el encargo `arte/codex/40` §3 y elegido por Jaime entre tres conceptos (sala del
+     tesoro · fiesta de las bolas · amanecer dorado). Sus palabras del brief: «bolas felices, lujo,
+     felicidad, brillos» — y de las cuatro, ésta va a por EL LUJO.
+     Sustituye a TRES apaños seguidos que fueron cayendo, y el porqué de cada caída está abajo porque
+     es lo único que impide repetirlos:
+       1. degradado de dos violetas → «un color plano es cutre»
+       2. abanico de rayos girando   → sólo se veía un aspa: «parece un arañazo»
+       3. la grada del juego         → «no se entiende qué es»
+     ⚠ VA CON `cover` Y SE RECORTA, Y ESO ESTÁ MEDIDO. El lienzo es 1050×920 (1,14:1) pero la tarjeta
+       NO tiene una proporción fija: cambia con el contenido y con el móvil. Medido en los cuatro:
+       1,01 a 375×812 · 1,36 a 360×640 · 1,11 a 320×640 · 1,28 en ventana ancha. O sea que `cover`
+       recorta por los lados o por arriba y abajo según el caso.
+       AGUANTA porque el dibujo se encargó sabiéndolo: lo que importa está en los DOS LATERALES y en
+       la franja de arriba, y el centro es liso. Un recorte de ±15 % no se lleva ni una columna ni un
+       montón de monedas. Verificado mirando la captura en los cuatro tamaños, no deducido.
+       ⚠ Si algún día el dibujo se cambia por otro con el interés en el centro, esto se rompe.
+     ⚠ EL DEGRADADO VIEJO SE QUEDA DEBAJO como segunda capa. No es adorno: si la imagen no carga (o
+       tarda), la tarjeta sigue siendo violeta de marca y no un rectángulo blanco.
+     ⚠ Y el dibujo está compuesto SABIENDO lo que lo tapa: columnas y monedas por los DOS LATERALES,
+       haz de luz arriba a la derecha, y el centro casi liso — porque el centro-bajo se lo come entero
+       el botón de comprar, que es verde, opaco y de ancho completo. Eso costó dos vueltas. */
+  .sh-feat{ position:relative; overflow:hidden; border-radius:20px; padding:17px;
+    background:url(arte/fondo/fondo-destacado.webp) no-repeat center center/cover, linear-gradient(150deg,#5a2c86,#2a1a58);
+    border:1px solid #ffffff22; box-shadow:0 12px 30px #0007; margin-bottom:12px; }
   /*+AG ⚠ EL GRANO, y su número está MIRADO, no calculado: a .07 había que buscarlo con lupa y la
      tarjeta seguía leyéndose plana, que es justo lo que había que arreglar. Un efecto que no se ve no
      existe. .12 sobre una teja de 170 px. */
@@ -876,11 +885,8 @@
        abajo y el aire arriba, así que sin voltear la franja superior sale vacía.
      ⚠ Y se van los doodles de esta tarjeta a propósito: con público de verdad, el grano de garabatos
        era una textura peleándose con otra. */
-  .sh-feat::before{ content:''; position:absolute; left:0; right:0; top:0; height:150px; z-index:0; pointer-events:none;
-    background:url(arte/fondo/tribuna.webp) no-repeat center top/auto 150px;
-    transform:scaleY(-1);
-    -webkit-mask-image:linear-gradient(transparent 6%, #000 58%);
-            mask-image:linear-gradient(transparent 6%, #000 58%); }
+  /*+AG el ::before ya no pinta nada: la grada volteada de la 3ª vuelta se va con el fondo pintado.
+     Se deja el hueco documentado y no la regla vacía. */
   /*+AG ⚠⚠ AQUÍ HUBO UN CALLEJÓN SIN SALIDA Y SE ABANDONÓ A PROPÓSITO. La idea primera era el abanico
      de rayos girando de `celebra()` detrás de la bola. Se probó en el juego DOS veces (centrado a ojo
      y luego centrado al píxel en la bola) y las dos se veía UNA sola aspa: la bola está pegada a la
@@ -897,10 +903,13 @@
          con el precio y con el botón. Sin ella, «SUELTO VALE 762» se lee sobre un montón de bolas.
      Cero arte nueva y cero peso nuevo: `tribuna.webp` ya viaja en el paquete. El fondo PINTADO de
      verdad está encargado (arte/codex/40) — esto no es el andamio, es la casa mientras tanto. */
+  /*+AG ⚠ EL VELO, y no es decoración: es lo que garantiza que el título blanco se lea SIEMPRE. El
+     dibujo trae el centro oscuro a propósito, pero un fondo pintado puede cambiar (otra temporada,
+     otro encargo) y el texto no puede depender de que el próximo también venga oscuro. Un velo suave
+     y sólo en el tercio de arriba —que es donde va el título— cuesta nada y hace el contraste
+     independiente del dibujo. Abajo NO hace falta: ahí está el botón, que es opaco. */
   .sh-feat::after{ content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
-    background:
-      radial-gradient(115% 75% at 76% 22%, #a55ce055 0%, transparent 56%),
-      url(arte/fondo/tribuna.webp) no-repeat center bottom/auto 150px; }
+    background:linear-gradient(#160a3859 0%, #160a3826 34%, transparent 55%); }
   .sh-feat > *{ position:relative; z-index:1; }
   .sh-feat-top{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:6px; }
   .sh-feat-top h3{ margin:0; min-width:0; }
@@ -4808,7 +4817,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=0cddb5b"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=7e6af1f"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -7784,7 +7793,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=0cddb5b').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=7e6af1f').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -10053,7 +10062,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=0cddb5b';
+  import { startAmbient } from './arte/ambient.mjs?v=7e6af1f';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -10069,7 +10078,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=0cddb5b').then(m => {
+  import('./arte/pista-preview.mjs?v=7e6af1f').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -10081,8 +10090,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=0cddb5b';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=0cddb5b';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=7e6af1f';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=7e6af1f';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -10250,7 +10259,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=0cddb5b'), import('./motor/chassis/sincro.mjs?v=0cddb5b')]);
+        import('./motor/chassis/nube.mjs?v=7e6af1f'), import('./motor/chassis/sincro.mjs?v=7e6af1f')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
