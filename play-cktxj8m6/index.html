@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 f84dd55"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-07 037a45d"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -1053,6 +1053,28 @@
      se negocia, el cuerpo no. */
   .sh-cat{ font-size:var(--fs-2); font-weight:800; letter-spacing:.04em; text-transform:uppercase; color:var(--qc,#96a0c2); }
   .sh-item .sh-buy{ font-size:var(--fs-4); letter-spacing:.01em; }
+  /*+AG ⚠ 2026-08-07 (Jaime, eligiendo sobre mockup) · «es una tienda, deberia ser un sitio de lujo;
+     esos botones oscuros no me parecen guay». Tenia razon: la fila era la MISMA placa gris-morada que
+     usan las pestañas de Temporada y Perfil, o sea el mueble de navegacion del juego puesto en el
+     escaparate. Ahora la Tienda tiene su propia voz — y SOLO la Tienda: esto va en `#tienda .sh-sec`
+     y no toca `.subtab` ni `.rktab`, que son navegacion y no mercancia.
+     ⚠ POR QUE NO VAN LAS SEIS EN ORO MACIZO, que fue lo primero que le enseñé: se ve en el mockup y
+     por eso se hizo el mockup. Con las seis doradas la elegida deja de distinguirse (el canon del
+     propio juego: «si todo brilla, no brilla nada») y la barra ancha de PASE se convierte en una
+     plancha de oro que compite con el boton de COMPRAR, que es el unico amarillo que deberia mandar
+     en esta pantalla. Con canto de oro se lee el joyero entero y la elegida no se confunde con nada.
+     Jaime eligio B mirando las tres tiras. */
+  #tienda .sh-sec{
+    background:linear-gradient(#3a2560,#241543);
+    border:1px solid #ffd23f8c; color:#ffe6a8;
+    box-shadow:0 3px 0 #150c2e, inset 0 1px 0 #ffd23f3d; }
+  #tienda .sh-sec.on{
+    background:linear-gradient(#fffbe6 4%,#ffe14d 34%,#ffab1f);
+    border-color:#fff6c9; color:#fff;
+    -webkit-text-stroke:.25em #6d3f08; paint-order:stroke fill; text-shadow:0 1px 0 #6d3f08;
+    box-shadow:0 4px 0 #b45a10, 0 0 22px #ffd23fcc, 0 8px 20px #ffb42a66, inset 0 2px 0 #fffffff0; }
+  #tienda .sh-sec:active{ transform:translateY(2px); box-shadow:0 1px 0 #150c2e, inset 0 1px 0 #ffd23f3d; }
+  #tienda .sh-sec.on:active{ transform:translateY(3px); box-shadow:0 1px 0 #b45a10, inset 0 2px 0 #fffffff0; }
   .sh-buy{ margin-top:3px; border:2px solid var(--tinta); border-radius:12px; padding:9px 8px; font-family:inherit; font-weight:900; font-size:var(--fs-3); cursor:pointer; width:100%; color:#3a2400; background:linear-gradient(#ffe27a,#ff9a3d); box-shadow:0 3px 0 #b45a10; display:flex; gap:4px; align-items:center; justify-content:center; }
   /* ══ LA TARJETA DE BOOSTER (2026-08-06) ════════════════════════════════════════════════════════
      Una por booster, de ancho completo, con sus cuatro compras dentro. El porqué de la forma está
@@ -1060,8 +1082,19 @@
        · el icono va a 64 px en un escaparate de 76 (antes 38: la mitad que el de una bola);
        · el precio vive DENTRO del botón que lo cobra, en blanco con trazo, no en gris al lado;
        · cada botón mide 75 px de ancho a 375 y 61 a 320 — el mínimo del canon es 44. */
+  /*+AG ⚠ 2026-08-07 (Jaime) · «no me parece logico que el escudo sea azul aunque el icono sea azul;
+     podria ser como el color de los botones, todo dorado». Hecho: el MARCO y la pildora del «cuantos
+     llevas» pasan a oro en las cuatro, que es lo que le da a la seccion la misma voz de joyero que la
+     fila de pestañas.
+     ⚠ LO QUE NO SE VA ES EL COLOR DE DENTRO, y no por gusto: ese color era el ANDAMIO que hoy separa
+     NITRO de IMPULSO, porque los dos comparten el MISMO fichero de icono (`icono-nitro.webp`) — el
+     comentario de BOOSTER_COLOR lo dice con todas las letras. Si le quito el color antes de que
+     llegue el arte, dejo dos tarjetas identicas en la misma pantalla, que es peor que el azul que me
+     pide quitar. Asi que el color se queda SOLO en el halo de detras del icono hasta que Codex
+     entregue el fondo y el icono propio de cada booster (encargo arte/codex/43); ese dia el halo se
+     va con el andamio. */
   .bst-card{ position:relative; border-radius:20px; padding:13px 13px 14px; margin-bottom:12px;
-    background:linear-gradient(#2a2260,#1b1642); border:2px solid var(--cc,#ffd23f);
+    background:linear-gradient(#2a2260,#1b1642); border:2px solid #ffd23f8c;
     box-shadow:0 4px 0 #0d0726, 0 8px 22px #0006, inset 0 1px 0 #ffffff14; }
   .bst-top{ display:flex; align-items:center; gap:13px; margin-bottom:12px; }
   .bst-show{ width:76px; height:76px; flex:0 0 auto; border-radius:18px; display:grid; place-items:center;
@@ -1078,7 +1111,7 @@
      Solo el símbolo × y la cifra → se entiende en los 20 idiomas y no se traduce nada. */
   .bst-tengo{ position:absolute; top:11px; right:12px; min-width:44px; height:30px; padding:0 11px;
     border-radius:999px; display:grid; place-items:center; font-size:var(--fs-4); font-weight:900;
-    background:var(--cc,#ffd23f); color:#17102e; box-shadow:0 2px 0 #0006; }
+    background:linear-gradient(#ffe14d,#ffab1f); color:#17102e; box-shadow:0 2px 0 #0006; }
   .bst-card.vacio .bst-tengo{ background:#ffffff14; color:var(--muted); box-shadow:none; }
   .bst-compras{ display:grid; grid-template-columns:repeat(4,1fr); gap:7px; }
   .bst-buy{ position:relative; border:2px solid var(--tinta); border-radius:14px; padding:9px 4px 8px; cursor:pointer;
@@ -5652,7 +5685,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=f84dd55"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=037a45d"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -8733,7 +8766,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=f84dd55').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=037a45d').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -11028,7 +11061,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=f84dd55';
+  import { startAmbient } from './arte/ambient.mjs?v=037a45d';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -11044,7 +11077,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=f84dd55').then(m => {
+  import('./arte/pista-preview.mjs?v=037a45d').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -11056,8 +11089,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=f84dd55';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=f84dd55';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=037a45d';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=037a45d';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -11227,7 +11260,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=f84dd55'), import('./motor/chassis/sincro.mjs?v=f84dd55')]);
+        import('./motor/chassis/nube.mjs?v=037a45d'), import('./motor/chassis/sincro.mjs?v=037a45d')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
