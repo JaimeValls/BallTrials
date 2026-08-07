@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 4beb0b6"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-07 0b61007"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -1402,20 +1402,35 @@
      el fondo va con `background-attachment:scroll`, queda clavado a la caja y no se mueve cuando el
      cuerpo se desliza en los moviles donde el panel se sale. `border-box` para que llegue a los bordes
      por debajo de los 13 px de relleno lateral. */
-  #temporada .sc-body{ background:url(arte/fondo/temporada-escena.webp) no-repeat bottom center/100% auto;
-    background-origin:border-box; }
-  /*+AG ⚠ Y EN PANTALLA BAJA LA ESCENA SE RETIRA, que es el segundo fallo que caza esta pieza y el que
-     de verdad dolia: a 360x640 las tres bolas salian ENCIMA de la lista de retos, con «Retos nuevos
-     mañana» escrito sobre las gafas de sol. No es que el fondo se colara por delante — es que
-     `.sc-block` es SEMITRANSPARENTE (por eso existe el velo del atardecer, tres bloques mas arriba), o
-     sea que todo lo que quede detras del panel se LEE a traves de el.
-     El numero sale de la medida, no del gusto: la pieza dibuja solo su 60 % de abajo (sus 256 px de
-     arriba son alfa 0), asi que aguanta que el panel le pise hasta 89 px sin que se note. Con el
-     cuerpo en 455 px de contenido y 146 de cabecera+barra, el solape pasa de esos 89 px por debajo de
-     los ~730 px de alto. Se corta en 790 para dejar margen a los idiomas que escriben mas largo.
-     Lo que se pierde por debajo de ahi es DECORACION de un hueco que en esos moviles no existe: ahi el
-     panel de retos ya se sale 86 px y hay que deslizar igualmente. */
-  @media (max-height:790px){ #temporada .sc-body{ background-image:none; } }
+  /*+AG ⚠⚠ 2026-08-07 (2ª vuelta) · LA ESCENA VA EN UN HIJO ELÁSTICO, NO EN UN `background` CON MEDIA
+     QUERY DE ALTO. Primero se resolvió con `@media (max-height:790px){ background-image:none }`, y
+     Jaime NO LA VEÍA en su móvil: *«te había dicho que eligieses el modelo B y no lo veo
+     implementado»*. El corte estaba medido contra los viewports del capturador, que **no tienen barra
+     de navegador**. Un móvil de 844 px de alto le da al CSS ~750 de viewport, o sea que mi regla
+     apagaba la escena justo en TODOS los móviles reales. Medido: 390×844 SE VE, pero 390×750, 393×730
+     y 412×780 salían OCULTA.
+     La regla buena no mira el alto: **`flex:1 1 0` con `min-height:0` ocupa SOLO el hueco que sobra**.
+     Si sobra, se lo queda entero y el dibujo se ancla abajo; si no sobra, la caja mide 0 y desaparece
+     sola — sin empujar nada y sin número que calibrar. El `> .se-escena` (dos clases) es para ganarle
+     en especificidad a `#temporada .sc-body > *{flex-shrink:0}` de docs/91 sin depender del orden.
+     Los márgenes negativos se comen el relleno del cuerpo para que llegue a los tres bordes. */
+  /*+AG ⚠ Y EL MARGEN DE ABAJO CANCELA EL COLCHÓN `--zafe`, que es el segundo hueco que se me escapó.
+     `.sc-body` lleva `padding-bottom:calc(var(--zafe) + safe-area)` en móvil = **128 px** (no 16), y
+     está ahí a propósito: es el colchón para que la barra del navegador no se coma el final de la
+     lista. Su comentario dice «mientras la lista quepa el colchón no se ve ni un píxel», y es cierto
+     para hijos alineados a start — pero un hijo que CRECE se para en el borde del relleno, así que la
+     escena quedaba flotando 112 px por encima de la barra con atardecer pelado debajo. Medido:
+     `padding-bottom` computado 128 px, y la caja de la escena 84 px cuando debía llegar abajo. */
+  #temporada .sc-body > .se-escena{ flex:1 1 0; min-height:0; margin:0 -13px -16px; pointer-events:none;
+    background:url(arte/fondo/temporada-escena.webp) no-repeat bottom center/100% auto; }
+  @media(max-width:519px){
+    #temporada .sc-body > .se-escena{ margin-bottom:calc(-1 * (var(--zafe) + env(safe-area-inset-bottom))); }
+  }
+  /*+AG el problema que resuelve el hijo elastico, para que no vuelva: `.sc-block` es SEMITRANSPARENTE
+     (por eso existe el velo del atardecer, un bloque mas abajo), asi que todo lo que quede DETRAS del
+     panel se LEE A TRAVES de el. A 360x640 las tres bolas salian encima de la lista de retos, con
+     «Retos nuevos mañana» escrito sobre las gafas de sol. Ocupando solo el hueco sobrante eso ya no
+     puede pasar por construccion: donde hay panel, la caja de la escena mide cero. */
   #temporada{ background:
       linear-gradient(#241159c4 0%, #241159c4 56%, #24115900 78%),
       url(arte/fondo/fondo-temporada.webp) no-repeat center center/cover,
@@ -3867,6 +3882,14 @@
     content:''; position:absolute; inset:7px 0; border-radius:999px; }
   .coin::before{ background:linear-gradient(var(--nav-1),var(--nav-2)); border:1px solid #ffffff30;
     box-shadow:0 3px 0 #0d0726, inset 0 1px 0 #ffffff2e; }
+  /*+AG 2026-08-07 · A CERO, LA PASTILLA SE PONE ROJIZA. Jaime: «cuando tienes cero, yo lo pondría
+     rojizo para que te incite más a comprar». Se pinta en el `::before` —la plancha— y no en el
+     número: el número ya es blanco con contorno y teñirlo lo dejaría por debajo del suelo de
+     contraste. El rojo sale de `--red` (#e0293d), que es el de la casa, oscurecido para que siga
+     siendo una PLANCHA y no una alerta: el icono de la moneda tiene que seguir mandando.
+     Va por clase y no por `:has()` porque el saldo lo pinta `pildora()`, que ya pasa por aquí. */
+  .coin.vacia::before{ background:linear-gradient(#8e2130,#5a1220); border-color:#e0293d66;
+    box-shadow:0 3px 0 #0d0726, 0 0 12px #e0293d3d, inset 0 1px 0 #ffffff2e; }
   .cupsband .cups::before{ background:linear-gradient(var(--nav-1),var(--nav-2)); border:1px solid #fbb91566;
     box-shadow:0 3px 0 #0d0726, 0 0 14px #fbb91522, inset 0 1px 0 #ffffff2e; }
   .coin > *, .cupsband .cups > *{ position:relative; }
@@ -5387,6 +5410,9 @@
       <div class="se-row me"><div class="pos">3</div><div class="who"><i class="sd star"></i><span data-t="you">Tú</span></div><div class="pts">2 960</div></div>
       <div class="se-row"><div class="pos">4</div><div class="who"><i class="sd" style="--c:#4ddc8a"></i>Bumper</div><div class="pts">2 610</div></div>
     </div>
+    <!--+AG LA ESCENA DE LA TEMPORADA (encargo 43). Va como ULTIMO hijo del cuerpo y no como fondo de
+         la pantalla: asi ocupa el hueco que sobra y solo el hueco que sobra. Su CSS, arriba. -->
+    <div class="se-escena" aria-hidden="true"></div>
   </div>
   <div class="h-tabs">
     <button class="tab" data-nav="jugar"><i class="tico t-jugar"></i><span data-t="tJugar">Jugar</span></button>
@@ -5737,7 +5763,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=4beb0b6"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=0b61007"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -7830,6 +7856,10 @@ function pintaSaldo(tipo, desde, hasta){
 //   alguien la mirase. Arreglarlo solo en la Tienda habria dejado el mismo fallo vivo en Temporada,
 //   que es justo donde se cobran los retos.
 function pildora(id, v){ const e=el(id); if(!e) return;
+  //+AG la plancha rojiza del saldo a cero (peticion de Jaime). Va ANTES del return de la cuenta a
+  //   proposito: durante una animacion manda el numero que se esta contando, pero el color tiene que
+  //   decir ya donde se acaba. Sube a `.coin` y no al <b> porque quien pinta la plancha es su ::before.
+  const p = e.closest('.coin'); if(p) p.classList.toggle('vacia', !(Number(v) > 0));
   if(e.classList.contains('cuenta')) return;   // hay una cuenta en marcha: es ella quien manda
   e.textContent = nfmt(v);
 }
@@ -8818,7 +8848,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=4beb0b6').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=0b61007').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -11128,7 +11158,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=4beb0b6';
+  import { startAmbient } from './arte/ambient.mjs?v=0b61007';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -11144,7 +11174,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=4beb0b6').then(m => {
+  import('./arte/pista-preview.mjs?v=0b61007').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -11156,8 +11186,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=4beb0b6';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=4beb0b6';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=0b61007';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=0b61007';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -11327,7 +11357,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=4beb0b6'), import('./motor/chassis/sincro.mjs?v=4beb0b6')]);
+        import('./motor/chassis/nube.mjs?v=0b61007'), import('./motor/chassis/sincro.mjs?v=0b61007')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
