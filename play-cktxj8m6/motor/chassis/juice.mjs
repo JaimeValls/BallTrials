@@ -49,7 +49,7 @@
 //  porque un efecto que a veces sale bonito y a veces sale torcido no se puede juzgar ni corregir.
 //
 //  USO:
-//    import { createJuice } from '../chassis/juice.mjs?v=035cbed';
+//    import { createJuice } from '../chassis/juice.mjs?v=95bdd8d-SUCIO';
 //    const juice = createJuice({ ambito:'#ctr', reducido: params.get('redfx')==='1' });
 //    juice.hit(btn, { color:'#6fe4ff', peso:'accion' });   // ha prendido
 //    juice.deny(btn);                                       // NO ha prendido
