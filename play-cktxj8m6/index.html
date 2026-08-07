@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 e45be05"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-07 7c5169e+SUCIO"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -330,8 +330,22 @@
   .h-modes .m .lk{ position:absolute; bottom:-14px; left:50%; transform:translateX(-50%); font-size:var(--fs-1); font-weight:800; color:var(--muted); white-space:nowrap; }
   .h-chal{ display:inline-flex; align-items:center; gap:7px; background:#0007; border:1px solid var(--line); border-radius:14px; padding:8px 14px; font-size:var(--fs-3); font-weight:700; color:#d3d8f4; }
   .h-chal b{ color:var(--gold2); }
-  .h-tabs{ display:flex; background:#1a0d45; border-top:1px solid var(--line); padding:5px 5px calc(5px + env(safe-area-inset-bottom)); }
-  .tab{ flex:1; background:none; border:0; color:var(--muted); font-family:inherit; font-weight:800; font-size:10px; letter-spacing:.03em; text-transform:uppercase; display:flex; flex-direction:column; align-items:center; gap:2px; padding:6px 2px; cursor:pointer; border-radius:12px; }
+  /*+AG ⚠ 7-ago (tarde) · LA BARRA PASA DE FRANJA A MUEBLE. Jaime: «el menu de abajo… no tiene mucho
+     protagonismo, tiene mas, pero yo creo que es un menu que tendria que saltar mas a la vista.
+     Podemos hacerlo mas grande, sobra espacio en el medio… que apetezca mucho mas dar a esos botones,
+     que se entienda que son muy importantes».
+     MEDIDO ANTES: 63 px de alto = 7,8 % de un movil de 812, icono de 27 px (un tercio escaso de su
+     casilla) y la letra a 9 px — por debajo del suelo del canon, que son 11 (docs/60).
+     AHORA: ~85 px (10,5 %), icono de 38 (mas de la mitad de la casilla) y letra a 11. El alto sale de
+     la zona del heroe, que es `vh` y se reajusta sola; no se le quita a nada que se note.
+     ⚠ Y LAS CUATRO APAGADAS PASAN A BLANCO CON TRAZO. Iban en `--muted` (#96a0c2), que es el gris de
+     "texto secundario": es exactamente lo que las hacia parecer un pie de pagina. Esto NO borra el
+     estado —la activa se sigue marcando con su PLATAFORMA y subiendo el icono, como ya estaba— pero
+     quita el "estas cuatro estan apagadas" que Jaime lee al mirarlas. Es la misma inversion que ya se
+     hizo el 27-jul con el color de los iconos, aplicada ahora al rotulo. */
+  .h-tabs{ display:flex; background:#1a0d45; border-top:1px solid var(--line); padding:7px 5px calc(7px + env(safe-area-inset-bottom)); }
+  .tab{ flex:1; background:none; border:0; color:#fff; -webkit-text-stroke:.25em #241a3f; paint-order:stroke fill; text-shadow:0 1px 0 #241a3f;
+    font-family:inherit; font-weight:800; font-size:var(--fs-2); letter-spacing:.03em; text-transform:uppercase; display:flex; flex-direction:column; align-items:center; gap:3px; padding:8px 2px; cursor:pointer; border-radius:12px; }
   .tab i{ font-style:normal; font-size:var(--fs-5); }
   .tab.on{ color:var(--gold2); }
   /*+AG doc 41: los 5 de la barra son ARTE (antes: 🏁🚗🛒🏆🙂 — un coche rojo y una carita amarilla
@@ -344,7 +358,7 @@
      O sea: el estado lo dice el MARCO, no apagar el arte. */
   /* OJO: aqui van propiedades LARGAS, no el atajo 'background'. Con el atajo, esta regla (mas
      especifica que .tico.t-*) reseteaba background-image a none y la barra salia sin iconos. */
-  .tab i.tico{ width:27px; height:27px; font-size:0; background-position:center; background-size:contain; background-repeat:no-repeat;
+  .tab i.tico{ width:38px; height:38px; font-size:0; background-position:center; background-size:contain; background-repeat:no-repeat;
     filter:drop-shadow(0 2px 4px #0007); opacity:.88; transition:opacity .15s, transform .12s; }
   .tab.on i.tico{ opacity:1; transform:translateY(-2px) scale(1.1); }
   /* LA PLATAFORMA de la pestaña activa. Va por dentro de la caja (inset) para no inflar lo que mide el
@@ -365,7 +379,10 @@
   .tab > *{ position:relative; z-index:1; }
   /*+AG a 360 px "TEMPORADA" mide 62,4 px dentro de una placa de 64: besaba el borde. En ingles no pasa
      ("Season" mide 39,7), pero el que se rompe manda. */
-  @media (max-width:375px){ .h-tabs .tab{ font-size:var(--fs-1); letter-spacing:0; } }
+  /*+AG el movil estrecho ya no baja el rotulo a 9 px (--fs-1): eso es lo que dejaba la barra entera por
+     debajo del suelo del canon justo en el tamaño de pantalla mas comun. Se queda en 11 y lo que cede
+     es el espaciado entre letras, que no cuesta legibilidad. "TEMPORADA" es el mas largo y cabe. */
+  @media (max-width:375px){ .h-tabs .tab{ letter-spacing:0; } }
   .tico.t-jugar{ background-image:url(arte/ui/nav-jugar.webp); }
   .tico.t-garaje{ background-image:url(arte/ui/nav-garaje.webp); }
   .tico.t-tienda{ background-image:url(arte/ui/nav-tienda.webp); }
@@ -1396,7 +1413,11 @@
   /*+AG peso 800 como TODAS las notas apagadas del juego: esta era la unica en 400 de todo juego.html
      (medido: 23 en 800, 7 en 900, 4 en 700, 1 en 600, y esta). Se queda en minusculas a proposito: es
      una frase descriptiva, y la regla de "rotulo pequeño en MAYUSCULAS" excluye las frases. */
-  .mi-nota{ font-size:var(--fs-2); font-weight:800; color:var(--muted); text-align:center; margin-top:9px; }
+  /*+AG doc 88 §10: pie de una linea de Temporada, la pantalla donde Jaime vio el problema. Los cuatro
+     RETOS de encima se quedan en Sentence case a proposito (son frases, regla 10 del doc 60); el pie que
+     los cierra es un rotulo y va como los demas pies del juego. */
+  .mi-nota{ font-size:var(--fs-2); font-weight:800; color:var(--muted); text-align:center; margin-top:9px;
+    text-transform:uppercase; letter-spacing:.05em; }
   /*+AG doc 75 · LA CARTA DEL CAMINO DE REGALOS (primera de Destacados). Tamaño de carta normal, NO
      un banner: la regla del canon es superficie proporcional a la informacion, y esto es un premio
      pequeño. Cuando hay algo que recoger se enciende con el borde dorado; ya recogida se queda
@@ -1870,7 +1891,11 @@
   @media (prefers-reduced-motion: reduce){
     .scr.on,.h-play,.h-ball,.ready,.ready::after,.justready,
     .cam-card,.cam-card.hay.ready,.sh-feat,.sh-feat::after,.cam-gift,.cam-gift.viva,.falta,
-    .sh-entra .sh-sec,.sh-entra #shBody > div > *,#shBody.secIn{ animation:none; }
+    .sh-entra .sh-sec,.sh-entra #shBody > div > *,#shBody.secIn,
+    .h-tabs .tab.badge:not(.on) i.tico,.h-tabs .tab.badge:not(.on) i.tico::after{ animation:none; }
+    /*+AG con las animaciones apagadas el halo se queda FIJO en vez de desaparecer: el aviso sigue
+       existiendo (es informacion, no adorno), solo deja de latir. */
+    .h-tabs .tab.badge:not(.on) i.tico::after{ opacity:.7; transform:translate(-50%,-50%) scale(1.1); }
     #vuelo{ display:none; }
   }
   /*+AG HOME v3 (mockups/flow.html validado por Jaime · docs/35 v2.2 + 37): anatomia Brawl en vertical.
@@ -1909,12 +1934,17 @@
      daba verde porque no se sale de la pantalla: encaja perfectamente y se come el CTA. Lo cazo una
      sonda de solapes hecha para esto (caja del icono contra caja de .playbig/.modecompact/.h-tabs).
      150 px = los 120 que el carril se metia dentro de `.homebottom` + el aire de respeto. */
-  .siderail{ position:absolute; top:10px; bottom:150px; display:flex; flex-direction:column;
-    justify-content:space-between; gap:11px; z-index:6; pointer-events:none; }
+  /*+AG ⚠ 7-ago (tarde) · SE DESHACE EL ESPARCIDO. Por la mañana estire los carriles hasta la fila de
+     accion, copiando que en las capturas de Brawl los laterales llegan al fondo sin hueco muerto.
+     Jaime, viendolo: «has esparcido por la derecha ranking, friends y club y yo creo que arriba a la
+     derecha estaban mejor todos compactados, no se por que esparcirlos asi». Manda el.
+     Y tenia razon de fondo: en SUS capturas el carril llega abajo porque lleva SEIS U OCHO iconos;
+     nosotros tenemos TRES. La regla que copie era «no dejes hueco muerto», y aplicada a tres piezas
+     produce lo contrario — tres botones flotando a 200 px unos de otros, que es otro hueco muerto con
+     mas pasos. Un cluster compacto se lee como UN sitio al que ir; tres iconos sueltos, como tres. */
+  .siderail{ position:absolute; top:10px; display:flex; flex-direction:column;
+    gap:11px; z-index:6; pointer-events:none; }
   .siderail > *{ pointer-events:auto; }
-  /*+AG el carril izquierdo NO se estira: un icono solo repartido en 700 px se iria al centro de la
-     pantalla, encima del heroe. Se queda pegado arriba, que es su sitio. */
-  .siderail.left{ bottom:auto; }
   .siderail.left{ left:11px; } .siderail.right{ right:11px; }
   .ricon{ width:48px; height:48px; border-radius:15px; background:var(--plate-a); border:1px solid #ffffff2e;
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; cursor:pointer; position:relative;
@@ -1974,7 +2004,11 @@
      O sea que la Portada llevaba el bloque del heroe montado sobre el pase en los moviles bajos desde
      antes de tocar nada, y `__fitCheck()` nunca lo canto. Con 36vh ya se arregla 360x640; 540 necesita
      este escalon porque ahi el hueco entre cabecera y `.homebottom` no da para el bloque entero. */
-  @media (max-height:580px){ .hero #hBall{ height:min(28vh,390px); } }
+  /*+AG el 28vh de esta mañana valia con la barra de abajo a 63 px. Al subirla a 86 (mueble, no franja)
+     el heroe perdio 23 px y las copas volvieron a meterse bajo el pase a 360x540 — el mismo solape de
+     antes, reaparecido por un cambio en OTRO sitio de la pantalla. Baja a 23vh. Y queda dicho: cada vez
+     que la barra o `.homebottom` cambien de alto, hay que volver a correr la sonda de solapes. */
+  @media (max-height:580px){ .hero #hBall{ height:min(23vh,390px); } }
   .hero canvas{ width:164px; height:164px; filter:drop-shadow(0 16px 24px #0009); animation:breathe 3.1s ease-in-out infinite; }
   /*+AG 2-ago · EL PROTAGONISTA SE PRESENTA COMO EN BRAWL: nombre grande y trofeos en placa, y NADA MAS.
      Jaime: «yo haría Bunker y las copas más grandes». El nombre sube de 24 a 30 (--fs-7) y estrena el
@@ -2027,7 +2061,11 @@
   .passband .pi{ font-size:var(--fs-4); }
   .passband .pt{ display:flex; flex-direction:column; line-height:1.1; }
   .passband .pt b{ font-size:var(--fs-3); font-weight:900; color:#ffe9a8; letter-spacing:.02em; }
-  .passband .pt small{ font-size:var(--fs-2); font-weight:800; color:#c9b6ff; }
+  /*+AG doc 88 §10: el pie del pase ("Nivel 1 · 0/120 XP") es el UNICO texto de <=13 px en minuscula de
+     la Portada, y su rotulo de encima ("PASE DE TEMPORADA") ya va en mayusculas: leidos juntos, uno
+     gritaba y el otro no. Es un rotulo de dato de una linea, no una frase. Medido: cabe en una linea en
+     los 20 idiomas. */
+  .passband .pt small{ font-size:var(--fs-2); font-weight:800; color:#c9b6ff; text-transform:uppercase; letter-spacing:.04em; }
   .passband .pbar{ width:64px; height:6px; border-radius:999px; background:#00000055; overflow:hidden; margin-left:2px; }
   .passband .pbar > i{ display:block; height:100%; border-radius:999px; background:linear-gradient(90deg,var(--gold2),var(--gold)); }
   .bottomrow{ display:flex; gap:10px; align-items:stretch; }
@@ -2513,7 +2551,19 @@
      va magenta sobre placa marino). Con la banda entera ya del color del modo eso deja de tener sentido
      — seria el color sobre si mismo — y pasa a blanco con trazo fino, que es lo que hace la referencia
      en su carta de evento. De paso se va el color-mix que existia solo para salvar el contraste. */
-  .tile .tsub{ min-width:0; font-size:var(--fs-2); font-weight:800; letter-spacing:.01em;
+  /*+AG doc 88 §10 · EL SUBTITULO DE LA CARTA VA EN MAYUSCULAS. Lo vio Jaime en Temporada («veo mucho
+     texto pequeño sin mayuscula, es obvio que no se ve muy bien») y MODOS era la pantalla peor: 5 de
+     sus 8 textos de <=13 px iban en minuscula, el 63 %. Son rotulos cortos de tres palabras, o sea
+     justo lo que la regla 10 del doc 60 manda en MAYUSCULAS — el Sentence case se lo reserva a las
+     frases largas de hoja, y por eso los retos de Temporada NO se tocan.
+     Va por `text-transform` y no editando los 20 diccionarios: en arabe y CJK el transform es inocuo,
+     y una traduccion en mayusculas a mano se rompe en cuanto alguien la retoca.
+     ⚠ MEDIDO ANTES DE ESCRIBIRLO, porque esta es la caja mas justa del juego (el doc 49 la bajo a dos
+     lineas porque no cabia ni en INGLES a 360 px): 540 rotulos en 20 idiomas x 3 anchos, y **cero
+     recortes nuevos**. Lo que si cambia es que las frases que entraban en una linea pasan a dos —
+     "SOBREVIVE AL SUELO" es la del español—, y eso no descuadra la carta porque la rejilla es de alto
+     fijo y el arte de debajo es el que cede. Comprobado en captura: las cartas miden lo mismo. */
+  .tile .tsub{ min-width:0; font-size:var(--fs-2); font-weight:800; letter-spacing:.01em; text-transform:uppercase;
     color:#fff; opacity:.94; -webkit-text-stroke:var(--stroke-2) #241a3f; paint-order:stroke fill;
     /*+AG doc 49: DOS LINEAS, no "…". Esta linea nacio de una sola con recorte ("a 175 px de carta no
        cabe una frase"), y con 20 idiomas se vio que la premisa era falsa al reves: no cabia ni en
@@ -2827,7 +2877,11 @@
   .rktile.on{ border-color:#fff; background:var(--plate-b); box-shadow:0 0 0 1px #ffffff55, 0 4px 12px #00000055; }
   .rktile.on span{ color:#fff; }
   .rktile:active{ transform:scale(.96); }
-  .rkprize{ margin:0 13px 8px; text-align:center; font-size:var(--fs-3); font-weight:800; color:#ffd9a0; line-height:1.4;
+  /*+AG doc 88 §10: el aviso de premios del Ranking es el unico texto de <=13 px de esa pantalla que se
+     puede tocar — los otros 12 son NOMBRES DE JUGADOR y esos no se transforman jamas.
+     ⚠ SIN letter-spacing a proposito: en frances y neerlandes la linea ya se va a dos con solo las
+     mayusculas, y un espaciado encima la llevaria a tres. */
+  .rkprize{ margin:0 13px 8px; text-align:center; font-size:var(--fs-3); font-weight:800; color:#ffd9a0; line-height:1.4; text-transform:uppercase;
     background:linear-gradient(90deg,#3a2a10cc,#4a3410cc); border:1px dashed #fbb91566; border-radius:12px; padding:8px 12px; }
   /*+AG ⚠ 3-ago · TU PUESTO PESABA MENOS QUE CUALQUIER TEXTO SECUNDARIO. En un ranking lo primero que
      quiere ver el jugador es DONDE ESTA EL, y esto salia en 13 px y en el gris de las notas al pie,
@@ -2976,6 +3030,43 @@
      queda plano A PROPOSITO — y por eso el banco las sigue contando como planas: es correcto. */
   .h-tabs .tab.on::before{ box-shadow:0 3px 0 #0d0726, inset 0 1px 0 #ffffff2e; }
   .h-tabs .tab.on span{ color:#fff; -webkit-text-stroke:.25em #241a3f; paint-order:stroke fill; }
+
+  /*+AG ⚠ 7-ago (tarde) · QUE APETEZCA TOCARLA. Jaime, sobre la pestaña de Tienda: «yo le añadiria que
+     brille, que se mueva, que ese icono es como un bolsito. Tiene que ser algo que quieras hacer clic
+     claramente, que brille un poco, que se mueva un poquito».
+     LA REGLA QUE LO SALVA DE SER UNA FERIA: no se anima "la Tienda", se anima **lo que tiene algo que
+     ver**. Se engancha a `.badge`, que es la clase que `pintaBadge()` ya pone cuando hay premio
+     esperando (el regalo del dia via `camHay()`, las bolas listas del Garaje, el cofre de Temporada).
+     Si el jugador ya lo ha recogido, se queda quieta. Y `:not(.on)` la para en cuanto entras: dentro
+     de la pantalla el reclamo ya no significa nada. Si todo se mueve, nada llama.
+     ⚠ EL MENEO VA EN EL ICONO, NO EN EL BOTON. Un `transform` sobre `.tab` le cambiaria la caja medida
+     y ya nos costo una vez que un boton de 44 px midiera 43 por una animacion de entrada — el minimo
+     tactil se mide sobre el <button>, que aqui no se toca.
+     El ciclo dura 3,2 s y el meneo ocupa el ultimo 20 %: la mayor parte del tiempo esta QUIETO. Un
+     balanceo continuo se convierte en ruido de fondo en diez segundos y deja de verse. */
+  @keyframes tabLlama{
+    0%, 78%   { transform:rotate(0deg)   scale(1); }
+    84%       { transform:rotate(-9deg)  scale(1.12); }
+    89%       { transform:rotate(7deg)   scale(1.12); }
+    94%       { transform:rotate(-4deg)  scale(1.06); }
+    100%      { transform:rotate(0deg)   scale(1); }
+  }
+  @keyframes tabHalo{
+    0%, 62%   { opacity:0;   transform:translate(-50%,-50%) scale(.6); }
+    80%       { opacity:.85; transform:translate(-50%,-50%) scale(1.15); }
+    100%      { opacity:0;   transform:translate(-50%,-50%) scale(1.35); }
+  }
+  .h-tabs .tab.badge:not(.on) i.tico{ position:relative; animation:tabLlama 3.2s ease-in-out infinite; }
+  /* el halo va DETRAS del dibujo (z-index -1) para que lo ilumine sin lavarlo, y es un radial dorado
+     —el color de "esto es para ti"— no un blanco, que sobre el morado se lee como una mancha. */
+  .h-tabs .tab.badge:not(.on) i.tico::after{
+    content:''; position:absolute; left:50%; top:50%; width:150%; height:150%; z-index:-1;
+    border-radius:50%; pointer-events:none;
+    background:radial-gradient(circle, #ffd23fbb 0%, #ffb42a55 45%, transparent 70%);
+    animation:tabHalo 3.2s ease-in-out infinite; }
+  /*+AG el brinco al soltar: `.tab:active` ya encoge la pestaña entera (scale .9) y eso se queda, pero
+     el icono de la que llama devuelve el gesto con un rebote propio para que el toque se sienta. */
+  .h-tabs .tab.badge:not(.on):active i.tico{ animation:none; transform:scale(1.22) rotate(-6deg); }
 
   /*+AG 4 · TARJETAS — lo que se toca pero no es un boton: las filas del Ranking y las tarjetas de bola
      del Garaje. Canto CORTO (2 px) a proposito: dice "se puede tocar" sin gritar, que es lo que separa
@@ -3443,15 +3534,34 @@
     letter-spacing:.02em; line-height:1.12; min-height:44px;
     display:inline-flex; align-items:center; justify-content:center; text-align:center;
     border-radius:13px; cursor:pointer;
-    background:linear-gradient(var(--nav-1),var(--nav-2)); border:1px solid #ffffff30; color:#c9d0f2;
-    box-shadow:0 3px 0 #0d0726, inset 0 1px 0 #ffffff24; transition:transform .08s, box-shadow .08s; }
+    /*+AG ⚠ 7-ago (tarde) · LA PESTAÑA APAGADA PIDE QUE LA TOQUES (Jaime: «esta bien que las de arriba
+       esten oscuras porque sabes que la que brilla es la seleccionada, pero no tienen demasiado
+       protagonismo… debe ser algo que te llame a los ojos y que quieras hacerles clic»).
+       LA CAUSA, medida: la placa era `--nav-1/2` (#282059→#161139), MAS OSCURA que el violeta del
+       fondo (#5024b5). Una placa mas oscura que su fondo se HUNDE — por eso se leian como huecos y no
+       como botones. En las capturas de Brawl la pestaña apagada es gris pizarra (#485678) y destaca
+       porque esta DESATURADA sobre un fondo saturado, no porque sea clara ni oscura.
+       Se copia esa relacion, no su tono: gris-violeta desaturado y un punto mas claro que el fondo.
+       ⚠ Y EL TRAZO SE PONE AQUI, no arriba. Esta regla es la ULTIMA de la familia en la hoja, asi que
+       gana por orden a las tres declaraciones de `.sh-sec` que hay mas arriba: el `border` de tinta que
+       puse por la mañana en la linea de `.sh-sec` NO se estaba aplicando (computaba #ffffff30). Es la
+       trampa "2 ter" de siempre — una @media o una regla igual mas abajo gana. Se comprueba con
+       getComputedStyle, nunca leyendo el fichero.
+       El canto sube de 3 a 5 px (mas cuerpo) y la letra pasa a BLANCA con trazo: el gris azulado
+       #c9d0f2 sobre placa oscura es lo que remataba la sensacion de "apagado". La ENCENDIDA no cambia:
+       sigue ganando por COLOR (dorado), que es lo que Jaime dice que ya funciona. */
+    background:linear-gradient(#4e4780,#332c5e); border:2px solid var(--tinta);
+    color:#fff; -webkit-text-stroke:var(--stroke-3) #241a3f; paint-order:stroke fill; text-shadow:0 1px 0 #241a3f;
+    box-shadow:0 5px 0 #0d0726, inset 0 1px 0 #ffffff30; transition:transform .08s, box-shadow .08s; }
   .subtab.on, .rktab.on, .sh-sec.on, .se-rk-tab.on{
-    background:linear-gradient(#ffe14d 12%,#ffb42a); border-color:transparent;
+    background:linear-gradient(#ffe14d 12%,#ffb42a); border-color:var(--tinta);
     box-shadow:0 4px 0 #b45a10, 0 7px 16px #ffb42a3d, inset 0 2px 0 #ffffff8c;
     color:#fff; -webkit-text-stroke:var(--stroke-3) #241a3f; paint-order:stroke fill;
     text-shadow:0 1px 0 #241a3f; }
+  /*+AG el hundimiento sigue al canto: si el canto son 5 px, se baja 4 y queda 1. Con el canto viejo de
+     3 se bajaba 2 — dejarlo asi con canto 5 haria que el boton se hundiera a medias. */
   .subtab:active, .rktab:active, .sh-sec:active, .se-rk-tab:active{
-    transform:translateY(2px); box-shadow:0 1px 0 #0d0726, inset 0 1px 0 #ffffff24; }
+    transform:translateY(4px); box-shadow:0 1px 0 #0d0726, inset 0 1px 0 #ffffff30; }
   .subtab.on:active, .rktab.on:active, .sh-sec.on:active, .se-rk-tab.on:active{
     transform:translateY(3px); box-shadow:0 1px 0 #b45a10, inset 0 2px 0 #ffffff8c; }
   .subtab, .rktab, .sh-sec, .se-rk-tab{ padding:11px 9px; }
@@ -5236,7 +5346,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=e45be05"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=7c5169e+SUCIO"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -8166,7 +8276,13 @@ function syncBadges(){
   //   arranque (renderHome → refreshTabBadges → aqui), o sea el sitio donde se detecta que la temporada
   //   ha rodado aunque el jugador no abra Temporada.
   pintaBadge('#hPass,[data-nav="temporada"]', misPendientes() + ((typeof cofreHay==='function' && cofreHay())?1:0));
-  pintaBadge('#shTabTienda,[data-nav="tienda"]', camHay() ? 1 : 0);
+  //+AG ⚠ 7-ago · FALTABA LA PORTADA, que es donde mas importa. La pestaña de Tienda de la Home es
+  //   `#homeShopTab` y no lleva `data-nav="tienda"` (las de Garaje/Temporada/Perfil si), asi que este
+  //   selector la dejaba fuera: en la pantalla donde el jugador pasa mas rato, la Tienda NUNCA avisaba
+  //   de que habia un regalo esperando. Se veia en las otras tres y no en la primera.
+  //   Salio buscando donde enganchar el meneo del icono (Jaime: «que brille, que se mueva»), porque la
+  //   animacion se cuelga justo de esta clase `.badge` — si el badge no llega, el reclamo tampoco.
+  pintaBadge('#shTabTienda,#homeShopTab,[data-nav="tienda"]', camHay() ? 1 : 0);
 }
 
 function openGaraje(){ checkHitos(); showScreen('garaje'); applyShell(); renderGaraje(); }
@@ -8251,7 +8367,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=e45be05').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=7c5169e-SUCIO').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -10520,7 +10636,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=e45be05';
+  import { startAmbient } from './arte/ambient.mjs?v=7c5169e-SUCIO';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -10536,7 +10652,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=e45be05').then(m => {
+  import('./arte/pista-preview.mjs?v=7c5169e-SUCIO').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -10548,8 +10664,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=e45be05';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=e45be05';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=7c5169e-SUCIO';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=7c5169e-SUCIO';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -10719,7 +10835,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=e45be05'), import('./motor/chassis/sincro.mjs?v=e45be05')]);
+        import('./motor/chassis/nube.mjs?v=7c5169e-SUCIO'), import('./motor/chassis/sincro.mjs?v=7c5169e-SUCIO')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
