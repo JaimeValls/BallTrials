@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 227bccc+SUCIO"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-07 eb591dd"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -1286,7 +1286,14 @@
   .sh-it img.ico{ width:40px; height:40px; object-fit:contain; filter:drop-shadow(0 3px 5px #0007); }
   /*+AG la bola viva ocupa el sitio del retrato y un poco mas: es la pieza que se mueve de la tarjeta
      y la que dice que lo del pack esta VIVO. La sombra la pone ella, asi que aqui no va filtro. */
-  .sh-it .ico.viva{ width:52px; height:52px; display:block; margin:0 auto; }
+  /*+AG ⚠ 2026-08-07 (Jaime) · «el tanque cuando salta se ve muy pequeño, no veo motivo para no
+     hacerlo mas grande». Ninguno, en efecto: medida la baldosa en produccion daba 99x95 px a 375 y
+     81x95 a 320, con 8/6 px de relleno — la bola ocupaba 52 y le sobraban 17 px de ancho a 320 y 7
+     de alto. Sube a 72 (58 en pantalla estrecha), que es todo lo que da la baldosa sin comerse el
+     rotulo. La baldosa crece con ella y eso aqui vale: el cuerpo de la Tienda es la coleccion que
+     desliza a proposito. Y el SALTO no se recorta porque `.sh-it` va en `overflow:visible`. */
+  .sh-it .ico.viva{ width:72px; height:72px; display:block; margin:0 auto; }
+  @media (max-width:359px){ .sh-it .ico.viva{ width:58px; height:58px; } }
   .sh-it .cmico{ width:40px; height:40px; color:var(--qc,#c9d0f2); }
   .sh-it .nm{ font-size:var(--fs-3); font-weight:800; line-height:1.15; }
   /*+AG `.sh-price` existia desde siempre y NO la llamaba nadie. Se revive como LINEA DE VALOR: lo que
@@ -1680,7 +1687,6 @@
     .sh-feat-items{ gap:5px; margin:6px 0 6px; }
     .sh-it{ min-height:0; padding:5px 4px; }
     .sh-it img.ico{ width:26px; height:26px; }
-    .sh-it .ico.viva{ width:34px; height:34px; }
     .sh-it .cmico{ width:26px; height:26px; }
     .sh-it .nm{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
     .sh-price{ margin-bottom:6px; }
@@ -5716,7 +5722,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=227bccc+SUCIO"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=eb591dd"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -8797,7 +8803,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=227bccc-SUCIO').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=eb591dd').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -9305,7 +9311,21 @@ function sacudeGemas(){ const p=el('shGemas'); if(!p) return;
 //   sistema, que es justo lo que el juego dejo de hacer en todas las demas pantallas.
 function bolasEl(){ const s=S(), d=document.createElement('div'); d.innerHTML='';
   const g=document.createElement('div'); g.className='sh-grid';
-  ARCH_KEYS.forEach(k=>{ const A=ARCHS[k], have=owned(k); const it=document.createElement('div'); it.className='sh-item'; it.style.setProperty('--qc',QUAL[A.q].c);   //+AG doc 39: marco = rareza de la bola
+  //+AG ⚠ 2026-08-07 (Jaime) · «no tiene sentido poner las bolas que ya posees en la tienda, para eso
+  //   esta el garaje». Las que ya son tuyas se van de aqui: ocupaban una ficha entera con un boton
+  //   apagado que no se puede pulsar, y en una cuenta con horas de juego la pestaña se llenaba de
+  //   escaparate muerto — el jugador tiene que rebuscar entre lo que ya tiene para encontrar lo que
+  //   puede comprar. El Garaje es donde vive lo tuyo.
+  //   ⚠ Y EL CASO DE TENERLAS TODAS, que si no deja la pestaña EN BLANCO: se pinta el rotulo que ya
+  //   existe en los 20 idiomas para justo esto («En tu Garaje» / «In deiner Garage»), o sea cero
+  //   traducciones nuevas. Una seccion vacia sin una palabra se lee como un fallo de carga.
+  const aVenta = ARCH_KEYS.filter(k=>!owned(k));
+  if(!aVenta.length){
+    const v=document.createElement('div'); v.className='sh-cat';
+    v.style.cssText='margin:18px 2px;text-align:center'; v.textContent=s.ownedGar;
+    d.appendChild(v); return d;
+  }
+  aVenta.forEach(k=>{ const A=ARCHS[k]; const it=document.createElement('div'); it.className='sh-item'; it.style.setProperty('--qc',QUAL[A.q].c);   //+AG doc 39: marco = rareza de la bola
     //+AG misma bola viva que en el Garaje: lo que se vende es lo que se juega
     //+AG ⚠ 2026-08-07 (Jaime) · «no se entiende que esa segunda frase es la descripcion». Era verdad:
     //   rareza y descripcion iban PEGADAS en un solo renglon —«COMUN · LA GRAN CARRERA»— del mismo
@@ -9313,9 +9333,10 @@ function bolasEl(){ const s=S(), d=document.createElement('div'); d.innerHTML=''
     //   cosas: la rareza en su linea y con su color (el marco ya dice lo mismo), y debajo lo que la
     //   bola HACE, en blanco, que es el dato por el que se compra. Cero traducciones nuevas: los dos
     //   trozos ya venian sueltos y `shBallCat` solo los pegaba con un punto.
-    it.innerHTML=`<div class="sh-ic" data-viva="${k}"${have?'':' data-viva-off="1"'}></div><div class="sh-nm">${archName(k)}</div><div class="sh-cat">${qualName(A.q)}</div><div class="sh-desc">${archBest(k)}</div>`;
+    //+AG `data-viva-off` se queda: aqui YA no hay ninguna que sea tuya, asi que las doce se pintan
+    //   apagadas — que es lo que significa «todavia no la tienes» en el lenguaje de las bolas vivas.
+    it.innerHTML=`<div class="sh-ic" data-viva="${k}" data-viva-off="1"></div><div class="sh-nm">${archName(k)}</div><div class="sh-cat">${qualName(A.q)}</div><div class="sh-desc">${archBest(k)}</div>`;
     const btn=document.createElement('button');
-    if(have){ btn.className='sh-buy owned'; btn.textContent=s.ownedGar; btn.disabled=true; }
     //+AG un solo boton para las doce, con los dos precios a la vista. Paga en Monedas si te llegan, y
     //   si no, en Gemas: nunca se cobra en Gemas teniendo Monedas suficientes (seria cobrar de mas).
     //+AG ⚠ 3-ago, dos arreglos de esta linea, los dos de la auditoria de UX:
@@ -9328,7 +9349,7 @@ function bolasEl(){ const s=S(), d=document.createElement('div'); d.innerHTML=''
     //     esa palabra suelta NO existe en el diccionario (existe `orPay`, que es la frase entera «o
     //     pagar N ◆», demasiado larga para este boton). Meter un «o» a pelo dejaria español en los 20
     //     idiomas, que es peor que el fallo que arregla. Necesita clave nueva y sus 20 traducciones.
-    else { const conGemas = SAVE.chispas<A.price;
+    { const conGemas = SAVE.chispas<A.price;
       btn.className='sh-buy'+(conGemas?' gem':'');
       btn.innerHTML=`${nfmt(A.price)} ${coinIco('chispa','sm')} / ${nfmt(A.gemas)} ${coinIco('gema','sm')}`;
       btn.disabled=SAVE.chispas<A.price&&SAVE.gemas<A.gemas;
@@ -11092,7 +11113,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=227bccc-SUCIO';
+  import { startAmbient } from './arte/ambient.mjs?v=eb591dd';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -11108,7 +11129,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=227bccc-SUCIO').then(m => {
+  import('./arte/pista-preview.mjs?v=eb591dd').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -11120,8 +11141,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=227bccc-SUCIO';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=227bccc-SUCIO';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=eb591dd';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=eb591dd';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -11291,7 +11312,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=227bccc-SUCIO'), import('./motor/chassis/sincro.mjs?v=227bccc-SUCIO')]);
+        import('./motor/chassis/nube.mjs?v=eb591dd'), import('./motor/chassis/sincro.mjs?v=eb591dd')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
