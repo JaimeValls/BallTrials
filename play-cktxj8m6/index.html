@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 e4f53ed+SUCIO"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-07 a16b169"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -514,7 +514,12 @@
      detras de un fondo opaco, o sea invisible. Sigue por debajo del iframe de partida (1000). */
   .toast.on{ opacity:1; transform:translateX(-50%); }
   /* --- GARAJE (doc 05: arquetipo + calidad, colección, hexágono, alineación) --- */
-  #garaje{ background:url(arte/fondo/doodles.webp) repeat top left/340px 340px, radial-gradient(130% 90% at 50% 8%, #5a2ec2 0%, var(--bg-mid) 45%, var(--bg-lo) 100%); }
+  /*+AG fondo pintado, encargo 41 pieza 6 (EL TALLER). El porque largo de las seis esta escrito una
+     sola vez, en el bloque de `#temporada`. Aqui solo asoman la banda de arriba, los margenes de
+     13 px y los huecos de 11 px entre tarjetas, asi que la pieza tiene el dibujo pegado al borde
+     superior y a los dos laterales y el centro liso: es lo que pide el encargo, y es lo que hace
+     que se vea algo en una pantalla que tapa el 85 %. */
+  #garaje{ background:url(arte/fondo/fondo-garaje.webp) no-repeat center center/cover, radial-gradient(130% 90% at 50% 8%, #5a2ec2 0%, var(--bg-mid) 45%, var(--bg-lo) 100%); }
   .g-top{ display:flex; align-items:center; gap:10px; padding:calc(10px + env(safe-area-inset-top)) 13px 6px; }
   .g-title{ font-size:var(--fs-5); font-weight:900; letter-spacing:.02em; }
   .g-back{ border:1px solid var(--line); background:var(--plate-a); color:#c9cff0; font-family:inherit; font-weight:800; font-size:var(--fs-3); border-radius:12px; padding:7px 13px; cursor:pointer; }
@@ -899,7 +904,10 @@
      el @media es justo lo que hace que a 375x640 se vea PERFECTO. Ahora lo vigila tools/prueba-css-shell.mjs, que
      cuenta las reglas que llegan al CSSOM: si vuelve a tragarse el CSS, se cae la prueba y no una captura. */
   /* --- TIENDA (doc 12: secciones + escaparate, cero azar, puerta parental) --- */
-  #tienda{ background:url(arte/fondo/doodles.webp) repeat top left/340px 340px, radial-gradient(130% 90% at 50% 8%, #3f3ad0 0%, #2a1c86 45%, var(--bg-lo) 100%); }
+  /*+AG fondo pintado, encargo 41 pieza 5 (EL MERCADO DE ORO). Es la pantalla con MENOS superficie de
+     fondo visible de las seis —cabecera, tira de pestañas y margenes—, asi que todo el dibujo vive en
+     la franja de arriba y en los dos postes de los lados. El porque largo, en `#temporada`. */
+  #tienda{ background:url(arte/fondo/fondo-tienda.webp) no-repeat center center/cover, radial-gradient(130% 90% at 50% 8%, #3f3ad0 0%, #2a1c86 45%, var(--bg-lo) 100%); }
   /*+AG La fila de secciones era una tira con scroll lateral: las 5 pastillas sumaban 449px en 369
      utiles y "Pase" se quedaba 60px fuera, invisible y sin nada que dijera que estaba ahi. Se rige
      ya por la MISMA ley que las .subtabs de Temporada y Perfil (doc 40): son secciones hermanas,
@@ -2243,7 +2251,10 @@
      (Garaje, Tienda, Temporada, Perfil y Ranking si la llevan desde docs/60). Era un degradado liso, y
      por eso el aire de arriba se leia como un hueco muerto y no como respiracion. Mismo asset, mismo
      tamaño de repeticion que las otras cinco: no se inventa nada, se le da lo que ya tenian todas. */
-  #selector{ background:url(arte/fondo/doodles.webp) repeat top left/340px 340px,
+  /*+AG fondo pintado, encargo 41 pieza 4 (LA PISTA VISTA DESDE ARRIBA). El porque largo, en
+     `#temporada`. Esta pantalla compartia tinte EXACTO con Garaje y Ranking; ahora su desvio a cian
+     es lo que la separa, y el cian ya es color de la casa. */
+  #selector{ background:url(arte/fondo/fondo-modos.webp) no-repeat center center/cover,
     radial-gradient(130% 90% at 50% 8%, #5a2ec2 0%, var(--bg-mid) 45%, var(--bg-lo) 100%); }
   #selector .selhead{ display:flex; align-items:center; gap:10px; padding:14px 16px 8px; }
   #selector .selhead h1{ margin:0; font-size:var(--fs-5); font-weight:900; letter-spacing:.02em; }
@@ -3448,7 +3459,20 @@
        · las pestañas, la banda de premio y "tu puesto" flotaban sueltas sobre ese fondo, mientras que
          en el Pase el mismo tipo de bloque va sobre una plancha. Eso es lo que Jaime comparo.
        · las filas iban con un blanco al 3% que casi no se ve. */
-  #ranking{ background:url(arte/fondo/doodles.webp) repeat top left/340px 340px,
+  /*+AG fondo pintado, encargo 41 pieza 3 (LA GRADA LLENA, DESENFOCADA). El porque largo, en
+     `#temporada`. ⚠ Esta es la unica de las seis en la que el fondo se ve POR TODA la pantalla, y no
+     por los huecos: las once filas de la tabla son semitransparentes y el fondo se lee a traves de
+     ellas. Por eso el encargo le exigia brillo UNIFORME de arriba abajo — cualquier zona clara hace
+     que una fila se lea peor que las otras. Y la pieza entregada NO es uniforme: va de 75 de brillo
+     en la banda de arriba a 19 en la de abajo.
+     ⚠ PERO NO LLEVA VELO, Y ESO ES UNA MEDIDA QUE ME DESMINTIO A MI. Dando por hecho el problema
+     escribi aqui que habria que corregirlo; al medir el contraste del nombre de LAS ONCE FILAS sobre
+     la captura real, todas salen por encima de 7:1 y todas SUBEN o se quedan igual respecto al papel
+     pintado (la peor pasa de 6,69:1 a 7,23:1). El motivo es que la zona clara de la imagen queda
+     detras de la PLANCHA OPACA de pestañas y premio, que empieza antes que la primera fila: cuando
+     la tabla arranca, el fondo ya ha bajado de brillo. Un velo aqui apagaria la grada sin arreglar
+     nada. Queda escrito porque la tentacion de "corregir por si acaso" vuelve sola. */
+  #ranking{ background:url(arte/fondo/fondo-ranking.webp) no-repeat center center/cover,
                        radial-gradient(130% 90% at 50% 8%, #5a2ec2 0%, var(--bg-mid) 45%, var(--bg-lo) 100%); }
   /*+AG la placa agrupa pestañas + selector de bola + premio + tu puesto. Al ir dentro de la plancha,
      los cuatro pierden su padding lateral propio (lo pone ya la placa) o se quedarian metidos hacia
@@ -5142,7 +5166,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=e4f53ed+SUCIO"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=a16b169"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -8157,7 +8181,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=e4f53ed-SUCIO').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=a16b169').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -10426,7 +10450,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=e4f53ed-SUCIO';
+  import { startAmbient } from './arte/ambient.mjs?v=a16b169';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -10442,7 +10466,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=e4f53ed-SUCIO').then(m => {
+  import('./arte/pista-preview.mjs?v=a16b169').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -10454,8 +10478,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=e4f53ed-SUCIO';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=e4f53ed-SUCIO';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=a16b169';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=a16b169';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -10625,7 +10649,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=e4f53ed-SUCIO'), import('./motor/chassis/sincro.mjs?v=e4f53ed-SUCIO')]);
+        import('./motor/chassis/nube.mjs?v=a16b169'), import('./motor/chassis/sincro.mjs?v=a16b169')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
