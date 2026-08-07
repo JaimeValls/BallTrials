@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 95bdd8d+SUCIO">
+<meta name="bt-build" content="2026-08-07 5a4eb82">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <!--+AG el HTML se sirve en INGLES (defecto del juego); ?lang=es lo traduce por JS (applyLang) -->
 <title>YouBall · The Hunter (WebGL)</title>
@@ -290,7 +290,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=95bdd8d+SUCIO"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=5a4eb82"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -301,27 +301,27 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 </script>
 
 <script type="module">
-import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, makeFacePlane, createItemPool, createItemPops, createStarBurst, createWindTrail, createBloom, frameOrtho } from '../chassis/gfx.mjs?v=95bdd8d-SUCIO';
-import { archLook } from '../chassis/ballmat.mjs?v=95bdd8d-SUCIO';   //+AG doc 41 bloque G: material de la bola-heroe
-import { attachSquash } from '../chassis/squash.mjs?v=95bdd8d-SUCIO';
-import { Sim, RNG, TEAMS, BALL_R, ARENA_W, ARENA_H, FPS, AGENCIA } from './sim.js?v=95bdd8d-SUCIO';
-import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=95bdd8d-SUCIO';
-import { archFace } from '../chassis/facegen.mjs?v=95bdd8d-SUCIO';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
-import { createCelebration } from '../chassis/celebration.mjs?v=95bdd8d-SUCIO';
-import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=95bdd8d-SUCIO';
-import { crearInventario } from '../chassis/invboost.mjs?v=95bdd8d-SUCIO';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
-import { buildSfxBuffer } from './sfxmap.mjs?v=95bdd8d-SUCIO';
-import { createCoach } from '../chassis/coach.mjs?v=95bdd8d-SUCIO';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
-import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=95bdd8d-SUCIO';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
-import { createUiSfx } from '../chassis/uisfx.mjs?v=95bdd8d-SUCIO';   //+AG doc 85: el sonido de "no puedo"
-import { createJuice } from '../chassis/juice.mjs?v=95bdd8d-SUCIO';   //+AG doc 85: lo que pasa cuando el dedo toca un botón (los 3 modos)
+import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, makeFacePlane, createItemPool, createItemPops, createStarBurst, createWindTrail, createBloom, frameOrtho } from '../chassis/gfx.mjs?v=5a4eb82';
+import { archLook } from '../chassis/ballmat.mjs?v=5a4eb82';   //+AG doc 41 bloque G: material de la bola-heroe
+import { attachSquash } from '../chassis/squash.mjs?v=5a4eb82';
+import { Sim, RNG, TEAMS, BALL_R, ARENA_W, ARENA_H, FPS, AGENCIA } from './sim.js?v=5a4eb82';
+import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=5a4eb82';
+import { archFace } from '../chassis/facegen.mjs?v=5a4eb82';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
+import { createCelebration } from '../chassis/celebration.mjs?v=5a4eb82';
+import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=5a4eb82';
+import { crearInventario } from '../chassis/invboost.mjs?v=5a4eb82';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
+import { buildSfxBuffer } from './sfxmap.mjs?v=5a4eb82';
+import { createCoach } from '../chassis/coach.mjs?v=5a4eb82';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=5a4eb82';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
+import { createUiSfx } from '../chassis/uisfx.mjs?v=5a4eb82';   //+AG doc 85: el sonido de "no puedo"
+import { createJuice } from '../chassis/juice.mjs?v=5a4eb82';   //+AG doc 85: lo que pasa cuando el dedo toca un botón (los 3 modos)
 //+AG el ámbito NO es opcional: la regla base es `#controls button` (id + etiqueta) y le gana en
 //   especificidad a cualquier `.j-hit` suelto. Es la misma trampa que ya costó una versión muerta en la
 //   Carrera y otra en Luz Roja; aquí va escrita para no repetirla una tercera vez.
 const juice = createJuice({ ambito:'#controls', reducido: new URLSearchParams(location.search).get('redfx')==='1' });
-import { createPausa } from '../chassis/pausa.mjs?v=95bdd8d-SUCIO';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
-import { cantarPuesto } from '../chassis/veredicto.mjs?v=95bdd8d-SUCIO';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
-import { runToEnd } from '../chassis/simrun.mjs?v=95bdd8d-SUCIO';
+import { createPausa } from '../chassis/pausa.mjs?v=5a4eb82';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
+import { cantarPuesto } from '../chassis/veredicto.mjs?v=5a4eb82';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
+import { runToEnd } from '../chassis/simrun.mjs?v=5a4eb82';
 
 window.addEventListener('error', e => { document.getElementById('err').style.display='grid'; console.error(e.error||e.message); });
 
@@ -636,9 +636,16 @@ function sync(dt, a=1){
   const plb=sim.balls[0];
   if(plb.rank===null && !celebrating){
     const pbx=px[0]+(plb.x-px[0])*a, pby=py[0]+(plb.y-py[0])*a, shieldOn=f<plb.shield_until;
+    //+AG doc 85 (2ª vuelta) · LA INMUNIDAD DEL SEÑUELO SE VE. El súper de este modo te regala 2,4 s en
+    //   los que el cazador NO te puede fijar (`aggro_immune_until`), y el juego no lo enseñaba en
+    //   NINGÚN sitio: pagabas 21 segundos de barra por algo invisible. Se dice donde ya se dicen tus
+    //   estados —el anillo de TÚ, que ya se pone cian con el escudo— en ORO, que es el color del súper
+    //   en los tres modos, y latiendo el doble de rápido para que se lea "esto se está acabando".
+    const inmune = f < (plb.aggro_immune_until||-1);
     youRing.visible=true; youRing.position.set(pbx,pby,0.55+BALL_R+0.30);
-    youRing.material.color.set(shieldOn?0x54d8ff:0xffffff);
-    youRing.material.opacity = shieldOn?0.95:(0.62+0.18*Math.abs(Math.sin(simNowF*0.012)));
+    youRing.material.color.set(inmune?0xffd23f:(shieldOn?0x54d8ff:0xffffff));
+    youRing.material.opacity = inmune?(0.75+0.25*Math.abs(Math.sin(simNowF*0.026)))
+                             : shieldOn?0.95:(0.62+0.18*Math.abs(Math.sin(simNowF*0.012)));
     _v3.set(pbx, pby+BALL_R*2.0, 0.55+BALL_R).project(cam);
     youLbl.style.left=((_v3.x*0.5+0.5)*innerWidth).toFixed(0)+'px';
     youLbl.style.top=((-_v3.y*0.5+0.5)*innerHeight).toFixed(0)+'px';
