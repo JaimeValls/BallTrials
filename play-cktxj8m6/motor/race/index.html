@@ -4,11 +4,21 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 a16b169">
+<meta name="bt-build" content="2026-08-07 77712da">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>YouBall · La Gran Carrera (WebGL)</title>
 <style>
-  html,body{margin:0;height:100%;overflow:hidden;background:#0a0a12;font-family:system-ui,Segoe UI,sans-serif;color:#fff}
+  /*+AG doc 87 · LA LETRA DE LA PARTIDA. Hasta el 7-ago-2026 este HUD iba a `system-ui, Segoe UI` y los
+     paneles a `'Segoe UI Rounded'`: ninguna fuente de marca y, peor, `Segoe UI Rounded` SOLO EXISTE EN
+     WINDOWS. En el movil de verdad —que es donde se juega— el marcador de la partida se pintaba con la
+     letra que le tocara al sistema, distinta en cada aparato, mientras el menu de al lado iba con la
+     del juego. Se cruza el umbral del iframe y se pinta con lo mismo que el shell.
+     El coste de red es CERO en la practica: el shell ya pidio estas dos fuentes al abrir el menu y el
+     navegador comparte la cache entre el documento y sus iframes, asi que al arrancar la partida ya
+     estan. El `display=swap` cubre el caso raro de entrar directo por URL. */
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Lilita+One&display=swap');
+  html,body{margin:0;height:100%;overflow:hidden;background:#0a0a12;color:#fff;
+    font-family:var(--fam,'Fredoka','Segoe UI Rounded','Nunito',system-ui,sans-serif)}
   /* ESTUDIO NOCTURNO (docs/47, base docs/18 §6): grafito frío con presencia. Importa en 9:16 (sin paneles)
      y en los flancos de la columna 16:9, donde el canvas es transparente. .quake = tinte cálido de Sacudida. */
   #bg{position:fixed;inset:0;z-index:-1;background:radial-gradient(120% 90% at 50% 30%,#1a2230 0%,#10141c 62%,#060910 100%);transition:background .3s}
@@ -33,12 +43,12 @@
   /*+AG CAPA DE AGENCIA (docs/21): controles de zona + boosters + barra de super sobre el look del video (patron cazador) */
   #backMenu{position:fixed;top:calc(10px + env(safe-area-inset-top));left:12px;z-index:20;display:inline-flex;align-items:center;gap:5px;
     text-decoration:none;color:#d9d2ee;background:rgba(0,0,0,.42);border:1px solid rgba(255,255,255,.18);border-radius:999px;
-    padding:6px 12px;font-weight:800;font-size:13px;backdrop-filter:blur(3px);font-family:system-ui,Segoe UI,sans-serif}
+    padding:6px 12px;font-weight:800;font-size:13px;backdrop-filter:blur(3px)}
   #pos{position:fixed;left:0;right:0;top:calc(12px + env(safe-area-inset-top));text-align:center;z-index:6;pointer-events:none;
-    font-family:'Segoe UI Rounded','Nunito',system-ui,sans-serif;font-weight:800;font-size:clamp(16px,3.4vw,24px);text-shadow:0 2px 10px #000c}
+    font-family:inherit;font-weight:800;font-size:clamp(16px,3.4vw,24px);text-shadow:0 2px 10px #000c}
   #pos small{font-size:.55em;color:#b9b3c8;font-weight:700}
   #ctr{position:fixed;left:50%;bottom:10px;transform:translateX(-50%);z-index:6;display:flex;flex-direction:column;gap:7px;
-    width:min(560px,94vw);font-family:'Segoe UI Rounded','Nunito',system-ui,sans-serif;user-select:none}
+    width:min(560px,94vw);font-family:inherit;user-select:none}
   #ctr .lbl{font-size:10px;color:#a9a3c2;letter-spacing:.12em;text-transform:uppercase;font-weight:800;text-shadow:0 1px 4px #000}
   #ctr .row{display:flex;gap:7px}
   /* ═══ doc 88 · EL BOTÓN DE PARTIDA, AL IDIOMA DE BRAWL ════════════════════════════════════════
@@ -188,17 +198,17 @@
   #superfill{height:100%;width:0%;background:linear-gradient(90deg,#ffd23f,#ff7a3d);box-shadow:0 0 12px #ffb03d88;transition:width .1s}
   #superlbl{font-size:10px;color:#a9a3c2;letter-spacing:.12em;font-weight:800}
   #youlbl{position:fixed;z-index:5;transform:translate(-50%,-100%);font-weight:900;font-size:13px;color:#fff;
-    text-shadow:0 2px 6px #000,0 0 10px #0008;letter-spacing:.06em;pointer-events:none;opacity:0;font-family:'Segoe UI Rounded','Nunito',system-ui,sans-serif}
+    text-shadow:0 2px 6px #000,0 0 10px #0008;letter-spacing:.06em;pointer-events:none;opacity:0;font-family:inherit}
   /*+AG cuenta atras 3-2-1-YA + "este eres tu" (sim en pausa), patron del cazador */
   #count{position:fixed;inset:0;z-index:8;display:none;flex-direction:column;align-items:center;justify-content:center;gap:8px;pointer-events:none;
-    font-family:'Segoe UI Rounded','Nunito',system-ui,sans-serif}
+    font-family:inherit}
   #count.show{display:flex}
   #count .n{font-size:clamp(64px,22vh,190px);font-weight:900;color:#fff;line-height:1;text-shadow:0 6px 34px #000,0 0 46px rgba(120,80,255,.5);transition:color .1s}
   #count .you{font-size:clamp(16px,3.6vw,28px);font-weight:800;color:#ffd23f;letter-spacing:.04em;text-shadow:0 2px 12px #000}
   /*+AG overlay de inicio/fin (nombre del modo, puesto con medalla, jugar otra) con selector de idioma */
   #ov{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
     background:rgba(6,7,15,.72);backdrop-filter:blur(4px);text-align:center;padding:22px;
-    font-family:'Segoe UI Rounded','Nunito',system-ui,sans-serif}
+    font-family:inherit}
   #ov.hide{display:none}
   #ovTitle{font-size:clamp(30px,8vw,52px);font-weight:900;letter-spacing:-.02em;text-shadow:0 4px 22px #000a}
   #ovSub{max-width:480px;color:#c9cff0;font-size:15.5px;line-height:1.5}
@@ -261,6 +271,19 @@
        que se rozaban acaban fundidas ("INDMDUAL", docs/56 §3bis.1). */
   #pos, #superlbl, #youlbl, #ctr .lbl, #ctr button, #ovTitle, #ovBtn, #ovMenu{
     color:#fff; -webkit-text-stroke:.11em #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f66}
+  /*+AG doc 87 · Y LA MISMA LISTA LLEVA LA LETRA QUE GRITA. No es casualidad que coincida con la del
+     trazo: son la misma pregunta hecha dos veces ("¿esto grita?"), asi que se responde igual. Regla
+     de la casa: si lleva -webkit-text-stroke, lleva --display.
+     ⚠ El font-weight se queda como esta y lo que se apaga es la SINTESIS. Lilita One solo tiene un
+     peso; pedirle 800/900 hace que el navegador se invente la negrita y con el contorno encima la
+     letra se empasta. Poner 400 a pelo seria peor: en ruso, arabe, tailandes y CJK —que Lilita no
+     dibuja— el marcador se quedaria FLOJO en mitad de la partida. Con la sintesis apagada, cada caso
+     hace lo correcto solo. var(--fam) va DETRAS, nunca delante: es lo que deja caer el glifo a la
+     fuente que idiomas.js elige por escritura (doc 49). */
+  #pos, #superlbl, #youlbl, #ctr .lbl, #ctr button, #ovTitle, #ovBtn, #ovMenu,
+  #count .n, #count .you{
+    font-family:'Lilita One', var(--fam,'Fredoka','Segoe UI Rounded','Nunito',system-ui,sans-serif);
+    font-synthesis:none; font-synthesis-weight:none}
   /* la cuenta atras conserva SU color (el numero blanco que JS pinta verde en el "¡YA!" y el ambar de
      "este eres tu"): solo se le anade el contorno, que es lo que le faltaba. */
   #count .n, #count .you{-webkit-text-stroke:.11em #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f66,0 6px 34px #000}
@@ -357,7 +380,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=a16b169"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=77712da"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -368,27 +391,27 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 </script>
 
 <script type="module">
-import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createItemPops, createBloom, frameOrtho, buildHud, updateHud } from '../chassis/gfx.mjs?v=a16b169';
-import { archLook } from '../chassis/ballmat.mjs?v=a16b169';   //+AG doc 41 bloque G: material de la bola-heroe
-import { attachSquash } from '../chassis/squash.mjs?v=a16b169';
+import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createItemPops, createBloom, frameOrtho, buildHud, updateHud } from '../chassis/gfx.mjs?v=77712da';
+import { archLook } from '../chassis/ballmat.mjs?v=77712da';   //+AG doc 41 bloque G: material de la bola-heroe
+import { attachSquash } from '../chassis/squash.mjs?v=77712da';
 import { Sim, RNG, TEAMS, SHORT_COLORS, BALL_R, WIDTH, GATE_Y, GATE_H, TOP, FPS,
-         DIR, N_BALLS, CAM_SCALE, ASPA_R, ASPA_THICK, PLAT_HW, PLAT_HH } from './sim.js?v=a16b169';   //+AG extras de la capa de agencia
+         DIR, N_BALLS, CAM_SCALE, ASPA_R, ASPA_THICK, PLAT_HW, PLAT_HH } from './sim.js?v=77712da';   //+AG extras de la capa de agencia
 //+AG doc 62: los encuadres del cierre (sim.hero_scale / sim.celeb_scale) se leen del OBJETO sim, no por
 //   import. Un export que la CDN aún no ha refrescado tumba el módulo entero y la partida no arranca (pasó
 //   en producción el 2-ago); un campo que falta degrada a la cámara de siempre. Ver la nota en sim.js.
-import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=a16b169';
-import { archFace } from '../chassis/facegen.mjs?v=a16b169';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
-import { itemTexture } from '../chassis/itemgen.mjs?v=a16b169';
-import { crearInventario } from '../chassis/invboost.mjs?v=a16b169';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
-import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=a16b169';
-import { buildSfxBuffer } from './sfxmap.mjs?v=a16b169';
-import { runToEnd } from '../chassis/simrun.mjs?v=a16b169';
-import { createCoach } from '../chassis/coach.mjs?v=a16b169';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
-import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=a16b169';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
-import { createPausa } from '../chassis/pausa.mjs?v=a16b169';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
-import { cantarPuesto } from '../chassis/veredicto.mjs?v=a16b169';   //+AG cartel de META: "en qué puesto has quedado", antes de soltar el resultado al shell
-import { createUiSfx } from '../chassis/uisfx.mjs?v=a16b169';   //+AG doc 88: el sonido de "no puedo"
-import { createJuice } from '../chassis/juice.mjs?v=a16b169';   //+AG doc 88: lo que pasa cuando el dedo toca un botón (los 3 modos)
+import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=77712da';
+import { archFace } from '../chassis/facegen.mjs?v=77712da';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
+import { itemTexture } from '../chassis/itemgen.mjs?v=77712da';
+import { crearInventario } from '../chassis/invboost.mjs?v=77712da';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
+import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=77712da';
+import { buildSfxBuffer } from './sfxmap.mjs?v=77712da';
+import { runToEnd } from '../chassis/simrun.mjs?v=77712da';
+import { createCoach } from '../chassis/coach.mjs?v=77712da';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=77712da';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
+import { createPausa } from '../chassis/pausa.mjs?v=77712da';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
+import { cantarPuesto } from '../chassis/veredicto.mjs?v=77712da';   //+AG cartel de META: "en qué puesto has quedado", antes de soltar el resultado al shell
+import { createUiSfx } from '../chassis/uisfx.mjs?v=77712da';   //+AG doc 88: el sonido de "no puedo"
+import { createJuice } from '../chassis/juice.mjs?v=77712da';   //+AG doc 88: lo que pasa cuando el dedo toca un botón (los 3 modos)
 //+AG el ámbito NO es opcional: `#ctr button:disabled` le gana en especificidad a cualquier `.j-hit` suelto,
 //   y un booster se pone `disabled` en el MISMO frame en que se dispara. Sin el ámbito, el fogonazo del
 //   botón que más importa no se vería jamás (es la trampa del doc 74 §6, ahora con su nombre).
