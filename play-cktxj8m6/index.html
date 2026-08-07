@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 1c6d87d+SUCIO"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-07 2067a3e"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -3855,11 +3855,61 @@
      `max-width`: el problema es de alto, y a 360x640 no existe). El sitio es la placa de temporada, que
      es decoracion: 15 px de aire arriba y abajo pasan a 10, el disco del campeon de 56 a 48, y el hueco
      entre bloques del cuerpo de 12 a 9. Ni una letra baja del suelo de 11 px, ni un tocable de 44. */
+  /*+AG ⚠ 2026-08-07 · LA TARJETA VIOLETA DE TEMPORADA SE COMIA SU PROPIA PRIMERA LINEA, y llevaba
+     meses haciendolo en LOS VEINTE IDIOMAS a la vez. Jaime lo canto en neerlandes («DAGEN» cortado a
+     media altura sobre «ZOMER OP DE TOP»), pero medido con el peor sorteo de retos el recorte iba de
+     28 px (ingles) a 63 px (ruso) en 320x640 Y en 360x640: 40 de 60 casos. Es deuda ANTERIOR a las
+     subpestañas del 7-ago — se reproduce igual sobre el juego.html de antes de aquel commit.
+
+     LA CAUSA NO ESTA EN LA TARJETA, ESTA EN QUIEN LA CONTIENE. `.sc-body` es una columna flex, y un
+     hijo flex encoge por debajo de su contenido antes de que el padre se plantee deslizar. Cuando el
+     cuerpo de Temporada se pasa de alto, flex le come la altura al PRIMER hijo que puede: `.se-hero`
+     pasaba de sus 87-155 px naturales a 32 px CLAVADOS, y como la tarjeta lleva `overflow:hidden`
+     por el doodle y la viñeta del fondo, el texto que sobraba no sobresalia — DESAPARECIA. Con
+     `align-items:center` el recorte se reparte arriba y abajo, y lo que se ve por arriba es media
+     letra de la linea de temporada.
+
+     ⚠ Y POR QUE NINGUN GUARDIA LO VEIA, que es la parte que hay que recordar: `__fitCheck` se salta
+     las cajas de menos de 60 px de alto (`clientHeight<60`), y una tarjeta aplastada a 32 px cae
+     justo debajo de ese suelo. Peor: al comerse 96 px de contenido, la tarjeta hacia que el cuerpo
+     de Temporada CUPIERA, asi que el banco daba verde POR EL FALLO. Un desbordamiento tapado por
+     otro desbordamiento. Por eso lo primero que se toca es el encogido, no el aire.
+
+     EL ARREGLO, en tres piezas y todas medidas con 20-30 sorteos de retos distintos (los retos se
+     siembran con dia+jugador, o sea que medir un solo jugador es medir a uno con suerte):
+       1. los hijos del cuerpo de Temporada NO ENCOGEN. La tarjeta mide siempre lo que pide su texto.
+       2. con la tarjeta a su tamaño real el cuerpo si se pasaba, asi que el aire vertical que ya se
+          recortaba por debajo de 560 px de alto se recorta tambien en los moviles de 640 (que es
+          donde vive el fallo). Mismas declaraciones, mismo criterio, solo el listón mas arriba.
+       3. y a 320 px de ancho, donde `.tl` se queda en 191 px y se parten LAS TRES lineas de la
+          tarjeta (temporada, tema y campeon), el disco del campeon baja a 38 px y el relleno a
+          8/10: eso le devuelve 26 px de ancho al texto, que valen mas que cualquier recorte de
+          alto — una linea que deja de partirse son 18 px verticales de golpe.
+     Resultado medido (tools/prueba-encaje-idiomas.mjs, que se lleva el diente nuevo que faltaba para
+     cazar esto — check 4, «texto comido por la caja que lo contiene»; 20 idiomas x 3 tamaños): CERO
+     recortes, y el cuerpo cabe en los 60 casos. El peor es vietnamita a 320x640, que cierra justo
+     en 0 px — ahi la linea del campeon ocupa dos renglones y la cabecera envuelve las monedas.
+     ⚠ EL ORDEN DE LOS TRES BLOQUES IMPORTA: este va ANTES del de 560 (que aprieta mas y tiene que
+     ganar en pantallas bajas) y el de 320 va DESPUES de los dos, porque es el mas apretado. */
+  @media (max-height:700px){
+    .se-hero{ padding-top:10px; padding-bottom:10px; }
+    #temporada .sc-body{ gap:9px; padding-top:3px; }
+    #temporada .sc-h{ margin-bottom:8px; }
+  }
   @media (max-height:560px){
     .se-hero{ padding:10px 14px; gap:11px; }
     .se-champ{ width:48px; height:48px; }
     #temporada .sc-body{ gap:9px; padding-top:4px; }
     #temporada .sc-h{ margin-bottom:8px; }
+  }
+  /*+AG la pieza 1, y es la que arregla el fallo de verdad: las otras dos solo pagan el alto que la
+     tarjeta ya no regala. Va en `#temporada` y no en `.sc-body` a secas porque Perfil comparte la
+     clase y ahi el reparto de alto es otro; tocarlo seria otro encargo. */
+  #temporada .sc-body > *{ flex-shrink:0; }
+  @media (max-width:339px){
+    .se-hero{ padding:8px 10px; gap:8px; }
+    .se-champ{ width:38px; height:38px; }
+    #temporada .sc-body{ gap:7px; padding-top:2px; }
   }
   /*+AG LA LISTA DE RETOS EN PANTALLAS PEQUEÑAS. El aire entre filas es lo unico que se toca: ni una
      letra baja del suelo de 11 px ni un tocable de los 44. Va por `max-height` Y por `max-width`
@@ -5418,7 +5468,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=1c6d87d+SUCIO"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=2067a3e"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -8499,7 +8549,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=1c6d87d-SUCIO').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=2067a3e').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -10768,7 +10818,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=1c6d87d-SUCIO';
+  import { startAmbient } from './arte/ambient.mjs?v=2067a3e';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -10784,7 +10834,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=1c6d87d-SUCIO').then(m => {
+  import('./arte/pista-preview.mjs?v=2067a3e').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -10796,8 +10846,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=1c6d87d-SUCIO';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=1c6d87d-SUCIO';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=2067a3e';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=2067a3e';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -10967,7 +11017,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=1c6d87d-SUCIO'), import('./motor/chassis/sincro.mjs?v=1c6d87d-SUCIO')]);
+        import('./motor/chassis/nube.mjs?v=2067a3e'), import('./motor/chassis/sincro.mjs?v=2067a3e')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
