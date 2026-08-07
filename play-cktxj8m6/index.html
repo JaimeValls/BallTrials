@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 e491a9a"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-07 8e2eab0"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -817,14 +817,57 @@
      de verdad de cada cosa y su marco de rareza, y el CTA sube de 13 a 20px.
      ⚠ EL CTA GRANDE ES SOLO DE ESTA TARJETA Y DEL REGALO. `.sh-buy` a secas lo comparten 30 y pico
      botones de Bolas/Cosmeticos/Gemas que son la MITAD de anchos, y ahi 20px parte la linea en dos. */
-  .sh-feat{ position:relative; border-radius:20px; padding:17px; background:linear-gradient(150deg,#5a2c86,#2a1a58); border:1px solid #ffffff22; box-shadow:0 12px 30px #0007; margin-bottom:12px; }
+  /*+AG ⚠⚠ 2026-08-07 (2ª vuelta) · LA PLANCHA DEJA DE SER UN COLOR PLANO. Jaime, viendo el pase ya
+     desplegado: «el fondo [...] es un color plano y te he pedido que fueses creativo [...] dejarlo así
+     con un color plano es cutre». Tenía razón: agrandé la letra, dibujé los contenidos y puse chapa al
+     rótulo… y dejé la plancha de detrás exactamente como estaba, un degradado de dos violetas.
+     Tres capas, y las TRES salen de cosas que ya existían en el juego — cero arte nuevo, cero espera:
+       1. `doodles.webp` al 7 %: es EL MISMO grano que llevan las seis pantallas grandes de fondo, así
+          que la tarjeta deja de ser una placa lisa sin inventarse una textura que no sea de la casa.
+       2. Los RAYOS: el mismo `conic-gradient` girando de `.cel .rayos` (la celebración), puesto detrás
+          de la bola. Es el lenguaje que el juego YA usa para decir «aquí hay un premio».
+       3. Un foco cálido detrás de la bola, para que la bola se apoye en algo y no flote.
+     ⚠ Las tres van en pseudoelementos con `z-index:0` y el contenido sube a `z-index:1`. Si no, el
+       doodle se pinta ENCIMA del texto.
+     ⚠ Y `overflow:hidden` es obligatorio con los rayos: sin él, el cuadrado de 260 px del conic se
+       sale de la tarjeta y pinta un abanico dorado por encima del regalo del día.
+     Está encargado el fondo pintado de verdad (arte/codex/40): esto es la casa, no el andamio. */
+  .sh-feat{ position:relative; overflow:hidden; border-radius:20px; padding:17px; background:linear-gradient(150deg,#5a2c86,#2a1a58); border:1px solid #ffffff22; box-shadow:0 12px 30px #0007; margin-bottom:12px; }
+  /*+AG ⚠ EL GRANO, y su número está MIRADO, no calculado: a .07 había que buscarlo con lupa y la
+     tarjeta seguía leyéndose plana, que es justo lo que había que arreglar. Un efecto que no se ve no
+     existe. .12 sobre una teja de 170 px. */
+  .sh-feat::before{ content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
+    background:url(arte/fondo/doodles.webp) repeat top left/170px 170px; opacity:.12; }
+  /*+AG ⚠⚠ AQUÍ HUBO UN CALLEJÓN SIN SALIDA Y SE ABANDONÓ A PROPÓSITO. La idea primera era el abanico
+     de rayos girando de `celebra()` detrás de la bola. Se probó en el juego DOS veces (centrado a ojo
+     y luego centrado al píxel en la bola) y las dos se veía UNA sola aspa: la bola está pegada a la
+     esquina, el `overflow:hidden` recorta la tarjeta y el resto del abanico cae fuera. Una raya
+     diagonal suelta no se lee como luz, se lee como un arañazo en la placa — peor que no tener nada.
+     La salida NO fue seguir afinando el conic, fue MIRAR cuatro tratamientos juntos en un mockup
+     suelto (`mockups/fondo-tarjeta-destacada.html`, se captura con `--crudo`) y elegir con los ojos. Ganó éste,
+     y por goleada:
+       · LA GRADA (`tribuna.webp`), la misma que ya usa el juego, asomando por abajo detrás del botón.
+         Es lo que convierte la tarjeta en una ESCENA en vez de en un color: hay público mirando la
+         oferta. Y es tematicamente correcto — «Temporada» es competición.
+       · UN FOCO violeta arriba a la derecha, que hace que la bola se apoye en algo y no flote.
+       · UNA VIÑETA que oscurece los bordes, y no es decoración: es lo que impide que la grada compita
+         con el precio y con el botón. Sin ella, «SUELTO VALE 762» se lee sobre un montón de bolas.
+     Cero arte nueva y cero peso nuevo: `tribuna.webp` ya viaja en el paquete. El fondo PINTADO de
+     verdad está encargado (arte/codex/40) — esto no es el andamio, es la casa mientras tanto. */
+  .sh-feat::after{ content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(125% 95% at 50% 38%, transparent 40%, #12082ed9 100%),
+      url(arte/fondo/tribuna.webp) no-repeat center bottom/auto 190px; }
+  .sh-feat > *{ position:relative; z-index:1; }
   .sh-feat-top{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:6px; }
   .sh-feat-top h3{ margin:0; min-width:0; }
   /*+AG la bola VIVA, la misma que gira en el Garaje y en la pestana Bolas (docs/55). Peticion literal
      de Jaime: «que aparezcan bolas si es necesario». 80px y no 72 como la rejilla: esto es UNA pieza
      destacada, no una celda de doce. No necesita JS: renderTienda() ya llama a vivasSync() y vivas.mjs
      barre `[data-viva]` de todo el documento. */
-  .sh-feat-ball{ width:80px; height:80px; flex:0 0 auto; }
+  /*+AG el foco cálido: la bola se APOYA en algo en vez de flotar sobre la placa. */
+  .sh-feat-ball{ width:80px; height:80px; flex:0 0 auto; border-radius:50%;
+    background:radial-gradient(circle at 50% 52%, #ffd23f38, #ffd23f14 42%, transparent 70%); }
   .sh-feat .fl{ display:inline-block; font-size:var(--fs-3); letter-spacing:.10em; text-transform:uppercase; font-weight:900;
                 background:linear-gradient(#ffe27a,#ffb43d); color:#3a2400; padding:3px 9px; border-radius:9px; box-shadow:0 2px 6px #ffb03d3d; }
   .sh-feat h3{ margin:6px 0 0; font-size:var(--fs-5); }
@@ -894,7 +937,23 @@
   .sc-ico{ width:15px; height:15px; flex:0 0 auto; display:block; }
   .sc-note{ font-size:var(--fs-2); color:#aeb6d8; line-height:1.5; margin-top:9px; }
   .sc-soon{ font-size:var(--fs-2); font-weight:800; color:var(--muted); background:var(--plate-a); border:1px solid var(--line); border-radius:999px; padding:2px 8px; margin-left:auto; letter-spacing:.04em; text-transform:uppercase; }
-  .se-hero{ border-radius:20px; padding:15px 16px; background:linear-gradient(150deg,#5a2c86,#2a1a58); border:1px solid #ffffff22; box-shadow:0 12px 30px #0007; display:flex; align-items:center; gap:13px; }
+  /*+AG 2026-08-07: la plancha del Pase recibe EL MISMO tratamiento que la del destacado de la Tienda.
+     El código ya decía que son «el mismo objeto visto en dos pantallas» y compartían el degradado; si
+     una deja de ser plana y la otra no, dejan de ser el mismo objeto. Aquí van el grano y el foco; los
+     rayos NO, porque esta tarjeta es una fila baja y ahí un abanico de 270 px se come el texto. */
+  .se-hero{ position:relative; overflow:hidden; border-radius:20px; padding:15px 16px;
+    background:
+      radial-gradient(110% 130% at 84% 16%, #9a4fd8 0%, transparent 58%),
+      linear-gradient(150deg,#5a2c86,#2a1a58);
+    border:1px solid #ffffff22; box-shadow:0 12px 30px #0007; display:flex; align-items:center; gap:13px; }
+  .se-hero::before{ content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
+    background:url(arte/fondo/doodles.webp) repeat top left/170px 170px; opacity:.12; }
+  /*+AG la viñeta, igual que en la tarjeta de la Tienda. Aquí NO va la grada: esta plancha es una fila
+     baja de ~90 px y un público detrás de dos renglones de texto es ruido, no escena. */
+  .se-hero::after{ content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
+    background:radial-gradient(125% 110% at 50% 40%, transparent 42%, #12082eb0 100%); }
+  .se-hero > *{ position:relative; z-index:1; }
+  .se-champ{ border-radius:50%; background:radial-gradient(circle at 50% 52%, #ffd23f30, transparent 70%); }
   .se-hero .tl{ flex:1; } .se-hero .fl{ font-size:var(--fs-2); letter-spacing:.16em; text-transform:uppercase; color:var(--gold2); font-weight:800; }
   .se-hero h3{ margin:2px 0 3px; font-size:var(--fs-5); } .se-hero .dd{ font-size:var(--fs-3); color:#cfd4f0; font-weight:700; }
   .se-champ{ width:56px; height:56px; }
@@ -1037,6 +1096,27 @@
      .sh-feat): 13px en un boton de ancho completo era la letra mas pequeña de la pantalla puesta en
      lo unico que hay que pulsar. */
   .cam-cta, .sh-feat .sh-buy{ font-size:var(--fs-5); min-height:52px; padding:14px 10px; letter-spacing:.04em; }
+  /*+AG ⚠⚠ 2026-08-07 (2ª vuelta) · CERO MINÚSCULAS EN ESTA PANTALLA. Jaime: «cada vez que escribes algo
+     en minúsculas no queda muy bien en general [...] yo creo que en Clash Royale nunca usan minúsculas».
+     La regla ya existía (docs/60, «rótulo pequeño nunca en minúsculas») pero estaba escrita solo para el
+     texto PEQUEÑO y aislado; él la sube a TODO: el título grande del pack también, y el CTA también.
+     ⚠ LAS MAYÚSCULAS LAS PONE EL CSS, NUNCA EL DICCIONARIO. Si se escriben en los 20 diccionarios, cada
+       idioma deja de escribirse como se escribe (y en alemán, turco o griego eso son reglas distintas).
+       `text-transform` las hace el navegador con las reglas de CADA idioma; el árabe, el chino y el
+       japonés no tienen caja y ahí simplemente no hace nada, que es lo correcto.
+     ⚠ Y VAN CON `letter-spacing`, no solas: una caja alta y sin bajadas necesita más aire o las letras
+       se pegan. .06em, que es lo que ya usan las etiquetas del canon.
+     ⚠ `.sh-buy` ENTERO, no solo el de esta tarjeta: si el botón de comprar de Destacados va en caja
+       alta y el de Bolas no, dejan de ser el mismo botón — que es justo lo que vigila docs/60. */
+  .sh-feat h3, .se-hero h3, .sh-price, .sh-it .nm, .cam-d, .sh-buy, .cam-cta{
+    text-transform:uppercase; letter-spacing:.06em; }
+  /*+AG ⚠ el TÍTULO grande es la excepción del interletrado, y está medido: «PACK DE TEMPORADA» son 18
+     letras a 20 px en caja alta, y con .06em pedía 225 px cuando solo hay 221 (313 de tarjeta − 80 de
+     bola − 12 de hueco). Se partía en dos líneas por 4 px. A .02em entra de una, y a 20 px un título
+     ya no necesita ese aire — el interletrado ancho es para las etiquetas cortas, no para los titulares.
+     `text-wrap:balance` es el cinturón: si un idioma largo lo parte igual, que lo parta equilibrado y
+     no dejando una palabra suelta abajo. */
+  .sh-feat h3, .se-hero h3{ letter-spacing:.02em; text-wrap:balance; }
   /*+AG ⚠ 2026-08-07 · ESTE BLOQUE ES EL QUE PAGA TODA LA SUBIDA DE TAMAÑOS, no es un adorno.
      Las letras y los iconos grandes de arriba suman alto, y en el movil BAJO (360x640) la pestaña ya
      tenia que deslizar 116 px antes de tocar nada. Aqui se devuelve ese alto donde no se nota: menos
@@ -1416,7 +1496,7 @@
      y las particulas se comprueban en JS ANTES de nacer. Aqui solo se paran los movimientos. */
   @media (prefers-reduced-motion: reduce){
     .scr.on,.h-play,.h-ball,.ready,.ready::after,.justready,
-    .cam-card,.cam-card.hay.ready,.sh-feat,.cam-gift,.cam-gift.viva,.falta,
+    .cam-card,.cam-card.hay.ready,.sh-feat,.sh-feat::after,.cam-gift,.cam-gift.viva,.falta,
     .sh-entra .sh-sec,.sh-entra #shBody > div > *,#shBody.secIn{ animation:none; }
     #vuelo{ display:none; }
   }
@@ -3596,6 +3676,48 @@
      que tener `color` definido. Donde ya lo habia (las cabeceras de bloque `.sc-h`, que son
      amarillas) la pieza entro bien a la primera. */
   .h-ic{ color:#fff; }
+
+  /* ═══════════════════════════════════════════════════════════════════════════════════════════════
+     doc 85 · EL JUEGO ENTERO SE ENCIENDE CUANDO LO PULSAS
+     ═══════════════════════════════════════════════════════════════════════════════════════════════
+     Jaime, 2026-08-07: «que los botones brillen mucho y te apetezca hacerles click».
+
+     Y no era una impresión. Barrido de HOY sobre los 206 pulsables únicos del shell: hay 77 reglas
+     `:active` vivas, 46 sólo bajan el botón 2 px, 21 lo encogen, y **UNA SOLA toca la luz**
+     (`.sh-buy:active` con `filter:brightness(1.06)`, o sea un 6 % — por debajo de lo que el ojo
+     distingue). Traducido: el juego se HUNDE al pulsarlo, que es la mitad del gesto, pero no se
+     ENCIENDE, que es la otra mitad y la que hace que apetezca repetirlo.
+
+     Esta regla es aditiva a propósito: sólo pone `filter`, y ninguna de las 77 reglas de arriba lo
+     usa (salvo esa del 1,06, que ésta pisa). Así el hundimiento, el encogido y el canto de cada
+     componente siguen siendo los suyos y no hay que tocar 77 sitios.
+
+     · 1.28 y no 1.06 porque 1.06 no se ve: el escalón perceptible de brillo ronda el 10 %.
+     · va con `saturate` porque sobre las placas marino oscuras el brillo solo las agrisa; lo que
+       hace que un botón "cante" es que su color se vuelva más color, no más blanco.
+     · `:not(:disabled)` para que un botón apagado no finja estar vivo — es la misma mentira que el
+       doc 74 persiguió en el nitro.
+     · la transición es de SALIDA (.12s): el encendido tiene que ser instantáneo y el apagado suave,
+       no al revés. Con transición en los dos sentidos el botón se enciende tarde y se siente pastoso.
+     ⚠ `filter` en un ancestro convierte a sus hijos `position:fixed` en relativos a él. Ninguno de
+       estos componentes tiene hijos fijos (comprobado en las 19 superficies del banco de canon), pero
+       si algún día un pulsable monta un modal por dentro, hay que sacarlo de aquí. */
+  #app button:active:not(:disabled),
+  #app .g-card:active, #app .subtab:active, #app .rktile:active, #app .cam-card.hay:active,
+  #app .onb-opt:active, #app .onb-b:active, #app .h-modecard:active, #app .sc-block:active,
+  #app [role="button"]:active:not([aria-disabled="true"]),
+  #cel .cta:active{
+    filter:brightness(1.28) saturate(1.14);
+    transition:none;                 /* ← el ENCENDIDO es instantáneo… */
+  }
+  #app button, #app .g-card, #app .subtab, #app .rktile, #app .cam-card,
+  #app .onb-opt, #app .onb-b, #app .h-modecard, #app .sc-block{
+    transition:filter .12s ease-out;   /* …y sólo el APAGADO se desvanece. Medido: con la transición en
+       los dos sentidos la sonda leía brightness(1) en el frame del dedo — o sea que el botón se
+       encendía TARDE. Un botón que tarda 120 ms en contestar se siente pastoso aunque acabe brillando. */
+  }
+  /*+AG «Efectos reducidos» y el ajuste del sistema NO apagan esto: un botón que contesta al dedo es
+     información, no decoración. Lo que apagan es el MOVIMIENTO, y aquí no hay ninguno. */
 </style>
 
 <!--+AG doc 34 Fase B: #app = la "columna telefono" que contiene TODAS las pantallas y overlays (portrait) -->
@@ -4614,7 +4736,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=e491a9a"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=8e2eab0"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -7590,7 +7712,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=e491a9a').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=8e2eab0').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -9859,7 +9981,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=e491a9a';
+  import { startAmbient } from './arte/ambient.mjs?v=8e2eab0';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -9875,7 +9997,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=e491a9a').then(m => {
+  import('./arte/pista-preview.mjs?v=8e2eab0').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -9887,8 +10009,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=e491a9a';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=e491a9a';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=8e2eab0';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=8e2eab0';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -10056,7 +10178,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=e491a9a'), import('./motor/chassis/sincro.mjs?v=e491a9a')]);
+        import('./motor/chassis/nube.mjs?v=8e2eab0'), import('./motor/chassis/sincro.mjs?v=8e2eab0')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
