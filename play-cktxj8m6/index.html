@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 77712da"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-07 8d3d10a+SUCIO"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -1439,12 +1439,29 @@
     .cam-cta, .sh-feat .sh-buy{ min-height:46px; padding:11px 10px; }
     .sh-feat{ padding:12px; margin-bottom:8px; }
     .sh-feat h3{ font-size:var(--fs-4); }
-    .sh-feat-ball{ width:52px; height:52px; }
-    .sh-feat-items{ gap:6px; margin:8px 0 8px; }
-    .sh-it{ min-height:48px; padding:6px 4px; }
-    .sh-it img.ico{ width:32px; height:32px; }
-    .sh-it .cmico{ width:32px; height:32px; }
-    .sh-it .nm{ display:none; }
+    .sh-feat-ball{ width:40px; height:40px; }
+    /*+AG ⚠ 7-ago (segunda pasada) · EL NOMBRE VUELVE. Lo de arriba decia que a 32 px «la bola y la
+       skin ya se reconocen por el dibujo», y para las dos primeras baldosas es cierto. Pero la TERCERA
+       no es un objeto: son 6000 MONEDAS, y su cifra vive en este mismo `.nm`. Apagandolo, el movil bajo
+       enseñaba una moneda dorada SIN NUMERO en la pantalla donde se piden 500 gemas — o sea, cobrando
+       por un pack sin decir cuanto trae. Jaime, con las dos capturas delante: «arreglalo».
+       ⚠⚠ Y EL MOTIVO POR EL QUE SE ESCONDIO NO SE CUMPLIA. Medido con `scrollHeight - clientHeight`
+       (que es lo que hay que mirar aqui, y lo dice el propio comentario de arriba): con los nombres ya
+       apagados la pestaña se salia igual **165 px a 640 y 265 a 540**. O sea que se pagaba el precio
+       —perder que se lea lo que compras— sin llegar a conseguir que cupiera.
+       EL ALTO SE PAGA DONDE MANDA ESE COMENTARIO: «se recorta la bola viva y las baldosas, jamas la
+       tipografia». El cuerpo de la letra se queda en --fs-3; lo que baja es la bola del pack (52→40),
+       el icono de cada baldosa (32→26) y el aire. El nombre pasa a UNA linea con puntos suspensivos,
+       que es lo que ahorra los 15 px de la segunda linea de «Estela Arcoiris».
+       RESULTADO MEDIDO en 375x640, 360x640, 320x640 y 360x540: los tres nombres se leen **y encima se
+       sale 4 px MENOS que antes** (161 en vez de 165; 261 en vez de 265). Gana por los dos lados.
+       ⚠ Queda dicho, porque no es esto: la pestaña Destacados SE SIGUE SALIENDO de pantalla en todos
+       los moviles medidos (134 px incluso en un 375x812). Eso es de antes y es harina de otro costal. */
+    .sh-feat-items{ gap:5px; margin:6px 0 6px; }
+    .sh-it{ min-height:0; padding:5px 4px; }
+    .sh-it img.ico{ width:26px; height:26px; }
+    .sh-it .cmico{ width:26px; height:26px; }
+    .sh-it .nm{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
     .sh-price{ margin-bottom:6px; }
   }
   .se-track{ display:flex; gap:8px; overflow-x:auto; padding:2px 1px 9px; -webkit-overflow-scrolling:touch; }
@@ -5166,7 +5183,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=77712da"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=8d3d10a+SUCIO"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -8181,7 +8198,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=77712da').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=8d3d10a-SUCIO').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -10450,7 +10467,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=77712da';
+  import { startAmbient } from './arte/ambient.mjs?v=8d3d10a-SUCIO';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -10466,7 +10483,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=77712da').then(m => {
+  import('./arte/pista-preview.mjs?v=8d3d10a-SUCIO').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -10478,8 +10495,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=77712da';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=77712da';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=8d3d10a-SUCIO';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=8d3d10a-SUCIO';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -10649,7 +10666,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=77712da'), import('./motor/chassis/sincro.mjs?v=77712da')]);
+        import('./motor/chassis/nube.mjs?v=8d3d10a-SUCIO'), import('./motor/chassis/sincro.mjs?v=8d3d10a-SUCIO')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
