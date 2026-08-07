@@ -19,8 +19,8 @@
 //   · UN SOLO LENGUAJE DE "PÚLSAME": el CTA usa el mismo oro del motor (#bSup.ready / #ovBtn), no inventa brillos.
 //   · CABE EN EL MÓVIL SIN DESLIZAR: todo el cartel se mide en vh/vw y el texto se recorta con line-clamp.
 
-import { createSynth, makeRng, peakGain } from './synth.mjs?v=5a4eb82';
-import { PAUSA } from './pausa.mjs?v=5a4eb82';   //+AG "el mundo no se mueve": el cartel tampoco se auto-arranca (ver tick)
+import { createSynth, makeRng, peakGain } from './synth.mjs?v=deb26dc-SUCIO';
+import { PAUSA } from './pausa.mjs?v=deb26dc-SUCIO';   //+AG "el mundo no se mueve": el cartel tampoco se auto-arranca (ver tick)
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────
 //  TEXTOS · en+es con fallback a INGLÉS, igual que el SHELL y que los motores de Cazador/Luz Roja

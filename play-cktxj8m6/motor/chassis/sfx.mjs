@@ -2,7 +2,7 @@
 // createSynth (add/note) de chassis/audio.mjs → byte-determinista (mismo rng). Da efectos CON NOMBRE para que
 // todos los modos suenen coherentes y NINGUNA situación quede muda: reventón, grito, impacto, whoosh, chispa,
 // explosión, metálico, ding de llegada. El "director de audio" (agente) audita qué evento de cada modo usa cuál.
-//   import { createFx } from '../chassis/sfx.mjs?v=5a4eb82';
+//   import { createFx } from '../chassis/sfx.mjs?v=deb26dc-SUCIO';
 //   const synth = createSynth({SR,N,buf,rng}); const fx = createFx(synth);
 // NOTA: el audio es RENDER (no sim) → aquí SÍ valen Math.pow/etc. Las amplitudes son orientativas (amp≈volumen).
 export function createFx({ add, note }){

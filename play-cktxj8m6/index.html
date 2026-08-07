@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 5a4eb82"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-07 deb26dc+SUCIO"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -1808,6 +1808,19 @@
      (moviles de 320) la altura se recalcula sola y la proporcion no se rompe. Y el alto sale de `vh`
      porque en 360x540 una altura fija se comia la fila de JUGAR. */
   .hero #hBall{ aspect-ratio:10/13; height:min(46vh,390px); max-width:78vw; display:block; margin:0 auto; }
+  /*+AG ⚠ Y EN PANTALLA BAJA CEDE, porque si no el bloque del heroe empuja al PASE. A 46vh la bola,
+     el nombre y la placa de copas suman mas que el hueco entre la cabecera y `.homebottom` en cuanto
+     el movil baja de ~700 px de alto: medido, `.ballcups` se metia DEBAJO del pase en 320x640 y
+     360x640, y en 360x540 se metia tambien el nombre. Y `__fitCheck()` daba verde en los tres —
+     nada se sale de la PANTALLA, solo se monta encima de lo de al lado.
+     El corte va por ALTO (`max-height`), no por ancho, porque el que manda aqui es el alto. */
+  @media (max-height:700px){ .hero #hBall{ height:min(36vh,390px); } }
+  /*+AG el segundo escalon arregla un solape PREEXISTENTE, no uno mio: medido con la caja vieja
+     (262x262 fija) a 360x540 se metian DEBAJO del pase el nombre Y las copas, y a 360x640 las copas.
+     O sea que la Portada llevaba el bloque del heroe montado sobre el pase en los moviles bajos desde
+     antes de tocar nada, y `__fitCheck()` nunca lo canto. Con 36vh ya se arregla 360x640; 540 necesita
+     este escalon porque ahi el hueco entre cabecera y `.homebottom` no da para el bloque entero. */
+  @media (max-height:580px){ .hero #hBall{ height:min(28vh,390px); } }
   .hero canvas{ width:164px; height:164px; filter:drop-shadow(0 16px 24px #0009); animation:breathe 3.1s ease-in-out infinite; }
   /*+AG 2-ago · EL PROTAGONISTA SE PRESENTA COMO EN BRAWL: nombre grande y trofeos en placa, y NADA MAS.
      Jaime: «yo haría Bunker y las copas más grandes». El nombre sube de 24 a 30 (--fs-7) y estrena el
@@ -5049,7 +5062,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=5a4eb82"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=deb26dc+SUCIO"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -8050,7 +8063,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=5a4eb82').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=deb26dc-SUCIO').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -10319,7 +10332,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=5a4eb82';
+  import { startAmbient } from './arte/ambient.mjs?v=deb26dc-SUCIO';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -10335,7 +10348,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=5a4eb82').then(m => {
+  import('./arte/pista-preview.mjs?v=deb26dc-SUCIO').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -10347,8 +10360,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=5a4eb82';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=5a4eb82';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=deb26dc-SUCIO';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=deb26dc-SUCIO';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -10518,7 +10531,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=5a4eb82'), import('./motor/chassis/sincro.mjs?v=5a4eb82')]);
+        import('./motor/chassis/nube.mjs?v=deb26dc-SUCIO'), import('./motor/chassis/sincro.mjs?v=deb26dc-SUCIO')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
