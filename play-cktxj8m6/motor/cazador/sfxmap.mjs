@@ -1,11 +1,11 @@
 // YouBall · MAPEO eventos→buffer de audio de El Cazador, browser-safe (sin Node). El corazón del sonido del modo:
 // por cada evento de la sim coloca su SFX en un Float32Array. Lo usan IGUAL el render (audio.mjs → WAV) y el
 // preview en vivo (index.html → Web Audio) → la web suena EXACTAMENTE como el render (misma síntesis, mismo seed).
-//   import { buildSfxBuffer } from './sfxmap.mjs?v=ababf72-SUCIO';
+//   import { buildSfxBuffer } from './sfxmap.mjs?v=1da222b';
 //   const buf = buildSfxBuffer({ events, decision_frame, f, seed, SR });   // Float32Array mono (sin normalizar)
-import { createSynth, makeRng } from '../chassis/synth.mjs?v=ababf72-SUCIO';
-import { createFx } from '../chassis/sfx.mjs?v=ababf72-SUCIO';
-import { FPS } from './sim.js?v=ababf72-SUCIO';
+import { createSynth, makeRng } from '../chassis/synth.mjs?v=1da222b';
+import { createFx } from '../chassis/sfx.mjs?v=1da222b';
+import { FPS } from './sim.js?v=1da222b';
 
 // events = sim.events de la SIM (runToEnd / runSeed: la sim acumula en sim.events). Claves array: orbs (SPAWN de
 // orbe), pickup (cogerlo, con e.kind 'dash'|'swap'|'invert'), dash, swap, invert (sub-eventos del pickup, mismo

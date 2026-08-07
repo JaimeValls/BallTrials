@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 ababf72+SUCIO"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-07 1da222b"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -1139,8 +1139,41 @@
   .pg-ok{ color:#052a30; background:linear-gradient(#8fe9f4,#18c7d6); } .pg-ok:disabled{ filter:grayscale(.6) brightness(.8); cursor:default; }
   .pg-no{ background:var(--plate-a); color:#c9cff0; }
   /* --- TEMPORADA (doc 10: Liga + Pase + Rankings + tema) y PERFIL (doc 13: identidad/amigos/referidos/emotes/consentimiento) · placeholders fieles --- */
-  #temporada{ background:url(arte/fondo/doodles.webp) repeat top left/340px 340px, radial-gradient(130% 90% at 50% 8%, #7a2fb8 0%, #3f1a86 45%, var(--bg-lo) 100%); }
-  #perfil{ background:url(arte/fondo/doodles.webp) repeat top left/340px 340px, radial-gradient(130% 90% at 50% 8%, #3a44c8 0%, #26208a 45%, var(--bg-lo) 100%); }
+  /*+AG ══ FONDOS PINTADOS · encargo 41, piezas 1 y 2 (7-ago-2026) ═════════════════════════════════
+     Jaime, mirando el Garaje: «quizas tendriais que pedir a Codex algo para los fondos. Me siguen
+     pareciendo un poco no triple A.» Y tenia razon con un dato detras: las SEIS pantallas grandes
+     compartian un unico fichero —`doodles.webp`, 22 KB en mosaico a 340 px— y tres de ellas
+     compartian ademas el mismo degradado exacto. No es que los fondos fueran flojos: es que no
+     habia fondos, habia un papel pintado y cinco tintes.
+     Estas dos entran primero porque son donde MAS fondo se ve con la interfaz puesta, medido a
+     375x812: en Perfil el fondo es mas de la mitad del alto (todo lo que hay bajo la tarjeta esta
+     vacio) y en Temporada es el tercio de abajo. En el Garaje o la Tienda solo asoman bandas y
+     margenes, y por eso van despues: ahi el mismo trabajo se nota mucho menos.
+
+     EL MOSAICO DE GARABATOS SE VA DE ESTAS DOS, y no es que estorbe: es que era el sintoma. Sigue
+     vivo donde su uso es correcto —capa fina al 12 % DENTRO de los paneles (`.sc-block`)—, que es
+     textura de material y no fondo de pantalla.
+
+     EL DEGRADADO RADIAL SE QUEDA DEBAJO, a proposito y no por inercia: es la red de seguridad si la
+     imagen tarda o falla, y es lo que permite integrar las seis piezas DE UNA EN UNA sin que ninguna
+     pantalla se quede a medio vestir mientras Codex pinta las otras cuatro.
+
+     `cover` recorta por los lados en pantalla ancha y por arriba/abajo en la estrecha; el encargo
+     declara los 60 px de cada borde como zona de sacrificio, asi que ahi no vive nada que importe. */
+  /*+AG ⚠ EL VELO DE TEMPORADA NO ES DECORACION, ES UNA REGRESION MEDIDA Y TAPADA. El panel de retos
+     (`.sc-block`) es SEMITRANSPARENTE, asi que al meter el atardecer detras su fondo local dejo de
+     ser violeta oscuro y se volvio calido. Medido sobre la captura real, en «Retos nuevos mañana»
+     —el texto mas bajo del panel y por tanto el que mas atardecer tiene detras— el contraste cayo de
+     4,58:1 a 2,89:1, o sea POR DEBAJO del suelo de 3:1 incluso para texto grande.
+     No se vio a ojo: en la captura el rotulo parecia estar bien. Se vio midiendo el recorte.
+     El velo apaga los dos tercios de arriba, que es justo donde el encargo pide «cielo abierto, liso
+     y casi vacio»: no tapa nada de lo que hace bonita a la pieza, y se abre del todo antes del 78 %,
+     que es donde empiezan las nubes y donde ya no hay ni un texto encima. */
+  #temporada{ background:
+      linear-gradient(#241159c4 0%, #241159c4 56%, #24115900 78%),
+      url(arte/fondo/fondo-temporada.webp) no-repeat center center/cover,
+      radial-gradient(130% 90% at 50% 8%, #7a2fb8 0%, #3f1a86 45%, var(--bg-lo) 100%); }
+  #perfil{ background:url(arte/fondo/fondo-perfil.webp) no-repeat center center/cover, radial-gradient(130% 90% at 50% 8%, #3a44c8 0%, #26208a 45%, var(--bg-lo) 100%); }
   .sc-body{ flex:1; min-height:0; overflow-y:auto; padding:6px 13px 16px; display:flex; flex-direction:column; gap:12px; }
   /*+AG doc 40: SUB-PESTAÑAS. Temporada y Perfil eran dos rollos de ~950px en 550 utiles: habia que deslizar
      siempre. Regla de Clash Royale (Muhtar: navegacion "horizontal swipe-based", Gornicki: la profundidad
@@ -3958,7 +3991,7 @@
   .h-ic{ color:#fff; }
 
   /* ═══════════════════════════════════════════════════════════════════════════════════════════════
-     doc 85 · EL JUEGO ENTERO SE ENCIENDE CUANDO LO PULSAS
+     doc 88 · EL JUEGO ENTERO SE ENCIENDE CUANDO LO PULSAS
      ═══════════════════════════════════════════════════════════════════════════════════════════════
      Jaime, 2026-08-07: «que los botones brillen mucho y te apetezca hacerles click».
 
@@ -5067,7 +5100,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=ababf72+SUCIO"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=1da222b"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -8082,7 +8115,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=ababf72-SUCIO').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=1da222b').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -10351,7 +10384,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=ababf72-SUCIO';
+  import { startAmbient } from './arte/ambient.mjs?v=1da222b';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -10367,7 +10400,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=ababf72-SUCIO').then(m => {
+  import('./arte/pista-preview.mjs?v=1da222b').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -10379,8 +10412,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=ababf72-SUCIO';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=ababf72-SUCIO';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=1da222b';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=1da222b';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -10550,7 +10583,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=ababf72-SUCIO'), import('./motor/chassis/sincro.mjs?v=ababf72-SUCIO')]);
+        import('./motor/chassis/nube.mjs?v=1da222b'), import('./motor/chassis/sincro.mjs?v=1da222b')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
