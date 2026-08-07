@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 1da222b"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-07 50cee4e"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -276,7 +276,16 @@
   /*+AG la pildora mide 30 px de alto y el minimo tactil son 44: este halo transparente sube el AREA DE
      TOQUE sin engordar el dibujo. Es la misma receta que ya usaba .sclose, no un invento. */
   .coin::before, .cups::before{ content:''; position:absolute; inset:-7px; border-radius:999px; }
-  .coin .cico{ width:32px; height:32px; margin:-7px 0; filter:drop-shadow(0 2px 3px #000a); }
+  /*+AG 7-ago · EL ICONO MUERDE LA PILDORA (docs/86, regla 4 del canon). A 32 px sobre una placa de 30
+     el icono se salia 1 px por lado: un 7 %, un desborde simbolico. En las capturas de Brawl el icono
+     ES el protagonista y se sale con aire de sobra — «si cabe con aire, es pequeño».
+     ⚠ Y NO CUESTA ANCHO, que es lo que tumbo el intento anterior: el comentario de arriba deja escrito
+     que a 42 px la fila se desbordaba a 320. La diferencia es que aquel margen negativo era SOLO
+     vertical (`-7px 0`), asi que el icono ocupaba sus 42 px enteros en la fila. Este lo lleva tambien
+     en horizontal: 38 px de dibujo menos 6 de margen = **32 px ocupados, exactamente los de antes**.
+     Crece hacia fuera, no hacia los lados. Y el -3 de la izquierda lo pega al borde de la placa, que
+     es justo la mordida de la referencia. Medido a 320, 360 y 375: la fila no se mueve. */
+  .coin .cico{ width:38px; height:38px; margin:-11px -3px; filter:drop-shadow(0 2px 3px #000a); }
   .coin i{ width:19px; height:19px; border-radius:50%; display:grid; place-items:center; font-style:normal; font-size:var(--fs-3); color:#1a1330; }
   .coin.chispa i{ background:radial-gradient(circle at 35% 30%,#ffe680,var(--gold)); box-shadow:0 0 8px #fbb91577; }
   .coin.gema i{ background:radial-gradient(circle at 35% 30%,#aef4ff,var(--cyan)); box-shadow:0 0 8px #18c7d677; }
@@ -968,8 +977,16 @@
   .bst-buy .p{ display:flex; align-items:center; gap:3px; font-size:var(--fs-3); font-weight:900; color:#fff;
     -webkit-text-stroke:.16em #6b3a05; paint-order:stroke fill; }
   .bst-buy .p .cico{ width:15px; height:15px; -webkit-text-stroke:0; }
+  /*+AG 7-ago · BANDERIN CON MUESCA, no pildora (docs/86). En las 7 capturas de Brawl las etiquetas que
+     cuelgan de una pieza —FREE, NEW— NO son pildoras redondeadas: son BANDERINES, con la cola mordida
+     en V. Es la silueta lo que las separa de un chip de dato; el color solo dice de que tipo son.
+     ⚠ El canto NO puede ir en `box-shadow`: `clip-path` recorta tambien la sombra y el banderin se
+     quedaria plano. Va en `filter:drop-shadow`, que sigue la silueta recortada. Y el `border-radius`
+     se va porque bajo un clip-path no pinta nada — la esquina recta es la del banderin. */
   .bst-buy .off{ position:absolute; top:-7px; right:-5px; background:var(--green); color:#08260f;
-    font-size:10px; font-weight:900; padding:2px 5px; border-radius:8px; box-shadow:0 2px 0 #1d7a35; }
+    font-size:10px; font-weight:900; padding:2px 6px 2px 9px;
+    clip-path:polygon(0 0, 100% 0, 100% 100%, 0 100%, 5px 50%);
+    filter:drop-shadow(0 2px 0 #1d7a35); }
   /*+AG ⚠ 2026-08-06 · EL ACUSE DE RECIBO DE LOS BOTONES DE COMPRAR. Lo cazó la auditoría de
      espectacularidad y el dato es demoledor: el juego tiene 74 reglas `:active` —se hunden las
      pestañas, las monedas, los chips— y NINGUNA apuntaba a `.sh-buy` ni a `.money`. O sea que los 31
@@ -1092,6 +1109,22 @@
   /*+AG el foco cálido: la bola se APOYA en algo en vez de flotar sobre la placa. */
   .sh-feat-ball{ width:80px; height:80px; flex:0 0 auto; border-radius:50%;
     background:radial-gradient(circle at 50% 52%, #ffd23f38, #ffd23f14 42%, transparent 70%); }
+  /*+AG ══ EL ESTANDARTE PINTADO (encargo 40, pieza 2) · PROBADO Y RETIRADO, 7-ago-2026 ═════════════
+     La pieza `ui-banner-oferta.webp` ESTÁ entregada y está bien dibujada — comprobada con
+     `tools/prueba-arte-entregado.mjs`: 700×220 exactos, 48,9 % transparente y las cuatro esquinas con
+     alfa 0. El problema no es el dibujo: es que NO CABE EN ESTE HUECO.
+     La cinta está dibujada a 700×220, o sea 3,2:1. Este rótulo es un eyebrow de 275×30, o sea 9,2:1.
+     Estirarla aquí la deforma casi 3×, y lo que se rompe primero son las COLAS DE GOLONDRINA: la V de
+     cada punta pasa de ser una muesca a ser una raya diagonal larga que CRUZA POR ENCIMA del texto.
+     Se vio mirando la captura, no leyendo el CSS.
+     Y el hueco no se puede hacer más alto: a su proporción natural, 275 px de ancho piden 86 px de
+     alto, y la tarjeta ya se sale de la pantalla por abajo tal y como está.
+     Se queda la chapa de CSS, que es canon y funciona. Lo que hace falta para usar la cinta es UNA
+     de estas dos, y las dos son decisión de Jaime, no mía: redibujarla a ~9:1 (el hueco real), o
+     darle un sitio donde quepa a su proporción. El fichero se queda en el repo esperando.
+     ⚠ Y lo que NO vale, por si alguien lo intenta: agrandar el `background-size` para sacar las
+     puntas fuera del texto. El fondo sólo se pinta dentro de la caja, así que eso recorta las dos
+     colas y la cinta deja de ser una cinta. */
   .sh-feat .fl{ display:inline-block; font-size:var(--fs-3); letter-spacing:.10em; text-transform:uppercase; font-weight:900;
                 background:linear-gradient(#ffe27a,#ffb43d); color:#3a2400; padding:3px 9px; border-radius:9px; box-shadow:0 2px 6px #ffb03d3d; }
   .sh-feat h3{ margin:6px 0 0; font-size:var(--fs-5); }
@@ -1108,7 +1141,12 @@
      costaria suelto, al lado de la chapa de ahorro. El numero sale calculado de los precios reales
      (bundleValor()), nunca escrito a mano — ver el porque largo en el comentario de BUNDLE. */
   .sh-price{ display:flex; align-items:center; gap:9px; justify-content:center; font-weight:900; font-size:var(--fs-4); margin-bottom:10px; color:#d6dbf4; }
-  .sh-off{ background:#ff4d4d; color:#fff; font-weight:900; font-size:var(--fs-3); padding:3px 9px; border-radius:9px; box-shadow:0 2px 0 #a51f1f; }
+  /*+AG 7-ago · el chivato de ahorro tambien pasa a BANDERIN (docs/86, mismo motivo que `.bst-buy .off`:
+     lo que cuelga de una pieza para gritar una oferta tiene silueta de banderin, no de pildora). El
+     canto va en `drop-shadow` porque el `clip-path` recorta el `box-shadow`. */
+  .sh-off{ background:#ff4d4d; color:#fff; font-weight:900; font-size:var(--fs-3); padding:3px 9px 3px 13px;
+    clip-path:polygon(0 0, 100% 0, 100% 100%, 0 100%, 6px 50%);
+    filter:drop-shadow(0 2px 0 #a51f1f); }
   /*+AG doc 45 §5: con la escalera de 6 packs de Clash Royale + la oferta del dia son 7 filas y
      la seccion se salia 13px. El aire entre filas baja de 10 a 8: cabe sin deslizar y no se nota. */
   .sh-pack{ display:flex; align-items:center; gap:12px; background:var(--plate-a); border:1px solid var(--line); border-radius:16px; padding:12px 14px; margin-bottom:8px; }
@@ -3380,8 +3418,12 @@
      propia y va despues del ::before por orden del DOM) — o sea que el fallo ni siquiera era uniforme.
      El arreglo es de una linea: se sube a los HIJOS a la misma capa. Al ser posicionados, se pintan
      despues del ::before por orden del DOM y vuelven a estar encima.
-     ⚠ Y EL ICONO SIGUE DESBORDANDO (regla 4 de docs/56): el <img> mide 32 con margen negativo, se centra
-     en los 44 y sobresale de los 30 de la pastilla igual que antes.
+     ⚠ Y EL ICONO SIGUE DESBORDANDO (regla 4 de docs/56): el <img> lleva margen negativo, se centra en
+     los 44 y sobresale de los 30 que mide la pastilla dibujada (el ::before, `inset:7px 0`).
+     ⚠⚠ OJO AL MEDIRLO (7-ago): la caja de `.coin` son 44 px de AREA TACTIL, no de dibujo. Una sonda que
+     compare el icono contra `.coin` dice que el icono va DENTRO y no desborda nada — me paso. Lo que
+     hay que medir es el ::before. Hoy: pastilla 30, icono 38, o sea 4 px de mordida por lado (27 %),
+     contra el 1 px (7 %) que tenia con 32. Ver docs/86.
      ⚠ `.cupsband .cups` va con sus DOS clases: la pieza 9.3 de arriba la pinta asi y una regla `.cups`
      a secas no le ganaria. */
   .coin, .cupsband .cups{ height:44px; background:none; border:0; box-shadow:none; }
@@ -5100,7 +5142,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=1da222b"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=50cee4e"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -8115,7 +8157,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=1da222b').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=50cee4e').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -8499,7 +8541,7 @@ function camEl(){
   //+AG el regalo DIBUJADO. `ui-regalo.webp` ya existia en el repo (encargo 31) y solo se usaba a 46 px
   //   en Perfil: aqui es la cara de la tarjeta. Se balancea si hay algo, y se queda gris si ya lo
   //   cogiste — nunca desaparece (canon 6: lo hecho se apaga, no se borra).
-  d.innerHTML=`<div class="cam-hd"><div class="cam-txt"><span class="cam-t">${s.camH}</span></div><span class="cam-d">${fin?s.camFin:s.camDia(i+1,total)}</span><img class="cam-gift ${hay?'viva':'ido'}" src="${uiArt('ui-regalo')}" alt=""></div>
+  d.innerHTML=`<div class="cam-hd"><div class="cam-txt"><span class="cam-t">${s.camH}</span></div><span class="cam-d">${fin?s.camFin:s.camDia(i+1,total)}</span><img class="cam-gift ${hay?'viva':'ido'}" src="${uiArt(hay?'ui-regalo-abierto':'ui-regalo')}" alt=""></div>
     <div class="cam-fila">
       <div class="cam-p old">${ayer||'·'}</div>
       <div class="cam-p now">${hoy||'★'}</div>
@@ -10384,7 +10426,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=1da222b';
+  import { startAmbient } from './arte/ambient.mjs?v=50cee4e';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -10400,7 +10442,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=1da222b').then(m => {
+  import('./arte/pista-preview.mjs?v=50cee4e').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -10412,8 +10454,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=1da222b';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=1da222b';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=50cee4e';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=50cee4e';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -10583,7 +10625,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=1da222b'), import('./motor/chassis/sincro.mjs?v=1da222b')]);
+        import('./motor/chassis/nube.mjs?v=50cee4e'), import('./motor/chassis/sincro.mjs?v=50cee4e')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };

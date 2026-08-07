@@ -3,7 +3,7 @@
 // el confeti. El confeti son piezas GRANDES de papel (pool fijo, poca CPU) CANALIZADAS en dos cascadas
 // LATERALES (centro despejado para el ganador → ya no "inunda" como antes). AR3 del plan de feedback.
 import * as THREE from 'three';
-import { sat } from './gfx.mjs?v=1da222b';
+import { sat } from './gfx.mjs?v=50cee4e';
 
 // Copa PLATEADA (base clara) para poder TINTARLA con el color del equipo ganador vía material.color
 // (blanco × color = color limpio). Contornos oscuros neutros para que se lea la forma sobre cualquier tinte.

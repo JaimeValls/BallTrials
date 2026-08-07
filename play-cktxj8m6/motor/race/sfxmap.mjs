@@ -1,11 +1,11 @@
 // YouBall · MAPEO eventos→buffer de audio de La Gran Carrera, browser-safe (sin Node). El corazón del sonido del
 // modo: por cada evento de la sim coloca su SFX en un Float32Array. Lo usan IGUAL el render (audio.mjs → WAV) y el
 // preview en vivo (index.html → Web Audio) → la web suena EXACTAMENTE como el render (misma síntesis, mismo seed).
-//   import { buildSfxBuffer } from './sfxmap.mjs?v=1da222b';
+//   import { buildSfxBuffer } from './sfxmap.mjs?v=50cee4e';
 //   const buf = buildSfxBuffer({ events, decision_frame, f, seed, SR });   // Float32Array mono (sin normalizar)
-import { createSynth, makeRng } from '../chassis/synth.mjs?v=1da222b';
-import { createFx } from '../chassis/sfx.mjs?v=1da222b';
-import { FPS } from './sim.js?v=1da222b';
+import { createSynth, makeRng } from '../chassis/synth.mjs?v=50cee4e';
+import { createFx } from '../chassis/sfx.mjs?v=50cee4e';
+import { FPS } from './sim.js?v=50cee4e';
 
 // events = sim.events (la sim de la Carrera ACUMULA sus propios eventos durante toda la partida; ver runToEnd/qa).
 // Claves array: bump, pickup, relay, gatebreak, twists, finishes. f = frame final. decision_frame = victoria (o null).
@@ -36,7 +36,7 @@ export function buildSfxBuffer({ events, decision_frame, f, seed, SR = 44100 }){
   // carrera, 0,7/s) — sin el thin sería un carpet, justo lo que mutea el pad de impulso. En el juego en vivo llega
   // filtrado a la bola del jugador (ver liveSfx en index.html), así que ahí el thin no recorta nada.
   for (const e of thin(ev.nitro || [], 1.1)){ fx.nitro(T(e.f), 0.55); }
-  // ESCUDO y SÚPER DEL JUGADOR (doc 85, 2ª vuelta). Los dos sonaban con el BLING DE COGER UN ÍTEM DEL
+  // ESCUDO y SÚPER DEL JUGADOR (doc 88, 2ª vuelta). Los dos sonaban con el BLING DE COGER UN ÍTEM DEL
   // SUELO: `liveSfx` los metía por el canal `pickup` con type 'shield' y 'star'. O sea la enfermedad
   // exacta que el doc 74 le curó al nitro — «sonaba a *he cogido algo* cuando lo que pasa es otra
   // cosa» — y que se quedó sin curar en sus dos vecinos.

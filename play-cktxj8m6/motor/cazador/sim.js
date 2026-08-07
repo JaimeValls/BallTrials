@@ -268,7 +268,7 @@ export class Sim {
   playerShield(){ const p = this.balls[0]; if (!p || p.rank !== null || this.f < p.shield_cd) return false;
     p.shield_until = this.f + Math.round(P_SHIELD_DUR * this._bstT()); p.shield_cd = this.f + P_SHIELD_CD; this._pushEv('save', { f: this.f, id: 0 }); return true; }
   playerDecoy(){ const p = this.balls[0]; if (!p || p.rank !== null) return false;   // SENUELO: el cazador te suelta y fija a otra presa
-    //+AG doc 85 (2ª vuelta) · EL SEÑUELO NO PUEDE "CAMBIAR" AL OBJETIVO QUE YA ESTABA FIJADO. El filtro
+    //+AG doc 88 (2ª vuelta) · EL SEÑUELO NO PUEDE "CAMBIAR" AL OBJETIVO QUE YA ESTABA FIJADO. El filtro
     //   sólo te excluía a TI, así que si el cazador ya iba a por el más cercano, gastabas la barra
     //   entera —21 s de juego— para que siguiera yendo a por él. Ahora se le excluye también.
     //   ⚠ TOCA `sim.js`, y eso normalmente rompe la reproducibilidad byte a byte de las repeticiones

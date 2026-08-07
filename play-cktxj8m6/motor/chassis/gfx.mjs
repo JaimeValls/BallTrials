@@ -9,8 +9,8 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { faceTexture, hunterTexture, faceLayers, bareExpr, PRESETS as FACE_PRESETS } from './facegen.mjs?v=1da222b';
-import { geometriaCuerpo } from './silueta.mjs?v=1da222b';   //+AG doc 55 capa 1: cuerpos que no son esferas
+import { faceTexture, hunterTexture, faceLayers, bareExpr, PRESETS as FACE_PRESETS } from './facegen.mjs?v=50cee4e';
+import { geometriaCuerpo } from './silueta.mjs?v=50cee4e';   //+AG doc 55 capa 1: cuerpos que no son esferas
 
 //+AG doc 55 capa 1 v2: bolas cuyo cuerpo es una FORMA PINTADA (bola invisible + sprite teñible).
 const CUERPO_SPRITE = new Set(['fantasma']);
@@ -53,9 +53,9 @@ export function makeCuerpo(arch, R, col, onReady){
   pl.material.map = cuerpoTexture(arch, () => { pl.visible = true; pl.material.needsUpdate = true; onReady && onReady(); });
   return pl;
 }
-import { itemTexture } from './itemgen.mjs?v=1da222b';
-import { ballMaterial, skinTexture } from './ballmat.mjs?v=1da222b';   //+AG skinTexture: la piel del cuerpo (encargo 17)
-import { makeProp } from './propgen.mjs?v=1da222b';   //+AG doc 41 bloque G: prop de la bola-heroe
+import { itemTexture } from './itemgen.mjs?v=50cee4e';
+import { ballMaterial, skinTexture } from './ballmat.mjs?v=50cee4e';   //+AG skinTexture: la piel del cuerpo (encargo 17)
+import { makeProp } from './propgen.mjs?v=50cee4e';   //+AG doc 41 bloque G: prop de la bola-heroe
 
 export { THREE };
 export const BLOOM = 1; // capa de bloom: SOLO partículas/orbes/ondas/retícula la activan
@@ -98,7 +98,7 @@ export function createParticles(scene){
 
   const rings = []; const ringGeo = new THREE.RingGeometry(0.95, 1.0, 72);
 
-  //+AG doc 85 (2ª vuelta) · CONTADOR DE EMISIONES, para el banco. Contar las partículas VIVAS de la
+  //+AG doc 88 (2ª vuelta) · CONTADOR DE EMISIONES, para el banco. Contar las partículas VIVAS de la
   //   escena no sirve para medir lo que crea UNA acción: el pool lo comparten el ambiente, las estelas
   //   y todo lo demás, y entre dos muestras seguidas la población baila en cientos — medido, el mismo
   //   booster daba +115 en una tanda y −18 en la siguiente. Lo que no baila es cuántas se han EMITIDO.

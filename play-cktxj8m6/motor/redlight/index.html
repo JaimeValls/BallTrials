@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 1da222b">
+<meta name="bt-build" content="2026-08-07 50cee4e">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <!--+AG el HTML se sirve en INGLES (defecto del juego); ?lang=es lo traduce por JS (applyLang) -->
 <title>YouBall · Red Light Rush (WebGL) · The Marble Games</title>
@@ -76,7 +76,7 @@
   #controls{position:fixed;left:50%;bottom:calc(12px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:6;display:flex;flex-direction:column;gap:7px;
     width:min(560px,94vw);font-family:'Segoe UI Rounded','Nunito',system-ui,sans-serif;user-select:none;touch-action:none}
   #controls .row{display:flex;gap:8px}
-  /* ═══ doc 85 · EL BOTÓN DE PARTIDA, AL IDIOMA DE BRAWL (mismo bloque que la Carrera y el Cazador).
+  /* ═══ doc 88 · EL BOTÓN DE PARTIDA, AL IDIOMA DE BRAWL (mismo bloque que la Carrera y el Cazador).
      El canto era `0 4px 0 #0009` —negro translúcido— y sobre el naranja de la pista de este modo se
      perdía del todo. Aquí es sólido y suyo (`--j-canto`), más bisel arriba, sombra interior abajo y
      sombra proyectada. `min-height:44px` es la regla 14 del doc 60: los tres CARRILES medían 30 px en
@@ -97,7 +97,7 @@
   /* con el icono puesto, los 5 botones de la fila de accion tenian su contenido a 3 alturas distintas
      (CORRER arriba del todo, FRENAZO en medio, los boosters mas abajo) porque el alto lo manda CORRER y
      cada uno empezaba en su padding. Centrado, la fila vuelve a leerse como una fila. */
-  /*+AG doc 85 · EL HUECO ENTRE EL RÓTULO Y EL PIE. Medido: eran 0 px, las dos cajas se tocaban. Con el
+  /*+AG doc 88 · EL HUECO ENTRE EL RÓTULO Y EL PIE. Medido: eran 0 px, las dos cajas se tocaban. Con el
      trazo de .11em no se notaba; con el de .14em que pidió Jaime («trazos gordos») los contornos se
      pisan y en la captura se lee «SÚPER» encima de su propio pie. El contorno pinta HACIA FUERA de la
      caja, así que el hueco tiene que ser mayor que el trazo: 2,24 px a 16 px de cuerpo → 3 px de gap.
@@ -120,7 +120,7 @@
      tenía CORRER solo (2.6) más el hueco del FRENAZO (1) entre los dos → la fila no crece ni un píxel y los
      boosters conservan su ancho. `nowrap` porque en alemán/holandés la palabra es larga (RENNEN/STOPPEN) y si
      parte en dos líneas SUBE el alto del HUD, que es lo único que no cabe en un móvil de 360×640. */
-  /*+AG doc 85: 14 px estaba fuera de la escala del doc 60 regla 8 (11/13/16/20/24). Sube a 16-20, que
+  /*+AG doc 88: 14 px estaba fuera de la escala del doc 60 regla 8 (11/13/16/20/24). Sube a 16-20, que
      son dos peldaños de la escala, y son los dos mandos que más se miran del modo. */
   #bRun,#bStop{flex:1.9;padding:16px 4px;font-size:clamp(16px,4.4vw,20px);white-space:nowrap}
   #bRun{background:linear-gradient(180deg,#357f59,#1d4d36 55%,#163a29);box-shadow:0 5px 0 #143526, inset 0 2px 0 #ffffff2e, inset 0 -3px 0 #00000044;--j-tinte:#8ff0c4;--j-canto:#143526}
@@ -164,7 +164,7 @@
      translúcida), SÚPER oro = acción, la convención del juego. Los dos mandos grandes se apagan cuando NO son
      tu estado: en todo momento hay exactamente uno encendido, y de un vistazo sabes si tu motor va o no. */
   /* ⚠⚠ 2026-08-07 · EL SELECTOR DE ESTADO LLEVA `#controls` DELANTE Y NO ES ADORNO. Al teñir los tres
-     boosters en reposo (doc 85) se escribió `#controls #bNitro` — DOS ids — y eso le gana a
+     boosters en reposo (doc 88) se escribió `#controls #bNitro` — DOS ids — y eso le gana a
      `#bNitro.ready` y a `#bNitro.act`, que son un id y una clase. Resultado: la placa de reposo se
      quedaba puesta también encendida y lista… pero la TINTA del `.act` sí se aplicaba, y esa tinta es
      oscura a propósito (`#032230`) porque el fondo del `.act` era cyan CLARO, y encima la excepción
@@ -193,7 +193,7 @@
   @keyframes readySweep{0%{left:-45%}26%,100%{left:132%}}
   @keyframes readyGlow{0%,100%{filter:drop-shadow(0 0 0 #ffd23f00)}50%{filter:drop-shadow(0 0 10px #ffd23fcc)}}
   @media (prefers-reduced-motion:reduce){#bSup.ready,#bSup.ready::after{animation:none}}
-  /* ⚠ ES `.off` Y NO `:disabled` (ver doc 85). Un <button disabled> no recibe el evento: el navegador
+  /* ⚠ ES `.off` Y NO `:disabled` (ver doc 88). Un <button disabled> no recibe el evento: el navegador
      se come el toque antes de que llegue el juego, así que un booster en recarga no podía ni contestar
      "ahora no". Y el apagado deja de ser opacity .4, que borraba el icono y con él la pista de qué es. */
   /* ⚠⚠ 2026-08-07 (2ª vuelta) · EL APAGADO DEJA DE SER UN FILTRO. Jaime, viéndolo: «tiene trazo negro
@@ -273,7 +273,7 @@
   /* la cuenta atras conserva SU color (el numero blanco que JS pinta verde en el "¡YA!" y el ambar de
      "este eres tu"): solo se le anade el contorno, que es lo que le faltaba. */
   #count .n, #count .you{-webkit-text-stroke:.11em #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f66,0 6px 34px #000}
-  /* ═══ doc 85 · EL TRAZO ENGORDA (Jaime: «trazos gordos como las referencias de Brawl Stars») ═════
+  /* ═══ doc 88 · EL TRAZO ENGORDA (Jaime: «trazos gordos como las referencias de Brawl Stars») ═════
      El HUD iba a .11em, el mínimo de la banda del doc 60 regla 11 (11-15 %). El resto del juego —el
      JUGAR, las monedas, la compra: arte YA APROBADO— corre a .25em, o sea que el HUD era menos de la
      mitad de grueso que la superficie con la que tiene que hacer juego. Sube a .14em, que sigue dentro
@@ -311,7 +311,7 @@
        el dedo puesto. Ya no hay dedo puesto que explicar: su .k son solo teclas, como los demas, y se apaga
        donde no hay teclado. Se cierra la deuda que este comentario dejaba escrita. */
   @media (pointer:coarse){ #controls button .k, .keys{display:none} }
-  /* ═══ doc 85 · «EFECTOS REDUCIDOS» APAGA TAMBIÉN LOS BRILLOS DEL HUD ═════════════════════════
+  /* ═══ doc 88 · «EFECTOS REDUCIDOS» APAGA TAMBIÉN LOS BRILLOS DEL HUD ═════════════════════════
      El ajuste del juego viajaba al motor por `&redfx=1` y sólo bajaba el pixelRatio: el barrido del
      súper, el latido y las respiraciones seguían corriendo. O sea que un jugador que pide menos
      movimiento seguía teniendo la parte del HUD que más se mueve. `prefers-reduced-motion` sí los
@@ -385,7 +385,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=1da222b"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=50cee4e"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -396,30 +396,30 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 </script>
 
 <script type="module">
-import { THREE, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createBloom, frameOrtho, BLOOM } from '../chassis/gfx.mjs?v=1da222b';
-import { archLook } from '../chassis/ballmat.mjs?v=1da222b';   //+AG doc 41 bloque G: material de la bola-heroe
-import { attachSquash } from '../chassis/squash.mjs?v=1da222b';
-import { createCelebration } from '../chassis/celebration.mjs?v=1da222b';
-import { createKillfeed } from '../chassis/killfeed.mjs?v=1da222b';
-import { createCensusBoard } from '../chassis/censusboard.mjs?v=1da222b';
-import { createCupoGauge } from '../chassis/cupogauge.mjs?v=1da222b';
-import { createKillTags } from '../chassis/killtag.mjs?v=1da222b';
-import { crearInventario } from '../chassis/invboost.mjs?v=1da222b';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
-import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=1da222b';
-import { archFace } from '../chassis/facegen.mjs?v=1da222b';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
-import { Sim, TEAMS, SHORT_COLORS, SHORT_COLORS_6, BALL_R, FPS, FIELD_W, FIELD_L, XL, XR, SPAWN_Y, GATE_Y, SAFE_Y } from './sim.js?v=1da222b';
-import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=1da222b';
-import { buildSfxBuffer } from './sfxmap.mjs?v=1da222b';
-import { createCoach } from '../chassis/coach.mjs?v=1da222b';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
-import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=1da222b';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
-import { createUiSfx } from '../chassis/uisfx.mjs?v=1da222b';   //+AG doc 85: el sonido de "no puedo"
-import { createJuice } from '../chassis/juice.mjs?v=1da222b';   //+AG doc 85: lo que pasa cuando el dedo toca un botón (los 3 modos)
+import { THREE, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createBloom, frameOrtho, BLOOM } from '../chassis/gfx.mjs?v=50cee4e';
+import { archLook } from '../chassis/ballmat.mjs?v=50cee4e';   //+AG doc 41 bloque G: material de la bola-heroe
+import { attachSquash } from '../chassis/squash.mjs?v=50cee4e';
+import { createCelebration } from '../chassis/celebration.mjs?v=50cee4e';
+import { createKillfeed } from '../chassis/killfeed.mjs?v=50cee4e';
+import { createCensusBoard } from '../chassis/censusboard.mjs?v=50cee4e';
+import { createCupoGauge } from '../chassis/cupogauge.mjs?v=50cee4e';
+import { createKillTags } from '../chassis/killtag.mjs?v=50cee4e';
+import { crearInventario } from '../chassis/invboost.mjs?v=50cee4e';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
+import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=50cee4e';
+import { archFace } from '../chassis/facegen.mjs?v=50cee4e';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
+import { Sim, TEAMS, SHORT_COLORS, SHORT_COLORS_6, BALL_R, FPS, FIELD_W, FIELD_L, XL, XR, SPAWN_Y, GATE_Y, SAFE_Y } from './sim.js?v=50cee4e';
+import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=50cee4e';
+import { buildSfxBuffer } from './sfxmap.mjs?v=50cee4e';
+import { createCoach } from '../chassis/coach.mjs?v=50cee4e';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=50cee4e';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
+import { createUiSfx } from '../chassis/uisfx.mjs?v=50cee4e';   //+AG doc 88: el sonido de "no puedo"
+import { createJuice } from '../chassis/juice.mjs?v=50cee4e';   //+AG doc 88: lo que pasa cuando el dedo toca un botón (los 3 modos)
 //+AG el ámbito NO es opcional: la regla base es `#controls button` (id + etiqueta) y le gana en
 //   especificidad a cualquier `.j-hit` suelto. Es la trampa que ya costó una versión muerta en este
 //   mismo fichero (ver la nota de `#controls button#bGhost .bi`).
 const juice = createJuice({ ambito:'#controls', reducido: new URLSearchParams(location.search).get('redfx')==='1' });
-import { createPausa } from '../chassis/pausa.mjs?v=1da222b';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
-import { cantarPuesto } from '../chassis/veredicto.mjs?v=1da222b';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
+import { createPausa } from '../chassis/pausa.mjs?v=50cee4e';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
+import { cantarPuesto } from '../chassis/veredicto.mjs?v=50cee4e';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
 
 window.addEventListener('error', e => { document.getElementById('err').style.display='grid'; console.error(e.error||e.message); });
 
@@ -429,7 +429,7 @@ const { renderer, scene, cam } = createStage();   // (?nobloom=1 = render sin bl
 (()=>{ const q=new URLSearchParams(location.search); let cap=2;
   const g=q.get('gfx'); if(g==='low') cap=1; else if(g==='med') cap=1.5;
   if(q.get('redfx')==='1') cap=Math.min(cap,1);
-  //+AG doc 85: el ajuste del juego («Efectos reducidos») marca el <html> para que el CSS pueda apagar
+  //+AG doc 88: el ajuste del juego («Efectos reducidos») marca el <html> para que el CSS pueda apagar
   //   los brillos del HUD, no sólo bajar la resolución. Va aquí, en el mismo sitio donde ya se lee.
   document.documentElement.classList.toggle('redfx', q.get('redfx')==='1');
 
@@ -799,7 +799,7 @@ let superVal=0, redEntryMoving=false, redEntryF=0;
 let ghostMat=null, ghostOn=false;
 function setGhostLook(on){
   const o=ballObjs && ballObjs[0]; if(!o || on===ghostOn) return;
-  //+AG doc 85 (2ª vuelta): VOLVER A SER SÓLIDO TAMBIÉN SE AVISA. La auditoría lo puso así: el fantasma
+  //+AG doc 88 (2ª vuelta): VOLVER A SER SÓLIDO TAMBIÉN SE AVISA. La auditoría lo puso así: el fantasma
   //   no tenía instante de encendido y su APAGADO tampoco avisaba «y ahí es donde te matan». Esta
   //   función ya sabía cuándo pasa —es la única que conoce la transición—, sólo le faltaba decirlo.
   if(ghostOn && !on) fxPista('vuelve');
@@ -1421,11 +1421,11 @@ window.__cap = {
 //+AG ventana de SOLO LECTURA para verificar desde fuera (tools/prueba-pausa-partida.mjs), hermana de __cap y
 //   gemela de la que el Cazador ya tenía (doc 61). Sin ella, comprobar que la partida se PARA de verdad
 //   —y que al volver no da un salto— exige mirar una pantalla con los ojos. No lo usa nada del juego.
-//+AG doc 85 · `cargaSuper()` existe para el BANCO. El SÚPER es el botón más importante del HUD y
+//+AG doc 88 · `cargaSuper()` existe para el BANCO. El SÚPER es el botón más importante del HUD y
 //   era el único que no se podía medir: su barra no llega al 100 % en los pocos segundos que dura una
 //   tanda de medición, así que salía siempre "apagado, sin medir" y su fogonazo no lo comprobaba nadie.
 //   No toca la Sim ni el RNG: sólo pone a 1 el contador de la barra, que es lo mismo que hace jugar bien.
-//+AG doc 85 (2ª vuelta) · `scene` se expone para el BANCO DE EFECTOS. Las partículas del motor viven
+//+AG doc 88 (2ª vuelta) · `scene` se expone para el BANCO DE EFECTOS. Las partículas del motor viven
 //   dentro de la escena 3D, no en el DOM, así que un banco que cuente elementos del DOM da CERO
 //   siempre y certifica que no pasa nada justo cuando sí pasa. Luz Roja ya la exponía por `window.dbg`;
 //   sin esto, el banco medía a ciegas dos de los tres modos y los cantaba a cero.
@@ -1524,7 +1524,7 @@ const LANES=['left','center','right'];
 //   botones se pintan siempre en espejo: uno encendido, el otro apagado.
 function setRun(on){ running=on && phase==='play'; if(running) estrenado=true;
   bRun.classList.toggle('on', running); bStop.classList.toggle('on', !running && phase==='play');
-  //+AG doc 85: CORRER y PARAR son los dos mandos del modo y no acusaban el dedo — sólo cambiaban de
+  //+AG doc 88: CORRER y PARAR son los dos mandos del modo y no acusaban el dedo — sólo cambiaban de
   //   color cuando el bucle de render pasara por ahí, que es estado y no respuesta. Peso 'roce': se
   //   alternan constantemente y no pueden soltar partículas cada vez.
   juice.roce(on?bRun:bStop, { color: on?'#8ff0c4':'#ffa596' }); }
@@ -1535,24 +1535,24 @@ function doBrake(){ return !!(sim && phase==='play' && sim.playerBrake()); }
 //   veo que sigo deslizándome, le doy otra vez. Así el frenazo NO se gasta sin querer al levantar el pie, que
 //   es lo que pasaría si el primer toque ya lo consumiera.
 function doStop(){ if(!sim || phase!=='play') return;
-  //+AG doc 85: el segundo toque es el FRENAZO. Si está cargado, es una acción de verdad y se ve como
+  //+AG doc 88: el segundo toque es el FRENAZO. Si está cargado, es una acción de verdad y se ve como
   //   tal; si no lo está, el botón lo DICE en vez de tragarse el dedo (que es lo que hacía).
   if(running){ setRun(false); return; }
   if(doBrake()){ juice.hit(bStop,{color:'#ff6673',peso:'accion'}); fxPista('frenazo'); } else juice.deny(bStop); }
 //+AG carril: la INTENCIÓN cambia al instante (vale hasta en la intro); la bola tarda lo que tarde la física
 function setLane(k){ if(!sim) return;
   const b={left:bLaneL,center:bLaneC,right:bLaneR}[k];
-  if(!sim.playerLane(k)){ juice.deny(b); return; }   //+AG doc 85: si el carril no se puede tomar, se dice
+  if(!sim.playerLane(k)){ juice.deny(b); return; }   //+AG doc 88: si el carril no se puede tomar, se dice
   bLaneL.classList.toggle('on', k==='left'); bLaneC.classList.toggle('on', k==='center'); bLaneR.classList.toggle('on', k==='right');
   juice.roce(b); }
 function shiftLane(d){ if(!sim) return; const i=LANES.indexOf(sim.pIn.lane); setLane(LANES[Math.max(0,Math.min(2,i+d))]); }
 //+AG 2026-08-06 · inventario: se pregunta ANTES y se descuenta DESPUÉS de que el motor confirme el
 //   disparo, para que un botón en recarga no se coma una carga sin hacer nada (ver invboost.mjs).
-//+AG doc 85 · los tres boosters acusan el toque, y dicen que no cuando no pueden. Antes su única
+//+AG doc 88 · los tres boosters acusan el toque, y dicen que no cuando no pueden. Antes su única
 //   reacción era la clase `.act` que pinta el ESTADO (que además llega cuando el motor quiere, no en el
 //   frame del dedo) y, si no había con qué, absolutamente nada. El orden no cambia: se pregunta, se
 //   dispara, y sólo entonces se descuenta (ver invboost.mjs).
-//+AG doc 85 (2ª vuelta) · LO QUE PASA EN LA PISTA CUANDO PULSAS UN BOOSTER.
+//+AG doc 88 (2ª vuelta) · LO QUE PASA EN LA PISTA CUANDO PULSAS UN BOOSTER.
 //   Hasta ahora, en este modo, NITRO / FANTASMA / FRENAZO no pintaban ni una partícula, ni un anillo,
 //   ni un destello, ni sonaban. Medido a 0/150/400/900 ms con la partida en juego: cero en los cuatro
 //   instantes. El único que movía algo era el súper. O sea que lo que el jugador COMPRA en la Tienda
@@ -1621,7 +1621,7 @@ function updateControls(){
   if(!sim){ return; } const p=sim.balls[0], f=sim.f, dead=p.rank!==null||sim.decision_frame!==null||phase!=='play';
   // CORRER se pinta ROJO en fase roja del semáforo (aviso de "si corres ahora, te delatas")
   bRun.classList.toggle('red', sim.color==='red' && sim.decision_frame===null && phase==='play');
-  //+AG doc 85: `off` en vez de `disabled` (ver la nota del CSS). El estado se calcula IGUAL que antes;
+  //+AG doc 88: `off` en vez de `disabled` (ver la nota del CSS). El estado se calcula IGUAL que antes;
   //   lo único que cambia es que el botón sigue oyendo el dedo para poder decir que no.
   const apaga=(b,v)=>{ b.classList.toggle('off',v); b.setAttribute('aria-disabled', v?'true':'false'); };
   apaga(bRun,dead); if(dead){ running=false; bRun.classList.remove('on'); bStop.classList.remove('on','urge'); }
@@ -1700,7 +1700,7 @@ const audio=createWebAudio({ musicUrl:pickTrack(['../_music/redlight.mp3','../_m
 let musicOn=false, sfxOn=false, lastMusicColor=null;
 if(EMBED){ musicOn = _q0.get('music')!=='0'; sfxOn = _q0.get('sfx')!=='0'; }
 
-//+AG doc 85 · EL SONIDO DEL "NO". Los tres motores tenían sonido de PARTIDA (lo que dispara la Sim)
+//+AG doc 88 · EL SONIDO DEL "NO". Los tres motores tenían sonido de PARTIDA (lo que dispara la Sim)
 //   pero ninguno importaba `uisfx.mjs`, que es donde vive el vocabulario de interfaz desde el 27-jul.
 //   No se les enchufa el clic genérico —el roce se repite cientos de veces por partida y sería una
 //   ametralladora—, sólo el `denied()`: el toque que NO prende es el único que el jugador no puede

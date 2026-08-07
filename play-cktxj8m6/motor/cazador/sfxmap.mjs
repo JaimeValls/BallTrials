@@ -1,11 +1,11 @@
 // YouBall · MAPEO eventos→buffer de audio de El Cazador, browser-safe (sin Node). El corazón del sonido del modo:
 // por cada evento de la sim coloca su SFX en un Float32Array. Lo usan IGUAL el render (audio.mjs → WAV) y el
 // preview en vivo (index.html → Web Audio) → la web suena EXACTAMENTE como el render (misma síntesis, mismo seed).
-//   import { buildSfxBuffer } from './sfxmap.mjs?v=1da222b';
+//   import { buildSfxBuffer } from './sfxmap.mjs?v=50cee4e';
 //   const buf = buildSfxBuffer({ events, decision_frame, f, seed, SR });   // Float32Array mono (sin normalizar)
-import { createSynth, makeRng } from '../chassis/synth.mjs?v=1da222b';
-import { createFx } from '../chassis/sfx.mjs?v=1da222b';
-import { FPS } from './sim.js?v=1da222b';
+import { createSynth, makeRng } from '../chassis/synth.mjs?v=50cee4e';
+import { createFx } from '../chassis/sfx.mjs?v=50cee4e';
+import { FPS } from './sim.js?v=50cee4e';
 
 // events = sim.events de la SIM (runToEnd / runSeed: la sim acumula en sim.events). Claves array: orbs (SPAWN de
 // orbe), pickup (cogerlo, con e.kind 'dash'|'swap'|'invert'), dash, swap, invert (sub-eventos del pickup, mismo
@@ -28,7 +28,7 @@ export function buildSfxBuffer({ events, decision_frame, f, seed, SR = 44100 }){
   // DASH (orbe de velocidad → estela CIAN, ver efecto-velocidad): ZIP = hermano sonoro del trail. PUNTUAL al cogerlo.
   for (const e of (ev.dash || [])){ fx.zip(T(e.f), 0.30); }
   // SWAP (el cazador cambia de presa por el orbe): swoosh DESCENDENTE + ding de "nuevo objetivo".
-  // LOS BOOSTERS DEL JUGADOR (doc 85, 2ª vuelta). Antes: el DASH sonaba con `fx.zip` por el canal
+  // LOS BOOSTERS DEL JUGADOR (doc 88, 2ª vuelta). Antes: el DASH sonaba con `fx.zip` por el canal
   // `dash`, que es el mismo que usan las once bolas de la IA; el ESCUDO caía en el canal `save` —el de
   // «librarse por los pelos»— y sonaba a un «uf» de 0,09 s; y el SEÑUELO sonaba al blip del orbe de la
   // IA. Los tres, prestados. ⚠ Estas claves las produce SÓLO el motor (la Sim no las emite), así que el

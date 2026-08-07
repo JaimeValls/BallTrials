@@ -1,14 +1,14 @@
 // YouBall · MAPEO eventos→buffer de audio de RED LIGHT RUSH, browser-safe (sin Node). Mismo patrón que
 // gauntlet/sfxmap.mjs: por cada evento de la sim coloca su SFX en un Float32Array. Determinista (mismo seed →
 // mismo WAV). Lo usa el preview en vivo (index.html → Web Audio); cuando exista el render Node reusará esto igual.
-//   import { buildSfxBuffer } from './sfxmap.mjs?v=1da222b';
+//   import { buildSfxBuffer } from './sfxmap.mjs?v=50cee4e';
 //   const buf = buildSfxBuffer({ events, decision_frame, f, seed, SR });   // Float32Array mono (sin normalizar)
 //
 // Los SFX van por el canal de EFECTOS (no el de música). v7.3: la música ya NO se calla en rojo; en su lugar
 // suena una ALARMA (klaxon) al ponerse rojo (ver fase 'red' abajo) que marca el "¡ALTO!" por encima de la música.
-import { createSynth, makeRng } from '../chassis/synth.mjs?v=1da222b';
-import { createFx } from '../chassis/sfx.mjs?v=1da222b';
-import { FPS } from './sim.js?v=1da222b';
+import { createSynth, makeRng } from '../chassis/synth.mjs?v=50cee4e';
+import { createFx } from '../chassis/sfx.mjs?v=50cee4e';
+import { FPS } from './sim.js?v=50cee4e';
 
 const WARN_F = 18;   // igual que en sim/render: el aviso ámbar dura 0.6 s antes del rojo
 
@@ -89,7 +89,7 @@ export function buildSfxBuffer({ events, decision_frame, resolved_by, f, seed, S
     note(t + 0.03, 0.10, 660, 0.09, { wave: 'tri', decay: 6 });
   }
 
-  // ---- LOS BOOSTERS DEL JUGADOR (doc 85, 2ª vuelta) ----------------------------------------------
+  // ---- LOS BOOSTERS DEL JUGADOR (doc 88, 2ª vuelta) ----------------------------------------------
   //  POR QUE NO ESTABAN: la Sim de este modo emite `phase`, `scan`, `target`, `kill`, `save` y `cross`
   //  — y NINGUNO de ellos es "el jugador ha pulsado algo". Los boosters de Luz Roja se disparan desde
   //  el motor (pIn.nitroUntil y compañía), así que nunca llegaba nada aquí y los tres eran MUDOS:
@@ -106,7 +106,7 @@ export function buildSfxBuffer({ events, decision_frame, resolved_by, f, seed, S
     note(t + 0.01, 0.30, 784, 0.16, { wave: 'sine', decay: 3.5 });   // nota limpia, sin cuerpo grave
   }
   // FANTASMA que SE ACABA: la misma figura al revés y más corta. Existe porque volver a ser sólido es
-  // el instante en el que te pueden matar, y hasta ahora no avisaba nada (auditoría del doc 85 §7).
+  // el instante en el que te pueden matar, y hasta ahora no avisaba nada (auditoría del doc 88 §7).
   for (const e of (ev.pghostend || [])){ const t = T(e.f);
     add(t, 0.16, 1500, 520, 0.24, 0.18, 4.5);                    // el soplo BAJA (vuelves)
     note(t + 0.01, 0.14, 523, 0.14, { wave: 'tri', decay: 6 });
