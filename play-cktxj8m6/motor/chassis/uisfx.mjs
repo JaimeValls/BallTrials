@@ -12,14 +12,14 @@
 //
 // SON EFECTOS, no música: van con el interruptor de EFECTOS de Ajustes (el que llama pásalo en sfxOn).
 //
-//   import { createUiSfx } from './motor/chassis/uisfx.mjs?v=aa6ce8c';
+//   import { createUiSfx } from './motor/chassis/uisfx.mjs?v=8f45408';
 //   const ui = createUiSfx(audio, ()=>SAVE.settings.sfx!==false);
 //   ui.tap();  ui.confirm();  ui.back();  ui.denied();
 //
 // REGLA DE VOLUMEN: un clic de menú se oye 200 veces por sesión, así que se queda DEBAJO de lo que hace la
 // partida (amplitudes ~0.2 contra ~0.5 de los golpes del motor) y siempre por debajo de 90 ms. Tiene que
 // confirmar el toque, no llamar la atención.
-import { createSynth, makeRng, peakGain } from './synth.mjs?v=aa6ce8c';
+import { createSynth, makeRng, peakGain } from './synth.mjs?v=8f45408';
 
 const SR = 44100;
 
@@ -87,11 +87,41 @@ export function createUiSfx(audio, sfxOn){
     S.note(0.09, 0.12, 185, 0.20, { wave:'pulse', duty:0.5, decay:10 });
     return b; };
 
+  // COMPRAR (2026-08-06): clic de caja + tres monedas que TINTINEAN SUBIENDO. Nace de que Jaime probara
+  // la Tienda y dijera «hago clic y aparece una cosita abajo ahí pequeña»: comprar sonaba con el CONFIRM
+  // genérico, o sea igual que pulsar JUGAR, y el cerebro no registra como logro algo que suena a
+  // navegación. Este es el único sonido del juego con esta forma, y por eso se reconoce.
+  //
+  // ⚠ NO ES INVENTADO: es el diseño que ya estaba probado y sonando en prototipo/sonidos.html
+  //   ("UI · Economía y recompensas" → "Comprar con Chispas"), que nunca se había traído al juego.
+  //   Las frecuencias son las suyas: 1319 / 1568 / 2093 Hz sobre un golpe de caja de 1100→700.
+  //
+  // ⚠ Y SIN AZAR, a diferencia del original. Allí la lluvia usaba rng() para separar las monedas; aquí
+  //   los buffers se CACHEAN, así que ese azar se congelaría en el primer disparo y sonaría idéntico el
+  //   resto de la sesión — el azar no aportaría nada y costaría reproducibilidad. Separaciones fijas.
+  const COMPRA = ()=>{ const { buf:b, S } = mkBuf(0.60);
+    S.add(0, 0.04, 1100, 700, 0.20, 0.30, 10);                                  // el golpe de la caja
+    S.note(0.05, 0.10, 1319, 0.18, { wave:'sine', decay:8 });
+    S.note(0.11, 0.10, 1568, 0.18, { wave:'sine', decay:8 });
+    S.note(0.17, 0.14, 2093, 0.15, { wave:'sine', decay:8 });
+    return b; };
+
+  // COMPRA GORDA (lotes de 15 y 40): la misma caja, pero LLOVIENDO monedas. Que comprar 40 suene igual
+  // que comprar 1 es perder gratis la mejor forma de premiar la compra grande.
+  const LLUVIA = ()=>{ const { buf:b, S } = mkBuf(0.90);
+    S.add(0, 0.05, 900, 600, 0.14, 0.35, 9);
+    const F = [1319, 1568, 1760, 2093];                                          // orden fijo, cero dado
+    for(let i=0;i<9;i++) S.note(0.03 + i*0.058, 0.09, F[i%4], 0.15*(1-i*0.05), { wave:'sine', decay:9 });
+    return b; };
+
   return {
     tap(){     play(buf('tap',     TAP)); },
     open(){    play(buf('open',    OPEN)); },
     confirm(){ play(buf('confirm', CONFIRM)); },
     back(){    play(buf('back',    BACK)); },
     denied(){  play(buf('denied',  DENIED)); },
+    //+AG `gorda` = true en los lotes grandes. Un solo método para que quien compre no tenga que saber
+    //   qué sonido le toca: se le pasa si la compra es gorda y ya.
+    compra(gorda){ play(buf(gorda?'lluvia':'compra', gorda?LLUVIA:COMPRA)); },
   };
 }

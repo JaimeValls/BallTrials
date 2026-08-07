@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-06 aa6ce8c"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-07 8f45408"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -726,6 +726,51 @@
      se negocia, el cuerpo no. */
   .sh-cat{ font-size:var(--fs-2); font-weight:800; letter-spacing:.04em; text-transform:uppercase; color:var(--qc,#96a0c2); }
   .sh-buy{ margin-top:3px; border:0; border-radius:12px; padding:9px 8px; font-family:inherit; font-weight:900; font-size:var(--fs-3); cursor:pointer; width:100%; color:#3a2400; background:linear-gradient(#ffe27a,#ff9a3d); box-shadow:0 3px 0 #b45a10; display:flex; gap:4px; align-items:center; justify-content:center; }
+  /* ══ LA TARJETA DE BOOSTER (2026-08-06) ════════════════════════════════════════════════════════
+     Una por booster, de ancho completo, con sus cuatro compras dentro. El porqué de la forma está
+     escrito en boostersEl(); aquí solo los números, que salen de lo medido:
+       · el icono va a 64 px en un escaparate de 76 (antes 38: la mitad que el de una bola);
+       · el precio vive DENTRO del botón que lo cobra, en blanco con trazo, no en gris al lado;
+       · cada botón mide 75 px de ancho a 375 y 61 a 320 — el mínimo del canon es 44. */
+  .bst-card{ position:relative; border-radius:20px; padding:13px 13px 14px; margin-bottom:12px;
+    background:linear-gradient(#2a2260,#1b1642); border:2px solid var(--cc,#ffd23f);
+    box-shadow:0 4px 0 #0d0726, 0 8px 22px #0006, inset 0 1px 0 #ffffff14; }
+  .bst-top{ display:flex; align-items:center; gap:13px; margin-bottom:12px; }
+  .bst-show{ width:76px; height:76px; flex:0 0 auto; border-radius:18px; display:grid; place-items:center;
+    background:radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--cc,#ffd23f) 30%, transparent), transparent 70%), #ffffff0a;
+    border:1px solid color-mix(in srgb, var(--cc,#ffd23f) 40%, transparent); }
+  .bst-show img{ width:64px; height:64px; filter:drop-shadow(0 4px 8px #0009); }
+  .bst-txt{ min-width:0; flex:1 1 auto; }
+  /* MAYÚSCULAS POR CSS, nunca tocando los 20 diccionarios (regla del canon para rótulo pequeño y aislado) */
+  .bst-nm{ font-size:var(--fs-4); font-weight:900; text-transform:uppercase; letter-spacing:.02em; line-height:1.15; }
+  .bst-modos{ display:flex; gap:6px; margin-top:6px; }
+  .bst-modos i{ width:26px; height:26px; border-radius:50%; background:#ffffff12; border:1px solid var(--line);
+    display:grid; place-items:center; font-size:15px; font-style:normal; }
+  /* el "cuántos llevas": era un 11 px huérfano, ahora es una píldora del color del booster.
+     Solo el símbolo × y la cifra → se entiende en los 20 idiomas y no se traduce nada. */
+  .bst-tengo{ position:absolute; top:11px; right:12px; min-width:44px; height:30px; padding:0 11px;
+    border-radius:999px; display:grid; place-items:center; font-size:var(--fs-4); font-weight:900;
+    background:var(--cc,#ffd23f); color:#17102e; box-shadow:0 2px 0 #0006; }
+  .bst-card.vacio .bst-tengo{ background:#ffffff14; color:var(--muted); box-shadow:none; }
+  .bst-compras{ display:grid; grid-template-columns:repeat(4,1fr); gap:7px; }
+  .bst-buy{ position:relative; border:0; border-radius:14px; padding:9px 4px 8px; cursor:pointer;
+    font-family:inherit; background:linear-gradient(#ffe27a,#ff9a3d); color:#3a2400;
+    box-shadow:0 4px 0 #b45a10, inset 0 1px 0 #fff8; display:grid; gap:2px; place-items:center;
+    min-height:60px; transition:transform .06s, box-shadow .06s; }
+  /*+AG EL ACUSE DE RECIBO. `.sh-buy` no tenía NINGUNA regla de pulsado: comprar no respondía al dedo.
+     Se hunde exactamente los 4 px de su propio canto, así que se apoya en vez de flotar. */
+  .bst-buy:active:not(:disabled){ transform:translateY(4px); box-shadow:0 0 0 #b45a10, inset 0 1px 0 #fff8; }
+  .bst-buy:disabled{ filter:grayscale(.65) brightness(.72); cursor:default; }
+  .bst-buy .n{ font-size:var(--fs-4); font-weight:900; line-height:1; }
+  .bst-buy .p{ display:flex; align-items:center; gap:3px; font-size:var(--fs-3); font-weight:900; color:#fff;
+    -webkit-text-stroke:.16em #6b3a05; paint-order:stroke fill; }
+  .bst-buy .p .cico{ width:15px; height:15px; -webkit-text-stroke:0; }
+  .bst-buy .off{ position:absolute; top:-7px; right:-5px; background:var(--green); color:#08260f;
+    font-size:10px; font-weight:900; padding:2px 5px; border-radius:8px; box-shadow:0 2px 0 #1d7a35; }
+  /*+AG mientras el saldo cuenta hacia abajo, la cifra se encoge un pelo y se enciende: sin esto, el
+     número rueda pero la píldora ni se entera y el ojo no va a mirarla. */
+  .cuenta{ animation:cuentaPulso .28s ease-out; color:var(--gold2) !important; }
+  @keyframes cuentaPulso{ 0%{ transform:scale(1) } 40%{ transform:scale(.92) } 100%{ transform:scale(1) } }
   /*+AG 2-ago (remate del encargo 29): el boton de PAGAR CON GEMAS seguia CIAN con la gema ya verde.
      O sea: el jugador ve un rombo VERDE en la cabecera, en el precio y dentro del propio boton... y el
      boton que se las cobra era azul. La moneda manda sobre el boton, no al reves.
@@ -1131,6 +1176,75 @@
   @keyframes readyGlow{ 0%,100%{ filter:drop-shadow(0 0 0 #ffd23f00); } 50%{ filter:drop-shadow(0 0 10px var(--rglow,#ffd23fcc)); } }
   .justready{ animation:justFlash .55s ease-out 1; }
   @keyframes justFlash{ 0%{ filter:brightness(2.1) drop-shadow(0 0 14px #ffd23f); transform:scale(1.09); } 100%{ filter:none; transform:none; } }
+
+  /* ══ LA CELEBRACIÓN DE COMPRA (Jaime 2026-08-06) ═══════════════════════════════════════════════
+     POR QUÉ EXISTE, con sus palabras: «hago clic y aparece una cosita abajo ahí pequeña. Te he dicho
+     que tiene que ser espectacular, que tienen que salir partículas [...] con efectos especiales,
+     todo muy satisfactorio, visual, atractivo, que parezca moderno, estilo rollo Supercell.»
+     Hasta hoy comprar un booster hacía UNA cosa: un toast() de texto de 1,7 s abajo del todo. Nada
+     se movía, y el único sonido era el mismo «confirmar» que suena al pulsar JUGAR.
+
+     ⚠ ES UNA VENTANA DE CELEBRACIÓN, NO DE CONFIRMACIÓN, y la diferencia importa: sale DESPUÉS de
+     comprar, no antes. Una ventana de «¿seguro?» delante de una compra de 12 monedas mata el impulso
+     y no protege de nada (el dinero de verdad ya tiene su puerta parental). Esta es la de Supercell:
+     compras, y la cosa que te llevas se te presenta girando y con luz. Se cierra tocando en
+     cualquier sitio y a los 2,2 s se va sola: ceremonia que no se puede saltar = ceremonia que
+     molesta a la segunda vez.
+
+     ⚠ Y ES DE USO GENERAL A PROPÓSITO. Nace en los boosters, pero `celebra()` acepta cualquier
+     icono, color y título, para que el siguiente que celebre algo (una bola, un cosmético, un reto)
+     no vuelva a inventarse otro. El fallo que arregla no es de la Tienda: es del juego entero. */
+  .cel{ position:fixed; inset:0; z-index:70; display:none; place-items:center; }
+  .cel.on{ display:grid; }
+  .cel .velo{ position:absolute; inset:0; background:#0b0724cc; backdrop-filter:blur(3px); animation:celVelo .22s ease-out; }
+  @keyframes celVelo{ from{ opacity:0 } to{ opacity:1 } }
+  /* la tarjeta: nace pequeña, se pasa de largo y se asienta. Es el popIn de la casa, con más rebote */
+  /*+AG `overflow:hidden` NO es cosmético: sin él los rayos del fondo (un conic-gradient de 280 px) se
+     salen de la caja y se ven como una franja azul suelta cruzando la pantalla. Se vio en la captura. */
+  .cel .caja{ position:relative; overflow:hidden; width:min(84vw,320px); padding:26px 20px 22px; border-radius:26px; text-align:center;
+    background:linear-gradient(#2f2668,#1b1642); border:3px solid var(--cc,#ffd23f);
+    box-shadow:0 10px 0 #0d0726, 0 18px 44px #000a, inset 0 2px 0 #ffffff1f;
+    animation:celPop .42s cubic-bezier(.2,1.5,.4,1); }
+  @keyframes celPop{ 0%{ transform:scale(.5) translateY(24px); opacity:0 } 60%{ transform:scale(1.06) translateY(0); opacity:1 } 100%{ transform:scale(1) } }
+  /* el rayo de luz de detrás: es lo que hace que parezca un premio y no un cartel */
+  .cel .rayos{ position:absolute; left:50%; top:96px; width:280px; height:280px; margin:-140px 0 0 -140px;
+    background:conic-gradient(from 0deg, var(--cc,#ffd23f) 0 6deg, transparent 6deg 30deg);
+    opacity:.16; animation:celGira 9s linear infinite; pointer-events:none; }
+  @keyframes celGira{ to{ transform:rotate(360deg) } }
+  .cel .ico{ position:relative; width:112px; height:112px; margin:0 auto 12px; display:grid; place-items:center;
+    border-radius:28px; background:radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--cc,#ffd23f) 34%, transparent), transparent 70%);
+    animation:celGolpe .5s cubic-bezier(.2,1.6,.4,1) .06s both; }
+  .cel .ico img{ width:96px; height:96px; filter:drop-shadow(0 6px 12px #000a); }
+  @keyframes celGolpe{ 0%{ transform:scale(.4) rotate(-14deg) } 55%{ transform:scale(1.22) rotate(4deg) } 100%{ transform:scale(1) rotate(0) } }
+  .cel .tit{ font-size:var(--fs-5); font-weight:900; letter-spacing:.02em; text-transform:uppercase;
+    -webkit-text-stroke:.14em #16102f; paint-order:stroke fill; }
+  .cel .sub{ margin-top:4px; font-size:var(--fs-4); font-weight:900; color:var(--cc,#ffd23f); }
+  .cel .pie{ margin-top:12px; font-size:var(--fs-2); color:var(--muted); letter-spacing:.06em; text-transform:uppercase; }
+  /* las partículas viven en la capa, no en la caja, para poder salirse de ella.
+     ⚠ Y VAN POR ENCIMA (`z-index:2`): en la primera versión el `.fx` iba antes que la caja en el DOM,
+     así que las 11 estrellas salían del centro… justo DETRÁS de la ventana, y no se veía ni una. La
+     captura lo enseñó a la primera; el contador de partículas decía 11 y era verdad — estaban ahí,
+     tapadas. Medir que existen no es lo mismo que ver que se ven. */
+  .cel .fx{ position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:2; }
+  /*+AG salen del ICONO (42% del alto), no del centro geométrico de la pantalla: el premio es el icono
+     y las partículas tienen que nacer de él para que se lean como suyas. */
+  .cel .pz{ position:absolute; left:50%; top:42%; will-change:transform,opacity; }
+  @keyframes celPz{ 0%{ transform:translate(-50%,-50%) scale(.3); opacity:0 }
+    12%{ opacity:1 }
+    100%{ transform:translate(calc(-50% + var(--dx)), calc(-50% + var(--dy) + 34px)) scale(var(--sc,1)) rotate(var(--rot,180deg)); opacity:0 } }
+  /* el anillo de onda: 26 → 190 px. Es lo que le da el golpe seco al momento */
+  .cel .onda{ position:absolute; left:50%; top:42%; width:26px; height:26px; margin:-13px 0 0 -13px;
+    border-radius:50%; border:5px solid #fff6d0; box-shadow:0 0 16px var(--cc,#ffd23f);
+    animation:celOnda .55s ease-out forwards; }
+  @keyframes celOnda{ to{ width:190px; height:190px; margin:-95px 0 0 -95px; opacity:0; border-width:1px } }
+  /*+AG LOS DOS APAGADOS SON OBLIGATORIOS, no un extra. Con "menos movimiento" del sistema NO se crea
+     ni una partícula (el JS lo mira antes de generarlas: apagar solo la animación por CSS dejaría 40
+     divs congelados encima de la pantalla, que es peor que no tener efecto). Aquí solo se quitan los
+     movimientos largos; la ventana sigue saliendo, porque la información no es decoración. */
+  @media (prefers-reduced-motion:reduce){
+    .cel .caja{ animation:none } .cel .ico{ animation:none } .cel .rayos{ animation:none; opacity:.1 }
+    .cel .onda{ display:none }
+  }
   /*+AG el BADGE rojo (.tab.badge, ya existente) es la OTRA capa del sistema y no se toca: el badge dice "hay
      algo nuevo ahi dentro" y no se anima; el brillo dice "pulsame a mi". En CR son cosas distintas a proposito. */
   @media (prefers-reduced-motion: reduce){ .scr.on,.h-play,.h-ball,.ready,.ready::after,.justready{ animation:none; } }
@@ -4303,11 +4417,25 @@
   </div>
 </div>
 <div class="toast" id="toast"></div>
+<!--+AG 2026-08-06 · LA CELEBRACIÓN. Una sola capa para todo el juego (la pinta celebra(), ver el JS).
+     Va aquí, al final del body y fuera de toda pantalla, porque tiene que poder salir ENCIMA de
+     cualquiera de ellas: hoy la usa la Tienda, mañana el Garaje al desbloquear una bola. -->
+<div class="cel" id="cel" aria-hidden="true">
+  <div class="velo" id="celVelo"></div>
+  <div class="fx" id="celFx"></div>
+  <div class="caja" id="celCaja">
+    <div class="rayos"></div>
+    <div class="ico" id="celIco"></div>
+    <div class="tit" id="celTit"></div>
+    <div class="sub" id="celSub"></div>
+    <div class="pie" id="celPie"></div>
+  </div>
+</div>
 </div><!--+AG fin #app (columna telefono) -->
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=aa6ce8c"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=8f45408"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -5264,7 +5392,8 @@ const MORE={
     equipBtn:'Equipar', equippedBtn:'Equipada', tEquipped:'¡Equipada!', tUnlocked:n=>'¡'+n+' desbloqueado!',
     // — Tienda —
     shSecs:['Destacados','Boosters','Bolas','Cosméticos','Gemas','Pase'],
-    shLotes:'Lotes', shBstOwn:'Tienes', tBooster:(nombre,n)=>`+${n} ${nombre}`,
+    shLotes:'Lotes', tBooster:(nombre,n)=>`+${n} ${nombre}`,
+    shBstFree:'El primero de cada partida es gratis', celTienes:n=>`Ahora tienes ×${n}`,
     bstNames:{nitro:'Nitro', escudo:'Escudo', dash:'Impulso', fantasma:'Fantasma'},
     shNoteBst:'El primer uso de cada booster es GRATIS en toda partida. Aquí compras los siguientes, con Monedas que ganas jugando. Los rivales también gastan los suyos.',
     shNoteFeat:'Escaparate que rota cada semana con el tema de temporada. Todo con precio y contenido a la vista, <b>nunca cajas sorpresa</b>.',
@@ -5442,7 +5571,8 @@ const MORE={
     equipBtn:'Equip', equippedBtn:'Equipped', tEquipped:'Equipped!', tUnlocked:n=>n+' unlocked!',
     // — Shop —
     shSecs:['Featured','Boosters','Balls','Cosmetics','Gems','Pass'],
-    shLotes:'Bundles', shBstOwn:'You have', tBooster:(nombre,n)=>`+${n} ${nombre}`,
+    shLotes:'Bundles', tBooster:(nombre,n)=>`+${n} ${nombre}`,
+    shBstFree:'The first one each match is free', celTienes:n=>`You now have ×${n}`,
     bstNames:{nitro:'Nitro', escudo:'Shield', dash:'Dash', fantasma:'Ghost'},
     shNoteBst:'The first use of each booster is FREE every match. Here you buy the next ones, with Coins you earn by playing. Rivals spend theirs too.',
     shNoteFeat:'A storefront that rotates every week with the season theme. Price and contents always in plain sight, <b>never loot boxes</b>.',
@@ -5857,6 +5987,13 @@ const BOOSTERS = {
   fantasma: { modos:['redlight'],        ico:'arte/ui/icono-fantasma-booster.webp' },
 };
 const BOOSTER_KEYS = Object.keys(BOOSTERS);
+//+AG 2026-08-06 · UN COLOR POR BOOSTER. `boostersEl()` era el ÚNICO render de la Tienda que no
+//   pintaba su `--qc`: bolas y cosméticos sí, así que las cuatro tarjetas de booster caían al mismo
+//   marco gris y parecían la misma cosa cuatro veces. Además resuelve HOY, sin esperar arte nuevo,
+//   que Nitro e Impulso compartan el archivo de icono: uno va en oro y el otro en cian.
+//   El cian del Impulso no me lo invento — es el que el MOTOR ya pinta para el orbe de dash en pista
+//   (`itemgen.mjs`: dash [38,210,245]), así que la tienda deja de contradecir a la partida.
+const BOOSTER_COLOR = { nitro:'#FBB915', escudo:'#3D8BFF', dash:'#26D2F5', fantasma:'#C7D6EA' };
 //+AG migración idempotente: un save viejo entra con el inventario a cero y sigue jugando igual que
 //   siempre, porque el uso gratis le da el mismo botón de antes. Nadie pierde nada al actualizar.
 if(!SAVE.boosters || typeof SAVE.boosters!=='object') SAVE.boosters={};
@@ -6895,6 +7032,85 @@ let toastT=0;
 //   por textContent, que es lo que toca para un texto que viene del diccionario y no es marcado.
 function toast(msg, ck){ const e2=el('toast'); if(ck) e2.innerHTML=ckTxt(msg); else e2.textContent=msg;
   e2.classList.add('on'); clearTimeout(toastT); toastT=setTimeout(()=>e2.classList.remove('on'),1700); }
+
+// ============================================================================
+//+AG 2026-08-06 · celebra() · LA VENTANA DE CELEBRACIÓN, para todo el juego.
+//
+//   Jaime, probando la Tienda: «hago clic y aparece una cosita abajo ahí pequeña. [...] tiene que ser
+//   espectacular, que tienen que salir partículas [...] estilo rollo Supercell.» Tenía razón: hasta
+//   hoy comprar hacía UNA cosa, un toast() de texto abajo del todo.
+//
+//   ⚠ SE LLAMA DESPUÉS DE QUE LA COSA YA SEA TUYA. No es un «¿seguro?»: es el premio. Por eso quien
+//   la llama ya ha cobrado y ya ha guardado — si esto fallara, la compra sigue hecha.
+//
+//   ⚠ LAS TRAYECTORIAS SALEN DE UNA TABLA FIJA, NO DE UN DADO. La regla de cero azar de docs/12 es de
+//   la tienda entera, también de sus efectos. Con 14 ángulos y 14 radios primos entre sí no se ve
+//   ningún patrón, y a cambio la misma compra se ve siempre igual y se puede capturar para verificar.
+const CEL_ANG = [8,34,61,95,127,152,186,213,241,272,299,318,341,17];
+const CEL_RAD = [58,74,63,88,69,81,55,92,66,78,60,85,71,64];
+let celT=null;
+//+AG el peso decide CUÁNTAS partículas salen: comprar 1 y comprar 40 no pueden sentirse igual. Es la
+//   cantidad comprada la que manda, nunca la suerte.
+function celebra({ ico, color, titulo, sub, pie, peso=1 }){
+  const cel=el('cel'), caja=el('celCaja'), fx=el('celFx');
+  clearTimeout(celT);
+  cel.style.setProperty('--cc', color||'#ffd23f');
+  el('celIco').innerHTML = ico ? `<img src="${ico}" alt="">` : '';
+  el('celTit').textContent = titulo||'';
+  el('celSub').textContent = sub||'';
+  el('celPie').textContent = pie||'';
+  fx.innerHTML='';
+  //+AG «menos movimiento» del sistema: NO se crea ni una partícula. Apagarlas por CSS dejaría 40 divs
+  //   congelados encima de la pantalla, que se ve peor que no tener efecto. Igual con el ajuste de
+  //   Efectos reducidos del juego, que ya apaga el fondo vivo.
+  const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches
+              || !!(SAVE.settings && SAVE.settings.reducedFx);
+  if(!quieto){
+    const n = peso>=40 ? 26 : peso>=15 ? 20 : peso>=5 ? 15 : 11;
+    const onda=document.createElement('div'); onda.className='onda'; fx.appendChild(onda);
+    for(let i=0;i<n;i++){
+      const a=CEL_ANG[i%CEL_ANG.length]*Math.PI/180, r=CEL_RAD[i%CEL_RAD.length]*(1+(i/n)*0.5);
+      const p=document.createElement('div'); p.className='pz';
+      const estrella = i%3!==0;
+      p.style.cssText=`--dx:${(Math.cos(a)*r).toFixed(1)}px;--dy:${(Math.sin(a)*r*.92).toFixed(1)}px;`
+        +`--rot:${(i%2?1:-1)*(160+i*17)}deg;--sc:${estrella?1:.8};`
+        +`animation:celPz ${(680+i*24)}ms cubic-bezier(.15,.7,.35,1) ${(i*11)}ms forwards`;
+      //+AG ⚠ LAS ESTRELLAS VAN EN BLANCO CÁLIDO, NO DEL COLOR DEL BOOSTER, y esto se vio MIRANDO la
+      //   captura: pintadas del color del premio, las del Escudo salían azules sobre una ventana azul
+      //   con un escudo azul dentro — 26 partículas invisibles. El color del booster va en el HALO
+      //   (drop-shadow), que lo tiñe sin comerse el contraste. Un blanco cálido se ve sobre los cuatro.
+      const halo = color||'#ffd23f';
+      p.innerHTML = estrella
+        ? `<svg viewBox="0 0 24 24" width="18" height="18" style="filter:drop-shadow(0 0 5px ${halo})"><path d="M12 1l3 7.5 7.5.6-5.7 5 1.8 7.4L12 17.6 5.4 21.5l1.8-7.4-5.7-5L9 8.5z" fill="#fff6d0"/></svg>`
+        : `<span style="display:block;width:8px;height:8px;border-radius:50%;background:#fff;box-shadow:0 0 6px ${halo}"></span>`;
+      fx.appendChild(p);
+    }
+  }
+  cel.classList.add('on'); cel.setAttribute('aria-hidden','false');
+  //+AG se cierra tocando en CUALQUIER sitio y sola a los 2,2 s. Las dos cosas: una ceremonia que hay
+  //   que cerrar a mano molesta a la segunda compra, y una que no se puede cortar molesta a la tercera.
+  celT=setTimeout(cierraCel, 2200);
+}
+function cierraCel(){ clearTimeout(celT); const cel=el('cel');
+  cel.classList.remove('on'); cel.setAttribute('aria-hidden','true'); el('celFx').innerHTML=''; }
+el('cel').addEventListener('pointerdown', cierraCel);   //+AG tocar en cualquier sitio la cierra
+//+AG 2026-08-06 · EL SALDO BAJA CONTANDO. Un número que cambia de golpe no se ve; uno que rueda, sí —
+//   y es la mitad de la transacción (la otra mitad es la cosa que te llevas). 9 pasos en 280 ms, rápido
+//   a propósito: un contador lento restando se lee como pérdida, y esto es una compra, no un castigo.
+//   ⚠ Escribe el número FINAL al terminar pase lo que pase: si el render repinta la pantalla a mitad
+//   de la cuenta, el saldo que se queda es el bueno y no un valor intermedio congelado.
+function cuentaSaldo(nodo, desde, hasta){
+  if(!nodo) return;
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){ nodo.textContent=nfmt(hasta); return; }
+  const PASOS=9, dur=280; let i=0;
+  nodo.classList.add('cuenta');
+  const t=setInterval(()=>{
+    i++;
+    const k=i/PASOS, e=1-Math.pow(1-k,2);                 // frena al final, como todo lo que se asienta
+    nodo.textContent = nfmt(Math.round(desde + (hasta-desde)*e));
+    if(i>=PASOS){ clearInterval(t); nodo.textContent=nfmt(hasta); nodo.classList.remove('cuenta'); }
+  }, dur/PASOS);
+}
 //+AG data-soonk: la etiqueta del toast sale del diccionario (antes era data-soon con el texto español fijo dentro
 //   del atributo, que salia en español con el juego en ingles)
 document.querySelectorAll('[data-soonk]').forEach(x=>x.addEventListener('click',()=>toast((S()[x.dataset.soonk]||'')+S().soon)));
@@ -7067,7 +7283,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=aa6ce8c').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=8f45408').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -7460,39 +7676,54 @@ function cosmEl(){ const s=S(), d=document.createElement('div'); d.innerHTML='';
 //+AG 2026-08-06 · LA SECCIÓN DE BOOSTERS. Lo que se vende son USOS: el primero de cada partida es
 //   gratis y estos son los siguientes (ver chassis/invboost.mjs). Cada tarjeta dice CUÁNTOS llevas,
 //   porque un inventario que no se ve no es un inventario.
+//+AG ⚠ 2026-08-06 · REHECHA ENTERA. La primera versión era una rejilla de 2×2 más una sección de
+//   "Lotes" aparte, y tenía tres fallos MEDIDOS que no se arreglaban afinando:
+//     · el icono medía 38 px cuando el de una BOLA, en una tarjeta del mismo ancho, mide 72;
+//     · el precio iba a 13 px en la rejilla y a 11 px GRIS y FUERA de la fila en los lotes, mientras
+//       que lo que recibías (el "×5") iba a 20: pesaba más lo que ganas que lo que pagas;
+//     · los 12 botones de lote medían 40 px de ancho contra los 44 mínimos del canon, y NO había
+//       arreglo posible con esa forma: a 360 px de pantalla, quitando el disco de moneda y la
+//       etiqueta, quedan 37 px por botón. No es un `min-width` que falte: no caben.
+//   Y remate: a 360×640 y 320×640 la sección de Lotes empezaba en y=683 con 640 px visibles, o sea que
+//   el mejor descuento (−25%) quedaba FUERA DE PANTALLA sin haber deslizado.
+//
+//   La forma nueva: UNA tarjeta de ancho completo por booster, con sus cuatro compras dentro y cada
+//   precio escrito EN el botón que lo cobra. Medido en el mockup antes de escribir esto: los botones
+//   pasan de 40 a 75 px (61 en la pantalla más estrecha) y la sección ocupa MENOS alto que antes.
 function boostersEl(){ const s=S(), d=document.createElement('div');
-  const g=document.createElement('div'); g.className='sh-grid';
-  BOOSTER_KEYS.forEach(k=>{ const B=BOOSTERS[k], it=document.createElement('div'); it.className='sh-item';
-    //+AG el subtítulo dice EN QUÉ MODOS se gasta, que es la información que hace interesante la compra:
-    //   el escudo vale en dos modos y el fantasma en uno, y eso cambia lo que te conviene.
-    const modos = B.modos.map(m=>modeTitle(m)).join(' · ');
-    it.innerHTML=`<div class="sh-ic"><img class="cico" src="${B.ico}" alt="" style="width:38px;height:38px"></div>`+
-      `<div class="sh-nm">${boosterName(k)}</div><div class="sh-cat">${modos}</div>`+
-      `<div class="sh-cat" style="color:var(--gold2);font-weight:900">×${invBooster(k)}</div>`;
-    const btn=document.createElement('button'); btn.className='sh-buy';
-    btn.innerHTML=`${BOOSTER_PRECIO} ${coinIco('chispa','sm')}`;
-    btn.disabled=SAVE.chispas<BOOSTER_PRECIO;
-    btn.onclick=()=>buyBooster(k,1);
-    it.appendChild(btn); g.appendChild(it); });
-  d.appendChild(g);
-  //+AG los lotes van DEBAJO de la rejilla y con el ahorro escrito: el descuento se ve, no se adivina.
-  //   Compran del booster que el jugador elija en el desplegable… que NO existe: los `<select>` son un
-  //   fallo en este proyecto (nada de widgets del navegador). Se resuelve con una fila por booster.
-  const h=document.createElement('div'); h.className='sh-cat'; h.style.cssText='margin:14px 2px 8px;font-weight:900;letter-spacing:.06em;text-transform:uppercase';
-  h.textContent=s.shLotes||'Lotes'; d.appendChild(h);
-  BOOSTER_LOTES.forEach(L=>{ const row=document.createElement('div'); row.className='sh-pack';
-    const ahorro=Math.round(100*(1-(L.m/(L.n*BOOSTER_PRECIO))));
-    row.innerHTML=`<div class="pg ico">${coinIco('chispa')}</div><div class="amt">×${L.n} <small>−${ahorro}%</small></div>`;
-    //+AG un botón por booster dentro de la fila: cuatro iconos, sin desplegables (docs/60: nada del navegador).
-    const wrap=document.createElement('div'); wrap.style.cssText='margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end';
-    BOOSTER_KEYS.forEach(k=>{ const b=document.createElement('button'); b.className='sh-buy';
-      b.style.cssText='width:auto;padding:9px 10px;display:flex;align-items:center;gap:5px';
-      b.title=boosterName(k)+' ×'+L.n;
-      b.innerHTML=`<img src="${BOOSTERS[k].ico}" alt="${boosterName(k)}" style="width:20px;height:20px">`;
-      b.disabled=SAVE.chispas<L.m; b.onclick=()=>buyBooster(k,L.n,L.m); wrap.appendChild(b); });
-    row.appendChild(wrap); d.appendChild(row);
-    const p=document.createElement('div'); p.className='sh-cat'; p.style.cssText='margin:-4px 2px 10px;text-align:right';
-    p.innerHTML=`${nfmt(L.m)} ${coinIco('chispa','sm')}`; d.appendChild(p);
+  //+AG el rótulo explica la regla que hace justo el sistema, y va arriba del todo porque es lo que
+  //   convierte "me venden botones" en "me venden usos EXTRA".
+  const cab=document.createElement('div'); cab.className='sh-cat';
+  cab.style.cssText='margin:2px 2px 10px;text-align:center';
+  cab.textContent=s.shBstFree||'El primero de cada partida es gratis';
+  d.appendChild(cab);
+  BOOSTER_KEYS.forEach(k=>{
+    const B=BOOSTERS[k], tengo=invBooster(k);
+    const c=document.createElement('div'); c.className='bst-card'+(tengo?'':' vacio');
+    c.style.setProperty('--cc', BOOSTER_COLOR[k]||'#ffd23f');
+    //+AG los modos van en ICONO y no en palabras: "LA GRAN CARRERA · EL CAZADOR" ocupaba dos renglones
+    //   de 11 px. El glifo de modo ya existe (MODOS[m].ico) y se lee igual en los 20 idiomas.
+    const modos = B.modos.map(m=>`<i title="${modeTitle(m)}">${(MODOS[m]&&MODOS[m].ico)||''}</i>`).join('');
+    c.innerHTML =
+      `<div class="bst-top">`+
+        `<div class="bst-show"><img src="${B.ico}" alt=""></div>`+
+        `<div class="bst-txt"><div class="bst-nm">${boosterName(k)}</div><div class="bst-modos">${modos}</div></div>`+
+        `<div class="bst-tengo">×${tengo}</div>`+
+      `</div>`;
+    const fila=document.createElement('div'); fila.className='bst-compras';
+    //+AG las cuatro compras salen de la MISMA fuente: la unitaria y los tres lotes. El descuento se
+    //   calcula, no se escribe a mano, así que tocar un precio no puede dejar una etiqueta mintiendo.
+    const compras=[{n:1,m:BOOSTER_PRECIO}, ...BOOSTER_LOTES];
+    compras.forEach(L=>{
+      const ahorro=Math.round(100*(1-(L.m/(L.n*BOOSTER_PRECIO))));
+      const b=document.createElement('button'); b.className='bst-buy';
+      b.innerHTML=(ahorro>0?`<span class="off">−${ahorro}%</span>`:'')+
+        `<span class="n">×${L.n}</span><span class="p">${nfmt(L.m)} ${coinIco('chispa','sm')}</span>`;
+      b.disabled=SAVE.chispas<L.m;
+      b.onclick=()=>buyBooster(k, L.n, L.m);
+      fila.appendChild(b);
+    });
+    c.appendChild(fila); d.appendChild(c);
   });
   return d;
 }
@@ -7560,7 +7791,17 @@ function buyBooster(k, n, coste){
   dinero('chispas', -total, 'booster');
   SAVE.boosters[k] = invBooster(k) + (n||1);
   apunta('booster_comprado', { k, n:(n||1), m:total });
-  persist(); toast(S().tBooster ? S().tBooster(boosterName(k), n||1) : boosterName(k)+' ×'+(n||1)); renderTienda(); }
+  persist();
+  //+AG 2026-08-06 · el premio. El toast de texto se va: era LO ÚNICO que pasaba al comprar y es
+  //   justo lo que Jaime señaló («una cosita abajo ahí pequeña»). Lo sustituye la ventana con el
+  //   booster girando, sus partículas y su sonido. El nombre del booster sigue estando —dentro de
+  //   la ventana y a 20 px— así que no se pierde información: se pierde la pequeñez.
+  if(window.BT_UI && BT_UI.compra) BT_UI.compra((n||1)>=15);
+  cuentaSaldo(el('shChispas'), SAVE.chispas + total, SAVE.chispas);   //+AG el dinero se ve IRSE, no aparece cambiado
+  celebra({ ico:BOOSTERS[k].ico, color:BOOSTER_COLOR[k], titulo:boosterName(k),
+            sub:'×'+(n||1), pie:S().celTienes ? S().celTienes(invBooster(k)) : '×'+invBooster(k),
+            peso:(n||1) });
+  renderTienda(); }
 //+AG 2026-08-06 · PAQUETES DE MONEDAS por gemas (encargo de Jaime, punto 10).
 function buyMonPack(pk){
   if(SAVE.gemas < pk.g) return;
@@ -9120,7 +9361,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=aa6ce8c';
+  import { startAmbient } from './arte/ambient.mjs?v=8f45408';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -9136,7 +9377,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=aa6ce8c').then(m => {
+  import('./arte/pista-preview.mjs?v=8f45408').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -9148,8 +9389,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=aa6ce8c';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=aa6ce8c';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=8f45408';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=8f45408';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -9302,7 +9543,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=aa6ce8c'), import('./motor/chassis/sincro.mjs?v=aa6ce8c')]);
+        import('./motor/chassis/nube.mjs?v=8f45408'), import('./motor/chassis/sincro.mjs?v=8f45408')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
