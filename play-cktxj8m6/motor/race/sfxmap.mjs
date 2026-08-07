@@ -1,11 +1,11 @@
 // YouBall · MAPEO eventos→buffer de audio de La Gran Carrera, browser-safe (sin Node). El corazón del sonido del
 // modo: por cada evento de la sim coloca su SFX en un Float32Array. Lo usan IGUAL el render (audio.mjs → WAV) y el
 // preview en vivo (index.html → Web Audio) → la web suena EXACTAMENTE como el render (misma síntesis, mismo seed).
-//   import { buildSfxBuffer } from './sfxmap.mjs?v=57a0c91';
+//   import { buildSfxBuffer } from './sfxmap.mjs?v=68cd758';
 //   const buf = buildSfxBuffer({ events, decision_frame, f, seed, SR });   // Float32Array mono (sin normalizar)
-import { createSynth, makeRng } from '../chassis/synth.mjs?v=57a0c91';
-import { createFx } from '../chassis/sfx.mjs?v=57a0c91';
-import { FPS } from './sim.js?v=57a0c91';
+import { createSynth, makeRng } from '../chassis/synth.mjs?v=68cd758';
+import { createFx } from '../chassis/sfx.mjs?v=68cd758';
+import { FPS } from './sim.js?v=68cd758';
 
 // events = sim.events (la sim de la Carrera ACUMULA sus propios eventos durante toda la partida; ver runToEnd/qa).
 // Claves array: bump, pickup, relay, gatebreak, twists, finishes. f = frame final. decision_frame = victoria (o null).
