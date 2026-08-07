@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 9d83055"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-07 ac93186+SUCIO"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -1357,7 +1357,17 @@
   .se-hero::after{ content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
     background:radial-gradient(125% 110% at 50% 40%, transparent 42%, #12082eb0 100%); }
   .se-hero > *{ position:relative; z-index:1; }
-  .se-champ{ border-radius:50%; background:radial-gradient(circle at 50% 52%, #ffd23f30, transparent 70%); }
+  /*+AG el disco de la campeona: la caja RESERVA 56 px (que es lo que ocupaba el canvas de antes, así
+     que el reparto de la fila no se mueve) y la bola se pinta encima al 124 % para que su tinta —el
+     78,9 % de su lienzo— acabe midiendo esos mismos 56 px. La corona sale por arriba a la derecha; la
+     recorta `.se-hero{overflow:hidden}` si la tarjeta se queda sin aire, que es lo que queremos. */
+  .se-champ{ position:relative; flex:0 0 auto;
+    border-radius:50%; background:radial-gradient(circle at 50% 52%, #ffd23f30, transparent 70%); }
+  .se-champ img{ position:absolute; object-fit:contain; pointer-events:none; }
+  .se-champ .bl{ left:50%; top:50%; width:124%; height:124%; transform:translate(-50%,-50%);
+    filter:drop-shadow(0 3px 6px #0006); }
+  .se-champ .cr{ left:46%; top:-22%; width:70%; height:70%; transform:rotate(-15deg);
+    filter:drop-shadow(0 2px 5px #0009); }
   .se-hero .tl{ flex:1; } .se-hero .fl{ font-size:var(--fs-2); letter-spacing:.16em; text-transform:uppercase; color:var(--gold2); font-weight:800; }
   .se-hero h3{ margin:2px 0 3px; font-size:var(--fs-5); } .se-hero .dd{ font-size:var(--fs-3); color:#cfd4f0; font-weight:700; }
   .se-champ{ width:56px; height:56px; }
@@ -5127,7 +5137,21 @@
            pantalla) le devolveria encima el «termina en 18 dias» de la maqueta. Misma trampa que la
            Liga (doc 78 §6). El texto de aqui es solo el relleno de antes de pintar. -->
       <div class="tl"><div class="fl" id="seSeasonTx">Temporada 1</div><h3 data-t="seTheme">Verano en la Cima</h3><div class="dd" data-th="seChampLine"></div></div>
-      <canvas class="se-champ" id="seChamp" width="112" height="112"></canvas>
+      <!--+AG 2026-08-07 · LA CAMPEONA DEJA DE SER UN EMOJI. Jaime, mirando la pantalla: «sale una
+           carita dormida a cuento de qué [...] no hay acción, no hay bolas». Aquí había un canvas con
+           drawPreviewBall(), o sea la MISMA esfera neutra de vista previa del Garaje con la cara
+           vectorial `feliz` — que es la de ojos cerrados en arco. A 56 px eso no se lee como una
+           campeona: se lee como un emoji dormido, y no lo desmiente nada (ni corona, ni pose).
+           Y la línea de al lado dice «Campeona de la temporada: BOLA DORADA» teniendo el juego una
+           bola dorada pintada de verdad en el arte (`bola-chispa`, oro #FFE038 en bolas-canon).
+           Se usa el `-icon` y no el `-hero` a propósito: el hero lleva 31 px de estela de rayos que
+           se meterían por encima del texto de la izquierda; el icon es la misma bola, centrada y
+           dibujada para leerse pequeña. Medido con PIL: tinta al 78,9 % del lienzo y centrada
+           (fx .512 / fy .503), de ahí el 124 % de abajo. Cero arte nuevo. -->
+      <div class="se-champ" id="seChamp">
+        <img class="bl" src="arte/bolas/bola-chispa-icon.webp" alt="">
+        <img class="cr" src="arte/ui/corona-campeon.webp" alt="">
+      </div>
     </div>
     <!--+AG doc 40: las tres secciones de Temporada ya no se apilan, se cambian con un tap -->
     <!--+AG doc 75: los RETOS entran como una seccion mas de Temporada, no como pantalla nueva ni como
@@ -5543,7 +5567,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=9d83055"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=ac93186+SUCIO"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -8624,7 +8648,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=9d83055').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=ac93186-SUCIO').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -9453,7 +9477,7 @@ function pintaCofre(){
   d.classList.add('mi-cobra'); d.appendChild(b);
   c.appendChild(d);
 }
-function openTemporada(){ showScreen('temporada'); applyShell(); pildora('seChispas', SAVE.chispas); pildora('seGemas', SAVE.gemas); drawPreviewBall(el('seChamp'), TEAMS[3].color); paintTempHd(); buildPaseTrack(); paintLiga(); renderRetos(); }
+function openTemporada(){ showScreen('temporada'); applyShell(); pildora('seChispas', SAVE.chispas); pildora('seGemas', SAVE.gemas); paintTempHd(); buildPaseTrack(); paintLiga(); renderRetos(); }
 //+AG doc 75 · EL PANEL DE RETOS. Pinta la semanal arriba y las 3 diarias debajo. Todo lo que decide
 //   (que retos, cuanto llevas, si esta cobrado) sale del motor de misiones; aqui solo se dibuja.
 function retoTxt(m){ const s=S(), T=MIS_TPL[m.p]||{};
@@ -10906,7 +10930,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=9d83055';
+  import { startAmbient } from './arte/ambient.mjs?v=ac93186-SUCIO';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -10922,7 +10946,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=9d83055').then(m => {
+  import('./arte/pista-preview.mjs?v=ac93186-SUCIO').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -10934,8 +10958,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=9d83055';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=9d83055';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=ac93186-SUCIO';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=ac93186-SUCIO';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -11105,7 +11129,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=9d83055'), import('./motor/chassis/sincro.mjs?v=9d83055')]);
+        import('./motor/chassis/nube.mjs?v=ac93186-SUCIO'), import('./motor/chassis/sincro.mjs?v=ac93186-SUCIO')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
