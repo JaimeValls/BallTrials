@@ -85,7 +85,7 @@ shell: {
   shNoteBalls:'Kesemua dua belas bola diperoleh dengan cara yang sama: <b>bermain</b> (Syiling ✦) atau guna <b>Permata ◆</b> jika tergesa-gesa. Bola <b>Epik</b> turut dihadiahkan apabila anda mencapai pencapaian piala 🏆. <b>Tiada apa-apa di sini yang hanya boleh dibeli.</b>',
   shNoteCosm:'Kosmetik ialah <b>rupa sahaja</b>, apa jua kelangkaan. Bingkainya (kelabu→emas) menunjukkan kelangkaan. Ia tidak pernah menyentuh atribut.',
   shNoteGems:'Pada akaun kanak-kanak, pembelian dengan wang sebenar melalui <b>pintu ibu bapa</b> dan <b>had perbelanjaan</b>, kedua-duanya hidup secara lalai.',
-  buyBtn:g=>'Beli · '+g+' ◆', ownedGar:'Ada dalam Garaj awak', ownedCosm:'Sudah dimiliki',
+  buyBtn:g=>'Beli · '+g+' ◆', ownedGar:'Ada dalam Garaj awak', bstStock:'Ada', ownedCosm:'Sudah dimiliki',
   shBallCat:(q,b)=>q+' · '+b,
   bundleNm:'Pakej Musim', bundleFl:'Tawaran pilihan musim ini',
   shVale:n=>'Berasingan bernilai '+n+' ◆',

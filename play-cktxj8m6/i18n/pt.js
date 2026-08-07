@@ -83,7 +83,7 @@ shell: {
   shNoteBalls:'As doze bolas conseguem-se da mesma forma: <b>a jogar</b> (Moedas ✦) ou com <b>Gemas ◆</b> se tiveres pressa. As bolas <b>Épico</b> são ainda oferecidas ao atingires o seu marco de taças 🏆. <b>Aqui não há nada que só se possa comprar.</b>',
   shNoteCosm:'Cosméticos = <b>só aparência</b>, de qualquer raridade. A moldura (cinza→dourada) mostra a raridade. Nunca mexem nos atributos.',
   shNoteGems:'Em contas de crianças, as compras com dinheiro real passam por um <b>portão parental</b> e um <b>limite de gasto</b>, ligados por padrão.',
-  buyBtn:g=>'Comprar · '+g+' ◆', ownedGar:'Na sua Garagem', ownedCosm:'Você já tem',
+  buyBtn:g=>'Comprar · '+g+' ◆', ownedGar:'Na sua Garagem', bstStock:'Tens', ownedCosm:'Você já tem',
   shBallCat:(q,b)=>q+' · '+b,
   bundleNm:'Pacote da Temporada', bundleFl:'A oferta em destaque da temporada',
   shVale:n=>'Vale '+n+' ◆ em separado',

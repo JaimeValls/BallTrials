@@ -83,7 +83,7 @@ shell: {
   shNoteBalls:'Tutte e dodici le biglie si ottengono allo stesso modo: <b>giocando</b> (Monete ✦) o con le <b>Gemme ◆</b> se hai fretta. Le biglie <b>Epica</b> vengono anche regalate quando raggiungi il loro traguardo di coppe 🏆. <b>Qui non c\'è niente che si possa solo comprare.</b>',
   shNoteCosm:'L\'estetica è <b>solo aspetto</b>, di qualsiasi rarità. La cornice (grigia→oro) mostra la rarità. Non tocca mai gli attributi.',
   shNoteGems:'Sugli account dei bambini gli acquisti con denaro reale passano da un <b>controllo genitori</b> e da un <b>limite di spesa</b>, attivi di default.',
-  buyBtn:g=>'Compra · '+g+' ◆', ownedGar:'Nel tuo Garage', ownedCosm:'Già tua',
+  buyBtn:g=>'Compra · '+g+' ◆', ownedGar:'Nel tuo Garage', bstStock:'Hai', ownedCosm:'Già tua',
   shBallCat:(q,b)=>q+' · '+b,
   bundleNm:'Pacchetto Stagione', bundleFl:'L\'offerta in evidenza della stagione',
   shVale:n=>'Vale '+n+' ◆ separatamente',

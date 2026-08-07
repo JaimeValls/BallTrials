@@ -85,7 +85,7 @@ shell: {
   shNoteBalls:'Alle zwölf Kugeln bekommst du auf demselben Weg: <b>durch Spielen</b> (Münzen ✦) oder mit <b>Gems ◆</b>, wenn es schnell gehen soll. <b>Episch</b> Kugeln gibt es zusätzlich geschenkt, sobald du ihren Pokal-Meilenstein 🏆 erreichst. <b>Nichts hier gibt es nur für Geld.</b>',
   shNoteCosm:'Kosmetik = <b>nur Optik</b>, jede Seltenheit. Der Rahmen (grau→gold) zeigt die Seltenheit. Sie rührt die Werte nie an.',
   shNoteGems:'Auf Kinderkonten laufen Echtgeldkäufe über eine <b>Elternsperre</b> und ein <b>Ausgabenlimit</b>, standardmäßig an.',
-  buyBtn:g=>'Kaufen · '+g+' ◆', ownedGar:'In deiner Garage', ownedCosm:'Hast du schon',
+  buyBtn:g=>'Kaufen · '+g+' ◆', ownedGar:'In deiner Garage', bstStock:'Du hast', ownedCosm:'Hast du schon',
   shBallCat:(q,b)=>q+' · '+b,
   bundleNm:'Saison-Paket', bundleFl:'Das Angebot der Saison',
   shVale:n=>'Einzeln '+n+' ◆ wert',

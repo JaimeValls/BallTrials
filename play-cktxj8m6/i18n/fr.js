@@ -83,7 +83,7 @@ shell: {
   shNoteBalls:'Les douze billes s\'obtiennent de la même façon : <b>en jouant</b> (pièces ✦) ou avec des <b>Gemmes ◆</b> si tu es pressé. Les billes <b>Épique</b> sont en plus offertes quand tu atteins leur palier de coupes 🏆. <b>Ici, rien ne s\'obtient uniquement en payant.</b>',
   shNoteCosm:'Les cosmétiques = <b>l\'apparence seulement</b>, toutes raretés. Le cadre (gris→or) montre la rareté. Ils ne touchent jamais aux attributs.',
   shNoteGems:'Sur les comptes enfants, les achats en argent réel passent par un <b>contrôle parental</b> et une <b>limite de dépense</b>, actifs par défaut.',
-  buyBtn:g=>'Acheter · '+g+' ◆', ownedGar:'Dans ton Garage', ownedCosm:'Déjà à toi',
+  buyBtn:g=>'Acheter · '+g+' ◆', ownedGar:'Dans ton Garage', bstStock:'Tu as', ownedCosm:'Déjà à toi',
   shBallCat:(q,b)=>q+' · '+b,
   bundleNm:'Pack de saison', bundleFl:'L\'offre à la une de la saison',
   shVale:n=>'Vaut '+n+' ◆ séparément',

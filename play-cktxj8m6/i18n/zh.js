@@ -84,7 +84,7 @@ shell: {
   shNoteBalls:'十二颗球的获得方式都一样：<b>靠游玩</b>（金币 ✦），赶时间就用<b>宝石 ◆</b>。<b>史诗</b>球在达成奖杯里程碑 🏆 时还会直接赠送。<b>这里没有只能花钱买的东西。</b>',
   shNoteCosm:'外观<b>只改样子</b>，任何稀有度都有。边框（灰→金）表示稀有度，永远不碰属性。',
   shNoteGems:'儿童账号里，真实货币消费必须通过<b>家长验证</b>和<b>消费上限</b>，两项默认开启。',
-  buyBtn:g=>'购买 · '+g+' ◆', ownedGar:'已在你的车库', ownedCosm:'已拥有',
+  buyBtn:g=>'购买 · '+g+' ◆', ownedGar:'已在你的车库', bstStock:'拥有', ownedCosm:'已拥有',
   shBallCat:(q,b)=>q+' · '+b,
   bundleNm:'赛季礼包', bundleFl:'赛季精选优惠',
   shVale:n=>'单买价值 '+n+' ◆',

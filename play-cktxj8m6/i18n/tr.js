@@ -83,7 +83,7 @@ shell: {
   shNoteBalls:'On iki topun hepsi aynı yoldan alınır: <b>oynayarak</b> (Altın ✦) ya da acelen varsa <b>Mücevher ◆</b> ile. <b>Destansı</b> toplar ayrıca kupa hedefine 🏆 ulaştığında hediye edilir. <b>Burada sadece parayla alınan hiçbir şey yok.</b>',
   shNoteCosm:'Kozmetik <b>yalnızca görünüştür</b>, her nadirlikte olur. Çerçeve (griden altına) nadirliği gösterir. Özelliklere asla dokunmaz.',
   shNoteGems:'Çocuk hesaplarında gerçek parayla alımlar bir <b>ebeveyn kapısından</b> ve bir <b>harcama sınırından</b> geçer, ikisi de açık gelir.',
-  buyBtn:g=>'Satın al · '+g+' ◆', ownedGar:'Garajında', ownedCosm:'Zaten sende',
+  buyBtn:g=>'Satın al · '+g+' ◆', ownedGar:'Garajında', bstStock:'Sende', ownedCosm:'Zaten sende',
   shBallCat:(q,b)=>q+' · '+b,
   bundleNm:'Sezon Paketi', bundleFl:'Sezonun öne çıkan fırsatı',
   shVale:n=>'Ayrı ayrı '+n+' ◆ değerinde',

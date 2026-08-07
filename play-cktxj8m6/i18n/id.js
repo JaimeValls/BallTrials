@@ -83,7 +83,7 @@ shell: {
   shNoteBalls:'Kedua belas bola didapat dengan cara yang sama: <b>bermain</b> (Koin ✦) atau pakai <b>Permata ◆</b> kalau buru-buru. Bola <b>Epik</b> juga dihadiahkan saat kamu mencapai tonggak piala 🏆. <b>Tidak ada yang hanya bisa dibeli di sini.</b>',
   shNoteCosm:'Kosmetik itu <b>hanya tampilan</b>, kelangkaan apa pun. Bingkainya (abu-abu→emas) menunjukkan kelangkaan. Tidak pernah menyentuh atribut.',
   shNoteGems:'Di akun anak, pembelian dengan uang asli lewat <b>gerbang orang tua</b> dan <b>batas belanja</b>, keduanya aktif secara bawaan.',
-  buyBtn:g=>'Beli · '+g+' ◆', ownedGar:'Ada di Garasimu', ownedCosm:'Sudah punya',
+  buyBtn:g=>'Beli · '+g+' ◆', ownedGar:'Ada di Garasimu', bstStock:'Punya', ownedCosm:'Sudah punya',
   shBallCat:(q,b)=>q+' · '+b,
   bundleNm:'Paket Musim', bundleFl:'Penawaran unggulan musim ini',
   shVale:n=>'Terpisah senilai '+n+' ◆',

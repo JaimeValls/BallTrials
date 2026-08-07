@@ -85,7 +85,7 @@ shell: {
   shNoteBalls:'十二顆球的取得方式都一樣：<b>靠遊玩</b>（金幣 ✦），趕時間就用<b>寶石 ◆</b>。<b>史詩</b>球在達成獎盃里程碑 🏆 時還會直接贈送。<b>這裡沒有只能花錢買的東西。</b>',
   shNoteCosm:'外觀<b>只改樣子</b>，任何稀有度都有。外框（灰→金）代表稀有度，永遠不碰能力值。',
   shNoteGems:'兒童帳號裡，真錢消費一定要通過<b>家長驗證</b>和<b>消費上限</b>，兩項都預設開啟。',
-  buyBtn:g=>'購買 · '+g+' ◆', ownedGar:'已在你的車庫', ownedCosm:'已擁有',
+  buyBtn:g=>'購買 · '+g+' ◆', ownedGar:'已在你的車庫', bstStock:'擁有', ownedCosm:'已擁有',
   shBallCat:(q,b)=>q+' · '+b,
   bundleNm:'賽季包', bundleFl:'賽季精選優惠',
   shVale:n=>'單買價值 '+n+' ◆',

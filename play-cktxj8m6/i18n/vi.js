@@ -83,7 +83,7 @@ shell: {
   shNoteBalls:'Cả mười hai quả bóng đều lấy được theo cùng một cách: <b>chơi để nhận</b> (Xu ✦) hoặc dùng <b>Đá quý ◆</b> nếu bạn vội. Bóng <b>Sử thi</b> còn được tặng khi bạn đạt mốc cúp 🏆 của nó. <b>Ở đây không có gì chỉ mua mới có.</b>',
   shNoteCosm:'Trang trí là <b>chỉ vẻ ngoài</b>, ở mọi độ hiếm. Khung (xám→vàng) cho biết độ hiếm. Chúng không bao giờ đụng tới chỉ số.',
   shNoteGems:'Ở tài khoản trẻ em, mua bằng tiền thật phải qua <b>cổng phụ huynh</b> và <b>hạn mức chi tiêu</b>, cả hai đều bật sẵn.',
-  buyBtn:g=>'Mua · '+g+' ◆', ownedGar:'Đã có trong Nhà xe', ownedCosm:'Đã sở hữu',
+  buyBtn:g=>'Mua · '+g+' ◆', ownedGar:'Đã có trong Nhà xe', bstStock:'Bạn có', ownedCosm:'Đã sở hữu',
   shBallCat:(q,b)=>q+' · '+b,
   bundleNm:'Gói mùa giải', bundleFl:'Ưu đãi nổi bật của mùa giải',
   shVale:n=>'Mua lẻ đáng giá '+n+' ◆',

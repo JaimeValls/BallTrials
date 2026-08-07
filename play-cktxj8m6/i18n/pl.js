@@ -85,7 +85,7 @@ shell: {
   shNoteBalls:'Wszystkie dwanaście kul zdobywa się tak samo: <b>grając</b> (Monety ✦) albo za <b>Klejnoty ◆</b>, jeśli się spieszysz. Kule <b>Epicka</b> dostajesz dodatkowo w prezencie po osiągnięciu ich progu pucharów 🏆. <b>Nic tu nie jest wyłącznie do kupienia.</b>',
   shNoteCosm:'Kosmetyka to <b>tylko wygląd</b>, każda rzadkość. Ramka (szara→złota) pokazuje rzadkość. Nigdy nie rusza atrybutów.',
   shNoteGems:'Na kontach dzieci zakupy za prawdziwe pieniądze przechodzą przez <b>bramkę rodzica</b> i <b>limit wydatków</b>, domyślnie włączone.',
-  buyBtn:g=>'Kup · '+g+' ◆', ownedGar:'W twoim Garażu', ownedCosm:'Już masz',
+  buyBtn:g=>'Kup · '+g+' ◆', ownedGar:'W twoim Garażu', bstStock:'Masz', ownedCosm:'Już masz',
   shBallCat:(q,b)=>q+' · '+b,
   bundleNm:'Pakiet sezonowy', bundleFl:'Polecana oferta sezonu',
   shVale:n=>'Osobno warte '+n+' ◆',

@@ -83,7 +83,7 @@ shell: {
   shNoteBalls:'Alle twaalf ballen krijg je op dezelfde manier: <b>door te spelen</b> (Munten ✦) of met <b>Edelstenen ◆</b> als je haast hebt. <b>Episch</b> ballen krijg je bovendien cadeau zodra je hun bekermijlpaal 🏆 haalt. <b>Niets hier is alleen te koop.</b>',
   shNoteCosm:'Cosmetica = <b>alleen uiterlijk</b>, elke zeldzaamheid. De lijst (grijs→goud) toont de zeldzaamheid. Ze raken de eigenschappen nooit aan.',
   shNoteGems:'Op kinderaccounts lopen aankopen met echt geld via een <b>ouderslot</b> en een <b>uitgavenlimiet</b>, standaard aan.',
-  buyBtn:g=>'Kopen · '+g+' ◆', ownedGar:'In je Garage', ownedCosm:'Al van jou',
+  buyBtn:g=>'Kopen · '+g+' ◆', ownedGar:'In je Garage', bstStock:'Je hebt', ownedCosm:'Al van jou',
   shBallCat:(q,b)=>q+' · '+b,
   bundleNm:'Seizoenspakket', bundleFl:'De uitgelichte deal van dit seizoen',
   shVale:n=>'Los '+n+' ◆ waard',
