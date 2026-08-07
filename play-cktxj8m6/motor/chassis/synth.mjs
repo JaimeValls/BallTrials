@@ -1,8 +1,8 @@
 // YouBall · NÚCLEO de síntesis de audio, PURO (sin Node) → reutilizable en NAVEGADOR y en Node.
 // Extraído de chassis/audio.mjs para que el preview en vivo pueda generar EXACTAMENTE el mismo buffer que el
 // render (mismo makeRng/createSynth) sin arrastrar node:fs. chassis/audio.mjs lo re-exporta para Node, así que
-// los audio.mjs existentes ("import { createSynth, makeRng } from '../chassis/audio.mjs?v=039b592'") siguen funcionando.
-//   import { createSynth, makeRng } from '../chassis/synth.mjs?v=039b592';
+// los audio.mjs existentes ("import { createSynth, makeRng } from '../chassis/audio.mjs?v=ac3c8c1-SUCIO'") siguen funcionando.
+//   import { createSynth, makeRng } from '../chassis/synth.mjs?v=ac3c8c1-SUCIO';
 
 export function mulberry32(a){ return function(){ a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 export function makeRng(seed){ return mulberry32((seed >>> 0) || 1); }   // RNG seedeado → ruido determinista (WAV reproducible)
