@@ -40,7 +40,7 @@ import * as THREE from 'three';
 //   instalada. La escribe tools/partir-props.py mirando la carpeta del arte, y por eso vive ALLI y
 //   no aqui: quien fabrica esas capas es esa herramienta, asi que la lista se actualiza sola en el
 //   mismo gesto en el que se instala el arte. Ver arte/props/capas.mjs para el por que largo.
-import { CAPAS_PROP } from '../../arte/props/capas.mjs?v=8f45408';
+import { CAPAS_PROP } from '../../arte/props/capas.mjs?v=ca14cba';
 
 const TEX = 256;                 // lienzo del sprite
 const SPAN = 3.2;                // el plano mide 3.2R -> 1R = 40 px de textura

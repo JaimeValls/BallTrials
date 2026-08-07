@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 8f45408"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-07 ca14cba"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -767,6 +767,15 @@
   .bst-buy .p .cico{ width:15px; height:15px; -webkit-text-stroke:0; }
   .bst-buy .off{ position:absolute; top:-7px; right:-5px; background:var(--green); color:#08260f;
     font-size:10px; font-weight:900; padding:2px 5px; border-radius:8px; box-shadow:0 2px 0 #1d7a35; }
+  /*+AG ⚠ 2026-08-06 · EL ACUSE DE RECIBO DE LOS BOTONES DE COMPRAR. Lo cazó la auditoría de
+     espectacularidad y el dato es demoledor: el juego tiene 74 reglas `:active` —se hunden las
+     pestañas, las monedas, los chips— y NINGUNA apuntaba a `.sh-buy` ni a `.money`. O sea que los 31
+     botones de comprar de la Tienda, incluidos los de DINERO REAL, eran los únicos que no respondían
+     al dedo. Se hunden sus propios 3 px de canto, así que se apoyan en vez de flotar.
+     `:not(:disabled)` para que un botón apagado no finja que ha recibido el toque. */
+  .sh-buy:active:not(:disabled), .money:active:not(:disabled){
+    transform:translateY(3px); box-shadow:0 0 0 currentColor; filter:brightness(1.06); }
+  .sh-buy, .money{ transition:transform .06s, box-shadow .06s, filter .06s; }
   /*+AG mientras el saldo cuenta hacia abajo, la cifra se encoge un pelo y se enciende: sin esto, el
      número rueda pero la píldora ni se entera y el ojo no va a mirarla. */
   .cuenta{ animation:cuentaPulso .28s ease-out; color:var(--gold2) !important; }
@@ -4435,7 +4444,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=8f45408"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=ca14cba"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -6232,7 +6241,16 @@ function misReclamar(i){
   m.cob=true;
   dinero('chispas', MIS_PAGA, 'mision'); SAVE.xp+=MIS_XP;
   M.sem.v=(M.sem.v||0)+1;                                   // la semanal cuenta misiones COBRADAS
-  if(M.lista.every(x=>x.cob)) dinero('chispas', MIS_PLENO, 'mision_pleno');   // remate del 3/3
+  //+AG ⚠ 2026-08-06 · ESTO NO ENSEÑABA NADA. Ni siquiera el toast pequeño: cobrabas 40 monedas, la
+  //   fila se apagaba y el sonido era el de cambiar de pestaña. Y el remate del 3/3 (otras 50) era
+  //   directamente invisible — nadie podía saber que existía. Lo cazó la auditoría de espectacularidad.
+  //   Ahora los dos se celebran, y el pleno con más peso porque es el premio de haber hecho las tres.
+  if(window.BT_UI && BT_UI.compra) BT_UI.compra(false);
+  celebra({ ico:'arte/ui/moneda-chispa.webp?v=2', color:'#FBB915',
+            titulo:S().chispasWord||'Monedas', sub:'+'+MIS_PAGA, peso:5 });
+  if(M.lista.every(x=>x.cob)){ dinero('chispas', MIS_PLENO, 'mision_pleno');   // remate del 3/3
+    celebra({ ico:'arte/ui/moneda-chispa.webp?v=2', color:'#ffd23f',
+              titulo:S().chispasWord||'Monedas', sub:'+'+MIS_PLENO, peso:40 }); }
   apunta('mision_hecha', { p:m.p, modo:m.modo||null });
   persist(); return true;
 }
@@ -6408,10 +6426,34 @@ function apuntaPartida(partida){ _metManda({partida}); }
 //   dinero real. Si alguien anade una fuente nueva tocando SAVE.chispas a mano, el informe
 //   lo delata: el neto deja de cuadrar con los saldos. La aritmetica es la de antes (sin
 //   topes nuevos) a proposito, para no cambiar el comportamiento del juego al instrumentarlo.
+//+AG 2026-08-06 · TODAS las píldoras de saldo del juego, por moneda. Vivían SOLO dentro del bloque del
+//   truco de pruebas, así que el resto del juego no repintaba ninguna. `chispas` es el nombre viejo de
+//   MONEDAS en el SAVE (ver la nota de la migración): la clave del save no se toca, solo su etiqueta.
+const PILDORAS = { chispas:['hChispas','gChispas','shChispas','seChispas','prChispas'],
+                   gemas:  ['hGemas','gGemas','shGemas','seGemas','prGemas'] };
 function dinero(tipo, delta, motivo){
   delta = Math.round(delta) || 0;
-  SAVE[tipo] = (SAVE[tipo] || 0) + delta;
+  const antes = SAVE[tipo] || 0;
+  SAVE[tipo] = antes + delta;
   if(delta) apunta('currency', { t:tipo, d:delta, m:motivo });
+  //+AG ⚠ 2026-08-06 · EL SALDO SE PINTA AQUÍ, en la puerta única por la que ya pasaba todo el dinero.
+  //   Lo cazó la auditoría de espectacularidad, y era un FALLO REAL, no solo falta de brillo: cobrabas
+  //   un reto de 200 monedas en Temporada y la píldora seguía poniendo el saldo viejo hasta que
+  //   cambiabas de pantalla, porque solo `openTemporada()` la pintaba y ya no se volvía a pasar por
+  //   ahí. Repintar desde `dinero()` lo arregla para las CINCO pantallas de una vez y por construcción:
+  //   cualquier cobro futuro se pinta solo sin que nadie se acuerde de llamar a nada.
+  //   Y de paso el número RUEDA en vez de saltar, que es la mitad de que una transacción se vea.
+  if(delta) pintaSaldo(tipo, antes, SAVE[tipo]);
+}
+//+AG `desde` solo se usa para la cuenta; si no viene, se escribe el número y ya (arranque, migración).
+function pintaSaldo(tipo, desde, hasta){
+  const ids = PILDORAS[tipo]; if(!ids) return;
+  for(const id of ids){ const e=el(id); if(!e) continue;
+    //+AG solo cuenta la píldora que se VE: animar cinco a la vez es trabajo tirado, y las ocultas
+    //   tienen que quedar ya con el número bueno para cuando su pantalla se abra.
+    if(desde===undefined || !e.offsetParent) e.textContent = nfmt(hasta);
+    else cuentaSaldo(e, desde, hasta);
+  }
 }
 //+AG un session_start por carga de pagina. props sin nada personal (docs/24 §1/§4).
 apunta('session_start', { lang:LANG, level:SAVE.level, played:SAVE.played,
@@ -7048,10 +7090,19 @@ function toast(msg, ck){ const e2=el('toast'); if(ck) e2.innerHTML=ckTxt(msg); e
 //   ningún patrón, y a cambio la misma compra se ve siempre igual y se puede capturar para verificar.
 const CEL_ANG = [8,34,61,95,127,152,186,213,241,272,299,318,341,17];
 const CEL_RAD = [58,74,63,88,69,81,55,92,66,78,60,85,71,64];
-let celT=null;
+let celT=null, celCola=[];
+//+AG ⚠ 2026-08-06 · LA COLA. Lo cazó la auditoría: al cruzar un hito de copas se desbloqueaban TRES
+//   bolas de golpe y solo se veía UN aviso, porque el toast se pisa a sí mismo (un solo nodo y un solo
+//   temporizador). Dos Épicas entraban en la colección sin que el jugador se enterase. Aquí las
+//   celebraciones se ENCOLAN: la siguiente arranca cuando la anterior cierra, no encima de ella.
 //+AG el peso decide CUÁNTAS partículas salen: comprar 1 y comprar 40 no pueden sentirse igual. Es la
 //   cantidad comprada la que manda, nunca la suerte.
-function celebra({ ico, color, titulo, sub, pie, peso=1 }){
+function celebra(datos){
+  //+AG si ya hay una en pantalla, esta espera su turno en vez de pisarla.
+  if(el('cel').classList.contains('on')){ celCola.push(datos); return; }
+  _celebraYa(datos);
+}
+function _celebraYa({ ico, color, titulo, sub, pie, peso=1 }){
   const cel=el('cel'), caja=el('celCaja'), fx=el('celFx');
   clearTimeout(celT);
   cel.style.setProperty('--cc', color||'#ffd23f');
@@ -7092,7 +7143,10 @@ function celebra({ ico, color, titulo, sub, pie, peso=1 }){
   celT=setTimeout(cierraCel, 2200);
 }
 function cierraCel(){ clearTimeout(celT); const cel=el('cel');
-  cel.classList.remove('on'); cel.setAttribute('aria-hidden','true'); el('celFx').innerHTML=''; }
+  cel.classList.remove('on'); cel.setAttribute('aria-hidden','true'); el('celFx').innerHTML='';
+  //+AG y si había cola, la siguiente entra tras un respiro corto: encadenadas sin pausa se leen como
+  //   un parpadeo y no como dos premios distintos.
+  if(celCola.length) setTimeout(()=>{ const d=celCola.shift(); if(d) _celebraYa(d); }, 220); }
 el('cel').addEventListener('pointerdown', cierraCel);   //+AG tocar en cualquier sitio la cierra
 //+AG 2026-08-06 · EL SALDO BAJA CONTANDO. Un número que cambia de golpe no se ve; uno que rueda, sí —
 //   y es la mitad de la transacción (la otra mitad es la cosa que te llevas). 9 pasos en 280 ms, rápido
@@ -7283,7 +7337,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=8f45408').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=ca14cba').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -7412,6 +7466,11 @@ function unlock(k,withGems){ const A=ARCHS[k];   // transacción compartida por 
   if(withGems){ if(SAVE.gemas<A.gemas) return false; dinero('gemas', -A.gemas, 'bola_compra'); }
   else { if(SAVE.chispas<A.price) return false; dinero('chispas', -A.price, 'bola_compra'); }
   SAVE.balls.push({arch:k,lvl:1,xp:0,copas:0});
+  //+AG 2026-08-06 · una bola nueva es de PESO 4 (un héroe entra en tu colección) y hasta hoy se
+  //   resolvía con el botón poniéndose gris. Se celebra con su arte y el color de SU rareza.
+  if(window.BT_UI && BT_UI.compra) BT_UI.compra(true);
+  celebra({ ico:ballArt(k,'icon'), color:QUAL[A.q].c, titulo:archName(k),
+            sub:qualName(A.q), pie:S().celNueva||'', peso:40 });
   apunta('ball_get', { arch:k, via: withGems?'gemas':'chispas' });   //+AG docs/53: que bolas QUIERE la gente
   persist(); toast(S().tUnlocked(archName(k))); return true;
 }
@@ -7780,7 +7839,10 @@ function buyCosm(c, conGemas){
   if(conGemas===undefined) conGemas = SAVE.chispas<c.m;
   if(conGemas){ if(SAVE.gemas<c.g) return; dinero('gemas', -c.g, 'cosmetico'); }
   else        { if(SAVE.chispas<c.m) return; dinero('chispas', -c.m, 'cosmetico'); }
-  SAVE.cosmetics.push(c.id); persist(); toast(S().tCosm(cosmName(c))); renderTienda(); }
+  SAVE.cosmetics.push(c.id); persist();
+  if(window.BT_UI && BT_UI.compra) BT_UI.compra(false);
+  celebra({ color:QUAL[c.rar].c, titulo:cosmName(c), sub:cosmCat(c), pie:qualName(c.rar), peso:5 });
+  renderTienda(); }
 //+AG 2026-08-06 · COMPRAR BOOSTERS. `coste` sólo viene en los lotes; suelto es el precio unitario.
 //   Se cobra por la puerta única de economía (dinero(), docs/53) para que la analítica lo vea, y el
 //   inventario sube por el SAVE. Como todo lo de esta tienda: precio a la vista y cero azar.
@@ -7797,7 +7859,7 @@ function buyBooster(k, n, coste){
   //   booster girando, sus partículas y su sonido. El nombre del booster sigue estando —dentro de
   //   la ventana y a 20 px— así que no se pierde información: se pierde la pequeñez.
   if(window.BT_UI && BT_UI.compra) BT_UI.compra((n||1)>=15);
-  cuentaSaldo(el('shChispas'), SAVE.chispas + total, SAVE.chispas);   //+AG el dinero se ve IRSE, no aparece cambiado
+  //+AG el saldo lo pinta ya `dinero()` para las cinco pantallas: aquí no hay que hacer nada.
   celebra({ ico:BOOSTERS[k].ico, color:BOOSTER_COLOR[k], titulo:boosterName(k),
             sub:'×'+(n||1), pie:S().celTienes ? S().celTienes(invBooster(k)) : '×'+invBooster(k),
             peso:(n||1) });
@@ -7806,15 +7868,26 @@ function buyBooster(k, n, coste){
 function buyMonPack(pk){
   if(SAVE.gemas < pk.g) return;
   dinero('gemas', -pk.g, 'pack_monedas'); dinero('chispas', pk.m, 'pack_monedas');
-  persist(); toast(S().tGems ? '+'+nfmt(pk.m) : '+'+nfmt(pk.m)); renderTienda(); }
+  persist();
+  if(window.BT_UI && BT_UI.compra) BT_UI.compra(true);
+  celebra({ ico:'arte/ui/moneda-chispa.webp?v=2', color:'#FBB915',
+            titulo:S().chispasWord||'Monedas', sub:'+'+nfmt(pk.m), peso:40 });
+  renderTienda(); }
 //+AG doc 45 §2. El tope se comprueba AQUI y no solo en el boton: el boton es pintura, y un
 //   toque doble o una pestana vieja no pueden colar dos veces la oferta del dia.
 function buyChispaDeal(){ if(dealDone() || SAVE.gemas<CHISPA_DEAL.g) return;
   dinero('gemas', -CHISPA_DEAL.g, 'oferta_chispas'); dinero('chispas', CHISPA_DEAL.c, 'oferta_chispas'); SAVE.dealDay=todayKey();
-  persist(); toast(S().tDeal(CHISPA_DEAL.c)); renderTienda(); }
+  persist();
+  if(window.BT_UI && BT_UI.compra) BT_UI.compra(true);
+  celebra({ ico:'arte/ui/moneda-chispa.webp?v=2', color:'#FBB915',
+            titulo:S().chispasWord||'Monedas', sub:'+'+nfmt(CHISPA_DEAL.c), peso:15 });
+  renderTienda(); }
 function buyBundle(){ if(SAVE.gemas<BUNDLE.g) return; dinero('gemas', -BUNDLE.g, 'pack');
   if(!owned('tanque')){ SAVE.balls.push({arch:'tanque',lvl:1,xp:0,copas:0}); apunta('ball_get', { arch:'tanque', via:'pack' }); }
-  if(!hasCosm('es_arcoiris')) SAVE.cosmetics.push('es_arcoiris'); dinero('chispas', 300, 'pack'); persist(); toast(S().tBundle); renderTienda(); }
+  if(!hasCosm('es_arcoiris')) SAVE.cosmetics.push('es_arcoiris'); dinero('chispas', 300, 'pack'); persist();
+  if(window.BT_UI && BT_UI.compra) BT_UI.compra(true);
+  celebra({ ico:ballArt('tanque','icon'), color:'#ffd23f', titulo:S().bundleNm||'Pack', sub:'+300', peso:40 });
+  renderTienda(); }
 // puerta parental: una pregunta de adulto (multiplicación) antes de abonar Gemas (compra simulada, sin pago real)
 let pgPack=null, pgAns=0;
 function parentalBuy(pk){ pgPack=pk; const a=6+Math.floor(Math.random()*6), b2=6+Math.floor(Math.random()*6); pgAns=a*b2;
@@ -9361,7 +9434,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=8f45408';
+  import { startAmbient } from './arte/ambient.mjs?v=ca14cba';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -9377,7 +9450,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=8f45408').then(m => {
+  import('./arte/pista-preview.mjs?v=ca14cba').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -9389,8 +9462,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=8f45408';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=8f45408';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=ca14cba';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=ca14cba';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -9543,7 +9616,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=8f45408'), import('./motor/chassis/sincro.mjs?v=8f45408')]);
+        import('./motor/chassis/nube.mjs?v=ca14cba'), import('./motor/chassis/sincro.mjs?v=ca14cba')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
