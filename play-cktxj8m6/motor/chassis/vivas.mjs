@@ -24,7 +24,7 @@
 //  blanco. Es la misma leccion que ya costo la pagina de previsualizacion.
 //
 //  COMO SE USA desde el shell:
-//     import { vivas } from './motor/chassis/vivas.mjs?v=724fcf0';
+//     import { vivas } from './motor/chassis/vivas.mjs?v=f4fd178';
 //     ... pinta `<div class="gi" data-viva="cohete"></div>` en vez del <img> ...
 //     vivas.sincroniza();      // despues de cada render de la pantalla
 //     vivas.para();            // al salir de la pantalla (deja de gastar bateria)
@@ -34,10 +34,10 @@
 //   (motor/vendor/three/) y quien manda es el importmap de la pagina, igual que en gfx.mjs. Si aqui
 //   se dejara la URL absoluta se cargarian DOS copias de la libreria: la local y la de fuera.
 import * as THREE from 'three';
-import { makeBallVinyl } from './gfx.mjs?v=724fcf0';
-import { archLook } from './ballmat.mjs?v=724fcf0';
-import { archFace } from './facegen.mjs?v=724fcf0';
-import { attachSquash } from './squash.mjs?v=724fcf0';
+import { makeBallVinyl } from './gfx.mjs?v=f4fd178';
+import { archLook } from './ballmat.mjs?v=f4fd178';
+import { archFace } from './facegen.mjs?v=f4fd178';
+import { attachSquash } from './squash.mjs?v=f4fd178';
 
 // El mundo de cada celda. HW es el SEMIANCHO de la camara en radios de bola: cuanto MENOR, mas
 // grande sale la bola... y antes lo elegi mirando solo la bola. Error: lo que decide el encuadre no
@@ -126,7 +126,20 @@ const SOMBRA = (() => {
   const S = 64, c = document.createElement('canvas'); c.width = c.height = S;
   const x = c.getContext('2d');
   const g = x.createRadialGradient(S/2, S/2, 0, S/2, S/2, S/2);
-  g.addColorStop(0, 'rgba(0,0,0,0.55)'); g.addColorStop(0.55, 'rgba(0,0,0,0.24)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+  //+AG 7-ago · LA SOMBRA SUBE DE 0,55 A 0,80. Jaime, mirando el Garaje: «¿por que no parece un juego
+  //   triple A?» Uno de los seis motivos medidos era que las bolas NO PISABAN NADA: flotaban cada una
+  //   a la altura que le tocaba dentro de su hueco. La sombra existia y estaba en el sitio correcto,
+  //   pero a 0,55 sobre una placa marino oscuro no llegaba a leerse como contacto con el suelo.
+  //   ⚠ SE ARREGLA AQUI Y NO EN EL CSS DEL GARAJE, y ese fue el segundo intento fallido del dia. El
+  //   primero fue dibujar un disco de suelo con CSS debajo de cada tarjeta: no puede funcionar, y no
+  //   por estilo sino por aritmetica. El punto de contacto NO cae a la misma altura en las doce —lo
+  //   fija `encuadre()` con la PIEZA de cada bola—, asi que un disco a una altura fija en CSS acierta
+  //   con Cohete (8,4 px desde abajo en una celda de 96) y falla 14 px con Chispa (22,7), que lleva
+  //   aura y encuadra mucho mas alto. Esta malla, en cambio, va SIEMPRE pegada al suelo del mundo y
+  //   ademas se aplasta con el squash al aterrizar. Una sola cifra, correcta para las doce.
+  //   Y por eso mismo esto se nota tambien en la Tienda, en la ficha y en el heroe de la Home: es el
+  //   mismo material en todas, y «las bolas pisan» no es una regla del Garaje, es de la bola.
+  g.addColorStop(0, 'rgba(0,0,0,0.80)'); g.addColorStop(0.55, 'rgba(0,0,0,0.38)'); g.addColorStop(1, 'rgba(0,0,0,0)');
   x.fillStyle = g; x.fillRect(0, 0, S, S);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
 })();

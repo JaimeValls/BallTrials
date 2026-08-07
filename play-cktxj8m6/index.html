@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 724fcf0"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-07 f4fd178"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -507,7 +507,129 @@
   .g-top{ display:flex; align-items:center; gap:10px; padding:calc(10px + env(safe-area-inset-top)) 13px 6px; }
   .g-title{ font-size:var(--fs-5); font-weight:900; letter-spacing:.02em; }
   .g-back{ border:1px solid var(--line); background:var(--plate-a); color:#c9cff0; font-family:inherit; font-weight:800; font-size:var(--fs-3); border-radius:12px; padding:7px 13px; cursor:pointer; }
-  .g-grid{ flex:1; min-height:0; overflow-y:auto; display:grid; grid-template-columns:1fr 1fr; gap:11px; padding:8px 13px 14px; align-content:start; }
+  /*+AG ══ LA VITRINA DEL GARAJE · 7-ago-2026 ═══════════════════════════════════════════════════
+     Jaime, con el Garaje delante: «Yo creo que aqui hace falta tambien otro rework. ¿Por que no
+     parece un juego triple A?» No era una impresion: mirando ESTA pantalla eran seis cosas, y las
+     seis se arreglan aqui.
+       1. LA BARRA DE DESLIZAR DEL NAVEGADOR ESTABA A LA VISTA. `.langgrid`, `.rkstrip` y el cuerpo
+          de las hojas la esconden desde que nacieron; `.g-grid` era la unica lista larga del juego
+          que no. Una barra de scroll de Windows en medio de la interfaz es lo primero que delata
+          que esto es una web (y ya lo prohibe la regla de "nada de widgets del navegador").
+       2. NO HABIA PROTAGONISTA. La bola equipada se distinguia de las otras once en una etiqueta
+          de 9 px arriba a la derecha. En Brawl el elegido ocupa media pantalla; aqui era una
+          casilla mas de doce, y el Garaje se leia como un inventario, no como una coleccion.
+       3. LA RAREZA ERA UN BORDE DE 2 px. Las cinco existen con su color (`QUAL[].c`) pero solo
+          pintaban el filo de la placa: dos marcos verdes entre diez azules se leen como un fallo de
+          dibujo, no como "estas dos son mejores".
+       4. LAS BOLAS NO PISABAN NADA. El motor trae su sombra de contacto, pero sin suelo dibujado
+          debajo cada una flota a la altura que le toque dentro de su hueco.
+       5. EL PRECIO ERA TEXTO SUELTO, con la misma letra y el mismo peso que el nombre de la bola.
+       6. TODO EN UN PLANO: papel pintado + placa plana + bola encima, sin foco ni profundidad.
+     Se le ofrecieron tres ideas y eligio VITRINA CON PROTAGONISTA.
+
+     ⚠ LO QUE NO SE HACE, Y ES A PROPOSITO. Las tarjetas NO pasan a tener el fondo entero del color
+     de su rareza. Esa era la idea 2 que Jaime NO eligio, y ademas chocaria de frente con docs/60
+     regla 12, que mando las doce al marino unico del kit precisamente para que el Garaje dejara de
+     ser la unica pantalla con placas de otro color. La rareza gana su peso sin romper eso: un FOCO
+     de su color detras de la bola y su nombre en chapa. La placa sigue siendo marino.
+
+     ⚠ Y LA FILA CORTADA DE ABAJO SE QUEDA CORTADA. Era el sexto sintoma en la lista de Jaime, pero
+     ver media tarjeta asomando ES la forma de decir "hay mas" cuando no hay barra: lo que se leia
+     como "aqui se acaba" era la barra de scroll de al lado, que decia que quedaba poquisimo. Sin
+     ella, la fila a medias hace su trabajo. No se le pone degradado de desvanecido encima porque
+     las bolas NO se pintan dentro de la rejilla —van en el lienzo WebGL de encima (docs/55)—, asi
+     que una mascara CSS aqui desvaneceria las tarjetas dejando las bolas enteras flotando. */
+
+  /* LA VITRINA vive FUERA de la rejilla, entre la cabecera y ella: la coleccion desliza y el
+     protagonista no se va nunca de la pantalla. Es pulsable entera y abre su ficha. */
+  .g-hero{ flex:0 0 auto; position:relative; margin:2px 13px 0; padding:9px 12px 10px; border-radius:22px;
+    background:linear-gradient(var(--nav-1),var(--nav-2)); border:2px solid #ffffff2e;
+    box-shadow:0 5px 0 #0d0726, 0 12px 26px #0009, inset 0 2px 0 #ffffff1f;
+    display:flex; flex-direction:column; align-items:center; gap:2px; overflow:hidden;
+    cursor:pointer; transition:transform .08s, box-shadow .08s; }
+  .g-hero:active{ transform:translateY(3px); box-shadow:0 2px 0 #0d0726, 0 6px 14px #0009, inset 0 2px 0 #ffffff1f; }
+  /*+AG EL FOCO DE RAREZA. Arregla el 3 y el 6 con una sola capa: le da color propio a la rareza de
+     TU bola y mete el primer plano de profundidad que no habia. Va detras de todo (z:0). */
+  .g-hero::before{ content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
+    background:radial-gradient(62% 56% at 50% 34%, var(--qc,#9aa4b8) 0%, transparent 70%); opacity:.34; }
+  .gh-stage{ position:relative; z-index:1; display:grid; place-items:center; }
+  /*+AG EL SUELO DEL PROTAGONISTA. Aqui SI hay disco de CSS y en las tarjetas no, y la diferencia no
+     es de gusto: la vitrina tiene UNA bola y su hueco es grande, asi que a la sombra de contacto del
+     motor —que es del tamaño de la bola— le falta alcance para leerse como escenario. Esto no
+     sustituye a aquella (las dos se suman): es el halo de fondo que dice «hay un suelo», no el
+     contacto. Por eso es enorme, muy suave y de opacidad baja.
+     ⚠ DOS COSAS QUE SE PROBARON Y NO VALEN, escritas para no repetirlas:
+       · Disco de CANTO DURO (relleno opaco + borde + aro), aplicando al pie de la letra la regla
+         madre de docs/86 («nada es plano, sin desenfoque»). Salio un AGUJERO NEGRO en la captura.
+         Esa regla habla de PIEZAS DE INTERFAZ; una sombra no es una pieza, es luz, y darle material
+         de pegatina la convierte en un objeto — y un objeto negro y redondo bajo una bola es un
+         boquete. El material bueno es el de `.hero .shadow` de la Home, que lleva ahi desde docs/68.
+       · El mismo disco en las doce tarjetas. Ahi no puede funcionar: el punto de contacto lo fija
+         `encuadre()` con la pieza de cada bola y va de 8,4 px (Cohete) a 22,7 (Chispa) en la misma
+         celda de 96. Una altura fija en CSS acierta con una y falla con la otra.
+     Su sitio si sale de una cuenta, no del ojo: el motor encuadra a Cohete con cy=0,315 y medio-alto
+     1,423, o sea que SUELO=-0,86 cae al 9,3 % del alto de la caja contando desde abajo — en una caja
+     de 150 px, 14 px. Centro del disco = bottom 5 + 26/2 = 18. Cerca de esos 14 y por debajo, que es
+     el lado correcto por el que fallar: una sombra un pelin baja lee como suelo lejano, una alta lee
+     como que la bola esta hundida. */
+  .gh-disc{ position:absolute; bottom:8px; left:50%; transform:translateX(-50%);
+    width:172px; height:38px; border-radius:50%;
+    background:radial-gradient(closest-side,#0007,#0004 55%,transparent); }
+  /*+AG el hueco de la BOLA VIVA del protagonista. ⚠ NADA de animarlo (ni `breathe` ni bob): el
+     motor lee este rectangulo cada frame para encuadrar, y las dos animaciones se sumarian —la
+     misma trampa que ya esta escrita en `.g-card .gi` y en `.hero #hBall`. */
+  /*+AG LA CAJA ES MAS ALTA QUE ANCHA (168x210, proporcion 1,25) Y ESO ES UNA CUENTA, NO UN GUSTO.
+     `encuadre()` devuelve `hw = max(medioH, medioV/aspecto)`: con una caja CUADRADA manda el medio
+     alto (1,423 para Cohete) y la bola se queda al 44 % del ancho de su hueco — de ahi que la
+     vitrina se viera con banda de sobra y un protagonista que solo era 1,5 veces la bola de una
+     tarjeta. A partir de aspecto 1,232 (= 1,423 / 1,155) manda el medio ancho, la vista deja de
+     sobrar por los lados y la bola pasa al 54 %. Se coge 1,25 para quedar justo por encima. */
+  .g-hero .gh-ball{ position:relative; z-index:1; width:168px; height:210px; display:block; }
+  /*+AG el nombre estrena el trio del canon (blanco + trazo + sombra corta, docs/56 regla 1), el
+     mismo que ya lleva el heroe de la Home. El clamp no es prudencia: a 30 px fijos el nombre mas
+     largo del catalogo en aleman («Napfschnecke») no cabe en un movil de 320. */
+  .gh-name{ position:relative; z-index:1; font-size:clamp(21px,7vw,var(--fs-7)); font-weight:900;
+    letter-spacing:.005em; text-transform:uppercase; line-height:1.08; text-align:center;
+    color:#fff; -webkit-text-stroke:var(--stroke-7) #241a3f; paint-order:stroke fill; text-shadow:0 3px 0 #241a3f; }
+  /*+AG LAS TRES CHAPAS: rareza, nivel y copas. A --fs-3 (13 px) y no a --fs-2, porque el dato del
+     protagonista no es un adorno — Jaime lleva dicho dos veces que pecamos de letras pequeñas. */
+  .gh-chips{ position:relative; z-index:1; display:flex; align-items:center; justify-content:center;
+    gap:6px; flex-wrap:wrap; margin-top:3px; }
+  .gh-chip{ display:inline-flex; align-items:center; gap:4px; padding:3px 11px; border-radius:999px;
+    background:#0d0726; border:1.5px solid #ffffff24; color:#dfe4ff;
+    font-size:var(--fs-3); font-weight:900; letter-spacing:.05em; text-transform:uppercase;
+    font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .gh-chip.q{ color:var(--qc,#dfe4ff); border-color:var(--qc,#ffffff24); }
+  .gh-chip.c{ color:var(--gold2); padding-left:4px; }
+  .gh-chip.c .cico{ width:22px; height:22px; margin:-6px 0; }
+
+  /*+AG EL ROTULO DE LA COLECCION. Separa la vitrina de la rejilla, que si no se leen como un solo
+     bloque de tarjetas de dos tamaños. El texto sale de `prBalls` («Bolas»), que YA existe en los
+     20 idiomas porque lo usa la chapa de Perfil: un rotulo nuevo aqui habria dejado 18 lenguas en
+     español hasta que alguien las tradujera. El contador nunca va solo, va detras de su nombre. */
+  .g-secrow{ flex:0 0 auto; display:flex; align-items:center; gap:9px; padding:12px 15px 3px; }
+  .g-sec{ font-size:var(--fs-4); font-weight:900; letter-spacing:.06em; text-transform:uppercase;
+    color:#fff; -webkit-text-stroke:var(--stroke-4) #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f; }
+  .g-count{ margin-left:auto; font-size:var(--fs-3); font-weight:900; color:#c9d0f2; font-variant-numeric:tabular-nums; }
+
+  /*+AG `scrollbar-width:none` + el pseudo de WebKit: el sintoma 1 de la lista. Las otras tres listas
+     largas del juego ya lo hacian; esta se quedo sin el y era la mas visible de todas. */
+  .g-grid{ flex:1; min-height:0; overflow-y:auto; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:11px; padding:8px 13px 14px; align-content:start;
+    scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+  .g-grid::-webkit-scrollbar{ display:none; }
+  /*+AG en un movil estrecho el aire de la rejilla vale menos que el hueco de la tarjeta: 320 px es
+     donde las dos pastillas de precio y su tarjeta se pelean por los mismos pixeles. */
+  @media(max-width:359px){ .g-grid{ gap:9px; padding-left:9px; padding-right:9px; } }
+  /*+AG PANTALLA CORTA. La vitrina se come alto fijo, y en un movil bajo (568 de alto, que es el iPhone
+     SE viejo) la rejilla se quedaba con sitio para menos de una fila: el protagonista se comia la
+     coleccion. Aqui encoge el protagonista, no la coleccion — un heroe algo mas pequeño sigue siendo
+     el heroe, pero una rejilla sin filas visibles deja de ser una rejilla. */
+  @media(max-height:700px){
+    .g-hero .gh-ball{ width:112px; height:140px; }   /* la misma proporcion 1,25 de arriba, encogida */
+    .gh-disc{ width:115px; height:26px; bottom:5px; }
+    .gh-name{ font-size:clamp(19px,6vw,var(--fs-6)); }
+    .g-secrow{ padding-top:8px; }
+  }
   /*+AG docs/60 regla 12: las 12 tarjetas del Garaje eran el ultimo sitio donde vivia el `--card:#2b1666`
      de docs/27 — un color de la WEB, nunca del juego. Pasan al marino unico del kit. No es un capricho
      de paleta: el Garaje es la pantalla con mas superficie de placa del juego, y era la unica donde el
@@ -527,7 +649,30 @@
     Se deja algo mas alto que ancho porque la bola SALTA y el brinco necesita aire por arriba. */
   /* El hueco crece con el encuadre: la vista pasa a enseñar 1.62 R (lo que necesita el accesorio mas
      ancho) en vez de 1.02 R, asi que si el hueco no creciera la bola saldria un 40% mas pequeña. */
-  .g-card .gi{ width:96px; height:96px; display:block; }
+  /*+AG EL FOCO DE RAREZA DE LA TARJETA: lo mismo que en la vitrina, en pequeño. Es la respuesta al
+     sintoma 3 sin tocar el color de la placa (docs/60 regla 12 sigue en pie: el fondo es marino).
+     El borde de --qc se queda; ahora tiene detras un halo de su mismo color y la rareza deja de
+     jugarselo todo a 2 px de filo. Opacidad baja a proposito: la protagonista de la tarjeta es la
+     bola, y esto tiene que leerse como el aire de detras, no como una pegatina de color. */
+  .g-card::before{ content:''; position:absolute; inset:0; z-index:0; pointer-events:none; border-radius:16px;
+    background:radial-gradient(72% 48% at 50% 30%, var(--qc,#9aa4b8) 0%, transparent 72%); opacity:.24; }
+  /*+AG ⚠ SE LEVANTAN LOS HIJOS UNO A UNO, NO CON `.g-card > *`. Un pseudo con `z-index:0` pinta
+     DESPUES del contenido estatico de su padre, asi que el halo taparia el nombre y el precio si no
+     se levantan; y `z-index:-1` no vale porque `.g-card` es `position:relative` SIN z-index y por
+     tanto no crea contexto de apilamiento — el halo se iria detras del propio fondo de la tarjeta.
+     La lista es explicita porque el atajo `> *` le habria puesto `position:relative` al candado, al
+     galon de EQUIPADA y al aviso de subir de nivel, que son absolutos y viven a z-index 21. */
+  .g-card .gi, .g-card .g-cname, .g-card .g-qtag, .g-card .gc, .g-card .g-price{ position:relative; z-index:1; }
+  /*+AG ⚠ AQUI NO VA NINGUN SUELO DE CSS, Y ESTA MEDIDO POR QUE NO. El sintoma 4 de la lista («las
+     bolas no pisan nada») se intento arreglar con un disco `::after` a una altura fija bajo cada
+     tarjeta, y no puede salir bien: el punto de contacto de cada bola lo fija `encuadre()` con SU
+     pieza (motor/chassis/vivas.mjs), asi que en una celda de 96 px Cohete apoya a 8,4 px del borde
+     de abajo y Chispa —que lleva aura y encuadra mucho mas alto— a 22,7. Un solo numero en CSS
+     acierta con una y falla 14 px con la otra, y a partir de ahi la sombra deja de leerse como
+     suelo y se lee como una mancha suelta. La sombra correcta ya existe, va pegada al suelo del
+     mundo y se aplasta con el aterrizaje: es la malla de vivas.mjs, y lo que le faltaba era peso.
+     Se subio alli (0,55 → 0,80) y esto se quedo sin escribir a proposito. */
+  .g-card .gi{ position:relative; width:96px; height:96px; display:block; }
   .sh-item .sh-ic{ width:72px; height:72px; display:block; margin:0 auto; }
   .g-cname{ font-weight:800; font-size:var(--fs-3); }
   .g-qtag{ font-size:var(--fs-2); font-weight:800; letter-spacing:.09em; text-transform:uppercase; color:var(--qc,#9aa4b8); }
@@ -550,8 +695,30 @@
      vivas va a 20: por debajo, la bola le pasaria por encima. */
   .g-lock{ position:absolute; top:7px; right:7px; width:22px; height:22px; object-fit:contain; z-index:21;
     filter:drop-shadow(0 2px 3px #000a); pointer-events:none; }
-  .g-price{ display:flex; gap:9px; font-size:var(--fs-3); font-weight:800; font-variant-numeric:tabular-nums; margin-top:2px; }
-  .g-price .pc{ display:flex; align-items:center; gap:3px; } .g-price i{ font-style:normal; color:var(--gold2); } .g-price .gm{ color:var(--cyan); }
+  /*+AG EL PRECIO DEJA DE SER TEXTO SUELTO (sintoma 5 de la lista de Jaime). Pasa al CHIP DE MONEDA
+     que docs/86 §5 saco medido de sus capturas: «pastilla negra opaca y el icono circular MORDIENDO
+     el borde, saliendose». Es el mismo material que ya llevan las monedas de la cabecera (.coin), o
+     sea que no se inventa nada: se le aplica a la unica cosa del juego que anunciaba un precio con
+     la misma letra que un nombre. Sube de --fs-3 a --fs-4 por lo de siempre: es lo que hay que leer
+     para decidir si compras. */
+  /*+AG ⚠ LOS TRES SEGUROS DE ANCHO, Y LOS TRES SALEN DE UN FALLO QUE CANTO `__fitCheck()` A 320 px:
+     la primera version de estas pastillas (icono de 21 px y numero a --fs-4 fijos) medía 68 px cada
+     una, o sea 142 las dos, dentro de una tarjeta que a 320 tiene 119 px de hueco. Y no se salia
+     "un poco": como la rejilla era `1fr 1fr`, la columna crecia con el contenido y se llevaba la
+     tarjeta ENTERA fuera de pantalla — por eso el banco cantaba tambien el candado, 47 px fuera.
+       · `minmax(0,1fr)` en la rejilla (abajo): una columna `1fr` NO baja de su ancho minimo de
+         contenido, `minmax(0,…)` si. Es lo que impide que esto vuelva a pasar con lo que sea que se
+         meta aqui mañana.
+       · `flex-wrap`: la pareja mas ancha del catalogo no es «350 · 25», es la Legendaria — «4.000 ·
+         199», cinco cifras. Cuando no quepan, bajan de linea y la tarjeta crece; nunca se salen.
+       · los `clamp()`: el icono y el numero encogen con la pantalla en vez de a saltos, asi que no
+         hay un movil raro entre dos puntos de ruptura donde esto se rompa. */
+  .g-price{ display:flex; flex-wrap:wrap; justify-content:center; gap:5px; margin-top:4px; }
+  .g-price .pc{ display:inline-flex; align-items:center; gap:3px; padding:2px 8px 2px 3px;
+    background:#0d0726; border:1.5px solid #ffffff22; border-radius:999px;
+    font-size:clamp(13px,4.2vw,var(--fs-4)); font-weight:900; font-variant-numeric:tabular-nums; color:#ffe9a8; }
+  .g-price .pc .cico{ width:clamp(17px,5.5vw,21px); height:clamp(17px,5.5vw,21px); margin:-6px 0; }
+  .g-price i{ font-style:normal; color:var(--gold2); } .g-price .gm{ color:var(--cyan); }
   .g-dot{ position:absolute; top:-5px; left:-5px; min-width:20px; height:20px; padding:0 5px; border-radius:999px; background:var(--red); color:#fff; font-size:var(--fs-2); font-weight:900; display:grid; place-items:center; box-shadow:0 2px 6px #0008; }
   /*+AG el aviso de la pestaña. Desde 2026-07-27 este es el UNICO aviso del Garaje (el riel de la Home ya no
      lo lleva), asi que se le exige mas que antes:
@@ -1575,7 +1742,25 @@
     -webkit-text-stroke:.25em #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f; }
   .cups small{ font-size:var(--fs-1); font-weight:800; color:var(--muted); letter-spacing:.08em; text-transform:uppercase; }
   #home .stage{ flex:1; min-height:0; position:relative; display:flex; flex-direction:column; }
-  .siderail{ position:absolute; top:10px; display:flex; flex-direction:column; gap:11px; z-index:6; }
+  /*+AG 7-ago · LOS CARRILES BAJAN HASTA EL FONDO (docs/86). Estaban clavados con `top:10px` y ya:
+     los tres accesos de la derecha se amontonaban en los primeros 164 px y dejaban ~500 px de carril
+     vacio debajo. En las 7 capturas de Brawl los carriles laterales llegan SIEMPRE hasta donde empieza
+     la fila de accion — no hay ni un hueco muerto en el borde. Se le da suelo (`bottom`) y los iconos
+     se reparten por el alto que hay.
+     ⚠ el `gap` se queda como MINIMO y el reparto es `space-between`: con `space-evenly` y solo tres
+     iconos quedaban flotando a 200 px unos de otros, que es cambiar un vacio por otro. Y el carril
+     izquierdo lleva un solo icono, asi que con `space-between` se queda arriba, que es donde estaba. */
+     ⚠⚠ Y EL SUELO NO ES EL BORDE DE LA PANTALLA, son 150 px por encima. Con `bottom:12px` el tercer
+     icono (Club) se plantaba ENCIMA del boton JUGAR en los cinco moviles medidos, y `__fitCheck()`
+     daba verde porque no se sale de la pantalla: encaja perfectamente y se come el CTA. Lo cazo una
+     sonda de solapes hecha para esto (caja del icono contra caja de .playbig/.modecompact/.h-tabs).
+     150 px = los 120 que el carril se metia dentro de `.homebottom` + el aire de respeto. */
+  .siderail{ position:absolute; top:10px; bottom:150px; display:flex; flex-direction:column;
+    justify-content:space-between; gap:11px; z-index:6; pointer-events:none; }
+  .siderail > *{ pointer-events:auto; }
+  /*+AG el carril izquierdo NO se estira: un icono solo repartido en 700 px se iria al centro de la
+     pantalla, encima del heroe. Se queda pegado arriba, que es su sitio. */
+  .siderail.left{ bottom:auto; }
   .siderail.left{ left:11px; } .siderail.right{ right:11px; }
   .ricon{ width:48px; height:48px; border-radius:15px; background:var(--plate-a); border:1px solid #ffffff2e;
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; cursor:pointer; position:relative;
@@ -1609,7 +1794,20 @@
   /*+AG hueco de la BOLA VIVA de la Home: solo reserva sitio. Nada de `breathe` ni de drop-shadow —
     la bola ya salta por su cuenta y trae su propia sombra de contacto; animar el hueco movia el
     rectangulo que el motor lee cada frame y las dos animaciones se sumaban. */
-  .hero #hBall{ width:262px; height:262px; display:block; margin:0 auto; }
+  /*+AG 7-ago · LA BOLA LLENA SU HUECO (docs/86, Fase 2 de docs/56). El auditor midio que la esfera
+     pintaba ~139 px de los 262 de su caja: casi la mitad era aire por encima de la cabeza, y con los
+     147 px de hueco externo salia un 32 % de Portada vacia. La causa NO era el tamaño de la caja, era
+     su FORMA. `encuadre()` (motor/chassis/vivas.mjs) reserva en vertical todo el arco del brinco —del
+     suelo con su sombra al apice, 2,71 unidades para el Cohete— y en una caja CUADRADA ese alto manda
+     sobre el ancho: hw sale 1,42 cuando la pieza solo pide 1,15, y el 19 % del ancho se tira.
+     Con la caja MAS ALTA QUE ANCHA el vertical deja de robar: hw cae al minimo (1,155) y la pieza pasa
+     de ocupar el 77 % del ancho al 95 %. La esfera crece ~30 % sin tocar una linea del motor y sin
+     recortar el salto. El punto exacto donde se igualan las dos mitades del max() es 1,24 de alto por
+     1 de ancho; se coge 1,3 para que las bolas mas altas (Volcan, Yunque) tambien ganen.
+     ⚠ El `aspect-ratio` va con `max-width` a proposito: cuando el ancho de la pantalla es quien manda
+     (moviles de 320) la altura se recalcula sola y la proporcion no se rompe. Y el alto sale de `vh`
+     porque en 360x540 una altura fija se comia la fila de JUGAR. */
+  .hero #hBall{ aspect-ratio:10/13; height:min(46vh,390px); max-width:78vw; display:block; margin:0 auto; }
   .hero canvas{ width:164px; height:164px; filter:drop-shadow(0 16px 24px #0009); animation:breathe 3.1s ease-in-out infinite; }
   /*+AG 2-ago · EL PROTAGONISTA SE PRESENTA COMO EN BRAWL: nombre grande y trofeos en placa, y NADA MAS.
      Jaime: «yo haría Bunker y las copas más grandes». El nombre sube de 24 a 30 (--fs-7) y estrena el
@@ -2587,6 +2785,18 @@
   .sclose, .sback, .r-home.ico, .gd-close{ background:linear-gradient(var(--nav-1),var(--nav-2)); border:1px solid #ffffff30;
     color:#dfe4ff; box-shadow:0 3px 0 #0d0726, inset 0 1px 0 #ffffff24; transition:transform .08s, box-shadow .08s; }
   .sclose:active, .sback:active, .r-home.ico:active, .gd-close:active{ transform:translateY(2px); box-shadow:0 1px 0 #0d0726, inset 0 1px 0 #ffffff24; }
+  /*+AG 7-ago · LA ✕ SE PONE ROJA (docs/86, decidido por Jaime). En las 7 capturas de Brawl el circulo
+     que CIERRA una capa que se abrio encima es rojo `#DE362D` — practicamente el `--red:#e0293d` que
+     ya teniamos definido y que solo usabamos en insignias de aviso.
+     ⚠ VA ACOTADO, y esto se comprobo en sus capturas antes de tocarlo: el `‹` de volver y el boton de
+     CASA de su cabecera son NEUTROS. El rojo no significa "salir", significa "cierra esto que se abrio
+     encima". Por eso entran `.sclose` y `.gd-close` y se quedan fuera `.sback` y `.r-home.ico`: esos
+     dos son navegacion de estructura, no un cierre. Mezclarlos seria pintar de urgencia el camino
+     normal de vuelta. El canto se oscurece al rojo quemado, que es la regla del desplazamiento: el
+     canto es el color de la pieza, nunca negro. */
+  .sclose, .gd-close{ background:linear-gradient(#f2495a,var(--red)); border-color:var(--tinta);
+    color:#fff; box-shadow:0 3px 0 #8c1526, inset 0 1px 0 #ffffff3d; }
+  .sclose:active, .gd-close:active{ box-shadow:0 1px 0 #8c1526, inset 0 1px 0 #ffffff3d; }
 
   /*+AG 3 · LA BARRA DE 5 PESTAÑAS de abajo. Va en las cinco pantallas, asi que es el elemento mas
      repetido del juego — y estaba entero sin idioma.
@@ -4289,6 +4499,28 @@
       <div class="coin gema"><img class="cico" src="arte/ui/moneda-gema.webp?v=2" alt=""><span id="gGemas">0</span></div>
     </div>
   </div>
+  <!--+AG LA VITRINA (7-ago, ver el bloque largo del CSS). Tu bola equipada, grande y pisando suelo,
+       encima de la coleccion. La pinta renderGaraje() entera, porque todo lo suyo cambia cuando te
+       equipas otra: el arquetipo de la bola viva, el color del foco, el nombre y las tres chapas.
+       Es pulsable ENTERA —bola, nombre y chapas— y abre su propia ficha, que es donde se sube de
+       nivel: lo que antes obligaba a buscarla entre las doce de la rejilla. -->
+  <div class="g-hero" id="gHero" role="button" tabindex="0">
+    <div class="gh-stage">
+      <div class="gh-disc"></div>
+      <!-- el hueco de la bola viva; renderGaraje() le pone el data-viva del arquetipo equipado -->
+      <div class="gh-ball" id="gHeroBall"></div>
+    </div>
+    <div class="gh-name" id="gHeroName"></div>
+    <div class="gh-chips">
+      <span class="gh-chip q" id="gHeroQual"></span>
+      <span class="gh-chip" id="gHeroLvl"></span>
+      <span class="gh-chip c" id="gHeroCups"></span>
+    </div>
+  </div>
+  <div class="g-secrow">
+    <div class="g-sec" data-t="prBalls">Bolas</div>
+    <div class="g-count" id="gCount"></div>
+  </div>
   <!-- data-fit="scroll": la coleccion son 12 bolas y subiendo; deslizar DENTRO de la rejilla es su forma
        correcta y __fitCheck() no lo cuenta como desbordamiento (ver la excepcion en __fitCheck) -->
   <div class="g-grid" id="gGrid" data-fit="scroll"></div>
@@ -4817,7 +5049,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=724fcf0"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=f4fd178"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -7751,7 +7983,32 @@ function syncBadges(){
 }
 
 function openGaraje(){ checkHitos(); showScreen('garaje'); applyShell(); renderGaraje(); }
+//+AG LA VITRINA (7-ago). Pinta al protagonista: la bola que llevas puesta, grande y con sus datos.
+//   ⚠ NO se fia de que `SAVE.equipped` apunte a algo. Es un INDICE dentro de `SAVE.balls`, y ese
+//   array cambia de longitud cada vez que compras o te regalan una bola; un save viejo o a medio
+//   migrar puede dejarlo fuera de rango. Si pasa, se cae a la primera bola que tengas en vez de
+//   dejar la vitrina en blanco — que es lo que haria un `SAVE.balls[SAVE.equipped].arch` a pelo.
+function renderVitrina(){
+  const b = SAVE.balls[SAVE.equipped] || SAVE.balls[0];
+  const h = el('gHero'); if(!h || !b) return;
+  const k = b.arch, A = ARCHS[k]; if(!A) return;
+  h.style.setProperty('--qc', QUAL[A.q].c);
+  //   el hueco de la bola viva se re-etiqueta y ya esta: vivas.sincroniza() barre `[data-viva]` del
+  //   documento entero despues de cada render, asi que al cambiar de bola equipada esta se remonta
+  //   sola con el arquetipo nuevo. Nunca lleva `data-viva-off`: la tuya es, por definicion, tuya.
+  el('gHeroBall').dataset.viva = k;
+  el('gHeroName').textContent  = archName(k);
+  el('gHeroQual').textContent  = qualName(A.q);
+  el('gHeroLvl').textContent   = S().lvlShort(b.lvl||1);
+  el('gHeroCups').innerHTML    = coinIco('copa') + ' ' + nfmt(b.copas||0);
+  h.onclick = ()=>openDetail(k);
+}
 function renderGaraje(){ pildora('gChispas', SAVE.chispas); pildora('gGemas', SAVE.gemas);
+  renderVitrina();
+  //+AG el contador de la coleccion. Va DETRAS de su rotulo («BOLAS   3/12»), nunca solo: un numero
+  //   suelto no dice de que es. Sale de contar `owned()`, no de `SAVE.balls.length`, para que no lo
+  //   descuadre nada que se llegue a guardar ahi y no sea una de las doce del roster.
+  el('gCount').textContent = ARCH_KEYS.filter(owned).length + '/' + ARCH_KEYS.length;
   const g=el('gGrid'); g.innerHTML='';
   ARCH_KEYS.forEach(k=>{ const A=ARCHS[k], b=owned(k), q=QUAL[A.q];   //+AG doc 39: el marco es la rareza FIJA de la bola (tenida o no)
     const c=document.createElement('div'); c.className='g-card'+(b?'':' locked'); c.style.setProperty('--qc',q.c);
@@ -7793,7 +8050,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=724fcf0').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=f4fd178').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -10062,7 +10319,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=724fcf0';
+  import { startAmbient } from './arte/ambient.mjs?v=f4fd178';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -10078,7 +10335,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=724fcf0').then(m => {
+  import('./arte/pista-preview.mjs?v=f4fd178').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -10090,8 +10347,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=724fcf0';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=724fcf0';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=f4fd178';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=f4fd178';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -10210,7 +10467,9 @@ atrasSync();
   //   Jaime reporto que la tarjeta de cambiar modo "no sonaba"; medido, si sonaba — pero con el clic de 55 ms
   //   de un boton cualquiera, y debajo de la transicion de pantalla eso no se percibe como respuesta.
   //+AG docs/60 F3: la (i) ABRE una hoja, asi que suena como lo que abre (swish), no como una pestaña.
-  const SEL_OPEN    = '.modecompact, .herotap, .passband, .ricon:not(.lock), .g-card, .h-modecard, .tile:not(.locked), .ibtn';
+  //+AG `.g-hero` entra aqui el 7-ago con la vitrina: es un role="button" y suena como lo que hace —
+  //   abrir una ficha—, igual que `.herotap` de la Home, que es la misma pieza en la otra pantalla.
+  const SEL_OPEN    = '.modecompact, .herotap, .g-hero, .passband, .ricon:not(.lock), .g-card, .h-modecard, .tile:not(.locked), .ibtn';
   const SEL_TAP     = 'button, select, [role="switch"], .tab, .coin, .cups, .m.open, .h-ic, .onb-opt, .onb-b, .sh-sec, .sc-block, .ricon, .tile, .set-row';
   //+AG ⚠ 2026-08-07 · LO QUE EL JUEGO TE DA SUENA DISTINTO DE LO QUE TU ARRANCAS. Estaba medido: recoger
   //   el regalo del dia, cobrar el cofre de Liga y darle a JUGAR en la portada disparaban los TRES el
@@ -10259,7 +10518,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=724fcf0'), import('./motor/chassis/sincro.mjs?v=724fcf0')]);
+        import('./motor/chassis/nube.mjs?v=f4fd178'), import('./motor/chassis/sincro.mjs?v=f4fd178')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
