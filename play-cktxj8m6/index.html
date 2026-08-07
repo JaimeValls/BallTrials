@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 deb26dc+SUCIO"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-07 ad10556"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -95,7 +95,9 @@
      derecha porque sus botones apuntan a lo que pasa en pantalla — el carril de la izquierda es
      el de la izquierda — y darles la vuelta seria mentir sobre el juego. Se espeja el menu, no
      el mando. */
-  .rtl .g-eq{ right:auto; left:8px; }
+  /* (aqui estaba el espejado del galon EQUIPADA de la tarjeta del Garaje; se fue con el galon el 7-ago,
+     cuando la bola equipada dejo de bajar a la rejilla. El de la ficha, `.gd-eqtag`, va centrado y no
+     necesita espejo.) */
   .rtl .g-dot{ left:auto; right:-5px; }
   .rtl .gd-close{ right:auto; left:15px; }
   .rtl .pr-sw::after{ left:auto; right:2px; transition:right .2s; }
@@ -676,7 +678,10 @@
   .sh-item .sh-ic{ width:72px; height:72px; display:block; margin:0 auto; }
   .g-cname{ font-weight:800; font-size:var(--fs-3); }
   .g-qtag{ font-size:var(--fs-2); font-weight:800; letter-spacing:.09em; text-transform:uppercase; color:var(--qc,#9aa4b8); }
-  .g-eq{ position:absolute; top:8px; right:8px; background:var(--gold2); color:#3a2400; font-size:var(--fs-1); font-weight:900; padding:2px 8px; border-radius:999px; letter-spacing:.05em; }
+  /* (aqui estaba `.g-eq`, el galon EQUIPADA de la tarjeta: el unico texto a 9 px del Garaje, que el
+     banco del canon cantaba en cada pasada. Se retira entero el 7-ago con su motivo — la bola equipada
+     ya no se pinta en la rejilla, asi que no habia tarjeta que marcar. Quien dice ahora «esta es la que
+     llevas» es la vitrina de arriba, en grande, y `.gd-eqtag` dentro de la ficha.) */
   /*+AG 3-ago · el mismo galon de la tarjeta del Garaje, pero DENTRO de la ficha y en flujo (no
      absoluto): aqui va debajo del nombre, donde se lee como un estado del personaje y no tapa nada.
      `hidden` de serie; lo enciende openDetail solo cuando la bola es la equipada. */
@@ -5062,7 +5067,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=deb26dc+SUCIO"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=ad10556"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -8023,7 +8028,17 @@ function renderGaraje(){ pildora('gChispas', SAVE.chispas); pildora('gGemas', SA
   //   descuadre nada que se llegue a guardar ahi y no sea una de las doce del roster.
   el('gCount').textContent = ARCH_KEYS.filter(owned).length + '/' + ARCH_KEYS.length;
   const g=el('gGrid'); g.innerHTML='';
-  ARCH_KEYS.forEach(k=>{ const A=ARCHS[k], b=owned(k), q=QUAL[A.q];   //+AG doc 39: el marco es la rareza FIJA de la bola (tenida o no)
+  //+AG ⚠ LA BOLA EQUIPADA NO SE PINTA ABAJO, Y ESTO ES UNA CORRECCION DE JAIME (7-ago), no un ahorro.
+  //   La primera version de la vitrina la dejaba TAMBIEN en la rejilla, copiando lo que hace Brawl con
+  //   el brawler elegido. Se la enseñe y su respuesta fue: «has hecho ahi una cosa grande y has puesto
+  //   uno repetido en grande arriba. No entiendo bien que has intentado hacer.» O sea que la referencia
+  //   no salva el resultado: si hay que explicar por que la misma bola sale dos veces en la misma
+  //   pantalla, la pantalla esta contando mal la historia. Ahora la vitrina es «la que llevas puesta» y
+  //   la rejilla es «las demas», que se lee sin que nadie lo explique.
+  //   Lo que NO cambia es el contador de arriba: sigue diciendo cuantas de las doce tienes (owned sobre
+  //   ARCH_KEYS), no cuantas tarjetas hay debajo. «1/12» es tu coleccion, no el inventario de la reja.
+  const kEquip = (SAVE.balls[SAVE.equipped] || SAVE.balls[0] || {}).arch;
+  ARCH_KEYS.filter(k=>k!==kEquip).forEach(k=>{ const A=ARCHS[k], b=owned(k), q=QUAL[A.q];   //+AG doc 39: el marco es la rareza FIJA de la bola (tenida o no)
     const c=document.createElement('div'); c.className='g-card'+(b?'':' locked'); c.style.setProperty('--qc',q.c);
     c.style.setProperty('--d', (ARCH_KEYS.indexOf(k)*0.21).toFixed(2)+'s');   //+AG desfase del idle por tarjeta
     //+AG la bola del Garaje ya NO es un retrato pintado: es LA MISMA bola del motor, viva y saltando
@@ -8031,7 +8046,11 @@ function renderGaraje(){ pildora('gChispas', SAVE.chispas); pildora('gGemas', SA
     //   personaje y la partida entregar otro — y lo hizo. Ahora coinciden por construccion.
     let h=`<div class="gi" data-viva="${k}"${b?'':' data-viva-off="1"'}></div><div class="g-cname">${archName(k)}</div>`;
     if(b){ h+=`<div class="g-qtag">${S().lvlShort(b.lvl||1)} · ${qualName(A.q)}</div><div class="gc">${coinIco('copa','sm')} ${nfmt(b.copas||0)}</div>`;   //+AG doc 37: cada bola muestra SUS copas
-      if(SAVE.equipped===SAVE.balls.indexOf(b)) h+=`<div class="g-eq">${S().equippedTag}</div>`;
+      //+AG aqui vivia el galon EQUIPADA de la tarjeta. Se va con la correccion de arriba y no es codigo
+      //   muerto por descuido: la bola equipada ya no baja a la rejilla, asi que esta linea no podia
+      //   dispararse NUNCA. El galon no desaparece del juego — sigue en la ficha (`.gd-eqtag`), que es
+      //   donde dice «esta es la que llevas» sin competir con la vitrina, y la vitrina misma ya es ese
+      //   mensaje en grande. `.g-eq` y su regla RTL se retiran del CSS con el.
       if(canLvlUp(b)) h+=`<div class="g-dot">↑</div>`;   //+AG doc 39: lista para subir (XP + Chispas suficientes)
     //+AG un solo trozo de precio para las doce: Monedas y Gemas, siempre los dos. El hito de copas de
     //   las Epicas ya no se pinta aqui (ocupaba el sitio del precio y ahora no es la unica puerta):
@@ -8063,7 +8082,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=deb26dc-SUCIO').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=ad10556').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -10332,7 +10351,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=deb26dc-SUCIO';
+  import { startAmbient } from './arte/ambient.mjs?v=ad10556';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -10348,7 +10367,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=deb26dc-SUCIO').then(m => {
+  import('./arte/pista-preview.mjs?v=ad10556').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -10360,8 +10379,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=deb26dc-SUCIO';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=deb26dc-SUCIO';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=ad10556';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=ad10556';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -10531,7 +10550,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=deb26dc-SUCIO'), import('./motor/chassis/sincro.mjs?v=deb26dc-SUCIO')]);
+        import('./motor/chassis/nube.mjs?v=ad10556'), import('./motor/chassis/sincro.mjs?v=ad10556')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
