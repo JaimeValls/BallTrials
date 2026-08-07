@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 68cd758"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-07 7777f97"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -178,6 +178,18 @@
      heredado en vez de verde. Se toma el mismo verde del boton de comprar que tiene justo al lado. */
   :root{ --gold:#fbb915; --gold2:#ffd23f; --cyan:#18c7d6; --line:#ffffff1a; --red:#e0293d; --green:#5bc46a;
     --bg-hi:#6d3ae0; --bg:#5024b5; --bg-mid:#3a1a8f; --bg-lo:#241159;
+    /*+AG 7-ago · LA TINTA DEL PERIMETRO (docs/86). Jaime trajo 7 capturas reales de Brawl y nombro tres
+       cosas: botones, "trazo con desplazamiento" y colores. El desplazamiento YA lo teniamos (el canto
+       de abajo, box-shadow:0 Npx 0) — lo que faltaba era el TRAZO: en Brawl toda pieza pulsable lleva
+       la MISMA tinta oscura por el perimetro COMPLETO, no solo por abajo, y da igual de que color sea
+       el relleno (comprobado a pixel en las 5 pestanas de su Tienda, en GOT IT verde y en GO! azul).
+       Medido en nuestro `.playbig`: el borde de arriba pasaba del morado del fondo al amarillo SIN un
+       solo pixel de tinta. Eso es lo que hacia que un boton nuestro pareciera "un degradado flotando"
+       en vez de "una pegatina recortada". Se centraliza aqui porque el color de la tinta es el MISMO
+       que ya usa la letra (#241a3f): trazo de letra y trazo de boton son la misma tinta, como en ellos.
+       ⚠ el grosor NO es una variable unica a proposito: en Brawl escala con la pieza (3 px en el CTA
+       grande, 2 en un control normal), igual que --stroke-* hace con la letra. */
+    --tinta:#241a3f;
     /*+AG 3-ago · EL TRAZO DEL ICONO, que hasta hoy no tenia regla ninguna (docs/70). La letra si la tenia
        (--bstroke, proporcional al cuerpo) y por eso es homogenea; los iconos nacieron cada uno con el
        grosor que le puso quien lo dibujo: 2,2 en las hojas, 2,6 en cerrar/atras, 7+2,6 a dos capas en el
@@ -389,9 +401,9 @@
      tailandes ni CJK, asi que en esos 8 idiomas el titular cae solo a la fuente que idiomas.js ya
      elige por escritura (doc 49). No hay que tocar nada por idioma: la cascada lo hace sola. */
      La lista de QUE lleva esta letra va al FINAL de esta hoja, no aqui: ver "LO QUE GRITA". */
-  .bstroke{ color:#fff; -webkit-text-stroke:.25em #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f66; }
+  .bstroke{ color:#fff; -webkit-text-stroke:.25em #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f; }
   .bstroke.thin{ -webkit-text-stroke-width:.25em; }
-  .coin{ -webkit-text-stroke:.25em #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f66; }
+  .coin{ -webkit-text-stroke:.25em #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f; }
   /* --- RESULTADOS --- */
   #results{ background:radial-gradient(120% 80% at 50% 20%, #4a26a8ee, var(--bg-lo)), var(--bg-lo); align-items:center; justify-content:center; padding:22px; gap:14px; overflow:hidden; }
   /*+AG feedback Jaime 2026-07-27: "el fondo monocolor queda cutre" → el FONDO VIVO de la Home (bolas reales
@@ -482,7 +494,7 @@
   .r-xpbar{ width:100%; height:6px; border-radius:8px; background:var(--plate-b); overflow:hidden; margin:3px 0 1px; }
   .r-xpfill{ height:100%; width:0%; background:linear-gradient(90deg,var(--gold2),var(--gold)); transition:width 1s cubic-bezier(.2,.7,.2,1); }
   .r-actions{ width:100%; max-width:430px; display:flex; flex-direction:column; gap:9px; margin-top:14px; }
-  .r-again{ border:0; border-radius:18px; padding:17px; font-family:inherit; font-weight:900; font-size:var(--fs-5); color:#3a2400; background:linear-gradient(#ffe27a,#ff9a3d); box-shadow:0 5px 0 #b45a10; cursor:pointer; }
+  .r-again{ border:3px solid var(--tinta); border-radius:18px; padding:17px; font-family:inherit; font-weight:900; font-size:var(--fs-5); color:#3a2400; background:linear-gradient(#ffe27a,#ff9a3d); box-shadow:0 5px 0 #b45a10; cursor:pointer; }
   .r-again:active{ transform:translateY(3px); box-shadow:0 2px 0 #b45a10; }
   .r-home{ border:1px solid var(--line); border-radius:16px; padding:13px; font-family:inherit; font-weight:800; font-size:var(--fs-4); color:#c9cff0; background:var(--plate-a); cursor:pointer; }
   .toast{ position:absolute; left:50%; bottom:86px; transform:translateX(-50%) translateY(18px); background:#0d0b22f2; border:1px solid var(--line); color:#e7ebff; padding:11px 18px; border-radius:14px; font-weight:700; font-size:var(--fs-3); opacity:0; transition:opacity .25s,transform .25s; pointer-events:none; z-index:80; }
@@ -657,7 +669,7 @@
   .gd-actions{ width:100%; max-width:370px; display:grid; grid-template-columns:1fr 58px; gap:8px; align-items:stretch; }
   .gd-actions .gd-btn.prim, .gd-actions .gd-btn.ghost{ grid-column:1; min-width:0; }
   .gd-btn{ border:0; border-radius:16px; padding:15px; font-family:inherit; font-weight:900; font-size:var(--fs-4); cursor:pointer; }
-  .gd-btn.prim{ color:#3a2400; background:linear-gradient(#ffe27a,#ff9a3d); box-shadow:0 4px 0 #b45a10; }
+  .gd-btn.prim{ color:#3a2400; background:linear-gradient(#ffe27a,#ff9a3d); box-shadow:0 4px 0 #b45a10; border:2px solid var(--tinta); }
   .gd-btn.prim:disabled{ filter:grayscale(.55) brightness(.82); box-shadow:none; cursor:default; }
   .gd-btn.ghost{ border:1px solid var(--line); background:var(--plate-a); color:#c9cff0; font-size:var(--fs-4); }
   /*+AG LA SALIDA DE LA FICHA: UNA SOLA, ICONO, PEGADA AL CTA (26-jul). Tres pasadas hicieron falta.
@@ -722,8 +734,11 @@
      lo que no cabe baje a una segunda fila. Dos filas se leen; un texto pisado, no. Y nada de scroll
      horizontal, que en este proyecto es un fallo, no una solución (docs/60: nada del navegador). */
   .sh-secs{ display:flex; flex-wrap:wrap; gap:6px; padding:2px 13px 8px; }
-  .sh-sec{ flex:1 1 auto; min-width:max-content; white-space:nowrap; border:1px solid #ffffff2a; background:var(--plate-a); color:#c4cbe6; font-family:inherit; font-weight:900; font-size:var(--fs-3); letter-spacing:.02em; border-radius:12px; padding:8px 6px; cursor:pointer; }
-  .sh-sec.on{ background:linear-gradient(#ffe27a,#ffb43d); color:#3a2400; border-color:transparent; box-shadow:0 3px 10px #ffb03d3d; }
+  /*+AG docs/86: la pestana APAGADA tambien lleva tinta. En Brawl las 5 pestanas de su Tienda llevan el
+     MISMO trazo oscuro aunque una este dorada y las otras cuatro en gris pizarra: el trazo dice "esto se
+     pulsa", no "esto esta elegido". Aqui el borde blanco al 16 % lo unico que hacia era desdibujarlas. */
+  .sh-sec{ flex:1 1 auto; min-width:max-content; white-space:nowrap; border:2px solid var(--tinta); background:var(--plate-a); color:#c4cbe6; font-family:inherit; font-weight:900; font-size:var(--fs-3); letter-spacing:.02em; border-radius:12px; padding:8px 6px; cursor:pointer; }
+  .sh-sec.on{ background:linear-gradient(#ffe27a,#ffb43d); color:#3a2400; border-color:var(--tinta); box-shadow:0 3px 10px #ffb03d3d; }
   /*+AG doc 60: el font-size de esta regla se fue. La pestaña unica del kit (final del <style>) manda
      sobre ella por cascada, asi que bajar aqui a 10 px era una linea MUERTA que ademas mentia sobre
      cual es el tamaño real. Lo que si sigue vivo es el aire: en pantallas estrechas se recorta el
@@ -741,7 +756,7 @@
      El interletrado baja de .08 a .04em para pagar el ancho que cuesta la letra mas grande — el aire
      se negocia, el cuerpo no. */
   .sh-cat{ font-size:var(--fs-2); font-weight:800; letter-spacing:.04em; text-transform:uppercase; color:var(--qc,#96a0c2); }
-  .sh-buy{ margin-top:3px; border:0; border-radius:12px; padding:9px 8px; font-family:inherit; font-weight:900; font-size:var(--fs-3); cursor:pointer; width:100%; color:#3a2400; background:linear-gradient(#ffe27a,#ff9a3d); box-shadow:0 3px 0 #b45a10; display:flex; gap:4px; align-items:center; justify-content:center; }
+  .sh-buy{ margin-top:3px; border:2px solid var(--tinta); border-radius:12px; padding:9px 8px; font-family:inherit; font-weight:900; font-size:var(--fs-3); cursor:pointer; width:100%; color:#3a2400; background:linear-gradient(#ffe27a,#ff9a3d); box-shadow:0 3px 0 #b45a10; display:flex; gap:4px; align-items:center; justify-content:center; }
   /* ══ LA TARJETA DE BOOSTER (2026-08-06) ════════════════════════════════════════════════════════
      Una por booster, de ancho completo, con sus cuatro compras dentro. El porqué de la forma está
      escrito en boostersEl(); aquí solo los números, que salen de lo medido:
@@ -769,7 +784,7 @@
     background:var(--cc,#ffd23f); color:#17102e; box-shadow:0 2px 0 #0006; }
   .bst-card.vacio .bst-tengo{ background:#ffffff14; color:var(--muted); box-shadow:none; }
   .bst-compras{ display:grid; grid-template-columns:repeat(4,1fr); gap:7px; }
-  .bst-buy{ position:relative; border:0; border-radius:14px; padding:9px 4px 8px; cursor:pointer;
+  .bst-buy{ position:relative; border:2px solid var(--tinta); border-radius:14px; padding:9px 4px 8px; cursor:pointer;
     font-family:inherit; background:linear-gradient(#ffe27a,#ff9a3d); color:#3a2400;
     box-shadow:0 4px 0 #b45a10, inset 0 1px 0 #fff8; display:grid; gap:2px; place-items:center;
     min-height:60px; transition:transform .06s, box-shadow .06s; }
@@ -847,8 +862,25 @@
   /*+AG ⚠ EL GRANO, y su número está MIRADO, no calculado: a .07 había que buscarlo con lupa y la
      tarjeta seguía leyéndose plana, que es justo lo que había que arreglar. Un efecto que no se ve no
      existe. .12 sobre una teja de 170 px. */
-  .sh-feat::before{ content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
-    background:url(arte/fondo/doodles.webp) repeat top left/170px 170px; opacity:.12; }
+  /*+AG ⚠⚠⚠ 3ª VUELTA, y el fallo anterior es la lección. Jaime, mirando la tarjeta ya con la grada
+     puesta: «¿qué imagen se supone que tengo que ver? no veo, veo un cuadrado morado».
+     Y tenía razón: **puse la grada justo detrás del botón de COMPRAR, que es verde, opaco y de ancho
+     completo — o sea que la tapaba entera.** Del dibujo asomaban dos dedos a los lados del botón. Si
+     hay que preguntar qué imagen hay, no hay imagen.
+     La grada ahora va donde SÍ queda hueco: una franja ARRIBA (volteada, como el graderío que cuelga
+     por encima) y otra ABAJO. El pack queda DENTRO del estadio, con público arriba y abajo y confeti
+     cayendo. Elegido otra vez mirando cuatro sitios distintos en `mockups/fondo-tarjeta-destacada.html`
+     (G arriba · H de fondo entero · I arriba y abajo · J rayos diagonales) — ganó la I, y las otras
+     tres se quedan escritas ahí para el que venga detrás.
+     ⚠ El `scaleY(-1)` de la franja de arriba NO es un truco de pereza: `tribuna.webp` tiene el público
+       abajo y el aire arriba, así que sin voltear la franja superior sale vacía.
+     ⚠ Y se van los doodles de esta tarjeta a propósito: con público de verdad, el grano de garabatos
+       era una textura peleándose con otra. */
+  .sh-feat::before{ content:''; position:absolute; left:0; right:0; top:0; height:150px; z-index:0; pointer-events:none;
+    background:url(arte/fondo/tribuna.webp) no-repeat center top/auto 150px;
+    transform:scaleY(-1);
+    -webkit-mask-image:linear-gradient(transparent 6%, #000 58%);
+            mask-image:linear-gradient(transparent 6%, #000 58%); }
   /*+AG ⚠⚠ AQUÍ HUBO UN CALLEJÓN SIN SALIDA Y SE ABANDONÓ A PROPÓSITO. La idea primera era el abanico
      de rayos girando de `celebra()` detrás de la bola. Se probó en el juego DOS veces (centrado a ojo
      y luego centrado al píxel en la bola) y las dos se veía UNA sola aspa: la bola está pegada a la
@@ -867,8 +899,8 @@
      verdad está encargado (arte/codex/40) — esto no es el andamio, es la casa mientras tanto. */
   .sh-feat::after{ content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
     background:
-      radial-gradient(125% 95% at 50% 38%, transparent 40%, #12082ed9 100%),
-      url(arte/fondo/tribuna.webp) no-repeat center bottom/auto 190px; }
+      radial-gradient(115% 75% at 76% 22%, #a55ce055 0%, transparent 56%),
+      url(arte/fondo/tribuna.webp) no-repeat center bottom/auto 150px; }
   .sh-feat > *{ position:relative; z-index:1; }
   .sh-feat-top{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:6px; }
   .sh-feat-top h3{ margin:0; min-width:0; }
@@ -908,7 +940,7 @@
   .sh-pack .pg.ico{ background:none; box-shadow:none; }
   .sh-pack .pg.ico .cico{ width:40px; height:40px; }
   .sh-pack .amt{ font-weight:900; font-size:var(--fs-5); } .sh-pack .amt small{ color:var(--green); font-size:var(--fs-2); font-weight:800; }
-  .sh-pack .money{ margin-left:auto; border:0; border-radius:12px; padding:11px 15px; font-family:inherit; font-weight:900; font-size:var(--fs-4); color:#fff; background:linear-gradient(#5bc46a,#2fa049); box-shadow:0 3px 0 #1d7a35; cursor:pointer; white-space:nowrap; }
+  .sh-pack .money{ margin-left:auto; border:2px solid var(--tinta); border-radius:12px; padding:11px 15px; font-family:inherit; font-weight:900; font-size:var(--fs-4); color:#fff; background:linear-gradient(#5bc46a,#2fa049); box-shadow:0 3px 0 #1d7a35; cursor:pointer; white-space:nowrap; }
   /*+AG docs/60 F3: `.sh-note` ya no lo lleva nadie — las cuatro notas de la Tienda se fueron a la hoja
      de informacion (pieza 20). La regla se queda porque es el aspecto de "aviso dentro del catalogo" y
      el dia que haga falta uno (una promo, un aviso de mantenimiento) esta escrito; borrarla obligaria a
@@ -935,8 +967,8 @@
      vez de apilarlas. Nada se esconde de verdad: sigue todo a un toque, y cada seccion cabe en pantalla. */
   .subtabs{ display:flex; gap:6px; padding:2px 13px 4px; flex:0 0 auto; }
   .subtab{ flex:1; font-family:inherit; font-size:var(--fs-3); font-weight:900; letter-spacing:.02em; color:#c4cbe6;
-    background:var(--plate-a); border:1px solid #ffffff2a; border-radius:12px; padding:8px 4px; cursor:pointer; transition:transform .08s; }
-  .subtab.on{ color:#3a2400; background:linear-gradient(#ffe27a,#ffb43d); border-color:transparent; box-shadow:0 3px 10px #ffb03d3d; }
+    background:var(--plate-a); border:2px solid var(--tinta); border-radius:12px; padding:8px 4px; cursor:pointer; transition:transform .08s; }
+  .subtab.on{ color:#3a2400; background:linear-gradient(#ffe27a,#ffb43d); border-color:var(--tinta); box-shadow:0 3px 10px #ffb03d3d; }
   .subtab:active{ transform:scale(.96); }
   .sc-body [data-sub]{ display:none; } .sc-body [data-sub].on{ display:block; }
   .sc-body .subtabs{ padding:0; }
@@ -1169,7 +1201,7 @@
   .se-rung .cell.prem{ background:linear-gradient(#3a2a70,#2a1e55); border-color:#7a5cff55; }
   .se-rung.done .cell{ box-shadow:inset 0 0 0 2px var(--gold2); }
   .se-rung .lb{ font-size:var(--fs-2); font-weight:800; text-transform:uppercase; letter-spacing:.01em; color:var(--muted); white-space:nowrap; }
-  .se-cta{ width:100%; border:0; border-radius:14px; padding:13px; font-family:inherit; font-weight:900; font-size:var(--fs-4); color:#052a30; background:linear-gradient(#8fe9f4,#18c7d6); box-shadow:0 3px 0 #0e8a9c; cursor:pointer; margin-top:3px; }
+  .se-cta{ width:100%; border:2px solid var(--tinta); border-radius:14px; padding:13px; font-family:inherit; font-weight:900; font-size:var(--fs-4); color:#052a30; background:linear-gradient(#8fe9f4,#18c7d6); box-shadow:0 3px 0 #0e8a9c; cursor:pointer; margin-top:3px; }
   .se-rk-tabs{ display:flex; gap:6px; margin-bottom:8px; }
   .se-rk-tab{ border:1px solid var(--line); background:var(--plate-a); color:#c9cff0; font-family:inherit; font-weight:800; font-size:var(--fs-3); border-radius:999px; padding:5px 12px; cursor:pointer; } .se-rk-tab.on{ background:var(--gold2); color:#3a2400; border-color:transparent; }
   .se-row{ display:flex; align-items:center; gap:10px; padding:8px 4px; border-bottom:1px solid #ffffff10; } .se-row:last-child{ border-bottom:0; }
@@ -1232,7 +1264,7 @@
      DERECHA, con las monedas, no aislada): se va a la derecha (order en .h-top) y baja de 46 a 40 px con el
      canto de 5 a 3. Sigue siendo amarillo —es pulsable y eso no se negocia— pero con menos masa que el CTA. */
   .h-ic{ position:relative; flex:0 0 auto; width:40px; height:40px; border-radius:12px; cursor:pointer;
-         padding:0; border:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+         padding:0; border:2px solid var(--tinta); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
          background:linear-gradient(#ffe14d,#ffb42a); box-shadow:0 3px 0 #b45a10, 0 6px 14px #ffb42a2e, inset 0 2px 0 #ffffff8c;
          font-size:0; line-height:0; order:9; }
   /*+AG 3-ago: la regla de las tres barras de CSS del boton de Ajustes SE VA. Ya no se pinta nada
@@ -1295,7 +1327,7 @@
   .onb-rec{ position:absolute; top:-9px; left:50%; transform:translateX(-50%); background:var(--gold2); color:#3a2400; font-size:var(--fs-1); font-weight:900; padding:2px 8px; border-radius:999px; white-space:nowrap; display:inline-flex; align-items:center; gap:3px; }
   .onb-b .onb-rec svg{ width:10px; height:10px; display:block; }
   .onb-b .gi{ font-size:var(--fs-6); } .onb-b img.gi{ width:52px; height:52px; object-fit:contain; margin:0 auto; animation:none; } .onb-b .nm{ font-weight:800; font-size:var(--fs-3); margin-top:3px; } .onb-b .ds{ font-size:var(--fs-2); color:var(--muted); margin-top:2px; line-height:1.3; }
-  .onb-go{ width:100%; border:0; border-radius:18px; padding:16px; font-family:inherit; font-weight:900; font-size:var(--fs-5); color:#3a2400; background:linear-gradient(#ffe27a,#ff9a3d); box-shadow:0 5px 0 #b45a10; cursor:pointer; } .onb-go:active{ transform:translateY(2px); box-shadow:0 3px 0 #b45a10; }
+  .onb-go{ width:100%; border:3px solid var(--tinta); border-radius:18px; padding:16px; font-family:inherit; font-weight:900; font-size:var(--fs-5); color:#3a2400; background:linear-gradient(#ffe27a,#ff9a3d); box-shadow:0 5px 0 #b45a10; cursor:pointer; } .onb-go:active{ transform:translateY(2px); box-shadow:0 3px 0 #b45a10; }
   .onb-skip{ display:block; margin:13px auto 0; background:none; border:0; color:var(--muted); font-family:inherit; font-weight:700; font-size:var(--fs-3); cursor:pointer; text-decoration:underline; }
   /*+AG BIENVENIDA (Jaime 2026-07-27): la primera pantalla OFRECE Google, no lo exige. Hereda el
      fondo y la caja del onboarding a proposito: es el mismo momento, un paso antes. "Jugar como
@@ -1531,7 +1563,7 @@
      donde sale (recompensas, resultados): aqui manda esta regla por ser mas especifica. */
   .cupsband .cups .cico{ width:32px; height:32px; margin:-8px 0; filter:drop-shadow(0 2px 3px #000a); }
   .cups b{ font-size:var(--fs-5); font-weight:900; color:var(--gold2); font-variant-numeric:tabular-nums; letter-spacing:.01em;
-    -webkit-text-stroke:.25em #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f66; }
+    -webkit-text-stroke:.25em #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f; }
   .cups small{ font-size:var(--fs-1); font-weight:800; color:var(--muted); letter-spacing:.08em; text-transform:uppercase; }
   #home .stage{ flex:1; min-height:0; position:relative; display:flex; flex-direction:column; }
   .siderail{ position:absolute; top:10px; display:flex; flex-direction:column; gap:11px; z-index:6; }
@@ -1582,7 +1614,7 @@
      Con `8vw` cae a 25,6 px en ese movil (163 px, cabe) y se queda en los 30 de tope a partir de 375,
      que es donde se juzgo el tamaño. Medido en de/ru/pl/tr, no calculado. */
   .hero .ballname{ display:flex; align-items:center; gap:7px; font-size:clamp(24px,8vw,var(--fs-7)); font-weight:900; letter-spacing:.005em; margin-top:4px;
-    color:#fff; -webkit-text-stroke:var(--stroke-7) #241a3f; paint-order:stroke fill; text-shadow:0 3px 0 #241a3f6b, 0 4px 18px #000a; }
+    color:#fff; -webkit-text-stroke:var(--stroke-7) #241a3f; paint-order:stroke fill; text-shadow:0 3px 0 #241a3f, 0 4px 18px #000a; }
   /*+AG LAS COPAS PASAN A SER UN OBJETO, no una linea de texto. De 13 px a 20 (--fs-5) y montadas en la
      MISMA placa que las pildoras de moneda de la cabecera (.coin): mismo marino, mismo canto, mismo
      icono desbordando por arriba y por abajo. No es un adorno nuevo — es que en la app "cifra que te
@@ -1677,7 +1709,7 @@
      +AG 1-ago: ahora lleva el trazo de marca (docs/56), como el CTA de al lado. */
   .modecompact .mctx b{ min-width:0; font-size:clamp(14px,4.4vw,17px); line-height:1.08; overflow-wrap:break-word;
     font-weight:900; letter-spacing:-.01em;
-    color:#fff; -webkit-text-stroke:.25em #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f55; }
+    color:#fff; -webkit-text-stroke:.25em #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f; }
   /*+AG la píldora del día era, tras la limpieza, LA ÚLTIMA CAJA DENTRO DE LA CAJA: oro sólido con sombra,
      o sea exactamente el lenguaje del botón JUGAR, dentro de una tarjeta que ya no quiere parecer pulsable.
      Y ahora que solo sale cuando el bonus es de TU modo, no compite con nadie: no necesita gritar. Pasa a
@@ -1706,8 +1738,8 @@
      (mas vivo, menos naranja) y el canto se queda en 8 px, que ya era del canon.
      ⚠ el trazo va aqui y NO con la clase .bstroke en el HTML: el <span data-t="playWord"> lo reescribe
      applyShell al cambiar de idioma y una clase puesta a mano en el hijo se perderia. */
-  .playbig{ flex:0 0 42%; border:0; border-radius:18px; padding:14px 10px; font-family:inherit; font-weight:900; font-size:var(--fs-6); letter-spacing:.03em;
-    color:#fff; -webkit-text-stroke:.25em #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f55;
+  .playbig{ flex:0 0 42%; border:3px solid var(--tinta); border-radius:18px; padding:14px 10px; font-family:inherit; font-weight:900; font-size:var(--fs-6); letter-spacing:.03em;
+    color:#fff; -webkit-text-stroke:.25em #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f;
     background:linear-gradient(#ffe14d 12%,#ffb42a); box-shadow:0 8px 0 #b45a10, 0 12px 30px #ffb42a55; cursor:pointer;
     /*+AG VB Jaime 1-ago: "el icono de play arriba pequeño, o lo quitas o lo pones a la derecha". Va a la
        DERECHA: en columna el triangulo quedaba flotando encima de la palabra como un adorno suelto. En
@@ -1996,7 +2028,7 @@
          · Lo bloqueado mantiene la misma banda y enseña la condición en el cuerpo, sin imagen.
        El icono grande centrado se va: en Brawl el icono es un sello de 26 px, no el protagonista. */
   .tile{ position:relative; aspect-ratio:1/1; border-radius:18px; overflow:hidden; cursor:pointer;
-    border:1px solid #ffffff26; box-shadow:0 10px 26px #0009, inset 0 1px 0 #ffffff22; display:flex; flex-direction:column; transition:transform .1s; }
+    border:3px solid var(--tinta); box-shadow:0 10px 26px #0009, inset 0 1px 0 #ffffff22; display:flex; flex-direction:column; transition:transform .1s; }
   .tile:active{ transform:scale(.95); }
   /* la seleccion va en BLANCO, el mismo lenguaje que .rktile.on. El dorado se reserva a la accion
      primaria (JUGAR) y al badge del dia: repartido en tres sitios no marcaba ninguno. */
@@ -2062,7 +2094,7 @@
      cede cuando el ancho real no da, y se escribe por que. */
   .tile .tname{ min-width:0; font-size:15px; font-weight:900; letter-spacing:.005em; line-height:1.1;
     color:#fff; -webkit-text-stroke:var(--stroke-4) #241a3f; paint-order:stroke fill;
-    text-shadow:0 2px 0 #241a3f66;
+    text-shadow:0 2px 0 #241a3f;
     /*+AG ⚠ LO MEDI ANTES Y DESPUES, Y LO HABIA EMPEORADO. En aleman "SCHRUMPFENDER BODEN" es UNA
        palabra que no cabe y se cortaba a media letra contra el borde de la carta — y ya se cortaba
        ANTES de este pase (se salia 23 px, medido con scrollWidth en el fichero de HEAD). Con el trazo
@@ -2388,8 +2420,8 @@
   .rk-top{ display:flex; align-items:center; gap:10px; padding:calc(10px + env(safe-area-inset-top)) 13px 6px; }
   .rktabs{ display:flex; gap:8px; padding:2px 13px 8px; }
   .rktab{ flex:1; text-align:center; font-family:inherit; font-size:var(--fs-3); font-weight:900; letter-spacing:.03em; color:#c4cbe6;
-    background:var(--plate-a); border:1px solid #ffffff2e; border-radius:12px; padding:9px 4px; cursor:pointer; }
-  .rktab.on{ color:#3a2400; background:linear-gradient(#ffe27a,#ffb43d); border-color:transparent; box-shadow:0 4px 12px #ffb03d44; }
+    background:var(--plate-a); border:2px solid var(--tinta); border-radius:12px; padding:9px 4px; cursor:pointer; }
+  .rktab.on{ color:#3a2400; background:linear-gradient(#ffe27a,#ffb43d); border-color:var(--tinta); box-shadow:0 4px 12px #ffb03d44; }
   .rktab:active{ transform:scale(.97); }
   /*+AG ⚠ 3-ago · EN MOVIL ESTRECHO LA LETRA ENCOGE, o "Por bola" parte en dos lineas. Medido a 320 px:
      en italiano ("Per pallina") y en aleman ("Pro Kugel") la pestaña pasa de 44 a 53 px de alto, y las
@@ -2512,7 +2544,7 @@
   .subtab.on, .rktab.on, .sh-sec.on{
     background:linear-gradient(#ffe14d 12%,#ffb42a); border-color:transparent;
     box-shadow:0 4px 0 #b45a10, 0 7px 16px #ffb42a3d, inset 0 2px 0 #ffffff8c;
-    color:#fff; -webkit-text-stroke:.25em #241a3f; paint-order:stroke fill; text-shadow:0 1px 0 #241a3f55; }
+    color:#fff; -webkit-text-stroke:.25em #241a3f; paint-order:stroke fill; text-shadow:0 1px 0 #241a3f; }
   /*+AG el :active se hunde HASTA su canto (mismo gesto que .playbig). Sustituye al scale(.96) de antes:
      un boton con grosor no encoge, se hunde — encoger es lo que hace una pegatina. */
   .subtab:active, .rktab:active, .sh-sec:active{ transform:translateY(2px); box-shadow:0 1px 0 #0d0726, inset 0 1px 0 #ffffff24; }
@@ -2584,7 +2616,7 @@
     box-shadow:0 3px 0 #0d0726, inset 0 1px 0 #ffffff24; transition:transform .08s, box-shadow .08s; }
   .set-seg button.on{ background:linear-gradient(#ffe14d 12%,#ffb42a); border-color:transparent;
     box-shadow:0 4px 0 #b45a10, inset 0 2px 0 #ffffff8c;
-    color:#fff; -webkit-text-stroke:.25em #241a3f; paint-order:stroke fill; text-shadow:0 1px 0 #241a3f55; }
+    color:#fff; -webkit-text-stroke:.25em #241a3f; paint-order:stroke fill; text-shadow:0 1px 0 #241a3f; }
   .set-seg button:active{ transform:translateY(2px); box-shadow:0 1px 0 #0d0726, inset 0 1px 0 #ffffff24; }
   .set-seg button.on:active{ transform:translateY(3px); box-shadow:0 1px 0 #b45a10, inset 0 2px 0 #ffffff8c; }
   /*+AG la fila de idioma lleva bandera + nombre + galon y ya era una placa: solo le faltaba el grosor. */
@@ -2604,7 +2636,7 @@
      Lo vio el auditor mirando la captura. Moraleja: cuando una regla del kit "no llega", sospecha de
      la especificidad antes que del valor. */
   .sh-buy, .sh-buy.gem, .se-cta, .r-again, .se-tier.cur, .se-rk-tab.on{
-    color:#fff; -webkit-text-stroke:.25em #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f55; }
+    color:#fff; -webkit-text-stroke:.25em #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f; }
   /*+AG el trazo de los botones cian se tiñe de su propia sombra (verde azulado) en vez de heredar el
      indigo: un contorno indigo sobre cian se lee como suciedad, no como canto.
      ⚠ 2-ago: `.sh-buy.gem` SALE de esta regla. Ya no es cian, es el verde de la gema, y la propia
@@ -2630,7 +2662,7 @@
      familia: blanco con trazo indigo, como `.sh-buy` y `#prAccCreate`. Medido, no deducido:
      getComputedStyle devolvia color rgb(58,36,0) con el kit pidiendo #fff. */
   .se-cta.oro{ background:linear-gradient(#ffe27a,#ff9a3d); box-shadow:0 3px 0 #b45a10;
-    color:#fff; -webkit-text-stroke-color:#241a3f; text-shadow:0 2px 0 #241a3f55; }
+    color:#fff; -webkit-text-stroke-color:#241a3f; text-shadow:0 2px 0 #241a3f; }
   /*+AG ⚠ Y EL MISMO AIRE PARA "JUGAR OTRA", que era el tercer sitio con el fallo el mismo dia. Jaime
      lo miro en captura: «jugar otra, no me gusta». 5 px de trazo sobre un cuerpo de 20 y
      `letter-spacing:normal`: la "Ju" se comia la "ga". Regla que sale de aqui y vale para siempre: si
@@ -2675,7 +2707,7 @@
      mas importantes del juego, y sus tres botones estaban cada uno en un idioma: el primario con el
      amarillo VIEJO y la letra marron, el de subir nivel en cian sin grosor, y el de volver plano. */
   .gd-btn.prim{ background:linear-gradient(#ffe14d 12%,#ffb42a); box-shadow:0 6px 0 #b45a10, 0 9px 20px #ffb42a3d, inset 0 2px 0 #ffffff8c;
-    color:#fff; -webkit-text-stroke:.25em #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f55; }
+    color:#fff; -webkit-text-stroke:.25em #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f; }
   /*+AG deshabilitado: se apaga con el filtro pero CONSERVA el canto (misma razon que .sh-buy) */
   .gd-btn.prim:disabled{ filter:grayscale(.5) brightness(.8); box-shadow:0 6px 0 #6b4a2a; cursor:default; }
   .gd-btn.ghost, .gd-btn.back{ background:linear-gradient(var(--nav-1),var(--nav-2)); border:1px solid #ffffff30; color:#dfe4ff;
@@ -2806,7 +2838,7 @@
      No llega al .07em de los CTA porque estos van a 9 px dentro de un azulejo de 48. */
   .ricon .rl{ font-size:var(--fs-1); color:#fff; -webkit-text-stroke:.25em #241a3f; paint-order:stroke fill;
     text-transform:uppercase; letter-spacing:.06em;
-    text-shadow:0 1px 0 #241a3f66; }
+    text-shadow:0 1px 0 #241a3f; }
   /*+AG los bloqueados (Amigos, Club) siguen apagados: el canon les da grosor porque son botones, y la
      opacidad sigue diciendo "todavia no". Las dos cosas a la vez, como .sh-buy:disabled. */
   .ricon.lock{ box-shadow:0 4px 0 #0d0726cc, inset 0 1px 0 #ffffff1a; }
@@ -2823,7 +2855,7 @@
      de progreso dorada que lleva al lado —dos cosas doradas en 64 px— y encima era el unico texto de
      la portada sin contorno. El subtitulo (nivel y XP) se queda apagado: es el dato, no el titular. */
   .passband .pt b{ color:#fff; -webkit-text-stroke:.25em #241a3f; paint-order:stroke fill;
-    text-shadow:0 1px 0 #241a3f66; }
+    text-shadow:0 1px 0 #241a3f; }
 
   /* ══ 12 · LAS CARTAS DE MODO (pantalla MODOS) ═════════════════════════════════════════════════
      67% de esta pantalla estaba plano y tampoco se veia: mismo agujero del inset. La pieza 8 ya le
@@ -3028,7 +3060,7 @@
     background:linear-gradient(#ffe14d 12%,#ffb42a); border-color:transparent;
     box-shadow:0 4px 0 #b45a10, 0 7px 16px #ffb42a3d, inset 0 2px 0 #ffffff8c;
     color:#fff; -webkit-text-stroke:var(--stroke-3) #241a3f; paint-order:stroke fill;
-    text-shadow:0 1px 0 #241a3f55; }
+    text-shadow:0 1px 0 #241a3f; }
   .subtab:active, .rktab:active, .sh-sec:active, .se-rk-tab:active{
     transform:translateY(2px); box-shadow:0 1px 0 #0d0726, inset 0 1px 0 #ffffff24; }
   .subtab.on:active, .rktab.on:active, .sh-sec.on:active, .se-rk-tab.on:active{
@@ -3052,7 +3084,7 @@
   .g-title, #selector .selhead h1{
     font-size:var(--fs-5); font-weight:900; text-transform:uppercase; letter-spacing:.03em;
     line-height:1.15; color:#fff;
-    -webkit-text-stroke:var(--stroke-5) #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f55; }
+    -webkit-text-stroke:var(--stroke-5) #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f; }
 
   /*+AG 16 · LA PLACA DE SECCION (pieza nueva). Jaime la señalo con el dedo: «la seccion de ranking no
      tiene color de fondo, que el Season Pass si tiene y queda mucho mejor». El Pase la tenia por
@@ -3425,7 +3457,7 @@
     letter-spacing:.07em; text-transform:uppercase;
     background:linear-gradient(#ffe14d 12%,#ffb42a); border-color:transparent;
     box-shadow:0 4px 0 #b45a10, 0 7px 16px #ffb42a3d, inset 0 2px 0 #ffffff8c;
-    color:#fff; -webkit-text-stroke:.25em #241a3f; paint-order:stroke fill; text-shadow:0 1px 0 #241a3f55; }
+    color:#fff; -webkit-text-stroke:.25em #241a3f; paint-order:stroke fill; text-shadow:0 1px 0 #241a3f; }
   /*+AG las TRES alternativas, iguales entre si en su fila. El cuerpo baja al suelo del canon (11 px,
      regla 9, NO por debajo) porque a un tercio de fila "Continuar con Google" a 13 px se parte en TRES
      renglones y la fila se iba a 69 px; a 11 px son dos y la fila cabe en los 44 px del minimo tactil.
@@ -4776,7 +4808,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=68cd758"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=7777f97"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -7752,7 +7784,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=68cd758').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=7777f97').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -10021,7 +10053,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=68cd758';
+  import { startAmbient } from './arte/ambient.mjs?v=7777f97';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -10037,7 +10069,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=68cd758').then(m => {
+  import('./arte/pista-preview.mjs?v=7777f97').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -10049,8 +10081,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=68cd758';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=68cd758';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=7777f97';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=7777f97';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -10218,7 +10250,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=68cd758'), import('./motor/chassis/sincro.mjs?v=68cd758')]);
+        import('./motor/chassis/nube.mjs?v=7777f97'), import('./motor/chassis/sincro.mjs?v=7777f97')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
