@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 b80e764"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-07 e236171"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -1093,9 +1093,28 @@
      pide quitar. Asi que el color se queda SOLO en el halo de detras del icono hasta que Codex
      entregue el fondo y el icono propio de cada booster (encargo arte/codex/43); ese dia el halo se
      va con el andamio. */
+  /*+AG ⚠ 2026-08-07 · EL MARCO DEL BOOSTER YA TIENE FONDO. Jaime: «te pedí también background para el
+     frame del booster, no hay nada». Estaba pedido a Codex Y ENTREGADO (`bstfondo-<clave>.webp`,
+     1024×384 a sangre, uno por booster con su color), y llevaba sin instalar desde las 22:50.
+     El velo de encima NO es decoración: el fondo es una energía oscura con vetas claras y detrás van
+     el nombre del booster y cuatro precios en blanco. Con el velo, `banco-contraste-pantallas` sigue
+     dando 0 textos por debajo del suelo; sin él, no se midió porque no se puso nunca sin él.
+     `--bg` lo pone renderBoosters(); el degradado de siempre se queda debajo como red de seguridad
+     por si una pieza no carga. */
   .bst-card{ position:relative; border-radius:20px; padding:13px 13px 14px; margin-bottom:12px;
-    background:linear-gradient(#2a2260,#1b1642); border:2px solid #ffd23f8c;
+    background:
+      linear-gradient(#2a2260c9,#1b1642ef),
+      var(--bg, none) center/cover no-repeat,
+      linear-gradient(#2a2260,#1b1642);
+    border:2px solid #ffd23f8c;
     box-shadow:0 4px 0 #0d0726, 0 8px 22px #0006, inset 0 1px 0 #ffffff14; }
+  /*+AG «UN POCO ROJIZO CUANDO NO TIENES NINGUNO», que es lo que Jaime pidió en vez del gris de
+     "no te llega". El rojo va en el MARCO y en un halo, no en el contenido: los iconos y los precios
+     siguen brillando igual. `--red` es el de la casa (#e0293d). */
+  .bst-card.vacio{ border-color:#e0293d99;
+    box-shadow:0 4px 0 #0d0726, 0 8px 22px #0006, 0 0 18px #e0293d3d, inset 0 1px 0 #ffffff14; }
+  .bst-card.vacio::after{ content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+    background:radial-gradient(120% 80% at 50% 100%, #e0293d26, transparent 70%); }
   .bst-top{ display:flex; align-items:center; gap:13px; margin-bottom:12px; }
   .bst-show{ width:76px; height:76px; flex:0 0 auto; border-radius:18px; display:grid; place-items:center;
     background:radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--cc,#ffd23f) 30%, transparent), transparent 70%), #ffffff0a;
@@ -1136,7 +1155,10 @@
   /*+AG EL ACUSE DE RECIBO. `.sh-buy` no tenía NINGUNA regla de pulsado: comprar no respondía al dedo.
      Se hunde exactamente los 4 px de su propio canto, así que se apoya en vez de flotar. */
   .bst-buy:active:not(:disabled){ transform:translateY(4px); box-shadow:0 0 0 #b45a10, inset 0 1px 0 #fff8; }
-  .bst-buy:disabled{ filter:grayscale(.65) brightness(.72); cursor:default; }
+  /*+AG ⚠ AQUI VIVIA EL GRIS QUE JAIME NO PIDIO: `.bst-buy:disabled{ filter:grayscale(.65) ... }`.
+     Ya no hay ningun `:disabled` que aplicar — el boton no se apaga nunca (ver el comentario del
+     `onclick` en la tienda de boosters). Se deja escrito para que nadie lo reponga «arreglando» que
+     se pueda pulsar sin saldo: eso NO es un fallo, es la peticion. */
   .bst-buy .n{ font-size:var(--fs-4); font-weight:900; line-height:1; }
   .bst-buy .p{ display:flex; align-items:center; gap:3px; font-size:var(--fs-3); font-weight:900; color:#fff;
     -webkit-text-stroke:.16em #6b3a05; paint-order:stroke fill; }
@@ -5791,7 +5813,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=b80e764"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=e236171"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -7095,7 +7117,7 @@ const nfmt=n=>Number(n||0).toLocaleString(BTI18N.nloc(LANG));
 //   `curl` devolvia los bytes nuevos y el navegador seguia pintando los viejos). La nota larga esta
 //   encima de `.cico` en el CSS. Al SUSTITUIR una imagen ya desplegada, sube este numero.
 //   v2 = 1-ago-2026: monedas de oro y gema (encargo 29) + trofeo con tinta (encargo 30).
-const ART_V='2';
+const ART_V='3';   /*+AG 7-ago: sube a 3 al entrar los 4 iconos de booster nuevos, que sustituyen a ficheros del mismo nombre */
 const uiArt=n=>`arte/ui/${n}.webp?v=${ART_V}`;
 const coinIco=(n,cls)=>`<img class="cico${cls?' '+cls:''}" src="${uiArt('moneda-'+n)}" alt="">`;
 //+AG 1-ago (encargo 31): los OBJETOS DE LOGRO — puesto 1º/2º/3º, corona del ganador y "hay premio"—
@@ -7408,10 +7430,17 @@ if(typeof SAVE.dayBonusDay!=='string') SAVE.dayBonusDay='';
 //   la Carrera Y en el Cazador, y el NITRO en la Carrera Y en Luz Roja. Gastarte los escudos hoy en el
 //   Cazador es quedarte sin ellos mañana en la Carrera.
 const BOOSTERS = {
-  nitro:    { modos:['race','redlight'], ico:'arte/ui/icono-nitro.webp' },
-  escudo:   { modos:['race','cazador'],  ico:'arte/ui/icono-escudo.webp' },
-  dash:     { modos:['cazador'],         ico:'arte/ui/icono-nitro.webp' },
-  fantasma: { modos:['redlight'],        ico:'arte/ui/icono-fantasma-booster.webp' },
+  //+AG ⚠ 2026-08-07 · IMPULSO YA TIENE ICONO PROPIO. Hasta hoy `dash` apuntaba al MISMO fichero que
+  //   `nitro`, y Jaime lo cantó mirando la Tienda: «te pedí que pusieses iconos distintos al nitro y
+  //   al dash, no lo has hecho». El arte estaba pedido Y ENTREGADO por Codex (Drive, 22:50 del 7-ago)
+  //   y llevaba ahí sin instalar. Ahora son cuatro piezas distintas: propulsor naranja, escudo azul,
+  //   rayo cian con líneas de velocidad y fantasma. Van por `uiArt()` y no a pelo para que se lleven
+  //   el `?v=` del pack: tres de las cuatro SUSTITUYEN a un fichero del mismo nombre, y sin sello el
+  //   navegador y la CDN siguen sirviendo el dibujo viejo.
+  nitro:    { modos:['race','redlight'], ico:'icono-nitro' },
+  escudo:   { modos:['race','cazador'],  ico:'icono-escudo' },
+  dash:     { modos:['cazador'],         ico:'icono-dash' },
+  fantasma: { modos:['redlight'],        ico:'icono-fantasma-booster' },
 };
 const BOOSTER_KEYS = Object.keys(BOOSTERS);
 //+AG 2026-08-06 · UN COLOR POR BOOSTER. `boostersEl()` era el ÚNICO render de la Tienda que no
@@ -8876,7 +8905,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=b80e764').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=e236171').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -9375,11 +9404,14 @@ function featEl(){ const d=document.createElement('div');
 }
 //+AG la sacudida de «no te llega»: 380 ms sobre la pildora de gemas de la cabecera. Se reinicia a mano
 //   (quitar clase + reflow + poner) porque pulsar dos veces seguidas sin eso no vuelve a animar.
-function sacudeGemas(){ const p=el('shGemas'); if(!p) return;
+function sacudePildora(id){ const p=el(id); if(!p) return;
   const caja=p.closest('.coin')||p;
   caja.classList.remove('falta'); void caja.offsetWidth; caja.classList.add('falta');
   setTimeout(()=>caja.classList.remove('falta'), 420);
 }
+function sacudeGemas(){ sacudePildora('shGemas'); }
+//+AG el hermano en monedas, para los boosters: el mismo gesto, la otra pildora (7-ago).
+function sacudeChispas(){ sacudePildora('shChispas'); }
 //+AG la nota va por coinify: lleva ✦ y ◆ dentro de la frase y sin esto se pintaba el glifo del
 //   sistema, que es justo lo que el juego dejo de hacer en todas las demas pantallas.
 function bolasEl(){ const s=S(), d=document.createElement('div'); d.innerHTML='';
@@ -9475,12 +9507,15 @@ function boostersEl(){ const s=S(), d=document.createElement('div');
     const B=BOOSTERS[k], tengo=invBooster(k);
     const c=document.createElement('div'); c.className='bst-card'+(tengo?'':' vacio');
     c.style.setProperty('--cc', BOOSTER_COLOR[k]||'#ffd23f');
+    //+AG el fondo pintado del marco, uno por booster (encargo entregado el 7-ago). Va como variable y
+    //   no como clase para no inventarse cuatro reglas de CSS que dicen lo mismo.
+    c.style.setProperty('--bg', `url(${uiArt('bstfondo-'+k)})`);
     //+AG los modos van en ICONO y no en palabras: "LA GRAN CARRERA · EL CAZADOR" ocupaba dos renglones
     //   de 11 px. El glifo de modo ya existe (MODOS[m].ico) y se lee igual en los 20 idiomas.
     const modos = B.modos.map(m=>`<i title="${modeTitle(m)}">${(MODOS[m]&&MODOS[m].ico)||''}</i>`).join('');
     c.innerHTML =
       `<div class="bst-top">`+
-        `<div class="bst-show"><img src="${B.ico}" alt=""></div>`+
+        `<div class="bst-show"><img src="${uiArt(B.ico)}" alt=""></div>`+
         `<div class="bst-txt"><div class="bst-nm">${boosterName(k)}</div><div class="bst-modos">${modos}</div></div>`+
         `<div class="bst-tengo"><b>${s.bstStock||'You have'}</b>×${tengo}</div>`+
       `</div>`;
@@ -9493,8 +9528,16 @@ function boostersEl(){ const s=S(), d=document.createElement('div');
       const b=document.createElement('button'); b.className='bst-buy';
       b.innerHTML=(ahorro>0?`<span class="off">−${ahorro}%</span>`:'')+
         `<span class="n">×${L.n}</span><span class="p">${nfmt(L.m)} ${coinIco('chispa','sm')}</span>`;
-      b.disabled=SAVE.chispas<L.m;
-      b.onclick=()=>buyBooster(k, L.n, L.m);
+      //+AG ⚠ 2026-08-07 (Jaime) · EL BOTON YA NO SE APAGA CUANDO NO TE LLEGA. Antes iba
+      //   `b.disabled = SAVE.chispas < L.m`, y con el saldo a cero las cuatro compras salian GRISES y
+      //   muertas. Su veredicto, literal: «has puesto gris las cosas, creo que es porque no tienes
+      //   dinero suficiente, NUNCA HE PEDIDO ESO. Los iconos siempre tienen que brillar y hacerles
+      //   click. Solo tienen que ponerse un poco rojizos cuando no tienes nada».
+      //   Asi que el boton se queda encendido y pulsable SIEMPRE, y si no llega el saldo hace lo que
+      //   ya hace el Pack (docs/84): sacude la pildora de monedas de la cabecera, que es DONDE esta la
+      //   respuesta — y que ademas ya esta roja si estas a cero. Señalar la puerta es informacion;
+      //   apagar el boton es quitarle al jugador la unica pista de que ahi se compra.
+      b.onclick=()=>{ if(SAVE.chispas<L.m){ sacudeChispas(); return; } buyBooster(k, L.n, L.m); };
       fila.appendChild(b);
     });
     c.appendChild(fila); d.appendChild(c);
@@ -9575,7 +9618,7 @@ function buyBooster(k, n, coste){
   //   la ventana y a 20 px— así que no se pierde información: se pierde la pequeñez.
   if(window.BT_UI && BT_UI.compra) BT_UI.compra((n||1)>=15);
   //+AG el saldo lo pinta ya `dinero()` para las cinco pantallas: aquí no hay que hacer nada.
-  celebra({ ico:BOOSTERS[k].ico, color:BOOSTER_COLOR[k], titulo:boosterName(k),
+  celebra({ ico:uiArt(BOOSTERS[k].ico), color:BOOSTER_COLOR[k], titulo:boosterName(k),
             sub:'×'+(n||1), pie:S().celTienes ? S().celTienes(invBooster(k)) : '×'+invBooster(k),
             peso:(n||1) });
   renderTienda(); }
@@ -11186,7 +11229,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=b80e764';
+  import { startAmbient } from './arte/ambient.mjs?v=e236171';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -11202,7 +11245,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=b80e764').then(m => {
+  import('./arte/pista-preview.mjs?v=e236171').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -11214,8 +11257,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=b80e764';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=b80e764';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=e236171';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=e236171';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -11385,7 +11428,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=b80e764'), import('./motor/chassis/sincro.mjs?v=b80e764')]);
+        import('./motor/chassis/nube.mjs?v=e236171'), import('./motor/chassis/sincro.mjs?v=e236171')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
