@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 037a45d"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-07 227bccc+SUCIO"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -1363,6 +1363,37 @@
      El velo apaga los dos tercios de arriba, que es justo donde el encargo pide «cielo abierto, liso
      y casi vacio»: no tapa nada de lo que hace bonita a la pieza, y se abre del todo antes del 78 %,
      que es donde empiezan las nubes y donde ya no hay ni un texto encima. */
+  /*+AG 2026-08-07 · LA ESCENA (encargo 43). Jaime: «esto no es Ball Trials, no hay accion, no hay
+     bolas». El atardecer se queda —le gusta y es bueno— y las bolas entran DELANTE de el, en el hueco
+     que la pantalla ya tenia vacio. Va como capa de fondo y no como elemento porque asi NO ENTRA EN EL
+     REPARTO DE ALTO: medido, a 360x640 ese hueco no existe (el panel de retos ya se sale 86 px), y un
+     hijo mas del cuerpo habria empujado. Como capa, ahi simplemente queda tapada y no rompe nada.
+     `bottom center/100% auto` = anclada abajo y a lo ancho completo, que es lo que pide la pieza: sus
+     256 px de arriba son alfa 0, asi que se le puede comer el borde superior por donde sea.
+     VA LA PRIMERA (encima del velo) a proposito: el velo apaga los dos tercios de arriba por contraste
+     y ahi la escena no llega; de 78 % para abajo el velo ya es transparente, asi que no se pisan. */
+  /*+AG ⚠ Y VA EN `.sc-body`, NO EN `#temporada`. Primer intento: capa de fondo de la PANTALLA anclada
+     `bottom`. Se perdio entera detras de la barra de abajo — de las tres bolas solo asomaba media
+     cabeza azul. El motivo es que `.h-tabs` es HIJA de la pantalla, asi que el borde de abajo de
+     `#temporada` esta DEBAJO de la barra, no encima. El cuerpo, en cambio, termina exactamente donde
+     empieza la barra (medido: 666 px de cuerpo + 146 de cabecera y barra = los 812 del movil). Y como
+     el fondo va con `background-attachment:scroll`, queda clavado a la caja y no se mueve cuando el
+     cuerpo se desliza en los moviles donde el panel se sale. `border-box` para que llegue a los bordes
+     por debajo de los 13 px de relleno lateral. */
+  #temporada .sc-body{ background:url(arte/fondo/temporada-escena.webp) no-repeat bottom center/100% auto;
+    background-origin:border-box; }
+  /*+AG ⚠ Y EN PANTALLA BAJA LA ESCENA SE RETIRA, que es el segundo fallo que caza esta pieza y el que
+     de verdad dolia: a 360x640 las tres bolas salian ENCIMA de la lista de retos, con «Retos nuevos
+     mañana» escrito sobre las gafas de sol. No es que el fondo se colara por delante — es que
+     `.sc-block` es SEMITRANSPARENTE (por eso existe el velo del atardecer, tres bloques mas arriba), o
+     sea que todo lo que quede detras del panel se LEE a traves de el.
+     El numero sale de la medida, no del gusto: la pieza dibuja solo su 60 % de abajo (sus 256 px de
+     arriba son alfa 0), asi que aguanta que el panel le pise hasta 89 px sin que se note. Con el
+     cuerpo en 455 px de contenido y 146 de cabecera+barra, el solape pasa de esos 89 px por debajo de
+     los ~730 px de alto. Se corta en 790 para dejar margen a los idiomas que escriben mas largo.
+     Lo que se pierde por debajo de ahi es DECORACION de un hueco que en esos moviles no existe: ahi el
+     panel de retos ya se sale 86 px y hay que deslizar igualmente. */
+  @media (max-height:790px){ #temporada .sc-body{ background-image:none; } }
   #temporada{ background:
       linear-gradient(#241159c4 0%, #241159c4 56%, #24115900 78%),
       url(arte/fondo/fondo-temporada.webp) no-repeat center center/cover,
@@ -5685,7 +5716,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=037a45d"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=227bccc+SUCIO"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -8766,7 +8797,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=037a45d').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=227bccc-SUCIO').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -11061,7 +11092,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=037a45d';
+  import { startAmbient } from './arte/ambient.mjs?v=227bccc-SUCIO';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -11077,7 +11108,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=037a45d').then(m => {
+  import('./arte/pista-preview.mjs?v=227bccc-SUCIO').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -11089,8 +11120,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=037a45d';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=037a45d';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=227bccc-SUCIO';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=227bccc-SUCIO';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -11260,7 +11291,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=037a45d'), import('./motor/chassis/sincro.mjs?v=037a45d')]);
+        import('./motor/chassis/nube.mjs?v=227bccc-SUCIO'), import('./motor/chassis/sincro.mjs?v=227bccc-SUCIO')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
