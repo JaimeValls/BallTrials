@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 726b446"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-07 6855491+SUCIO"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -1042,11 +1042,24 @@
   /*+AG 2026-08-08 · la pestaña de recarga lleva dos iconos en vez de palabra. Se centran y se les
      quita el contorno de letra, que sobre un <img> pinta un halo. Y la fila de sub-pestañas de dentro
      se come el relleno lateral del cuerpo para alinearse con las tarjetas. */
-  .sh-sec .cico{ vertical-align:-2px; -webkit-text-stroke:0; }
-  .sh-sec .cico + .cico{ margin-left:5px; }
-  .subtabs.sh-rec{ padding:0 0 9px; }
-  .subtabs.sh-rec .subtab{ display:flex; align-items:center; justify-content:center; gap:6px; }
-  .subtabs.sh-rec .cico{ -webkit-text-stroke:0; }
+  /*+AG ⚠ 2026-08-08 · TODO ESTO ES MAS GRANDE PORQUE ERA PEQUEÑO, y no por poco. Jaime: «haría los
+     iconos de los botones más grandes. Donde pone COINS lo haría bastante más grande, en el botón, y
+     el icono de la moneda también mucho más grande [...] no entiendo esa necesidad de hacerlo todo
+     pequeño que tienes».
+     Tenía razón y el defecto es de método: monté la fila reutilizando `.subtab` tal cual —13 px de
+     letra y el icono `sm` de 15— porque era lo que ya existía, sin preguntarme si el tamaño heredado
+     valía AQUI. Esta fila no es navegación fina como la de Temporada: es el selector de QUE MONEDA
+     estás comprando, o sea la decisión más gorda de la pantalla, y tiene que pesar como tal.
+     Letra 13 -> 20 px (`--fs-5`, el mismo cuerpo que un título de tarjeta) e icono 15 -> 28 px.
+     Va TODO en `.sh-rec`, así que las sub-pestañas de Temporada y Perfil no se enteran.
+     Los iconos de la pestaña de arriba suben de 15 a 24 por lo mismo: son el rótulo entero, no un
+     adorno al lado de una palabra. */
+  .sh-sec .cico{ width:24px; height:24px; vertical-align:-5px; -webkit-text-stroke:0; }
+  .sh-sec .cico + .cico{ margin-left:6px; }
+  .subtabs.sh-rec{ padding:0 0 10px; gap:8px; }
+  .subtabs.sh-rec .subtab{ display:flex; align-items:center; justify-content:center; gap:9px;
+    font-size:var(--fs-5); padding:11px 6px; }
+  .subtabs.sh-rec .cico{ width:28px; height:28px; -webkit-text-stroke:0; }
   /*+AG ⚠ 2026-08-08 · `overflow-x:hidden` NO es cosmetico y no es mio: la animacion de entrada de
      seccion (`#shBody.secIn`) desliza el cuerpo entero 18 px de lado, asi que MIENTRAS dura, todo lo
      que llega al borde se sale. Medido en el mismo instante: `.subtab` y `.sh-pack` sobresalen los
@@ -4291,6 +4304,17 @@
     #temporada .mi-sem .mi-bar{ display:none; }                       /* 5 */
     /*+AG y la portada del Pase (encargo 44) tampoco: son 86 px y aqui el cuerpo va con 3 de margen. */
     #temporada .se-pase-cover{ display:none; }
+    /*+AG ⚠ 8-ago · Y LA LEYENDA DE VIAS DEL PASE («Vía gratis · Vía premium»), que es la pieza 8 de
+       este bloque y la unica que se descubrio con el diente NUEVO del banco: hasta ayer nadie medía
+       esta sub-pestaña. Se va porque SOBRA, no porque estorbe: cada peldaño del riel lleva ya escrito
+       debajo GRATIS o PREMIUM, o sea que la leyenda dice por segunda vez lo que el propio riel dice
+       quince veces. En pantalla alta se queda, que ahi el aire no cuesta. −25 px. */
+    #temporada .se-vias{ display:none; }
+    /*+AG ⚠ EL RANKING A 320x540 EN JAPONES SE SALE 7 px Y SE QUEDA ASI, dicho aqui para que nadie
+       lo intente por el camino corto: probe apretar el relleno de las filas y NO HIZO NADA, porque
+       ya estaban a 6 px por una regla de mas arriba —lei el numero antes de leer el CSS—, y de paso
+       el caso empeoro a 9. Es un solo idioma, un solo tamaño y 7 px; el panel entero pide su repaso,
+       no un pellizco. Queda cantado por el banco, que es donde tiene que estar. */
     #temporada .sc-block{ padding:8px; }                              /* 6 */
     #temporada .sc-body{ gap:5px; padding-top:2px; }
     #temporada .mi-row{ padding:4px 8px; margin-bottom:1px; }
@@ -5885,7 +5909,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=726b446"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=6855491+SUCIO"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -8977,7 +9001,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=726b446').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=6855491-SUCIO').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -11397,7 +11421,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=726b446';
+  import { startAmbient } from './arte/ambient.mjs?v=6855491-SUCIO';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -11413,7 +11437,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=726b446').then(m => {
+  import('./arte/pista-preview.mjs?v=6855491-SUCIO').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -11425,8 +11449,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=726b446';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=726b446';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=6855491-SUCIO';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=6855491-SUCIO';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -11596,7 +11620,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=726b446'), import('./motor/chassis/sincro.mjs?v=726b446')]);
+        import('./motor/chassis/nube.mjs?v=6855491-SUCIO'), import('./motor/chassis/sincro.mjs?v=6855491-SUCIO')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
