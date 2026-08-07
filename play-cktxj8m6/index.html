@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 ca14cba"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-07 71c81de"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -362,6 +362,11 @@
      partiendo el boton en dos. inline-block no cambia nada en los flex y arregla el texto corrido. */
   .cico{ width:19px; height:19px; object-fit:contain; display:inline-block; vertical-align:middle; flex:0 0 auto; filter:drop-shadow(0 1px 2px #0007); }
   .cico.sm{ width:15px; height:15px; }            /* chips de precio, junto al numero */
+  /*+AG 2026-08-07 · el escalon que faltaba. La escala saltaba de 15 (.sm) a 19 (base) a 32 (.coin) y no
+     habia nada en medio, asi que el premio de HOY del Regalo del Dia —que sube a 24px de letra— se
+     quedaba con una moneda de 15 y el numero pesaba mas que la cosa que te dan. `coinIco`/`uiIco` ya
+     aceptan la clase como segundo argumento, asi que esto no obliga a tocar ninguna funcion. */
+  .cico.md{ width:24px; height:24px; }            /* el premio de hoy, en la tarjeta del regalo */
   .cico.big{ width:22px; height:22px; filter:drop-shadow(0 0 6px #fbb91566); }   /* banda de copas */
   .rico{ width:26px; height:26px; object-fit:contain; display:block; filter:drop-shadow(0 2px 4px #0008); }   /* rieles de la Home */
   /*+AG EL TRAZO DE MARCA (docs/56 regla 1, VB Jaime 1-ago). Es LA pieza que separa un boton de Supercell
@@ -802,12 +807,41 @@
      hero van en el violeta de .se-hero; las placas de kit, en marino" — asi que hereda el gradiente
      EXACTO de .se-hero (150deg,#5a2c86->#2a1a58): el destacado de la Tienda y el hero del Pase son el
      mismo objeto visto en dos pantallas, y ahora se pintan igual. `.se-hero` no se toca. */
-  .sh-feat{ border-radius:20px; padding:17px; background:linear-gradient(150deg,#5a2c86,#2a1a58); border:1px solid #ffffff22; box-shadow:0 12px 30px #0007; margin-bottom:12px; }
-  .sh-feat .fl{ font-size:var(--fs-2); letter-spacing:.16em; text-transform:uppercase; color:var(--gold2); font-weight:800; }
-  .sh-feat h3{ margin:3px 0 0; font-size:var(--fs-5); }
-  .sh-feat ul{ margin:9px 0 12px; padding-left:20px; color:#d6dbf4; font-size:var(--fs-3); line-height:1.65; }
-  .sh-price{ display:flex; align-items:center; gap:9px; justify-content:center; font-weight:900; font-size:var(--fs-4); }
-  .sh-price .was{ color:#96a0c2; text-decoration:line-through; font-size:var(--fs-3); font-weight:700; }
+  /*+AG ⚠ 2026-08-07 · LA TARJETA DEL PACK DEJA DE SER UNA FACTURA. Feedback de Jaime mirando esta
+     pantalla: «la tienda tiene que ser espectacular y ahora mismo es un poco churrella [...] pecas
+     mucho de numeros pequenos, de letras pequenas». Tenia razon y esta medido: de los 8 textos de la
+     pestana Destacados habia 4 a 11px y 3 a 13px, y el contenido del pack era literalmente un <ul>
+     con vinetas — tres renglones de texto para vender lo mas caro de la Tienda.
+     Lo que cambia: el rotulo pasa de texto suelto a CHAPA (el mismo tratamiento exacto que la pestana
+     activa `.sh-sec.on`, que ya es canon), el <ul> muere y en su sitio van tres BALDOSAS con el icono
+     de verdad de cada cosa y su marco de rareza, y el CTA sube de 13 a 20px.
+     ⚠ EL CTA GRANDE ES SOLO DE ESTA TARJETA Y DEL REGALO. `.sh-buy` a secas lo comparten 30 y pico
+     botones de Bolas/Cosmeticos/Gemas que son la MITAD de anchos, y ahi 20px parte la linea en dos. */
+  .sh-feat{ position:relative; border-radius:20px; padding:17px; background:linear-gradient(150deg,#5a2c86,#2a1a58); border:1px solid #ffffff22; box-shadow:0 12px 30px #0007; margin-bottom:12px; }
+  .sh-feat-top{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:6px; }
+  .sh-feat-top h3{ margin:0; min-width:0; }
+  /*+AG la bola VIVA, la misma que gira en el Garaje y en la pestana Bolas (docs/55). Peticion literal
+     de Jaime: «que aparezcan bolas si es necesario». 80px y no 72 como la rejilla: esto es UNA pieza
+     destacada, no una celda de doce. No necesita JS: renderTienda() ya llama a vivasSync() y vivas.mjs
+     barre `[data-viva]` de todo el documento. */
+  .sh-feat-ball{ width:80px; height:80px; flex:0 0 auto; }
+  .sh-feat .fl{ display:inline-block; font-size:var(--fs-3); letter-spacing:.10em; text-transform:uppercase; font-weight:900;
+                background:linear-gradient(#ffe27a,#ffb43d); color:#3a2400; padding:3px 9px; border-radius:9px; box-shadow:0 2px 6px #ffb03d3d; }
+  .sh-feat h3{ margin:6px 0 0; font-size:var(--fs-5); }
+  /*+AG las tres baldosas. Cada una lleva SU icono real (el arte de la bola, el SVG del cosmetico, la
+     moneda dibujada) y su marco de rareza en --qc, que es el mismo lenguaje que ya usan las fichas de
+     `.sh-item`: lo que se vende se DIBUJA, no se enumera. */
+  .sh-feat-items{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:11px 0 10px; }
+  .sh-it{ background:#ffffff10; border:2px solid var(--qc,#ffffff22); border-radius:14px; padding:8px 6px;
+          display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; text-align:center; min-height:90px; }
+  .sh-it img.ico{ width:40px; height:40px; object-fit:contain; filter:drop-shadow(0 3px 5px #0007); }
+  .sh-it .cmico{ width:40px; height:40px; color:var(--qc,#c9d0f2); }
+  .sh-it .nm{ font-size:var(--fs-3); font-weight:800; line-height:1.15; }
+  /*+AG `.sh-price` existia desde siempre y NO la llamaba nadie. Se revive como LINEA DE VALOR: lo que
+     costaria suelto, al lado de la chapa de ahorro. El numero sale calculado de los precios reales
+     (bundleValor()), nunca escrito a mano — ver el porque largo en el comentario de BUNDLE. */
+  .sh-price{ display:flex; align-items:center; gap:9px; justify-content:center; font-weight:900; font-size:var(--fs-4); margin-bottom:10px; color:#d6dbf4; }
+  .sh-off{ background:#ff4d4d; color:#fff; font-weight:900; font-size:var(--fs-3); padding:3px 9px; border-radius:9px; box-shadow:0 2px 0 #a51f1f; }
   /*+AG doc 45 §5: con la escalera de 6 packs de Clash Royale + la oferta del dia son 7 filas y
      la seccion se salia 13px. El aire entre filas baja de 10 a 8: cabe sin deslizar y no se nota. */
   .sh-pack{ display:flex; align-items:center; gap:12px; background:var(--plate-a); border:1px solid var(--line); border-radius:16px; padding:12px 14px; margin-bottom:8px; }
@@ -954,9 +988,35 @@
      apagada y visible (canon 6), nunca desaparece. */
   .cam-card{ background:var(--plate-a); border:1px solid var(--line); border-radius:18px; padding:12px; margin-bottom:12px; }
   .cam-card.hay{ border-color:#ffd23f80; background:linear-gradient(180deg,#ffd23f1a,#ffffff08); }
-  .cam-hd{ display:flex; align-items:baseline; gap:8px; margin-bottom:9px; }
-  .cam-t{ font-size:var(--fs-2); letter-spacing:.12em; text-transform:uppercase; color:var(--gold2); font-weight:800; }
-  .cam-d{ margin-left:auto; font-size:var(--fs-2); color:var(--muted); font-weight:800; }
+  /*+AG ⚠ 2026-08-07 · LA TARJETA ENTERA ES EL BOTON, Y LATE. Medido antes de tocarla: de los 48.511 px²
+     de la tarjeta solo 14.212 respondian al dedo (el 29%), o sea que 7 de cada 10 dedos caian en zona
+     muerta. Ahora se pulsa entera (el JS reenvia el clic al CTA).
+     ⚠ EL LATIDO Y EL BRILLO VAN EN LA MISMA REGLA O SE PISAN: `animation` es una sola propiedad, y dos
+     reglas distintas no se suman, la segunda gana. El precedente literal es `.playbig.ready`.
+     ⚠ Y `:active` LLEVA `animation:none`: sin el, el latido sigue corriendo y se come el hundimiento —
+     el dedo pulsa y no pasa nada visible, que es justo el fallo que esto viene a arreglar. */
+  @keyframes camLatido{ 0%,100%{ transform:scale(1) } 50%{ transform:scale(1.014) } }
+  .cam-card.hay.ready{ animation:camLatido 2600ms cubic-bezier(.45,0,.55,1) infinite, readyGlow 1900ms ease-in-out infinite; }
+  .cam-card.hay{ cursor:pointer; }
+  .cam-card.hay:active{ transform:scale(.975); animation:none; }
+  /*+AG el Pack respira en CONTRAFASE (delay negativo de medio ciclo): las dos a la vez se leen como un
+     parpadeo de la pantalla, y alternadas se leen como dos objetos vivos. 2600ms es exactamente el
+     tempo del `breathe` de la Home, asi que el juego entero late a un solo compas. */
+  .sh-feat{ animation:camLatido 2600ms cubic-bezier(.45,0,.55,1) infinite; animation-delay:-1300ms; }
+  .cam-hd{ display:flex; align-items:center; gap:10px; margin-bottom:9px; }
+  .cam-txt{ flex:1; min-width:0; }
+  /*+AG EL REGALO DIBUJADO. `ui-regalo.webp` ya estaba en el repo (encargo 31) y solo se usaba a 46px en
+     Perfil. Aqui es la cara de la tarjeta: si hay algo que recoger se balancea, y una vez recogido se
+     queda gris y a media opacidad — visible siempre (canon 6: lo hecho no desaparece, se apaga). */
+  @keyframes camTumbo{ 0%,100%{ transform:rotate(-6deg) } 50%{ transform:rotate(6deg) } }
+  .cam-gift{ width:44px; height:44px; flex:0 0 auto; object-fit:contain; filter:drop-shadow(0 3px 6px #0007); }
+  .cam-gift.viva{ animation:camTumbo 2600ms cubic-bezier(.45,0,.55,1) infinite; }
+  .cam-gift.ido{ filter:grayscale(.7); opacity:.45; }
+  .cam-t{ font-size:var(--fs-3); letter-spacing:.10em; text-transform:uppercase; color:var(--gold2); font-weight:900; }
+  /*+AG «Día 1 de 20» sube de 11 a 13 px: es un DATO que el jugador lee (cuánto camino le queda), no un
+     adorno. Los que se quedan en 11 son solo los premios de ayer y mañana, y eso es a propósito: el
+     contraste con los 24 px del de HOY es lo que cuenta la historia. */
+  .cam-d{ margin-left:auto; font-size:var(--fs-3); color:var(--muted); font-weight:800; }
   .cam-fila{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px; }
   /*+AG los tres pasos: ayer / hoy / mañana. El de hoy es el grande; los otros dos, atenuados y mas
      pequeños. Enseñar el de mañana es lo que hace que esto NO sea una caja sorpresa. */
@@ -964,12 +1024,46 @@
     background:#ffffff10; border-radius:12px; padding:8px 4px; }
   .cam-p.old{ opacity:.42; }
   .cam-p.next{ opacity:.6; }
-  /*+AG mismo caso que el semanal: venia en el inexistente --fs-0. Se fija en --fs-4, que son los 16 px
-     que ya estaba pintando de casualidad, para que el "hoy grande" del camino no cambie de tamaño y
-     ademas quede gobernado por la escala. */
-  .cam-p.now{ font-size:var(--fs-4); background:#ffffff1e; box-shadow:inset 0 0 0 1px #ffd23f4d; }
+  /*+AG ⚠ 2026-08-07: el premio de HOY sube de 16 a 24px y su moneda de 15 a 24 (`.cico.md`). Y los tres
+     dejan de valer lo mismo: eran `flex:1` los tres, o sea 102px cada uno, asi que el ojo no tenia
+     forma de saber cual importa. Ayer y mañana NO se agrandan a proposito — el contraste es lo que
+     cuenta la historia, y subirlos los tres seria no haber subido ninguno. */
+  .cam-p.old{ flex:.8; }
+  .cam-p.next{ flex:.8; }
+  .cam-p.now{ flex:1.4; font-size:var(--fs-6); padding:11px 4px; background:#ffffff22; box-shadow:inset 0 0 0 2px #ffd23f80; }
   .cam-cta{ width:100%; }
   .cam-cta:disabled{ opacity:.5; }
+  /*+AG EL CTA GRANDE, y SOLO en las dos tarjetas de Destacados (ver el porque en el comentario de
+     .sh-feat): 13px en un boton de ancho completo era la letra mas pequeña de la pantalla puesta en
+     lo unico que hay que pulsar. */
+  .cam-cta, .sh-feat .sh-buy{ font-size:var(--fs-5); min-height:52px; padding:14px 10px; letter-spacing:.04em; }
+  /*+AG ⚠ 2026-08-07 · ESTE BLOQUE ES EL QUE PAGA TODA LA SUBIDA DE TAMAÑOS, no es un adorno.
+     Las letras y los iconos grandes de arriba suman alto, y en el movil BAJO (360x640) la pestaña ya
+     tenia que deslizar 116 px antes de tocar nada. Aqui se devuelve ese alto donde no se nota: menos
+     aire, iconos mas pequeños y —lo unico que se esconde— el NOMBRE de las tres baldosas, porque a
+     32 px la bola y la skin ya se reconocen por el dibujo.
+     ⚠ LO QUE NO SE TOCA NUNCA AQUI: el cuerpo de la letra de los textos. Bajarla otra vez seria
+     deshacer exactamente lo que se ha venido a arreglar. Si en el futuro hay que recortar mas, se
+     recorta la bola viva y las baldosas, jamas la tipografia.
+     ⚠ Y esto NO lo caza `__fitCheck()`: `.sh-body` tiene overflow-y:auto, asi que el guardia pasa en
+     verde con 116 px fuera de pantalla. Se mide a mano con scrollHeight - clientHeight. */
+  @media (max-height:700px){
+    .cam-card{ padding:9px; margin-bottom:8px; }
+    .cam-hd{ margin-bottom:6px; }
+    .cam-gift{ width:34px; height:34px; }
+    .cam-fila{ margin-bottom:7px; }
+    .cam-p.now{ font-size:var(--fs-5); padding:7px 4px; }
+    .cam-cta, .sh-feat .sh-buy{ min-height:46px; padding:11px 10px; }
+    .sh-feat{ padding:12px; margin-bottom:8px; }
+    .sh-feat h3{ font-size:var(--fs-4); }
+    .sh-feat-ball{ width:52px; height:52px; }
+    .sh-feat-items{ gap:6px; margin:8px 0 8px; }
+    .sh-it{ min-height:48px; padding:6px 4px; }
+    .sh-it img.ico{ width:32px; height:32px; }
+    .sh-it .cmico{ width:32px; height:32px; }
+    .sh-it .nm{ display:none; }
+    .sh-price{ margin-bottom:6px; }
+  }
   .se-track{ display:flex; gap:8px; overflow-x:auto; padding:2px 1px 9px; -webkit-overflow-scrolling:touch; }
   .se-rung{ flex:0 0 auto; width:64px; display:flex; flex-direction:column; align-items:center; gap:4px; }
   /*+AG docs/60 regla 9: el numero del peldaño y su etiqueta iban a 9 px — son 30 textos de la escalera
@@ -1153,6 +1247,44 @@
   /* --- Fase E: pulido de feel Supercell (docs/27 §4): transicion entre pantallas, squash en botones, micro-vida --- */
   @keyframes scrIn{ from{ opacity:0; transform:translateY(10px) scale(.985); } to{ opacity:1; transform:none; } }
   .scr.on{ animation:scrIn .24s cubic-bezier(.2,.75,.25,1); }
+  /*+AG 2026-08-07 · LA TIENDA ENTRA ESCALONADA. Medido antes: `.scr.on` animaba el BLOQUE ENTERO en
+     240 ms y todos sus hijos entraban con `animation:none` y `opacity:1`, o sea que la pantalla
+     aparecia de una pieza, como una diapositiva. Ahora las seis pestañas caen una detras de otra y las
+     dos tarjetas suben despues: la ultima pieza asienta a los 600 ms.
+     ⚠ LA CLASE LA PONE `openTienda()`, NUNCA `renderTienda()`. Si la pusiera el render, la pantalla
+     entera volveria a barajarse cada vez que compras o recoges algo — y eso es peor que no tener
+     entrada: convierte una compra en un parpadeo de toda la interfaz.
+     ⚠ CERO ELEMENTOS NUEVOS: son tres keyframes y tres reglas. El coste es 0 nodos. */
+  @keyframes chipIn{ 0%{ opacity:0; transform:translateY(-8px) scale(.9) } 100%{ opacity:1; transform:none } }
+  /*+AG ⚠ CARDIN NO LLEVA `scale`, Y NO ES UN CAPRICHO: LO CAZO EL BANCO DE HOMOGENEIDAD.
+     La primera version entraba con scale(.955)→1.018→1, que se ve muy bien... y durante esos 340 ms
+     TODO lo de dentro mide menos de lo que mide. El banco pilla la pantalla a media animacion, encuentra
+     un boton de 44 px midiendo 43 y lo canta como fallo de minimo tactil (paso de 3 fallos a 4, y el
+     nuevo estaba en Cosmeticos, una pestaña que ni se habia tocado).
+     El banco tenia razon: si un boton mide 43 px durante 340 ms, durante 340 ms es un boton de 43 px.
+     Con `translateY` + `opacity` la entrada se sigue viendo igual de bien y el tamaño no miente nunca. */
+  /*+AG ⚠ CARDIN NO SE PASA DE SU SITIO NI HACIA ARRIBA NI HACIA ABAJO, y las dos cosas las cazo el
+     banco de homogeneidad, una detras de otra:
+       · la 1ª version entraba con `scale(.955)→1.018`, y durante 340 ms TODO lo de dentro medía menos
+         de lo que mide: un boton de 44 px salia a 43 y el banco lo cantaba como minimo tactil roto;
+       · la 2ª quito el scale pero dejo un rebote de `translateY(-3px)`, y esos 3 px hacia arriba se
+         comian 2 px del HALO TACTIL invisible del boton (i) de la fila de encima — que mide 26 px de
+         dibujo y 44 de toque, asi que 2 px se lo bajan de 44 a 42.
+     Lo mismo en los dos casos: el banco tenia razon. Si durante 340 ms un boton no recoge el dedo en
+     44 px, durante 340 ms ese boton esta roto. Un rebote no vale ese precio. */
+  @keyframes cardIn{ 0%{ opacity:0; transform:translateY(16px) } 100%{ opacity:1; transform:none } }
+  @keyframes secIn{ 0%{ opacity:0; transform:translateX(var(--dir,14px)) } 100%{ opacity:1; transform:none } }
+  .sh-entra .sh-sec{ animation:chipIn 220ms cubic-bezier(.2,.9,.3,1) both; animation-delay:calc(var(--ix,0) * 26ms); }
+  .sh-entra #shBody > div > *{ animation:cardIn 340ms cubic-bezier(.2,.9,.3,1) both; }
+  .sh-entra #shBody > div > *:nth-child(1){ animation-delay:170ms; }
+  .sh-entra #shBody > div > *:nth-child(2){ animation-delay:260ms; }
+  #shBody.secIn{ animation:secIn 200ms cubic-bezier(.2,.85,.3,1); }
+  /*+AG LA SACUDIDA DE «NO TE LLEGA». El CTA del Pack ya no se queda muerto cuando faltan gemas: sacude
+     la pildora de gemas de la cabecera, que es DONDE esta la respuesta. No salta a la seccion de Gemas
+     y no imprime cuanto falta — señalar donde esta la puerta es informacion; empujar por ella es otra
+     cosa, y docs/12 la veta. */
+  @keyframes faltaSacude{ 0%,100%{ transform:translateX(0) } 18%{ transform:translateX(-6px) } 36%{ transform:translateX(5px) } 54%{ transform:translateX(-3px) } 76%{ transform:translateX(2px) } }
+  .falta{ animation:faltaSacude 380ms ease-in-out; }
   @keyframes popIn{ 0%{ transform:scale(.85); opacity:0; } 70%{ transform:scale(1.04); } 100%{ transform:scale(1); opacity:1; } }
   /* SQUASH al pulsar (Angry Birds/Supercell): se aplasta y sobre-impulsa. Anula el translateY previo con !important donde hace falta. */
   .h-play:active, .r-again:active, .onb-go:active, .gd-btn.prim:active, .se-cta:active, .h-modecard:active{ transform:scale(1.05,.92)!important; }
@@ -1250,13 +1382,44 @@
      ni una partícula (el JS lo mira antes de generarlas: apagar solo la animación por CSS dejaría 40
      divs congelados encima de la pantalla, que es peor que no tener efecto). Aquí solo se quitan los
      movimientos largos; la ventana sigue saliendo, porque la información no es decoración. */
+  /*+AG 2026-08-07 · EL PESO 40 TENIA QUE VERSE COMO UN PESO 40. La compra mas cara del juego se
+     distinguia de una compra media en SEIS estrellas (26 contra 20). Ahora son veinte (44 contra 24), y
+     ademas se lleva una segunda onda con retardo y un destello de pantalla. Las tres piezas se crean
+     DENTRO del `if(!quieto)` del JS: con «efectos reducidos» no nace ninguna. */
+  .cel .onda.b{ animation-delay:180ms; }
+  .cel .flash{ position:absolute; inset:0; background:#fff; pointer-events:none; animation:celFlash 260ms ease-out forwards; }
+  @keyframes celFlash{ 0%{ opacity:.55 } 100%{ opacity:0 } }
   @media (prefers-reduced-motion:reduce){
     .cel .caja{ animation:none } .cel .ico{ animation:none } .cel .rayos{ animation:none; opacity:.1 }
     .cel .onda{ display:none }
   }
+  /*+AG 2026-08-07 · LA CAPA DEL VUELO DE MONEDAS. Lo que ganas SALE VOLANDO del premio y aterriza en tu
+     pildora de la cabecera: es lo que convierte «te han dado 25» en «ahora tengo 25 mas».
+     ⚠ VIVE EN EL SHELL, NO EN #shBody, y esto esta probado: `renderTienda()` destruye #shBody con
+     innerHTML, asi que un efecto colgado de la tarjeta o del boton muere en el mismo fotograma en que
+     se dispara. #cel y #toast ya son capas fijas por esta misma razon.
+     ⚠ DOS CAPAS ANIDADAS a proposito: el arco necesita una curva en X (lineal-acelerada) y otra
+     distinta en Y (sube y cae). Con una sola animacion el vuelo sale RECTO y se lee como un
+     deslizamiento, no como una parabola.
+     ⚠ CERO AZAR (docs/12): los retardos y las dispersiones salen de dos tablas fijas, igual que
+     CEL_ANG y CEL_RAD. La misma recogida se ve siempre igual y por eso se puede capturar y verificar. */
+  #vuelo{ position:fixed; inset:0; pointer-events:none; z-index:78; overflow:hidden; }
+  #vuelo .vm{ position:absolute; animation:volX 560ms cubic-bezier(.5,0,1,.6) forwards; }
+  #vuelo .vm i{ display:block; width:26px; height:26px; background-size:contain; background-repeat:no-repeat;
+    filter:drop-shadow(0 2px 5px #0008); animation:volY 560ms cubic-bezier(.25,.9,.4,1) forwards; }
+  @keyframes volX{ from{ transform:translateX(var(--x0)) } to{ transform:translateX(var(--x1)) } }
+  @keyframes volY{ 0%{ transform:translateY(var(--y0)) scale(.6) } 22%{ transform:translateY(calc(var(--y0) - 46px)) scale(1.15) } 100%{ transform:translateY(var(--y1)) scale(.55) } }
   /*+AG el BADGE rojo (.tab.badge, ya existente) es la OTRA capa del sistema y no se toca: el badge dice "hay
      algo nuevo ahi dentro" y no se anima; el brillo dice "pulsame a mi". En CR son cosas distintas a proposito. */
-  @media (prefers-reduced-motion: reduce){ .scr.on,.h-play,.h-ball,.ready,.ready::after,.justready{ animation:none; } }
+  /*+AG ⚠ 2026-08-07: la lista crece con TODO lo nuevo de la Tienda. Y ojo con la trampa que ya costo una
+     vuelta en la celebracion: apagar por CSS no basta para lo que CREA elementos — el vuelo de monedas
+     y las particulas se comprueban en JS ANTES de nacer. Aqui solo se paran los movimientos. */
+  @media (prefers-reduced-motion: reduce){
+    .scr.on,.h-play,.h-ball,.ready,.ready::after,.justready,
+    .cam-card,.cam-card.hay.ready,.sh-feat,.cam-gift,.cam-gift.viva,.falta,
+    .sh-entra .sh-sec,.sh-entra #shBody > div > *,#shBody.secIn{ animation:none; }
+    #vuelo{ display:none; }
+  }
   /*+AG HOME v3 (mockups/flow.html validado por Jaime · docs/35 v2.2 + 37): anatomia Brawl en vertical.
      Total de copas arriba, BOLA PROTAGONISTA al centro, rieles laterales de iconos, tarjeta compacta del
      modo + JUGAR dominante abajo, banda del Pase. La barra de 5 pestañas SE QUEDA (decision: la app real ya
@@ -2390,13 +2553,15 @@
      sigue al suyo: se desatura hacia el gris, no se apaga a negro. */
   .sh-buy.gem:disabled{ box-shadow:0 3px 0 #2c5c33; }
 
-  /*+AG ⚠ BUG REAL, no estilo: el precio ANTIGUO no se tachaba. La regla era `.sh-price .was`, pero el
-     <span class="was"> vive dentro del BOTON (.sh-buy), no dentro de .sh-price, asi que el selector no
-     coincidia con nada. En pantalla salia "Comprar · 600 ~870" con los dos precios del mismo tamaño y
-     ninguno tachado: dos numeros pegados que parecen el mismo dato. */
-  /*+AG doc 60: el `.82em` daba 10,66 px —por debajo del suelo de legibilidad— y encima cambiaba de
-     tamaño segun el boton. Pasa al escalon de la escala que le toca. */
-  .sh-buy .was{ text-decoration:line-through; opacity:.72; font-size:var(--fs-2); -webkit-text-stroke-width:.25em; }
+  /*+AG ⚠ 2026-08-07 · EL TACHADO SE MUERE, Y NO SE SUSTITUYE POR OTRO TACHADO.
+     Historia corta: primero el `.was` no se tachaba (el selector apuntaba a `.sh-price` y el span vive
+     dentro de `.sh-buy`), luego se arreglo y subio de tamaño... y al medirlo de verdad salio esto: la
+     caja son 42x16 px, con `-webkit-text-stroke-width` al 25% del cuerpo —que cierra los contraojos— y
+     un `line-through` encima, en blanco al 72% sobre el degradado VERDE del boton. Contraste 1,6:1
+     contra el 4,5:1 minimo. O sea: ilegible, y ademas el numero era falso (un «~870» escrito a mano
+     cuando el contenido valia 287).
+     Ahora el ahorro se cuenta con la chapa `.sh-off` CALCULADA, fuera del boton y sobre el violeta de
+     la tarjeta, donde si tiene contraste. Un descuento que no se puede leer no es un descuento. */
 
   /*+AG ⚠ el icono del modo salia ACHATADO en la hoja de "Vas a jugar". Es el mismo SVG que en la
      rejilla de MODOS, pero `.smicon` solo fijaba font-size y un SVG sin width/height cae a su tamaño
@@ -4440,11 +4605,16 @@
     <div class="pie" id="celPie"></div>
   </div>
 </div>
+<!--+AG 2026-08-07 · LA CAPA DEL VUELO DE MONEDAS. Vacia en reposo (1 nodo); la llena vuelaMonedas().
+     Va AQUI, como hermana de #cel y dentro del shell, y no dentro de la Tienda, porque #shBody se
+     destruye entero en cada repintado: un efecto colgado de la tarjeta no llega ni al segundo
+     fotograma. Mismo motivo por el que #cel y #toast viven aqui desde siempre. -->
+<div id="vuelo" aria-hidden="true"></div>
 </div><!--+AG fin #app (columna telefono) -->
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=ca14cba"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=71c81de"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -5411,7 +5581,17 @@ const MORE={
     shNoteGems:'En cuentas de menores, las compras con dinero real pasan por <b>puerta parental</b> y <b>límite de gasto</b>, activados por defecto.',
     buyBtn:g=>'Comprar · '+g+' ◆', ownedGar:'En tu Garaje', ownedCosm:'En posesión',
     shBallCat:(q,b)=>q+' · '+b,
-    bundleNm:'Pack de Temporada', bundleFl:'Destacado de esta semana',
+    bundleNm:'Pack de Temporada', bundleFl:'Destacado de la temporada',
+    //+AG 2026-08-07 · `shVale` es la LINEA DE VALOR: lo que costaria suelto lo que llevas dentro. El
+    //   numero llega ya calculado y formateado (bundleValor + nfmt), asi que aqui solo se coloca.
+    //   ⚠ Se ha elegido esta frase, y no «AHORRAS 262 GEMAS», porque lleva UN SOLO token variable y
+    //     ningun plural: «gemas» declinado pide reglas distintas en ruso, polaco y arabe, y una clave
+    //     con plurales en 20 idiomas es una clave que se rompe.
+    shVale:n=>'Suelto vale '+n+' ◆',
+    //+AG ⚠ `bundleItems` YA NO SE PINTA (2026-08-07). El contenido del pack sale ahora de BUNDLE.items,
+    //   que apunta al catalogo real, y se dibuja en baldosas con el icono de cada cosa. Esta clave se
+    //   queda en los 20 diccionarios a proposito y NO se borra a medias: una clave muerta y documentada
+    //   es mucho mejor que veinte ficheros a los que les falta una y no se sabe por que.
     bundleItems:['Tanque (Común)','Estela Arcoíris','✦ +300 Monedas'],
     paseNm:'Pase de Batalla', paseSeason:'Temporada',
     paseBullets:['50 peldaños con recompensas <b>visibles antes de comprar</b>','Vía <b>gratis</b> para todos + vía <b>premium</b>','Solo cosmética y comodidad, <b>nunca poder</b>'],
@@ -5590,7 +5770,8 @@ const MORE={
     shNoteGems:'On kids’ accounts, real-money purchases go through a <b>parental gate</b> and a <b>spending limit</b>, on by default.',
     buyBtn:g=>'Buy · '+g+' ◆', ownedGar:'In your Garage', ownedCosm:'Owned',
     shBallCat:(q,b)=>q+' · '+b,
-    bundleNm:'Season Pack', bundleFl:'This week’s featured deal',
+    bundleNm:'Season Pack', bundleFl:'Season featured deal',
+    shVale:n=>'Worth '+n+' ◆ separately',
     bundleItems:['Tank (Common)','Rainbow Trail','✦ +300 Coins'],
     paseNm:'Battle Pass', paseSeason:'Season',
     paseBullets:['50 rungs with rewards <b>visible before you buy</b>','A <b>free</b> track for everyone + a <b>premium</b> track','Cosmetics and comfort only, <b>never power</b>'],
@@ -6455,6 +6636,20 @@ function pintaSaldo(tipo, desde, hasta){
     else cuentaSaldo(e, desde, hasta);
   }
 }
+//+AG ⚠ 2026-08-07 · EL SALDO HACIA YO-YO, y era un BUG de verdad, no un detalle de brillo.
+//   Medido al recoger el regalo del dia: al pulsar ponia 25, a los 150 ms ponia 20, y a los 400 ms
+//   volvia a 25. O sea: subia, RETROCEDIA y volvia a subir. Y lo mismo al comprar el pack.
+//   La causa: `cuentaSaldo()` va escribiendo los pasos intermedios en la pildora mientras, en paralelo,
+//   `renderTienda()` (y `openTemporada()`, y `renderGaraje()`...) escriben el valor FINAL a pelo con
+//   textContent. Las dos manos escribiendo en el mismo nodo, y gana la ultima.
+//   El arreglo es una sola puerta: quien quiera pintar una pildora pasa por aqui, y aqui se respeta a
+//   quien esta contando. `cuentaSaldo` ya marcaba el nodo con la clase `.cuenta`; solo faltaba que
+//   alguien la mirase. Arreglarlo solo en la Tienda habria dejado el mismo fallo vivo en Temporada,
+//   que es justo donde se cobran los retos.
+function pildora(id, v){ const e=el(id); if(!e) return;
+  if(e.classList.contains('cuenta')) return;   // hay una cuenta en marcha: es ella quien manda
+  e.textContent = nfmt(v);
+}
 //+AG un session_start por carga de pagina. props sin nada personal (docs/24 §1/§4).
 apunta('session_start', { lang:LANG, level:SAVE.level, played:SAVE.played,
   movil: !!(window.matchMedia && matchMedia('(pointer:coarse)').matches),
@@ -6552,7 +6747,7 @@ function ligaNombre(t,d){ const s=S(), tiers=(s.seTiers&&s.seTiers.length===5)?s
 const ligaAhora=()=>{ const L=ligaDe(totalCopas()), suelo=Math.max(0, SAVE.ligaSuelo|0);
   return L.t<suelo ? {t:suelo, d:0, porSuelo:true} : L; };
 function renderHome(){ applyShell();
-  el('hChispas').textContent=SAVE.chispas; el('hGemas').textContent=SAVE.gemas; el('hLvl').textContent=SAVE.level;
+  pildora('hChispas', SAVE.chispas); pildora('hGemas', SAVE.gemas); el('hLvl').textContent=SAVE.level;
   document.documentElement.style.setProperty('--lvlpct', Math.round(100*SAVE.xp/xpForLevel(SAVE.level))+'%');
   //+AG Home v3: total de copas (suma de la coleccion, doc 37) + bola PROTAGONISTA equipada + tarjeta compacta del modo
   el('hCups').textContent=nfmt(totalCopas());
@@ -7102,8 +7297,9 @@ function celebra(datos){
   if(el('cel').classList.contains('on')){ celCola.push(datos); return; }
   _celebraYa(datos);
 }
-function _celebraYa({ ico, color, titulo, sub, pie, peso=1 }){
+function _celebraYa({ ico, color, titulo, sub, pie, peso=1, vuela=null }){
   const cel=el('cel'), caja=el('celCaja'), fx=el('celFx');
+  celVuela = vuela;   //+AG lo que se lleve la ventana al cerrarse: 'chispas' | 'gemas' | null (ver cierraCel)
   clearTimeout(celT);
   cel.style.setProperty('--cc', color||'#ffd23f');
   el('celIco').innerHTML = ico ? `<img src="${ico}" alt="">` : '';
@@ -7117,8 +7313,17 @@ function _celebraYa({ ico, color, titulo, sub, pie, peso=1 }){
   const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches
               || !!(SAVE.settings && SAVE.settings.reducedFx);
   if(!quieto){
-    const n = peso>=40 ? 26 : peso>=15 ? 20 : peso>=5 ? 15 : 11;
+    //+AG ⚠ 2026-08-07 · LA ESCALA SE ABRE POR ARRIBA. Medido: el pack mas caro del juego (peso 40) se
+    //   distinguia de una compra media (peso 15) en SEIS estrellas. Con 44/24/16/11 son VEINTE, y el
+    //   escalon de abajo no se toca (11 sigue siendo 11: una compra de 12 monedas no tiene que explotar).
+    const n = peso>=40 ? 44 : peso>=15 ? 24 : peso>=5 ? 16 : 11;
     const onda=document.createElement('div'); onda.className='onda'; fx.appendChild(onda);
+    //+AG el peso 40 se lleva ADEMAS una segunda onda a destiempo y un destello de pantalla. Las dos
+    //   viven aqui dentro, o sea DENTRO del `if(!quieto)`: con efectos reducidos no nacen.
+    if(peso>=40){
+      const o2=document.createElement('div'); o2.className='onda b'; fx.appendChild(o2);
+      const fl=document.createElement('div'); fl.className='flash'; fx.appendChild(fl);
+    }
     for(let i=0;i<n;i++){
       const a=CEL_ANG[i%CEL_ANG.length]*Math.PI/180, r=CEL_RAD[i%CEL_RAD.length]*(1+(i/n)*0.5);
       const p=document.createElement('div'); p.className='pz';
@@ -7140,13 +7345,61 @@ function _celebraYa({ ico, color, titulo, sub, pie, peso=1 }){
   cel.classList.add('on'); cel.setAttribute('aria-hidden','false');
   //+AG se cierra tocando en CUALQUIER sitio y sola a los 2,2 s. Las dos cosas: una ceremonia que hay
   //   que cerrar a mano molesta a la segunda compra, y una que no se puede cortar molesta a la tercera.
-  celT=setTimeout(cierraCel, 2200);
+  //+AG el peso 40 se queda UN SEGUNDO MAS: es el unico momento del juego que se gana ese segundo.
+  celT=setTimeout(cierraCel, peso>=40 ? 3200 : 2200);
 }
 function cierraCel(){ clearTimeout(celT); const cel=el('cel');
+  //+AG ⚠ EL VUELO SALE AL CERRAR, NO AL ABRIR, y el orden importa: se lee el sitio del icono ANTES de
+  //   quitar la clase `.on` (con la ventana escondida el rect sale 0x0 y las monedas nacerian en la
+  //   esquina). Lo que aterriza en la pildora es lo que acabas de ganar.
+  const lleva = celVuela; celVuela = null;
+  if(lleva) vuelaMonedas(el('celIco'), lleva);
   cel.classList.remove('on'); cel.setAttribute('aria-hidden','true'); el('celFx').innerHTML='';
   //+AG y si había cola, la siguiente entra tras un respiro corto: encadenadas sin pausa se leen como
   //   un parpadeo y no como dos premios distintos.
   if(celCola.length) setTimeout(()=>{ const d=celCola.shift(); if(d) _celebraYa(d); }, 220); }
+//+AG 2026-08-07 · EL VUELO DE MONEDAS. Siete monedas salen del premio, describen un arco y aterrizan en
+//   la pildora de la cabecera; cuando la primera toca, el saldo empieza a contar. Es la mitad que
+//   faltaba de una transaccion: sin esto el numero de arriba cambiaba solo, sin que nada lo conectara
+//   con lo que acababas de pulsar.
+//   ⚠ CERO AZAR (docs/12): retardos y dispersiones salen de dos TABLAS FIJAS, como CEL_ANG/CEL_RAD. La
+//     misma recogida se ve siempre igual, y por eso se puede capturar para verificarla.
+//   ⚠ Y el apagado se mira AQUI, antes de crear nada: con «efectos reducidos» no nace ni un div (apagar
+//     por CSS dejaria 14 nodos congelados, que es peor que no tener efecto).
+const VM_RETARDO = [0,55,110,45,150,90,190];
+const VM_SALIDA  = [[-26,-8],[18,-22],[-8,14],[30,4],[-34,10],[6,-30],[22,18]];
+let celVuela = null;
+function vuelaMonedas(desde, moneda){
+  const capa = el('vuelo'), destino = el(moneda==='gemas' ? 'shGemas' : 'shChispas');
+  if(!capa || !desde || !destino) return;
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches || (SAVE.settings && SAVE.settings.reducedFx)) return;
+  const a = desde.getBoundingClientRect(), b = destino.getBoundingClientRect();
+  if(!a.width || !b.width) return;                     // la pildora no esta en pantalla: no hay adonde volar
+  const x0 = a.left + a.width/2 - 13, y0 = a.top + a.height/2 - 13;
+  const x1 = b.left + b.width/2 - 13, y1 = b.top + b.height/2 - 13;
+  const art = moneda==='gemas' ? uiArt('moneda-gema') : uiArt('moneda-chispa');
+  let vivas = 0;
+  VM_RETARDO.forEach((ret, i)=>{
+    const [dx,dy] = VM_SALIDA[i];
+    const v = document.createElement('div'); v.className='vm';
+    v.style.cssText = `left:0;top:0;--x0:${(x0+dx).toFixed(1)}px;--x1:${x1.toFixed(1)}px;`
+      + `--y0:${(y0+dy).toFixed(1)}px;--y1:${y1.toFixed(1)}px;animation-delay:${ret}ms`;
+    const ic = document.createElement('i');
+    ic.style.backgroundImage = `url("${art}")`;
+    ic.style.animationDelay = ret+'ms';
+    v.appendChild(ic); capa.appendChild(v); vivas++;
+    //+AG ⚠ CUANDO ATERRIZA LA ULTIMA, LA PILDORA PEGA UN GOLPE. Sin esto el vuelo acaba en nada: siete
+    //   monedas que llegan a un numero que no se inmuta se leen como decoracion, no como un ingreso.
+    //   (El numero ya subio DENTRO de la ventana, pero eso el jugador no lo ve: el velo tapa la
+    //   cabecera. Lo que ve es esto: las monedas llegan y su cartera responde.)
+    v.addEventListener('animationend', ()=>{ v.remove();
+      if(--vivas===0){ capa.innerHTML='';
+        const caja = destino.closest('.coin') || destino;
+        caja.classList.remove('justready'); void caja.offsetWidth; caja.classList.add('justready');
+        setTimeout(()=>caja.classList.remove('justready'), 560);
+      } }, { once:true });
+  });
+}
 el('cel').addEventListener('pointerdown', cierraCel);   //+AG tocar en cualquier sitio la cierra
 //+AG 2026-08-06 · EL SALDO BAJA CONTANDO. Un número que cambia de golpe no se ve; uno que rueda, sí —
 //   y es la mitad de la transacción (la otra mitad es la cosa que te llevas). 9 pasos en 280 ms, rápido
@@ -7295,7 +7548,7 @@ function syncBadges(){
 }
 
 function openGaraje(){ checkHitos(); showScreen('garaje'); applyShell(); renderGaraje(); }
-function renderGaraje(){ el('gChispas').textContent=SAVE.chispas; el('gGemas').textContent=SAVE.gemas;
+function renderGaraje(){ pildora('gChispas', SAVE.chispas); pildora('gGemas', SAVE.gemas);
   const g=el('gGrid'); g.innerHTML='';
   ARCH_KEYS.forEach(k=>{ const A=ARCHS[k], b=owned(k), q=QUAL[A.q];   //+AG doc 39: el marco es la rareza FIJA de la bola (tenida o no)
     const c=document.createElement('div'); c.className='g-card'+(b?'':' locked'); c.style.setProperty('--qc',q.c);
@@ -7337,7 +7590,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=ca14cba').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=71c81de').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -7589,16 +7842,55 @@ const BOOSTER_LOTES = [ {n:5,m:55}, {n:15,m:150}, {n:40,m:360} ];
 //   por eso está limitada a una al día; estos van al cambio oficial de CAMBIO, así que no hay nada que
 //   racionar — comprar aquí nunca es mejor negocio que jugar, solo es más rápido.
 const MON_PACKS = [ {g:25}, {g:100}, {g:300}, {g:800} ].map(p=>({ ...p, m:enMonedas(p.g) }));
-//+AG `items` aqui ya no se pinta (la Tienda usa s.bundleItems, que esta traducido a los 20 idiomas);
-//   se deja al dia igualmente para que nadie lo lea y se crea que la moneda sigue llamandose Chispas.
-//+AG docs/60 F5 (2-ago): los dos primeros renglones llevaban un escudo y un arcoiris del sistema. Se QUITAN, no se cambian
-//   por un SVG, y el motivo es que la lista que SE VE (s.bundleItems, los 20 idiomas) nunca tuvo icono:
-//   son tres renglones de texto dentro de la oferta, y el unico simbolo que sobrevive es el ✦ del tercero
-//   porque coinify lo cambia por la moneda dibujada. Meterle aqui un cosmSvg habria dejado esta copia
-//   prometiendo una fila con icono que la Tienda de verdad no pinta, que es justo el enredo que este
-//   duplicado tiene que evitar. Ademas «Tanque» es una BOLA comun, no un escudo: el emoji ni siquiera
-//   describia el premio, asi que tampoco tocaba el icono-escudo.webp del encargo 34.
-const BUNDLE={nm:'Pack de Temporada',fl:'Destacado de esta semana',items:['Tanque (Común)','Estela Arcoíris','✦ +300 Monedas'],g:600,was:'~870'};
+//+AG ⚠⚠ 2026-08-07 · EL PACK DEJA DE MENTIR. Esto no es un cambio de estilo y hay que leerlo entero.
+//
+//   Lo que habia: contenido = Tanque + Estela Arcoiris + 300 monedas. Precio = 600 gemas. Y en el boton,
+//   un «~870» TACHADO Y ESCRITO A MANO que decia que valia 870.
+//   Lo que vale ESO de verdad, con los precios del propio codigo: Tanque 12 (PRECIO_POR_RAREZA[0].g) +
+//   Estela 250 (COSM) + 300 monedas = 25 gemas al cambio oficial (CAMBIO=12). TOTAL: 287 gemas.
+//   O sea que el «destacado» de la Tienda cobraba 600 por 287 —mas del DOBLE de lo que daba— y encima
+//   lo anunciaba como un chollo con una cifra inventada. Eso es exactamente lo que docs/12 prohibe
+//   («ofertas honestas, sin trucos») y lo que docs/81 §2.2 ya habia mandado retirar.
+//
+//   Y salio al agrandar la tarjeta: el tachado iba a subir de 11 a 13 px y a ganar contraste, o sea que
+//   el pase de espectacularidad habria AMPLIFICADO la mentira. Un numero falso pequeño sigue siendo
+//   falso; grande, ademas es una promesa.
+//
+//   Lo que hay ahora, y el porque de cada numero:
+//   · El contenido ES EL MISMO (Tanque + Estela Arcoiris): no se promociona ninguna skin nueva, para no
+//     vaciar la pestaña de Cosmeticos, que solo tiene seis.
+//   · Las monedas suben de 300 a 6.000. Eso son 500 gemas AL CAMBIO OFICIAL, ni un cent de regalo: el
+//     mismo cambio que ya vende MON_PACKS. El descuento no sale de inflar las monedas, sale de que la
+//     bola y la estela entran GRATIS encima.
+//   · El precio baja de 600 a 500 gemas. 500 es EXACTAMENTE el pack de 4,99 € (GEM_PACKS[1]), asi que
+//     no deja resto varado en la cartera; con 600 habia que comprar 660 (6,97 €) o 1.200 (9,99 €), que
+//     es el patron de «moneda que casi llega» que veta docs/45 §5.
+//   · Valor 762, precio 500 → −34 %, y ese 34 SE CALCULA (bundleOff), no se escribe.
+//
+//   ⚠ EL ARRAY PASA A SER TIPADO, y esa es la pieza que impide que esto vuelva a pasar: el contenido
+//     deja de ser tres frases sueltas y pasa a ser tres objetos que APUNTAN al catalogo real. De ahi
+//     salen a la vez el dibujo de cada baldosa, el valor de la linea de ahorro y lo que cobra
+//     buyBundle(). Antes eran tres sitios distintos escritos a mano que podian divergir — y divergieron.
+const BUNDLE={ nm:'Pack de Temporada',
+  items:[ {t:'bola',k:'tanque'}, {t:'cosm',id:'es_arcoiris'}, {t:'monedas',n:6000} ], g:500 };
+//+AG el valor SUELTO del pack, sumado de los precios reales. Si mañana sube el precio de la Estela,
+//   este numero sube solo y el descuento se recalcula: no hay ningun sitio donde se pueda quedar viejo.
+const bundleValor = () => BUNDLE.items.reduce((s,it) =>
+  s + ( it.t==='bola'    ? PRECIO_POR_RAREZA[ARCHS[it.k].q].g
+      : it.t==='cosm'    ? (COSM.find(c=>c.id===it.id)||{g:0}).g
+      : Math.round(it.n/CAMBIO) ), 0);
+//+AG ⚠ EL `Math.max(0, ...)` ES LA GUARDA, no una defensa paranoica: si alguien vuelve a poner un precio
+//   por encima del valor, el descuento sale 0 y la chapa NO SE PINTA. Un pack malo podra existir, pero
+//   ya no podra anunciarse como una ganga. Es la unica forma de que esto no dependa de que alguien se
+//   acuerde de revisar un numero a mano.
+const bundleOff = () => Math.max(0, Math.round(100*(1 - BUNDLE.g/bundleValor())));
+//+AG ¿ya lo tienes todo? Hasta hoy `buyBundle()` comprobaba item por item si te lo daba, pero el boton
+//   cobraba igual: un jugador que ya tuviera el Tanque y la Estela pagaba el pack entero por las
+//   monedas y nadie se lo decia. Ahora el boton se apaga como «Ya la tienes».
+//   ⚠ las monedas se FILTRAN antes del every(): son un grifo, no una posesion, y si entraran en la
+//     cuenta el pack no se daria nunca por completo (una moneda nunca esta «ya comprada»).
+const bundleTodo = () => BUNDLE.items.filter(it => it.t!=='monedas')
+  .every(it => it.t==='bola' ? owned(it.k) : hasCosm(it.id));
 const PASE={nm:'Pase de Batalla',g:900};
 //+AG doc 45 §2: las Gemas compran Monedas, pero UNA VEZ AL DIA. El tope es lo que separa
 //   "el dinero acelera" de "el dinero compra el techo" (docs/20 §2.1): sin el, pagar seria
@@ -7620,9 +7912,25 @@ const SECS=['destacados','boosters','bolas','cosmeticos','gemas','pase'];   //+A
 const SH_NOTA={destacados:'shNoteFeat',boosters:'shNoteBst',bolas:'shNoteBalls',cosmeticos:'shNoteCosm',gemas:'shNoteGems',pase:null};
 let shSec='destacados';
 const hasCosm=id=>SAVE.cosmetics.includes(id);
-function openTienda(){ showScreen('tienda'); applyShell(); renderTienda(); }
-function renderTienda(){ el('shChispas').textContent=SAVE.chispas; el('shGemas').textContent=SAVE.gemas;
-  const secs=el('shSecs'); secs.innerHTML=''; SECS.forEach((k,ix)=>{ const b=document.createElement('button'); b.className='sh-sec'+(shSec===k?' on':''); b.textContent=S().shSecs[ix]; b.onclick=()=>{ shSec=k; renderTienda(); }; secs.appendChild(b); });
+//+AG ⚠ 2026-08-07 · LA CLASE DE ENTRADA LA PONE `openTienda()`, NUNCA `renderTienda()`. Es la
+//   diferencia entre "la Tienda entra bonita al abrirla" y "la Tienda entera se rebaraja cada vez que
+//   compras algo", que es mucho peor que no tener entrada: convierte una compra en un parpadeo de toda
+//   la interfaz. Por eso vive aqui y no una linea mas abajo.
+function openTienda(){ showScreen('tienda'); applyShell(); renderTienda();
+  const t=el('tienda'); t.classList.add('sh-entra'); setTimeout(()=>t.classList.remove('sh-entra'), 650); }
+function renderTienda(){ pildora('shChispas', SAVE.chispas); pildora('shGemas', SAVE.gemas);
+  const secs=el('shSecs'); secs.innerHTML=''; SECS.forEach((k,ix)=>{ const b=document.createElement('button'); b.className='sh-sec'+(shSec===k?' on':''); b.textContent=S().shSecs[ix];
+    b.style.setProperty('--ix', ix);   //+AG el escalonado de la entrada: 0/26/52/78/104/130 ms, por CSS
+    //+AG al cambiar de seccion el cuerpo entra DESLIZANDO, y hacia el lado que corresponde: si vas a una
+    //   pestaña de mas a la derecha entra por la derecha. La direccion es NOMINAL (la posicion en SECS),
+    //   cero azar. Y la pestaña que se enciende pega un destello de una vez con `justFlash`, que ya existe.
+    b.onclick=()=>{ const antes=SECS.indexOf(shSec); shSec=k; renderTienda();
+      const body=el('shBody'); body.style.setProperty('--dir', SECS.indexOf(k)>antes ? '18px' : '-18px');
+      body.classList.remove('secIn'); void body.offsetWidth; body.classList.add('secIn');
+      const on=el('shSecs').querySelector('.sh-sec.on');
+      if(on){ on.classList.remove('justready'); void on.offsetWidth; on.classList.add('justready'); setTimeout(()=>on.classList.remove('justready'), 560); }
+    };
+    secs.appendChild(b); });
   const body=el('shBody'); body.innerHTML=''; body.appendChild({destacados:featEl,boosters:boostersEl,bolas:bolasEl,cosmeticos:cosmEl,gemas:gemasEl,pase:paseEl}[shSec]());
   //+AG docs/60 F3: la (i) de la cabecera cuenta LA SECCION QUE SE ESTA VIENDO. El Pase no tiene
   //   nota propia (su tarjeta ya lo explica con sus bullets), asi que ahi la (i) se esconde en vez
@@ -7639,12 +7947,15 @@ function renderTienda(){ el('shChispas').textContent=SAVE.chispas; el('shGemas')
 //   ⚠ SIN RACHA Y SIN RELOJ: si hoy no lo recoges no pierdes nada, el paso te espera. Por eso el texto
 //     de "ya recogido" es «vuelve mañana» y NO una cuenta atras — la cuenta atras es la que mete la
 //     ansiedad que este proyecto veta (docs/10 §7).
-function camPremioTxt(pr){ const s=S();
+//+AG ⚠ 2026-08-07 · `cls` es nuevo: el premio de HOY pinta su moneda a 24 px (`.cico.md`) y los de ayer
+//   y mañana siguen a 15 (`.sm`). El icono tiene que pesar lo mismo que su numero, y el numero de hoy
+//   ha subido de 16 a 24 px — dejarlo en 'sm' habria puesto una moneda enana al lado de una cifra grande.
+function camPremioTxt(pr, cls){ const s=S(), z=cls||'sm';
   if(!pr) return '';
-  if(pr.t==='monedas') return `+${pr.n} ${coinIco('chispa','sm')}`;
-  if(pr.t==='gemas')   return `+${pr.n} ${coinIco('gema','sm')}`;
-  if(pr.t==='dup')     return `${uiIco('ui-reto','sm')} ×2` + (pr.gemas?` +${pr.gemas} ${coinIco('gema','sm')}`:'');
-  if(pr.t==='grande')  return `★ +${pr.gemas} ${coinIco('gema','sm')}`;
+  if(pr.t==='monedas') return `+${pr.n} ${coinIco('chispa',z)}`;
+  if(pr.t==='gemas')   return `+${pr.n} ${coinIco('gema',z)}`;
+  if(pr.t==='dup')     return `${uiIco('ui-reto',z)} ×2` + (pr.gemas?` +${pr.gemas} ${coinIco('gema',z)}`:'');
+  if(pr.t==='grande')  return `★ +${pr.gemas} ${coinIco('gema',z)}`;
   return '';
 }
 function camEl(){
@@ -7654,37 +7965,115 @@ function camEl(){
   //+AG los tres iconos: ayer (hecho), hoy (grande) y mañana (atenuado). El de mañana SIEMPRE visible:
   //   ver lo que viene es la regla de "cero azar" — nunca una caja cerrada.
   const ayer = i>0 ? camPremioTxt(CAM_PASOS[i-1]) : '';
-  const hoy  = fin ? '' : camPremioTxt(CAM_PASOS[i]);
+  const hoy  = fin ? '' : camPremioTxt(CAM_PASOS[i], 'md');
   const man  = (i+1<total) ? camPremioTxt(CAM_PASOS[i+1]) : '';
-  d.className='cam-card'+(hay?' hay':'');
-  d.innerHTML=`<div class="cam-hd"><span class="cam-t">${s.camH}</span><span class="cam-d">${fin?s.camFin:s.camDia(i+1,total)}</span></div>
+  //+AG ⚠ EL BRILLO CAMBIA DE DUEÑO: lo llevaba el boton (323x44 px) y pasa a llevarlo LA TARJETA
+  //   (349x186). Sigue habiendo UN SOLO `.ready` por pantalla —la regla no se rompe, el brillo se
+  //   MUEVE— pero ahora ilumina cuatro veces mas superficie con el mismo readyGlow de siempre.
+  d.className='cam-card'+(hay?' hay ready':'');
+  //+AG el regalo DIBUJADO. `ui-regalo.webp` ya existia en el repo (encargo 31) y solo se usaba a 46 px
+  //   en Perfil: aqui es la cara de la tarjeta. Se balancea si hay algo, y se queda gris si ya lo
+  //   cogiste — nunca desaparece (canon 6: lo hecho se apaga, no se borra).
+  d.innerHTML=`<div class="cam-hd"><div class="cam-txt"><span class="cam-t">${s.camH}</span></div><span class="cam-d">${fin?s.camFin:s.camDia(i+1,total)}</span><img class="cam-gift ${hay?'viva':'ido'}" src="${uiArt('ui-regalo')}" alt=""></div>
     <div class="cam-fila">
       <div class="cam-p old">${ayer||'·'}</div>
       <div class="cam-p now">${hoy||'★'}</div>
       <div class="cam-p next">${man||'·'}</div>
     </div>`;
   const b=document.createElement('button');
-  b.className='sh-buy cam-cta'+(hay?' ready':'');
+  b.className='sh-buy cam-cta';
   b.textContent = fin ? s.camFin : (hay ? s.camCoger : s.camManana);
   b.disabled = !hay;
-  b.onclick=()=>{ const pr=camRecoger(); if(pr){ renderTienda(); syncBadges(); applyShell(); toast(s.camCogido); } };
+  //+AG ⚠ EL «RECOGER» DEJA DE SER UN TOAST. Medido antes de tocarlo: al pulsar, el DOM no crecia —
+  //   pasaba de 1008 a 1006 nodos— y a los 16/150/400/900/1400 ms habia CERO particulas. El unico
+  //   acuse era un texto de 13 px a 86 px del fondo de la pantalla. O sea que el regalo diario, que es
+  //   lo primero que hace el jugador cada dia, celebraba MENOS que comprar un booster de 12 monedas.
+  //   El peso sale del PREMIO, nunca de la suerte: monedas 5, gemas/duplicador 15, y el paso 20 (el
+  //   final del camino) 40, que es el escalon con doble onda y destello.
+  //   Y el `toast()` SE VA: la ventana ya lo dice todo, y dos avisos a la vez es ruido, no enfasis.
+  b.onclick=()=>{ const pr=camRecoger(); if(!pr) return;
+    const peso = pr.t==='monedas' ? 5 : pr.t==='grande' ? 40 : 15;
+    const conGemas = pr.t==='gemas' || pr.t==='grande' || (pr.t==='dup' && pr.gemas);
+    renderTienda(); syncBadges(); applyShell();
+    celebra({ ico: conGemas ? uiArt('moneda-gema') : pr.t==='dup' ? uiArt('ui-reto') : uiArt('moneda-chispa'),
+      color: pr.t==='monedas' ? '#FBB915' : '#26ec35',
+      titulo: s.camH, sub: camPremioTxt(pr).replace(/<[^>]+>/g,'').trim(), pie: s.camDia(i+1,total),
+      peso, vuela: conGemas ? 'gemas' : 'chispas' }); };
   d.appendChild(b);
+  //+AG ⚠ LA TARJETA ENTERA ES EL BOTON. Medido: de los 48.511 px² de la tarjeta solo respondian al dedo
+  //   14.212 (el 29 %), asi que 7 de cada 10 dedos caian en zona muerta y no pasaba nada. El
+  //   `closest('.cam-cta')` evita el doble disparo cuando el dedo cae DENTRO del boton de verdad.
+  if(hay) d.onclick = e => { if(!e.target.closest('.cam-cta')) b.click(); };
   return d;
+}
+//+AG 2026-08-07 · UNA BALDOSA POR COSA QUE TE LLEVAS. Antes esto era un <ul> con vinetas: tres
+//   renglones de texto de 13 px para vender lo mas caro de la Tienda. Cada baldosa saca su dibujo del
+//   MISMO sitio de donde lo saca el resto del juego —el arte de la bola en el Garaje, el SVG del
+//   cosmetico en su pestaña, la moneda dibujada— asi que lo que se vende se PARECE a lo que recibes.
+//   Y cada una lleva su marco de rareza en --qc, el mismo lenguaje de color que ya usan las fichas.
+function bundleItemHTML(it){
+  if(it.t==='bola'){ const A=ARCHS[it.k];
+    return `<div class="sh-it" style="--qc:${QUAL[A.q].c}"><img class="ico" src="${ballArt(it.k,'icon')}" alt=""><div class="nm">${archName(it.k)}</div></div>`; }
+  if(it.t==='cosm'){ const c=COSM.find(x=>x.id===it.id); if(!c) return '';
+    return `<div class="sh-it" style="--qc:${QUAL[c.rar].c}">${c.ic}<div class="nm">${cosmName(c)}</div></div>`; }
+  return `<div class="sh-it" style="--qc:#FBB915"><img class="ico" src="${uiArt('moneda-chispa')}" alt=""><div class="nm">${nfmt(it.n)}</div></div>`;
 }
 function featEl(){ const d=document.createElement('div');
   const s=S();
   d.appendChild(camEl());   //+AG doc 75: el regalo del dia va ARRIBA del bundle — es lo unico gratis de la pantalla
   const f=document.createElement('div');
-  f.innerHTML=`<div class="sh-feat"><div class="fl">${s.bundleFl}</div><h3>${s.bundleNm}</h3><ul>${s.bundleItems.map(i=>`<li>${coinify(i)}</li>`).join('')}</ul>
-    <button class="sh-buy gem" id="buyBundle">${coinify(s.buyBtn(BUNDLE.g))} <span class="was">${BUNDLE.was} ${coinIco('gema','sm')}</span></button></div>
-`;
+  const bola=BUNDLE.items.find(i=>i.t==='bola');
+  const off=bundleOff(), todo=bundleTodo();
+  //+AG LA BOLA VIVA, peticion literal de Jaime («que aparezcan bolas si es necesario»). Es la misma que
+  //   gira en el Garaje (docs/55), no un retrato: la clave sale del array tipado, asi que un pack sin
+  //   bola no deja un hueco vacio. Y no hace falta JS: renderTienda() ya llama a vivasSync() al final,
+  //   y vivas.mjs barre `[data-viva]` de todo el documento.
+  //+AG ⚠ EL ROTULO VA FUERA DE LA FILA, y esto se vio MIDIENDO la primera version: metido dentro del
+  //   flex junto a la bola le quedaban 249 px de los 375, y «DESTACADO DE LA TEMPORADA» a 13 px parte
+  //   en DOS lineas y deja una chapa de 37 px de alto con forma de ladrillo. Fuera tiene los 313 px
+  //   enteros y entra de una. La fila de abajo se queda con lo que de verdad es una pareja: el nombre
+  //   del pack y la bola que te llevas.
+  f.innerHTML=`<div class="sh-feat">
+    <div class="fl">${s.bundleFl}</div>
+    <div class="sh-feat-top">
+      <h3>${s.bundleNm}</h3>
+      ${bola?`<div class="sh-feat-ball" data-viva="${bola.k}"></div>`:''}
+    </div>
+    <div class="sh-feat-items">${BUNDLE.items.map(bundleItemHTML).join('')}</div>
+    <div class="sh-price">${off>0?`<span class="sh-off">−${off} %</span>`:''}<span>${s.shVale(nfmt(bundleValor()))}</span></div>
+    <button class="sh-buy gem" id="buyBundle"></button></div>`;
   d.appendChild(f);
-  const b=d.querySelector('#buyBundle'); b.disabled=SAVE.gemas<BUNDLE.g; b.onclick=buyBundle;
+  const b=d.querySelector('#buyBundle');
+  if(todo){
+    //+AG ya lo tienes todo: hasta hoy el boton cobraba igual y te daba solo las monedas, sin avisar.
+    b.className='sh-buy owned'; b.textContent=s.ownedGar; b.disabled=true;
+  } else {
+    //+AG ⚠ EL CTA SIN SALDO DEJA DE SER UN AGUJERO NEGRO. Estaba medido: con la cartera de arranque (20
+    //   gemas, o sea el 100 % de los jugadores nuevos) pulsar «Comprar» dejaba el DOM exactamente igual
+    //   —cero nodos, cero toast, no cambiaba de seccion—, y encima con `disabled` de verdad Chrome movil
+    //   ni despacha el pointerdown, asi que tampoco sonaba. El boton mas grande de la pantalla no hacia
+    //   nada. Ahora suena el «no» y SACUDE la pildora de gemas, que es donde esta la respuesta.
+    //   ⚠ Y ahi se para: NO salta a la seccion de Gemas y NO imprime cuanto te falta. Señalar donde esta
+    //     la puerta es informacion; empujar por ella es otra cosa, y docs/12 la veta.
+    b.innerHTML=coinify(s.buyBtn(BUNDLE.g));
+    b.disabled=false;
+    b.onclick=()=>{ if(SAVE.gemas<BUNDLE.g){ sacudeGemas(); return; } buyBundle(); };
+  }
   //+AG doc 40: la oferta destacada es LA accion de la Tienda; el resto de botones de compra NO brillan.
   //   ⚠ pero si HAY REGALO por recoger, el brillo es del regalo: es gratis y es de hoy, y dos cosas
   //     brillando a la vez en la misma pantalla rompen la regla de "un solo `.ready` por pantalla".
-  b.classList.toggle('ready', !b.disabled && !camHay());
+  //   ⚠ 2026-08-07: la condicion ya NO puede ser `!b.disabled`, porque el boton ha dejado de apagarse
+  //     cuando falta saldo — con la condicion vieja se habria puesto a brillar justo cuando NO se puede
+  //     pagar, que es la peor version posible de un cebo. Se pregunta por el saldo directamente.
+  b.classList.toggle('ready', !todo && SAVE.gemas>=BUNDLE.g && !camHay());
   return d;
+}
+//+AG la sacudida de «no te llega»: 380 ms sobre la pildora de gemas de la cabecera. Se reinicia a mano
+//   (quitar clase + reflow + poner) porque pulsar dos veces seguidas sin eso no vuelve a animar.
+function sacudeGemas(){ const p=el('shGemas'); if(!p) return;
+  const caja=p.closest('.coin')||p;
+  caja.classList.remove('falta'); void caja.offsetWidth; caja.classList.add('falta');
+  setTimeout(()=>caja.classList.remove('falta'), 420);
 }
 //+AG la nota va por coinify: lleva ✦ y ◆ dentro de la frase y sin esto se pintaba el glifo del
 //   sistema, que es justo lo que el juego dejo de hacer en todas las demas pantallas.
@@ -7882,12 +8271,32 @@ function buyChispaDeal(){ if(dealDone() || SAVE.gemas<CHISPA_DEAL.g) return;
   celebra({ ico:'arte/ui/moneda-chispa.webp?v=2', color:'#FBB915',
             titulo:S().chispasWord||'Monedas', sub:'+'+nfmt(CHISPA_DEAL.c), peso:15 });
   renderTienda(); }
-function buyBundle(){ if(SAVE.gemas<BUNDLE.g) return; dinero('gemas', -BUNDLE.g, 'pack');
-  if(!owned('tanque')){ SAVE.balls.push({arch:'tanque',lvl:1,xp:0,copas:0}); apunta('ball_get', { arch:'tanque', via:'pack' }); }
-  if(!hasCosm('es_arcoiris')) SAVE.cosmetics.push('es_arcoiris'); dinero('chispas', 300, 'pack'); persist();
+//+AG ⚠ 2026-08-07 · COBRA POR EL ARRAY, Y CANTA LOS TRES CONTENIDOS.
+//   Dos fallos, y el segundo era el gordo:
+//   (1) el Tanque y la Estela estaban ESCRITOS A MANO aqui. O sea que el pack tenia su contenido en dos
+//       sitios (el array que se PINTA y este que COBRA) y podian divergir sin que nadie se enterase.
+//       Ahora los dos salen de BUNDLE.items: cambiar el pack es cambiar una linea, no tres.
+//   (2) de las tres cosas que te llevabas solo se celebraba UNA. La Estela —el 87 % del valor del pack—
+//       no aparecia en ningun fotograma: entraba en la coleccion en silencio. Ahora salen las tres,
+//       encadenadas por la cola de celebra() (`celCola`), que estaba montada exactamente para esto y
+//       aqui no se usaba. La mas gorda va primero: si el jugador corta la ceremonia tocando, corta por
+//       lo pequeño.
+function buyBundle(){ if(SAVE.gemas<BUNDLE.g || bundleTodo()) return;
+  dinero('gemas', -BUNDLE.g, 'pack');
+  const fiesta=[];
+  for(const it of BUNDLE.items){
+    if(it.t==='bola'){ if(!owned(it.k)){ SAVE.balls.push({arch:it.k,lvl:1,xp:0,copas:0}); apunta('ball_get', { arch:it.k, via:'pack' }); }
+      fiesta.push({ ico:ballArt(it.k,'icon'), color:QUAL[ARCHS[it.k].q].c, titulo:archName(it.k), sub:qualName(ARCHS[it.k].q), pie:S().bundleNm, peso:15 }); }
+    else if(it.t==='cosm'){ const c=COSM.find(x=>x.id===it.id); if(!c) continue;
+      if(!hasCosm(it.id)) SAVE.cosmetics.push(it.id);
+      fiesta.unshift({ color:QUAL[c.rar].c, titulo:cosmName(c), sub:cosmCat(c), pie:qualName(c.rar), peso:40 }); }
+    else { dinero('chispas', it.n, 'pack');
+      fiesta.push({ ico:uiArt('moneda-chispa'), color:'#FBB915', titulo:S().chispasWord||'', sub:'+'+nfmt(it.n), pie:S().bundleNm, peso:15, vuela:'chispas' }); }
+  }
+  persist();
   if(window.BT_UI && BT_UI.compra) BT_UI.compra(true);
-  celebra({ ico:ballArt('tanque','icon'), color:'#ffd23f', titulo:S().bundleNm||'Pack', sub:'+300', peso:40 });
-  renderTienda(); }
+  renderTienda();
+  fiesta.forEach(celebra); }
 // puerta parental: una pregunta de adulto (multiplicación) antes de abonar Gemas (compra simulada, sin pago real)
 let pgPack=null, pgAns=0;
 function parentalBuy(pk){ pgPack=pk; const a=6+Math.floor(Math.random()*6), b2=6+Math.floor(Math.random()*6); pgAns=a*b2;
@@ -7985,13 +8394,19 @@ function pintaCofre(){
             + `<div class="mi-tx"><div class="mi-t"><span>${s.seLeague||''} · ${tiers[T.cofre.esc]||''}</span>`
             + `<b class="mi-n">+${T.cofre.gemas} ${coinIco('gema','sm')}</b></div></div>`;
   const b=document.createElement('button'); b.className='mi-cta ready'; b.textContent=s.miCobrar;
+  //+AG ⚠ 2026-08-07 · EL COFRE DE LIGA TAMBIEN ERA UN TOAST. Lo canta la misma auditoria que la Tienda,
+  //   y aqui duele mas: es el premio de haber cerrado una temporada entera, paga GEMAS —la moneda que
+  //   cuesta dinero— y se resolvia con un texto de 13 px abajo del todo. Desde el 6-ago se celebraban
+  //   las COMPRAS y no lo que el juego te REGALA, que esta justo al reves de como tiene que ser.
   b.onclick=()=>{ const co=cofreCoger(); if(!co) return;
-    if(el('seGemas')) el('seGemas').textContent=SAVE.gemas;
-    paintLiga(); syncBadges(); applyShell(); toast(s.camCogido); };
+    if(el('seGemas')) pildora('seGemas', SAVE.gemas);
+    paintLiga(); syncBadges(); applyShell();
+    celebra({ ico:uiArt('moneda-gema'), color:'#26ec35', titulo:s.gemasWord||'', sub:'+'+nfmt(co.gemas),
+      pie:(s.seLeague||'')+' · '+(tiers[co.esc]||''), peso: co.gemas>=40?40:15, vuela:'gemas' }); };
   d.appendChild(b);
   c.appendChild(d);
 }
-function openTemporada(){ showScreen('temporada'); applyShell(); el('seChispas').textContent=SAVE.chispas; el('seGemas').textContent=SAVE.gemas; drawPreviewBall(el('seChamp'), TEAMS[3].color); paintTempHd(); buildPaseTrack(); paintLiga(); renderRetos(); }
+function openTemporada(){ showScreen('temporada'); applyShell(); pildora('seChispas', SAVE.chispas); pildora('seGemas', SAVE.gemas); drawPreviewBall(el('seChamp'), TEAMS[3].color); paintTempHd(); buildPaseTrack(); paintLiga(); renderRetos(); }
 //+AG doc 75 · EL PANEL DE RETOS. Pinta la semanal arriba y las 3 diarias debajo. Todo lo que decide
 //   (que retos, cuanto llevas, si esta cobrado) sale del motor de misiones; aqui solo se dibuja.
 function retoTxt(m){ const s=S(), T=MIS_TPL[m.p]||{};
@@ -8035,7 +8450,17 @@ function renderRetos(){
       ${M.sem.cob?'':`<div class="mi-bar"><i style="width:${pct}%"></i></div>`}</div>`;
   if(!M.sem.cob){
     if(listo){ const b=document.createElement('button'); b.className='mi-cta ready'; b.textContent=s.miCobrar;
-      b.onclick=()=>{ if(misReclamarSem()){ renderRetos(); syncBadges(); applyShell(); toast(s.miSemHecha); } }; fs.appendChild(b); }
+      //+AG ⚠ 2026-08-07 · EL RETO DE LA SEMANA ERA EL RECLAMO MAS RICO Y EL MAS MUDO DEL JUEGO: paga
+      //   monedas, gemas Y cinco duplicadores, y lo resolvia un toast. Los cinco duplicadores —el premio
+      //   mas grande del ciclo semanal— no aparecian en ningun fotograma. Ahora salen los tres premios
+      //   encadenados por la cola de celebra(), y el duplicador va el ULTIMO y con peso 40: es el que
+      //   hay que recordar, y el ultimo es el que se queda en la cabeza.
+      b.onclick=()=>{ if(!misReclamarSem()) return;
+        renderRetos(); syncBadges(); applyShell();
+        celebra({ ico:uiArt('moneda-chispa'), color:'#FBB915', titulo:s.chispasWord||'', sub:'+'+nfmt(SEM_MONEDAS), pie:s.miSemHecha, peso:15, vuela:'chispas' });
+        celebra({ ico:uiArt('moneda-gema'), color:'#26ec35', titulo:s.gemasWord||'', sub:'+'+nfmt(SEM_GEMAS), pie:s.miSemHecha, peso:15, vuela:'gemas' });
+        celebra({ ico:uiArt('ui-reto'), color:'#B345FF', titulo:s.miSemHecha, sub:'×2 · 5', pie:s.dupOn?s.dupOn(5):'', peso:40 });
+      }; fs.appendChild(b); }
     else { const pr=document.createElement('div'); pr.className='mi-pr';
       pr.innerHTML=`${SEM_GEMAS} ${coinIco('gema','sm')} +${SEM_MONEDAS} ${coinIco('chispa','sm')}`; fs.appendChild(pr); }
   }
@@ -8044,7 +8469,7 @@ function renderRetos(){
   cont.innerHTML='';
   M.lista.forEach((m,i)=>cont.appendChild(retoFila(m,i)));
 }
-function openPerfil(){ showScreen('perfil'); applyShell(); el('prChispas').textContent=SAVE.chispas; el('prGemas').textContent=SAVE.gemas; el('prLvl').textContent=SAVE.level; el('prColl').textContent=SAVE.balls.length; drawPreviewBall(el('prAv'), TEAMS[0].color);
+function openPerfil(){ showScreen('perfil'); applyShell(); pildora('prChispas', SAVE.chispas); pildora('prGemas', SAVE.gemas); el('prLvl').textContent=SAVE.level; el('prColl').textContent=SAVE.balls.length; drawPreviewBall(el('prAv'), TEAMS[0].color);
   //+AG 3-ago · el escaparate deja de ser una maqueta. TROFEOS = totalCopas(), la MISMA cuenta que pinta
   //   la pildora dorada de la portada (#hCups): dos sitios que dicen "tus trofeos" no pueden salir de
   //   dos sitios distintos. Y VICTORIAS = SAVE.victorias, que cuenta applyCupsForResult al acabar.
@@ -9434,7 +9859,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=ca14cba';
+  import { startAmbient } from './arte/ambient.mjs?v=71c81de';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -9450,7 +9875,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=ca14cba').then(m => {
+  import('./arte/pista-preview.mjs?v=71c81de').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -9462,8 +9887,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=ca14cba';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=ca14cba';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=71c81de';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=71c81de';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -9584,13 +10009,28 @@ atrasSync();
   //+AG docs/60 F3: la (i) ABRE una hoja, asi que suena como lo que abre (swish), no como una pestaña.
   const SEL_OPEN    = '.modecompact, .herotap, .passband, .ricon:not(.lock), .g-card, .h-modecard, .tile:not(.locked), .ibtn';
   const SEL_TAP     = 'button, select, [role="switch"], .tab, .coin, .cups, .m.open, .h-ic, .onb-opt, .onb-b, .sh-sec, .sc-block, .ricon, .tile, .set-row';
-  const SEL_TODO    = SEL_CONFIRM+', '+SEL_BACK+', '+SEL_NO+', '+SEL_OPEN+', '+SEL_TAP;
+  //+AG ⚠ 2026-08-07 · LO QUE EL JUEGO TE DA SUENA DISTINTO DE LO QUE TU ARRANCAS. Estaba medido: recoger
+  //   el regalo del dia, cobrar el cofre de Liga y darle a JUGAR en la portada disparaban los TRES el
+  //   mismo `confirm()`. Un logro que suena igual que navegar no se registra como logro.
+  //   · SEL_BONUS es SOLO el regalo del dia, y eso es a proposito: es lo primero que haces cada dia y
+  //     tiene que reconocerse de oido antes de mirar la pantalla.
+  //   · SEL_PREMIO es el resto de reclamos (retos, cofre de Liga).
+  //   ⚠ LOS DOS SE EVALUAN ANTES QUE SEL_CONFIRM en la cadena de abajo, o `.sh-buy` se come el regalo
+  //     del dia por orden (`.cam-cta` lleva las dos clases).
+  const SEL_BONUS   = '.cam-cta, .cam-card.hay';
+  const SEL_PREMIO  = '.mi-cta';
+  const SEL_TODO    = SEL_BONUS+', '+SEL_PREMIO+', '+SEL_CONFIRM+', '+SEL_BACK+', '+SEL_NO+', '+SEL_OPEN+', '+SEL_TAP;
   document.addEventListener('pointerdown', e=>{
     const t = e.target && e.target.closest ? e.target.closest(SEL_TODO) : null;
     if(!t) return;
     const sonar = ()=>{
       if(t.matches(SEL_NO)) ui.denied();
       else if(t.matches(SEL_BACK)) ui.back();
+      //+AG los dos de premio van ANTES que SEL_CONFIRM: `.cam-cta` es tambien `.sh-buy` y si no,
+      //   el regalo del dia volveria a sonar como comprar. Y `.disabled` no llega aqui (el toque de un
+      //   boton apagado no dispara pointerdown), asi que «vuelve mañana» no suena a premio.
+      else if(t.matches(SEL_BONUS)) ui.bonus();
+      else if(t.matches(SEL_PREMIO)) ui.premio();
       else if(t.matches(SEL_CONFIRM)) ui.confirm();
       else if(t.matches(SEL_OPEN)) ui.open();
       else ui.tap();
@@ -9616,7 +10056,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=ca14cba'), import('./motor/chassis/sincro.mjs?v=ca14cba')]);
+        import('./motor/chassis/nube.mjs?v=71c81de'), import('./motor/chassis/sincro.mjs?v=71c81de')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };

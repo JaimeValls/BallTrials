@@ -87,7 +87,9 @@ shell: {
   shNoteGems:'Na kontach dzieci zakupy za prawdziwe pieniądze przechodzą przez <b>bramkę rodzica</b> i <b>limit wydatków</b>, domyślnie włączone.',
   buyBtn:g=>'Kup · '+g+' ◆', ownedGar:'W twoim Garażu', ownedCosm:'Już masz',
   shBallCat:(q,b)=>q+' · '+b,
-  bundleNm:'Pakiet sezonowy', bundleFl:'Polecana oferta tego tygodnia',
+  bundleNm:'Pakiet sezonowy', bundleFl:'Polecana oferta sezonu',
+  shVale:n=>'Osobno warte '+n+' ◆',
+
   bundleItems:['Czołg (Zwykła)','Tęczowy ślad','✦ +300 monet'],
   paseNm:'Karnet bojowy', paseSeason:'Sezon',
   paseBullets:['50 szczebli z nagrodami <b>widocznymi przed zakupem</b>','Ścieżka <b>darmowa</b> dla wszystkich + ścieżka <b>premium</b>','Tylko kosmetyka i wygoda, <b>nigdy siła</b>'],

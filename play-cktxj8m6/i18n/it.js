@@ -85,7 +85,9 @@ shell: {
   shNoteGems:'Sugli account dei bambini gli acquisti con denaro reale passano da un <b>controllo genitori</b> e da un <b>limite di spesa</b>, attivi di default.',
   buyBtn:g=>'Compra · '+g+' ◆', ownedGar:'Nel tuo Garage', ownedCosm:'Già tua',
   shBallCat:(q,b)=>q+' · '+b,
-  bundleNm:'Pacchetto Stagione', bundleFl:'L\'offerta in evidenza di questa settimana',
+  bundleNm:'Pacchetto Stagione', bundleFl:'L\'offerta in evidenza della stagione',
+  shVale:n=>'Vale '+n+' ◆ separatamente',
+
   bundleItems:['Carro (Comune)','Scia Arcobaleno','✦ +300 Monete'],
   paseNm:'Pass Battaglia', paseSeason:'Stagione',
   paseBullets:['50 gradini con premi <b>visibili prima di comprare</b>','Un percorso <b>gratuito</b> per tutti + uno <b>premium</b>','Solo estetica e comodità, <b>mai potenza</b>'],

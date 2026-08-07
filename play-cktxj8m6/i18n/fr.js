@@ -85,7 +85,9 @@ shell: {
   shNoteGems:'Sur les comptes enfants, les achats en argent réel passent par un <b>contrôle parental</b> et une <b>limite de dépense</b>, actifs par défaut.',
   buyBtn:g=>'Acheter · '+g+' ◆', ownedGar:'Dans ton Garage', ownedCosm:'Déjà à toi',
   shBallCat:(q,b)=>q+' · '+b,
-  bundleNm:'Pack de saison', bundleFl:'L\'offre à la une de la semaine',
+  bundleNm:'Pack de saison', bundleFl:'L\'offre à la une de la saison',
+  shVale:n=>'Vaut '+n+' ◆ séparément',
+
   bundleItems:['Tank (Commune)','Traînée arc-en-ciel','✦ +300 pièces'],
   paseNm:'Passe de combat', paseSeason:'Saison',
   paseBullets:['50 paliers avec des récompenses <b>visibles avant l\'achat</b>','Une voie <b>gratuite</b> pour tous + une voie <b>premium</b>','Cosmétiques et confort uniquement, <b>jamais de puissance</b>'],

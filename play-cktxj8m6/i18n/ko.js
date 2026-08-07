@@ -86,7 +86,9 @@ shell: {
   shNoteGems:'어린이 계정에서는 실제 결제가 <b>보호자 확인</b>과 <b>사용 한도</b>를 거칩니다. 둘 다 기본으로 켜져 있어요.',
   buyBtn:g=>'구매 · '+g+' ◆', ownedGar:'차고에 있어요', ownedCosm:'이미 보유',
   shBallCat:(q,b)=>q+' · '+b,
-  bundleNm:'시즌 팩', bundleFl:'이번 주 추천 상품',
+  bundleNm:'시즌 팩', bundleFl:'시즌 추천 상품',
+  shVale:n=>'개별 구매 시 '+n+' ◆',
+
   bundleItems:['탱크 (일반)','무지개 트레일','✦ +300 코인'],
   paseNm:'배틀 패스', paseSeason:'시즌',
   paseBullets:['보상을 <b>사기 전에 다 볼 수 있는</b> 50단계','모두에게 열린 <b>무료</b> 트랙 + <b>프리미엄</b> 트랙','꾸미기와 편의만, <b>힘은 절대 없음</b>'],

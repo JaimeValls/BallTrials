@@ -85,7 +85,9 @@ shell: {
   shNoteGems:'Di akun anak, pembelian dengan uang asli lewat <b>gerbang orang tua</b> dan <b>batas belanja</b>, keduanya aktif secara bawaan.',
   buyBtn:g=>'Beli · '+g+' ◆', ownedGar:'Ada di Garasimu', ownedCosm:'Sudah punya',
   shBallCat:(q,b)=>q+' · '+b,
-  bundleNm:'Paket Musim', bundleFl:'Penawaran unggulan minggu ini',
+  bundleNm:'Paket Musim', bundleFl:'Penawaran unggulan musim ini',
+  shVale:n=>'Terpisah senilai '+n+' ◆',
+
   bundleItems:['Tank (Umum)','Jejak Pelangi','✦ +300 Koin'],
   paseNm:'Battle Pass', paseSeason:'Musim',
   paseBullets:['50 anak tangga dengan hadiah yang <b>terlihat sebelum dibeli</b>','Jalur <b>gratis</b> untuk semua + jalur <b>premium</b>','Hanya kosmetik dan kenyamanan, <b>tidak pernah kekuatan</b>'],

@@ -86,7 +86,9 @@ shell: {
   shNoteGems:'儿童账号里，真实货币消费必须通过<b>家长验证</b>和<b>消费上限</b>，两项默认开启。',
   buyBtn:g=>'购买 · '+g+' ◆', ownedGar:'已在你的车库', ownedCosm:'已拥有',
   shBallCat:(q,b)=>q+' · '+b,
-  bundleNm:'赛季礼包', bundleFl:'本周精选优惠',
+  bundleNm:'赛季礼包', bundleFl:'赛季精选优惠',
+  shVale:n=>'单买价值 '+n+' ◆',
+
   bundleItems:['坦克（普通）','彩虹拖尾','✦ +300 金币'],
   paseNm:'战斗通行证', paseSeason:'赛季',
   paseBullets:['50 级奖励<b>买之前全部看得见</b>','所有人都有的<b>免费</b>轨道 + 一条<b>高级</b>轨道','只给外观和便利，<b>绝不给强度</b>'],

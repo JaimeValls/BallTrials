@@ -12,14 +12,18 @@
 //
 // SON EFECTOS, no música: van con el interruptor de EFECTOS de Ajustes (el que llama pásalo en sfxOn).
 //
-//   import { createUiSfx } from './motor/chassis/uisfx.mjs?v=ca14cba';
+//   import { createUiSfx } from './motor/chassis/uisfx.mjs?v=71c81de';
 //   const ui = createUiSfx(audio, ()=>SAVE.settings.sfx!==false);
 //   ui.tap();  ui.confirm();  ui.back();  ui.denied();
 //
 // REGLA DE VOLUMEN: un clic de menú se oye 200 veces por sesión, así que se queda DEBAJO de lo que hace la
 // partida (amplitudes ~0.2 contra ~0.5 de los golpes del motor) y siempre por debajo de 90 ms. Tiene que
 // confirmar el toque, no llamar la atención.
-import { createSynth, makeRng, peakGain } from './synth.mjs?v=ca14cba';
+import { createSynth, makeRng, peakGain } from './synth.mjs?v=71c81de';
+//+AG 2026-08-07: `createFx` da el `pop` y el `sparkle` que pide el diseño de «Recompensa reclamada» de
+//   prototipo/sonidos.html. Se importa aqui y no se reescribe a mano: son los mismos efectos que usa la
+//   partida, asi que reclamar un premio suena de la familia del juego y no de otro sitio.
+import { createFx } from './sfx.mjs?v=71c81de';
 
 const SR = 44100;
 
@@ -114,6 +118,28 @@ export function createUiSfx(audio, sfxOn){
     for(let i=0;i<9;i++) S.note(0.03 + i*0.058, 0.09, F[i%4], 0.15*(1-i*0.05), { wave:'sine', decay:9 });
     return b; };
 
+  // RECLAMAR UN PREMIO (2026-08-07). Hasta hoy, recoger el regalo del día, cobrar el cofre de Liga y
+  // pulsar JUGAR en la portada disparaban LOS TRES el mismo `confirm()`: el mismo buffer, byte por byte.
+  // Y si un logro suena igual que navegar, el cerebro no lo registra como logro. Esto separa lo que el
+  // juego te DA de lo que tú ARRANCAS, que es la mitad de por qué un premio se siente premio.
+  //
+  // ⚠ NO ES INVENTADO, igual que COMPRA: es «Recompensa reclamada» de prototipo/sonidos.html, donde
+  //   estaba diseñado y sonando desde siempre y nunca se había traído. Pop de regalo + doble chispa.
+  const PREMIO = ()=>{ const { buf:b, S } = mkBuf(0.70);
+    const fx = createFx(S);
+    fx.pop(0, 0.40); fx.sparkle(0.09, 0.40); fx.sparkle(0.20, 0.30);
+    return b; };
+
+  // EL REGALO DEL DÍA tiene el suyo propio, y esa es toda la gracia: es lo primero que haces cada día y
+  // tiene que reconocerse de oído antes de mirar. Campanita cálida, 1175 → 1568 Hz («Bonus del día»,
+  // misma hoja de sonidos). ⚠ Cero rng() aquí dentro: los buffers se CACHEAN y el azar se congelaría en
+  // el primer disparo, sonando idéntico el resto de la sesión (la lección que ya dejó LLUVIA).
+  const BONUS = ()=>{ const { buf:b, S } = mkBuf(0.90);
+    S.note(0,    0.5, 1175, 0.20, { wave:'sine', decay:2, vib:0.004 });
+    S.note(0.12, 0.5, 1568, 0.14, { wave:'sine', decay:2 });
+    S.add(0.01, 0.03, 2400, 2000, 0.06, 0.1, 12);
+    return b; };
+
   return {
     tap(){     play(buf('tap',     TAP)); },
     open(){    play(buf('open',    OPEN)); },
@@ -123,5 +149,7 @@ export function createUiSfx(audio, sfxOn){
     //+AG `gorda` = true en los lotes grandes. Un solo método para que quien compre no tenga que saber
     //   qué sonido le toca: se le pasa si la compra es gorda y ya.
     compra(gorda){ play(buf(gorda?'lluvia':'compra', gorda?LLUVIA:COMPRA)); },
+    premio(){  play(buf('premio', PREMIO)); },
+    bonus(){   play(buf('bonus',  BONUS)); },
   };
 }

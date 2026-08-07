@@ -87,7 +87,9 @@ shell: {
   shNoteGems:'Pada akaun kanak-kanak, pembelian dengan wang sebenar melalui <b>pintu ibu bapa</b> dan <b>had perbelanjaan</b>, kedua-duanya hidup secara lalai.',
   buyBtn:g=>'Beli · '+g+' ◆', ownedGar:'Ada dalam Garaj awak', ownedCosm:'Sudah dimiliki',
   shBallCat:(q,b)=>q+' · '+b,
-  bundleNm:'Pakej Musim', bundleFl:'Tawaran pilihan minggu ini',
+  bundleNm:'Pakej Musim', bundleFl:'Tawaran pilihan musim ini',
+  shVale:n=>'Berasingan bernilai '+n+' ◆',
+
   bundleItems:['Kereta Kebal (Biasa)','Jejak Pelangi','✦ +300 Syiling'],
   paseNm:'Pas Pertempuran', paseSeason:'Musim',
   paseBullets:['50 anak tangga dengan ganjaran yang <b>kelihatan sebelum dibeli</b>','Laluan <b>percuma</b> untuk semua + laluan <b>premium</b>','Kosmetik dan keselesaan sahaja, <b>bukan kuasa</b>'],

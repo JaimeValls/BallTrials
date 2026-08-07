@@ -87,7 +87,9 @@ shell: {
   shNoteGems:'兒童帳號裡，真錢消費一定要通過<b>家長驗證</b>和<b>消費上限</b>，兩項都預設開啟。',
   buyBtn:g=>'購買 · '+g+' ◆', ownedGar:'已在你的車庫', ownedCosm:'已擁有',
   shBallCat:(q,b)=>q+' · '+b,
-  bundleNm:'賽季包', bundleFl:'本週精選優惠',
+  bundleNm:'賽季包', bundleFl:'賽季精選優惠',
+  shVale:n=>'單買價值 '+n+' ◆',
+
   bundleItems:['坦克（普通）','彩虹拖尾','✦ +300 金幣'],
   paseNm:'戰鬥通行證', paseSeason:'賽季',
   paseBullets:['50 階獎勵<b>買之前全部看得到</b>','人人都有的<b>免費</b>路線 + 一條<b>付費</b>路線','只給外觀和便利，<b>絕不給強度</b>'],

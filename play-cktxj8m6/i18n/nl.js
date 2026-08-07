@@ -85,7 +85,9 @@ shell: {
   shNoteGems:'Op kinderaccounts lopen aankopen met echt geld via een <b>ouderslot</b> en een <b>uitgavenlimiet</b>, standaard aan.',
   buyBtn:g=>'Kopen · '+g+' ◆', ownedGar:'In je Garage', ownedCosm:'Al van jou',
   shBallCat:(q,b)=>q+' · '+b,
-  bundleNm:'Seizoenspakket', bundleFl:'De uitgelichte deal van deze week',
+  bundleNm:'Seizoenspakket', bundleFl:'De uitgelichte deal van dit seizoen',
+  shVale:n=>'Los '+n+' ◆ waard',
+
   bundleItems:['Tank (Gewoon)','Regenboogspoor','✦ +300 munten'],
   paseNm:'Battle Pass', paseSeason:'Seizoen',
   paseBullets:['50 treden met beloningen die je <b>voor de aankoop ziet</b>','Een <b>gratis</b> spoor voor iedereen + een <b>premium</b> spoor','Alleen cosmetica en gemak, <b>nooit kracht</b>'],

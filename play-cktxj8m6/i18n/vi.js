@@ -85,7 +85,9 @@ shell: {
   shNoteGems:'Ở tài khoản trẻ em, mua bằng tiền thật phải qua <b>cổng phụ huynh</b> và <b>hạn mức chi tiêu</b>, cả hai đều bật sẵn.',
   buyBtn:g=>'Mua · '+g+' ◆', ownedGar:'Đã có trong Nhà xe', ownedCosm:'Đã sở hữu',
   shBallCat:(q,b)=>q+' · '+b,
-  bundleNm:'Gói mùa giải', bundleFl:'Ưu đãi nổi bật tuần này',
+  bundleNm:'Gói mùa giải', bundleFl:'Ưu đãi nổi bật của mùa giải',
+  shVale:n=>'Mua lẻ đáng giá '+n+' ◆',
+
   bundleItems:['Xe tăng (Thường)','Vệt cầu vồng','✦ +300 xu'],
   paseNm:'Vé chiến đấu', paseSeason:'Mùa giải',
   paseBullets:['50 nấc với phần thưởng <b>nhìn thấy trước khi mua</b>','Một nhánh <b>miễn phí</b> cho mọi người + một nhánh <b>cao cấp</b>','Chỉ trang trí và tiện lợi, <b>không bao giờ là sức mạnh</b>'],

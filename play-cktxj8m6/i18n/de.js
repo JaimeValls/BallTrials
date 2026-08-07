@@ -87,7 +87,9 @@ shell: {
   shNoteGems:'Auf Kinderkonten laufen Echtgeldkäufe über eine <b>Elternsperre</b> und ein <b>Ausgabenlimit</b>, standardmäßig an.',
   buyBtn:g=>'Kaufen · '+g+' ◆', ownedGar:'In deiner Garage', ownedCosm:'Hast du schon',
   shBallCat:(q,b)=>q+' · '+b,
-  bundleNm:'Saison-Paket', bundleFl:'Das Angebot der Woche',
+  bundleNm:'Saison-Paket', bundleFl:'Das Angebot der Saison',
+  shVale:n=>'Einzeln '+n+' ◆ wert',
+
   bundleItems:['Panzer (Gewöhnlich)','Regenbogen-Spur','✦ +300 Münzen'],
   paseNm:'Battle Pass', paseSeason:'Saison',
   paseBullets:['50 Stufen mit Belohnungen, die du <b>vor dem Kauf siehst</b>','Eine <b>kostenlose</b> Bahn für alle + eine <b>Premium</b>-Bahn','Nur Kosmetik und Komfort, <b>niemals Stärke</b>'],

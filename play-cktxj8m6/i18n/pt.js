@@ -85,7 +85,9 @@ shell: {
   shNoteGems:'Em contas de crianças, as compras com dinheiro real passam por um <b>portão parental</b> e um <b>limite de gasto</b>, ligados por padrão.',
   buyBtn:g=>'Comprar · '+g+' ◆', ownedGar:'Na sua Garagem', ownedCosm:'Você já tem',
   shBallCat:(q,b)=>q+' · '+b,
-  bundleNm:'Pacote da Temporada', bundleFl:'A oferta em destaque desta semana',
+  bundleNm:'Pacote da Temporada', bundleFl:'A oferta em destaque da temporada',
+  shVale:n=>'Vale '+n+' ◆ em separado',
+
   bundleItems:['Tanque (Comum)','Rastro Arco-íris','✦ +300 Moedas'],
   paseNm:'Passe de Batalha', paseSeason:'Temporada',
   paseBullets:['50 degraus com prêmios <b>visíveis antes de comprar</b>','Uma trilha <b>grátis</b> para todos + uma trilha <b>premium</b>','Só cosméticos e conforto, <b>nunca poder</b>'],

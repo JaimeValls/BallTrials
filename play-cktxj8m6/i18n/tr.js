@@ -85,7 +85,9 @@ shell: {
   shNoteGems:'Çocuk hesaplarında gerçek parayla alımlar bir <b>ebeveyn kapısından</b> ve bir <b>harcama sınırından</b> geçer, ikisi de açık gelir.',
   buyBtn:g=>'Satın al · '+g+' ◆', ownedGar:'Garajında', ownedCosm:'Zaten sende',
   shBallCat:(q,b)=>q+' · '+b,
-  bundleNm:'Sezon Paketi', bundleFl:'Bu haftanın öne çıkan fırsatı',
+  bundleNm:'Sezon Paketi', bundleFl:'Sezonun öne çıkan fırsatı',
+  shVale:n=>'Ayrı ayrı '+n+' ◆ değerinde',
+
   bundleItems:['Tank (Sıradan)','Gökkuşağı İzi','✦ +300 Altın'],
   paseNm:'Savaş Pass\'i', paseSeason:'Sezon',
   paseBullets:['<b>Almadan önce görebildiğin</b> ödüllerle 50 basamak','Herkese <b>ücretsiz</b> bir hat + bir <b>premium</b> hat','Yalnızca kozmetik ve konfor, <b>asla güç değil</b>'],
