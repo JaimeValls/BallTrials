@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 d17deb4"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-07 2dbddba"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -5859,7 +5859,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=d17deb4"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=2dbddba"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -8951,7 +8951,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=d17deb4').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=2dbddba').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -9279,6 +9279,32 @@ const hasCosm=id=>SAVE.cosmetics.includes(id);
 //   la interfaz. Por eso vive aqui y no una linea mas abajo.
 function openTienda(){ showScreen('tienda'); applyShell(); renderTienda();
   const t=el('tienda'); t.classList.add('sh-entra'); setTimeout(()=>t.classList.remove('sh-entra'), 650); }
+/*+AG ⚠ 2026-08-08 (Jaime) · «CUANDO CLIQUES EN MONEDAS ESTARIA BIEN QUE TE LLEVE A LA SECCION DE
+   COMPRAR MONEDAS». Hasta hoy las cinco pildoras de saldo (Home, Garaje, Tienda, Temporada, Perfil)
+   eran un <div> MUERTO: no tenian click, pero si `.coin:active{transform:scale(.9)}`, o sea que se
+   hundian al tocarlas y no pasaba nada. Eso es peor que no ser pulsable — promete y no cumple.
+   Ahora llevan a la recarga, que es lo que hace cualquier tienda f2p. Un solo listener delegado en
+   vez de cinco: las pildoras se repintan y un handler por elemento se perderia al repintar.
+   Las cinco viven en pantallas del shell; en los motores de partida NO hay ninguna, asi que esto no
+   puede abrir la tienda en mitad de una carrera.
+   ⚠ Y se les pone role/tabindex desde aqui: si algo se hunde al tocarlo y navega, es un boton, y
+   tiene que poder pulsarse con el teclado. Tocar los 5 bloques de HTML a mano era pedir que uno se
+   quedara sin ello. */
+function abreRecarga(){ shSec='gemas'; openTienda(); }
+addEventListener('DOMContentLoaded', ()=>{
+  document.querySelectorAll('.scr .coin').forEach(c=>{
+    c.setAttribute('role','button'); c.setAttribute('tabindex','0');
+  });
+});
+addEventListener('click', e=>{
+  const c = e.target.closest && e.target.closest('.scr .coin'); if(!c) return;
+  abreRecarga();
+});
+addEventListener('keydown', e=>{
+  if(e.key!=='Enter' && e.key!==' ') return;
+  const c = document.activeElement; if(!c || !c.matches || !c.matches('.scr .coin')) return;
+  e.preventDefault(); abreRecarga();
+});
 function renderTienda(){ pildora('shChispas', SAVE.chispas); pildora('shGemas', SAVE.gemas);
   //+AG ⚠ 2026-08-07 · LA TIENDA ESTABA MAL ROTULADA EN 18 DE LOS 20 IDIOMAS, y no lo canto ningun
   //   banco porque no se salia nada: los rotulos CABIAN, solo que decian otra cosa. `shSecs` es una
@@ -11294,7 +11320,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=d17deb4';
+  import { startAmbient } from './arte/ambient.mjs?v=2dbddba';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -11310,7 +11336,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=d17deb4').then(m => {
+  import('./arte/pista-preview.mjs?v=2dbddba').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -11322,8 +11348,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=d17deb4';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=d17deb4';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=2dbddba';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=2dbddba';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -11493,7 +11519,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=d17deb4'), import('./motor/chassis/sincro.mjs?v=d17deb4')]);
+        import('./motor/chassis/nube.mjs?v=2dbddba'), import('./motor/chassis/sincro.mjs?v=2dbddba')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
