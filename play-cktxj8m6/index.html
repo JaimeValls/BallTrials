@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 7c5169e+SUCIO"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-07 039b592"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -3573,6 +3573,37 @@
      columna de escritorio son 13. Es un clamp documentado, de los que la regla 8 permite. */
   .sh-sec{ font-size:clamp(11px,3.1vw,13px); padding-left:5px; padding-right:5px; }
 
+  /*+AG 7-ago · LAS CUATRO SUBPESTAÑAS, EN UNA FILA Y EN LOS 20 IDIOMAS.
+     EL FALLO (venia de largo, no de un cambio de esta semana; medido con prueba-encaje-idiomas a
+     320x640): `.subtab` era `flex:1`, o sea base 0 y a repartir a partes iguales... salvo que un item
+     flex NO baja de su min-content. Una palabra larga se plantaba en su ancho natural y las tres
+     hermanas se comian el recorte: en aleman "RANGLISTE" media 85 px contra 52 de sus vecinas, y en
+     neerlandés "OPDRACHTEN" 99 contra 71 hasta en un movil normal de 375. La fila se veia torcida.
+
+     POR QUE NO SE ARREGLA CON UN CLAMP como el de `.sh-sec` de aqui arriba: se midio. A 320 px a cada
+     pestaña le tocan 49 px de hueco para el texto, y "OPDRACHTEN" mide 80 px a 13 px de cuerpo — y 62
+     px incluso a 10, por debajo del suelo de 11 px del canon. NINGUN tamaño de letra legal mete cuatro
+     rotulos de una linea a 320. Encogiendo la letra solo se cambia una fila torcida por una fila
+     ilegible, asi que la anchura hay que pagarla con otra moneda.
+
+     LA MONEDA ES LA SEGUNDA LINEA, Y SALE GRATIS DE ALTO. Un 2x2 (dos filas de dos pestañas) costaria
+     ~50 px verticales, y el `.sc-body` de TEMPORADA no los tiene: medido, a 360x640 ya va con 18 px de
+     mas viviendo del colchon --zafe, y esa caja NO esta marcada `data-fit="scroll"` a proposito. Pero
+     partir el rotulo en dos lineas DENTRO de la misma pestaña no cuesta nada si se afina el relleno:
+     una linea son 15 px de texto y dos son 29; con 7 px arriba y abajo, 29+14 = 43 y manda el
+     `min-height:44px` de la familia. O sea: 44 px de alto y 44 px de dedo en los dos casos, identico a
+     como se veia antes con una linea. El relleno de los lados baja de 9 a 6 px (la Tienda ya vive en 5)
+     para comprar 6 px de texto por pestaña.
+
+     Y `hyphens:auto` para las palabras de una pieza, que son las que no tienen por donde partirse. El
+     idioma se lo da el `lang` del <html> que ya pone BTI18N.applyDoc, asi que el corte lo hace el
+     diccionario del navegador y sale con guion, como en un libro — no a mitad de silaba.
+
+     ⚠ EL `min-width:0` ES LA PIEZA QUE ARREGLA EL DESCUADRE, y sola no vale: deja las cuatro pestañas
+     iguales Y el rotulo saliendose de las cuatro. Por eso el banco estrena un tercer guardia ("rotulo
+     fuera de su pestaña"): sin el, esto se habria cantado como arreglado midiendo solo el empate. */
+  .subtab, .rktab{ min-width:0; padding:7px 6px; hyphens:auto; -webkit-hyphens:auto; overflow-wrap:anywhere; }
+
   /*+AG 15 · EL TITULO DE PANTALLA. Siete pantallas, siete titulos, DOS selectores distintos y dos
      estilos: seis en "Sentence case" con .g-title y el de MODOS en mayusculas con su propio h1 a 21 px.
      Ahora es una sola voz: 20 px, mayusculas POR CSS (nunca editando los 20 diccionarios: en arabe y en
@@ -5346,7 +5377,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=7c5169e+SUCIO"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=039b592"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -6157,7 +6188,15 @@ const LANGS=BTI18N.LANGS;
 const SHELL={
   es:{ featured:'Modo destacado', play:'▶ JUGAR', you:'TÚ', lvl:'Nivel', again:'▶ Jugar otra', back:'Atrás', home:'Inicio',
     rNext:'Continuar ▸', rSeeAll:n=>'Ver los '+n+' ▾',   //+AG doc 40: paso 1 (veredicto) → paso 2 (botín)
-    seTabLiga:'Liga', seTabPase:'Pase', seTabRk:'Ranking', seTabRetos:'Retos',   //+AG doc 40: sub-pestañas (etiquetas cortas)
+    //+AG doc 40: sub-pestañas (etiquetas cortas). El `­` es un GUION BLANDO: no se ve nunca, y solo
+    //   cuando el rotulo no cabe de una linea el navegador parte AHI y pinta el guion. Va escrito con el
+    //   ESCAPE y no con el caracter, que pegado en el texto seria invisible al leer el codigo y el
+    //   primero que pasara por aqui lo borraria sin saber que lo borraba.
+    //   Por que se pone a mano en vez de dejarselo a `hyphens:auto`: los diccionarios de silabas del
+    //   navegador se descargan aparte y no estan en todos los aparatos — el mismo movil que aqui parte
+    //   "RAN-KING" alli parte "RANKIN-G" y deja una letra suelta. Es el fallo invisible de siempre:
+    //   perfecto en mi pantalla, roto en la del jugador. El porque de todo esto, en el CSS de `.subtab`.
+    seTabLiga:'Liga', seTabPase:'Pase', seTabRk:'Ranking', seTabRetos:'Retos',
     //+AG doc 75 · RETOS, CAMINO DE REGALOS Y DUPLICADOR. Los textos de reto son funciones porque el
     //   numero viaja dentro de la frase y en varios idiomas no va en el mismo sitio.
     miH:'Retos', miReset:'Retos nuevos mañana', miCobrar:'Coger', miRerollT:'Cambiar este reto (1 al día)',
@@ -6678,6 +6717,57 @@ const coinify=s=>String(s).replace(RE_COIN, c=>coinIco(COIN_CHAR[c],'sm'));
 //   son cadenas NUESTRAS (i18n + numeros), nunca texto del jugador: no hay nada que escapar.
 const hasCoin=s=>RE_COIN1.test(String(s));
 function setCoin(node, str){ if(hasCoin(str)) node.innerHTML=coinify(str); else node.textContent=str; }
+//+AG 7-ago · POR DONDE SE PARTE UN ROTULO DE PESTAÑA. El porque de que haya que partirlo esta en el
+//  CSS de `.subtab`, arriba: a 320 px a cada una de las cuatro pestañas le tocan 54 px de texto, y
+//  "OPDRACHTEN" mide 80 — no hay tamaño de letra legal que lo meta de una linea.
+//  La BARRA marca el corte. El codigo la cambia por un GUION BLANDO (U+00AD): no se ve nunca, y solo
+//  cuando el rotulo no cabe el navegador parte AHI y pinta un guion de verdad, como en un libro.
+//  ⚠ POR QUE NO SE DEJA EN `hyphens:auto`, que hace esto solo: el diccionario de silabas lo descarga el
+//  navegador aparte y NO esta en todos los aparatos. Medido aqui: aleman, ruso y neerlandes se parten
+//  con guion, y turco, malayo e indonesio no — "GÖREVLER" sale "GÖREVLE / R", con una letra sola en la
+//  segunda linea. Es el fallo invisible de siempre (el mismo de `Segoe UI Rounded`): impecable en mi
+//  pantalla y roto en el movil del jugador, porque lo pone el sistema y no el juego. `hyphens:auto`
+//  sigue puesto en el CSS, pero como propina: quien manda es esta tabla, que va igual en todas partes.
+//  ⚠ Y POR QUE AQUI Y NO EN LOS 20 DICCIONARIOS: el mismo criterio que el ▶ de "Jugar otra" de aqui
+//  arriba. Un U+00AD metido dentro de 'Ranking' es INVISIBLE al leer el fichero, asi que el primero que
+//  pasara por ahi lo borraria sin saber que lo borraba — y ademas serian 13 ficheros tocados para no
+//  cambiar ni una palabra traducida. La clave es la palabra tal cual, no el idioma: 'Account' vale a la
+//  vez para ingles, italiano y neerlandes.
+//  ⚠ SOLO ENTRAN LAS QUE NO CABEN a 320 px (medido con tools/prueba-encaje-idiomas.mjs --vp=320x640).
+//  Lo que cabe no se toca: un guion blando de mas no se ve, pero es una linea que alguien mantiene.
+//  Chino, japones, coreano y tailandes no estan porque su escritura ya parte por donde quiere, y el
+//  vietnamita tampoco porque sus rotulos son de dos palabras y parten solos por el espacio.
+const SUBTAB_CORTE={
+  // en · es · pt · pl
+  'Ranking':'Ran|king', 'Account':'Ac|count', 'Desafios':'Desa|fios',
+  'Zadania':'Za|dania', 'Znajomi':'Zna|jomi',
+  // fr · it · de · nl
+  'Classement':'Classe|ment', 'Classifica':'Classi|fica',
+  'Aufgaben':'Auf|gaben', 'Rangliste':'Rang|liste', 'Freunde':'Freun|de',
+  'Opdrachten':'Op|drach|ten', 'Ranglijst':'Rang|lijst', 'Vrienden':'Vrien|den',
+  // ru
+  'Задания':'Зада|ния', 'Пропуск':'Про|пуск', 'Рейтинг':'Рей|тинг',
+  'Аккаунт':'Ак|каунт', 'Друзья':'Дру|зья',
+  // tr · id · ms
+  'Görevler':'Görev|ler', 'Sıralama':'Sıra|lama', 'Arkadaş':'Arka|daş',
+  'Peringkat':'Pering|kat', 'Lainnya':'Lain|nya', 'Kedudukan':'Kedu|dukan',
+  //+AG y la pestaña del RANKING, que es la misma familia del canon (.subtab y .rktab son "LA PESTAÑA
+  //  UNICA", pieza 14 del CSS) y traia la misma averia: en italiano "GIORNALIERA" media 104 px contra
+  //  los 72 de sus dos hermanas. Se arregla con la misma regla y con la misma tabla, no con otra.
+  'Giornaliera':'Giorna|liera' };
+function cortaPestanas(){
+  //+AG el guion blando se escribe con fromCharCode y no pegado en el texto: asi se VE que esta.
+  const SHY=String.fromCharCode(0xAD), fuera=new RegExp(SHY,'g');
+  document.querySelectorAll('.subtabs .subtab, .rktabs .rktab').forEach(b=>{
+    // hoy las pestañas son texto pelado; si mañana alguna lleva un icono dentro, esto NO se lo borra
+    if(b.children.length) return;
+    // se parte SIEMPRE del rotulo limpio: applyShell puede pasar dos veces (al cambiar de idioma y
+    // otra vez cuando aterriza el paquete) y sin esto se irian acumulando guiones dentro de guiones
+    const limpio=b.textContent.replace(fuera,'');
+    const corte=SUBTAB_CORTE[limpio];
+    b.textContent = corte ? corte.split('|').join(SHY) : limpio;
+  });
+}
 function applyShell(){ const s=S();
   //+AG 1-ago: si el texto trae un simbolo de moneda (✦ ◆ ⬡ 🏆) se pinta su ICONO dibujado en vez del
   //   caracter. Solo en ese caso se pasa a innerHTML: los demas siguen por textContent, porque cambiar
@@ -6694,6 +6784,7 @@ function applyShell(){ const s=S();
   //   ⚠ Solo a "Jugar otra". El ▶ de JUGAR (portada) se queda delante: Jaime lo ha visto y le vale.
   const _ag=document.getElementById('rAgain');
   if(_ag) _ag.textContent=_ag.textContent.replace(/^\s*▶\s*/,'').trim()+' ▶';
+  cortaPestanas();   //+AG 7-ago: por donde se parte un rotulo de pestaña que no cabe (ver arriba)
   //+AG data-th = el texto lleva <b>/<small> (notas legales, hero de Temporada…); data-tt = title; data-tp = aria-label
   document.querySelectorAll('[data-th]').forEach(e=>{ const v=s[e.dataset.th]; if(typeof v==='string') e.innerHTML=coinify(v); });
   document.querySelectorAll('[data-tt]').forEach(e=>{ const v=s[e.dataset.tt]; if(typeof v==='string') e.title=v; });
@@ -8367,7 +8458,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=7c5169e-SUCIO').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=039b592').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -10636,7 +10727,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=7c5169e-SUCIO';
+  import { startAmbient } from './arte/ambient.mjs?v=039b592';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -10652,7 +10743,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=7c5169e-SUCIO').then(m => {
+  import('./arte/pista-preview.mjs?v=039b592').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -10664,8 +10755,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=7c5169e-SUCIO';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=7c5169e-SUCIO';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=039b592';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=039b592';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -10835,7 +10926,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=7c5169e-SUCIO'), import('./motor/chassis/sincro.mjs?v=7c5169e-SUCIO')]);
+        import('./motor/chassis/nube.mjs?v=039b592'), import('./motor/chassis/sincro.mjs?v=039b592')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
