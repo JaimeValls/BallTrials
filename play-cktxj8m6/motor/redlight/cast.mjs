@@ -1,7 +1,7 @@
 // YouBall · RED LIGHT RUSH — casting (DRAMA). Fórmula: docs/44 §14.1 (VB del dueño 2026-07-06, punto de
 // partida a recalibrar con datos reales del sweep). Simula una partida completa y puntúa su drama para que
 // el casting elija, de N_SIM semillas por hueco de torneo, la de mayor DRAMA que cumpla los gates duros.
-import { Sim, GAME_F } from './sim.js?v=ac93186-SUCIO';
+import { Sim, GAME_F } from './sim.js?v=17fbbac';
 
 // simula una partida entera y devuelve { sim, events, saves, leadChanges, causeSet } acumulados.
 export function simulate(seed){

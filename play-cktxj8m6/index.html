@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 ac93186+SUCIO"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-07 17fbbac"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -742,7 +742,7 @@
      mundo y se aplasta con el aterrizaje: es la malla de vivas.mjs, y lo que le faltaba era peso.
      Se subio alli (0,55 → 0,80) y esto se quedo sin escribir a proposito. */
   .g-card .gi{ position:relative; width:96px; height:96px; display:block; }
-  .sh-item .sh-ic{ width:72px; height:72px; display:block; margin:0 auto; }
+  .sh-item .sh-ic{ width:96px; height:96px; display:block; margin:0 auto; }
   /*+AG MAYÚSCULAS, 7-ago-2026 · decisión de Jaime: «pondré el nombre en el garaje siempre en
      mayúsculas de todas las bolas, no solo la del título». Va por CSS y NO tocando los textos, que es
      la regla de la casa para esto: los nombres viajan a 20 idiomas y ponerlos en mayúsculas a mano
@@ -1035,13 +1035,24 @@
   .sh-item{ border-radius:16px; padding:13px 12px; background:var(--plate-a); border:2px solid var(--qc,#ffffff22); display:flex; flex-direction:column; align-items:center; gap:5px; text-align:center; }
   .sh-ic{ font-size:var(--fs-6); filter:drop-shadow(0 3px 5px #0007); }
   img.sh-ic{ width:46px; height:46px; object-fit:contain; }   /*+AG doc 41: la bola de la Tienda, con su arte */
-  .sh-nm{ font-weight:800; font-size:var(--fs-3); }
+  /*+AG ⚠ 2026-08-07 (Jaime) · LA FICHA DE BOLA, cuatro peticiones suyas de una vez: el nombre en
+     MAYUSCULAS como en el Garaje, la bola mas grande porque «hay espacio de sobra», la rareza con
+     salto de linea propio y el precio mas visible. El nombre sube a 16 px y a la letra que grita
+     (por CSS: ni un diccionario tocado), la bola de 72 a 96 px —el hueco estaba vacio— y el boton
+     al mismo cuerpo que el nombre. La ficha crece, y ahi si se puede: el cuerpo de la Tienda es una
+     COLECCION que desliza a proposito (`.sh-body`, la excepcion de doc 40). */
+  .sh-nm{ font-weight:900; font-size:var(--fs-4); text-transform:uppercase; letter-spacing:.02em; line-height:1.1; }
+  /*+AG lo que la bola HACE, en blanco y separado de la rareza. El color de rareza se queda arriba,
+     donde significa algo (y donde el marco de la ficha ya lo esta diciendo). */
+  .sh-desc{ font-size:var(--fs-2); font-weight:800; letter-spacing:.03em; text-transform:uppercase;
+    color:#eef1ff; line-height:1.2; }
   /*+AG docs/60 regla 9: esto iba a 9 px y son 18 renglones de la Tienda ("COMÚN · MEJOR EN LA GRAN
      CARRERA", "SKIN · POCO COMÚN"...). El 9 esta reservado a la etiqueta de UNA palabra bajo icono
      (el patron del nav de abajo) y aqui hay frases de cinco y seis palabras: sube al suelo de 11.
      El interletrado baja de .08 a .04em para pagar el ancho que cuesta la letra mas grande — el aire
      se negocia, el cuerpo no. */
   .sh-cat{ font-size:var(--fs-2); font-weight:800; letter-spacing:.04em; text-transform:uppercase; color:var(--qc,#96a0c2); }
+  .sh-item .sh-buy{ font-size:var(--fs-4); letter-spacing:.01em; }
   .sh-buy{ margin-top:3px; border:2px solid var(--tinta); border-radius:12px; padding:9px 8px; font-family:inherit; font-weight:900; font-size:var(--fs-3); cursor:pointer; width:100%; color:#3a2400; background:linear-gradient(#ffe27a,#ff9a3d); box-shadow:0 3px 0 #b45a10; display:flex; gap:4px; align-items:center; justify-content:center; }
   /* ══ LA TARJETA DE BOOSTER (2026-08-06) ════════════════════════════════════════════════════════
      Una por booster, de ancho completo, con sus cuatro compras dentro. El porqué de la forma está
@@ -1240,6 +1251,9 @@
   .sh-it{ background:#ffffff10; border:2px solid var(--qc,#ffffff22); border-radius:14px; padding:8px 6px;
           display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; text-align:center; min-height:90px; }
   .sh-it img.ico{ width:40px; height:40px; object-fit:contain; filter:drop-shadow(0 3px 5px #0007); }
+  /*+AG la bola viva ocupa el sitio del retrato y un poco mas: es la pieza que se mueve de la tarjeta
+     y la que dice que lo del pack esta VIVO. La sombra la pone ella, asi que aqui no va filtro. */
+  .sh-it .ico.viva{ width:52px; height:52px; display:block; margin:0 auto; }
   .sh-it .cmico{ width:40px; height:40px; color:var(--qc,#c9d0f2); }
   .sh-it .nm{ font-size:var(--fs-3); font-weight:800; line-height:1.15; }
   /*+AG `.sh-price` existia desde siempre y NO la llamaba nadie. Se revive como LINEA DE VALOR: lo que
@@ -1602,6 +1616,7 @@
     .sh-feat-items{ gap:5px; margin:6px 0 6px; }
     .sh-it{ min-height:0; padding:5px 4px; }
     .sh-it img.ico{ width:26px; height:26px; }
+    .sh-it .ico.viva{ width:34px; height:34px; }
     .sh-it .cmico{ width:26px; height:26px; }
     .sh-it .nm{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
     .sh-price{ margin-bottom:6px; }
@@ -4501,7 +4516,7 @@
   .g-cname, .g-price .pc, .g-card .gc,
   .cam-t, .cam-p.now, .sh-feat h3, .sh-off, .sh-it .nm,
   .se-hero .tl h3, .subtab, .sh-sec, .sh-feat .fl, .pr-id .al, .pr-chip .v,
-  .mi-cta,
+  .mi-cta, .sh-nm,
   /*+AG el boton de COBRAR entra aqui el 7-ago con su subida a 13 px: por debajo de 12 no se admite
      (regla de arriba), y a 11 px era justo lo que le pasaba — Fredoka y en caja baja. */
   #selector .selhead h1, #pos{
@@ -5567,7 +5582,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=ac93186+SUCIO"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=17fbbac"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -8648,7 +8663,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=ac93186-SUCIO').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=17fbbac').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -9083,7 +9098,9 @@ function camEl(){
 //   Y cada una lleva su marco de rareza en --qc, el mismo lenguaje de color que ya usan las fichas.
 function bundleItemHTML(it){
   if(it.t==='bola'){ const A=ARCHS[it.k];
-    return `<div class="sh-it" style="--qc:${QUAL[A.q].c}"><img class="ico" src="${ballArt(it.k,'icon')}" alt=""><div class="nm">${archName(it.k)}</div></div>`; }
+    //+AG la bola de la baldosa es VIVA (data-viva), no un retrato: renderTienda() llama a vivasSync()
+    //   al final y vivas.mjs barre `[data-viva]` de todo el documento, asi que no hace falta JS aqui.
+    return `<div class="sh-it" style="--qc:${QUAL[A.q].c}"><div class="ico viva" data-viva="${it.k}"></div><div class="nm">${archName(it.k)}</div></div>`; }
   if(it.t==='cosm'){ const c=COSM.find(x=>x.id===it.id); if(!c) return '';
     return `<div class="sh-it" style="--qc:${QUAL[c.rar].c}">${c.ic}<div class="nm">${cosmName(c)}</div></div>`; }
   return `<div class="sh-it" style="--qc:#FBB915"><img class="ico" src="${uiArt('moneda-chispa')}" alt=""><div class="nm">${nfmt(it.n)}</div></div>`;
@@ -9107,7 +9124,12 @@ function featEl(){ const d=document.createElement('div');
     <div class="fl">${s.bundleFl}</div>
     <div class="sh-feat-top">
       <h3>${s.bundleNm}</h3>
-      ${bola?`<div class="sh-feat-ball" data-viva="${bola.k}"></div>`:''}
+      ${''/*+AG ⚠ 2026-08-07 (Jaime): «esta guay que aparezca la bola bailando, pero ponla en el
+             recuadro de tanque, quita esa imagen estatica». Tiene razon y es mas que estetica: la
+             bola flotaba AL LADO del nombre del pack, o sea decorando, mientras la baldosa que de
+             verdad te la vende enseñaba un retrato quieto. Ahora la bola viva ES la baldosa: lo que
+             se mueve es lo que te llevas. La flotante se va — no se duplica, que serian dos bolas
+             iguales en la misma tarjeta.*/}
     </div>
     <div class="sh-feat-items">${BUNDLE.items.map(bundleItemHTML).join('')}</div>
     <div class="sh-price">${off>0?`<span class="sh-off">−${off} %</span>`:''}<span>${s.shVale(nfmt(bundleValor()))}</span></div>
@@ -9151,7 +9173,13 @@ function bolasEl(){ const s=S(), d=document.createElement('div'); d.innerHTML=''
   const g=document.createElement('div'); g.className='sh-grid';
   ARCH_KEYS.forEach(k=>{ const A=ARCHS[k], have=owned(k); const it=document.createElement('div'); it.className='sh-item'; it.style.setProperty('--qc',QUAL[A.q].c);   //+AG doc 39: marco = rareza de la bola
     //+AG misma bola viva que en el Garaje: lo que se vende es lo que se juega
-    it.innerHTML=`<div class="sh-ic" data-viva="${k}"${have?'':' data-viva-off="1"'}></div><div class="sh-nm">${archName(k)}</div><div class="sh-cat">${s.shBallCat(qualName(A.q), archBest(k))}</div>`;
+    //+AG ⚠ 2026-08-07 (Jaime) · «no se entiende que esa segunda frase es la descripcion». Era verdad:
+    //   rareza y descripcion iban PEGADAS en un solo renglon —«COMUN · LA GRAN CARRERA»— del mismo
+    //   color, el de la rareza, y partiendose por donde cayera. Ahora son dos cosas porque son dos
+    //   cosas: la rareza en su linea y con su color (el marco ya dice lo mismo), y debajo lo que la
+    //   bola HACE, en blanco, que es el dato por el que se compra. Cero traducciones nuevas: los dos
+    //   trozos ya venian sueltos y `shBallCat` solo los pegaba con un punto.
+    it.innerHTML=`<div class="sh-ic" data-viva="${k}"${have?'':' data-viva-off="1"'}></div><div class="sh-nm">${archName(k)}</div><div class="sh-cat">${qualName(A.q)}</div><div class="sh-desc">${archBest(k)}</div>`;
     const btn=document.createElement('button');
     if(have){ btn.className='sh-buy owned'; btn.textContent=s.ownedGar; btn.disabled=true; }
     //+AG un solo boton para las doce, con los dos precios a la vista. Paga en Monedas si te llegan, y
@@ -10930,7 +10958,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=ac93186-SUCIO';
+  import { startAmbient } from './arte/ambient.mjs?v=17fbbac';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -10946,7 +10974,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=ac93186-SUCIO').then(m => {
+  import('./arte/pista-preview.mjs?v=17fbbac').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -10958,8 +10986,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=ac93186-SUCIO';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=ac93186-SUCIO';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=17fbbac';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=17fbbac';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -11129,7 +11157,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=ac93186-SUCIO'), import('./motor/chassis/sincro.mjs?v=ac93186-SUCIO')]);
+        import('./motor/chassis/nube.mjs?v=17fbbac'), import('./motor/chassis/sincro.mjs?v=17fbbac')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
