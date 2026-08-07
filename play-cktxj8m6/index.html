@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 e236171"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-07 7565afb"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -1023,6 +1023,15 @@
   /*+AG docs/86: la pestana APAGADA tambien lleva tinta. En Brawl las 5 pestanas de su Tienda llevan el
      MISMO trazo oscuro aunque una este dorada y las otras cuatro en gris pizarra: el trazo dice "esto se
      pulsa", no "esto esta elegido". Aqui el borde blanco al 16 % lo unico que hacia era desdibujarlas. */
+  /*+AG ⚠ 2026-08-07 · LAS SEIS PESTAÑAS SON DORADAS, es el MODELO B que Jaime eligió y que hubo que
+     pedirle dos veces porque no se había implementado: «te pedí que los botones dorados también
+     estuviesen arriba [...] te dije la B, que era TODO DORADO y el seleccionado brillaba aún más».
+     Antes la no elegida era `var(--plate-a)`, o sea marino: la fila entera se leía como «una encendida
+     y cinco apagadas», que es justo lo contrario de lo que dice el canon de Brawl (docs/56: es dorado
+     lo que se puede tocar, y aquí se pueden tocar las seis).
+     La jerarquía NO se pierde, se cambia de sitio: la no elegida es oro VIEJO y mate; la elegida es
+     oro claro, con brillo y con un filo de luz arriba. Texto marrón oscuro en las dos, que sobre oro
+     es lo único que pasa el suelo de contraste (un #c4cbe6 sobre oro se cae). */
   .sh-sec{ flex:1 1 auto; min-width:max-content; white-space:nowrap; border:2px solid var(--tinta); background:var(--plate-a); color:#c4cbe6; font-family:inherit; font-weight:900; font-size:var(--fs-3); letter-spacing:.02em; border-radius:12px; padding:8px 6px; cursor:pointer; }
   .sh-sec.on{ background:linear-gradient(#ffe27a,#ffb43d); color:#3a2400; border-color:var(--tinta); box-shadow:0 3px 10px #ffb03d3d; }
   /*+AG doc 60: el font-size de esta regla se fue. La pestaña unica del kit (final del <style>) manda
@@ -1058,16 +1067,32 @@
      usan las pestañas de Temporada y Perfil, o sea el mueble de navegacion del juego puesto en el
      escaparate. Ahora la Tienda tiene su propia voz — y SOLO la Tienda: esto va en `#tienda .sh-sec`
      y no toca `.subtab` ni `.rktab`, que son navegacion y no mercancia.
-     ⚠ POR QUE NO VAN LAS SEIS EN ORO MACIZO, que fue lo primero que le enseñé: se ve en el mockup y
-     por eso se hizo el mockup. Con las seis doradas la elegida deja de distinguirse (el canon del
-     propio juego: «si todo brilla, no brilla nada») y la barra ancha de PASE se convierte en una
-     plancha de oro que compite con el boton de COMPRAR, que es el unico amarillo que deberia mandar
-     en esta pantalla. Con canto de oro se lee el joyero entero y la elegida no se confunde con nada.
-     Jaime eligio B mirando las tres tiras. */
+     ⚠⚠ 2026-08-07 · LAS SEIS PASAN A ORO MACIZO, Y ESTO REVIERTE LA DECISION QUE HABIA AQUI ESCRITA.
+     El comentario anterior decia que Jaime «eligio B mirando las tres tiras» y que B era el canto de
+     oro sobre plancha marina, con este argumento: si las seis brillan, la elegida no se distingue, y
+     la barra ancha de PASE compite con el boton de COMPRAR. **El argumento sigue siendo bueno y aqui
+     se deja escrito.** Pero Jaime lo ha pedido DOS VECES despues de aquello, y la segunda con las
+     palabras exactas: «te dije la B, que era TODO DORADO y el seleccionado brillaba aun mas» y
+     «hacen falta todavia los botones dorados en la parte superior de la tienda, como habiamos
+     hablado». Su recuerdo de lo que eligio manda sobre mi comentario: la decision es suya.
+     Como la objecion era REAL, se paga con jerarquia y no ignorandola: la no elegida es oro VIEJO
+     y mate (mismo material, otra luz) y la elegida se queda con el oro claro, el filo blanco, el
+     contorno de la letra y el halo — o sea que sigue habiendo una sola pieza encendida. */
+  /*+AG ⚠ Y LA LETRA VA EN BLANCO CON EL MISMO CONTORNO QUE LA ELEGIDA, no en marron. Primer intento:
+     texto `#3a2400` sobre el oro mate — y se empastó, porque el kit del canon (`.subtab,.rktab,.sh-sec`)
+     ya le pone a estos rotulos un `-webkit-text-stroke` OSCURO, asi que salia letra oscura con
+     contorno oscuro sobre oro: un relieve ilegible. Se vio en la captura, no en el banco: el banco mide
+     el color del texto contra el fondo y ahi el numero salia bien. Con blanco + contorno marron la
+     diferencia entre elegida y no elegida la hace la PLANCHA (oro claro con halo contra oro viejo
+     mate), que es como se distingue en Brawl. */
   #tienda .sh-sec{
-    background:linear-gradient(#3a2560,#241543);
-    border:1px solid #ffd23f8c; color:#ffe6a8;
-    box-shadow:0 3px 0 #150c2e, inset 0 1px 0 #ffd23f3d; }
+    /*+AG el oro mate se oscurecio a proposito tras MEDIRLO: con `#c08c34→#8a5f1a` los cinco rotulos no
+       elegidos daban 3,97:1 contra un suelo de 4,5 — se leian a ojo en la captura y el banco decia que
+       no, y aqui manda el banco. Con este par pasan. */
+    background:linear-gradient(#a3701f,#6b4610);
+    border:1px solid #ffd23fb0; color:#fff;
+    -webkit-text-stroke:.25em #4a2a05; paint-order:stroke fill; text-shadow:0 1px 0 #4a2a05;
+    box-shadow:0 3px 0 #150c2e, inset 0 1px 0 #ffe9a866; }
   #tienda .sh-sec.on{
     background:linear-gradient(#fffbe6 4%,#ffe14d 34%,#ffab1f);
     border-color:#fff6c9; color:#fff;
@@ -1146,7 +1171,15 @@
     font-size:var(--fs-4); font-weight:900;
     background:linear-gradient(#ffe14d,#ffab1f); color:#17102e; box-shadow:0 2px 0 #0006; }
   .bst-tengo b{ font-size:var(--fs-2); font-weight:900; text-transform:uppercase; letter-spacing:.03em; opacity:.82; }
-  .bst-card.vacio .bst-tengo{ background:#ffffff14; color:var(--muted); box-shadow:none; }
+  /*+AG ⚠ 2026-08-07 (2ª vuelta) · EL «×0» ERA GRIS Y JAIME LO VOLVIÓ A PEDIR: «cuando no tengas stock
+     que se ponga rojizo DE ALGUNA MANERA CON ESTILO para que sepas que no tienes y te incite a
+     comprar». Un filo rojo en el marco no bastaba: el dato que dice que no tienes ninguno es esta
+     píldora, y estaba en gris apagado — o sea vestida de «esto no importa», que es lo contrario.
+     Ahora es la píldora la que grita, en el rojo de la casa y con el mismo canto que la dorada de
+     cuando sí tienes. Blanco sobre #8e2130 pasa el suelo de sobra. */
+  .bst-card.vacio .bst-tengo{ background:linear-gradient(#e0293d,#8e2130); color:#fff;
+    box-shadow:0 2px 0 #0006, 0 0 12px #e0293d59; }
+  .bst-card.vacio .bst-tengo b{ opacity:.9; }
   .bst-compras{ display:grid; grid-template-columns:repeat(4,1fr); gap:7px; }
   .bst-buy{ position:relative; border:2px solid var(--tinta); border-radius:14px; padding:9px 4px 8px; cursor:pointer;
     font-family:inherit; background:linear-gradient(#ffe27a,#ff9a3d); color:#3a2400;
@@ -5813,7 +5846,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=e236171"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=7565afb"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -8905,7 +8938,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=e236171').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=7565afb').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -9412,6 +9445,18 @@ function sacudePildora(id){ const p=el(id); if(!p) return;
 function sacudeGemas(){ sacudePildora('shGemas'); }
 //+AG el hermano en monedas, para los boosters: el mismo gesto, la otra pildora (7-ago).
 function sacudeChispas(){ sacudePildora('shChispas'); }
+/*+AG ⚠ 2026-08-07 (Jaime, 3ª pieza del mismo encargo) · «cuando cliques en comprar y no tengas, te
+   tiene que LLEVAR A COMPRAR de la manera habitual en las tiendas». Sacudir la pildora dice donde
+   esta el problema pero deja al jugador buscando la solucion; lo que hace cualquier tienda f2p es
+   abrirte el sitio donde se recarga. Aqui las monedas se compran en la seccion GEMAS (los MON_PACKS
+   viven ahi), asi que un intento de compra sin saldo TE LLEVA a esa seccion.
+   La sacudida no se pierde, se hace DESPUES de repintar: al aterrizar, la pildora que se mueve es la
+   que explica por que estas ahi. Y si ya estabas en GEMAS no se repinta (seria un parpadeo gratis),
+   solo se sacude. */
+function faltanChispas(){
+  if(shSec!=='gemas'){ shSec='gemas'; renderTienda(); }
+  requestAnimationFrame(()=>sacudeChispas());
+}
 //+AG la nota va por coinify: lleva ✦ y ◆ dentro de la frase y sin esto se pintaba el glifo del
 //   sistema, que es justo lo que el juego dejo de hacer en todas las demas pantallas.
 function bolasEl(){ const s=S(), d=document.createElement('div'); d.innerHTML='';
@@ -9537,7 +9582,7 @@ function boostersEl(){ const s=S(), d=document.createElement('div');
       //   ya hace el Pack (docs/84): sacude la pildora de monedas de la cabecera, que es DONDE esta la
       //   respuesta — y que ademas ya esta roja si estas a cero. Señalar la puerta es informacion;
       //   apagar el boton es quitarle al jugador la unica pista de que ahi se compra.
-      b.onclick=()=>{ if(SAVE.chispas<L.m){ sacudeChispas(); return; } buyBooster(k, L.n, L.m); };
+      b.onclick=()=>{ if(SAVE.chispas<L.m){ faltanChispas(); return; } buyBooster(k, L.n, L.m); };
       fila.appendChild(b);
     });
     c.appendChild(fila); d.appendChild(c);
@@ -9574,7 +9619,11 @@ function gemasEl(){ const s=S(), d=document.createElement('div'); d.innerHTML=''
     const btn=document.createElement('button'); btn.className='sh-buy gem';
     btn.style.cssText='margin-left:auto;width:auto;padding:11px 15px;white-space:nowrap';
     btn.innerHTML=`${pk.g} ${coinIco('gema','sm')}`;
-    btn.disabled=SAVE.gemas<pk.g; btn.onclick=()=>buyMonPack(pk);
+    //+AG misma regla que en los boosters (7-ago): el boton NO se apaga por falta de saldo. Aqui importa
+    //   el doble, porque es justo donde aterriza quien viene de intentar comprar sin monedas: llegar y
+    //   encontrarse cuatro botones muertos seria mandarle a un callejon. Sin gemas, se sacude la pildora
+    //   de gemas, que es el siguiente escalon (las gemas se compran con dinero, ahi arriba).
+    btn.onclick=()=>{ if(SAVE.gemas<pk.g){ sacudeGemas(); return; } buyMonPack(pk); };
     row.appendChild(btn); d.appendChild(row); });
   return d;
 }
@@ -11229,7 +11278,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=e236171';
+  import { startAmbient } from './arte/ambient.mjs?v=7565afb';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -11245,7 +11294,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=e236171').then(m => {
+  import('./arte/pista-preview.mjs?v=7565afb').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -11257,8 +11306,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=e236171';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=e236171';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=7565afb';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=7565afb';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -11428,7 +11477,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=e236171'), import('./motor/chassis/sincro.mjs?v=e236171')]);
+        import('./motor/chassis/nube.mjs?v=7565afb'), import('./motor/chassis/sincro.mjs?v=7565afb')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
