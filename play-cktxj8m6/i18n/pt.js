@@ -78,7 +78,7 @@ shell: {
   unlockBtn:p=>'Liberar · '+p+' ✦', orPay:g=>'ou pague '+g+' ◆',
   equipBtn:'Equipar', equippedBtn:'Equipada', tEquipped:'Equipada!', tUnlocked:n=>n+' liberada!',
   // — Loja —
-  shSecs:['Destaques','Bolas','Cosméticos','Gemas','Passe'],
+  shSecs:['Destaques','Boosters','Bolas','Cosméticos','Gemas','Passe'],
   shNoteFeat:'Uma vitrine que muda toda semana com o tema da temporada. Preço e conteúdo sempre à vista, <b>nunca caixas de loot</b>.',
   shNoteBalls:'As doze bolas conseguem-se da mesma forma: <b>a jogar</b> (Moedas ✦) ou com <b>Gemas ◆</b> se tiveres pressa. As bolas <b>Épico</b> são ainda oferecidas ao atingires o seu marco de taças 🏆. <b>Aqui não há nada que só se possa comprar.</b>',
   shNoteCosm:'Cosméticos = <b>só aparência</b>, de qualquer raridade. A moldura (cinza→dourada) mostra a raridade. Nunca mexem nos atributos.',

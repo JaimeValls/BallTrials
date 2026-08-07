@@ -80,7 +80,7 @@ shell: {
   unlockBtn:p=>'Odblokuj · '+p+' ✦', orPay:g=>'albo zapłać '+g+' ◆',
   equipBtn:'Załóż', equippedBtn:'Założona', tEquipped:'Założona!', tUnlocked:n=>n+' odblokowana!',
   // — Sklep —
-  shSecs:['Polecane','Kule','Kosmetyka','Klejnoty','Karnet'],
+  shSecs:['Polecane','Dopalacze','Kule','Kosmetyka','Klejnoty','Karnet'],
   shNoteFeat:'Witryna, która zmienia się co tydzień razem z motywem sezonu. Cena i zawartość zawsze na wierzchu, <b>nigdy skrzynki z losowaniem</b>.',
   shNoteBalls:'Wszystkie dwanaście kul zdobywa się tak samo: <b>grając</b> (Monety ✦) albo za <b>Klejnoty ◆</b>, jeśli się spieszysz. Kule <b>Epicka</b> dostajesz dodatkowo w prezencie po osiągnięciu ich progu pucharów 🏆. <b>Nic tu nie jest wyłącznie do kupienia.</b>',
   shNoteCosm:'Kosmetyka to <b>tylko wygląd</b>, każda rzadkość. Ramka (szara→złota) pokazuje rzadkość. Nigdy nie rusza atrybutów.',

@@ -80,7 +80,7 @@ shell: {
   unlockBtn:p=>'Buka · '+p+' ✦', orPay:g=>'atau bayar '+g+' ◆',
   equipBtn:'Pakai', equippedBtn:'Dipakai', tEquipped:'Sudah dipakai!', tUnlocked:n=>n+' terbuka!',
   // — Kedai —
-  shSecs:['Pilihan','Bola','Kosmetik','Permata','Pas'],
+  shSecs:['Pilihan','Penggalak','Bola','Kosmetik','Permata','Pas'],
   shNoteFeat:'Etalase yang bertukar setiap minggu mengikut tema musim. Harga dan isinya sentiasa terpampang, <b>tiada kotak rawak</b>.',
   shNoteBalls:'Kesemua dua belas bola diperoleh dengan cara yang sama: <b>bermain</b> (Syiling ✦) atau guna <b>Permata ◆</b> jika tergesa-gesa. Bola <b>Epik</b> turut dihadiahkan apabila anda mencapai pencapaian piala 🏆. <b>Tiada apa-apa di sini yang hanya boleh dibeli.</b>',
   shNoteCosm:'Kosmetik ialah <b>rupa sahaja</b>, apa jua kelangkaan. Bingkainya (kelabu→emas) menunjukkan kelangkaan. Ia tidak pernah menyentuh atribut.',

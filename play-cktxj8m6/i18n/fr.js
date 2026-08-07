@@ -78,7 +78,7 @@ shell: {
   unlockBtn:p=>'Débloquer · '+p+' ✦', orPay:g=>'ou payer '+g+' ◆',
   equipBtn:'Équiper', equippedBtn:'Équipée', tEquipped:'Équipée !', tUnlocked:n=>n+' débloquée !',
   // — Boutique —
-  shSecs:['À la une','Billes','Cosmétiques','Gemmes','Passe'],
+  shSecs:['À la une','Boosters','Billes','Cosmétiques','Gemmes','Passe'],
   shNoteFeat:'Une vitrine qui change chaque semaine avec le thème de la saison. Prix et contenu toujours visibles, <b>jamais de coffres surprise</b>.',
   shNoteBalls:'Les douze billes s\'obtiennent de la même façon : <b>en jouant</b> (pièces ✦) ou avec des <b>Gemmes ◆</b> si tu es pressé. Les billes <b>Épique</b> sont en plus offertes quand tu atteins leur palier de coupes 🏆. <b>Ici, rien ne s\'obtient uniquement en payant.</b>',
   shNoteCosm:'Les cosmétiques = <b>l\'apparence seulement</b>, toutes raretés. Le cadre (gris→or) montre la rareté. Ils ne touchent jamais aux attributs.',

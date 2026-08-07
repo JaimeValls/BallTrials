@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 2a79017"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-07 2abc472"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -1416,8 +1416,27 @@
   /*+AG el premio SIEMPRE visible, tambien antes de completarlo: es la regla de "ves lo que te llevas
      antes de empezar" (docs/10 §7, cero azar). Cuando esta listo, el boton se lleva el sitio. */
   .mi-pr{ flex:0 0 auto; display:flex; align-items:center; gap:3px; font-weight:900; font-size:var(--fs-2); white-space:nowrap; }
-  .mi-cta{ flex:0 0 auto; border:0; border-radius:12px; padding:9px 14px; font-family:inherit; font-weight:900;
-    font-size:var(--fs-2); color:#3a2400; background:linear-gradient(#ffe27a,#ff9a3d); box-shadow:0 3px 0 #a85a12; cursor:pointer; }
+  /*+AG ⚠ 2026-08-07 · EL BOTON QUE TE DA EL PREMIO SUSURRABA, y es la segunda vez que Jaime lo pide.
+     Decia «Coger» en caja baja, en Fredoka —la letra de LEER— y a 11 px, en la unica pantalla donde
+     todo lo demas grita en mayusculas (RETOS, LIGA, PASE, RETOS NUEVOS MAÑANA). Y medido era peor
+     que feo: 32 px de alto en los 20 idiomas, o sea DOCE por debajo del minimo tactil de 44 que en
+     esta casa no se negocia. El boton que cobra el premio era el mas pequeño de la pantalla.
+     Ahora es lo que tiene que ser: MAYUSCULAS por CSS (canon 10, y asi no se tocan 20 diccionarios),
+     Lilita One —la letra que grita— a 13 px, que es justo el corte de 12 px que pide esa familia, y
+     44 px de dedo.
+     ⚠ Y LA PIEZA QUE HACE QUE ESO QUEPA, que sin ella no entraba en ningun movil de 640: la fila que
+     lleva boton NO pone aire propio arriba y abajo — lo llena el boton. Medido: subir el boton a 44
+     sin esto engorda cada fila de 45 a 58 px, o sea +33 px en el panel, y a 320x640 solo hay entre 2
+     y 22 px de holgura (se salia en 6 idiomas a 320 y en 10 a 360). Con la fila a cero, la fila pasa
+     de 45 a 46 px: UN pixel, y el boton se lee como que ocupa el renglon entero, que es justo como
+     se ve un «cobrar» en Brawl. Barrido: 20 idiomas x 375x812, 360x640 y 320x640, cero desbordes.
+     ⚠ La clase la pone el JS al colgar el boton y NO se usa `:has()`: el selector serviria, pero esto
+     ya se sabe en el unico sitio que construye la fila y una clase no depende de la version del
+     navegador de nadie. */
+  .mi-cta{ flex:0 0 auto; border:0; border-radius:12px; padding:0 13px; min-height:44px; font-weight:900;
+    font-size:var(--fs-3); text-transform:uppercase; letter-spacing:.02em;
+    color:#3a2400; background:linear-gradient(#ffe27a,#ff9a3d); box-shadow:0 3px 0 #a85a12; cursor:pointer; }
+  .mi-row.mi-cobra{ padding-top:0; padding-bottom:0; }
   .mi-cta:active{ transform:translateY(2px); box-shadow:0 1px 0 #a85a12; }
   /*+AG cobrado = apagado y con check, NUNCA desaparece (canon 6: lo que ya no se puede tocar se
      enseña apagado, no se esconde — si desapareciera, el jugador no sabria que lo hizo). */
@@ -3677,6 +3696,18 @@
      fuera de su pestaña"): sin el, esto se habria cantado como arreglado midiendo solo el empate. */
   .subtab, .rktab{ min-width:0; padding:7px 6px; hyphens:auto; -webkit-hyphens:auto; overflow-wrap:anywhere; }
 
+  /*+AG ⚠ 2026-08-07 · EL JAPONES PARTIA LAS PALABRAS DONDE NO SE PUEDE, y esto NO lo caza ningun
+     banco: no se sale nada, no se recorta nada, las cuatro pestañas miden lo mismo. Se ve MIRANDO la
+     captura en japones, y una vez que lo ves ya no se puede dejar. La pestaña de retos partia
+     「ミッション」 como ミッシ / ョン, o sea dejando la ョ pequeña abriendo renglon; en japones eso es
+     una falta de ortografia tipografica de las de toda la vida (kinsoku shori): las kana pequeñas
+     ゃゅょっ y el alargador ー no empiezan linea NUNCA. Igual en 「プロフィール」 de la barra de abajo.
+     El navegador ya sabe hacerlo bien, solo hay que pedirselo: `line-break:strict` mueve el corte a
+     ミッ / ション sin cambiar ni el numero de lineas ni el ancho — medido en las cuatro pestañas y en
+     los 20 idiomas, cero desbordes nuevos. Va en `#app` porque es una regla del IDIOMA, no de una
+     pestaña: alcanza a los rotulos de la barra, a los retos y a lo que venga. */
+  #app{ line-break:strict; }
+
   /*+AG 15 · EL TITULO DE PANTALLA. Siete pantallas, siete titulos, DOS selectores distintos y dos
      estilos: seis en "Sentence case" con .g-title y el de MODOS en mayusculas con su propio h1 a 21 px.
      Ahora es una sola voz: 20 px, mayusculas POR CSS (nunca editando los 20 diccionarios: en arabe y en
@@ -4451,6 +4482,9 @@
   .g-cname, .g-price .pc, .g-card .gc,
   .cam-t, .cam-p.now, .sh-feat h3, .sh-off, .sh-it .nm,
   .se-hero .tl h3, .subtab, .sh-sec, .sh-feat .fl, .pr-id .al, .pr-chip .v,
+  .mi-cta,
+  /*+AG el boton de COBRAR entra aqui el 7-ago con su subida a 13 px: por debajo de 12 no se admite
+     (regla de arriba), y a 11 px era justo lo que le pasaba — Fredoka y en caja baja. */
   #selector .selhead h1, #pos{
     font-family:'Lilita One', var(--fam,'Fredoka','Segoe UI Rounded','Nunito',system-ui,Arial,sans-serif);
     /*+AG ⚠ EL font-weight SE QUEDA EN 900 A PROPOSITO, y lo que se apaga es la SINTESIS. Lilita One
@@ -5500,7 +5534,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=2a79017"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=2abc472"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -8581,7 +8615,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=2a79017').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=2abc472').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -8910,7 +8944,19 @@ const hasCosm=id=>SAVE.cosmetics.includes(id);
 function openTienda(){ showScreen('tienda'); applyShell(); renderTienda();
   const t=el('tienda'); t.classList.add('sh-entra'); setTimeout(()=>t.classList.remove('sh-entra'), 650); }
 function renderTienda(){ pildora('shChispas', SAVE.chispas); pildora('shGemas', SAVE.gemas);
-  const secs=el('shSecs'); secs.innerHTML=''; SECS.forEach((k,ix)=>{ const b=document.createElement('button'); b.className='sh-sec'+(shSec===k?' on':''); b.textContent=S().shSecs[ix];
+  //+AG ⚠ 2026-08-07 · LA TIENDA ESTABA MAL ROTULADA EN 18 DE LOS 20 IDIOMAS, y no lo canto ningun
+  //   banco porque no se salia nada: los rotulos CABIAN, solo que decian otra cosa. `shSecs` es una
+  //   lista POSICIONAL y BOOSTERS (docs/83) entro despues; los 18 paquetes se quedaron con cinco
+  //   nombres para seis secciones, asi que TODO iba corrido un puesto — en aleman la pestaña de
+  //   boosters ponia «Kugeln» (bolas), la de bolas «Kosmetik», la de gemas «Pass»... y la del pase
+  //   salia EN BLANCO, un boton de 294 px sin una letra. Se vio cambiando el juego a japones y
+  //   MIRANDO la pantalla, que es la unica forma de ver un texto que esta bien puesto y dice mentira.
+  //   Los 18 paquetes ya llevan su palabra («ブースター», «Ускорители»…): estaba en `boosts`, que es
+  //   la misma seccion vista desde el inventario. Cero traducciones nuevas.
+  //   ⚠ Y EL SEGURO, que es lo que impide que vuelva a pasar: si mañana entra una septima seccion y
+  //   un paquete se queda corto, cae al ingles en vez de pintar un boton mudo. Una lista posicional
+  //   sin red se rompe EN SILENCIO, que es como se rompio esta.
+  const secs=el('shSecs'); secs.innerHTML=''; SECS.forEach((k,ix)=>{ const b=document.createElement('button'); b.className='sh-sec'+(shSec===k?' on':''); b.textContent=(S().shSecs&&S().shSecs[ix]) || SHELL.en.shSecs[ix] || '';
     b.style.setProperty('--ix', ix);   //+AG el escalonado de la entrada: 0/26/52/78/104/130 ms, por CSS
     //+AG al cambiar de seccion el cuerpo entra DESLIZANDO, y hacia el lado que corresponde: si vas a una
     //   pestaña de mas a la derecha entra por la derecha. La direccion es NOMINAL (la posicion en SECS),
@@ -9394,7 +9440,8 @@ function pintaCofre(){
     paintLiga(); syncBadges(); applyShell();
     celebra({ ico:uiArt('moneda-gema'), color:'#26ec35', titulo:s.gemasWord||'', sub:'+'+nfmt(co.gemas),
       pie:(s.seLeague||'')+' · '+(tiers[co.esc]||''), peso: co.gemas>=40?40:15, vuela:'gemas' }); };
-  d.appendChild(b);
+  //+AG `mi-cobra`: la fila que lleva boton no pone aire propio, lo llena el boton de 44 px (ver el CSS)
+  d.classList.add('mi-cobra'); d.appendChild(b);
   c.appendChild(d);
 }
 function openTemporada(){ showScreen('temporada'); applyShell(); pildora('seChispas', SAVE.chispas); pildora('seGemas', SAVE.gemas); drawPreviewBall(el('seChamp'), TEAMS[3].color); paintTempHd(); buildPaseTrack(); paintLiga(); renderRetos(); }
@@ -9417,7 +9464,7 @@ function retoFila(m, i){
     //+AG el `.ready` (glow + barrido) es el lenguaje UNICO de "esto se pulsa" del juego: aqui se
     //   reutiliza tal cual, no se inventa un brillo nuevo para los retos.
     b.onclick=()=>{ if(misReclamar(i)){ renderRetos(); syncBadges(); applyShell(); } };
-    d.appendChild(b);
+    d.classList.add('mi-cobra'); d.appendChild(b);
   } else {
     const pr=document.createElement('div'); pr.className='mi-pr'; pr.innerHTML=`+${MIS_PAGA} ${coinIco('chispa','sm')}`;
     d.appendChild(pr);
@@ -9451,7 +9498,7 @@ function renderRetos(){
         celebra({ ico:uiArt('moneda-chispa'), color:'#FBB915', titulo:s.chispasWord||'', sub:'+'+nfmt(SEM_MONEDAS), pie:s.miSemHecha, peso:15, vuela:'chispas' });
         celebra({ ico:uiArt('moneda-gema'), color:'#26ec35', titulo:s.gemasWord||'', sub:'+'+nfmt(SEM_GEMAS), pie:s.miSemHecha, peso:15, vuela:'gemas' });
         celebra({ ico:uiArt('ui-reto'), color:'#B345FF', titulo:s.miSemHecha, sub:'×2 · 5', pie:s.dupOn?s.dupOn(5):'', peso:40 });
-      }; fs.appendChild(b); }
+      }; fs.classList.add('mi-cobra'); fs.appendChild(b); }
     else { const pr=document.createElement('div'); pr.className='mi-pr';
       pr.innerHTML=`${SEM_GEMAS} ${coinIco('gema','sm')} +${SEM_MONEDAS} ${coinIco('chispa','sm')}`; fs.appendChild(pr); }
   }
@@ -10850,7 +10897,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=2a79017';
+  import { startAmbient } from './arte/ambient.mjs?v=2abc472';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -10866,7 +10913,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=2a79017').then(m => {
+  import('./arte/pista-preview.mjs?v=2abc472').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -10878,8 +10925,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=2a79017';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=2a79017';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=2abc472';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=2abc472';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -11049,7 +11096,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=2a79017'), import('./motor/chassis/sincro.mjs?v=2a79017')]);
+        import('./motor/chassis/nube.mjs?v=2abc472'), import('./motor/chassis/sincro.mjs?v=2abc472')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };

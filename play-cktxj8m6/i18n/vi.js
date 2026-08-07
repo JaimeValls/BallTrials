@@ -78,7 +78,7 @@ shell: {
   unlockBtn:p=>'Mở khóa · '+p+' ✦', orPay:g=>'hoặc trả '+g+' ◆',
   equipBtn:'Dùng bóng này', equippedBtn:'Đang dùng', tEquipped:'Đã trang bị!', tUnlocked:n=>'Đã mở '+n+'!',
   // — Cửa hàng —
-  shSecs:['Nổi bật','Bóng','Trang trí','Đá quý','Vé'],
+  shSecs:['Nổi bật','Booster','Bóng','Trang trí','Đá quý','Vé'],
   shNoteFeat:'Quầy hàng đổi mỗi tuần theo chủ đề mùa giải. Giá và nội dung luôn hiện rõ, <b>không bao giờ có hộp ngẫu nhiên</b>.',
   shNoteBalls:'Cả mười hai quả bóng đều lấy được theo cùng một cách: <b>chơi để nhận</b> (Xu ✦) hoặc dùng <b>Đá quý ◆</b> nếu bạn vội. Bóng <b>Sử thi</b> còn được tặng khi bạn đạt mốc cúp 🏆 của nó. <b>Ở đây không có gì chỉ mua mới có.</b>',
   shNoteCosm:'Trang trí là <b>chỉ vẻ ngoài</b>, ở mọi độ hiếm. Khung (xám→vàng) cho biết độ hiếm. Chúng không bao giờ đụng tới chỉ số.',

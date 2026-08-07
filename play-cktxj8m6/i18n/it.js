@@ -78,7 +78,7 @@ shell: {
   unlockBtn:p=>'Sblocca · '+p+' ✦', orPay:g=>'o paga '+g+' ◆',
   equipBtn:'Equipaggia', equippedBtn:'Equipaggiata', tEquipped:'Equipaggiata!', tUnlocked:n=>n+' sbloccata!',
   // — Negozio —
-  shSecs:['In evidenza','Palline','Estetica','Gemme','Pass'],
+  shSecs:['In evidenza','Booster','Palline','Estetica','Gemme','Pass'],
   shNoteFeat:'Una vetrina che cambia ogni settimana con il tema della stagione. Prezzo e contenuto sempre in chiaro, <b>mai loot box</b>.',
   shNoteBalls:'Tutte e dodici le biglie si ottengono allo stesso modo: <b>giocando</b> (Monete ✦) o con le <b>Gemme ◆</b> se hai fretta. Le biglie <b>Epica</b> vengono anche regalate quando raggiungi il loro traguardo di coppe 🏆. <b>Qui non c\'è niente che si possa solo comprare.</b>',
   shNoteCosm:'L\'estetica è <b>solo aspetto</b>, di qualsiasi rarità. La cornice (grigia→oro) mostra la rarità. Non tocca mai gli attributi.',

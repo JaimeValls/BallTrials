@@ -80,7 +80,7 @@ shell: {
   unlockBtn:p=>'Freischalten · '+p+' ✦', orPay:g=>'oder '+g+' ◆ zahlen',
   equipBtn:'Ausrüsten', equippedBtn:'Ausgerüstet', tEquipped:'Ausgerüstet!', tUnlocked:n=>n+' freigeschaltet!',
   // — Shop —
-  shSecs:['Highlights','Kugeln','Kosmetik','Gems','Pass'],
+  shSecs:['Highlights','Booster','Kugeln','Kosmetik','Gems','Pass'],
   shNoteFeat:'Ein Schaufenster, das jede Woche mit dem Saisonthema wechselt. Preis und Inhalt immer sichtbar, <b>niemals Lootboxen</b>.',
   shNoteBalls:'Alle zwölf Kugeln bekommst du auf demselben Weg: <b>durch Spielen</b> (Münzen ✦) oder mit <b>Gems ◆</b>, wenn es schnell gehen soll. <b>Episch</b> Kugeln gibt es zusätzlich geschenkt, sobald du ihren Pokal-Meilenstein 🏆 erreichst. <b>Nichts hier gibt es nur für Geld.</b>',
   shNoteCosm:'Kosmetik = <b>nur Optik</b>, jede Seltenheit. Der Rahmen (grau→gold) zeigt die Seltenheit. Sie rührt die Werte nie an.',

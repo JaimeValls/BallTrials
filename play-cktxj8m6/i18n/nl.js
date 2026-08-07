@@ -78,7 +78,7 @@ shell: {
   unlockBtn:p=>'Vrijspelen · '+p+' ✦', orPay:g=>'of betaal '+g+' ◆',
   equipBtn:'Uitrusten', equippedBtn:'Uitgerust', tEquipped:'Uitgerust!', tUnlocked:n=>n+' vrijgespeeld!',
   // — Winkel —
-  shSecs:['Uitgelicht','Ballen','Cosmetica','Edelstenen','Pass'],
+  shSecs:['Uitgelicht','Boosters','Ballen','Cosmetica','Edelstenen','Pass'],
   shNoteFeat:'Een etalage die elke week meewisselt met het seizoensthema. Prijs en inhoud altijd in beeld, <b>nooit lootboxen</b>.',
   shNoteBalls:'Alle twaalf ballen krijg je op dezelfde manier: <b>door te spelen</b> (Munten ✦) of met <b>Edelstenen ◆</b> als je haast hebt. <b>Episch</b> ballen krijg je bovendien cadeau zodra je hun bekermijlpaal 🏆 haalt. <b>Niets hier is alleen te koop.</b>',
   shNoteCosm:'Cosmetica = <b>alleen uiterlijk</b>, elke zeldzaamheid. De lijst (grijs→goud) toont de zeldzaamheid. Ze raken de eigenschappen nooit aan.',

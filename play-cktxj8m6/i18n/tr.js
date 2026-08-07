@@ -78,7 +78,7 @@ shell: {
   unlockBtn:p=>'Aç · '+p+' ✦', orPay:g=>'ya da '+g+' ◆ öde',
   equipBtn:'Kuşan', equippedBtn:'Kuşanıldı', tEquipped:'Kuşanıldı!', tUnlocked:n=>n+' açıldı!',
   // — Mağaza —
-  shSecs:['Öne çıkan','Toplar','Kozmetik','Mücevher','Pass'],
+  shSecs:['Öne çıkan','Hızlandırıcılar','Toplar','Kozmetik','Mücevher','Pass'],
   shNoteFeat:'Her hafta sezon temasıyla birlikte değişen bir vitrin. Fiyat ve içerik hep göz önünde, <b>asla ganimet kutusu yok</b>.',
   shNoteBalls:'On iki topun hepsi aynı yoldan alınır: <b>oynayarak</b> (Altın ✦) ya da acelen varsa <b>Mücevher ◆</b> ile. <b>Destansı</b> toplar ayrıca kupa hedefine 🏆 ulaştığında hediye edilir. <b>Burada sadece parayla alınan hiçbir şey yok.</b>',
   shNoteCosm:'Kozmetik <b>yalnızca görünüştür</b>, her nadirlikte olur. Çerçeve (griden altına) nadirliği gösterir. Özelliklere asla dokunmaz.',

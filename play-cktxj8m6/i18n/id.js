@@ -78,7 +78,7 @@ shell: {
   unlockBtn:p=>'Buka · '+p+' ✦', orPay:g=>'atau bayar '+g+' ◆',
   equipBtn:'Pakai', equippedBtn:'Dipakai', tEquipped:'Terpasang!', tUnlocked:n=>n+' terbuka!',
   // — Toko —
-  shSecs:['Unggulan','Bola','Kosmetik','Permata','Pass'],
+  shSecs:['Unggulan','Booster','Bola','Kosmetik','Permata','Pass'],
   shNoteFeat:'Etalase yang berganti tiap minggu mengikuti tema musim. Harga dan isinya selalu terlihat, <b>tidak pernah kotak acak</b>.',
   shNoteBalls:'Kedua belas bola didapat dengan cara yang sama: <b>bermain</b> (Koin ✦) atau pakai <b>Permata ◆</b> kalau buru-buru. Bola <b>Epik</b> juga dihadiahkan saat kamu mencapai tonggak piala 🏆. <b>Tidak ada yang hanya bisa dibeli di sini.</b>',
   shNoteCosm:'Kosmetik itu <b>hanya tampilan</b>, kelangkaan apa pun. Bingkainya (abu-abu→emas) menunjukkan kelangkaan. Tidak pernah menyentuh atribut.',
