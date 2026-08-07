@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 f64190d+SUCIO">
+<meta name="bt-build" content="2026-08-07 0cddb5b">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <!--+AG el HTML se sirve en INGLES (defecto del juego); ?lang=es lo traduce por JS (applyLang) -->
 <title>YouBall · Red Light Rush (WebGL) · The Marble Games</title>
@@ -163,22 +163,32 @@
      cian = la estela de velocidad del motor, FANTASMA blanco = intangible (en pista la bola se vuelve
      translúcida), SÚPER oro = acción, la convención del juego. Los dos mandos grandes se apagan cuando NO son
      tu estado: en todo momento hay exactamente uno encendido, y de un vistazo sabes si tu motor va o no. */
-  #bNitro.ready{background:linear-gradient(#59e0ff,#1f9ec8);box-shadow:0 4px 0 #0f5e7c, inset 0 1px 0 #ffffff30}
-  #bNitro.act{background:linear-gradient(#a8f2ff,#3fc2ea);color:#032230;box-shadow:0 2px 0 #0f5e7c,0 0 20px #59e0ffcc, inset 0 1px 0 #ffffff50}
+  /* ⚠⚠ 2026-08-07 · EL SELECTOR DE ESTADO LLEVA `#controls` DELANTE Y NO ES ADORNO. Al teñir los tres
+     boosters en reposo (doc 85) se escribió `#controls #bNitro` — DOS ids — y eso le gana a
+     `#bNitro.ready` y a `#bNitro.act`, que son un id y una clase. Resultado: la placa de reposo se
+     quedaba puesta también encendida y lista… pero la TINTA del `.act` sí se aplicaba, y esa tinta es
+     oscura a propósito (`#032230`) porque el fondo del `.act` era cyan CLARO, y encima la excepción
+     de más abajo le quita el trazo. Letra oscura, sin contorno, sobre placa oscura.
+     Jaime, viéndolo: «tiene trazo negro y fondo negro y no se lee bien». Medido: contraste 1,81.
+     Es la MISMA trampa de especificidad que este fichero ya documenta dos veces (ver la nota de
+     `#controls button#bGhost .bi`), pero al revés: esta vez el selector nuevo era demasiado fuerte.
+     REGLA: si el reposo lleva `#controls #bX`, sus estados llevan `#controls #bX.estado`. */
+  #controls #bNitro.ready{background:linear-gradient(#59e0ff,#1f9ec8);box-shadow:0 4px 0 #0f5e7c, inset 0 1px 0 #ffffff30}
+  #controls #bNitro.act{background:linear-gradient(#a8f2ff,#3fc2ea);color:#032230;box-shadow:0 2px 0 #0f5e7c,0 0 20px #59e0ffcc, inset 0 1px 0 #ffffff50}
   /*+AG el FANTASMA era lila y el CARRIL activo también (#laneRow button.on): dos violetas para cosas que no tienen
      nada que ver. En blanco deja de confundirse y además dice lo que hace: atravesar. Texto oscuro: el color base
      de los controles es blanco y sobre fondo claro no se leería. */
-  #bGhost.ready{background:linear-gradient(#ffffff,#dbe1f0);color:#141b2e;box-shadow:0 4px 0 #878ea6, inset 0 1px 0 #ffffff80}
-  #bGhost.act{background:linear-gradient(#ffffffdd,#dfe6f5b0);color:#141b2e;box-shadow:0 2px 0 #878ea6,0 0 22px #ffffffcc, inset 0 1px 0 #ffffff70}
+  #controls #bGhost.ready{background:linear-gradient(#ffffff,#dbe1f0);color:#141b2e;box-shadow:0 4px 0 #878ea6, inset 0 1px 0 #ffffff80}
+  #controls #bGhost.act{background:linear-gradient(#ffffffdd,#dfe6f5b0);color:#141b2e;box-shadow:0 2px 0 #878ea6,0 0 22px #ffffffcc, inset 0 1px 0 #ffffff70}
   /*+AG doc 40: mismo lenguaje de "listo para pulsar" que el resto del juego (glow que late + barrido de brillo).
      Aqui SOLO el super lo lleva: freno/nitro/fantasma tambien usan .ready para decir "disponible", y si los
      cuatro barrieran a la vez el aviso dejaria de significar nada (regla Supercell: uno por pantalla). */
-  #bSup.ready{background:linear-gradient(#ffe27a,#ff9a3d);color:#3a2400;box-shadow:0 3px 0 #a85a12,0 0 18px #ffb03daa;
+  #controls #bSup.ready{background:linear-gradient(#ffe27a,#ff9a3d);color:#3a2400;box-shadow:0 3px 0 #a85a12,0 0 18px #ffb03daa;
     position:relative;overflow:hidden;animation:readyGlow 1.9s ease-in-out infinite}
   #bSup.ready::after{content:'';position:absolute;top:0;height:100%;width:32%;left:-45%;
     background:linear-gradient(100deg,#fff0,#ffffff88 46%,#fff0);transform:skewX(-18deg);
     animation:readySweep 3.2s ease-in-out infinite;pointer-events:none}
-  #bSup.act{background:linear-gradient(#fff3b8,#ffc44d);color:#3a2400;box-shadow:0 2px 0 #a85a12,0 0 26px #ffd34dee, inset 0 1px 0 #ffffff60}
+  #controls #bSup.act{background:linear-gradient(#fff3b8,#ffc44d);color:#3a2400;box-shadow:0 2px 0 #a85a12,0 0 26px #ffd34dee, inset 0 1px 0 #ffffff60}
   #bSup.act::after{display:none}
   @keyframes readySweep{0%{left:-45%}26%,100%{left:132%}}
   @keyframes readyGlow{0%,100%{filter:drop-shadow(0 0 0 #ffd23f00)}50%{filter:drop-shadow(0 0 10px #ffd23fcc)}}
@@ -186,9 +196,37 @@
   /* ⚠ ES `.off` Y NO `:disabled` (ver doc 85). Un <button disabled> no recibe el evento: el navegador
      se come el toque antes de que llegue el juego, así que un booster en recarga no podía ni contestar
      "ahora no". Y el apagado deja de ser opacity .4, que borraba el icono y con él la pista de qué es. */
-  #controls button.off{opacity:.62;filter:grayscale(.55) brightness(.72);cursor:default;
-    box-shadow:0 2px 0 var(--j-canto), inset 0 1px 0 #ffffff1a}
+  /* ⚠⚠ 2026-08-07 (2ª vuelta) · EL APAGADO DEJA DE SER UN FILTRO. Jaime, viéndolo: «tiene trazo negro
+     y fondo negro y no se lee bien». Tenía razón y la culpa era de este mismo bloque: el apagado se
+     hacía con `filter:grayscale(.55) brightness(.72)`, y un filtro se lo come TODO — la placa, la
+     letra y el contorno a la vez. Sobre una placa que ya era oscura (el nitro es azul petróleo) el
+     resultado era gris sobre casi negro con un contorno negro alrededor. Y no es un estado raro: es
+     lo que estás mirando los 5 segundos siguientes a pulsar el nitro.
+     Ahora el apagado tiene SU PROPIA PLACA, neutra y no más oscura que la encendida, y **la letra no
+     se toca**: sigue clara con su contorno, que es lo que la hace legible. Sólo se desatura el ICONO,
+     que es la pieza que puede permitirse perder color sin perder la forma.
+     REGLA: para apagar un botón, cámbiale el COLOR, no le bajes el brillo. Bajar el brillo apaga
+     también lo único que hay que seguir leyendo. */
+  /* ⚠⚠ Y AQUÍ LA TERCERA VUELTA DE LA MISMA TRAMPA. `#controls button.off` es (1 id, 1 clase, 1 etiqueta) y
+     los tintes de reposo de cada booster son `#controls #bXxx` = DOS IDS, que le ganan. O sea que esta
+     placa nueva no se aplicaba y el apagado seguía siendo el tinte oscuro de siempre — medido: la
+     sonda seguía leyendo el fondo del nitro, no el gris. En CSS los ids mandan: ninguna regla de un
+     solo id puede ganarle a una de dos, por mucho que vaya después. Así que el estado se escribe con
+     los mismos ids, uno a uno. Es feo y es explícito, que es lo que hace falta después de tropezar
+     tres veces con esto en el mismo pase. */
+  #controls button.off,
+  #controls #bLaneL.off, #controls #bLaneC.off, #controls #bLaneR.off, #controls #bRun.off, #controls #bStop.off, #controls #bNitro.off, #controls #bGhost.off, #controls #bSup.off{opacity:1;cursor:default;
+    background:linear-gradient(180deg,#43435a,#30303f 50%,#24242f);
+    box-shadow:0 2px 0 #15151f, inset 0 1px 0 #ffffff26;
+    color:#d3d3e2}
+  #controls button.off .bi{filter:grayscale(.7) brightness(.9)}
+  #controls button.off .cd{opacity:.9}
+  /* mientras el booster ARDE manda el .act aunque ya no queden usos: lo que estás viendo es el efecto
+     en marcha, no un botón apagado. `background:revert-layer` no vale aquí, así que se repite el .act. */
   #controls button.act.off{opacity:1;filter:none}
+  #controls #bNitro.act.off{background:linear-gradient(#a8f2ff,#3fc2ea);color:#032230}
+  #controls #bGhost.act.off{background:linear-gradient(#ffffffdd,#dfe6f5b0);color:#141b2e}
+  #controls #bSup.act.off{background:linear-gradient(#fff3b8,#ffc44d);color:#3a2400}
   #youlbl{position:fixed;z-index:5;transform:translate(-50%,-100%);font-weight:900;font-size:13px;color:#fff;
     text-shadow:0 2px 6px #000,0 0 10px #0008;letter-spacing:.06em;pointer-events:none;opacity:0}
   /*+AG estado ESPECTADOR: al morir se ocultan los controles y sale este cartel */
@@ -249,12 +287,12 @@
   /* docs/56 regla 1: sobre el DORADO el texto es BLANCO con trazo, NUNCA tinta oscura sobre amarillo
      (el mismo arreglo que se le hizo al JUGAR del shell). Van aparte porque estos selectores le ganan
      en especificidad al grupo de arriba, no por orden. */
-  #bSup.ready, #bSup.act, #specExit{color:#fff}
+  #controls #bSup.ready, #controls #bSup.act, #specExit{color:#fff}
   /* EXCEPCION CONSCIENTE (doc 60 regla 14 pide listarlas): FANTASMA y NITRO EN MARCHA son placas CLARAS
      —el fantasma es blanco a proposito, "atravesar", y su tinta oscura esta razonada arriba—, y letra
      blanca sobre plancha casi blanca no se lee ni con contorno. Se quedan con su tinta oscura y SIN trazo:
      con el, el contorno indigo alrededor de una letra ya oscura solo emborrona y funde letras. */
-  #bGhost.ready, #bGhost.act, #bNitro.act{-webkit-text-stroke-width:0;text-shadow:none}
+  #controls #bGhost.ready, #controls #bGhost.act, #controls #bNitro.act{-webkit-text-stroke-width:0;text-shadow:none}
   /* doc 60 regla 9 · SUELO DE 11 px: ningun texto informativo del HUD baja de ahi. Los 10 y 9 px de este
      HUD venian de cuando el HUD era una herramienta de preview en pantalla grande. */
   #controls button .k{font-size:11px}
@@ -347,7 +385,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=f64190d+SUCIO"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=0cddb5b"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -358,30 +396,30 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 </script>
 
 <script type="module">
-import { THREE, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createBloom, frameOrtho, BLOOM } from '../chassis/gfx.mjs?v=f64190d-SUCIO';
-import { archLook } from '../chassis/ballmat.mjs?v=f64190d-SUCIO';   //+AG doc 41 bloque G: material de la bola-heroe
-import { attachSquash } from '../chassis/squash.mjs?v=f64190d-SUCIO';
-import { createCelebration } from '../chassis/celebration.mjs?v=f64190d-SUCIO';
-import { createKillfeed } from '../chassis/killfeed.mjs?v=f64190d-SUCIO';
-import { createCensusBoard } from '../chassis/censusboard.mjs?v=f64190d-SUCIO';
-import { createCupoGauge } from '../chassis/cupogauge.mjs?v=f64190d-SUCIO';
-import { createKillTags } from '../chassis/killtag.mjs?v=f64190d-SUCIO';
-import { crearInventario } from '../chassis/invboost.mjs?v=f64190d-SUCIO';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
-import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=f64190d-SUCIO';
-import { archFace } from '../chassis/facegen.mjs?v=f64190d-SUCIO';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
-import { Sim, TEAMS, SHORT_COLORS, SHORT_COLORS_6, BALL_R, FPS, FIELD_W, FIELD_L, XL, XR, SPAWN_Y, GATE_Y, SAFE_Y } from './sim.js?v=f64190d-SUCIO';
-import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=f64190d-SUCIO';
-import { buildSfxBuffer } from './sfxmap.mjs?v=f64190d-SUCIO';
-import { createCoach } from '../chassis/coach.mjs?v=f64190d-SUCIO';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
-import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=f64190d-SUCIO';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
-import { createUiSfx } from '../chassis/uisfx.mjs?v=f64190d-SUCIO';   //+AG doc 85: el sonido de "no puedo"
-import { createJuice } from '../chassis/juice.mjs?v=f64190d-SUCIO';   //+AG doc 85: lo que pasa cuando el dedo toca un botón (los 3 modos)
+import { THREE, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createBloom, frameOrtho, BLOOM } from '../chassis/gfx.mjs?v=0cddb5b';
+import { archLook } from '../chassis/ballmat.mjs?v=0cddb5b';   //+AG doc 41 bloque G: material de la bola-heroe
+import { attachSquash } from '../chassis/squash.mjs?v=0cddb5b';
+import { createCelebration } from '../chassis/celebration.mjs?v=0cddb5b';
+import { createKillfeed } from '../chassis/killfeed.mjs?v=0cddb5b';
+import { createCensusBoard } from '../chassis/censusboard.mjs?v=0cddb5b';
+import { createCupoGauge } from '../chassis/cupogauge.mjs?v=0cddb5b';
+import { createKillTags } from '../chassis/killtag.mjs?v=0cddb5b';
+import { crearInventario } from '../chassis/invboost.mjs?v=0cddb5b';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
+import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=0cddb5b';
+import { archFace } from '../chassis/facegen.mjs?v=0cddb5b';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
+import { Sim, TEAMS, SHORT_COLORS, SHORT_COLORS_6, BALL_R, FPS, FIELD_W, FIELD_L, XL, XR, SPAWN_Y, GATE_Y, SAFE_Y } from './sim.js?v=0cddb5b';
+import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=0cddb5b';
+import { buildSfxBuffer } from './sfxmap.mjs?v=0cddb5b';
+import { createCoach } from '../chassis/coach.mjs?v=0cddb5b';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=0cddb5b';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
+import { createUiSfx } from '../chassis/uisfx.mjs?v=0cddb5b';   //+AG doc 85: el sonido de "no puedo"
+import { createJuice } from '../chassis/juice.mjs?v=0cddb5b';   //+AG doc 85: lo que pasa cuando el dedo toca un botón (los 3 modos)
 //+AG el ámbito NO es opcional: la regla base es `#controls button` (id + etiqueta) y le gana en
 //   especificidad a cualquier `.j-hit` suelto. Es la trampa que ya costó una versión muerta en este
 //   mismo fichero (ver la nota de `#controls button#bGhost .bi`).
 const juice = createJuice({ ambito:'#controls', reducido: new URLSearchParams(location.search).get('redfx')==='1' });
-import { createPausa } from '../chassis/pausa.mjs?v=f64190d-SUCIO';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
-import { cantarPuesto } from '../chassis/veredicto.mjs?v=f64190d-SUCIO';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
+import { createPausa } from '../chassis/pausa.mjs?v=0cddb5b';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
+import { cantarPuesto } from '../chassis/veredicto.mjs?v=0cddb5b';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
 
 window.addEventListener('error', e => { document.getElementById('err').style.display='grid'; console.error(e.error||e.message); });
 

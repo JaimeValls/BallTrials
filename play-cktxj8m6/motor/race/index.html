@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 f64190d+SUCIO">
+<meta name="bt-build" content="2026-08-07 0cddb5b">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>YouBall · La Gran Carrera (WebGL)</title>
 <style>
@@ -95,8 +95,31 @@
      en enfriamiento no podía ni contestar "ahora no puedo" — se comportaba igual que un botón roto.
      Con `aria-disabled` + esta clase el toque SÍ llega, el manejador comprueba lo mismo que antes y
      contesta con `juice.deny()`. La semántica de accesibilidad la conserva el aria-disabled. */
-  #ctr button.off{opacity:.62;filter:grayscale(.55) brightness(.72);cursor:default;
-    box-shadow:0 2px 0 var(--j-canto), inset 0 1px 0 #ffffff1a}
+  /* ⚠⚠ 2026-08-07 (2ª vuelta) · EL APAGADO DEJA DE SER UN FILTRO. Jaime, viéndolo: «tiene trazo negro
+     y fondo negro y no se lee bien». Tenía razón y la culpa era de este mismo bloque: el apagado se
+     hacía con `filter:grayscale(.55) brightness(.72)`, y un filtro se lo come TODO — la placa, la
+     letra y el contorno a la vez. Sobre una placa que ya era oscura (el nitro es azul petróleo) el
+     resultado era gris sobre casi negro con un contorno negro alrededor. Y no es un estado raro: es
+     lo que estás mirando los 5 segundos siguientes a pulsar el nitro.
+     Ahora el apagado tiene SU PROPIA PLACA, neutra y no más oscura que la encendida, y **la letra no
+     se toca**: sigue clara con su contorno, que es lo que la hace legible. Sólo se desatura el ICONO,
+     que es la pieza que puede permitirse perder color sin perder la forma.
+     REGLA: para apagar un botón, cámbiale el COLOR, no le bajes el brillo. Bajar el brillo apaga
+     también lo único que hay que seguir leyendo. */
+  /* ⚠⚠ Y AQUÍ LA TERCERA VUELTA DE LA MISMA TRAMPA. `#ctr button.off` es (1 id, 1 clase, 1 etiqueta) y
+     los tintes de reposo de cada booster son `#ctr #bXxx` = DOS IDS, que le ganan. O sea que esta
+     placa nueva no se aplicaba y el apagado seguía siendo el tinte oscuro de siempre — medido: la
+     sonda seguía leyendo el fondo del nitro, no el gris. En CSS los ids mandan: ninguna regla de un
+     solo id puede ganarle a una de dos, por mucho que vaya después. Así que el estado se escribe con
+     los mismos ids, uno a uno. Es feo y es explícito, que es lo que hace falta después de tropezar
+     tres veces con esto en el mismo pase. */
+  #ctr button.off,
+  #ctr #bL.off, #ctr #bC.off, #ctr #bR.off, #ctr #bNit.off, #ctr #bShd.off, #ctr #bSup.off{opacity:1;cursor:default;
+    background:linear-gradient(180deg,#43435a,#30303f 50%,#24242f);
+    box-shadow:0 2px 0 #15151f, inset 0 1px 0 #ffffff26;
+    color:#d3d3e2}
+  #ctr button.off .bi{filter:grayscale(.7) brightness(.9)}
+  #ctr button.off .cd{opacity:.9}
   /*+AG v0.15 los tres botones de ZONA se pulsan cientos de veces por carrera y con el pulgar sin mirar,
      asi que se les da mas dedo que a los boosters: medidos daban 44 px de alto, que es EXACTAMENTE mi
      minimo tolerable (la guia de iOS) y no un objetivo. A 50 el pulgar no tiene que apuntar, y el HUD
@@ -334,7 +357,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=f64190d+SUCIO"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=0cddb5b"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -345,27 +368,27 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 </script>
 
 <script type="module">
-import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createItemPops, createBloom, frameOrtho, buildHud, updateHud } from '../chassis/gfx.mjs?v=f64190d-SUCIO';
-import { archLook } from '../chassis/ballmat.mjs?v=f64190d-SUCIO';   //+AG doc 41 bloque G: material de la bola-heroe
-import { attachSquash } from '../chassis/squash.mjs?v=f64190d-SUCIO';
+import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createItemPops, createBloom, frameOrtho, buildHud, updateHud } from '../chassis/gfx.mjs?v=0cddb5b';
+import { archLook } from '../chassis/ballmat.mjs?v=0cddb5b';   //+AG doc 41 bloque G: material de la bola-heroe
+import { attachSquash } from '../chassis/squash.mjs?v=0cddb5b';
 import { Sim, RNG, TEAMS, SHORT_COLORS, BALL_R, WIDTH, GATE_Y, GATE_H, TOP, FPS,
-         DIR, N_BALLS, CAM_SCALE, ASPA_R, ASPA_THICK, PLAT_HW, PLAT_HH } from './sim.js?v=f64190d-SUCIO';   //+AG extras de la capa de agencia
+         DIR, N_BALLS, CAM_SCALE, ASPA_R, ASPA_THICK, PLAT_HW, PLAT_HH } from './sim.js?v=0cddb5b';   //+AG extras de la capa de agencia
 //+AG doc 62: los encuadres del cierre (sim.hero_scale / sim.celeb_scale) se leen del OBJETO sim, no por
 //   import. Un export que la CDN aún no ha refrescado tumba el módulo entero y la partida no arranca (pasó
 //   en producción el 2-ago); un campo que falta degrada a la cámara de siempre. Ver la nota en sim.js.
-import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=f64190d-SUCIO';
-import { archFace } from '../chassis/facegen.mjs?v=f64190d-SUCIO';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
-import { itemTexture } from '../chassis/itemgen.mjs?v=f64190d-SUCIO';
-import { crearInventario } from '../chassis/invboost.mjs?v=f64190d-SUCIO';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
-import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=f64190d-SUCIO';
-import { buildSfxBuffer } from './sfxmap.mjs?v=f64190d-SUCIO';
-import { runToEnd } from '../chassis/simrun.mjs?v=f64190d-SUCIO';
-import { createCoach } from '../chassis/coach.mjs?v=f64190d-SUCIO';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
-import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=f64190d-SUCIO';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
-import { createPausa } from '../chassis/pausa.mjs?v=f64190d-SUCIO';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
-import { cantarPuesto } from '../chassis/veredicto.mjs?v=f64190d-SUCIO';   //+AG cartel de META: "en qué puesto has quedado", antes de soltar el resultado al shell
-import { createUiSfx } from '../chassis/uisfx.mjs?v=f64190d-SUCIO';   //+AG doc 85: el sonido de "no puedo"
-import { createJuice } from '../chassis/juice.mjs?v=f64190d-SUCIO';   //+AG doc 85: lo que pasa cuando el dedo toca un botón (los 3 modos)
+import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=0cddb5b';
+import { archFace } from '../chassis/facegen.mjs?v=0cddb5b';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
+import { itemTexture } from '../chassis/itemgen.mjs?v=0cddb5b';
+import { crearInventario } from '../chassis/invboost.mjs?v=0cddb5b';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
+import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=0cddb5b';
+import { buildSfxBuffer } from './sfxmap.mjs?v=0cddb5b';
+import { runToEnd } from '../chassis/simrun.mjs?v=0cddb5b';
+import { createCoach } from '../chassis/coach.mjs?v=0cddb5b';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=0cddb5b';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
+import { createPausa } from '../chassis/pausa.mjs?v=0cddb5b';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
+import { cantarPuesto } from '../chassis/veredicto.mjs?v=0cddb5b';   //+AG cartel de META: "en qué puesto has quedado", antes de soltar el resultado al shell
+import { createUiSfx } from '../chassis/uisfx.mjs?v=0cddb5b';   //+AG doc 85: el sonido de "no puedo"
+import { createJuice } from '../chassis/juice.mjs?v=0cddb5b';   //+AG doc 85: lo que pasa cuando el dedo toca un botón (los 3 modos)
 //+AG el ámbito NO es opcional: `#ctr button:disabled` le gana en especificidad a cualquier `.j-hit` suelto,
 //   y un booster se pone `disabled` en el MISMO frame en que se dispara. Sin el ámbito, el fogonazo del
 //   botón que más importa no se vería jamás (es la trampa del doc 74 §6, ahora con su nombre).
