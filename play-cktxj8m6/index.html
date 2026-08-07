@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 ab3d86c"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-07 e45be05"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -729,7 +729,40 @@
      portada. Es diminuto (22 px) a proposito: tiene que decir "no es tuya" sin taparte el personaje,
      que es lo que estas mirando para decidir si lo compras. z-index 21 porque el lienzo de las bolas
      vivas va a 20: por debajo, la bola le pasaria por encima. */
-  .g-lock{ position:absolute; top:7px; right:7px; width:22px; height:22px; object-fit:contain; z-index:21;
+  /*+AG ══ LA CUÑA ROJA · 7-ago-2026 ═══════════════════════════════════════════════════════════════
+     Jaime: «el candado no queda muy claro de cuándo posees una. Como sobra mucho espacio, yo pondría
+     algo que se come la esquina, como un triángulo desde la esquina y el candado, y algo más visible
+     de rojo o rojizo, haciéndote ver que te falta y que quieras tenerlo.» Propuesta del auditor de
+     arte (agente `supercell-arte`) sobre las tarjetas reales medidas.
+
+     ⚠ EL HALLAZGO QUE EXPLICA LA QUEJA, Y NO ERA EL TAMAÑO: el candado dorado casi DESAPARECE en la
+     tarjeta Legendaria, porque el borde de esa rareza (`QUAL[4].c`) es dorado también. O sea que el
+     único color del marcador era uno de los cinco que ya ocupa la paleta de rareza, y contra el suyo
+     se fundía. Por eso el rojo no es «un color más llamativo»: de los cinco tonos de rareza
+     —gris, verde, azul, violeta, dorado— **ninguno es rojo**, así que es el único hueco cromático que
+     queda libre y el único que no puede fundirse con ningún borde.
+
+     ⚠ Y NO SE CONFUNDE CON LA ✕ DE CERRAR, que es el otro uso del rojo en el canon: aquélla es un
+     círculo flotante sobre un modal (`.sclose`, `.gd-close`) y ésta es una cuña clavada en la esquina
+     de una tarjeta de rejilla. Misma tinta, dos formas que no comparten sitio ni gesto.
+
+     CERO ARTE NUEVA: reutiliza `ui-candado.webp`, que ya está aprobado, y el banderín se dibuja con
+     `clip-path`, que es el mismo patrón que ya llevan desplegado `.bst-buy .off` y `.sh-off`.
+
+     ⚠ EL ORDEN DE PINTADO ES LA TRAMPA DE ESTA REGLA: un pseudo `::after` se pinta SIEMPRE después
+     que los hijos reales de su elemento, así que con el mismo z-index la cuña taparía el candado. Por
+     eso el candado sube a 22 y la cuña se queda en 21 (y las dos por encima del 20 del lienzo de las
+     bolas vivas, que si no la bola les pasa por delante).
+
+     `top:0;right:0` + `border-radius` de 16 px (los 18 de la tarjeta menos sus 2 de borde) es lo que
+     hace que SE COMA la esquina en vez de flotar dentro de ella, que es lo que pidió Jaime. El borde
+     de rareza sigue viéndose entero por fuera: la cuña se pega a su cara interna, no lo tapa. */
+  .g-card.locked::after{ content:''; position:absolute; top:0; right:0; z-index:21; pointer-events:none;
+    width:clamp(44px,15vw,54px); aspect-ratio:1/1;
+    border-radius:0 16px 0 0; clip-path:polygon(0 0, 100% 0, 100% 100%);
+    background:linear-gradient(135deg,#f2495a,var(--red));
+    filter:drop-shadow(-1px 2px 0 #8c1526) drop-shadow(0 2px 4px #0007); }
+  .g-lock{ position:absolute; top:9px; right:8px; width:26px; height:26px; object-fit:contain; z-index:22;
     filter:drop-shadow(0 2px 3px #000a); pointer-events:none; }
   /*+AG EL PRECIO DEJA DE SER TEXTO SUELTO (sintoma 5 de la lista de Jaime). Pasa al CHIP DE MONEDA
      que docs/86 §5 saco medido de sus capturas: «pastilla negra opaca y el icono circular MORDIENDO
@@ -5203,7 +5236,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=ab3d86c"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=e45be05"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -8218,7 +8251,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=ab3d86c').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=e45be05').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -10487,7 +10520,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=ab3d86c';
+  import { startAmbient } from './arte/ambient.mjs?v=e45be05';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -10503,7 +10536,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=ab3d86c').then(m => {
+  import('./arte/pista-preview.mjs?v=e45be05').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -10515,8 +10548,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=ab3d86c';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=ab3d86c';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=e45be05';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=e45be05';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -10686,7 +10719,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=ab3d86c'), import('./motor/chassis/sincro.mjs?v=ab3d86c')]);
+        import('./motor/chassis/nube.mjs?v=e45be05'), import('./motor/chassis/sincro.mjs?v=e45be05')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
