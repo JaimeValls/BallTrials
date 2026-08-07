@@ -12,18 +12,18 @@
 //
 // SON EFECTOS, no música: van con el interruptor de EFECTOS de Ajustes (el que llama pásalo en sfxOn).
 //
-//   import { createUiSfx } from './motor/chassis/uisfx.mjs?v=50cee4e';
+//   import { createUiSfx } from './motor/chassis/uisfx.mjs?v=e4f53ed-SUCIO';
 //   const ui = createUiSfx(audio, ()=>SAVE.settings.sfx!==false);
 //   ui.tap();  ui.confirm();  ui.back();  ui.denied();
 //
 // REGLA DE VOLUMEN: un clic de menú se oye 200 veces por sesión, así que se queda DEBAJO de lo que hace la
 // partida (amplitudes ~0.2 contra ~0.5 de los golpes del motor) y siempre por debajo de 90 ms. Tiene que
 // confirmar el toque, no llamar la atención.
-import { createSynth, makeRng, peakGain } from './synth.mjs?v=50cee4e';
+import { createSynth, makeRng, peakGain } from './synth.mjs?v=e4f53ed-SUCIO';
 //+AG 2026-08-07: `createFx` da el `pop` y el `sparkle` que pide el diseño de «Recompensa reclamada» de
 //   prototipo/sonidos.html. Se importa aqui y no se reescribe a mano: son los mismos efectos que usa la
 //   partida, asi que reclamar un premio suena de la familia del juego y no de otro sitio.
-import { createFx } from './sfx.mjs?v=50cee4e';
+import { createFx } from './sfx.mjs?v=e4f53ed-SUCIO';
 
 const SR = 44100;
 

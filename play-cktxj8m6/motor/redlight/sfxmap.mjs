@@ -1,14 +1,14 @@
 // YouBall · MAPEO eventos→buffer de audio de RED LIGHT RUSH, browser-safe (sin Node). Mismo patrón que
 // gauntlet/sfxmap.mjs: por cada evento de la sim coloca su SFX en un Float32Array. Determinista (mismo seed →
 // mismo WAV). Lo usa el preview en vivo (index.html → Web Audio); cuando exista el render Node reusará esto igual.
-//   import { buildSfxBuffer } from './sfxmap.mjs?v=50cee4e';
+//   import { buildSfxBuffer } from './sfxmap.mjs?v=e4f53ed-SUCIO';
 //   const buf = buildSfxBuffer({ events, decision_frame, f, seed, SR });   // Float32Array mono (sin normalizar)
 //
 // Los SFX van por el canal de EFECTOS (no el de música). v7.3: la música ya NO se calla en rojo; en su lugar
 // suena una ALARMA (klaxon) al ponerse rojo (ver fase 'red' abajo) que marca el "¡ALTO!" por encima de la música.
-import { createSynth, makeRng } from '../chassis/synth.mjs?v=50cee4e';
-import { createFx } from '../chassis/sfx.mjs?v=50cee4e';
-import { FPS } from './sim.js?v=50cee4e';
+import { createSynth, makeRng } from '../chassis/synth.mjs?v=e4f53ed-SUCIO';
+import { createFx } from '../chassis/sfx.mjs?v=e4f53ed-SUCIO';
+import { FPS } from './sim.js?v=e4f53ed-SUCIO';
 
 const WARN_F = 18;   // igual que en sim/render: el aviso ámbar dura 0.6 s antes del rojo
 

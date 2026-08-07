@@ -11,7 +11,7 @@
 // (la semantica de rank difiere entre modos). survivors = las que NO estan 'dead'.
 //   update(dt, cam, balls, classify)  cada frame; redibuja el lienzo solo cuando cambia el estado.
 import * as THREE from 'three';
-import { sat } from './gfx.mjs?v=50cee4e';
+import { sat } from './gfx.mjs?v=e4f53ed-SUCIO';
 
 const CW = 1500;                // ancho del lienzo (fijo en ambos perfiles)
 const CH_TOR = 150;             // alto del lienzo en TORNEO (aspecto 10:1) => franja delgada arriba
