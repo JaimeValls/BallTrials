@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 f4fd178">
+<meta name="bt-build" content="2026-08-07 035cbed">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>YouBall · La Gran Carrera (WebGL)</title>
 <style>
@@ -357,7 +357,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=f4fd178"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=035cbed"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -368,27 +368,27 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 </script>
 
 <script type="module">
-import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createItemPops, createBloom, frameOrtho, buildHud, updateHud } from '../chassis/gfx.mjs?v=f4fd178';
-import { archLook } from '../chassis/ballmat.mjs?v=f4fd178';   //+AG doc 41 bloque G: material de la bola-heroe
-import { attachSquash } from '../chassis/squash.mjs?v=f4fd178';
+import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createItemPops, createBloom, frameOrtho, buildHud, updateHud } from '../chassis/gfx.mjs?v=035cbed';
+import { archLook } from '../chassis/ballmat.mjs?v=035cbed';   //+AG doc 41 bloque G: material de la bola-heroe
+import { attachSquash } from '../chassis/squash.mjs?v=035cbed';
 import { Sim, RNG, TEAMS, SHORT_COLORS, BALL_R, WIDTH, GATE_Y, GATE_H, TOP, FPS,
-         DIR, N_BALLS, CAM_SCALE, ASPA_R, ASPA_THICK, PLAT_HW, PLAT_HH } from './sim.js?v=f4fd178';   //+AG extras de la capa de agencia
+         DIR, N_BALLS, CAM_SCALE, ASPA_R, ASPA_THICK, PLAT_HW, PLAT_HH } from './sim.js?v=035cbed';   //+AG extras de la capa de agencia
 //+AG doc 62: los encuadres del cierre (sim.hero_scale / sim.celeb_scale) se leen del OBJETO sim, no por
 //   import. Un export que la CDN aún no ha refrescado tumba el módulo entero y la partida no arranca (pasó
 //   en producción el 2-ago); un campo que falta degrada a la cámara de siempre. Ver la nota en sim.js.
-import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=f4fd178';
-import { archFace } from '../chassis/facegen.mjs?v=f4fd178';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
-import { itemTexture } from '../chassis/itemgen.mjs?v=f4fd178';
-import { crearInventario } from '../chassis/invboost.mjs?v=f4fd178';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
-import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=f4fd178';
-import { buildSfxBuffer } from './sfxmap.mjs?v=f4fd178';
-import { runToEnd } from '../chassis/simrun.mjs?v=f4fd178';
-import { createCoach } from '../chassis/coach.mjs?v=f4fd178';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
-import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=f4fd178';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
-import { createPausa } from '../chassis/pausa.mjs?v=f4fd178';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
-import { cantarPuesto } from '../chassis/veredicto.mjs?v=f4fd178';   //+AG cartel de META: "en qué puesto has quedado", antes de soltar el resultado al shell
-import { createUiSfx } from '../chassis/uisfx.mjs?v=f4fd178';   //+AG doc 85: el sonido de "no puedo"
-import { createJuice } from '../chassis/juice.mjs?v=f4fd178';   //+AG doc 85: lo que pasa cuando el dedo toca un botón (los 3 modos)
+import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=035cbed';
+import { archFace } from '../chassis/facegen.mjs?v=035cbed';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
+import { itemTexture } from '../chassis/itemgen.mjs?v=035cbed';
+import { crearInventario } from '../chassis/invboost.mjs?v=035cbed';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
+import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=035cbed';
+import { buildSfxBuffer } from './sfxmap.mjs?v=035cbed';
+import { runToEnd } from '../chassis/simrun.mjs?v=035cbed';
+import { createCoach } from '../chassis/coach.mjs?v=035cbed';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=035cbed';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
+import { createPausa } from '../chassis/pausa.mjs?v=035cbed';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
+import { cantarPuesto } from '../chassis/veredicto.mjs?v=035cbed';   //+AG cartel de META: "en qué puesto has quedado", antes de soltar el resultado al shell
+import { createUiSfx } from '../chassis/uisfx.mjs?v=035cbed';   //+AG doc 85: el sonido de "no puedo"
+import { createJuice } from '../chassis/juice.mjs?v=035cbed';   //+AG doc 85: lo que pasa cuando el dedo toca un botón (los 3 modos)
 //+AG el ámbito NO es opcional: `#ctr button:disabled` le gana en especificidad a cualquier `.j-hit` suelto,
 //   y un booster se pone `disabled` en el MISMO frame en que se dispara. Sin el ámbito, el fogonazo del
 //   botón que más importa no se vería jamás (es la trampa del doc 74 §6, ahora con su nombre).
@@ -1107,7 +1107,11 @@ window.__cap = {
 //   era el único que no se podía medir: su barra no llega al 100 % en los pocos segundos que dura una
 //   tanda de medición, así que salía siempre "apagado, sin medir" y su fogonazo no lo comprobaba nadie.
 //   No toca la Sim ni el RNG: sólo pone a 1 el contador de la barra, que es lo mismo que hace jugar bien.
-window.__test = { get sim(){ return sim; }, get phase(){ return phase; }, get pausa(){ return pausa.estado; }, cargaSuper(){ sim.super = 1; } };
+//+AG doc 85 (2ª vuelta) · `scene` se expone para el BANCO DE EFECTOS. Las partículas del motor viven
+//   dentro de la escena 3D, no en el DOM, así que un banco que cuente elementos del DOM da CERO
+//   siempre y certifica que no pasa nada justo cuando sí pasa. Luz Roja ya la exponía por `window.dbg`;
+//   sin esto, el banco medía a ciegas dos de los tres modos y los cantaba a cero.
+window.__test = { get sim(){ return sim; }, get phase(){ return phase; }, get pausa(){ return pausa.estado; }, get scene(){ return scene; }, get P(){ return P; }, cargaSuper(){ sim.super = 1; } };
 
 addEventListener('resize',()=>{ layout(); });
 //+AG teclado del juego: 1/2/3 (o flechas) = zona · A/S/D = nitro/escudo/super · R = otra ronda.
@@ -1247,8 +1251,13 @@ function liveSfx(ev, won){
   if(ev.bump && ev.bump.length && sim.f-lastBumpF>=4){ put('bump',[ev.bump[0]]); lastBumpF=sim.f; }
   put('pickup', ev.pickup);
   put('nitro', (ev.nitro||[]).filter(e=>e.id===0));
-  put('pickup', (ev.shieldup||[]).filter(e=>e.id===0).map(e=>({type:'shield'})));
-  put('pickup', (ev.super||[]).map(e=>({type:'star'})));
+  //+AG doc 85 (2ª vuelta): el escudo y el súper DEL JUGADOR dejan de sonar al bling de coger un ítem y
+  //   pasan a su canal propio. Los de las OTRAS bolas se quedan como estaban (el súper de la IA sigue
+  //   en `pickup`/star): si los once súperes ajenos sonaran con la fanfarria nueva, la carrera sería
+  //   una verbena y el tuyo dejaría de destacar — la misma razón por la que el nitro va filtrado.
+  put('pshield', (ev.shieldup||[]).filter(e=>e.id===0));
+  put('psuper',  (ev.super||[]).filter(e=>e.id===0));
+  put('pickup',  (ev.super||[]).filter(e=>e.id!==0).map(e=>({type:'star'})));
   put('relay', ev.relay); put('gatebreak', ev.gatebreak); put('finishes', ev.finishes);
   if(ev.quake!==null && ev.quake!==undefined){ reb.twists=[{f:0}]; any=true; }
   if(!any && !won) return;
@@ -1446,6 +1455,37 @@ function setDir(d){ if(!sim||sim.player.rank!==null) return; sim.player.dir=d;
 //   motor VA a disparar (enfriamiento/meta) y solo entonces se descuenta. Al revés, un nitro en
 //   enfriamiento se comería una carga sin que la bola hiciera nada — que es la peor manera posible de
 //   gastar algo que has pagado. Por eso btQuedan() se consulta antes y btConsume() después del fire.
+//+AG doc 85 (2ª vuelta) · LO QUE PASA EN LA PISTA CUANDO GASTAS UN BOOSTER.
+//   El NITRO ya lo tenía (doc 74: llama, brillo emisivo, estela cuádruple y 26 chispas) y no se toca.
+//   Sus dos vecinos, no: medido, el ESCUDO pintaba UN anillo y cero partículas, y el SÚPER 22
+//   partículas sin un solo temblor de cámara — menos que romper una compuerta, que son 38 y sí tiembla.
+//   ⚠ VIVE EN EL MOTOR Y NO EN LA SIM: render puro, no consume RNG, no toca a las otras bolas y no
+//   puede mover el resultado. La huella de la sim queda idéntica.
+//   ⚠ Y VA EN EL MANEJADOR, no en `react()`: así nace en el MISMO frame del dedo. Por `react()` llega
+//   un paso de sim más tarde, que es medio pestañeo de retraso justo donde más se nota.
+const FX_BOOST = {
+  //         color de chispa       n   fuerza  temblor squash  anillo
+  escudo:  { col:[0.33,0.85,1.00], n:24, pw:3.6, sk:0.10, sq:0.35, ring:[0.33,0.85,1.0] },
+  super:   { col:[1.00,0.84,0.30], n:30, pw:5.0, sk:0.22, sq:0.60, ring:null },
+};
+function fxPista(tipo){
+  const c = FX_BOOST[tipo]; if(!c || !sim) return;
+  const o = ballObjs && ballObjs[0]; if(!o) return;
+  const x = o.g.position.x, y = o.g.position.y;
+  //+AG «Efectos reducidos» recorta las partículas y quita el temblor, pero NO apaga el efecto: saber
+  //   que tu booster ha prendido es información, no decoración.
+  const red = document.documentElement.classList.contains('redfx')
+           || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  try{
+    P.burst(x, y, 0.30, c.col, red ? Math.round(c.n*0.45) : c.n, c.pw);
+    //+AG el pool de anillos es de 4 (gfx.mjs): jamás más de uno por evento. Y el SÚPER no lleva —
+    //   el doc 74 §6bis quitó la onda expansiva del nitro con el dato delante: es el idioma de una
+    //   explosión, es omnidireccional, y le roba el protagonismo a la bola.
+    if(c.ring && !red) P.ring(x, y, c.ring, 0.85);
+    if(!red) shake = Math.max(shake, c.sk);
+    o.squash = Math.max(o.squash||0, c.sq);
+  }catch(e){ console.error('[fxPista]', tipo, e); }   //+AG un efecto NUNCA puede tumbar el disparo
+}
 //+AG doc 85 · LOS TRES BOOSTERS ACUSAN EL TOQUE, Y LOS TRES DICEN QUE NO CUANDO NO PUEDEN.
 //   Antes sólo el nitro tenía fogonazo; el escudo y el súper se disparaban en silencio y lo único que
 //   se veía era el botón apagándose. Y si el toque NO prendía (enfriamiento o sin existencias) no
@@ -1462,14 +1502,14 @@ function useNitro(){ if(!(sim&&phase==='play')) return; const n=el('bNit');
 function useShield(){ if(!(sim&&phase==='play')) return; const s=el('bShd');
   if(sim.player.rank!==null) return;
   if(btQuedan('escudo')<=0 || sim.player.shieldCd>0){ juice.deny(s); return; }
-  if(sim.fireShield(sim.player)){ btConsume('escudo'); juice.hit(s,{color:'#7fb2ff',peso:'accion'}); }
+  if(sim.fireShield(sim.player)){ btConsume('escudo'); juice.hit(s,{color:'#7fb2ff',peso:'accion'}); fxPista('escudo'); }
   else juice.deny(s); }
 //+AG el SÚPER es peso 'momento': es la jugada más gorda que puede hacer el jugador y la única que no se
 //   compra (doc 83 §1), así que su fogonazo es el más grande del HUD. 18 chispas contra 10.
 function useSuper(){ if(!(sim&&phase==='play')) return; const u=el('bSup');
   if(sim.player.rank!==null) return;
   if(sim.super<1){ juice.deny(u); return; }
-  if(sim.fireSuper(sim.player)){ sim.super=0; juice.hit(u,{color:'#ffd23f',peso:'momento'}); }
+  if(sim.fireSuper(sim.player)){ sim.super=0; juice.hit(u,{color:'#ffd23f',peso:'momento'}); fxPista('super'); }
   else juice.deny(u); }   // super = estrella, consume la barra
 //+AG v0.15 LA ZONA SE CAMBIA AL TOCAR, NO AL SOLTAR. Los tres botones iban con `onclick`, y en un movil
 //   `click` solo dispara al LEVANTAR el dedo y el navegador lo CANCELA si el dedo se desliza un poco. Jugando

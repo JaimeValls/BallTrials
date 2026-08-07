@@ -1,14 +1,14 @@
 // YouBall · MAPEO eventos→buffer de audio de RED LIGHT RUSH, browser-safe (sin Node). Mismo patrón que
 // gauntlet/sfxmap.mjs: por cada evento de la sim coloca su SFX en un Float32Array. Determinista (mismo seed →
 // mismo WAV). Lo usa el preview en vivo (index.html → Web Audio); cuando exista el render Node reusará esto igual.
-//   import { buildSfxBuffer } from './sfxmap.mjs?v=f4fd178';
+//   import { buildSfxBuffer } from './sfxmap.mjs?v=035cbed';
 //   const buf = buildSfxBuffer({ events, decision_frame, f, seed, SR });   // Float32Array mono (sin normalizar)
 //
 // Los SFX van por el canal de EFECTOS (no el de música). v7.3: la música ya NO se calla en rojo; en su lugar
 // suena una ALARMA (klaxon) al ponerse rojo (ver fase 'red' abajo) que marca el "¡ALTO!" por encima de la música.
-import { createSynth, makeRng } from '../chassis/synth.mjs?v=f4fd178';
-import { createFx } from '../chassis/sfx.mjs?v=f4fd178';
-import { FPS } from './sim.js?v=f4fd178';
+import { createSynth, makeRng } from '../chassis/synth.mjs?v=035cbed';
+import { createFx } from '../chassis/sfx.mjs?v=035cbed';
+import { FPS } from './sim.js?v=035cbed';
 
 const WARN_F = 18;   // igual que en sim/render: el aviso ámbar dura 0.6 s antes del rojo
 
@@ -87,6 +87,35 @@ export function buildSfxBuffer({ events, decision_frame, resolved_by, f, seed, S
   for (const s of (ev.save || [])){ const t = T(s.f);
     add(t, 0.10, 900, 560, 0.11, 0.05, 5);                                        // "uf" suave descendente
     note(t + 0.03, 0.10, 660, 0.09, { wave: 'tri', decay: 6 });
+  }
+
+  // ---- LOS BOOSTERS DEL JUGADOR (doc 85, 2ª vuelta) ----------------------------------------------
+  //  POR QUE NO ESTABAN: la Sim de este modo emite `phase`, `scan`, `target`, `kill`, `save` y `cross`
+  //  — y NINGUNO de ellos es "el jugador ha pulsado algo". Los boosters de Luz Roja se disparan desde
+  //  el motor (pIn.nitroUntil y compañía), así que nunca llegaba nada aquí y los tres eran MUDOS:
+  //  pulsabas nitro, fantasma o el frenazo y no sonaba absolutamente nada. Medido a 0/150/400/900 ms.
+  //  Ahora el motor inyecta estas claves por `liveSfx()`, que es la vía que ya existía para sonar en
+  //  vivo. ⚠ Son claves que la Sim NO produce: en el render offline del vídeo del canal esta rama no
+  //  se ejecuta nunca, así que el WAV del torneo no cambia ni un byte.
+  for (const e of (ev.pnitro || [])) fx.nitro(T(e.f), 0.95);     // el MISMO nitro de la Carrera (doc 74 §6ter)
+  // FANTASMA: un "se desvanece" — aire que sube y se apaga, sin golpe. Lo contrario del nitro, que
+  // arranca con un THUMP: aquí no hay empujón, hay una desaparición.
+  for (const e of (ev.pghost || [])){ const t = T(e.f);
+    add(t, 0.26, 620, 1750, 0.30, 0.26, 3.0);                    // soplo que SUBE (se va)
+    add(t + 0.02, 0.20, 2400, 3300, 0.14, 0.10, 5);              // glaseado cristalino (intangible)
+    note(t + 0.01, 0.30, 784, 0.16, { wave: 'sine', decay: 3.5 });   // nota limpia, sin cuerpo grave
+  }
+  // FANTASMA que SE ACABA: la misma figura al revés y más corta. Existe porque volver a ser sólido es
+  // el instante en el que te pueden matar, y hasta ahora no avisaba nada (auditoría del doc 85 §7).
+  for (const e of (ev.pghostend || [])){ const t = T(e.f);
+    add(t, 0.16, 1500, 520, 0.24, 0.18, 4.5);                    // el soplo BAJA (vuelves)
+    note(t + 0.01, 0.14, 523, 0.14, { wave: 'tri', decay: 6 });
+  }
+  // FRENAZO: derrape. Ruido ancho que cae de golpe + el golpe seco de clavarse.
+  for (const e of (ev.pbrake || [])){ const t = T(e.f);
+    add(t, 0.22, 1900, 380, 0.34, 0.85, 3.2);                    // CHIRRIDO (ruido casi puro que desciende)
+    add(t, 0.10, 150, 60, 0.40, 0.25, 7);                        // el golpe de clavar
+    note(t + 0.03, 0.12, 165, 0.16, { wave: 'tri', decay: 6 });  // peso grave
   }
 
   // ---- META: ding ascendente por orden de llegada (cada bola que cruza suena un poco más aguda) ----

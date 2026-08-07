@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 f4fd178">
+<meta name="bt-build" content="2026-08-07 035cbed">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <!--+AG el HTML se sirve en INGLES (defecto del juego); ?lang=es lo traduce por JS (applyLang) -->
 <title>YouBall · The Hunter (WebGL)</title>
@@ -290,7 +290,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=f4fd178"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=035cbed"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -301,27 +301,27 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 </script>
 
 <script type="module">
-import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, makeFacePlane, createItemPool, createItemPops, createStarBurst, createWindTrail, createBloom, frameOrtho } from '../chassis/gfx.mjs?v=f4fd178';
-import { archLook } from '../chassis/ballmat.mjs?v=f4fd178';   //+AG doc 41 bloque G: material de la bola-heroe
-import { attachSquash } from '../chassis/squash.mjs?v=f4fd178';
-import { Sim, RNG, TEAMS, BALL_R, ARENA_W, ARENA_H, FPS, AGENCIA } from './sim.js?v=f4fd178';
-import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=f4fd178';
-import { archFace } from '../chassis/facegen.mjs?v=f4fd178';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
-import { createCelebration } from '../chassis/celebration.mjs?v=f4fd178';
-import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=f4fd178';
-import { crearInventario } from '../chassis/invboost.mjs?v=f4fd178';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
-import { buildSfxBuffer } from './sfxmap.mjs?v=f4fd178';
-import { createCoach } from '../chassis/coach.mjs?v=f4fd178';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
-import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=f4fd178';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
-import { createUiSfx } from '../chassis/uisfx.mjs?v=f4fd178';   //+AG doc 85: el sonido de "no puedo"
-import { createJuice } from '../chassis/juice.mjs?v=f4fd178';   //+AG doc 85: lo que pasa cuando el dedo toca un botón (los 3 modos)
+import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, makeFacePlane, createItemPool, createItemPops, createStarBurst, createWindTrail, createBloom, frameOrtho } from '../chassis/gfx.mjs?v=035cbed';
+import { archLook } from '../chassis/ballmat.mjs?v=035cbed';   //+AG doc 41 bloque G: material de la bola-heroe
+import { attachSquash } from '../chassis/squash.mjs?v=035cbed';
+import { Sim, RNG, TEAMS, BALL_R, ARENA_W, ARENA_H, FPS, AGENCIA } from './sim.js?v=035cbed';
+import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=035cbed';
+import { archFace } from '../chassis/facegen.mjs?v=035cbed';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
+import { createCelebration } from '../chassis/celebration.mjs?v=035cbed';
+import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=035cbed';
+import { crearInventario } from '../chassis/invboost.mjs?v=035cbed';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
+import { buildSfxBuffer } from './sfxmap.mjs?v=035cbed';
+import { createCoach } from '../chassis/coach.mjs?v=035cbed';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=035cbed';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
+import { createUiSfx } from '../chassis/uisfx.mjs?v=035cbed';   //+AG doc 85: el sonido de "no puedo"
+import { createJuice } from '../chassis/juice.mjs?v=035cbed';   //+AG doc 85: lo que pasa cuando el dedo toca un botón (los 3 modos)
 //+AG el ámbito NO es opcional: la regla base es `#controls button` (id + etiqueta) y le gana en
 //   especificidad a cualquier `.j-hit` suelto. Es la misma trampa que ya costó una versión muerta en la
 //   Carrera y otra en Luz Roja; aquí va escrita para no repetirla una tercera vez.
 const juice = createJuice({ ambito:'#controls', reducido: new URLSearchParams(location.search).get('redfx')==='1' });
-import { createPausa } from '../chassis/pausa.mjs?v=f4fd178';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
-import { cantarPuesto } from '../chassis/veredicto.mjs?v=f4fd178';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
-import { runToEnd } from '../chassis/simrun.mjs?v=f4fd178';
+import { createPausa } from '../chassis/pausa.mjs?v=035cbed';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
+import { cantarPuesto } from '../chassis/veredicto.mjs?v=035cbed';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
+import { runToEnd } from '../chassis/simrun.mjs?v=035cbed';
 
 window.addEventListener('error', e => { document.getElementById('err').style.display='grid'; console.error(e.error||e.message); });
 
@@ -545,7 +545,18 @@ function stepOnce(){
   if(ev){
     const p=sim.balls[0];
     if(p.rank===null && sim.decision_frame===null) superVal=Math.min(1, superVal+0.0016);          // se gana sobreviviendo...
-    for(const s of ev.save) if(s.id===0) superVal=Math.min(1, superVal+0.10);                      // ...y librandote por los pelos
+    //+AG ⚠⚠ doc 85 (2ª vuelta) · EL ESCUDO ESTABA COMPRANDO BARRA DE SÚPER. `playerShield()` empuja el
+    //   evento `save`, que es el MISMO canal de los near-miss («me he librado por los pelos»), así que
+    //   cada pulsado del escudo regalaba un 10 % de súper. Y el escudo SÍ se compra en la Tienda
+    //   (doc 83), con lo que cruzaba la única línea que ese doc declara blindada: «el súper se gana
+    //   jugando bien y no se compra nunca — es lo único que blinda que el remontón grande siga siendo
+    //   100 % mérito». Con 10 escudos comprados te llevabas la barra entera.
+    //   Se arregla AQUÍ y no en la Sim a propósito: tocar `sim.js` para marcar el evento rompería la
+    //   reproducibilidad byte a byte de las repeticiones (docs/33) por un fallo que es de lectura, no
+    //   de simulación. El motor sabe en qué frame ha disparado su propio escudo; con eso basta.
+    for(const s of ev.save){ if(s.id!==0) continue;
+      if(s.f===escudoPropioF) continue;                                                            // este `save` es MI escudo, no un near-miss
+      superVal=Math.min(1, superVal+0.10); }                                                       // ...y librandote por los pelos
     liveSfx(ev, !wasDecided && sim.decision_frame!==null);
     if(p.rank!==null && prevPlayerRank===null){ prevPlayerRank=p.rank; showSpectator(false, sim.balls.length-p.rank+1); }   // te cazaron
     else if(sim.decision_frame!==null && p.rank===null && !wasDecided){ showSpectator(true, 1); }                            // sobreviviste hasta el final
@@ -860,7 +871,11 @@ window.__cap = {
 //   era el único que no se podía medir: su barra no llega al 100 % en los pocos segundos que dura una
 //   tanda de medición, así que salía siempre "apagado, sin medir" y su fogonazo no lo comprobaba nadie.
 //   No toca la Sim ni el RNG: sólo pone a 1 el contador de la barra, que es lo mismo que hace jugar bien.
-window.__test = { get sim(){ return sim; }, get phase(){ return phase; }, get pausa(){ return pausa.estado; }, AGENCIA, cargaSuper(){ superVal = 1; } };
+//+AG doc 85 (2ª vuelta) · `scene` se expone para el BANCO DE EFECTOS. Las partículas del motor viven
+//   dentro de la escena 3D, no en el DOM, así que un banco que cuente elementos del DOM da CERO
+//   siempre y certifica que no pasa nada justo cuando sí pasa. Luz Roja ya la exponía por `window.dbg`;
+//   sin esto, el banco medía a ciegas dos de los tres modos y los cantaba a cero.
+window.__test = { get sim(){ return sim; }, get phase(){ return phase; }, get pausa(){ return pausa.estado; }, AGENCIA, get scene(){ return scene; }, get P(){ return P; }, cargaSuper(){ superVal = 1; } };
 
 addEventListener('resize',()=>{ renderer.setSize(innerWidth,innerHeight); bloom.setSize(innerWidth,innerHeight); });
 //+AG controles del jugador: intenciones (1/2/3) + boosters (A/S/D). R y flechas del video se conservan.
@@ -890,23 +905,48 @@ for(const [id,k] of [['iTum','tumulto'],['iBoo','booster'],['iEsc','escapar']]){
 }
 //+AG 2026-08-06 · inventario: se pregunta ANTES y se descuenta DESPUÉS de que el motor confirme el
 //   disparo, para que un botón en enfriamiento no se coma una carga sin hacer nada (ver invboost.mjs).
+//+AG doc 85 (2ª vuelta) · LO QUE PASA EN LA PISTA CUANDO GASTAS UN BOOSTER.
+//   Medido antes: el DASH salía con CERO partículas (donde la Carrera pone 70), el ESCUDO con cero, y
+//   el SEÑUELO —que cuesta 21 s de barra— pintaba un anillo sobre la OTRA bola y nada sobre la tuya.
+//   ⚠ Render puro, en el manejador y no en `react()`: nace en el MISMO frame del dedo.
+const FX_BOOST = {
+  //         color de chispa       n   fuerza  temblor squash  anillo
+  dash:    { col:[0.35,0.90,1.00], n:26, pw:4.6, sk:0.12, sq:0.50, ring:null },
+  escudo:  { col:[0.33,0.85,1.00], n:24, pw:3.6, sk:0.10, sq:0.35, ring:[0.33,0.85,1.0] },
+  senuelo: { col:[0.45,1.00,0.55], n:30, pw:4.4, sk:0.20, sq:0.55, ring:[0.35,1.0,0.45] },
+};
+function fxPista(tipo){
+  const c = FX_BOOST[tipo]; if(!c || !sim) return;
+  const o = ballObjs && ballObjs[0]; if(!o) return;
+  const x = o.g.position.x, y = o.g.position.y;
+  const red = document.documentElement.classList.contains('redfx')
+           || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  try{
+    P.burst(x, y, 0.30, c.col, red ? Math.round(c.n*0.45) : c.n, c.pw);
+    if(c.ring && !red) P.ring(x, y, c.ring, 0.85);   //+AG el pool de anillos es de 4: uno por evento
+    if(!red) shake = Math.max(shake, c.sk);
+    o.squash = Math.max(o.squash||0, c.sq);
+  }catch(e){ console.error('[fxPista]', tipo, e); }
+}
 //+AG doc 85 · los tres BOOSTERS acusan el toque, y los tres dicen que no cuando no pueden. Antes su
 //   única reacción visible al pulsarlos era APAGARSE (opacity .35) — el mismo fallo que el doc 74 le
 //   arregló al nitro de la Carrera y que aquí se había quedado sin arreglar. El orden no cambia: se
 //   pregunta, se dispara, y sólo entonces se descuenta (ver invboost.mjs).
 bDash.onclick=()=>{ if(!sim) return;
   if(INV.quedan('dash')<=0){ juice.deny(bDash); return; }
-  if(sim.playerDash()){ INV.consume('dash'); juice.hit(bDash,{color:'#6fe4ff',peso:'accion'}); }
+  if(sim.playerDash()){ INV.consume('dash'); juice.hit(bDash,{color:'#6fe4ff',peso:'accion'}); fxPista('dash'); liveSfx({pdash:[{f:0}]}, false); }
   else juice.deny(bDash); };
 bShd.onclick=()=>{ if(!sim) return;
   if(INV.quedan('escudo')<=0){ juice.deny(bShd); return; }
-  if(sim.playerShield()){ INV.consume('escudo'); juice.hit(bShd,{color:'#7fb2ff',peso:'accion'}); }
+  if(sim.playerShield()){ INV.consume('escudo'); juice.hit(bShd,{color:'#7fb2ff',peso:'accion'}); fxPista('escudo');
+    escudoPropioF = sim.f;   //+AG ver la nota de `escudoPropioF` más abajo: el escudo se emite por el canal `save`
+    liveSfx({pshield:[{f:0}]}, false); }
   else juice.deny(bShd); };
 //+AG el SEÑUELO es peso 'momento': se gana con la barra, no se compra (doc 83 §1), y es la jugada más
 //   gorda del modo. 18 chispas contra 10.
 bSup.onclick=()=>{ if(!sim) return;
   if(superVal<1){ juice.deny(bSup); return; }
-  if(sim.playerDecoy()){ superVal=0; juice.hit(bSup,{color:'#ffd23f',peso:'momento'}); }
+  if(sim.playerDecoy()){ superVal=0; juice.hit(bSup,{color:'#ffd23f',peso:'momento'}); fxPista('senuelo'); liveSfx({pdecoy:[{f:0}]}, false); }
   else juice.deny(bSup); };
 function updateControls(){
   if(!sim) return; const p=sim.balls[0], f=sim.f, dead=p.rank!==null||sim.decision_frame!==null;
@@ -1164,6 +1204,9 @@ function startAudio(){
 //   Lo lee tools/prueba-musica.mjs desde dentro del iframe.
 window.BT_MATCH_AUDIO = { get estado(){ return { phase, musicOn, sfxOn, unlocked:audio.unlocked,
   sonando:audio.musicPlaying, hasMusic:audio.hasMusic, ctx:(audio.ctx?audio.ctx.state:'sin-ctx'), nivel:audio.musicLevel }; } };
+//+AG doc 85: frame en el que el JUGADOR disparó su propio escudo. Sirve para distinguir su evento
+//   `save` (que la Sim emite igual para el escudo y para un near-miss) del near-miss de verdad.
+let escudoPropioF = -1;
 let liveGain=null;
 function liveSfx(ev, won){
   if(!sfxOn || !audio.unlocked || !audio.ctx) return;

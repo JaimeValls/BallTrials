@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 f4fd178">
+<meta name="bt-build" content="2026-08-07 035cbed">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <!--+AG el HTML se sirve en INGLES (defecto del juego); ?lang=es lo traduce por JS (applyLang) -->
 <title>YouBall · Red Light Rush (WebGL) · The Marble Games</title>
@@ -385,7 +385,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=f4fd178"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=035cbed"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -396,30 +396,30 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 </script>
 
 <script type="module">
-import { THREE, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createBloom, frameOrtho, BLOOM } from '../chassis/gfx.mjs?v=f4fd178';
-import { archLook } from '../chassis/ballmat.mjs?v=f4fd178';   //+AG doc 41 bloque G: material de la bola-heroe
-import { attachSquash } from '../chassis/squash.mjs?v=f4fd178';
-import { createCelebration } from '../chassis/celebration.mjs?v=f4fd178';
-import { createKillfeed } from '../chassis/killfeed.mjs?v=f4fd178';
-import { createCensusBoard } from '../chassis/censusboard.mjs?v=f4fd178';
-import { createCupoGauge } from '../chassis/cupogauge.mjs?v=f4fd178';
-import { createKillTags } from '../chassis/killtag.mjs?v=f4fd178';
-import { crearInventario } from '../chassis/invboost.mjs?v=f4fd178';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
-import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=f4fd178';
-import { archFace } from '../chassis/facegen.mjs?v=f4fd178';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
-import { Sim, TEAMS, SHORT_COLORS, SHORT_COLORS_6, BALL_R, FPS, FIELD_W, FIELD_L, XL, XR, SPAWN_Y, GATE_Y, SAFE_Y } from './sim.js?v=f4fd178';
-import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=f4fd178';
-import { buildSfxBuffer } from './sfxmap.mjs?v=f4fd178';
-import { createCoach } from '../chassis/coach.mjs?v=f4fd178';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
-import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=f4fd178';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
-import { createUiSfx } from '../chassis/uisfx.mjs?v=f4fd178';   //+AG doc 85: el sonido de "no puedo"
-import { createJuice } from '../chassis/juice.mjs?v=f4fd178';   //+AG doc 85: lo que pasa cuando el dedo toca un botón (los 3 modos)
+import { THREE, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createBloom, frameOrtho, BLOOM } from '../chassis/gfx.mjs?v=035cbed';
+import { archLook } from '../chassis/ballmat.mjs?v=035cbed';   //+AG doc 41 bloque G: material de la bola-heroe
+import { attachSquash } from '../chassis/squash.mjs?v=035cbed';
+import { createCelebration } from '../chassis/celebration.mjs?v=035cbed';
+import { createKillfeed } from '../chassis/killfeed.mjs?v=035cbed';
+import { createCensusBoard } from '../chassis/censusboard.mjs?v=035cbed';
+import { createCupoGauge } from '../chassis/cupogauge.mjs?v=035cbed';
+import { createKillTags } from '../chassis/killtag.mjs?v=035cbed';
+import { crearInventario } from '../chassis/invboost.mjs?v=035cbed';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
+import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=035cbed';
+import { archFace } from '../chassis/facegen.mjs?v=035cbed';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
+import { Sim, TEAMS, SHORT_COLORS, SHORT_COLORS_6, BALL_R, FPS, FIELD_W, FIELD_L, XL, XR, SPAWN_Y, GATE_Y, SAFE_Y } from './sim.js?v=035cbed';
+import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=035cbed';
+import { buildSfxBuffer } from './sfxmap.mjs?v=035cbed';
+import { createCoach } from '../chassis/coach.mjs?v=035cbed';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=035cbed';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
+import { createUiSfx } from '../chassis/uisfx.mjs?v=035cbed';   //+AG doc 85: el sonido de "no puedo"
+import { createJuice } from '../chassis/juice.mjs?v=035cbed';   //+AG doc 85: lo que pasa cuando el dedo toca un botón (los 3 modos)
 //+AG el ámbito NO es opcional: la regla base es `#controls button` (id + etiqueta) y le gana en
 //   especificidad a cualquier `.j-hit` suelto. Es la trampa que ya costó una versión muerta en este
 //   mismo fichero (ver la nota de `#controls button#bGhost .bi`).
 const juice = createJuice({ ambito:'#controls', reducido: new URLSearchParams(location.search).get('redfx')==='1' });
-import { createPausa } from '../chassis/pausa.mjs?v=f4fd178';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
-import { cantarPuesto } from '../chassis/veredicto.mjs?v=f4fd178';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
+import { createPausa } from '../chassis/pausa.mjs?v=035cbed';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
+import { cantarPuesto } from '../chassis/veredicto.mjs?v=035cbed';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
 
 window.addEventListener('error', e => { document.getElementById('err').style.display='grid'; console.error(e.error||e.message); });
 
@@ -798,7 +798,12 @@ let superVal=0, redEntryMoving=false, redEntryF=0;
 //   en Cazador/Carrera que copiar (el escudo del Cazador es un anillo), así que se sigue la spec: opacidad ~0.45.
 let ghostMat=null, ghostOn=false;
 function setGhostLook(on){
-  const o=ballObjs && ballObjs[0]; if(!o || on===ghostOn) return; ghostOn=on;
+  const o=ballObjs && ballObjs[0]; if(!o || on===ghostOn) return;
+  //+AG doc 85 (2ª vuelta): VOLVER A SER SÓLIDO TAMBIÉN SE AVISA. La auditoría lo puso así: el fantasma
+  //   no tenía instante de encendido y su APAGADO tampoco avisaba «y ahí es donde te matan». Esta
+  //   función ya sabía cuándo pasa —es la única que conoce la transición—, sólo le faltaba decirlo.
+  if(ghostOn && !on) fxPista('vuelve');
+  ghostOn=on;
   if(on){
     if(!ghostMat) ghostMat=new THREE.MeshStandardMaterial({transparent:true, opacity:0.45, roughness:0.35, metalness:0.0, depthWrite:false});
     ghostMat.color.setRGB(o.col[0],o.col[1],o.col[2]);
@@ -1420,7 +1425,11 @@ window.__cap = {
 //   era el único que no se podía medir: su barra no llega al 100 % en los pocos segundos que dura una
 //   tanda de medición, así que salía siempre "apagado, sin medir" y su fogonazo no lo comprobaba nadie.
 //   No toca la Sim ni el RNG: sólo pone a 1 el contador de la barra, que es lo mismo que hace jugar bien.
-window.__test = { get sim(){ return sim; }, get phase(){ return phase; }, get pausa(){ return pausa.estado; }, cargaSuper(){ superVal = 1; } };
+//+AG doc 85 (2ª vuelta) · `scene` se expone para el BANCO DE EFECTOS. Las partículas del motor viven
+//   dentro de la escena 3D, no en el DOM, así que un banco que cuente elementos del DOM da CERO
+//   siempre y certifica que no pasa nada justo cuando sí pasa. Luz Roja ya la exponía por `window.dbg`;
+//   sin esto, el banco medía a ciegas dos de los tres modos y los cantaba a cero.
+window.__test = { get sim(){ return sim; }, get phase(){ return phase; }, get pausa(){ return pausa.estado; }, get scene(){ return scene; }, get P(){ return P; }, cargaSuper(){ superVal = 1; } };
 addEventListener('resize',()=>{ renderer.setSize(innerWidth,innerHeight); bloom.setSize(innerWidth,innerHeight); });
 
 //+AG PUESTO del jugador al resolverse — UN SOLO criterio, el MISMO con que la sim corona (_finishByProgress): PROGRESO
@@ -1529,7 +1538,7 @@ function doStop(){ if(!sim || phase!=='play') return;
   //+AG doc 85: el segundo toque es el FRENAZO. Si está cargado, es una acción de verdad y se ve como
   //   tal; si no lo está, el botón lo DICE en vez de tragarse el dedo (que es lo que hacía).
   if(running){ setRun(false); return; }
-  if(doBrake()) juice.hit(bStop,{color:'#ff6673',peso:'accion'}); else juice.deny(bStop); }
+  if(doBrake()){ juice.hit(bStop,{color:'#ff6673',peso:'accion'}); fxPista('frenazo'); } else juice.deny(bStop); }
 //+AG carril: la INTENCIÓN cambia al instante (vale hasta en la intro); la bola tarda lo que tarde la física
 function setLane(k){ if(!sim) return;
   const b={left:bLaneL,center:bLaneC,right:bLaneR}[k];
@@ -1543,13 +1552,47 @@ function shiftLane(d){ if(!sim) return; const i=LANES.indexOf(sim.pIn.lane); set
 //   reacción era la clase `.act` que pinta el ESTADO (que además llega cuando el motor quiere, no en el
 //   frame del dedo) y, si no había con qué, absolutamente nada. El orden no cambia: se pregunta, se
 //   dispara, y sólo entonces se descuenta (ver invboost.mjs).
+//+AG doc 85 (2ª vuelta) · LO QUE PASA EN LA PISTA CUANDO PULSAS UN BOOSTER.
+//   Hasta ahora, en este modo, NITRO / FANTASMA / FRENAZO no pintaban ni una partícula, ni un anillo,
+//   ni un destello, ni sonaban. Medido a 0/150/400/900 ms con la partida en juego: cero en los cuatro
+//   instantes. El único que movía algo era el súper. O sea que lo que el jugador COMPRA en la Tienda
+//   (doc 83) se gastaba sin que pasara nada visible.
+//   ⚠ VIVE EN EL MOTOR Y NO EN LA SIM, y eso no es pereza: es render puro, no consume RNG, no toca a
+//   las otras bolas y no puede mover el resultado de la ronda. La huella de la sim queda idéntica.
+//   ⚠ NADA DE ANILLOS EN EL NITRO. El doc 74 §6bis los quitó del nitro de la Carrera con el dato
+//   delante: una onda expansiva es el idioma de una EXPLOSIÓN y además es omnidireccional, justo
+//   cuando lo que hay que decir es "esta bola sale disparada". El anillo se queda para el FRENAZO,
+//   que sí es un impacto. Y el pool de anillos es de 4 (gfx.mjs): jamás más de uno por evento.
+const FX_BOOST = {
+  //          color de chispa       n   fuerza  destello    tamaño temblor squash  sonido
+  nitro:    { col:[0.35,0.90,1.00], n:26, pw:5.2, fl:0x9fefff, sz:1.6, sk:0.18, sq:0.55, snd:'pnitro',    ring:null },
+  fantasma: { col:[0.85,0.93,1.00], n:20, pw:3.4, fl:0xffffff, sz:1.9, sk:0.10, sq:0.30, snd:'pghost',    ring:null },
+  vuelve:   { col:[0.80,0.86,1.00], n:12, pw:2.4, fl:0xdfe8ff, sz:1.2, sk:0.06, sq:0.20, snd:'pghostend', ring:null },
+  frenazo:  { col:[1.00,0.72,0.30], n:22, pw:3.0, fl:0xffb347, sz:1.3, sk:0.24, sq:0.72, snd:'pbrake',    ring:[1.0,0.62,0.22] },
+};
+function fxPista(tipo){
+  const c = FX_BOOST[tipo]; if(!c || !sim) return;
+  const p = sim.balls[0]; if(!p || p.rank!==null) return;
+  //+AG «Efectos reducidos» y el ajuste del sistema recortan las partículas a la mitad, pero NO apagan
+  //   el destello ni el sonido: saber que tu booster ha prendido es información, no decoración.
+  const red = document.documentElement.classList.contains('redfx')
+           || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  try{
+    P.burst(p.x, p.y, 0.30, c.col, red ? Math.round(c.n*0.45) : c.n, c.pw);
+    if(c.ring && !red) P.ring(p.x, p.y, c.ring, 0.75);
+    flashAt(p.x, p.y, c.fl, c.sz, 0.85);
+    if(!red) shake = Math.max(shake, c.sk);
+    const o = ballObjs && ballObjs[0]; if(o) o.squash = Math.max(o.squash||0, c.sq);
+    liveSfx({ [c.snd]: [{ f: 0 }] }, false);
+  }catch(e){ console.error('[fxPista]', tipo, e); }   //+AG un efecto NUNCA puede tumbar el disparo
+}
 function doNitro(){ if(!(sim && phase==='play')) return;
   if(INV.quedan('nitro')<=0){ juice.deny(bNitro); return; }
-  if(sim.playerNitro()){ INV.consume('nitro'); juice.hit(bNitro,{color:'#59e0ff',peso:'accion'}); }
+  if(sim.playerNitro()){ INV.consume('nitro'); juice.hit(bNitro,{color:'#59e0ff',peso:'accion'}); fxPista('nitro'); }
   else juice.deny(bNitro); }
 function doGhost(){ if(!(sim && phase==='play')) return;
   if(INV.quedan('fantasma')<=0){ juice.deny(bGhost); return; }
-  if(sim.playerGhost()){ INV.consume('fantasma'); juice.hit(bGhost,{color:'#ffffff',peso:'accion'}); }
+  if(sim.playerGhost()){ INV.consume('fantasma'); juice.hit(bGhost,{color:'#ffffff',peso:'accion'}); fxPista('fantasma'); }
   else juice.deny(bGhost); }
 //+AG el SÚPER es peso 'momento': se gana con la barra, no se compra (doc 83 §1). 18 chispas contra 10.
 function doSuper(){ if(!(sim && phase==='play')) return;

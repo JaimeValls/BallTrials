@@ -1,11 +1,11 @@
 // YouBall · MAPEO eventos→buffer de audio de El Cazador, browser-safe (sin Node). El corazón del sonido del modo:
 // por cada evento de la sim coloca su SFX en un Float32Array. Lo usan IGUAL el render (audio.mjs → WAV) y el
 // preview en vivo (index.html → Web Audio) → la web suena EXACTAMENTE como el render (misma síntesis, mismo seed).
-//   import { buildSfxBuffer } from './sfxmap.mjs?v=f4fd178';
+//   import { buildSfxBuffer } from './sfxmap.mjs?v=035cbed';
 //   const buf = buildSfxBuffer({ events, decision_frame, f, seed, SR });   // Float32Array mono (sin normalizar)
-import { createSynth, makeRng } from '../chassis/synth.mjs?v=f4fd178';
-import { createFx } from '../chassis/sfx.mjs?v=f4fd178';
-import { FPS } from './sim.js?v=f4fd178';
+import { createSynth, makeRng } from '../chassis/synth.mjs?v=035cbed';
+import { createFx } from '../chassis/sfx.mjs?v=035cbed';
+import { FPS } from './sim.js?v=035cbed';
 
 // events = sim.events de la SIM (runToEnd / runSeed: la sim acumula en sim.events). Claves array: orbs (SPAWN de
 // orbe), pickup (cogerlo, con e.kind 'dash'|'swap'|'invert'), dash, swap, invert (sub-eventos del pickup, mismo
@@ -28,6 +28,30 @@ export function buildSfxBuffer({ events, decision_frame, f, seed, SR = 44100 }){
   // DASH (orbe de velocidad → estela CIAN, ver efecto-velocidad): ZIP = hermano sonoro del trail. PUNTUAL al cogerlo.
   for (const e of (ev.dash || [])){ fx.zip(T(e.f), 0.30); }
   // SWAP (el cazador cambia de presa por el orbe): swoosh DESCENDENTE + ding de "nuevo objetivo".
+  // LOS BOOSTERS DEL JUGADOR (doc 85, 2ª vuelta). Antes: el DASH sonaba con `fx.zip` por el canal
+  // `dash`, que es el mismo que usan las once bolas de la IA; el ESCUDO caía en el canal `save` —el de
+  // «librarse por los pelos»— y sonaba a un «uf» de 0,09 s; y el SEÑUELO sonaba al blip del orbe de la
+  // IA. Los tres, prestados. ⚠ Estas claves las produce SÓLO el motor (la Sim no las emite), así que el
+  // render offline del vídeo no las ve y su WAV no cambia.
+  for (const e of (ev.pdash || [])){ const t = T(e.f);
+    fx.zip(t, 0.42);                                              // el idioma de velocidad del motor, pero TUYO y más fuerte
+    add(t, 0.07, 200, 90, 0.30, 0.22, 8);                         // el empujón grave que el zip no tenía
+  }
+  // ESCUDO: cúpula que se cierra. Golpe sordo + metal que se asienta. Nada de «uf».
+  for (const e of (ev.pshield || [])){ const t = T(e.f);
+    add(t, 0.09, 240, 130, 0.34, 0.20, 6);
+    add(t + 0.02, 0.34, 620, 900, 0.20, 0.06, 2.2);
+    note(t + 0.02, 0.40, 392, 0.20, { wave: 'sine', decay: 2.4 });
+    note(t + 0.06, 0.34, 587, 0.12, { wave: 'sine', decay: 3 });
+  }
+  // SEÑUELO: se gana con la barra y no se compra (doc 83 §1). Un «pluf» de sustitución: algo que
+  // aparece donde tú estabas y una nota que se aleja — el cazador se va detrás de otro.
+  for (const e of (ev.pdecoy || [])){ const t = T(e.f);
+    add(t, 0.12, 900, 240, 0.32, 0.30, 5);                        // el pluf del señuelo apareciendo
+    [659, 523, 392].forEach((nf, i) =>                            // la nota SE ALEJA (baja): «ya no vienen a por mí»
+      note(t + 0.05 + i * 0.07, 0.22, nf, 0.17 - i * 0.03, { wave: 'tri', decay: 5 }));
+    add(t + 0.05, 0.30, 2200, 3000, 0.13, 0.09, 5);               // brillo (es un momentazo, no un roce)
+  }
   for (const e of (ev.swap || [])){ add(T(e.f), 0.15, 950, 320, 0.18); add(T(e.f) + 0.09, 0.10, 1500, 1500, 0.13); }
   // INVERT (giro DRAMÁTICO: marca a otro equipo, raro ~1 cada 15s): whoosh grave→agudo + nota de tensión.
   for (const e of (ev.invert || [])){ const t = T(e.f); fx.whoosh(t, { f0: 240, f1: 1100, amp: 0.26, dur: 0.26, noise: 0.12 }); note(t + 0.14, 0.22, 392, 0.18, { wave: 'tri', decay: 4, vib: 0.06 }); }
