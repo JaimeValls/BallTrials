@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 17fbbac"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-07 f84dd55"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -4005,13 +4005,83 @@
      estrecho (ahi la frase del reto se parte en dos lineas y cada fila crece 13 px).
      ⚠ QUEDA DEUDA MEDIDA: a 320x640 el panel sigue desbordando ~11 px en el peor sorteo de retos.
      Venia de produccion desbordando 52 y no lo cazo nadie porque doc 75 solo se midio a 375x812.
-     Cerrarlo del todo pide FRASES MAS CORTAS (canon 5: "icono + una palabra"), o sea reescribir los
-     textos de reto en los 20 idiomas: es contenido, y lo decide Jaime. */
+     ⚠⚠ Y AQUI ESTABA ESCRITA UNA RECETA QUE ERA FALSA, borrada el 7-ago: decia que cerrarlo del todo
+     pedia FRASES MAS CORTAS en los 20 idiomas. Se midio y no: ver el bloque de aqui abajo. */
   @media (max-height:560px), (max-width:340px){
     .mi-row{ padding:6px 8px; margin-bottom:4px; }
     .mi-sem{ padding:8px; margin-bottom:7px; }
     .mi-bar{ margin-top:4px; }
     .mi-nota{ margin-top:6px; }
+  }
+
+  /* ══ TEMPORADA CABE EN UN MOVIL BAJO (540 px de alto) · 2026-08-07 ═══════════════════════════════
+     LA RECETA QUE HABIA ESCRITA AHI ARRIBA ERA FALSA, y es lo primero que hay que contar porque casi
+     me cuesta veinte traducciones. Decia que cerrar el desbordamiento pedia frases de reto mas cortas
+     ("icono + una palabra"). Se midio poniendo los tres textos en UNA LETRA: devuelve 0 px a 360x540
+     y 6 a 320x540. El alto de una fila de reto NO lo manda la frase —el texto ocupa 13 px— lo manda
+     el BOTON de su derecha: el ⟳ dibuja 31 px y el COGER 36. Veinte diccionarios reescritos para
+     ganar seis pixeles de ciento treinta y ocho. Una receta heredada se mide antes de ejecutarla.
+
+     Y EL NUMERO DE VERDAD ERA EL DOBLE DEL QUE CANTABA EL BANCO, por dos casos que nadie barria:
+       · EL ESTADO DE LA FILA. Con los tres retos COMPLETADOS Y SIN COBRAR cada fila cambia el ⟳ por
+         el boton COGER y crece; medir la pantalla recien abierta da 67 px de desbordamiento, medir
+         los tres estados da 85. Un banco que mide un solo estado mide el estado facil.
+       · EL SALDO. `.g-top` puede ENVOLVER a proposito (ver su bloque, mas abajo): con la cuenta
+         recien nacida las pastillas de moneda son estrechas y la cabecera mide 60 px, con 12.500
+         monedas —una cuenta de tres dias— bajan a una segunda linea y mide 98. Esos 38 px se los
+         come el cuerpo. Medido con saldo 0 el fallo son 85 px; con saldo real, 123 a 360x540 y 138
+         a 320x540. El mismo sesgo que ya cazo el bloque de la cabecera del Garaje, en otra pantalla.
+     O sea: los 20 idiomas x el peor trio de retos (se siembran con dia+jugador: se barrieron los 10
+     posibles, no uno) x 9 combinaciones de estado x 3 saldos. 123 px a 360x540 y 138 a 320x540.
+
+     LAS SIETE PIEZAS. Ninguna toca un diccionario, ninguna baja la letra de 11 px ni un tocable de
+     44, y TODAS viven bajo 560 px de alto: en un movil normal esta pantalla no cambia ni un pixel.
+       1. el rotulo RETOS de dentro del panel se va: la sub-pestaña encendida a 8 px por encima ya lo
+          dice. La misma palabra dos veces seguidas no es jerarquia, es relleno.               −24 px
+       2. la nota "Retos nuevos mañana" se va.                                                 −18 px
+       3. LAS MONEDAS SALEN DE LA CABECERA DE TEMPORADA. Es la pieza que decide, y la unica que hace
+          el encaje INDEPENDIENTE DEL SALDO: mientras esten, la pantalla cabe o no cabe segun lo rico
+          que seas, que es la peor clase de fallo (verde en el banco, roto en el movil del jugador
+          que lleva un mes). Aqui son un dato, no un mando: no se compra nada desde Temporada, y la
+          portada y la Tienda las siguen enseñando. Quitarlas es lo que devuelve la cabecera a una
+          sola linea SIEMPRE.                                                                  −38 px
+       4. la linea del campeon de la tarjeta violeta se va.                                    −19 px
+       5. la barra de progreso del RETO DE LA SEMANA se va; su contador (0/12) esta a su derecha
+          diciendo lo mismo. Las tres barras diarias se quedan.                                −11 px
+       6. el aire se aprieta un punto mas.                                                     −29 px
+       7. y el titulo baja a 15 px por debajo de 340 de ancho (el suelo de la casa son 11).
+
+     ⚠ LO QUE SE PROBO Y NO VALE, para que nadie lo vuelva a intentar:
+       · `flex-wrap:nowrap` en la cabecera. Revierte un arreglo medido (el bloque de `.g-top`, mas
+         abajo) que existe justo porque con saldo de verdad los tres no caben. Y ademas recorta:
+         medido, «Temporada» se queda en «Tempor…» a 320.
+       · apretar las pastillas de moneda en vez de quitarlas: da ~20 px de los 38 y la cabecera
+         sigue envolviendo en japones y arabe. Ademas rompe el canon 4 (el icono muerde la pastilla).
+       · encoger el boton COGER. Es lo que mas devolveria (−24 px) y NO SE PUEDE: `.ready` lleva
+         `overflow:hidden` para su barrido de brillo, asi que ese boton no admite el halo tactil
+         invisible de la casa. Encogerlo empeoraria un dedo que ya esta por debajo de 44 px.
+         (⚠ DEUDA APUNTADA: el COGER mide 36 px y el ⟳ 31; los dos estan bajo el minimo tactil desde
+          siempre, en TODAS las pantallas. Se arregla rehaciendo el barrido de `.ready`, que es otro
+          encargo porque `.ready` es el idioma de "esto se pulsa" de todo el juego.)
+     Resultado medido (tools/prueba-encaje-idiomas.mjs a 360x540 y 320x540, y el barrido de estados y
+     saldos de arriba): CABE en los 20 idiomas con 28 px de margen a 360x540 y 27 a 320x540, y el
+     margen ya NO depende del saldo. */
+  @media (max-height:560px){
+    #temporada .sc-block[data-sub="retos"] > .sc-h{ display:none; }   /* 1 */
+    #temporada .mi-nota{ display:none; }                              /* 2 */
+    #temporada .g-top .h-coins{ display:none; }                       /* 3 */
+    #temporada .se-hero .dd{ display:none; }                          /* 4 */
+    #temporada .mi-sem .mi-bar{ display:none; }                       /* 5 */
+    #temporada .sc-block{ padding:8px; }                              /* 6 */
+    #temporada .sc-body{ gap:5px; padding-top:2px; }
+    #temporada .mi-row{ padding:4px 8px; margin-bottom:1px; }
+    #temporada .mi-sem{ padding:6px; margin-bottom:4px; }
+    #temporada .se-hero{ padding:8px 11px; gap:9px; }
+  }
+  /*+AG 7 · el titulo, solo donde la anchura aprieta y solo en esta pantalla. 15 px sigue muy por
+     encima del suelo de 11, y con las monedas fuera es aire de sobra para cualquier idioma. */
+  @media (max-height:560px) and (max-width:340px){
+    #temporada .g-title{ font-size:15px; letter-spacing:0; }
   }
   /*+AG las OPCIONES de Ajustes (Bajo/Medio/Alto, Auto/Baja/Media/Alta, Sí/No…) a mayusculas por CSS
      (canon 10). Por CSS y no en los 20 diccionarios: en arabe y en japones el transform es inocuo,
@@ -5582,7 +5652,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=17fbbac"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=f84dd55"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -8663,7 +8733,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=17fbbac').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=f84dd55').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -10958,7 +11028,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=17fbbac';
+  import { startAmbient } from './arte/ambient.mjs?v=f84dd55';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -10974,7 +11044,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=17fbbac').then(m => {
+  import('./arte/pista-preview.mjs?v=f84dd55').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -10986,8 +11056,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=17fbbac';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=17fbbac';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=f84dd55';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=f84dd55';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -11157,7 +11227,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=17fbbac'), import('./motor/chassis/sincro.mjs?v=17fbbac')]);
+        import('./motor/chassis/nube.mjs?v=f84dd55'), import('./motor/chassis/sincro.mjs?v=f84dd55')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
