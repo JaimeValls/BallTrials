@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 6855491+SUCIO"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-07 6855491"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -4310,11 +4310,13 @@
        debajo GRATIS o PREMIUM, o sea que la leyenda dice por segunda vez lo que el propio riel dice
        quince veces. En pantalla alta se queda, que ahi el aire no cuesta. −25 px. */
     #temporada .se-vias{ display:none; }
-    /*+AG ⚠ EL RANKING A 320x540 EN JAPONES SE SALE 7 px Y SE QUEDA ASI, dicho aqui para que nadie
-       lo intente por el camino corto: probe apretar el relleno de las filas y NO HIZO NADA, porque
-       ya estaban a 6 px por una regla de mas arriba —lei el numero antes de leer el CSS—, y de paso
-       el caso empeoro a 9. Es un solo idioma, un solo tamaño y 7 px; el panel entero pide su repaso,
-       no un pellizco. Queda cantado por el banco, que es donde tiene que estar. */
+    /*+AG y la pieza 9, la ultima que quedaba roja: el RANKING se pasaba 7 px en japones a 320x540.
+       Sale del aire entre las cuatro filas de clasificacion, no del texto — en japones los nombres
+       son mas cortos, lo que crece es la fila de pestañas Diario/Semanal/General al partirse. Se
+       paga con 2 px por fila y 4 de la fila de pestañas, que a este alto no se notan y no tocan ni
+       la letra ni el minimo tactil (las pestañas mandan por `min-height`, no por este relleno). */
+    #temporada .se-row{ padding:6px 4px; }
+    #temporada .se-rk-tabs{ margin-bottom:4px; }
     #temporada .sc-block{ padding:8px; }                              /* 6 */
     #temporada .sc-body{ gap:5px; padding-top:2px; }
     #temporada .mi-row{ padding:4px 8px; margin-bottom:1px; }
@@ -5909,7 +5911,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=6855491+SUCIO"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=6855491"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -9001,7 +9003,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=6855491-SUCIO').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=6855491').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -11421,7 +11423,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=6855491-SUCIO';
+  import { startAmbient } from './arte/ambient.mjs?v=6855491';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -11437,7 +11439,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=6855491-SUCIO').then(m => {
+  import('./arte/pista-preview.mjs?v=6855491').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -11449,8 +11451,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=6855491-SUCIO';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=6855491-SUCIO';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=6855491';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=6855491';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -11620,7 +11622,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=6855491-SUCIO'), import('./motor/chassis/sincro.mjs?v=6855491-SUCIO')]);
+        import('./motor/chassis/nube.mjs?v=6855491'), import('./motor/chassis/sincro.mjs?v=6855491')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
