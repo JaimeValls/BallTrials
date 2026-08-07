@@ -165,7 +165,23 @@ export function ballMaterial(col, look = LOOK, skin = null){
     uBounce: { value: look.bounce }, uGlow: { value: look.glow },
     uSatFloor: { value: look.satFloor ?? 0.62 },
     uSkin:  { value: skin || BLANCO },
-    uSkinK: { value: skin ? (look.skinK ?? 1.0) : 0.0 },
+    //+AG 7-ago · LA CHAPA BAJA A UN TERCIO (docs/86, elegido por Jaime entre 4 variantes capturadas).
+    //  Al subir la bola de la Portada de 262 a 374 px, Jaime vio «unas rayas en la piel, como unas
+    //  lineas cruzadas» y dudo de si el tamaño rentaba «por la falta de calidad de detalle».
+    //  NO ERA CALIDAD: la piel es 512x512 sobre una bola de ~300 px (sobra de largo), y la prueba es
+    //  que con la chapa apagada la bola se ve nitida al tamaño nuevo. Las rayas son el ARTE: el mapa
+    //  de relieve del Cohete son paneles de chapa remachada, y estaban ahi desde el encargo 14 — a
+    //  262 px simplemente no se leian.
+    //  El fallo real es DONDE caen: la piel se muestrea tipo matcap (un disco pegado a la cara
+    //  frontal, ver el comentario del FS), asi que no sabe que debajo hay una cara y las juntas
+    //  cruzan la mejilla y la barbilla. Ahi dejan de leerse como material y se leen como grietas —
+    //  en Brawl el material nunca cruza la expresion del personaje.
+    //  ⚠ El arreglo es bajar la INTENSIDAD, no borrar la piel: a 1.0 el relieve compite con la cara,
+    //  a 0.0 las once bolas se quedan de plastico liso y pierden su seña (el Cohete su fuselaje, el
+    //  Bunker su blindaje). A 0.33 queda el rastro de material sin que ninguna junta se lea.
+    //  Se compararon A(1.0) / B(0.5) / C(0.33) / D(0.0) con capturas REALES del mismo encuadre,
+    //  sirviendo este modulo modificado por `page.route` — no con mockups pintados a mano.
+    uSkinK: { value: skin ? (look.skinK ?? 0.33) : 0.0 },
   };
   const m = new THREE.ShaderMaterial({ uniforms: u, vertexShader: VS, fragmentShader: FS });
   // fachada compatible con el material viejo: los modos hacen mat.color.setRGB(...), mat.emissive.copy(...)
