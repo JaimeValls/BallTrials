@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 2067a3e"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-07 2a79017"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -359,25 +359,29 @@
   /* OJO: aqui van propiedades LARGAS, no el atajo 'background'. Con el atajo, esta regla (mas
      especifica que .tico.t-*) reseteaba background-image a none y la barra salia sin iconos. */
   .tab i.tico{ width:38px; height:38px; font-size:0; background-position:center; background-size:contain; background-repeat:no-repeat;
-    /*+AG ⚠ 7-ago (tarde) · EL FILO QUE LOS DESPEGA DEL FONDO. Jaime, del icono de la Tienda: «tiene
-       casi el mismo color que el fondo, por lo cual esta casi camuflado… tiene que ser muy llamativo y
-       que siempre lo quieras clicar, que lo encuentres muy facilmente».
-       MEDIDO (contraste de luminancia contra el fondo real de la barra, #1a0d45):
-         JUGAR 10,4 · TEMPORADA 10,2 · PERFIL 4,4 · GARAJE 4,2 · TIENDA 4,1
-       Los dos dorados sacan 10 y los otros tres se quedan en 4. Y la bolsa es ademas #b447d8, MORADA
-       como el fondo: no es solo poco contraste, es la misma familia de color.
-       ⚠ LO QUE NO FUNCIONA, Y ESTA PROBADO: recolorear por CSS. Cuatro `hue-rotate/saturate` medidos
-       sobre la captura real subieron como mucho a 5,0 — y esa variante dejaba la bolsa AZUL, que es el
-       color de Perfil. El arreglo de fondo es ARTE: la bolsa tiene que nacer de otro color.
-       LO QUE SI FUNCIONA MIENTRAS TANTO: un filo claro alrededor. No cambia el color del dibujo, lo
-       RECORTA contra el fondo — que es lo mismo que hace el trazo de tinta en los botones, solo que
-       aqui el fondo es oscuro y por eso el filo va en claro y no en tinta.
-       Va a LOS CINCO y no solo a la Tienda: Garaje y Perfil estan igual de justos (4,2 y 4,4) y un
-       contorno en uno solo de los cinco canta como un parche. Y la opacidad sube de .88 a 1 — estaban
-       ademas un 12 % transparentes, que es regalar contraste sin ganar nada. */
-    filter:drop-shadow(1.5px 0 0 #ffe9a8) drop-shadow(-1.5px 0 0 #ffe9a8)
-           drop-shadow(0 1.5px 0 #ffe9a8) drop-shadow(0 -1.5px 0 #ffe9a8)
-           drop-shadow(0 3px 4px #0008);
+    /*+AG ⚠⚠ 7-ago (noche) · AQUI VIVIO UN FILO CREMA DE CUATRO `drop-shadow` Y SE VA. Lo puso el pase de
+       la tarde para despegar la bolsa de la Tienda del fondo morado, y era un remedio de CSS a un
+       problema de ARTE. Jaime lo miró pestaña por pestaña: «en Shop no está mal, en Garaje tampoco, en
+       Play yo creo que no ayuda, en Profile sí ayuda un poco y en Season queda mal… evidentemente hay
+       cosas que son de color claro y que dan mal, otras son de color oscuro y quedan bien».
+       Su diagnóstico es exactamente lo que dicen los números. Contraste del dibujo contra la barra
+       (#1a0d45), medido SIN filo y con el arte de hoy — que incluye la bolsa VERDE del encargo 42:
+         JUGAR 10,6 · TEMPORADA 10,9 · TIENDA 9,7 · PERFIL 5,0 · GARAJE 4,2
+       O sea que el filo aportaba +2 donde ya había 10 (y ahí solo ensucia un dibujo dorado con un borde
+       lechoso) y menos de +1 donde de verdad estaba justo. Y LA BOLSA VERDE YA ARREGLO LA TIENDA SOLA:
+       de 4,06 a 9,7 sin necesitar filo — el arreglo de arte hizo innecesario el parche de CSS.
+       ⚠ SE PROBARON LAS DOS ALTERNATIVAS ANTES DE QUITARLO, con captura de cada una:
+       · filo SOLO en los dos oscuros (Garaje y Perfil): **canta como un parche**, que es justo lo que
+         el comentario de la tarde temía. El aro crema de Perfil al lado de Temporada sin nada se lee
+         como un error.
+       · un halo OSCURO en vez del crema, para despegar sin colorear: **no funciona**, medido — baja los
+         ratios (3,98 y 4,83) porque lo que añade alrededor son píxeles oscuros sobre un fondo oscuro.
+       Así que se queda LIMPIO. Con la sombra de siempre, los cinco dibujos se ven más nítidos y el peor
+       (el baúl del Garaje, 4,2) sigue muy por encima del 3:1 que la WCAG pide para un gráfico.
+       LO QUE SI SE QUEDA de aquel pase es `opacity:1`: estaban un 12 % transparentes, y eso era regalar
+       contraste sin ganar nada. Si algún día el Garaje vuelve a quedarse corto, el arreglo es el MISMO
+       que funcionó con la bolsa —redibujar el icono— y no otra capa de CSS encima. */
+    filter:drop-shadow(0 3px 4px #0008);
     opacity:1; transition:opacity .15s, transform .12s; }
   .tab.on i.tico{ opacity:1; transform:translateY(-2px) scale(1.1); }
   /* LA PLATAFORMA de la pestaña activa. Va por dentro de la caja (inset) para no inflar lo que mide el
@@ -1927,7 +1931,10 @@
     .scr.on,.h-play,.h-ball,.ready,.ready::after,.justready,
     .cam-card,.cam-card.hay.ready,.sh-feat,.sh-feat::after,.cam-gift,.cam-gift.viva,.falta,
     .sh-entra .sh-sec,.sh-entra #shBody > div > *,#shBody.secIn,
-    .h-tabs .tab.badge:not(.on) i.tico,.h-tabs .tab.badge:not(.on)::after{ animation:none; }
+    /*+AG la Tienda entra aquí igual que el badge: se menea siempre, así que si alguien pide menos
+       movimiento es lo PRIMERO que hay que parar. */
+    .h-tabs .tab.badge:not(.on) i.tico,.h-tabs .tab.badge:not(.on)::after,
+    .h-tabs .tab:not(.on) i.tico.t-tienda{ animation:none; }
     /*+AG con las animaciones apagadas el halo se queda FIJO en vez de desaparecer: el aviso sigue
        existiendo (es informacion, no adorno), solo deja de latir. */
     .h-tabs .tab.badge:not(.on)::after{ opacity:.7; transform:translate(-50%,-50%) scale(1.1); }
@@ -2608,7 +2615,20 @@
        idioma raro empuje la carta; a partir de ahi si recorta. En español e ingles no cambia nada:
        su frase sigue entrando en una linea. */
     display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2;
-    white-space:normal; overflow:hidden; }
+    white-space:normal; overflow:hidden;
+    /*+AG ⚠ 7-ago (noche) · EL CONTORNO DE LA PRIMERA LETRA SE LO COMIA EL `overflow`. Jaime: «se corta
+       el texto un poco cuando le doy a modos, la primera letra se corta un poquito… en Escape la E, en
+       Run la R. Estamos hablando de un pixel o dos, pero se corta».
+       MEDIDO, y era exactamente eso: 1,38 px en los subtitulos de 11 px y 1,63 px en el de 13. La causa
+       son dos cosas correctas que se pelean: `overflow:hidden` (que hace falta para el corte a dos
+       lineas de arriba) y `-webkit-text-stroke`, que **pinta hacia FUERA de la caja del glifo** — la
+       mitad del trazo, o sea .125em. Con `--stroke-2` a .25em, eso es justo el pixel y medio que se ve.
+       Y NO ES DE LAS MAYUSCULAS: se cortaba igual antes, solo que una minuscula estrecha lo disimulaba.
+       El hueco va en `em` para que valga en los tres tamanos de la escala, y el margen negativo lo
+       devuelve, asi que la caja de texto NO se estrecha y ningun idioma pasa a dos lineas por esto
+       (comprobado: 20 idiomas x 2 tamanos siguen 40/40). `inline` y no `left` por el arabe: en RTL la
+       letra que se corta es la de la derecha, y la propiedad logica se gira sola. */
+    padding-inline:.14em; margin-inline:-.14em; }
   /*+AG doc 49: la linea NO cabia ni en su propio idioma. Medido con tools/prueba-encaje-idiomas.mjs:
      a 360 px de pantalla el INGLES ya se cortaba ("Escape the monster", "Grab the most gems", 3 px
      cada uno), o sea que la caja iba justa para la referencia y los otros 19 idiomas pagaban una
@@ -3092,14 +3112,26 @@
     100%      { opacity:0;   transform:translate(-50%,-50%) scale(1.35); }
   }
   .h-tabs .tab.badge:not(.on) i.tico{ animation:tabLlama 3.2s ease-in-out infinite; }
+  /*+AG ⚠ 7-ago (noche) · LA TIENDA SE MUEVE SIEMPRE, tenga o no notificación. Lo pidió Jaime así:
+     «añadiría que Shop se mueva siempre, aunque no tenga notificación». Es un cambio de criterio sobre
+     lo de arriba a proposito suyo, y tiene sentido: la Tienda no es un aviso que se agota cuando lo
+     recoges, es el sitio al que quieres que el jugador entre TODOS los dias.
+     ⚠ SE MUEVE EL ICONO, PERO EL HALO DORADO SIGUE SIENDO SOLO DE `.badge`, y esa mitad no se toca: el
+     meneo invita a entrar y el resplandor dice «tienes algo esperándote». Si el halo saliera siempre,
+     el jugador dejaría de saber cuándo hay regalo — y entonces sí se cumpliría lo de que si todo llama,
+     nada llama. Son dos señales distintas y ahora cada una dice una cosa.
+     `:not(.on)` se conserva: dentro de la Tienda el reclamo ya no significa nada. */
+  .h-tabs .tab:not(.on) i.tico.t-tienda{ animation:tabLlama 3.2s ease-in-out infinite; }
+  .h-tabs .tab:not(.on):active i.tico.t-tienda{ animation:none; transform:scale(1.22) rotate(-6deg); }
   /* el halo va DETRAS del dibujo para que lo ilumine sin lavarlo, y es un radial dorado —el color de
      "esto es para ti"— no un blanco, que sobre el morado se lee como una mancha.
-     ⚠⚠ Y CUELGA DEL BOTON, NO DEL ICONO, y esto costo verlo: el `<i>` lleva ahora el filo de cuatro
-     `drop-shadow` que lo despega del fondo, y **un `filter` se aplica tambien a los pseudo-elementos
-     del elemento**. Con el halo colgando del `<i>`, el filo le pintaba un contorno crema y el
-     resplandor se convertia en un DISCO amarillo opaco y duro que tapaba media barra. Colgandolo de
-     `.tab::after` queda fuera del filtro. Y no choca con `.tab::before`, que es la plataforma de la
-     activa: una vive en `.on` y la otra en `:not(.on)`, nunca coinciden. */
+     ⚠⚠ Y CUELGA DEL BOTON, NO DEL ICONO, y conviene que siga asi: **un `filter` sobre un elemento se
+     aplica tambien a sus pseudo-elementos**. Cuando el `<i>` llevo un filo crema de cuatro
+     `drop-shadow` (7-ago tarde, ya retirado), con el halo colgando del `<i>` el filo le pintaba un
+     contorno y el resplandor se convertia en un DISCO amarillo opaco y duro que tapaba media barra.
+     El filo se ha ido, pero el `<i>` sigue teniendo `filter` (la sombra), asi que la razon sigue en
+     pie. Y no choca con `.tab::before`, que es la plataforma de la activa: una vive en `.on` y la otra
+     en `:not(.on)`, nunca coinciden. */
   .h-tabs .tab.badge:not(.on)::after{
     content:''; position:absolute; left:50%; top:38%; width:64px; height:64px; z-index:0;
     border-radius:50%; pointer-events:none;
@@ -5468,7 +5500,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=2067a3e"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=2a79017"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -8549,7 +8581,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=2067a3e').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=2a79017').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -10818,7 +10850,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=2067a3e';
+  import { startAmbient } from './arte/ambient.mjs?v=2a79017';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -10834,7 +10866,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=2067a3e').then(m => {
+  import('./arte/pista-preview.mjs?v=2a79017').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -10846,8 +10878,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=2067a3e';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=2067a3e';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=2a79017';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=2a79017';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -11017,7 +11049,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=2067a3e'), import('./motor/chassis/sincro.mjs?v=2067a3e')]);
+        import('./motor/chassis/nube.mjs?v=2a79017'), import('./motor/chassis/sincro.mjs?v=2a79017')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
