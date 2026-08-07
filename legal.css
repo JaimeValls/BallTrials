@@ -2,7 +2,9 @@
    Aparte de style.css a propósito: son páginas de TEXTO, sin hero ni vídeo, y lo único que
    necesitan de la marca es la tipografía, el fondo y el dorado. Todo lo demás sobra. */
 .legal{max-width:760px;margin:0 auto;padding:120px 22px 90px}
-.legal h1{font-size:clamp(30px,4.2vw,42px);font-weight:700;margin:0 0 6px;letter-spacing:.5px}
+/* el titulo de la pagina lleva la letra de marca; los h2 del cuerpo NO, que esto
+   es un texto legal y se lee de arriba abajo, no se ojea. */
+.legal h1{font-family:var(--display);font-weight:400;font-size:clamp(30px,4.2vw,42px);margin:0 0 6px;letter-spacing:.5px}
 .legal .upd{color:var(--text-dim);font-size:14px;margin:0 0 34px}
 .legal h2{font-size:21px;font-weight:700;margin:34px 0 10px;letter-spacing:.3px}
 .legal p,.legal li{color:var(--text-dim);font-size:16px;line-height:1.65}

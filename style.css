@@ -16,13 +16,31 @@
   --red:#E8362F; --blue:#1E74E0; --green:#2FB84B; --yellow:#FFC525; --magenta:#E0249C; --cyan:#18C7D6;
   --radius:26px;
   --shadow:0 14px 40px rgba(10,4,32,.45);
+
+  /* ── TIPOGRAFÍA: dos fuentes, como Supercell ────────────────────────────────
+     Clash Royale no usa la misma letra para el titular y para el párrafo, y esa
+     es la mitad del efecto. --display es la que GRITA (titulares, botones,
+     rótulos); --texto es la que se LEE (párrafos, navegación, pies).
+     Lilita One es lo más cercano que existe en abierto a Supercell Magic (que es
+     propiedad de Supercell y no se licencia). Fredoka se queda para el texto:
+     ahí funcionaba bien, el problema era usarla también de titular.
+     ⚠ Lilita One NO dibuja cirílico, árabe, tailandés ni CJK. Por eso Fredoka
+     va detrás en el stack: en esas escrituras el titular cae ahí solo. */
+  --display:"Lilita One","Fredoka","Baloo 2",system-ui,"Segoe UI",sans-serif;
+  --texto:"Fredoka","Baloo 2",system-ui,"Segoe UI",sans-serif;
+
+  /* El borde oscuro de Supercell. Va en em, NO en px: el trazo tiene que crecer
+     con la letra, si no, a 52px se queda de hilo y a 17px se come el hueco.
+     El paint-order es lo que mantiene el trazo POR FUERA del relleno; sin él
+     (navegador viejo) la letra sale más gorda, pero se sigue leyendo. */
+  --borde:#1b0a3c;
 }
 
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 html,body{margin:0;padding:0}
 body{
-  font-family:"Fredoka","Baloo 2",system-ui,"Segoe UI",sans-serif;
+  font-family:var(--texto);
   color:var(--text);
   background:
     radial-gradient(120% 80% at 50% -10%, var(--purple-hi) 0%, var(--purple) 42%, #3a1a8f 72%, var(--indigo) 100%)
@@ -37,6 +55,29 @@ body{
 
 ::selection{background:var(--gold);color:var(--indigo)}
 
+/* ── LO QUE GRITA ────────────────────────────────────────
+   Todo lo que lleva --display va en peso 400 A PROPÓSITO: Lilita One solo tiene
+   ese peso, y pedirle 700 hace que el navegador se invente la negrita
+   engordando los trazos a lo bruto. Ya es una letra gorda de nacimiento. */
+.hero h1, .sec-head h2, .game-strip h2, .pillar h3, .trial h3,
+.btn, .tab, .kicker, .social b, .social .soon-badge, .yt .list-tag,
+nav .brand, nav .links a.cta{
+  font-family:var(--display);font-weight:400;
+}
+/* el contorno duro solo en lo GRANDE: por debajo de ~24px el trazo empieza a
+   cerrar los huecos de la 'a' y la 'e' y el rótulo se emborrona. */
+.hero h1, .sec-head h2, .game-strip h2{
+  -webkit-text-stroke:.13em var(--borde);paint-order:stroke fill;
+  text-shadow:0 .09em 0 var(--borde), 0 .16em .28em rgba(10,4,32,.5);
+  /* Lilita One es más estrecha que Fredoka, así que los titulares parten en otro
+     sitio: en móvil el hero dejaba "team." solo en la segunda línea. El balance
+     reparte las líneas por igual en vez de llenar la primera hasta el borde.
+     Si el navegador no lo entiende, lo ignora y parte como antes: no rompe nada. */
+  text-wrap:balance;
+}
+.btn{-webkit-text-stroke:.09em rgba(10,4,32,.55);paint-order:stroke fill}
+.btn-gold{-webkit-text-stroke-color:rgba(122,58,0,.5)}
+
 /* ── NAV ─────────────────────────────────────────────── */
 nav{
   position:fixed;top:0;left:0;right:0;z-index:20;
@@ -46,7 +87,7 @@ nav{
   backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
   border-bottom:1px solid rgba(255,255,255,.08);
 }
-nav .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text);font-weight:600;font-size:18px}
+nav .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text);font-size:19px}
 nav .brand img{width:34px;height:34px;border-radius:10px}
 nav .links{display:flex;gap:4px;margin-left:auto;align-items:center;flex-wrap:wrap}
 nav .links a{
@@ -54,16 +95,16 @@ nav .links a{
   padding:8px 14px;border-radius:999px;transition:all .15s ease;
 }
 nav .links a:hover{color:#fff;background:rgba(255,255,255,.09)}
-nav .links a.cta{background:var(--gold);color:var(--indigo);font-weight:700}
+nav .links a.cta{background:var(--gold);color:var(--indigo)}
 nav .links a.cta:hover{background:var(--gold-hi);transform:scale(1.06)}
 
 /* ── secciones base ──────────────────────────────────── */
 section{max-width:1120px;margin:0 auto;padding:96px 22px 0}
 .sec-head{text-align:center;margin-bottom:34px}
-.sec-head h2{font-size:clamp(30px,4.2vw,44px);font-weight:700;margin:0 0 8px;letter-spacing:.5px}
+.sec-head h2{font-size:clamp(30px,4.2vw,44px);margin:0 0 8px;letter-spacing:.5px}
 .sec-head p{color:var(--text-dim);font-size:17px;margin:0}
 .kicker{display:inline-block;background:rgba(251,185,21,.16);color:var(--gold);border:1px solid rgba(251,185,21,.35);
-  font-size:13px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;padding:6px 14px;border-radius:999px;margin-bottom:14px}
+  font-size:13px;letter-spacing:2.5px;text-transform:uppercase;padding:6px 14px;border-radius:999px;margin-bottom:14px}
 
 /* ── HERO ────────────────────────────────────────────── */
 .hero{
@@ -72,8 +113,7 @@ section{max-width:1120px;margin:0 auto;padding:96px 22px 0}
 }
 .hero .wordmark{width:min(480px,78vw);height:auto;filter:drop-shadow(0 10px 30px rgba(0,0,0,.45))}
 .hero h1{
-  font-size:clamp(28px,4.6vw,52px);font-weight:700;margin:18px 0 6px;
-  text-shadow:0 3px 18px rgba(10,4,32,.55);
+  font-size:clamp(28px,4.6vw,52px);margin:18px 0 6px;
 }
 .hero h1 .g{color:var(--gold)}
 .hero .sub{max-width:640px;color:var(--text-dim);font-size:clamp(15px,2vw,19px);margin:0 0 30px;text-shadow:0 2px 12px rgba(10,4,32,.6)}
@@ -89,7 +129,7 @@ section{max-width:1120px;margin:0 auto;padding:96px 22px 0}
 /* ── botones ─────────────────────────────────────────── */
 .btn{
   display:inline-flex;align-items:center;gap:10px;
-  font-family:inherit;font-weight:700;font-size:17px;text-decoration:none;cursor:pointer;
+  font-size:17.5px;text-decoration:none;cursor:pointer;
   padding:14px 28px;border-radius:999px;border:0;
   transition:transform .12s cubic-bezier(.34,1.56,.64,1), background .15s, box-shadow .15s;
 }
@@ -118,7 +158,7 @@ section{max-width:1120px;margin:0 auto;padding:96px 22px 0}
 /* ── WATCH ───────────────────────────────────────────── */
 .tabs{display:flex;gap:10px;justify-content:center;margin-bottom:26px}
 .tab{
-  font-family:inherit;font-size:16px;font-weight:700;cursor:pointer;
+  font-size:16.5px;cursor:pointer;
   padding:11px 26px;border-radius:999px;border:2px solid rgba(255,255,255,.25);
   background:transparent;color:var(--text-dim);transition:all .15s;
 }
@@ -168,7 +208,7 @@ section{max-width:1120px;margin:0 auto;padding:96px 22px 0}
 .yt.list{aspect-ratio:16/5;margin-top:20px}
 .yt .list-tag{position:absolute;left:16px;bottom:14px;background:rgba(12,5,30,.78);
   border:1px solid rgba(251,185,21,.4);color:var(--gold);padding:7px 14px;border-radius:999px;
-  font-weight:700;font-size:14px;pointer-events:none}
+  font-size:14.5px;pointer-events:none}
 
 /* ── GAME teaser ─────────────────────────────────────── */
 .game-strip{padding:44px 30px;text-align:center;border:2px dashed rgba(251,185,21,.55);position:relative;overflow:hidden}
@@ -207,7 +247,7 @@ a.social:hover{transform:scale(1.04,.99)}
 .social.tt .s-ico{background:#0f0f14}
 .social.fb .s-ico{background:#1877f2}
 .social.soon{opacity:.55;pointer-events:none}
-.social .soon-badge{margin-left:auto;font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--gold);
+.social .soon-badge{margin-left:auto;font-size:11.5px;letter-spacing:1.5px;color:var(--gold);
   border:1px solid rgba(251,185,21,.45);padding:4px 9px;border-radius:999px;text-transform:uppercase;flex:none}
 
 /* ── CONTACT ─────────────────────────────────────────── */

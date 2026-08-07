@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 8e2eab0"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-07 57a0c91"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -55,7 +55,7 @@
 -->
 <style>
   /*+AG doc 34 Fase E: Fredoka (biblia de marca docs/27 §3: redonda, gorda, amable). Fallback al stack previo si no carga. */
-  @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Lilita+One&display=swap');
   :root{ --ink:#eef2ff; --muted:#96a0c2;
     /*+AG ALTO REAL DEL VIEWPORT en 3 escalones, de peor a mejor. Antes era 'height:100dvh' a secas: en un
        navegador SIN dvh (WebView in-app de WhatsApp/Instagram, Safari < 15.4) esa declaracion se descarta
@@ -378,6 +378,17 @@
      el trazo queda por fuera y la letra conserva su peso.
      El color del trazo es #241a3f (el indigo del fondo, no negro puro) para que el canto no "recorte"
      agujeros sobre las placas oscuras del juego. */
+  /*+AG LA LETRA QUE GRITA (7-ago). Jaime, mirando la portada de la web: «no me gusta nada la fuente,
+     cuando esta en mayuscula esta okay pero en minuscula me da mucha grima, da la sensacion de
+     documento cutre... siempre te hablo de Clash Royale». Tenia razon y el fallo era de metodo, no de
+     gusto: Fredoka es una fuente de INTERFAZ (menus, listas, parrafos) y se estaba usando tambien de
+     titular. Clash Royale nunca hace eso — tiene una letra gorda que grita y otra normal que se lee.
+     Aqui se parte igual: --display para lo que grita, la --fam de siempre para lo que se lee.
+     Lilita One es lo mas cercano en abierto a Supercell Magic, que es de Supercell y no se licencia.
+     ⚠ EL ORDEN IMPORTA: var(--fam) va DETRAS, no delante. Lilita One no dibuja cirilico, arabe,
+     tailandes ni CJK, asi que en esos 8 idiomas el titular cae solo a la fuente que idiomas.js ya
+     elige por escritura (doc 49). No hay que tocar nada por idioma: la cascada lo hace sola. */
+     La lista de QUE lleva esta letra va al FINAL de esta hoja, no aqui: ver "LO QUE GRITA". */
   .bstroke{ color:#fff; -webkit-text-stroke:.25em #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f66; }
   .bstroke.thin{ -webkit-text-stroke-width:.25em; }
   .coin{ -webkit-text-stroke:.25em #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f66; }
@@ -3718,6 +3729,35 @@
   }
   /*+AG «Efectos reducidos» y el ajuste del sistema NO apagan esto: un botón que contesta al dedo es
      información, no decoración. Lo que apagan es el MOVIMIENTO, y aquí no hay ninguno. */
+  /* ══ LO QUE GRITA · la lista de la letra display ═══════════════════════════════════════════
+     Va AL FINAL de la hoja a proposito, y no junto a su comentario de arriba. La primera version
+     estaba arriba del todo y NO LLEGABA casi a nada: `.playbig` declara `font-family:inherit` en su
+     propia regla, mil lineas mas abajo, y a igual especificidad gana la ultima. La sonda lo canto
+     — "PLAY" y el nombre de la bola seguian en Fredoka mientras yo daba el cambio por hecho.
+     Poniendola aqui, cualquier `font-family:inherit` que quede por el camino ya no la pisa.
+     ⚠ NO se anaden rotulos de 9-11 px (las pestanas de abajo, NOTICIAS/RANKING/AMIGOS, "Total"):
+     Lilita One a ese cuerpo pierde legibilidad y ahi Fredoka hace mejor su trabajo. El corte esta
+     en 12 px, y lo pone `.sh-sec`: las pestanas de la Tienda van a 12 y las de Temporada/Perfil
+     (`.subtab`) a 13, son LA MISMA cosa, y dejar una dentro y otra fuera se ve al momento.
+     Si manana entra uno nuevo, se mide con la sonda, no se anade a ojo. */
+  .display,
+  .bstroke, .coin, .cups b, .h-lvlnum b,
+  .ballname, .ballcups, .passband .pt b, .mctx b,
+  .h-play, .playbig, .onb-go, .onb-q, .wel-t,
+  .r-again, .r-place, .se-cta, .sh-buy, .sh-buy.gem, .se-tier.cur, .se-rk-tab.on,
+  .set-seg button.on, .sfmt, .g-title, .gd-name, .cel .tit, .tname,
+  .g-cname, .g-price .pc, .g-card .gc,
+  .cam-t, .cam-p.now, .sh-feat h3, .sh-off, .sh-it .nm,
+  .se-hero .tl h3, .subtab, .sh-sec, .sh-feat .fl, .pr-id .al, .pr-chip .v,
+  #selector .selhead h1, #pos{
+    font-family:'Lilita One', var(--fam,'Fredoka','Segoe UI Rounded','Nunito',system-ui,Arial,sans-serif);
+    /*+AG ⚠ EL font-weight SE QUEDA EN 900 A PROPOSITO, y lo que se apaga es la SINTESIS. Lilita One
+       solo existe en un peso; pedirle 900 hace que el navegador se invente la negrita engordando los
+       trazos a lo bruto, y con el contorno encima la letra se empasta. Poner 400 a pelo seria peor:
+       en ruso o en arabe, donde Lilita no dibuja, el titular se quedaria FLOJO. Con la sintesis
+       apagada cada caso hace lo correcto solo — Lilita usa su unico peso, y la fuente del idioma usa
+       su 900 de verdad. */
+    font-synthesis:none; font-synthesis-weight:none; }
 </style>
 
 <!--+AG doc 34 Fase B: #app = la "columna telefono" que contiene TODAS las pantallas y overlays (portrait) -->
@@ -4736,7 +4776,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=8e2eab0"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=57a0c91"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -7712,7 +7752,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=8e2eab0').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=57a0c91').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -9981,7 +10021,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=8e2eab0';
+  import { startAmbient } from './arte/ambient.mjs?v=57a0c91';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -9997,7 +10037,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=8e2eab0').then(m => {
+  import('./arte/pista-preview.mjs?v=57a0c91').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -10009,8 +10049,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=8e2eab0';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=8e2eab0';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=57a0c91';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=57a0c91';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -10178,7 +10218,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=8e2eab0'), import('./motor/chassis/sincro.mjs?v=8e2eab0')]);
+        import('./motor/chassis/nube.mjs?v=57a0c91'), import('./motor/chassis/sincro.mjs?v=57a0c91')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
