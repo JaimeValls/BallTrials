@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-07 09a6e6b"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-07 726b446"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -1039,7 +1039,21 @@
      cual es el tamaño real. Lo que si sigue vivo es el aire: en pantallas estrechas se recorta el
      padding lateral y el interletrado, nunca el cuerpo (suelo de 11 px, regla 9). */
   @media (max-width:359px){ .sh-sec{ padding:8px 4px; letter-spacing:0; } }
-  .sh-body{ flex:1; min-height:0; overflow-y:auto; padding:4px 13px 16px; }
+  /*+AG 2026-08-08 · la pestaña de recarga lleva dos iconos en vez de palabra. Se centran y se les
+     quita el contorno de letra, que sobre un <img> pinta un halo. Y la fila de sub-pestañas de dentro
+     se come el relleno lateral del cuerpo para alinearse con las tarjetas. */
+  .sh-sec .cico{ vertical-align:-2px; -webkit-text-stroke:0; }
+  .sh-sec .cico + .cico{ margin-left:5px; }
+  .subtabs.sh-rec{ padding:0 0 9px; }
+  .subtabs.sh-rec .subtab{ display:flex; align-items:center; justify-content:center; gap:6px; }
+  .subtabs.sh-rec .cico{ -webkit-text-stroke:0; }
+  /*+AG ⚠ 2026-08-08 · `overflow-x:hidden` NO es cosmetico y no es mio: la animacion de entrada de
+     seccion (`#shBody.secIn`) desliza el cuerpo entero 18 px de lado, asi que MIENTRAS dura, todo lo
+     que llega al borde se sale. Medido en el mismo instante: `.subtab` y `.sh-pack` sobresalen los
+     MISMOS 5 px durante la animacion y quedan 13 px DENTRO al acabar — o sea que le pasaba ya a las
+     tarjetas de siempre, y solo salio a la luz al meter la fila de sub-pestañas. Un deslizamiento
+     horizontal dentro de un contenedor que solo desliza en vertical hay que recortarlo. */
+  .sh-body{ flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; padding:4px 13px 16px; }
   .sh-grid{ display:grid; grid-template-columns:1fr 1fr; gap:11px; }
   .sh-item{ border-radius:16px; padding:13px 12px; background:var(--plate-a); border:2px solid var(--qc,#ffffff22); display:flex; flex-direction:column; align-items:center; gap:5px; text-align:center; }
   .sh-ic{ font-size:var(--fs-6); filter:drop-shadow(0 3px 5px #0007); }
@@ -2025,7 +2039,7 @@
      Lo mismo en los dos casos: el banco tenia razon. Si durante 340 ms un boton no recoge el dedo en
      44 px, durante 340 ms ese boton esta roto. Un rebote no vale ese precio. */
   @keyframes cardIn{ 0%{ opacity:0; transform:translateY(16px) } 100%{ opacity:1; transform:none } }
-  @keyframes secIn{ 0%{ opacity:0; transform:translateX(var(--dir,14px)) } 100%{ opacity:1; transform:none } }
+  @keyframes secIn{ 0%{ opacity:0; transform:translateX(var(--dir,10px)) } 100%{ opacity:1; transform:none } }
   .sh-entra .sh-sec{ animation:chipIn 220ms cubic-bezier(.2,.9,.3,1) both; animation-delay:calc(var(--ix,0) * 26ms); }
   .sh-entra #shBody > div > *{ animation:cardIn 340ms cubic-bezier(.2,.9,.3,1) both; }
   .sh-entra #shBody > div > *:nth-child(1){ animation-delay:170ms; }
@@ -5871,7 +5885,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=09a6e6b"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=726b446"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -8963,7 +8977,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=09a6e6b').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=726b446').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -9302,7 +9316,9 @@ function openTienda(){ showScreen('tienda'); applyShell(); renderTienda();
    ⚠ Y se les pone role/tabindex desde aqui: si algo se hunde al tocarlo y navega, es un boton, y
    tiene que poder pulsarse con el teclado. Tocar los 5 bloques de HTML a mano era pedir que uno se
    quedara sin ello. */
-function abreRecarga(){ shSec='gemas'; openTienda(); }
+//+AG y desde el 8-ago la pildora elige TAMBIEN la sub-pestaña: tocar monedas abre MONEDAS y tocar
+//   gemas abre GEMAS. Llegar a la recarga y tener que buscar tu moneda seria dejar el viaje a medias.
+function abreRecarga(esGema){ shSec='gemas'; shRec = esGema ? 'gemas' : 'monedas'; openTienda(); }
 addEventListener('DOMContentLoaded', ()=>{
   document.querySelectorAll('.scr .coin').forEach(c=>{
     c.setAttribute('role','button'); c.setAttribute('tabindex','0');
@@ -9310,12 +9326,12 @@ addEventListener('DOMContentLoaded', ()=>{
 });
 addEventListener('click', e=>{
   const c = e.target.closest && e.target.closest('.scr .coin'); if(!c) return;
-  abreRecarga();
+  abreRecarga(c.classList.contains('gema'));
 });
 addEventListener('keydown', e=>{
   if(e.key!=='Enter' && e.key!==' ') return;
   const c = document.activeElement; if(!c || !c.matches || !c.matches('.scr .coin')) return;
-  e.preventDefault(); abreRecarga();
+  e.preventDefault(); abreRecarga(c.classList.contains('gema'));
 });
 function renderTienda(){ pildora('shChispas', SAVE.chispas); pildora('shGemas', SAVE.gemas);
   //+AG ⚠ 2026-08-07 · LA TIENDA ESTABA MAL ROTULADA EN 18 DE LOS 20 IDIOMAS, y no lo canto ningun
@@ -9330,13 +9346,30 @@ function renderTienda(){ pildora('shChispas', SAVE.chispas); pildora('shGemas', 
   //   ⚠ Y EL SEGURO, que es lo que impide que vuelva a pasar: si mañana entra una septima seccion y
   //   un paquete se queda corto, cae al ingles en vez de pintar un boton mudo. Una lista posicional
   //   sin red se rompe EN SILENCIO, que es como se rompio esta.
-  const secs=el('shSecs'); secs.innerHTML=''; SECS.forEach((k,ix)=>{ const b=document.createElement('button'); b.className='sh-sec'+(shSec===k?' on':''); b.textContent=(S().shSecs&&S().shSecs[ix]) || SHELL.en.shSecs[ix] || '';
+  const secs=el('shSecs'); secs.innerHTML=''; SECS.forEach((k,ix)=>{ const b=document.createElement('button'); b.className='sh-sec'+(shSec===k?' on':'');
+    const rot=(S().shSecs&&S().shSecs[ix]) || SHELL.en.shSecs[ix] || '';
+    //+AG ⚠ 2026-08-08 · LA PESTAÑA DE RECARGA VA CON LOS DOS ICONOS Y SIN PALABRA. Desde que dentro
+    //   viven monedas Y gemas, el rotulo «Gemas» mentia sobre la mitad de su contenido. Poner las dos
+    //   palabras obligaba a una cadena nueva («Monedas y gemas») en los 20 idiomas, con su «y» distinta
+    //   en cada uno; los dos iconos lo dicen igual de bien, ya estan dibujados y no se traducen — es el
+    //   mismo truco que usan los modos de cada booster. El nombre sigue existiendo en `aria-label`,
+    //   que es lo que lee quien no ve los dibujos.
+    if(k==='gemas'){ b.innerHTML=`${coinIco('chispa','sm')}${coinIco('gema','sm')}`; b.setAttribute('aria-label', `${S().chispasWord||'Monedas'} · ${S().gemasWord||'Gemas'}`); }
+    else b.textContent=rot;
     b.style.setProperty('--ix', ix);   //+AG el escalonado de la entrada: 0/26/52/78/104/130 ms, por CSS
     //+AG al cambiar de seccion el cuerpo entra DESLIZANDO, y hacia el lado que corresponde: si vas a una
     //   pestaña de mas a la derecha entra por la derecha. La direccion es NOMINAL (la posicion en SECS),
     //   cero azar. Y la pestaña que se enciende pega un destello de una vez con `justFlash`, que ya existe.
     b.onclick=()=>{ const antes=SECS.indexOf(shSec); shSec=k; renderTienda();
-      const body=el('shBody'); body.style.setProperty('--dir', SECS.indexOf(k)>antes ? '18px' : '-18px');
+      //+AG ⚠ 2026-08-08 · el deslizamiento baja de 18 px a 10, y es un ARREGLO, no un capricho. El
+      //   cuerpo entero se mueve de lado durante la entrada, asi que MIENTRAS dura, todo lo que llega
+      //   al borde se sale de la pantalla: medido en el mismo instante, `.sh-pack` y `.subtab`
+      //   sobresalian los mismos 5 px y quedaban 13 px DENTRO al acabar. O sea que le pasaba ya a las
+      //   tarjetas y solo salio a la luz al meter la fila de sub-pestañas de la recarga.
+      //   Con 10 px el contenido se queda 3 px dentro incluso en el pico del movimiento, y el gesto se
+      //   sigue notando igual. (`overflow-x:hidden` en `.sh-body` lo recorta ademas visualmente, pero
+      //   no vale por si solo: getBoundingClientRect NO se entera de que un ancestro recorte.)
+      const body=el('shBody'); body.style.setProperty('--dir', SECS.indexOf(k)>antes ? '10px' : '-10px');
       body.classList.remove('secIn'); void body.offsetWidth; body.classList.add('secIn');
       const on=el('shSecs').querySelector('.sh-sec.on');
       if(on){ on.classList.remove('justready'); void on.offsetWidth; on.classList.add('justready'); setTimeout(()=>on.classList.remove('justready'), 560); }
@@ -9505,7 +9538,10 @@ function sacudeChispas(){ sacudePildora('shChispas'); }
    que explica por que estas ahi. Y si ya estabas en GEMAS no se repinta (seria un parpadeo gratis),
    solo se sacude. */
 function faltanChispas(){
-  if(shSec!=='gemas'){ shSec='gemas'; renderTienda(); }
+  //+AG 8-ago: ademas de la seccion, elige la SUB-pestaña. Quien viene de no poder pagar en monedas
+  //   aterriza en MONEDAS, con la oferta del dia arriba del todo. Antes caia en la lista de gemas y
+  //   sus monedas quedaban 589 px mas abajo, o sea fuera de pantalla.
+  if(shSec!=='gemas' || shRec!=='monedas'){ shSec='gemas'; shRec='monedas'; renderTienda(); }
   requestAnimationFrame(()=>sacudeChispas());
 }
 //+AG la nota va por coinify: lleva ✦ y ◆ dentro de la frase y sin esto se pintaba el glifo del
@@ -9640,7 +9676,39 @@ function boostersEl(){ const s=S(), d=document.createElement('div');
   });
   return d;
 }
+/*+AG ⚠⚠ 2026-08-08 · LA RECARGA SE PARTE EN DOS. Jaime: «la seccion de monedas esta debajo de la de
+   gemas y cuesta ver porque hay que hacer scroll down. No se si vale la pena crear otra seccion mas
+   todavia dentro del shop, pues ya se hacen muchas pestañas. ¿Que plan propones?».
+   MEDIDO antes de proponer nada: la seccion entera media 1049 px en una ventana de 472, y la cabecera
+   MONEDAS empezaba en el pixel 589 — o sea FUERA de la primera pantalla. No es que costara verla: es
+   que no se veia.
+   Se descartaron, y queda escrito por que:
+     · una SEPTIMA pestaña arriba — el la veto, y ademas a 390 px la fila ya se parte en dos renglones;
+     · poner monedas encima de gemas — una linea, pero solo MUEVE el problema: entonces son los packs
+       de gemas (los que se pagan con dinero real) los que caen fuera de pantalla;
+     · bajar solo hasta las monedas al entrar — arregla al que viene de una compra fallida y deja
+       escondidas las monedas para el que entra a mirar.
+   Lo que se hace es SUB-PESTAÑAS DENTRO de la seccion, que es el idioma que el juego ya habla en
+   Temporada y en Perfil (docs/40). Cada lista cabe entonces en una pantalla, y **no cuesta ni una
+   traduccion**: `chispasWord` y `gemasWord` ya estan en los 20 diccionarios.
+   La oferta del dia va en MONEDAS y no en GEMAS porque lo que da son MONEDAS.
+   Y la puerta decide donde entras: tocar la pildora de monedas o fallar una compra en monedas abre
+   MONEDAS; tocar la de gemas abre GEMAS. */
+let shRec='monedas';
 function gemasEl(){ const s=S(), d=document.createElement('div'); d.innerHTML='';
+  const tabs=document.createElement('div'); tabs.className='subtabs sh-rec';
+  [['monedas', s.chispasWord||'Monedas', 'chispa'], ['gemas', s.gemasWord||'Gemas', 'gema']].forEach(([k,tx,ic])=>{
+    const b=document.createElement('button'); b.className='subtab'+(shRec===k?' on':'');
+    b.innerHTML=`${coinIco(ic,'sm')} ${tx}`;
+    b.onclick=()=>{ if(shRec===k) return; shRec=k; renderTienda(); };
+    tabs.appendChild(b);
+  });
+  d.appendChild(tabs);
+  if(shRec==='gemas'){
+    GEM_PACKS.forEach(pk=>{ const row=document.createElement('div'); row.className='sh-pack'; row.innerHTML=`<div class="pg ico">${coinIco('gema')}</div><div class="amt">${s.gemsAmt(pk.g)} ${pk.bonus?`<small>${pk.bonus}</small>`:''}</div>`;
+      const btn=document.createElement('button'); btn.className='money'; btn.textContent=pk.p; btn.onclick=()=>parentalBuy(pk); row.appendChild(btn); d.appendChild(row); });
+    return d;
+  }
   //+AG doc 45 §2: la oferta del dia va ARRIBA y con su propio marco, para que se lea como lo
   //   que es (una vez al dia) y no como un pack mas. Gastada, se queda a la vista en gris con
   //   "vuelve manana": esconderla haria pensar que ha desaparecido.
@@ -9655,16 +9723,13 @@ function gemasEl(){ const s=S(), d=document.createElement('div'); d.innerHTML=''
   db.disabled = done || SAVE.gemas<CHISPA_DEAL.g;
   db.onclick=()=>buyChispaDeal();
   deal.appendChild(db); d.appendChild(deal);
-  GEM_PACKS.forEach(pk=>{ const row=document.createElement('div'); row.className='sh-pack'; row.innerHTML=`<div class="pg ico">${coinIco('gema')}</div><div class="amt">${s.gemsAmt(pk.g)} ${pk.bonus?`<small>${pk.bonus}</small>`:''}</div>`;
-    const btn=document.createElement('button'); btn.className='money'; btn.textContent=pk.p; btn.onclick=()=>parentalBuy(pk); row.appendChild(btn); d.appendChild(row); });
-  //+AG 2026-08-06 · PAQUETES DE MONEDAS (encargo de Jaime, punto 10). Van DEBAJO de los de gemas porque
-  //   la cadena es esa: el dinero real compra gemas y las gemas compran monedas. Al cambio oficial
-  //   (CAMBIO), así que aquí no hay chollo ninguno — el chollo es la oferta del día de arriba, y por eso
-  //   esa está limitada a una al día y estos no necesitan tope.
-  const h=document.createElement('div'); h.className='sh-cat';
-  h.style.cssText='margin:16px 2px 8px;font-weight:900;letter-spacing:.06em;text-transform:uppercase';
-  h.innerHTML=`${coinIco('chispa','sm')} ${s.chispasWord||'Monedas'}`;
-  d.appendChild(h);
+  //+AG 2026-08-06 · PAQUETES DE MONEDAS (encargo de Jaime, punto 10). La cadena sigue siendo la misma
+  //   —el dinero real compra gemas y las gemas compran monedas— pero desde el 8-ago ya NO viven debajo
+  //   de los packs de gemas: viven en su propia sub-pestaña, porque debajo no se veian (589 px de
+  //   caida en una ventana de 472). El chollo sigue siendo la oferta del dia de arriba, y por eso esa
+  //   esta limitada a una al dia y estos no necesitan tope.
+  //   ⚠ Y aqui YA NO VA la cabecera «MONEDAS» que habia: lo dice la sub-pestaña encendida, y repetirlo
+  //   dos veces en la misma pantalla es ruido — ademas de ser el elemento que se salia 3 px.
   MON_PACKS.forEach(pk=>{ const row=document.createElement('div'); row.className='sh-pack';
     row.innerHTML=`<div class="pg ico">${coinIco('chispa')}</div><div class="amt">+${nfmt(pk.m)}</div>`;
     const btn=document.createElement('button'); btn.className='sh-buy gem';
@@ -11332,7 +11397,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=09a6e6b';
+  import { startAmbient } from './arte/ambient.mjs?v=726b446';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -11348,7 +11413,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=09a6e6b').then(m => {
+  import('./arte/pista-preview.mjs?v=726b446').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -11360,8 +11425,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=09a6e6b';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=09a6e6b';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=726b446';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=726b446';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -11531,7 +11596,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=09a6e6b'), import('./motor/chassis/sincro.mjs?v=09a6e6b')]);
+        import('./motor/chassis/nube.mjs?v=726b446'), import('./motor/chassis/sincro.mjs?v=726b446')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
