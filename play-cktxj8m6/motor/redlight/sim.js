@@ -147,6 +147,37 @@ const RUBBER = 1.08;           // rebufo <= +8% al equipo más atrasado, solo en
 const STUCK_F = 150;           // anti-atasco (5 s sin avanzar en verde)
 const ANTICIP_MIN = 6, ANTICIP_MAX = PLAN_HORIZON_F;   // rango de b.brakeLead (temeraria..veterana)
 
+//+AG ⚠⚠ docs/99 · QUÉ ES LA «PERICIA» EN LUZ ROJA, y no se ha elegido a ojo: se ha MEDIDO (2026-08-08).
+//   En la Carrera la pericia es cuándo gastas el nitro; en el Cazador, cuándo sueltas el escudo. Aquí el
+//   booster propio es el FANTASMA y la IA no usa boosters —ni uno—, así que no había nada que repartir.
+//   Lo que sí decide una partida en este modo es `b.brakeLead`: a cuántos frames del ámbar suelta el
+//   acelerador esa bola. Y estaba EXACTAMENTE igual de roto que lo que docs/99 vino a arreglar en la
+//   Carrera, pero peor: no es que se sorteara en cada partida, es que se re-sortea EN CADA VERDE. El
+//   bot que la clasificación pinta 3.º era temerario en un semáforo y veterano en el siguiente.
+//
+//   ⚠ Y LA DIRECCIÓN ES LA CONTRARIA DE LA QUE PARECE — es el fallo que costó dos pasadas en el Cazador
+//   y aquí habría vuelto a caer, porque el comentario de abajo lo dice al revés («con más margen
+//   (veterana) ya ha perdido bastante velocidad»). Medido con 800 muestras, un bot con el margen fijo y
+//   los demás con el sorteo de siempre:
+//         margen  6 (apura) → cruza 21,1 %   muere 78,8 %
+//         margen 30 (frena pronto) → cruza  4,5 %   muere 95,3 %
+//   Monótono en todo el rango y aguanta en las cuatro bolas que se probaron. Frenar pronto NO te salva:
+//   te mata MÁS, porque en este modo no basta con no morir —hay que CRUZAR— y el que se queda atrás lo
+//   fusila el embudo. En Luz Roja el bueno es el que apura.
+const RL_OPTIMO = 6;   // el margen que mejor resultado da, medido. Es el techo: ningún carácter baja de aquí.
+//   El CARÁCTER es el mismo del bot en los tres modos (sale de su semilla en el shell), así que aquí no
+//   se inventa uno nuevo: se traduce el MISMO eje —¿apuras o te precipitas?—. El que en el Cazador
+//   guarda el escudo hasta el último momento es el que aquí frena en el último momento.
+//   Todos los caracteres quedan POR ENCIMA del óptimo, y eso no es casual: si una manía fuera mejor que
+//   el óptimo, un bot FLOJO con esa manía jugaría mejor que un crack, y se cae la D1 («los de arriba
+//   están arriba porque juegan mejor»), que es lo único que hace que la clasificación signifique algo.
+const RL_CHAR = {
+  ahorrador:   12,   // apura hasta el final, como cuando guarda el escudo
+  tactico:     16,   // frena con cabeza
+  nervioso:    23,   // se asusta y suelta el acelerador pronto
+  derrochador: 28,   // se asusta a la primera
+};
+
 //+AG capa de AGENCIA del jugador (docs/21, port del Cazador): el jugador controla SOLO su bola (balls[0]) y SOLO
 //   cuando da input (this.pIn.engaged). El control PRINCIPAL es CORRER (mantener pulsado): decide CUÁNDO empuja el
 //   motor, no CUÁNTO (usa la MISMA fuerza GOAL y el MISMO vmax V_CLAMP que la IA). Todo se aplica DESPUÉS del
@@ -303,6 +334,21 @@ export class Sim {
     this.pmul = _S ? { vel:statMul(_S[0]), ace:statMul(_S[1]), pes:statMul(_S[2]), aga:statMul(_S[3]), res:statMul(_S[4]), bst:statMul(_S[5]) } : NEUTRAL_MUL;
     //+AG doc 39: el RASGO de la bola equipada. Mismo doble candado y sin consumir RNG, como los stats.
     this.trait = (this.individual && TRAITS_RED.has(opts.trait)) ? opts.trait : null;
+    //+AG docs/99 · QUIÉN ES CADA RIVAL. `botSkills` trae la pericia del bot ya emparejado por el shell
+    //   (el mismo `&bskill=` de la Carrera y el Cazador) y `botChars` su carácter. Mismo doble candado
+    //   que stats/trait —solo INDIVIDUAL y validado valor a valor—, así que basura entra y no hace nada,
+    //   y el torneo/vídeo del canal no los recibe jamás.
+    //   ⚠ NO CONSUMEN RNG NI UNA TIRADA, y aquí eso es más delicado que en el Cazador: el sorteo de
+    //   `brakeLead` corre sobre TODAS las bolas en cada verde, dentro de la cinta de la partida. Si se
+    //   saltara una tirada para las bolas con pericia, se desplazaría el mapa, los boulders y todo lo
+    //   demás. Por eso el dado se tira IGUAL y lo único que cambia es que su valor se descarta (ver
+    //   `_lead`). La huella lo demuestra: sin estos parámetros, los 7 perfiles idénticos.
+    this.botSkills = null;
+    if (this.individual && Array.isArray(opts.botSkills)){
+      const v = opts.botSkills.filter(x => typeof x === 'number' && isFinite(x) && x >= 0 && x <= 2);
+      if (v.length === opts.botSkills.length && v.length) this.botSkills = v;
+    }
+    this.botChars = (this.individual && Array.isArray(opts.botChars)) ? opts.botChars.map(c => RL_CHAR[c] ? c : 'tactico') : null;
     const nInd6 = this.individual && opts.n === 6;
     this.teams = this.individual ? (nInd6 ? SHORT_COLORS_6 : SHORT_COLORS) : TEAMS;
     this.nTeams = this.teams.length;                                   // 4 torneo · 8/6 individual
@@ -330,6 +376,12 @@ export class Sim {
       this.balls.push({ id: i, num: roster[i].num, team, color: this.teams[team].color,
         x, y, vx: 0.6 * ux / ul, vy: 0.6 * uy / ul, m: 1.0, scale: 1.0,
         rank: null, safe: false, waitf: 0, stuckF: 0, stuckMarkY: y, starF: 0, invuln: false,
+        //+AG docs/99 · quién es este rival. Los dos campos NO consumen RNG (se leen de las listas que
+        //   mandó el shell) y van al final del literal, así que la cinta de aleatoriedad queda intacta.
+        //   `null` = el bot anónimo de siempre, que sortea su margen en cada verde como toda la vida.
+        //   El índice va -1 porque balls[0] es el jugador y el shell solo manda a los rivales.
+        _skill: (this.botSkills && i > 0 && this.botSkills[i - 1] != null) ? this.botSkills[i - 1] : null,
+        _char:  (this.botChars  && i > 0 && this.botChars[i - 1])          ? this.botChars[i - 1]  : 'tactico',
         isPlayer: i === 0 });   //+AG balls[0] = jugador (color Azul en individual, primero de la paleta short)
     }
     this.byTeam = this.teams.map((_, t) => this.balls.filter(b => b.team === t));
@@ -361,7 +413,9 @@ export class Sim {
     }
     this.phaseIdx = 0; this.phaseStart = 0; this.phaseEnd = this.phases[0].dur;
     this.color = 'green'; this.redStartF = null;
-    for (const b of this.balls) b.brakeLead = Math.round(rng.uniform(ANTICIP_MIN, ANTICIP_MAX));
+    //+AG docs/99 · el dado se tira SIEMPRE (la cinta de RNG no se puede saltar ni una vez: movería el
+    //   mapa, los boulders y las minas); `_lead` decide si lo usa o lo descarta por el margen del bot.
+    for (const b of this.balls) b.brakeLead = this._lead(b, Math.round(rng.uniform(ANTICIP_MIN, ANTICIP_MAX)));
 
     // trampas/obstáculos: layout POR SEMILLA (jitter leve → el mapa no sale idéntico siempre). RNG SEPARADA del
     // juego (no desplaza la secuencia de la sim). Solo las MINAS se jitterean (X±1.6, Y±0.7); boulders/bloqueadores/
@@ -437,6 +491,23 @@ export class Sim {
   _pLaneAx(b){ const g = this.pmul.aga, mx = P_LANE_MAX * g, a = (P_LANE_X[this.pIn.lane] - b.x) * P_LANE_K * g;
     return a < -mx ? -mx : (a > mx ? mx : a); }
   _freshEvents(){ return { kill: [], save: [], cross: [], phase: [], scan: [], target: [], barrier: [], block: [] }; }
+  //+AG docs/99 · EL MARGEN DE FRENADA DE ESTA BOLA EN ESTE VERDE. `dado` es el sorteo de siempre, y se
+  //   recibe YA TIRADO: quien llama tiene que haber consumido su tirada de RNG pase lo que pase aquí,
+  //   porque el sorteo va dentro de la cinta de la partida y saltárselo movería el mapa entero.
+  //   Sin pericia se devuelve el dado tal cual → la partida de siempre, bit a bit.
+  //   Con pericia, el margen se interpola entre la MANÍA del carácter y el juego ÓPTIMO según lo bueno
+  //   que sea el bot: un crack converge al óptimo haga el carácter que haga (su techo es jugar bien, no
+  //   raro), y un flojo juega su manía entera. Es la misma mecánica que el Cazador usa para decidir
+  //   cuándo suelta el escudo, y por la misma razón: es lo que hace que la clasificación signifique
+  //   algo en vez de ser una lista ordenada por un número secreto.
+  //   El [0,45 · 1,20] es el rango que reparte el shell (BOT_SKILL en juego.html), el mismo que ya usan
+  //   la Carrera y el Cazador para normalizar la pericia.
+  _lead(b, dado){
+    if (b._skill == null) return dado;
+    const t = Math.max(0, Math.min(1, (b._skill - 0.45) / 0.75));
+    const mania = RL_CHAR[b._char] || RL_CHAR.tactico;
+    return Math.round(RL_OPTIMO * t + mania * (1 - t));
+  }
   aliveBalls(){ return this.balls.filter(b => b.rank === null); }
   activeNotSafe(){ return this.balls.filter(b => b.rank === null && !b.safe); }
   get winner_color(){ return this.winner_team != null ? this.teams[this.winner_team]?.name : null; }
@@ -553,7 +624,7 @@ export class Sim {
         while (this.phases[this.phaseIdx].color !== this.tutLight) this.phaseIdx++;
         const prevColor = this.color; this.color = this.tutLight;
         if (this.color === 'red') this.redStartF = f; else this.redStartF = null;
-        for (const b of this.balls) b.brakeLead = Math.round(this.rng.uniform(ANTICIP_MIN, ANTICIP_MAX));
+        for (const b of this.balls) b.brakeLead = this._lead(b, Math.round(this.rng.uniform(ANTICIP_MIN, ANTICIP_MAX)));
         ev.phase.push({ f, color: this.color, from: prevColor });
       }
       this.phaseStart = f; this.phaseEnd = f + 600;   // se renueva cada frame: la luz no cambia hasta soltar la lección
@@ -562,7 +633,7 @@ export class Sim {
       this.phaseIdx++; this.phaseStart = this.phaseEnd; this.phaseEnd += this.phases[this.phaseIdx].dur;
       const prevColor = this.color; this.color = this.phases[this.phaseIdx].color;
       if (this.color === 'red') this.redStartF = f;
-      else for (const b of this.balls) b.brakeLead = Math.round(this.rng.uniform(ANTICIP_MIN, ANTICIP_MAX));
+      else for (const b of this.balls) b.brakeLead = this._lead(b, Math.round(this.rng.uniform(ANTICIP_MIN, ANTICIP_MAX)));
       ev.phase.push({ f, color: this.color, from: prevColor });
     }
     const framesToPhaseEnd = this.phaseEnd - f;

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-08 21012f2">
+<meta name="bt-build" content="2026-08-08 797ae79">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <!--+AG el HTML se sirve en INGLES (defecto del juego); ?lang=es lo traduce por JS (applyLang) -->
 <title>YouBall · Red Light Rush (WebGL) · The Marble Games</title>
@@ -536,7 +536,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=21012f2"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=797ae79"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -547,32 +547,32 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 </script>
 
 <script type="module">
-import { THREE, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createBloom, frameOrtho, BLOOM } from '../chassis/gfx.mjs?v=21012f2';
-import { paleta as estelaPaleta, emiteEstela } from '../chassis/estelas.mjs?v=21012f2';   //+AG doc 97 §6: la estela cosmetica del jugador
-import { archLook } from '../chassis/ballmat.mjs?v=21012f2';   //+AG doc 41 bloque G: material de la bola-heroe
-import { attachSquash } from '../chassis/squash.mjs?v=21012f2';
-import { createCelebration } from '../chassis/celebration.mjs?v=21012f2';
-import { createKillfeed } from '../chassis/killfeed.mjs?v=21012f2';
-import { createCensusBoard } from '../chassis/censusboard.mjs?v=21012f2';
-import { createCupoGauge } from '../chassis/cupogauge.mjs?v=21012f2';
-import { createKillTags } from '../chassis/killtag.mjs?v=21012f2';
-import { crearInventario } from '../chassis/invboost.mjs?v=21012f2';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
-import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=21012f2';
-import { archFace } from '../chassis/facegen.mjs?v=21012f2';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
-import { Sim, TEAMS, SHORT_COLORS, SHORT_COLORS_6, BALL_R, FPS, FIELD_W, FIELD_L, XL, XR, SPAWN_Y, GATE_Y, SAFE_Y } from './sim.js?v=21012f2';
-import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=21012f2';
-import { buildSfxBuffer } from './sfxmap.mjs?v=21012f2';
-import { createCoach } from '../chassis/coach.mjs?v=21012f2';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
-import { crearSalida } from '../chassis/salida.mjs?v=21012f2';   //+AG 2026-08-08 · preparar la bola durante la cuenta atrás
-import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=21012f2';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
-import { createUiSfx } from '../chassis/uisfx.mjs?v=21012f2';   //+AG doc 88: el sonido de "no puedo"
-import { createJuice } from '../chassis/juice.mjs?v=21012f2';   //+AG doc 88: lo que pasa cuando el dedo toca un botón (los 3 modos)
+import { THREE, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createBloom, frameOrtho, BLOOM } from '../chassis/gfx.mjs?v=797ae79';
+import { paleta as estelaPaleta, emiteEstela } from '../chassis/estelas.mjs?v=797ae79';   //+AG doc 97 §6: la estela cosmetica del jugador
+import { archLook } from '../chassis/ballmat.mjs?v=797ae79';   //+AG doc 41 bloque G: material de la bola-heroe
+import { attachSquash } from '../chassis/squash.mjs?v=797ae79';
+import { createCelebration } from '../chassis/celebration.mjs?v=797ae79';
+import { createKillfeed } from '../chassis/killfeed.mjs?v=797ae79';
+import { createCensusBoard } from '../chassis/censusboard.mjs?v=797ae79';
+import { createCupoGauge } from '../chassis/cupogauge.mjs?v=797ae79';
+import { createKillTags } from '../chassis/killtag.mjs?v=797ae79';
+import { crearInventario } from '../chassis/invboost.mjs?v=797ae79';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
+import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=797ae79';
+import { archFace } from '../chassis/facegen.mjs?v=797ae79';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
+import { Sim, TEAMS, SHORT_COLORS, SHORT_COLORS_6, BALL_R, FPS, FIELD_W, FIELD_L, XL, XR, SPAWN_Y, GATE_Y, SAFE_Y } from './sim.js?v=797ae79';
+import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=797ae79';
+import { buildSfxBuffer } from './sfxmap.mjs?v=797ae79';
+import { createCoach } from '../chassis/coach.mjs?v=797ae79';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { crearSalida } from '../chassis/salida.mjs?v=797ae79';   //+AG 2026-08-08 · preparar la bola durante la cuenta atrás
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=797ae79';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
+import { createUiSfx } from '../chassis/uisfx.mjs?v=797ae79';   //+AG doc 88: el sonido de "no puedo"
+import { createJuice } from '../chassis/juice.mjs?v=797ae79';   //+AG doc 88: lo que pasa cuando el dedo toca un botón (los 3 modos)
 //+AG el ámbito NO es opcional: la regla base es `#controls button` (id + etiqueta) y le gana en
 //   especificidad a cualquier `.j-hit` suelto. Es la trampa que ya costó una versión muerta en este
 //   mismo fichero (ver la nota de `#controls button#bGhost .bi`).
 const juice = createJuice({ ambito:'#controls', reducido: new URLSearchParams(location.search).get('redfx')==='1' });
-import { createPausa } from '../chassis/pausa.mjs?v=21012f2';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
-import { cantarPuesto } from '../chassis/veredicto.mjs?v=21012f2';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
+import { createPausa } from '../chassis/pausa.mjs?v=797ae79';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
+import { cantarPuesto } from '../chassis/veredicto.mjs?v=797ae79';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
 
 window.addEventListener('error', e => { document.getElementById('err').style.display='grid'; console.error(e.error||e.message); });
 
@@ -610,6 +610,22 @@ if(shortOpts){ const _s=(_q0.get('stats')||'').split(',').map(Number); if(_s.len
 //+AG doc 39: ?trait=<clave> → el RASGO de la bola equipada. La Sim valida la clave y solo reconoce los suyos (aquí
 //   no vive Fantasma: este modo no tiene Cazador). Mismo candado que ?stats: solo INDIVIDUAL.
 if(shortOpts){ const _t=_q0.get('trait'); if(_t) shortOpts.trait=_t; }
+//+AG docs/99 · ?bskill= y ?bchar= · QUIÉN ES CADA RIVAL. La pericia decide su margen de frenada (aquí no
+//   hay boosters de IA que gastar: lo que se juega en este modo es cuándo suelta el acelerador) y el
+//   carácter es su manía. Los manda el shell ya emparejados por copas, en el mismo orden y de los mismos
+//   bots cuyos nombres pinta luego Resultados. Mismo candado que ?stats: solo INDIVIDUAL.
+//   ⚠ SE PREGUNTA SI EL PARÁMETRO EXISTE, y no es estilo: `''.split(',')` es `['']`, que con `map(Number)`
+//   es `[0]` y pasa cualquier `every(isFinite)`. La forma corta enciende el sistema SIN parámetro y le
+//   planta al primer rival pericia CERO — el fallo que se cazó el 8-ago en la Carrera y en el Cazador, y
+//   que se colaba justo donde nadie mira (tutorial, motor abierto suelto). Lo vigila
+//   tools/prueba-eslabon-bskill.mjs, que ejecuta la línea REAL de este fichero.
+if(shortOpts){
+  const _raw=_q0.get('bskill');
+  if(_raw){ const _bs=_raw.split(',').map(Number);
+    if(_bs.length && _bs.every(v=>isFinite(v))) shortOpts.botSkills=_bs; }
+  const _bc=(_q0.get('bchar')||'').split(',').filter(Boolean);
+  if(_bc.length) shortOpts.botChars=_bc;
+}
 //+AG doc 41 bloque G: ?arch=<clave> (la bola-heroe equipada) -> su MATERIAL solo para balls[0].
 //   Misma regla que ?stats: solo en INDIVIDUAL, y ausente o desconocido = null = el look de siempre.
 //   Es 100% cosmetico: no toca la Sim, asi que no puede mover el balance ni un milimetro.
