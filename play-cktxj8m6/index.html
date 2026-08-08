@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-08 f83bb49"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-08 02c0386"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -3589,7 +3589,17 @@
      fichero— y aun asi se hundian al pulsarlas igual que la tarjeta del Garaje. Son 51 filas por tres
      pestañas prometiendo algo que no pasa, en una de las pantallas mas visitadas.
      Se les quita la promesa en vez de inventarles un destino: adonde deberia llevar tocar la fila de
-     un rival es una decision de producto, no de CSS. Cuando se decida, vuelve aqui. */
+     un rival es una decision de producto, no de CSS. Cuando se decida, vuelve aqui.
+     ⚠ 8-ago · YA SE DECIDIO, Y ESTE COMENTARIO LO PEDIA: las filas que estan EN FRANJA DE PREMIO
+     (`.prz`, doc 102) si tienen destino — abren la hoja que dice que se lleva ese puesto. Asi que
+     recuperan el canto corto, y solo ellas: las otras 41 filas siguen sin promesa porque siguen sin
+     destino. El contraste no es un descuido, es el mensaje — el canto marca exactamente las diez que
+     llevan a algun sitio. Regla que se conserva intacta: la afordancia se pone cuando existe el
+     destino, nunca antes. */
+  /*+AG doc 102 · y el `:active` es el MISMO de la casa (hundirse 1 px, no encogerse): dos maneras de
+     acusar el dedo en la misma pantalla es justo lo que el pase de homogeneidad vino a matar. */
+  .rkrow.prz{ box-shadow:0 2px 0 #0d0726, inset 0 1px 0 #ffffff18; }
+  .rkrow.prz:active{ transform:translateY(1px); box-shadow:0 1px 0 #0d0726, inset 0 1px 0 #ffffff18; }
   .g-card, .sc-block{ box-shadow:0 2px 0 #0d0726, inset 0 1px 0 #ffffff18; }
   .g-card:active{ transform:translateY(1px); box-shadow:0 1px 0 #0d0726, inset 0 1px 0 #ffffff18; }
 
@@ -4595,7 +4605,9 @@
      el regalo mide 26 px y el minimo tactil de la casa son 44, asi que colgar el toque SOLO del
      dibujo seria construir un boton que falla. La fila mide 48 de alto y todo su ancho. */
   .rkrow.prz{ cursor:pointer; }
-  .rkrow.prz:active{ transform:scale(.985); }
+  /*+AG el canto corto de «esto se toca» y su `:active` NO viven aqui: viven con el resto de la
+     familia (bloque 5, `.g-card, .sc-block`), que es donde un comentario del 3-ago dejo escrito que
+     `.rkrow` salia de ahi «hasta que se decida adonde lleva tocar una fila». Ya se decidio. */
   /*+AG doc 102 · LA TARJETA DE PREMIOS. Antes esto era una tirita de texto de 13 px —«#1 100 · #3 60
      · #10 30»— que decia la verdad y no la enseñaba. Ahora cada franja es una COLUMNA con su regalo
      dibujado encima, que es como se presenta un premio en este genero, y la tarjeta entera abre la
@@ -6311,7 +6323,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=f83bb49"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=02c0386"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -9865,7 +9877,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=f83bb49').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=02c0386').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -10135,7 +10147,7 @@ const esEstela=id=>ESTELA_ORD.indexOf(id)>=0;
 let ESTELA_COLS=null;
 function cargaEstelaCols(cb){
   if(ESTELA_COLS) return cb();
-  import('./motor/chassis/estelas.mjs?v=f83bb49')
+  import('./motor/chassis/estelas.mjs?v=02c0386')
     .then(m=>{ ESTELA_COLS=m.ESTELAS||{}; cb(); })
     .catch(()=>{ ESTELA_COLS={}; cb(); });   //   sin red, fichas en gris: nunca una pantalla rota
 }
@@ -12606,7 +12618,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=f83bb49';
+  import { startAmbient } from './arte/ambient.mjs?v=02c0386';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -12622,7 +12634,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=f83bb49').then(m => {
+  import('./arte/pista-preview.mjs?v=02c0386').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -12634,8 +12646,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=f83bb49';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=f83bb49';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=02c0386';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=02c0386';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -12805,7 +12817,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=f83bb49'), import('./motor/chassis/sincro.mjs?v=f83bb49')]);
+        import('./motor/chassis/nube.mjs?v=02c0386'), import('./motor/chassis/sincro.mjs?v=02c0386')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
