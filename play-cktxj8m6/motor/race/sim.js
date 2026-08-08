@@ -336,6 +336,18 @@ class Sim{
     //   candado que stats/trait (solo individual) y tampoco consume RNG → el torneo y el vídeo del canal
     //   entran con null y salen byte-idénticos. Lo fija el motor desde el shell, no se inventa aquí.
     this.botStock=(this.individual&&typeof opts.botStock==='number'&&opts.botStock>=0)?(opts.botStock|0):null;
+    //+AG 2026-08-08 · LA PERICIA DE CADA RIVAL, DICHA DESDE FUERA (encargo de Jaime). Hasta hoy `_skill`
+    //   se sorteaba aquí con el RNG de la partida, así que era de la CARRERA y no del bot: el rival que
+    //   va primero en la clasificación del shell podía jugar como un manta, y el último machacarte.
+    //   Ahora el shell manda la pericia de los bots-persona que ha emparejado (docs/36: «un bot
+    //   Calculador Oro se comporta como Oro siempre»), y de esa misma cifra sale su puesto en la tabla.
+    //   Mismo doble candado que stats/trait/botStock: solo individual, y validado valor a valor. Sin
+    //   `botSkills` —torneo, vídeo del canal, tutorial, banco— todo se comporta EXACTAMENTE como antes.
+    this.botSkills=null;
+    if(this.individual && Array.isArray(opts.botSkills)){
+      const v=opts.botSkills.filter(x=>typeof x==='number' && isFinite(x) && x>=0 && x<=2);
+      if(v.length===opts.botSkills.length && v.length) this.botSkills=v;
+    }
     this.teams=this.individual?SHORT_COLORS:TEAMS;
     this.nTeams=this.teams.length;                         // 4 torneo · 8 individual
     this.ballsPerTeam=this.individual?1:BALLS_PER_TEAM;    // 3 torneo · 1 individual (cada color = equipo de 1)
@@ -357,8 +369,32 @@ class Sim{
         //   sin límite, que es el torneo y el vídeo del canal de siempre. El número YA lleva sumado el
         //   uso gratis que tiene el jugador, para que la pista salga de la misma regla para todos.
         //   No se reparte por pericia a propósito: un bot listo debe usarlos MEJOR, no tener MÁS.
-        _stock: this.botStock===null ? null : { n:this.botStock, s:this.botStock },
-        _skill:0.45+rng.random()*0.75 });
+        //+AG ⚠⚠ 2026-08-08 · Y CUÁNTOS BOOSTERS LLEVA CADA UNO SALE DE SU PERICIA. Esto CORRIGE la
+        //   decisión escrita justo debajo («un bot listo debe usarlos MEJOR, no tener MÁS»), y la corrige
+        //   Jaime: «habrá bots que juegan mal o que NO USAN NUNCA NITROS en su perfil, pues tenderán a
+        //   perder más… y hay unos bots que juegan muy bien y TIENEN MUCHOS NITROS, y son los que están
+        //   más arriba». Medido, la regla vieja hacía que su modelo no pudiera existir: con el mismo
+        //   stock para todos, la pericia solo cambiaba CUÁNDO se gastaban los dos usos —nunca cuántos—,
+        //   y la diferencia entre correr contra los peores y contra los mejores era de 0,8 puntos de
+        //   victoria. O sea, indistinguible: no había a quién adelantar.
+        //   LA MEDIA DE LA POBLACIÓN SE CONSERVA, que es lo que protege el balance: el reparto va de 0 a
+        //   2×botStock alrededor de la pericia media, así que en conjunto los bots siguen gastando lo
+        //   mismo que gastaban. Lo que cambia es CÓMO se reparte: flojos con menos, cracks con más. Sin
+        //   `botSkills` (torneo, vídeo, tutorial, banco) esto no se ejecuta y el stock es el de siempre.
+        _stock: this.botStock===null ? null
+              : (this.botSkills && i>0 && this.botSkills[i-1]!=null
+                  ? (()=>{ const k=Math.max(0, Math.round(this.botStock*2*(this.botSkills[i-1]-0.45)/0.75));
+                           return { n:k, s:k }; })()
+                  : { n:this.botStock, s:this.botStock }),
+        //+AG ⚠⚠ EL SORTEO SE CONSUME SIEMPRE, AUNQUE LUEGO SE TIRE. Es la misma disciplina que el test
+        //   de stock de _botBoosters: el RNG de la Sim es una cinta compartida por el mapa, las zonas y
+        //   los spawns, así que saltarse una tirada aquí desplazaría TODO lo que viene detrás y una
+        //   partida con pericias no tendría el mismo circuito que una sin ellas. Con la tirada hecha y
+        //   descartada, `botSkills` cambia CÓMO juegan los rivales y nada más.
+        //   El índice va -1 porque balls[0] es el jugador y el shell manda solo a los rivales. El
+        //   jugador conserva su valor sorteado, que además no se usa nunca (isPlayer no pasa por la IA).
+        _skill:(()=>{ const s=0.45+rng.random()*0.75;
+          return (this.botSkills && i>0 && this.botSkills[i-1]!=null) ? this.botSkills[i-1] : s; })() });
     }
     this.player=this.balls[0];
     this.byTeam=this.teams.map((_,t)=>this.balls.filter(b=>b.team===t));   //+AG dimensionado a nTeams (4 torneo · 8 individual); default = TEAMS.map (idéntico)
