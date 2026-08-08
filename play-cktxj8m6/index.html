@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-08 96ca7c9"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-08 6930664"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -6089,7 +6089,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=96ca7c9"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=6930664"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -8659,13 +8659,34 @@ function onTutorialEnd(d){
 }
 function onMatchEnd(d){
   //+AG doc 07: los 3 modos son INDIVIDUALES → el resultado que cuenta es el PUESTO del jugador (playerPlace)
-  const place = d.playerPlace||1;
+  //+AG ⚠⚠ 2026-08-08 · «A VECES MUERO Y ME DICE QUE HE GANADO» (Jaime). Esta línea decía
+  //   `d.playerPlace||1`, y ese `||1` es lo peor que puede tener un marcador: **cuando el juego NO SABE
+  //   tu puesto, se lo inventa, y se lo inventa como PRIMERO.** Cualquier fallo de cálculo, un mensaje a
+  //   medias o un `0` por delante se cobraba como victoria: música de victoria, premio de campeón y copas
+  //   de primero. Un valor por defecto nunca puede ser el mejor resultado posible.
+  //   Ahora, si el puesto no viene o no es un entero dentro del rango, se cae al PEOR puesto conocido
+  //   (el número de bolas que corrieron, o 8 si tampoco viene la tabla) y se deja rastro en consola: así
+  //   un fallo se nota porque el jugador se queja de que le han quitado un puesto, no porque llevemos
+  //   meses pagando victorias que no existieron.
+  const nBolas = Array.isArray(d.standings) && d.standings.length ? d.standings.length : 8;
+  const placeCrudo = d.playerPlace;
+  const placeOk = Number.isInteger(placeCrudo) && placeCrudo >= 1 && placeCrudo <= nBolas;
+  if(!placeOk) console.error('[bt:matchEnd] puesto del jugador inválido:', placeCrudo, '· se usa el último ('+nBolas+')');
+  const place = placeOk ? placeCrudo : nBolas;
   //+AG EL TEMA SE ELIGE ANTES DE CERRAR EL IFRAME, y el orden es lo único que importa aquí: closeGameFrame()
   //   reenciende la música del shell, así que si esto fuera después se oiría un pellizco de la pista de MENÚ
   //   antes de entrar la de victoria. Con enPartida todavía en true, tema() solo cambia la pista y la precarga
   //   (no arranca nada), y el on() de closeGameFrame ya suelta la buena. De regalo, el mp3 empieza a bajar
   //   mientras se pinta Resultados. En EQUIPOS solo hay 4 puestos, así que "podio" ahí es ganar.
-  if(window.BT_MUSIC) BT_MUSIC.tema(((curFmt==='equipos'?(d.teamPlace||1)===1:place<=3)) ? 'victoria' : 'resultado');
+  //+AG ⚠ 2026-08-08 · el puesto de EQUIPO llevaba el mismo `||1` que el individual y con la misma
+  //   consecuencia: sin dato, tu equipo campeón. Se valida igual y se cae al peor puesto (nº de equipos,
+  //   4 por defecto). Se calcula AQUÍ y no más abajo porque la música de victoria ya lo necesita.
+  const nEquipos = Array.isArray(d.teamStandings) && d.teamStandings.length ? d.teamStandings.length : 4;
+  const tpCrudo = d.teamPlace;
+  const tpOk = Number.isInteger(tpCrudo) && tpCrudo >= 1 && tpCrudo <= nEquipos;
+  if(curFmt==='equipos' && !tpOk) console.error('[bt:matchEnd] puesto de equipo inválido:', tpCrudo, '· se usa el último ('+nEquipos+')');
+  const teamP = curFmt==='equipos' ? (tpOk ? tpCrudo : nEquipos) : 0;
+  if(window.BT_MUSIC) BT_MUSIC.tema(((curFmt==='equipos' ? teamP===1 : place<=3)) ? 'victoria' : 'resultado');
   closeGameFrame();
   //+AG 2026-08-06 · lo que la partida se ha comido del inventario. ANTES de pagar el premio, para que
   //   si algo peta aquí el jugador no se quede con el cobro hecho y el stock intacto (sería un grifo).
@@ -8685,7 +8706,6 @@ function onMatchEnd(d){
   let leveled=false; while(SAVE.xp>=xpForLevel(SAVE.level)){ SAVE.xp-=xpForLevel(SAVE.level); SAVE.level++; leveled=true; }
   const eb=SAVE.balls[SAVE.equipped]; if(eb){ eb.xp=(eb.xp||0)+rew.xp; }   //+AG doc 39: la XP de bola se ACUMULA (subir de nivel se paga en el Garaje con Chispas)
   //+AG COPAS de LA BOLA equipada (doc 37): en EQUIPOS puntua el puesto de equipo (1..4); en INDIVIDUAL el puesto (1..8)
-  const teamP = curFmt==='equipos' ? (d.teamPlace||1) : 0;
   applyCupsForResult(teamP ? {teamPlace:teamP} : {place}, eb, place, d);
   persist(); checkHitos();   //+AG doc 39: ¿algún hito de copas cruzado? la Épica se une sola
   //+AG el aviso del ICONO de la pantalla de inicio se arma AQUI y se dispara en goHome(): "primera partida"
@@ -9395,7 +9415,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=96ca7c9').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=6930664').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -9665,7 +9685,7 @@ const esEstela=id=>ESTELA_ORD.indexOf(id)>=0;
 let ESTELA_COLS=null;
 function cargaEstelaCols(cb){
   if(ESTELA_COLS) return cb();
-  import('./motor/chassis/estelas.mjs?v=96ca7c9')
+  import('./motor/chassis/estelas.mjs?v=6930664')
     .then(m=>{ ESTELA_COLS=m.ESTELAS||{}; cb(); })
     .catch(()=>{ ESTELA_COLS={}; cb(); });   //   sin red, fichas en gris: nunca una pantalla rota
 }
@@ -12004,7 +12024,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=96ca7c9';
+  import { startAmbient } from './arte/ambient.mjs?v=6930664';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -12020,7 +12040,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=96ca7c9').then(m => {
+  import('./arte/pista-preview.mjs?v=6930664').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -12032,8 +12052,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=96ca7c9';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=96ca7c9';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=6930664';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=6930664';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -12203,7 +12223,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=96ca7c9'), import('./motor/chassis/sincro.mjs?v=96ca7c9')]);
+        import('./motor/chassis/nube.mjs?v=6930664'), import('./motor/chassis/sincro.mjs?v=6930664')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
