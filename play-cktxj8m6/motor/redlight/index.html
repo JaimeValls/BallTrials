@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-08 0c4584d">
+<meta name="bt-build" content="2026-08-08 05e5c3d">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <!--+AG el HTML se sirve en INGLES (defecto del juego); ?lang=es lo traduce por JS (applyLang) -->
 <title>YouBall · Red Light Rush (WebGL) · The Marble Games</title>
@@ -49,8 +49,13 @@
   #mini .md{position:absolute;left:50%;width:13px;height:13px;border-radius:50%;transform:translate(-50%,50%);box-shadow:inset 0 -2px rgba(0,0,0,.3)}
   #mini .md.fin{box-shadow:0 0 0 2px #ffd34d,0 0 8px rgba(255,211,77,.7)}
   #mini .md.dead{opacity:.16;filter:grayscale(1)}
-  .keys{position:fixed;left:14px;bottom:34px;font-size:12px;color:#7d7596;z-index:5}
-  #snd{position:fixed;right:14px;bottom:30px;z-index:6;width:46px;height:46px;border-radius:50%;border:0;
+  /*+AG ⚠ 2026-08-08 · LOS DOS SUBEN POR ENCIMA DEL HUD. Con el mockup B el bloque de controles pasó de
+     137 a 219 px de alto, y medido en un móvil de 360×640 el disco del SÚPER se comía el botón de
+     sonido entero: quedaba debajo, sin poder tocarse. Van a la izquierda porque a la derecha, a esa
+     altura, corre el minimapa vertical (#mini). El 238 es el alto del HUD (219) más su separación del
+     borde (12) más un dedo de aire. */
+  .keys{position:fixed;left:74px;bottom:calc(238px + env(safe-area-inset-bottom));font-size:12px;color:#7d7596;z-index:5}
+  #snd{position:fixed;left:14px;bottom:calc(238px + env(safe-area-inset-bottom));z-index:6;width:46px;height:46px;border-radius:50%;border:0;
     background:rgba(0,0,0,.42);color:#fff;font-size:22px;line-height:46px;cursor:pointer;
     box-shadow:0 0 0 2px rgba(255,255,255,.14);transition:transform .12s,box-shadow .18s,background .18s}
   #snd:hover{transform:scale(1.08)}
@@ -87,7 +92,9 @@
      perdía del todo. Aquí es sólido y suyo (`--j-canto`), más bisel arriba, sombra interior abajo y
      sombra proyectada. `min-height:44px` es la regla 14 del doc 60: los tres CARRILES medían 30 px en
      el móvil de verdad, que es el peor incumplimiento de dedo de todo el juego. */
-  #controls button{--j-canto:#120a24;--j-tinte:#ffffff;
+  /*+AG `box-sizing:border-box` para TODOS: desde que los botones llevan borde propio (2026-08-08), sin
+     esto el canto se suma al ancho y un disco de 66 mide 72. Es la misma corrección que el #supAro. */
+  #controls button{--j-canto:#120a24;--j-tinte:#ffffff;box-sizing:border-box;
     border:0;border-radius:16px;min-height:44px;font-family:inherit;font-weight:900;color:#fff;cursor:pointer;
     box-shadow:0 5px 0 var(--j-canto), inset 0 2px 0 #ffffff33, inset 0 -3px 0 #00000055, 0 6px 14px #00000055;
     transition:transform .05s,filter .1s,box-shadow .08s;line-height:1.05;backdrop-filter:blur(3px)}
@@ -108,7 +115,16 @@
      pisan y en la captura se lee «SÚPER» encima de su propio pie. El contorno pinta HACIA FUERA de la
      caja, así que el hueco tiene que ser mayor que el trazo: 2,24 px a 16 px de cuerpo → 3 px de gap.
      Es la misma lección del doc 56 §3bis.1 («INDMDUAL»), pero en vertical. */
-  #controls .row:not(#laneRow) button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+  #controls .row:not(#laneRow):not(#mainRow) button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+  /*+AG ⚠ 2026-08-08 · CORRER y PARAR llevan el icono AL LADO, no encima: son los dos rótulos largos del
+     HUD (RENNEN/STOPPEN en alemán) y en columna el botón crecería a lo alto, que es lo único que no sobra.
+     El `:not(#mainRow)` de la regla de arriba NO es adorno: sin él, la columna le gana a esta por
+     especificidad (2 ids + 1 clase contra 2 ids) y el icono se sigue poniendo encima. Es la misma
+     trampa que este fichero ya documenta tres veces más abajo. */
+  #controls #mainRow button{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
+  #controls #mainRow button .mi{width:24px;height:24px;flex:0 0 auto;stroke-width:2.4;stroke-linejoin:round;
+    filter:drop-shadow(0 2px 0 #00000055)}
+  #controls #mainRow button .k,#controls #mainRow button .cd{flex-basis:100%;margin-top:0}
   /* el FANTASMA es blanco-azulado y su boton es BLANCO cuando esta disponible: sin separarlo, la silueta se
      funde con la placa. Se le refuerza el contorno con la misma sombra doble que usa la insignia de liga. */
   /* ⚠ el selector lleva `#controls button` delante A PROPOSITO: la regla de arriba es `#controls button .bi`
@@ -118,52 +134,134 @@
   /*+AG carriles (intención, estilo intenciones del Cazador): el activo lleva .on */
   /* los CARRILES son la intención de este modo y se tocan constantemente. Medían 107×30 px: el peor
      objetivo táctil del juego, por debajo del mínimo de 44 (doc 60 r.14). El cuerpo sube de 11 a 13. */
-  #laneRow button{flex:1;padding:11px 4px;min-height:46px;font-size:clamp(13px,3.4vw,16px);
-    background:linear-gradient(180deg,#3a3050,#241c3a 50%,#1a1430);--j-tinte:#c9beff}
-  #laneRow button.on{background:linear-gradient(180deg,#b0a3ff,#6f5be6 55%,#5443c4);
-    box-shadow:0 5px 0 #4133a0, inset 0 2px 0 #ffffff66, inset 0 -3px 0 #00000044, 0 0 15px #9b8cff66}
+  /*+AG ⚠ 2026-08-08 (VB Jaime, mockup B) · EL CARRIL DEJA DE SER UNA PALABRA Y PASA A SER UNA FLECHA.
+     Jaime, viendo la partida: «los botones no parecen un triple A, parecen de una web de mierda».
+     «◀ LEFT» es un rótulo de menú; una flecha maciza con su trazo es una pieza de juego, y además se
+     lee igual en los 20 idiomas sin pasar por el diccionario. La palabra viajaba en `laneL/C/R` de
+     i18n: las claves SE QUEDAN y se siguen escribiendo en el `.t`, solo que oculto a la vista.
+     `min-height` sube de 46 a 50: sigue mandando la regla 14 del doc 60 (mínimo 44 de dedo). */
+  #controls #laneRow button{flex:1;padding:8px 4px;min-height:50px;font-size:clamp(13px,3.4vw,16px);
+    border:3px solid #1b1132;
+    background:linear-gradient(180deg,#4b3e70,#2e2450 55%,#221a3e);--j-tinte:#c9beff;--j-canto:#150c28}
+  #controls #laneRow button .li{width:34px;height:34px;fill:#d6ccff;stroke:#1b1132;stroke-width:2.4;stroke-linejoin:round;
+    filter:drop-shadow(0 2px 0 #00000055)}
+  #controls #laneRow button.on{background:linear-gradient(180deg,#c6baff,#7a63f0 55%,#5b48c9);border-color:#3a2c88;
+    box-shadow:0 5px 0 #38299b, inset 0 2px 0 #ffffff88, inset 0 -3px 0 #00000044, 0 0 20px #9b8cffaa}
+  #controls #laneRow button.on .li{fill:#fff;stroke:#2a1e5e}
   /*+AG doc 73: los DOS MANDOS del modo, del mismo tamaño y uno al lado del otro. El ancho sale de repartir lo que
      tenía CORRER solo (2.6) más el hueco del FRENAZO (1) entre los dos → la fila no crece ni un píxel y los
      boosters conservan su ancho. `nowrap` porque en alemán/holandés la palabra es larga (RENNEN/STOPPEN) y si
      parte en dos líneas SUBE el alto del HUD, que es lo único que no cabe en un móvil de 360×640. */
   /*+AG doc 88: 14 px estaba fuera de la escala del doc 60 regla 8 (11/13/16/20/24). Sube a 16-20, que
      son dos peldaños de la escala, y son los dos mandos que más se miran del modo. */
-  #bRun,#bStop{flex:1.9;padding:16px 4px;font-size:clamp(16px,4.4vw,20px);white-space:nowrap}
-  #bRun{background:linear-gradient(180deg,#357f59,#1d4d36 55%,#163a29);box-shadow:0 5px 0 #143526, inset 0 2px 0 #ffffff2e, inset 0 -3px 0 #00000044;--j-tinte:#8ff0c4;--j-canto:#143526}
+  /*+AG 2026-08-08 · los dos mandos ganan borde propio y radio mayor: en el mockup B el HUD entero
+     se apoya en «rectángulo con canto grueso = mando, redondo = habilidad», y para que esa lectura
+     funcione el rectángulo tiene que ser MÁS macizo que antes, no igual. */
+  #controls #bRun,#controls #bStop{flex:1.9;padding:12px 6px;min-height:58px;border-radius:18px;border:3px solid #0e4527;
+    font-size:clamp(16px,4.4vw,20px);white-space:nowrap}
+  /*+AG ⚠ EL REPOSO DE #bRun SIGUE SIENDO EL VERDE SUCIO Y NO SE TOCA. Es el estado APAGADO del motor
+     (doc 73): en todo momento hay exactamente uno de los dos mandos encendido, y esa es la única señal
+     de «estoy corriendo» que tiene el jugador desde que se quitó el mantener-pulsado. Al pasar el HUD
+     al mockup B estuve a punto de pintar este reposo del verde vivo del mockup — el mockup dibuja el
+     botón ENCENDIDO— y eso habría dejado los dos mandos gritando a la vez. Lo vivo va en `.on`. */
+  #controls #bRun{background:linear-gradient(180deg,#357f59,#1d4d36 55%,#163a29);border-color:#0e4527;
+    box-shadow:0 6px 0 #143526, inset 0 2px 0 #ffffff2e, inset 0 -3px 0 #00000044;
+    --j-tinte:#8ff0c4;--j-canto:#143526}
+  #controls #bRun .mi{fill:#fff;stroke:#0e4527}
+  #controls #bStop .mi{fill:#fff;stroke:#550b15}
   /* ENCENDIDO = el estado, no el dedo: mientras el motor va, CORRER se queda vivo aunque no lo estés tocando.
      Es la única señal de "estoy corriendo" que tiene el jugador ahora que no hay dedo puesto, así que el apagado
      es DE VERDAD apagado (verde sucio, hundido) y el encendido canta. */
-  #bRun.on{background:linear-gradient(180deg,#78f5ac,#2bb869 55%,#1f9455);box-shadow:0 5px 0 #14663a,0 0 22px #3ad07acc, inset 0 2px 0 #ffffff66, inset 0 -3px 0 #00000033}
+  #controls #bRun.on{background:linear-gradient(180deg,#7df3ae,#2fbe6f 52%,#209a57);
+    box-shadow:0 6px 0 #125a33,0 0 22px #3ad07acc, inset 0 3px 0 #ffffff70, inset 0 -4px 0 #00000033}
   /* corriendo EN ROJO: el motor sigue dado en zona prohibida. Se pinta rojo, pero APAGADO y sin halo, y no
      es un capricho: medido en captura, con el rojo brillante de antes los DOS mandos grandes gritaban a la
      vez sobre un fondo que el semáforo ya tiñe entero de rojo, y el jugador tenía dos alarmas y ninguna
      instrucción. Aquí el rojo de CORRER dice «esto que estás haciendo es peligroso» y el que canta es
      PARAR, que es la tecla que hay que tocar. Ese rojo vivo lo lleva UNO solo. */
-  #bRun.on.red{background:linear-gradient(180deg,#b8463a,#7a1f16 55%,#5e160f);box-shadow:0 5px 0 #4d1109, inset 0 2px 0 #ffffff33, inset 0 -3px 0 #00000044}
-  #bStop{background:linear-gradient(180deg,#6d2a3b,#3a1220 55%,#2c0d19);box-shadow:0 5px 0 #2a0c16, inset 0 2px 0 #ffffff2e, inset 0 -3px 0 #00000044;--j-tinte:#ffa596;--j-canto:#2a0c16}
-  #bStop.on{background:linear-gradient(180deg,#ff6673,#9e0f22 55%,#7d0b1a);box-shadow:0 5px 0 #66091a, inset 0 2px 0 #ffffff55, inset 0 -3px 0 #00000033}
+  #controls #bRun.on.red{background:linear-gradient(180deg,#b8463a,#7a1f16 55%,#5e160f);box-shadow:0 5px 0 #4d1109, inset 0 2px 0 #ffffff33, inset 0 -3px 0 #00000044}
+  /*+AG el borde de 3 px lo pone la regla conjunta `#bRun,#bStop` y ahí va en verde: sin este
+     `border-color`, PARAR salía con el canto de CORRER. */
+  #controls #bStop{background:linear-gradient(180deg,#6d2a3b,#3a1220 55%,#2c0d19);border-color:#550b15;
+    box-shadow:0 5px 0 #2a0c16, inset 0 2px 0 #ffffff2e, inset 0 -3px 0 #00000044;--j-tinte:#ffa596;--j-canto:#2a0c16}
+  #controls #bStop.on{background:linear-gradient(180deg,#ff8a78,#d22036 52%,#a5142a);
+    box-shadow:0 6px 0 #66091a, inset 0 3px 0 #ffffff5c, inset 0 -4px 0 #00000033, 0 8px 18px #00000066}
   /* AVISO: en cuanto el semáforo se pone ámbar (o ya rojo) y TÚ sigues corriendo, el que late es PARAR — se le
      dice al jugador lo que TIENE QUE HACER, no lo que no debe. Late sin barrido: el barrido de brillo es del
      SÚPER y en este juego solo lo lleva uno (regla Supercell: si avisan todos, no avisa ninguno). */
   /* la INVITACIÓN de salida: CORRER late en verde hasta que el jugador lo estrena. Mismo latido de
      tamaño que el aviso de PARAR (lo que se ve sobre cualquier fondo es que algo se mueva), en el color
      que ya tiene el botón: no se le añade un cartel al HUD, se le señala el botón que ya está ahí. */
-  #bRun.urge{background:linear-gradient(#5aec97,#2bb869);box-shadow:0 4px 0 #14663a,0 0 26px #ffffff55, inset 0 1px 0 #ffffff55;
+  #controls #bRun.urge{background:linear-gradient(#5aec97,#2bb869);box-shadow:0 4px 0 #14663a,0 0 26px #ffffff55, inset 0 1px 0 #ffffff55;
     animation:urgeGlow 0.62s ease-in-out infinite}
-  #bStop.urge{background:linear-gradient(#ff8f80,#f0402c);box-shadow:0 4px 0 #8a2016,0 0 26px #ffffff55, inset 0 1px 0 #ffffff55;
+  #controls #bStop.urge{background:linear-gradient(#ff8f80,#f0402c);box-shadow:0 4px 0 #8a2016,0 0 26px #ffffff55, inset 0 1px 0 #ffffff55;
     animation:urgeGlow 0.62s ease-in-out infinite}
   /* el latido es de TAMAÑO, no solo de halo: cuando el semáforo se pone rojo el juego tiñe la pantalla
      entera de rojo, y un halo rojo sobre fondo rojo no se ve. Lo que sí se ve siempre es que algo se mueva. */
   @keyframes urgeGlow{0%,100%{transform:scale(1);filter:drop-shadow(0 0 0 #ffffff00)}
                       50%{transform:scale(1.045);filter:drop-shadow(0 0 12px #ffffffaa)}}
   @media (prefers-reduced-motion:reduce){#bStop.urge{animation:none}}
-  #bNitro,#bGhost,#bSup{flex:1;padding:9px 3px;font-size:clamp(13px,3.2vw,16px);
-    background:linear-gradient(180deg,#3a3050,#241c3a 50%,#1a1430)}
+  /* ═══ 2026-08-08 · LA HABILIDAD ES UN DISCO (mockup B, elegido por Jaime) ═══════════════════════
+     Veredicto suyo mirando la partida: «los botones no parecen un triple A, parecen de una web de
+     mierda, no están utilizando el arte del juego» y «los iconos no cuadran con la tienda».
+     Las dos cosas eran verdad y se midieron: el mismo dibujo de booster va a 64 px dentro de un marco
+     en la Tienda y salía a 25 px suelto sobre una placa rectangular aquí. Y la placa rectangular es
+     LA MISMA SILUETA que un botón de menú, así que nada distinguía «mando» de «habilidad».
+     La regla que entra: REDONDO = habilidad, RECTÁNGULO = mando. El disco lleva el dibujo a 42 px,
+     su aro del color de lo que hace, y el contador colgando en una píldora igual que la «TIENES ×N»
+     de la Tienda. El rótulo de palabra se va: el propulsor y el fantasma se reconocen sin leer, y era
+     la palabra la que dejaba al dibujo en 25 px (el botón medía 45 de ancho y «NITRO» ocupaba 37).
+     ⚠ Los nombres SIGUEN en los 20 diccionarios y en el `.t`, solo que recortado a 1 px: quitar el
+     texto visible no puede dejar el botón mudo para un lector de pantalla. */
+  #controls #bNitro,#controls #bGhost,#controls #bSup{position:relative;flex:0 0 auto;width:66px;height:66px;padding:0;border-radius:50%;
+    border:3px solid var(--j-canto,#120a24);font-size:clamp(13px,3.2vw,16px);
+    background:radial-gradient(circle at 50% 34%, color-mix(in srgb, var(--cc,#7c6ea8) 58%, #1b1132), #171029 78%);
+    box-shadow:0 5px 0 #0c0718, inset 0 3px 0 #ffffff30, inset 0 -6px 10px #00000066, 0 7px 16px #00000077}
+  /* el aro interior es lo que pone el color del booster DELANTE, sin teñir el dibujo */
+  #controls #bNitro::before,#controls #bGhost::before,#controls #bSup::before{content:'';position:absolute;inset:4px;border-radius:50%;
+    border:2px solid color-mix(in srgb, var(--cc,#7c6ea8) 62%, transparent);pointer-events:none}
+  #controls #bstRow{justify-content:center;gap:15px;align-items:center}
+  /* el contador deja de ser un pie de texto y pasa a ser la píldora de la Tienda, colgada del disco */
+  #controls #bstRow button .cd{position:absolute;bottom:-5px;inset-inline-end:-6px;min-width:26px;height:22px;
+    padding:0 6px;border-radius:999px;font-size:13px;line-height:18px;opacity:1;
+    background:linear-gradient(#ffe14d,#ffab1f);color:#17102e;border:2px solid #17102e;
+    box-shadow:0 2px 0 #0007;-webkit-text-stroke-width:0;text-shadow:none}
+  /*+AG el ×0 en ROJO, la misma píldora que ya pusimos en la Tienda cuando no te queda ninguno
+     («que se ponga rojizo DE ALGUNA MANERA CON ESTILO», 7-ago). Mismo objeto, mismo aviso, dos pantallas. */
+  #controls #bstRow button.vacio .cd{background:linear-gradient(#e0293d,#8e2130);color:#fff}
+  /*+AG sin cifra no hay píldora: con inventario infinito, mientras el booster arde y en el súper (que
+     cuenta con el aro) el pie va vacío, y una píldora dorada vacía sería una mancha sin significado. */
+  #controls #bstRow button .cd:empty{display:none}
+  #controls #bstRow button .bi{height:42px;width:42px;margin:0;filter:drop-shadow(0 3px 5px #000a)}
+  /*+AG ⚠ EL RÓTULO SE OCULTA A LA VISTA, NO SE BORRA. `display:none` habría dejado el botón MUDO para
+     un lector de pantalla, y un `aria-label` escrito aquí lo habría dejado mudo en 19 idiomas (el
+     atributo gana al contenido y no pasa por applyLang). Con este recorte, `applyLang()` sigue
+     escribiendo el nombre traducido en el `.t` de siempre, el botón se sigue anunciando en el idioma
+     del jugador, y en pantalla solo queda el dibujo. Vale para los carriles y para los boosters. */
+  #controls #bstRow button .t, #controls #laneRow button .t{position:absolute;width:1px;height:1px;
+    margin:-1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
   /* cada booster teñido también EN REPOSO, no sólo cuando está listo: eran tres placas iguales para
      tres cosas distintas. Los colores son los que este modo ya tenía en .ready/.act (doc 73). */
-  #controls #bNitro{--j-tinte:#59e0ff;background:linear-gradient(180deg,#2b6b8a,#1d4d66 50%,#143a4e);--j-canto:#0a2532}
-  #controls #bGhost{--j-tinte:#ffffff;background:linear-gradient(180deg,#4a5068,#343a4e 50%,#252a3a);--j-canto:#171b26}
-  #controls #bSup{--j-tinte:#ffd23f;background:linear-gradient(180deg,#6d5526,#4e3c1c 50%,#382b14);--j-canto:#241a08}
+  /*+AG con el disco, el color de cada booster viaja en UNA variable (`--cc`) y la pinta el radial de
+     arriba: se acabaron los tres degradados lineales que decían lo mismo tres veces. */
+  #controls #bNitro{--cc:#59e0ff;--j-tinte:#59e0ff;--j-canto:#0a2532}
+  #controls #bGhost{--cc:#c7d6ea;--j-tinte:#ffffff;--j-canto:#171b26}
+  #controls #bSup{--cc:#ffd23f;--j-tinte:#ffd23f;--j-canto:#241a08}
+  /* ═══ EL ARO DE CARGA DEL SÚPER ═════════════════════════════════════════════════════════════════
+     Jaime: «en todos los niveles hay una habilidad que es una barra que se carga y ahora solo lo has
+     hecho con un tanto por ciento y no me gusta porque estás en acción y no tienes tiempo para ver
+     números». El `0%` de este modo (y el del Cazador) se va y lo sustituye este aro, que es la misma
+     información sin una cifra que leer. La Carrera ya tenía barra; ahora los tres hablan igual.
+     El relleno es un `conic-gradient` que arranca ARRIBA (0deg por defecto) y da la vuelta: --p lo
+     escribe el bucle del HUD en cada frame. */
+  /*+AG ⚠ `box-sizing:border-box` NO es cosmético: sin él, los 9 px de aro y los 3 de canto se SUMAN a
+     los 84 y el súper sale de 108 px, o sea más ancho que los dos boosters juntos. Medido. */
+  #supAro{position:relative;box-sizing:border-box;display:grid;place-items:center;width:84px;height:84px;flex:0 0 auto;
+    padding:9px;border-radius:50%;border:3px solid #0f0920;
+    background:conic-gradient(#ffd23f calc(var(--p,0)*1%), #1a1030 0);
+    box-shadow:0 5px 0 #0c0718, inset 0 0 0 2px #00000066}
+  #supAro.lleno{box-shadow:0 5px 0 #8a5a10, 0 0 22px #ffb03daa, inset 0 0 0 2px #00000066}
+  #controls #supAro #bSup{width:100%;height:100%;box-shadow:inset 0 3px 0 #ffffff30, inset 0 -6px 10px #00000066}
   /*+AG CADA BOTÓN DEL COLOR DE SU SIGNIFICADO (VB Jaime 2026-07-25). En este modo el color YA es la mecánica
      (semáforo), así que los controles hablan el mismo idioma: CORRER verde, PARAR rojo de luz de freno, NITRO
      cian = la estela de velocidad del motor, FANTASMA blanco = intangible (en pista la bola se vuelve
@@ -179,22 +277,31 @@
      Es la MISMA trampa de especificidad que este fichero ya documenta dos veces (ver la nota de
      `#controls button#bGhost .bi`), pero al revés: esta vez el selector nuevo era demasiado fuerte.
      REGLA: si el reposo lleva `#controls #bX`, sus estados llevan `#controls #bX.estado`. */
-  #controls #bNitro.ready{background:linear-gradient(#59e0ff,#1f9ec8);box-shadow:0 4px 0 #0f5e7c, inset 0 1px 0 #ffffff30}
-  #controls #bNitro.act{background:linear-gradient(#a8f2ff,#3fc2ea);color:#032230;box-shadow:0 2px 0 #0f5e7c,0 0 20px #59e0ffcc, inset 0 1px 0 #ffffff50}
+  /*+AG los estados pasan a hablar en REDONDO. El `.ready` sube el brillo del centro y enciende el aro;
+     el `.act` es la placa clara del color con halo, que es «esto está ardiendo AHORA». Ya no llevan
+     `color:` porque en el disco no queda texto que teñir: el contador vive en su píldora aparte. */
+  #controls #bNitro.ready{background:radial-gradient(circle at 50% 34%, #59e0ff, #12617e 78%);
+    box-shadow:0 5px 0 #0f5e7c, inset 0 3px 0 #ffffff44, 0 0 16px #59e0ff66}
+  #controls #bNitro.act{background:radial-gradient(circle at 50% 34%, #d6f8ff, #3fc2ea 78%);
+    box-shadow:0 3px 0 #0f5e7c,0 0 22px #59e0ffdd, inset 0 3px 0 #ffffff70}
   /*+AG el FANTASMA era lila y el CARRIL activo también (#laneRow button.on): dos violetas para cosas que no tienen
      nada que ver. En blanco deja de confundirse y además dice lo que hace: atravesar. Texto oscuro: el color base
      de los controles es blanco y sobre fondo claro no se leería. */
-  #controls #bGhost.ready{background:linear-gradient(#ffffff,#dbe1f0);color:#141b2e;box-shadow:0 4px 0 #878ea6, inset 0 1px 0 #ffffff80}
-  #controls #bGhost.act{background:linear-gradient(#ffffffdd,#dfe6f5b0);color:#141b2e;box-shadow:0 2px 0 #878ea6,0 0 22px #ffffffcc, inset 0 1px 0 #ffffff70}
+  #controls #bGhost.ready{background:radial-gradient(circle at 50% 34%, #ffffff, #a9b3cc 78%);
+    box-shadow:0 5px 0 #878ea6, inset 0 3px 0 #ffffff90, 0 0 16px #ffffff55}
+  #controls #bGhost.act{background:radial-gradient(circle at 50% 34%, #ffffff, #dfe6f5 78%);
+    box-shadow:0 3px 0 #878ea6,0 0 24px #ffffffdd, inset 0 3px 0 #ffffff90}
   /*+AG doc 40: mismo lenguaje de "listo para pulsar" que el resto del juego (glow que late + barrido de brillo).
      Aqui SOLO el super lo lleva: freno/nitro/fantasma tambien usan .ready para decir "disponible", y si los
      cuatro barrieran a la vez el aviso dejaria de significar nada (regla Supercell: uno por pantalla). */
-  #controls #bSup.ready{background:linear-gradient(#ffe27a,#ff9a3d);color:#3a2400;box-shadow:0 3px 0 #a85a12,0 0 18px #ffb03daa;
+  #controls #bSup.ready{background:radial-gradient(circle at 50% 34%, #ffe27a, #f0801e 78%);
+    box-shadow:0 5px 0 #a85a12,0 0 18px #ffb03daa, inset 0 3px 0 #ffffff70;
     position:relative;overflow:hidden;animation:readyGlow 1.9s ease-in-out infinite}
   #bSup.ready::after{content:'';position:absolute;top:0;height:100%;width:32%;left:-45%;
     background:linear-gradient(100deg,#fff0,#ffffff88 46%,#fff0);transform:skewX(-18deg);
     animation:readySweep 3.2s ease-in-out infinite;pointer-events:none}
-  #controls #bSup.act{background:linear-gradient(#fff3b8,#ffc44d);color:#3a2400;box-shadow:0 2px 0 #a85a12,0 0 26px #ffd34dee, inset 0 1px 0 #ffffff60}
+  #controls #bSup.act{background:radial-gradient(circle at 50% 34%, #fff3b8, #ffc44d 78%);
+    box-shadow:0 3px 0 #a85a12,0 0 26px #ffd34dee, inset 0 3px 0 #ffffff70}
   #bSup.act::after{display:none}
   @keyframes readySweep{0%{left:-45%}26%,100%{left:132%}}
   @keyframes readyGlow{0%,100%{filter:drop-shadow(0 0 0 #ffd23f00)}50%{filter:drop-shadow(0 0 10px #ffd23fcc)}}
@@ -230,9 +337,15 @@
   /* mientras el booster ARDE manda el .act aunque ya no queden usos: lo que estás viendo es el efecto
      en marcha, no un botón apagado. `background:revert-layer` no vale aquí, así que se repite el .act. */
   #controls button.act.off{opacity:1;filter:none}
-  #controls #bNitro.act.off{background:linear-gradient(#a8f2ff,#3fc2ea);color:#032230}
-  #controls #bGhost.act.off{background:linear-gradient(#ffffffdd,#dfe6f5b0);color:#141b2e}
-  #controls #bSup.act.off{background:linear-gradient(#fff3b8,#ffc44d);color:#3a2400}
+  #controls #bNitro.act.off{background:radial-gradient(circle at 50% 34%, #d6f8ff, #3fc2ea 78%)}
+  #controls #bGhost.act.off{background:radial-gradient(circle at 50% 34%, #ffffff, #dfe6f5 78%)}
+  #controls #bSup.act.off{background:radial-gradient(circle at 50% 34%, #fff3b8, #ffc44d 78%)}
+  /*+AG el apagado de un DISCO no puede ser el degradado lineal de una placa: en un círculo se lee
+     como una moneda plana. Mismo criterio que el de arriba (se cambia el COLOR, no el brillo: bajar
+     el brillo apaga también lo único que hay que seguir leyendo), pero en radial. */
+  #controls #bNitro.off, #controls #bGhost.off, #controls #bSup.off{
+    background:radial-gradient(circle at 50% 34%, #4d4d64, #26262f 78%)}
+  #controls #bstRow button.off::before{border-color:#ffffff2e}
   #youlbl{position:fixed;z-index:5;transform:translate(-50%,-100%);font-weight:900;font-size:13px;color:#fff;
     text-shadow:0 2px 6px #000,0 0 10px #0008;letter-spacing:.06em;pointer-events:none;opacity:0}
   /*+AG estado ESPECTADOR: al morir se ocultan los controles y sale este cartel */
@@ -364,16 +477,21 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 <!--+AG etiqueta TÚ (DOM proyectado sobre tu bola) + controles + cuenta atras + cartel espectador -->
 <div id="youlbl">YOU</div>
 <div id="controls">
+  <!--+AG 2026-08-08 · el carril es una FLECHA MACIZA, no un rótulo (mockup B). El nombre traducido no
+       desaparece: se queda en el `.t`, recortado a 1 px, que es lo que lee un lector de pantalla. Los `.t`
+       siguen existiendo vacíos porque applyLang() escribe en ellos y no puede quedarse sin destino. -->
   <div class="row" id="laneRow">
-    <button id="bLaneL"><span class="t">◀ LEFT</span><span class="k">←/1</span></button>
-    <button id="bLaneC" class="on"><span class="t">● CENTER</span><span class="k">2</span></button>
-    <button id="bLaneR"><span class="t">RIGHT ▶</span><span class="k">→/3</span></button>
+    <button id="bLaneL"><svg class="li" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4 7 12l8 8z"/></svg><span class="t"></span><span class="k">←/1</span></button>
+    <button id="bLaneC" class="on"><svg class="li" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6"/></svg><span class="t"></span><span class="k">2</span></button>
+    <button id="bLaneR"><svg class="li" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4l8 8-8 8z"/></svg><span class="t"></span><span class="k">→/3</span></button>
   </div>
-  <div class="row">
+  <div class="row" id="mainRow">
     <!--+AG doc 73: CORRER y PARAR, dos estados. El .cd de PARAR es el FRENAZO: cuando esta cargado, un segundo
          toque en PARAR clava la bola en seco (antes era un boton propio). -->
-    <button id="bRun"><span class="t">RUN</span><span class="k">space/↑</span></button>
-    <button id="bStop"><span class="t">STOP</span><span class="cd" id="cdStop">F</span></button>
+    <button id="bRun"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 20l6-16 6 16-6-4z"/></svg><span class="t">RUN</span><span class="k">space/↑</span></button>
+    <button id="bStop"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="3"/></svg><span class="t">STOP</span><span class="cd" id="cdStop">F</span></button>
+  </div>
+  <div class="row" id="bstRow">
     <!--+AG encargo 34: el icono lo pone el HTML (arte/ui/icono-*.webp), NO la cadena traducida. El rayo, el
          fantasma y la estrella viajaban dentro de nitro/ghost/sup en los 20 idiomas y los dibujaba el emoji
          del SISTEMA (por eso aqui ya no queda ni un emoji que grepear), distinto en
@@ -381,9 +499,10 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
          palabra y no al lado como en los otros dos motores: estos botones miden 45 px de ancho (son 5 en una
          fila) y "NITRO" ya ocupa 37 de ellos — al lado, la palabra se partia. Arriba sobra sitio: el alto de la
          fila lo manda CORRER (79 px) y estos solo usaban 37. -->
-    <button id="bNitro"><img class="bi" src="../../arte/ui/icono-nitro.webp" alt=""><span class="t">NITRO</span><span class="cd" id="cdNitro">A</span></button>
-    <button id="bGhost"><img class="bi" src="../../arte/ui/icono-fantasma-booster.webp" alt=""><span class="t">GHOST</span><span class="cd" id="cdGhost">S</span></button>
-    <button id="bSup"><img class="bi" src="../../arte/ui/icono-super.webp" alt=""><span class="t">SUPER</span><span class="cd" id="cdSup">0%</span></button>
+    <button id="bNitro"><img class="bi" src="../../arte/ui/icono-nitro.webp" alt=""><span class="t"></span><span class="cd" id="cdNitro">A</span></button>
+    <button id="bGhost"><img class="bi" src="../../arte/ui/icono-fantasma-booster.webp" alt=""><span class="t"></span><span class="cd" id="cdGhost">S</span></button>
+    <!--+AG el súper va DENTRO de su aro de carga: el aro es el que se llena, el disco es el que se pulsa. -->
+    <span id="supAro" style="--p:0"><button id="bSup"><img class="bi" src="../../arte/ui/icono-super.webp" alt=""><span class="t"></span><span class="cd" id="cdSup"></span></button></span>
   </div>
 </div>
 <div id="count"><div class="n" id="countN"></div><div class="you" id="countYou">This is you</div></div>
@@ -399,7 +518,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=0c4584d"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=05e5c3d"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -410,31 +529,31 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 </script>
 
 <script type="module">
-import { THREE, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createBloom, frameOrtho, BLOOM } from '../chassis/gfx.mjs?v=0c4584d';
-import { paleta as estelaPaleta, emiteEstela } from '../chassis/estelas.mjs?v=0c4584d';   //+AG doc 97 §6: la estela cosmetica del jugador
-import { archLook } from '../chassis/ballmat.mjs?v=0c4584d';   //+AG doc 41 bloque G: material de la bola-heroe
-import { attachSquash } from '../chassis/squash.mjs?v=0c4584d';
-import { createCelebration } from '../chassis/celebration.mjs?v=0c4584d';
-import { createKillfeed } from '../chassis/killfeed.mjs?v=0c4584d';
-import { createCensusBoard } from '../chassis/censusboard.mjs?v=0c4584d';
-import { createCupoGauge } from '../chassis/cupogauge.mjs?v=0c4584d';
-import { createKillTags } from '../chassis/killtag.mjs?v=0c4584d';
-import { crearInventario } from '../chassis/invboost.mjs?v=0c4584d';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
-import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=0c4584d';
-import { archFace } from '../chassis/facegen.mjs?v=0c4584d';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
-import { Sim, TEAMS, SHORT_COLORS, SHORT_COLORS_6, BALL_R, FPS, FIELD_W, FIELD_L, XL, XR, SPAWN_Y, GATE_Y, SAFE_Y } from './sim.js?v=0c4584d';
-import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=0c4584d';
-import { buildSfxBuffer } from './sfxmap.mjs?v=0c4584d';
-import { createCoach } from '../chassis/coach.mjs?v=0c4584d';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
-import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=0c4584d';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
-import { createUiSfx } from '../chassis/uisfx.mjs?v=0c4584d';   //+AG doc 88: el sonido de "no puedo"
-import { createJuice } from '../chassis/juice.mjs?v=0c4584d';   //+AG doc 88: lo que pasa cuando el dedo toca un botón (los 3 modos)
+import { THREE, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createBloom, frameOrtho, BLOOM } from '../chassis/gfx.mjs?v=05e5c3d';
+import { paleta as estelaPaleta, emiteEstela } from '../chassis/estelas.mjs?v=05e5c3d';   //+AG doc 97 §6: la estela cosmetica del jugador
+import { archLook } from '../chassis/ballmat.mjs?v=05e5c3d';   //+AG doc 41 bloque G: material de la bola-heroe
+import { attachSquash } from '../chassis/squash.mjs?v=05e5c3d';
+import { createCelebration } from '../chassis/celebration.mjs?v=05e5c3d';
+import { createKillfeed } from '../chassis/killfeed.mjs?v=05e5c3d';
+import { createCensusBoard } from '../chassis/censusboard.mjs?v=05e5c3d';
+import { createCupoGauge } from '../chassis/cupogauge.mjs?v=05e5c3d';
+import { createKillTags } from '../chassis/killtag.mjs?v=05e5c3d';
+import { crearInventario } from '../chassis/invboost.mjs?v=05e5c3d';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
+import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=05e5c3d';
+import { archFace } from '../chassis/facegen.mjs?v=05e5c3d';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
+import { Sim, TEAMS, SHORT_COLORS, SHORT_COLORS_6, BALL_R, FPS, FIELD_W, FIELD_L, XL, XR, SPAWN_Y, GATE_Y, SAFE_Y } from './sim.js?v=05e5c3d';
+import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=05e5c3d';
+import { buildSfxBuffer } from './sfxmap.mjs?v=05e5c3d';
+import { createCoach } from '../chassis/coach.mjs?v=05e5c3d';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=05e5c3d';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
+import { createUiSfx } from '../chassis/uisfx.mjs?v=05e5c3d';   //+AG doc 88: el sonido de "no puedo"
+import { createJuice } from '../chassis/juice.mjs?v=05e5c3d';   //+AG doc 88: lo que pasa cuando el dedo toca un botón (los 3 modos)
 //+AG el ámbito NO es opcional: la regla base es `#controls button` (id + etiqueta) y le gana en
 //   especificidad a cualquier `.j-hit` suelto. Es la trampa que ya costó una versión muerta en este
 //   mismo fichero (ver la nota de `#controls button#bGhost .bi`).
 const juice = createJuice({ ambito:'#controls', reducido: new URLSearchParams(location.search).get('redfx')==='1' });
-import { createPausa } from '../chassis/pausa.mjs?v=0c4584d';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
-import { cantarPuesto } from '../chassis/veredicto.mjs?v=0c4584d';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
+import { createPausa } from '../chassis/pausa.mjs?v=05e5c3d';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
+import { cantarPuesto } from '../chassis/veredicto.mjs?v=05e5c3d';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
 
 window.addEventListener('error', e => { document.getElementById('err').style.display='grid'; console.error(e.error||e.message); });
 
@@ -1669,14 +1788,27 @@ function updateControls(){
   //   con ×N. Mientras el booster está ARDIENDO manda su etiqueta (T().on), que es información de ahora
   //   mismo y pesa más que el contador. Sin inventario (tutorial/vídeo) el pie es la tecla de siempre.
   const qn=INV.quedan('nitro'), qg=INV.quedan('fantasma');
-  const pieN = qn===Infinity?'A':'×'+qn, pieG = qg===Infinity?'S':'×'+qg;
+  //+AG ⚠ 2026-08-08 · EL PIE DEJA DE SER UN RENGLÓN Y PASA A SER LA PÍLDORA DE LA TIENDA. Por eso ya
+  //   NO puede llevar la tecla ('A'/'S') ni la palabra T().on: una píldora de 26 px con «EN MARCHA»
+  //   dentro no cabe en ningún idioma, y la tecla no pinta nada en un móvil. Lo que dice la píldora es
+  //   SOLO el inventario (×N) o los segundos que faltan, que son las dos cifras cortas. Con inventario
+  //   infinito (tutorial y vídeo) no hay nada que contar y la píldora se va del todo.
+  const pieBst=(q,cd,act)=> act?'' : (cd>0?Math.ceil(cd/30)+'s' : (q===Infinity?'':'×'+q));
   apaga(bNitro, dead||(!nAct&&nd>0)||(!nAct&&qn<=0)); bNitro.classList.toggle('act',nAct&&!dead); bNitro.classList.toggle('ready',!dead&&!nAct&&nd<=0&&qn>0);
-  cdNitro.textContent = dead?'':(nAct?T().on:(nd>0?Math.ceil(nd/30)+'s':pieN));
+  bNitro.classList.toggle('vacio', !dead && qn<=0);
+  cdNitro.textContent = dead?'':pieBst(qn,nd,nAct);
   apaga(bGhost, dead||(!gAct&&gd>0)||(!gAct&&qg<=0)); bGhost.classList.toggle('act',gAct&&!dead); bGhost.classList.toggle('ready',!dead&&!gAct&&gd<=0&&qg>0);
-  cdGhost.textContent = dead?'':(gAct?T().on:(gd>0?Math.ceil(gd/30)+'s':pieG));
+  bGhost.classList.toggle('vacio', !dead && qg<=0);
+  cdGhost.textContent = dead?'':pieBst(qg,gd,gAct);
   const sReady=superVal>=1&&!dead&&!sAct;
   apaga(bSup, dead||(!sReady&&!sAct)); bSup.classList.toggle('ready',sReady); bSup.classList.toggle('act',sAct&&!dead);
-  cdSup.textContent = dead?'':(sAct?T().on:(sReady?T().ready:Math.round(superVal*100)+'%'));
+  //+AG ⚠ 2026-08-08 · SE ACABÓ EL «0 %». Jaime: «estás en acción y no tienes tiempo para ver números;
+  //   una barra que se va llenando es mucho más intuitiva». La carga se pinta en el ARO que rodea al
+  //   disco (--p de 0 a 100) y el pie se queda vacío. El aro se vacía mientras el súper ARDE, que es
+  //   lo que ya hacía el porcentaje, y así el jugador ve cuánto le queda sin leer nada.
+  supAro.style.setProperty('--p', dead?0:Math.round(superVal*100));
+  supAro.classList.toggle('lleno', sReady||( sAct&&!dead));
+  cdSup.textContent='';
   for(const b of [bLaneL,bLaneC,bLaneR]) apaga(b,dead);
 }
 addEventListener('keydown',e=>{

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-08 0c4584d">
+<meta name="bt-build" content="2026-08-08 05e5c3d">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <!--+AG el HTML se sirve en INGLES (defecto del juego); ?lang=es lo traduce por JS (applyLang) -->
 <title>YouBall · The Hunter (WebGL)</title>
@@ -28,7 +28,10 @@
   #status{position:fixed;left:0;right:0;top:46px;text-align:center;font-size:13px;color:#eed2d2;text-shadow:0 1px 5px #000;z-index:5}
   .keys{position:fixed;right:14px;bottom:12px;font-size:12px;color:#967b7b;text-align:right;z-index:5}
   /* botón de SONIDO (preview): Web Audio necesita un gesto → arranca mudo y pulsa para invitar al click */
-  #snd{position:fixed;right:14px;bottom:30px;z-index:6;width:46px;height:46px;border-radius:50%;border:0;
+  /*+AG ⚠ 2026-08-08 · SUBE POR ENCIMA DEL HUD. Con el mockup B el disco del SÚPER llega más a la
+     derecha y más arriba que la placa que había antes, y medido en un móvil de 360×640 se comía este
+     botón: quedaba debajo, sin poder tocarse. Se pega al borde superior del bloque de controles. */
+  #snd{position:fixed;right:14px;bottom:calc(170px + env(safe-area-inset-bottom));z-index:6;width:46px;height:46px;border-radius:50%;border:0;
     background:rgba(0,0,0,.42);color:#fff;font-size:22px;line-height:46px;cursor:pointer;
     box-shadow:0 0 0 2px rgba(255,255,255,.14);transition:transform .12s,box-shadow .18s,background .18s}
   #snd:hover{transform:scale(1.08)}
@@ -259,6 +262,61 @@
   html.redfx #bSup.ready, html.redfx #bSup.ready::after,
   html.redfx #controls button.j-hit, html.redfx #controls button.j-roce, html.redfx #controls button.j-deny{animation:none}
   html.redfx #controls button.j-hit{filter:brightness(1.9)}
+
+  /* ═══════════ 2026-08-08 · EL HUD DE PARTIDA PASA AL MOCKUP B (elegido por Jaime) ═══════════════
+     Mismo bloque que la Carrera y Luz Roja, mismas razones: el dibujo del booster iba a 64 px en la
+     Tienda y a 25 aquí, y la placa rectangular tenía la misma silueta que un botón de menú.
+     REGLA: REDONDO = habilidad · RECTÁNGULO = mando.
+     ⚠ LAS INTENCIONES (`iTum` / `iBoo` / `iEsc`) NO SE TOCAN. En la Carrera y en Luz Roja el control de
+     arriba es una DIRECCIÓN y por eso pasó a flecha; aquí son tres órdenes con significado —«al bulto»,
+     «a por un booster», «huir»— que ningún icono cuenta sin haberlo aprendido antes. Cambiarlas pide su
+     propio mockup y el visto bueno de Jaime, no un icono inventado sobre la marcha.
+     Va AL FINAL del <style>: varias reglas empatan a 2 ids con las de arriba y ahí decide el orden. */
+  #controls button{box-sizing:border-box}
+  /* el rótulo «BOOSTERS» se va, igual que en la Carrera: es un renglón de 11 px explicando algo que la
+     forma ya dice. «TU INTENCIÓN» SE QUEDA: esa fila sí son tres órdenes en palabras y necesita su
+     encabezado. Se oculta a la vista, no se borra (i18n y lectores de pantalla). */
+  #controls #lblBoost{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;
+    clip-path:inset(50%);white-space:nowrap}
+  #controls #bstRow{display:flex;justify-content:center;align-items:center;gap:15px}
+  #controls #bDash,#controls #bShd,#controls #bSup{position:relative;flex:0 0 auto;width:66px;height:66px;
+    padding:0;border-radius:50%;border:3px solid var(--j-canto,#150c26);gap:0;
+    background:radial-gradient(circle at 50% 34%, color-mix(in srgb, var(--cc,#7c6ea8) 58%, #241326), #1a0d1c 78%);
+    box-shadow:0 5px 0 #12070f, inset 0 3px 0 #ffffff30, inset 0 -6px 10px #00000066, 0 7px 16px #00000077}
+  #controls #bDash::before,#controls #bShd::before,#controls #bSup::before{content:'';position:absolute;
+    inset:4px;border-radius:50%;border:2px solid color-mix(in srgb, var(--cc,#7c6ea8) 62%, transparent);pointer-events:none}
+  #controls #bDash{--cc:#26d2f5}
+  #controls #bShd{--cc:#3d8bff}
+  #controls #bSup{--cc:#ffd23f}
+  #controls #bstRow button .bi{height:42px;width:42px;margin:0;filter:drop-shadow(0 3px 5px #000a)}
+  /* el rótulo se oculta a la VISTA, no se borra: applyLang sigue escribiéndolo y el botón se sigue
+     anunciando en el idioma del jugador. Un `aria-label` aquí lo habría dejado mudo en 19 idiomas. */
+  #controls #bstRow button .t{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;
+    clip-path:inset(50%);white-space:nowrap}
+  #controls #bstRow button .cd{position:absolute;bottom:-5px;inset-inline-end:-6px;min-width:26px;height:22px;
+    padding:0 6px;border-radius:999px;font-size:13px;line-height:18px;opacity:1;
+    background:linear-gradient(#ffe14d,#ffab1f);color:#17102e;border:2px solid #17102e;
+    box-shadow:0 2px 0 #0007;-webkit-text-stroke-width:0;text-shadow:none}
+  #controls #bstRow button.vacio .cd{background:linear-gradient(#e0293d,#8e2130);color:#fff}
+  #controls #bstRow button .cd:empty{display:none}
+  #controls #bDash.ready{background:radial-gradient(circle at 50% 34%, #4fe0f5, #12707e 78%);
+    box-shadow:0 5px 0 #0a2532, inset 0 3px 0 #ffffff44, 0 0 16px #26d2f566}
+  #controls #bShd.ready{background:radial-gradient(circle at 50% 34%, #7fa8f5, #24479e 78%);
+    box-shadow:0 5px 0 #0d1a38, inset 0 3px 0 #ffffff44, 0 0 16px #7fb2ff66}
+  #controls #bShd.act{background:radial-gradient(circle at 50% 34%, #e6f2ff, #6aa6f5 78%);
+    box-shadow:0 5px 0 #14346e, inset 0 3px 0 #ffffff88, 0 0 22px #8fd0ffcc;
+    animation:shdAct 1.2s ease-in-out infinite}
+  #controls #bSup.ready{background:radial-gradient(circle at 50% 34%, #ffe27a, #f0801e 78%);
+    box-shadow:0 5px 0 #a85a12, inset 0 3px 0 #ffffff70, 0 0 18px #ffb03daa}
+  #controls #bDash.off,#controls #bShd.off,#controls #bSup.off{background:radial-gradient(circle at 50% 34%, #4d4d64, #26262f 78%)}
+  #controls #bstRow button.off::before{border-color:#ffffff2e}
+  /* el aro de carga del súper: la barra que pidió Jaime, pegada a lo que se carga */
+  #controls #supAro{position:relative;box-sizing:border-box;display:grid;place-items:center;
+    width:84px;height:84px;flex:0 0 auto;padding:9px;border-radius:50%;border:3px solid #12070f;
+    background:conic-gradient(#ffd23f calc(var(--p,0)*1%), #241326 0);
+    box-shadow:0 5px 0 #12070f, inset 0 0 0 2px #00000066}
+  #controls #supAro.lleno{box-shadow:0 5px 0 #8a5a10, 0 0 22px #ffb03daa, inset 0 0 0 2px #00000066}
+  #controls #supAro #bSup{width:100%;height:100%;box-shadow:inset 0 3px 0 #ffffff30, inset 0 -6px 10px #00000066}
 </style>
 </head>
 <body>
@@ -295,13 +353,20 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
       <button id="iEsc"><span class="t">Escape at all costs</span><span class="k">3</span></button>
     </div></div>
   <div><div class="lbl" id="lblBoost">Boosters</div>
-    <div class="row">
+    <div class="row" id="bstRow">
       <!--+AG encargo 34: el icono lo pone el HTML (arte/ui/icono-*.webp), NO la cadena traducida: el rayo, el
            escudo y la estrella viajaban dentro de boosts[] en los 20 idiomas y los dibujaba el emoji del
            sistema, distinto en cada movil (por eso aqui ya no queda ni un emoji que grepear). -->
-      <button id="bDash"><img class="bi" src="../../arte/ui/icono-nitro.webp" alt=""><span class="t">Dash</span><span class="cd" id="cdDash"></span></button>
+      <!--+AG ⚠ 2026-08-08 · EL IMPULSO RECUPERA SU DIBUJO. Este botón enseñaba `icono-nitro.webp`, o sea
+           el propulsor del NITRO, que es exactamente el fallo que Jaime cantó en la Tienda: «te pedí que
+           pusieses iconos distintos al nitro y al dash, no lo has hecho». Allí se arregló el 7-ago con el
+           arte que Codex ya había entregado (`icono-dash.webp`, el rayo cian con líneas de velocidad) y
+           la pantalla de PARTIDA se quedó sin arreglar: el mismo booster con dos caras según dónde lo
+           mires. Aquí queda igualado con la Tienda. -->
+      <button id="bDash"><img class="bi" src="../../arte/ui/icono-dash.webp" alt=""><span class="t">Dash</span><span class="cd" id="cdDash"></span></button>
       <button id="bShd"><img class="bi" src="../../arte/ui/icono-escudo.webp" alt=""><span class="t">Shield</span><span class="cd" id="cdShd"></span></button>
-      <button id="bSup"><img class="bi" src="../../arte/ui/icono-super.webp" alt=""><span class="t">Decoy</span><span class="cd" id="cdSup"></span></button>
+      <!--+AG el súper va DENTRO de su aro de carga: el aro es el que se llena, el disco el que se pulsa. -->
+      <span id="supAro" style="--p:0"><button id="bSup"><img class="bi" src="../../arte/ui/icono-super.webp" alt=""><span class="t">Decoy</span><span class="cd" id="cdSup"></span></button></span>
     </div></div>
 </div>
 <!--+AG viñeta de peligro (te fijan) + cuenta atras con "este eres tu" -->
@@ -319,7 +384,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=0c4584d"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=05e5c3d"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -330,29 +395,29 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 </script>
 
 <script type="module">
-import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, makeFacePlane, createItemPool, createItemPops, createStarBurst, createWindTrail, createBloom, frameOrtho } from '../chassis/gfx.mjs?v=0c4584d';
-import { archLook } from '../chassis/ballmat.mjs?v=0c4584d';   //+AG doc 41 bloque G: material de la bola-heroe
-import { attachSquash } from '../chassis/squash.mjs?v=0c4584d';
-import { crearEscudos } from '../chassis/escudo.mjs?v=0c4584d';   //+AG 2026-08-08: la burbuja que dice "llevo escudo puesto" (misma pieza que la Carrera)
-import { paleta as estelaPaleta, emiteEstela } from '../chassis/estelas.mjs?v=0c4584d';   //+AG doc 97 §6: la estela cosmetica del jugador
-import { Sim, RNG, TEAMS, BALL_R, ARENA_W, ARENA_H, FPS, AGENCIA } from './sim.js?v=0c4584d';
-import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=0c4584d';
-import { archFace } from '../chassis/facegen.mjs?v=0c4584d';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
-import { createCelebration } from '../chassis/celebration.mjs?v=0c4584d';
-import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=0c4584d';
-import { crearInventario } from '../chassis/invboost.mjs?v=0c4584d';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
-import { buildSfxBuffer } from './sfxmap.mjs?v=0c4584d';
-import { createCoach } from '../chassis/coach.mjs?v=0c4584d';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
-import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=0c4584d';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
-import { createUiSfx } from '../chassis/uisfx.mjs?v=0c4584d';   //+AG doc 88: el sonido de "no puedo"
-import { createJuice } from '../chassis/juice.mjs?v=0c4584d';   //+AG doc 88: lo que pasa cuando el dedo toca un botón (los 3 modos)
+import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, makeFacePlane, createItemPool, createItemPops, createStarBurst, createWindTrail, createBloom, frameOrtho } from '../chassis/gfx.mjs?v=05e5c3d';
+import { archLook } from '../chassis/ballmat.mjs?v=05e5c3d';   //+AG doc 41 bloque G: material de la bola-heroe
+import { attachSquash } from '../chassis/squash.mjs?v=05e5c3d';
+import { crearEscudos } from '../chassis/escudo.mjs?v=05e5c3d';   //+AG 2026-08-08: la burbuja que dice "llevo escudo puesto" (misma pieza que la Carrera)
+import { paleta as estelaPaleta, emiteEstela } from '../chassis/estelas.mjs?v=05e5c3d';   //+AG doc 97 §6: la estela cosmetica del jugador
+import { Sim, RNG, TEAMS, BALL_R, ARENA_W, ARENA_H, FPS, AGENCIA } from './sim.js?v=05e5c3d';
+import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=05e5c3d';
+import { archFace } from '../chassis/facegen.mjs?v=05e5c3d';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
+import { createCelebration } from '../chassis/celebration.mjs?v=05e5c3d';
+import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=05e5c3d';
+import { crearInventario } from '../chassis/invboost.mjs?v=05e5c3d';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
+import { buildSfxBuffer } from './sfxmap.mjs?v=05e5c3d';
+import { createCoach } from '../chassis/coach.mjs?v=05e5c3d';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=05e5c3d';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
+import { createUiSfx } from '../chassis/uisfx.mjs?v=05e5c3d';   //+AG doc 88: el sonido de "no puedo"
+import { createJuice } from '../chassis/juice.mjs?v=05e5c3d';   //+AG doc 88: lo que pasa cuando el dedo toca un botón (los 3 modos)
 //+AG el ámbito NO es opcional: la regla base es `#controls button` (id + etiqueta) y le gana en
 //   especificidad a cualquier `.j-hit` suelto. Es la misma trampa que ya costó una versión muerta en la
 //   Carrera y otra en Luz Roja; aquí va escrita para no repetirla una tercera vez.
 const juice = createJuice({ ambito:'#controls', reducido: new URLSearchParams(location.search).get('redfx')==='1' });
-import { createPausa } from '../chassis/pausa.mjs?v=0c4584d';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
-import { cantarPuesto } from '../chassis/veredicto.mjs?v=0c4584d';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
-import { runToEnd } from '../chassis/simrun.mjs?v=0c4584d';
+import { createPausa } from '../chassis/pausa.mjs?v=05e5c3d';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
+import { cantarPuesto } from '../chassis/veredicto.mjs?v=05e5c3d';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
+import { runToEnd } from '../chassis/simrun.mjs?v=05e5c3d';
 
 window.addEventListener('error', e => { document.getElementById('err').style.display='grid'; console.error(e.error||e.message); });
 
@@ -1027,7 +1092,14 @@ function updateControls(){
   const iBoo=document.getElementById('iBoo');
   apaga(iBoo, (!sim.orbs.length && sim.playerIntent!=='booster') || dead);
   const ready=superVal>=1&&!dead; apaga(bSup,!ready); bSup.classList.toggle('ready',ready);
-  cdSup.textContent=ready?T().ready:Math.round(superVal*100)+'%';
+  //+AG ⚠ 2026-08-08 · SE ACABÓ EL PORCENTAJE (Jaime: «estás en acción y no tienes tiempo para ver
+  //   números; una barra que se va llenando es mucho más intuitiva»). La carga se pinta en el ARO que
+  //   rodea al disco, igual que en la Carrera y en Luz Roja: los tres modos dicen lo mismo igual.
+  supAro.style.setProperty('--p', dead?0:Math.round(superVal*100));
+  supAro.classList.toggle('lleno', ready);
+  cdSup.textContent='';
+  bDash.classList.toggle('vacio', !dead && qd<=0);
+  bShd.classList.toggle('vacio', !dead && qs<=0);
 }
 //+AG cartel de ESPECTADOR: al morir (o ganar) se ocultan los controles y se explica el estado. Reset en buildSim.
 //+AG EMITIR RESULTADO (embed): calcula el puesto y se lo manda al shell. Lo llaman DOS caminos y dan lo MISMO:
