@@ -39,6 +39,10 @@ shell: {
   noticiasToast:'ニュース: 近日公開', amigosToast:'フレンドはオンラインアカウントと一緒に来ます', clubToast:'クラブはオンラインアカウントと一緒に来ます',
   cupsWord:'カップ', floorWord:'下限', rkGlobal:'全体', rkBola:'ボール別', rkDiario:'デイリー',
   rkPrize:'報酬 · 上位10%と上位1% · 近日',
+
+  przDia:'1日の終わりに', przTemp:'シーズン終了時に',
+
+  przMin:n=>'受け取るには今日'+n+'レース',
   rkYouPos:(p,n)=>'あなたの順位: #'+p+' / '+n, rkYouBest:(b,p,n)=>'一番いいボール: '+b+' · #'+p+' / '+n,
   rkNoBall:'そのタイプのボールを持っていません',
   rkTodayTail:' · 今日の変動',

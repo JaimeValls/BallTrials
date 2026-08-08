@@ -38,6 +38,10 @@ shell: {
   noticiasToast:'Actus : bientôt', amigosToast:'Les amis arrivent avec les comptes en ligne', clubToast:'Le Club arrive avec les comptes en ligne',
   cupsWord:'Coupes', floorWord:'plancher', rkGlobal:'Global', rkBola:'Par bille', rkDiario:'Du jour',
   rkPrize:'Récompenses · Top 10% et Top 1% · bientôt',
+
+  przDia:'À la fin de la journée', przTemp:'À la fin de la saison',
+
+  przMin:n=>'Joue '+n+' courses aujourd’hui pour récupérer',
   rkYouPos:(p,n)=>'Ton rang : #'+p+' sur '+n, rkYouBest:(b,p,n)=>'Ta meilleure bille : '+b+' · #'+p+' sur '+n,
   rkNoBall:'Tu n\'as pas de bille de ce type',
   rkTodayTail:' · évolution du jour',

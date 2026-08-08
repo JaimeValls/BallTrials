@@ -40,6 +40,10 @@ shell: {
   noticiasToast:'News: demnächst', amigosToast:'Freunde kommen mit den Online-Konten', clubToast:'Der Club kommt mit den Online-Konten',
   cupsWord:'Pokale', floorWord:'Minimum', rkGlobal:'Global', rkBola:'Pro Kugel', rkDiario:'Täglich',
   rkPrize:'Preise · Top 10% und Top 1% · bald',
+
+  przDia:'Wenn der Tag endet', przTemp:'Wenn die Saison endet',
+
+  przMin:n=>'Spiele heute '+n+' Rennen zum Abholen',
   rkYouPos:(p,n)=>'Dein Platz: #'+p+' von '+n, rkYouBest:(b,p,n)=>'Deine beste Kugel: '+b+' · #'+p+' von '+n,
   rkNoBall:'Du hast keine Kugel dieser Art',
   rkTodayTail:' · heutige Bewegung',

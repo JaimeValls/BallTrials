@@ -39,6 +39,10 @@ shell: {
   noticiasToast:'ख़बरें: जल्द', amigosToast:'दोस्त ऑनलाइन खातों के साथ आएँगे', clubToast:'क्लब ऑनलाइन खातों के साथ आएगा',
   cupsWord:'कप', floorWord:'न्यूनतम', rkGlobal:'वैश्विक', rkBola:'गेंद के हिसाब से', rkDiario:'दैनिक',
   rkPrize:'इनाम · टॉप 10% और टॉप 1% · जल्द',
+
+  przDia:'दिन खत्म होने पर', przTemp:'सीज़न खत्म होने पर',
+
+  przMin:n=>'पाने के लिए आज '+n+' रेस खेलो',
   rkYouPos:(p,n)=>'आपकी रैंक: #'+p+' / '+n, rkYouBest:(b,p,n)=>'आपकी सबसे अच्छी गेंद: '+b+' · #'+p+' / '+n,
   rkNoBall:'आपके पास इस तरह की गेंद नहीं है',
   rkTodayTail:' · आज का बदलाव',

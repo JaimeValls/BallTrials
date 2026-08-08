@@ -38,6 +38,10 @@ shell: {
   noticiasToast:'Nieuws: binnenkort', amigosToast:'Vrienden komen met de online accounts', clubToast:'De Club komt met de online accounts',
   cupsWord:'Bekers', floorWord:'ondergrens', rkGlobal:'Globaal', rkBola:'Per bal', rkDiario:'Dagelijks',
   rkPrize:'Prijzen · Top 10% en Top 1% · binnenkort',
+
+  przDia:'Aan het eind van de dag', przTemp:'Aan het eind van het seizoen',
+
+  przMin:n=>'Speel vandaag '+n+' races om te claimen',
   rkYouPos:(p,n)=>'Jouw plek: #'+p+' van '+n, rkYouBest:(b,p,n)=>'Je beste bal: '+b+' · #'+p+' van '+n,
   rkNoBall:'Je hebt geen bal van dat type',
   rkTodayTail:' · verschuiving van vandaag',

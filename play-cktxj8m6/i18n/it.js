@@ -38,6 +38,10 @@ shell: {
   noticiasToast:'Notizie: in arrivo', amigosToast:'Gli amici arrivano con gli account online', clubToast:'Il Club arriva con gli account online',
   cupsWord:'Coppe', floorWord:'minimo', rkGlobal:'Globale', rkBola:'Per pallina', rkDiario:'Giornaliera',
   rkPrize:'Premi · Top 10% e Top 1% · presto',
+
+  przDia:'Alla fine del giorno', przTemp:'Alla fine della stagione',
+
+  przMin:n=>'Gioca '+n+' gare oggi per riscuotere',
   rkYouPos:(p,n)=>'Il tuo posto: #'+p+' su '+n, rkYouBest:(b,p,n)=>'La tua pallina migliore: '+b+' · #'+p+' su '+n,
   rkNoBall:'Non hai palline di questo tipo',
   rkTodayTail:' · variazione di oggi',

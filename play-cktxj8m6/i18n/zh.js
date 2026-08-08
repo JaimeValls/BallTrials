@@ -39,6 +39,10 @@ shell: {
   noticiasToast:'资讯：即将推出', amigosToast:'好友会和在线账号一起上线', clubToast:'俱乐部会和在线账号一起上线',
   cupsWord:'奖杯', floorWord:'保底', rkGlobal:'全球', rkBola:'按弹珠', rkDiario:'每日',
   rkPrize:'奖励 · 前10% 与前1% · 即将推出',
+
+  przDia:'每日结算时', przTemp:'赛季结束时',
+
+  przMin:n=>'今天玩'+n+'局才能领取',
   rkYouPos:(p,n)=>'你的名次：#'+p+' / '+n, rkYouBest:(b,p,n)=>'你最强的弹珠：'+b+' · #'+p+' / '+n,
   rkNoBall:'你还没有这种弹珠',
   rkTodayTail:' · 今日变动',

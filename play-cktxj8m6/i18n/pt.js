@@ -38,6 +38,10 @@ shell: {
   noticiasToast:'Notícias: em breve', amigosToast:'Amigos chega com as contas online', clubToast:'O Clube chega com as contas online',
   cupsWord:'Taças', floorWord:'piso', rkGlobal:'Global', rkBola:'Por bola', rkDiario:'Diário',
   rkPrize:'Prêmios · Top 10% e Top 1% · em breve',
+
+  przDia:'No fim do dia', przTemp:'No fim da temporada',
+
+  przMin:n=>'Joga '+n+' corridas hoje para receber',
   rkYouPos:(p,n)=>'Sua posição: #'+p+' de '+n, rkYouBest:(b,p,n)=>'Sua melhor bola: '+b+' · #'+p+' de '+n,
   rkNoBall:'Você não tem bola desse tipo',
   rkTodayTail:' · variação de hoje',

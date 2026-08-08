@@ -40,6 +40,10 @@ shell: {
   noticiasToast:'消息：即將推出', amigosToast:'好友會跟線上帳號一起上線', clubToast:'俱樂部會跟線上帳號一起上線',
   cupsWord:'獎盃', floorWord:'保底', rkGlobal:'全球', rkBola:'依彈珠', rkDiario:'每日',
   rkPrize:'獎勵 · 前10% 與前1% · 即將推出',
+
+  przDia:'每日結算時', przTemp:'賽季結束時',
+
+  przMin:n=>'今天玩'+n+'局才能領取',
   rkYouPos:(p,n)=>'你的名次：#'+p+' / '+n, rkYouBest:(b,p,n)=>'你最強的彈珠：'+b+' · #'+p+' / '+n,
   rkNoBall:'你還沒有這種彈珠',
   rkTodayTail:' · 今日變動',

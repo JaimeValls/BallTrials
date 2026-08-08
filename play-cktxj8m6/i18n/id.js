@@ -38,6 +38,10 @@ shell: {
   noticiasToast:'Berita: segera', amigosToast:'Teman datang bersama akun online', clubToast:'Klub datang bersama akun online',
   cupsWord:'Piala', floorWord:'batas bawah', rkGlobal:'Global', rkBola:'Per bola', rkDiario:'Harian',
   rkPrize:'Hadiah · 10% dan 1% teratas · segera',
+
+  przDia:'Saat hari berakhir', przTemp:'Saat musim berakhir',
+
+  przMin:n=>'Main '+n+' balapan hari ini untuk klaim',
   rkYouPos:(p,n)=>'Peringkatmu: #'+p+' dari '+n, rkYouBest:(b,p,n)=>'Bola terbaikmu: '+b+' · #'+p+' dari '+n,
   rkNoBall:'Kamu tidak punya bola jenis itu',
   rkTodayTail:' · perubahan hari ini',

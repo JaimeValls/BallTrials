@@ -40,6 +40,10 @@ shell: {
   noticiasToast:'Berita: akan datang', amigosToast:'Rakan akan tiba bersama akaun dalam talian', clubToast:'Kelab akan tiba bersama akaun dalam talian',
   cupsWord:'Piala', floorWord:'had bawah', rkGlobal:'Global', rkBola:'Ikut bola', rkDiario:'Harian',
   rkPrize:'Hadiah · 10% dan 1% teratas · akan datang',
+
+  przDia:'Apabila hari berakhir', przTemp:'Apabila musim berakhir',
+
+  przMin:n=>'Main '+n+' perlumbaan hari ini untuk tuntut',
   rkYouPos:(p,n)=>'Kedudukan awak: #'+p+' daripada '+n, rkYouBest:(b,p,n)=>'Bola terbaik awak: '+b+' · #'+p+' daripada '+n,
   rkNoBall:'Awak tiada bola jenis itu',
   rkTodayTail:' · perubahan hari ini',

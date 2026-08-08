@@ -38,6 +38,10 @@ shell: {
   noticiasToast:'Haberler: yakında', amigosToast:'Arkadaşlar çevrimiçi hesaplarla geliyor', clubToast:'Kulüp çevrimiçi hesaplarla geliyor',
   cupsWord:'Kupalar', floorWord:'taban', rkGlobal:'Genel', rkBola:'Topa göre', rkDiario:'Günlük',
   rkPrize:'Ödüller · İlk %10 ve ilk %1 · yakında',
+
+  przDia:'Gün bitiminde', przTemp:'Sezon bitiminde',
+
+  przMin:n=>'Almak için bugün '+n+' yarış oyna',
   rkYouPos:(p,n)=>'Sıran: #'+p+' / '+n, rkYouBest:(b,p,n)=>'En iyi topun: '+b+' · #'+p+' / '+n,
   rkNoBall:'Bu türden bir topun yok',
   rkTodayTail:' · bugünkü değişim',

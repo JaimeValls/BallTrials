@@ -39,6 +39,10 @@ shell: {
   noticiasToast:'소식: 곧 출시', amigosToast:'친구는 온라인 계정과 함께 옵니다', clubToast:'클럽은 온라인 계정과 함께 옵니다',
   cupsWord:'트로피', floorWord:'하한', rkGlobal:'전체', rkBola:'공별', rkDiario:'일간',
   rkPrize:'보상 · 상위 10%와 상위 1% · 곧',
+
+  przDia:'하루가 끝나면', przTemp:'시즌이 끝나면',
+
+  przMin:n=>'받으려면 오늘 '+n+'판 플레이',
   rkYouPos:(p,n)=>'내 순위: #'+p+' / '+n, rkYouBest:(b,p,n)=>'최고 성적 공: '+b+' · #'+p+' / '+n,
   rkNoBall:'그 종류의 공이 없어요',
   rkTodayTail:' · 오늘의 변동',

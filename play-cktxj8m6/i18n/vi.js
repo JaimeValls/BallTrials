@@ -38,6 +38,10 @@ shell: {
   noticiasToast:'Tin tức: sắp có', amigosToast:'Bạn bè sẽ đến cùng tài khoản trực tuyến', clubToast:'Câu lạc bộ sẽ đến cùng tài khoản trực tuyến',
   cupsWord:'Cúp', floorWord:'mức sàn', rkGlobal:'Toàn cầu', rkBola:'Theo bóng', rkDiario:'Hằng ngày',
   rkPrize:'Thưởng · Top 10% và Top 1% · sắp có',
+
+  przDia:'Khi hết ngày', przTemp:'Khi hết mùa',
+
+  przMin:n=>'Chơi '+n+' ván hôm nay để nhận',
   rkYouPos:(p,n)=>'Hạng của bạn: #'+p+' trên '+n, rkYouBest:(b,p,n)=>'Bóng tốt nhất của bạn: '+b+' · #'+p+' trên '+n,
   rkNoBall:'Bạn không có quả bóng loại đó',
   rkTodayTail:' · thay đổi hôm nay',

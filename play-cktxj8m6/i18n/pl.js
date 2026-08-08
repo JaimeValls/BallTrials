@@ -40,6 +40,10 @@ shell: {
   noticiasToast:'Nowości: wkrótce', amigosToast:'Znajomi przyjdą z kontami online', clubToast:'Klub przyjdzie z kontami online',
   cupsWord:'Puchary', floorWord:'minimum', rkGlobal:'Globalny', rkBola:'Wg kuli', rkDiario:'Dzienny',
   rkPrize:'Nagrody · Top 10% i Top 1% · wkrótce',
+
+  przDia:'Na koniec dnia', przTemp:'Na koniec sezonu',
+
+  przMin:n=>'Zagraj dziś '+n+' wyścigi, aby odebrać',
   rkYouPos:(p,n)=>'Twoje miejsce: #'+p+' z '+n, rkYouBest:(b,p,n)=>'Twoja najlepsza kula: '+b+' · #'+p+' z '+n,
   rkNoBall:'Nie masz kuli tego typu',
   rkTodayTail:' · zmiana z dziś',

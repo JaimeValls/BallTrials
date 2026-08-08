@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-08 797ae79"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-08 f83bb49"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -1067,9 +1067,16 @@
      reves, lo barato pareciendo lo grande. Se vio en una captura del movil de Jaime, no en el papel.
      Con dos columnas (accion | 58) los dos botones de accion miden EXACTAMENTE lo mismo y la flecha
      se queda en su columna. El "o pagar" cae solo en la fila 2 columna 1 por el auto-flow, sin
-     tener que decirselo, y cuando esta oculto (display:none) sale de la rejilla y no deja hueco. */
-  .gd-actions{ width:100%; max-width:370px; display:grid; grid-template-columns:1fr 58px; gap:8px; align-items:stretch; }
-  .gd-actions .gd-btn.prim, .gd-actions .gd-btn.ghost{ grid-column:1; min-width:0; }
+     tener que decirselo, y cuando esta oculto (display:none) sale de la rejilla y no deja hueco.
+     ⚠ 8-ago: LA COLUMNA DE LA FLECHA SE MUDA DE LA 2 A LA 1 (decision de Jaime, la misma que en
+     Resultados y por lo mismo: el galon apunta a la izquierda, y abajo-derecha es donde cae el pulgar).
+     Lo unico que cambia es el ORDEN de las columnas — la rejilla sigue siendo 58 + resto, asi que los
+     dos botones de accion (`prim` y `ghost`) siguen midiendo exactamente lo mismo y la jerarquia sigue
+     de pie. El "o pagar" (`ghost`) se queda en fila 2 por auto-flow igual que antes, solo que ahora su
+     columna declarada es la 2. Y `grid-column` es RELATIVO A LA ESCRITURA como el flex de Resultados:
+     en arabe la columna 1 es la de la derecha, o sea que el volver se mira solo en los 20 idiomas. */
+  .gd-actions{ width:100%; max-width:370px; display:grid; grid-template-columns:58px 1fr; gap:8px; align-items:stretch; }
+  .gd-actions .gd-btn.prim, .gd-actions .gd-btn.ghost{ grid-column:2; min-width:0; }
   .gd-btn{ border:0; border-radius:16px; padding:15px; font-family:inherit; font-weight:900; font-size:var(--fs-4); cursor:pointer; }
   .gd-btn.prim{ color:#3a2400; background:linear-gradient(#ffe27a,#ff9a3d); box-shadow:0 4px 0 #b45a10; border:2px solid var(--tinta); }
   .gd-btn.prim:disabled{ filter:grayscale(.55) brightness(.82); box-shadow:none; cursor:default; }
@@ -1091,7 +1098,7 @@
      existe en Resultados (.r-home.ico): misma anchura de 58, mismo path de flecha, mismo velo.
      Y de propina QUITA alto en vez de sumarlo: la fila del volver desaparece (-47 px), que en movil
      corto es justo lo que iba apretado. */
-  .gd-btn.back{ grid-column:2; grid-row:1; padding:0; display:grid; place-items:center; border:1px solid var(--line); background:var(--plate-a); color:#c9cff0; }
+  .gd-btn.back{ grid-column:1; grid-row:1; padding:0; display:grid; place-items:center; border:1px solid var(--line); background:var(--plate-a); color:#c9cff0; }
   .gd-btn.back svg{ width:22px; height:22px; display:block; }
   .gd-btn.back:active{ background:var(--plate-b); color:#fff; }
   /*+AG MOVIL CORTO. Medido, no estimado: en 375x640 la ficha de una bola BLOQUEADA (la mas alta: lleva
@@ -2315,6 +2322,11 @@
   @media (prefers-reduced-motion: reduce){
     .scr.on,.h-play,.h-ball,.ready,.ready::after,.justready,
     .cam-card,.cam-card.hay.ready,.sh-feat,.sh-feat::after,.cam-gift,.cam-gift.viva,.falta,
+    /*+AG doc 102 · los tres regalos del Ranking. Se paran los DOS: el tumbo del dibujo y la chispa de
+       la esquina. El halo del metal se queda fijo (con `rkGiftHalo` parada el filtro se congela en su
+       fotograma inicial, que ya lleva su drop-shadow): igual que el badge, el aviso sigue existiendo
+       porque es informacion — lo que se apaga es el movimiento. */
+    .rkrow .kt .gimg,.rkrow .kt::after,
     .sh-entra .sh-sec,.sh-entra #shBody > div > *,#shBody.secIn,
     /*+AG la Tienda entra aquí igual que el badge: se menea siempre, así que si alguien pide menos
        movimiento es lo PRIMERO que hay que parar. */
@@ -3235,7 +3247,20 @@
      contenido llena de arriba abajo y ya no hace falta empujar nada: lo unico que se ancla abajo son las
      ACCIONES, que es lo que de verdad tiene que caer bajo el pulgar. Ojo: el `margin-top:auto` que hace eso
      NO va aqui — va en la regla sticky de mas abajo, que es identica en especificidad y gana por orden. */
-  #results .r-arow{ display:flex; gap:9px; align-items:stretch; }
+  /*+AG 8-ago (decision de Jaime): EL VOLVER SE VA AL LADO IZQUIERDO DE LA FILA. Tres razones, y la
+     tercera es la que no se veia desde el papel:
+     · el galon ‹ apunta a la izquierda y estaba pegado al borde DERECHO — el dibujo decia una cosa y
+       el sitio decia la contraria;
+     · abajo-derecha es donde descansa el pulgar, o sea que el unico boton que te SACA de la pantalla
+       estaba en la zona de mas toque accidental, pegado al que quieres que pulse todo el mundo;
+     · las otras seis pantallas (Garaje, Tienda, Temporada, Perfil, Ranking, Seleccion) ya sacan por
+       `.sback`, que vive arriba a la IZQUIERDA. Resultados era la excepcion, no la regla.
+     `row-reverse` y no `order:-1` a proposito: la direccion del flex es RELATIVA A LA ESCRITURA, asi
+     que en arabe (<html dir="rtl">) se da la vuelta sola y el volver cae a la derecha, que es su sitio
+     en RTL. Con `order` habria quedado clavado al mismo lado fisico en los 20 idiomas.
+     El marcado NO se toca: en el DOM sigue yendo primero el primario, que es el orden que oye un lector
+     de pantalla y el que recorre el tabulador. Aqui solo cambia donde se PINTA. */
+  #results .r-arow{ display:flex; flex-direction:row-reverse; gap:9px; align-items:stretch; }
   #results .r-arow .r-again{ flex:1; min-width:0; }
   /*+AG el secundario pasa a ICONO cuadrado al lado del primario (patron Supercell) en vez de una segunda fila:
      ahorra ~55px de alto, que es justo lo que hacia falta para que la clasificacion entera quepa. */
@@ -4528,6 +4553,157 @@
   .tp-cobra{ width:100%; margin-top:2px; }
   .rkprize .gico{ flex:0 0 auto; width:22px; height:22px; object-fit:contain;
     filter:drop-shadow(0 2px 4px #0008); }
+  /*+AG doc 102 · LOS TRES REGALOS DE LA LISTA, Y POR QUE SON TRES Y NO UNO.
+     Hasta hoy los diez puestos de la franja llevaban EL MISMO icono, y lo que cobran no se parece en
+     nada: 100 Monedas + Duplicador el #1, 60 el podio y 30 del cuarto al decimo. Un marcador igual
+     para todos dice «aqui hay premio» y esconde «cual», o sea obliga a tocar para enterarse de lo
+     unico que importa. Con tres metales la lista se lee de un golpe de vista y sin una palabra, que
+     es la regla del canon (§5: icono + cifra, nunca una frase).
+     El metal sale del INDICE de la franja en TOP_DIA, no de un numero escrito aqui: si mañana se
+     recalibra la tabla, esto se entera solo.
+     ⚠ EL DIBUJO DE LOS TRES ES EL MISMO FICHERO TODAVIA (encargo 47 a Codex, pedido el 8-ago). Hasta
+       que llegue, la jerarquia la ponen el TAMAÑO y el HALO —que ya se leen—; cuando entren las tres
+       cajas pintadas solo cambia `rkGiftArt()`, ni una linea de este CSS. */
+  .rkrow .kt{ position:relative; display:inline-flex; align-items:center; justify-content:center;
+    flex:0 0 auto; background:none; border:0; padding:0; }
+  .rkrow .kt .gimg{ display:block; object-fit:contain; }
+  .rkrow .kt.g0{ --gc:#ffc93a; } .rkrow .kt.g0 .gimg{ width:28px; height:28px; }
+  .rkrow .kt.g1{ --gc:#dbe2ee; } .rkrow .kt.g1 .gimg{ width:22px; height:22px; }
+  .rkrow .kt.g2{ --gc:#e08a49; } .rkrow .kt.g2 .gimg{ width:18px; height:18px; }
+  /*+AG QUE BRILLEN Y SE MUEVAN (peticion de Jaime, 8-ago: «deberian de brillar y moverse para que la
+     gente diga wow, regalos»). Son TRES capas y cada una hace un trabajo distinto:
+     · el tumbo, que es el mismo lenguaje del regalo diario de la portada (`camTumbo`), para que dos
+       regalos del mismo juego no se muevan de dos maneras;
+     · el halo del METAL, que es lo que se lee como «brilla» y ademas repite el color de la franja;
+     · la chispa de la esquina, que aparece un instante al final del ciclo — es el remate que hace
+       mirar, y va desfasada respecto al tumbo a proposito.
+     ⚠ Y EL ESCALONADO NO ES UN ADORNO: con las diez filas latiendo a la vez, una lista que ademas
+       hace scroll se lee como un banner de publicidad y el ojo la aparta. Con `--gd` (140 ms por
+       fila) baja una OLA, que es lo que hace Brawl en sus listas de recompensa. */
+  @keyframes rkGiftTumbo{ 0%,100%{ transform:rotate(-7deg) scale(1) } 46%{ transform:rotate(7deg) scale(1.11) } }
+  @keyframes rkGiftHalo{ 0%,100%{ filter:drop-shadow(0 2px 3px #0009) drop-shadow(0 0 2px var(--gc)) }
+                          46%{ filter:drop-shadow(0 2px 3px #0009) drop-shadow(0 0 10px var(--gc)) } }
+  @keyframes rkGiftSpark{ 0%,58%,100%{ opacity:0; transform:scale(.3) } 70%{ opacity:1; transform:scale(1) } 86%{ opacity:0; transform:scale(.5) } }
+  .rkrow .kt .gimg{ filter:drop-shadow(0 2px 3px #0009) drop-shadow(0 0 3px var(--gc));
+    animation:rkGiftTumbo 2400ms cubic-bezier(.45,0,.55,1) var(--gd,0ms) infinite,
+              rkGiftHalo 2400ms cubic-bezier(.45,0,.55,1) var(--gd,0ms) infinite; }
+  .rkrow .kt::after{ content:''; position:absolute; top:-1px; right:-2px; width:10px; height:10px;
+    pointer-events:none; opacity:0;
+    background:radial-gradient(circle, #ffffff 0 20%, #ffffffaa 38%, transparent 66%);
+    animation:rkGiftSpark 2400ms linear var(--gd,0ms) infinite; }
+  /*+AG LA FILA CON PREMIO SE TOCA ENTERA, y eso es lo que hace que el gesto se acierte con el dedo:
+     el regalo mide 26 px y el minimo tactil de la casa son 44, asi que colgar el toque SOLO del
+     dibujo seria construir un boton que falla. La fila mide 48 de alto y todo su ancho. */
+  .rkrow.prz{ cursor:pointer; }
+  .rkrow.prz:active{ transform:scale(.985); }
+  /*+AG doc 102 · LA TARJETA DE PREMIOS. Antes esto era una tirita de texto de 13 px —«#1 100 · #3 60
+     · #10 30»— que decia la verdad y no la enseñaba. Ahora cada franja es una COLUMNA con su regalo
+     dibujado encima, que es como se presenta un premio en este genero, y la tarjeta entera abre la
+     hoja con el detalle. En columna y no en fila por una cuenta: a 320 px de ancho tres celdas
+     horizontales con icono, puesto y cifra no caben y envuelven feo; en columna cada una pide ~100 px
+     y sobra sitio. */
+  .tp-card{ display:flex; flex-direction:column; gap:6px; width:100%; font-family:inherit;
+    background:#00000038; border:1px solid #ffffff14; border-radius:14px; padding:8px 6px 7px;
+    box-shadow:0 2px 0 #0d072633, inset 0 1px 0 #ffffff10; }
+  .tp-card:active{ transform:translateY(1px); }
+  .tp-row{ display:flex; align-items:flex-end; justify-content:center; gap:4px; }
+  .tp-cel{ display:inline-flex; align-items:center; gap:5px; white-space:nowrap; }
+  .tp-row .tp-cel{ flex:1 1 0; min-width:0; flex-direction:column; gap:3px; }
+  .tp-g{ position:relative; display:grid; place-items:center; height:30px; }
+  .tp-g img{ width:28px; height:28px; object-fit:contain; filter:drop-shadow(0 2px 4px #0009) drop-shadow(0 0 5px var(--gc,#ffc93a)); }
+  .tp-g.g0{ --gc:#ffc93a; height:36px; } .tp-g.g0 img{ width:34px; height:34px; }
+  .tp-g.g1{ --gc:#dbe2ee; } .tp-g.g1 img{ width:28px; height:28px; }
+  .tp-g.g2{ --gc:#e08a49; } .tp-g.g2 img{ width:24px; height:24px; }
+  .tp-pay{ display:inline-flex; align-items:center; gap:4px; font-weight:900; color:#fff;
+    font-size:var(--fs-3); font-variant-numeric:tabular-nums; }
+  .tp-pay .cico{ width:15px; height:15px; }
+  /*+AG las dos monedas del Duplicador, solapadas: la de atras asoma un tercio, que es lo que hace que
+     se lean como DOS y no como una moneda gorda. El margen negativo va a la segunda, no a la primera,
+     para que el conjunto crezca hacia dentro y no empuje la cifra de al lado. */
+  .dup2{ display:inline-flex; align-items:center; }
+  .dup2 .cico + .cico{ margin-left:-9px; }
+  .prz-pay .dup2 .cico + .cico{ margin-left:-11px; }
+  /*+AG EL CANDADO DE LAS 3 PARTIDAS, que es lo que MAS falta hacia decir. Es la unica condicion del
+     premio y no estaba escrita en ninguna pantalla: se podia quedar #1 y no cobrar sin saber por que.
+     Va en verde cuando ya esta cumplido, para que sea una recompensa y no un reproche. */
+  .tp-lock{ display:flex; align-items:center; justify-content:center; gap:6px; font-size:var(--fs-2);
+    font-weight:800; color:#ffd9a0; opacity:.92; line-height:1.3; text-align:center; }
+  .tp-lock.ok{ color:#7fe08a; }
+  .tp-lock b{ font-variant-numeric:tabular-nums; }
+  /*+AG doc 102 · LA HOJA DE PREMIOS. Reusa `.sheetwrap`/`.sheet` como ya hicieron la de info, la de
+     idioma y la de confirmar: mismo velo, misma entrada, mismo cierre por el fondo. Lo que cambia es
+     el cuerpo, porque aqui no se lee un parrafo — se MIRAN los premios.
+     Y existe como hoja y no como seccion fija por una razon medida: el Ranking ya es una lista larga
+     con scroll propio y Temporada vive del hueco que le sobra a su escena (doc 93); desplegar aqui
+     las siete franjas empujaria la tabla fuera de la primera pantalla en los dos sitios.
+     El `title` de navegador que habia antes no era una explicacion: EN EL MOVIL NO EXISTE. */
+  .prz-list{ display:flex; flex-direction:column; gap:8px; flex:1 1 auto; min-height:0; overflow-y:auto; }
+  .prz-row{ display:flex; align-items:center; gap:11px; padding:8px 10px;
+    background:linear-gradient(#2a2050,#1d1640); border:1px solid #ffffff16; border-radius:14px;
+    box-shadow:0 2px 0 #0d0726, inset 0 1px 0 #ffffff12; }
+  /*+AG la franja que TE toca ahora mismo va marcada en oro. Es la diferencia entre una tabla de
+     precios y una carrera: sin esto el jugador lee siete premios y no sabe cual es el suyo. */
+  .prz-row.yours{ border-color:#ffd23f; box-shadow:0 3px 0 #0d0726, 0 0 0 2px #ffd23f4d, inset 0 1px 0 #ffffff2e; }
+  .prz-g{ position:relative; display:grid; place-items:center; width:56px; height:56px; flex:0 0 auto; }
+  .prz-g img{ width:42px; height:42px; object-fit:contain;
+    filter:drop-shadow(0 3px 5px #000a) drop-shadow(0 0 7px var(--gc,#ffc93a)); }
+  /*+AG ⚠ EL TAMAÑO ES LA JERARQUIA MIENTRAS EL DIBUJO SEA EL MISMO. Medido en la primera captura: con
+     los cuatro regalos a 46 px la hoja se leia como cuatro premios iguales con cifras distintas, que
+     es exactamente lo que este trabajo viene a arreglar en la lista. El escalon 54/46/40/36 se ve de
+     un vistazo, y cuando lleguen las tres cajas de Codex sumara al metal en vez de sustituirlo. */
+  .prz-g.g0{ --gc:#ffc93a; } .prz-g.g0 img{ width:54px; height:54px; }
+  .prz-g.g1{ --gc:#dbe2ee; } .prz-g.g1 img{ width:46px; height:46px; }
+  .prz-g.g2{ --gc:#e08a49; } .prz-g.g2 img{ width:40px; height:40px; }
+  .prz-g.g3{ --gc:#8e9bb4; } .prz-g.g3 img{ width:36px; height:36px; }
+  .prz-tx{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:3px; }
+  .prz-p{ font-size:var(--fs-2); font-weight:900; color:#ffd23f; letter-spacing:.02em;
+    font-variant-numeric:tabular-nums; text-transform:uppercase; }
+  .prz-pay{ display:flex; align-items:center; flex-wrap:wrap; gap:4px 9px; font-size:var(--fs-4);
+    font-weight:900; color:#fff; font-variant-numeric:tabular-nums; }
+  .prz-pay span{ display:inline-flex; align-items:center; gap:4px; }
+  .prz-pay .cico{ width:19px; height:19px; }
+  /*+AG LA ESTELA SE ENSEÑA DIBUJADA, con TU bola y la cola saliendole por detras: es exactamente la
+     misma `escenaEstela()` que pintan el Garaje y la Tienda. Escribir «estela de campeon» y ya seria
+     vender una palabra — y este juego ya cobro 250 Gemas una vez por un cosmetico que nadie veia. */
+  .prz-ex{ flex:0 0 auto; width:78px; height:46px; border-radius:11px; overflow:hidden;
+    background:#150f33; border:1px solid #ffffff12; }
+  .prz-ex .es-mues{ height:46px; }
+  .prz-ex .es-bola{ width:30px; height:30px; margin-top:-15px; right:7px; }
+  /*+AG el pie dice la condicion (dia) o el reloj y tu puesto de ahora (temporada). Sin el, la hoja es
+     un cartel de premios; con el, es una carrera que vas ganando o perdiendo. */
+  .prz-foot{ flex:0 0 auto; margin-top:10px; padding:9px 11px; border-radius:12px;
+    background:#00000038; border:1px solid #ffffff12; font-size:var(--fs-3); font-weight:800;
+    color:#ffd9a0; line-height:1.45; text-align:center; }
+  .prz-foot.ok{ color:#7fe08a; }
+  .prz-foot b{ color:#fff; font-variant-numeric:tabular-nums; }
+  /*+AG doc 102 · LA TARJETA DE CIERRE DE TEMPORADA. Aqui NO habia absolutamente nada: la pantalla
+     enseñaba la tabla de copas de los 42 dias y se callaba que al cerrar paga 60/30/15 Gemas, 500
+     Monedas y las dos estelas. Estaba construido, pagando, y sin anunciar en ninguna pantalla. */
+  .se-przc{ display:flex; align-items:center; gap:10px; width:100%; font-family:inherit; text-align:left;
+    margin:0 0 8px; padding:8px 10px; border-radius:14px;
+    background:linear-gradient(#2f2358,#211846); border:1px solid #ffffff18;
+    box-shadow:0 3px 0 #0d0726, inset 0 1px 0 #ffffff14; }
+  .se-przc:active{ transform:translateY(2px); box-shadow:0 1px 0 #0d0726, inset 0 1px 0 #ffffff14; }
+  .se-przc .gs{ display:flex; align-items:center; flex:0 0 auto; }
+  .se-przc .gs img{ width:30px; height:30px; object-fit:contain; filter:drop-shadow(0 2px 4px #0009); }
+  .se-przc .gs img + img{ margin-left:-11px; }   /* solapadas: tres regalos en el ancho de dos */
+  .se-przc .tx{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:2px; }
+  .se-przc .h{ font-size:var(--fs-2); font-weight:900; color:#ffd9a0; text-transform:uppercase; letter-spacing:.02em; }
+  .se-przc .v{ display:flex; align-items:center; gap:8px; font-size:var(--fs-3); font-weight:900; color:#fff; font-variant-numeric:tabular-nums; }
+  .se-przc .v span{ display:inline-flex; align-items:center; gap:3px; }
+  .se-przc .v .cico{ width:15px; height:15px; }
+  .se-przc .ch{ flex:0 0 auto; display:grid; place-items:center; color:#ffd23f; opacity:.8; }
+  /*+AG el bidi NO gira los dibujos, solo el texto: en arabe el chevron apuntaria al lado contrario y
+     diria «vuelve» donde el juego quiere decir «entra». Se gira a mano, como ya se hizo con las
+     flechas ‹ › del carrusel de bolas del Ranking. */
+  [dir="rtl"] .se-przc .ch{ transform:scaleX(-1); }
+  /*+AG 8-ago · Y LOS DOS VOLVER QUE ACABAN DE CAMBIARSE DE LADO, por la misma razon exacta. El flex de
+     `.r-arow` y la rejilla de `.gd-actions` son relativos a la escritura, asi que en arabe el boton se
+     va SOLO al lado que le toca (la derecha) — pero el dibujo de dentro no se entera y seguiria
+     apuntando a la izquierda, o sea señalando hacia DELANTE en una pantalla que se lee al reves.
+     Se giran los dos glifos, y SOLO estos dos: los `.sback` de las otras seis pantallas no se tocan
+     aqui porque no son parte de este cambio y girarlos es una decision aparte —queda apuntado—. */
+  [dir="rtl"] .r-home.ico svg, [dir="rtl"] .gd-btn.back svg{ transform:scaleX(-1); }
   /*+AG los siete rotulos de seccion de Ajustes eran 🔊🌐🎮♿👤🛟⚖ metidos DENTRO de la cadena de i18n,
      o sea multiplicados por 20 diccionarios. Ahora el icono lo pone el HTML —SVG de trazo, la misma
      factura que el icono de LIGA de Temporada— y la cadena solo lleva la palabra. */
@@ -5001,6 +5177,21 @@
        apagada cada caso hace lo correcto solo — Lilita usa su unico peso, y la fuente del idioma usa
        su 900 de verdad. */
     font-synthesis:none; font-synthesis-weight:none; }
+
+  /*+AG doc 102 · LA TARJETA DE PREMIOS EN UNA PANTALLA DE 320. Va AL FINAL del bloque y no junto a
+     su componente, por la regla que ya costó una vuelta en las pestañas del Ranking: una @media NO
+     añade especificidad, así que si alguien vuelve a fijar `.tp-pay` más abajo, gana el de abajo.
+     ⚠ Y NO ES UN AJUSTE PREVENTIVO: está medido. La sonda de las dos tarjetas (20 idiomas × 4
+       tamaños) devolvió 3 px de rebose en `.tp-cel` a 320 px de ancho en 19 de los 20 idiomas — la
+       culpa es de la celda del #1, que es la única que lleva DOS premios (las 100 Monedas y el
+       Duplicador) y en tres columnas de ~95 px no cabía. Rebosaba sobre la celda de al lado.
+       Los 20 idiomas daban lo mismo porque aquí no hay ni una palabra: son cifras e iconos. */
+  @media (max-width:340px){
+    .tp-pay{ font-size:var(--fs-2); gap:3px; }
+    .tp-pay .cico{ width:13px; height:13px; }
+    .tp-pay .dup2 .cico + .cico{ margin-left:-8px; }
+    .tp-row{ gap:2px; }
+  }
 </style>
 
 <!--+AG doc 34 Fase B: #app = la "columna telefono" que contiene TODAS las pantallas y overlays (portrait) -->
@@ -5343,6 +5534,31 @@
          acabarian separandose. -->
     <input id="askIn" class="ask-in" hidden autocomplete="off" spellcheck="false">
     <div class="ask-btns"><button class="pr-inv" id="askNo"></button><button class="pr-inv ask-si" id="askSi"></button></div>
+  </div>
+</div>
+
+<!--+AG ===== HOJA DE PREMIOS (doc 102, 8-ago) =====
+     Peticion de Jaime: «los regalos brillan y molan, y cuando haces clic te dice que regalo va ahi».
+     Esto es la segunda mitad de esa frase. Se abre tocando cualquier fila con premio del Ranking, la
+     tarjeta de premios de esa pantalla, o la tarjeta de cierre de Temporada; y sirve para las DOS
+     cadencias con el mismo componente, porque si fueran dos hojas acabarian contando cosas distintas.
+     Se REUSA `.sheetwrap`/`.sheet` (la cuarta que lo hace, detras de la de formato, la de idioma y la
+     de confirmar): mismo velo, misma animacion, mismo cierre por el fondo.
+     ⚠ El titulo NO lleva `data-t`: lo pone abrePremios() segun de donde se abra, y un `data-t` fijo
+       haria que el siguiente applyShell() —cambiar de idioma, volver a la pantalla— le devolviera
+       encima el rotulo del otro modo. Es la trampa que ya se cazo en la Liga y en la banda de premios
+       del propio Ranking (doc 78 §6). -->
+<div class="sheetwrap" id="przSheet" aria-hidden="true">
+  <div class="sheetback" id="przBack"></div>
+  <div class="sheet">
+    <div class="shead">
+      <div class="stit" id="przTit"></div>
+      <button class="sclose" id="przClose" data-tt="close" title="Cerrar"><svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6.8 6.8 L17.2 17.2"/><path d="M17.2 6.8 L6.8 17.2"/></g></svg></button>
+    </div>
+    <!-- data-fit="scroll": son hasta cuatro franjas con su dibujo, y deslizar dentro de la hoja es su
+         forma correcta (doc 40 §4.3); sin la marca, el guardia de encaje la contaria como rota. -->
+    <div class="prz-list" id="przList" data-fit="scroll"></div>
+    <div class="prz-foot" id="przFoot"></div>
   </div>
 </div>
 
@@ -5734,6 +5950,12 @@
              prometia en los 20 idiomas «Top 10 % = Fichas · Top 1 % = título + skin», y las Fichas son
              una moneda que NUNCA llego a existir en el juego (ya se cazo lo mismo en el cartel del
              Ranking el 1-ago). Un texto de ayuda que miente es peor que no tener texto de ayuda. -->
+      <!--+AG doc 102 · LO QUE SE LLEVA EL TOP AL CERRAR. Esta pantalla enseñaba la tabla de las copas
+           de los 42 dias y no decia en ninguna parte que al cerrar paga 60/30/15 Gemas, 500 Monedas y
+           las dos estelas: estaba construido, pagando desde el 8-ago, y sin anunciar en NINGUNA
+           pantalla del juego. Va ENCIMA de la tabla y no debajo porque es el motivo de mirarla.
+           La pinta pintaSeTopPrz() y abre la hoja de premios en su modo de temporada. -->
+      <div id="seTopPrz"></div>
       <div class="se-rk" id="seRkList"></div>
     </div>
     <!--+AG LA ESCENA DE LA TEMPORADA (encargo 43). Va como ULTIMO hijo del cuerpo y no como fondo de
@@ -6089,7 +6311,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=797ae79"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=f83bb49"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -6951,6 +7173,11 @@ const SHELL={
     //   el juego prometía un premio que no podía entregar por ganar a nadie. Ahora las franjas siguen
     //   anunciándose —son buen gancho— pero marcadas como lo que son: algo que todavía no reparte nada.
     rkPrize:'Premios · Top 10% y Top 1% · pronto',
+    //+AG doc 102 · LAS UNICAS TRES CADENAS NUEVAS de toda la hoja de premios, y no es casualidad: los
+    //   rangos son cifras («#2-3»), los premios son cifras con su moneda al lado, el reloj sale de
+    //   `seSeason` y tu puesto de `rkYouPos`. Todo lo demas ya estaba traducido a las 20 lenguas.
+    przDia:'Al acabar el día', przTemp:'Al cerrar la temporada',
+    przMin:n=>'Juega '+n+' partidas hoy para cobrar',
     rkYouPos:(p,n)=>'Tu puesto: #'+p+' de '+n, rkYouBest:(b,p,n)=>'Tu mejor bola: '+b+' · #'+p+' de '+n,
     rkNoBall:'No tienes bola de ese tipo',
     rkTodayTail:' · deriva de hoy', you:'TÚ',
@@ -6992,6 +7219,8 @@ const SHELL={
     //+AG Fase 2 · cups + ranking (doc 37)
     cupsWord:'Cups', floorWord:'floor', rkGlobal:'Global', rkBola:'Per ball', rkDiario:'Daily',
     rkPrize:'Prizes · Top 10% and Top 1% · soon',
+    przDia:'When the day ends', przTemp:'When the season ends',
+    przMin:n=>'Play '+n+' races today to claim',
     rkYouPos:(p,n)=>'Your rank: #'+p+' of '+n, rkYouBest:(b,p,n)=>'Your best ball: '+b+' · #'+p+' of '+n,
     rkNoBall:'You have no ball of that type',
     rkTodayTail:' · today\'s drift', you:'YOU',
@@ -8280,6 +8509,44 @@ function topFranja(tabla, puesto, pob){
   for(const f of tabla){ const tope = f.max!=null ? f.max : Math.ceil(pob*f.pct); if(puesto<=tope) return f; }
   return null;
 }
+//+AG doc 102 · LO QUE HACÍA FALTA PARA ENSEÑAR LOS PREMIOS, y todo sale de las MISMAS dos tablas que
+//   los pagan. Es la regla que doc 97 dejó escrita y que aquí se estira: el día que se recalibre un
+//   premio, la pantalla que lo anuncia se entera sola. Si esto llevara los cortes escritos a mano,
+//   el jugador vería una cifra y cobraría otra — el fallo exacto que docs/99 §2 bis tuvo que cerrar
+//   cuando la tabla y el premio empezaron a contar por caminos distintos.
+//   `topFranja` devuelve la franja; esto devuelve su ÍNDICE, que es lo que elige el metal del regalo.
+function topFranjaIx(tabla, puesto, pob){
+  for(let i=0;i<tabla.length;i++){ const f=tabla[i], tope = f.max!=null ? f.max : Math.ceil(pob*f.pct);
+    if(puesto<=tope) return i; }
+  return -1;
+}
+//   el rango de puestos de una franja, en cifras y SIN UNA PALABRA: «#1», «#2-3», «#4-10». Cero
+//   traducciones, y se lee igual en las 20 lenguas incluidas las de derecha a izquierda.
+function topRango(tabla, i, pob){
+  const tope=t=> t.max!=null ? t.max : Math.ceil(pob*t.pct);
+  const hi=tope(tabla[i]), lo = i===0 ? 1 : tope(tabla[i-1])+1;
+  return lo>=hi ? '#'+lo : '#'+lo+'-'+hi;
+}
+//+AG ⚠ LOS TRES REGALOS SON EL MISMO FICHERO TODAVÍA. El encargo 47 a Codex (pedido el 8-ago, en
+//   Drive) pide las tres cajas pintadas —oro, plata y bronce, hermanas de las tres medallas del
+//   podio—. Hasta que lleguen, la jerarquía la ponen el TAMAÑO y el HALO del CSS, que ya se leen.
+//   Cuando entren, esta lista es lo único que cambia: ni el CSS ni las pantallas se enteran.
+const RANK_GIFT=['ranking-regalo','ranking-regalo','ranking-regalo','ranking-regalo'];
+const rkGiftArt=ix=>uiArt(RANK_GIFT[Math.max(0, Math.min(RANK_GIFT.length-1, ix|0))]);
+//+AG ⚠ EL DUPLICADOR TAMPOCO TIENE DIBUJO PROPIO, y el apaño heredado no valía. El Camino de Regalos
+//   lo pinta con `ui-reto` —una DIANA ROJA— y en la primera captura de esta hoja se leía como
+//   «objetivo ×2», que no es lo que paga: el Duplicador dobla las Monedas de tus próximas partidas.
+//   Hasta que llegue `icono-duplicador` (encargo 47), se compone con la pieza que YA dice la verdad:
+//   dos monedas de las de verdad, solapadas. No es un icono dibujado por mí — es la moneda del juego
+//   puesta dos veces, que es literalmente lo que significa el premio.
+const dupIco=()=>`<span class="dup2">${coinIco('chispa')}${coinIco('chispa')}</span>`;
+//   las partidas que llevas HOY: es la condición para cobrar el premio del día (doc 97 §3.1) y hasta
+//   hoy no estaba escrita en ninguna pantalla del juego.
+function topPartidasHoy(){ const C=SAVE.cupsToday; return (C && C.k===todayKey()) ? (C.p||0) : 0; }
+//   y el puesto que llevas hoy AHORA MISMO, contra el estado vivo de los bots. Sin día registrado,
+//   cero copas y el día de hoy: es el puesto que verías si cerrara el día en este instante.
+function topPuestoHoy(){ const C=SAVE.cupsToday, hoy=todayKey(), mio=(C && C.k===hoy);
+  return topPuestoDia(mio ? C.v : 0, (mio && typeof C.n==='number') ? C.n : todayNum()); }
 //+AG EL ESTADO, con la misma disciplina que tempEstado(): idempotente, y el reloj hacia ATRAS no paga
 //   nada. `d` es el ultimo dia YA evaluado (para no evaluarlo dos veces) y `pend` lo que hay en la mesa.
 function topEstado(){
@@ -9598,7 +9865,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=797ae79').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=f83bb49').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -9868,7 +10135,7 @@ const esEstela=id=>ESTELA_ORD.indexOf(id)>=0;
 let ESTELA_COLS=null;
 function cargaEstelaCols(cb){
   if(ESTELA_COLS) return cb();
-  import('./motor/chassis/estelas.mjs?v=797ae79')
+  import('./motor/chassis/estelas.mjs?v=f83bb49')
     .then(m=>{ ESTELA_COLS=m.ESTELAS||{}; cb(); })
     .catch(()=>{ ESTELA_COLS={}; cb(); });   //   sin red, fichas en gris: nunca una pantalla rota
 }
@@ -10606,13 +10873,17 @@ function paintLiga(){
 //     y pedirlo son 20 traducciones nuevas para UN dia de cada 42. Asi que ese dia se enseña solo la
 //     mitad de delante de la frase —«Temporada 1», «第 1 赛季»—, que se lee bien en las 20. Si alguna
 //     lengua perdiera su «·», esa se queda con la frase entera: peor, pero nunca rota.
-function paintTempHd(){
-  const e=el('seSeasonTx'); if(!e) return;
+//+AG doc 102 · la frase sale a una funcion porque la hoja de premios necesita EXACTAMENTE la misma:
+//   «cuando cierra» es el dato que convierte una lista de premios en una cuenta atras, y si lo
+//   escribiera aparte serian 20 traducciones nuevas para decir algo que ya esta dicho — y dos sitios
+//   donde el reloj podria acabar diciendo cosas distintas.
+function tempHdTxt(){
   const s=S(), raw=String(s.seSeason||SHELL.en.seSeason||''), n=tempIdx(), q=tempQuedan();
-  if(q<=1 && raw.indexOf('·')>0){ e.textContent = raw.split('·')[0].trim().replace(/\d+/, ()=>String(n)); return; }
+  if(q<=1 && raw.indexOf('·')>0) return raw.split('·')[0].trim().replace(/\d+/, ()=>String(n));
   let i=0;
-  e.textContent = raw.replace(/\d+/g, m=>{ i++; return i===1 ? String(n) : (i===2 ? String(q) : m); });
+  return raw.replace(/\d+/g, m=>{ i++; return i===1 ? String(n) : (i===2 ? String(q) : m); });
 }
+function paintTempHd(){ const e=el('seSeasonTx'); if(!e) return; e.textContent = tempHdTxt(); }
 //+AG doc 79 · EL COFRE, pintado. Titulo y boton salen de cadenas que YA estan en los 20 idiomas
 //   (seLeague + el nombre del escalon + miCobrar): cero traducciones nuevas para estrenarlo.
 //+AG doc 97 §3.2 · LA TABLA DE LA TEMPORADA. Las copas ganadas en estos 42 dias: tu cuenta sale de
@@ -10626,8 +10897,33 @@ function paintTempHd(){
 //   Se enseñan las tres primeras filas Y LA TUYA, aunque vayas la 40: un ranking donde no te
 //   encuentras no es tuyo. Si ya vas en el podio entra la cuarta, para que el bloque no encoja de
 //   golpe y desmonte el alto de la pantalla (la escena de temporada, doc 93, vive del hueco que sobra).
+//+AG doc 102 · LO QUE SE LLEVA EL TOP AL CERRAR, anunciado. Esta pantalla enseñaba desde el 8-ago la
+//   tabla de copas de los 42 dias y NO decia en ninguna parte lo que paga ese ranking al cerrar: 60,
+//   30 o 15 Gemas, 500 Monedas a la mitad de arriba y las dos estelas. Estaba construido, pagando, y
+//   sin una sola mencion en ninguna pantalla del juego — o sea que la unica forma de enterarse era
+//   ganarlo. Va ENCIMA de la tabla porque es el motivo de mirarla.
+//   Enseña el techo (60 Gemas) y el suelo (500 Monedas): las dos puntas dicen «hay premio para el que
+//   gana Y para el que juega», que es exactamente lo que la franja del 50 % vino a arreglar.
+function pintaSeTopPrz(){
+  const box=el('seTopPrz'); if(!box) return;
+  const s=S(); box.innerHTML='';
+  const b=document.createElement('button'); b.type='button'; b.className='se-przc';
+  const gs=[0,1,2].map(i=>'<img src="'+rkGiftArt(i)+'" alt="">').join('');
+  const top=TOP_TEMP[0]||{}, suelo=TOP_TEMP[TOP_TEMP.length-1]||{};
+  b.innerHTML='<span class="gs">'+gs+'</span>'
+    + '<span class="tx"><span class="h">'+(s.przTemp||'')+'</span><span class="v">'
+    + (top.gemas ? '<span>'+nfmt(top.gemas)+' '+coinIco('gema')+'</span>' : '')
+    + (suelo.monedas ? '<span>'+nfmt(suelo.monedas)+' '+coinIco('chispa')+'</span>' : '')
+    + '</span></span>'
+    //   chevron DIBUJADO y no el glifo «›»: el bidi no gira los glifos de flecha, asi que en arabe
+    //   apuntaria al lado contrario. Este lo gira el CSS con [dir=rtl].
+    + '<span class="ch"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M9.5 5.5 L16 12 L9.5 18.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
+  b.onclick=()=>abrePremios('temp');
+  box.appendChild(b);
+}
 function paintSeRk(){
   const box=el('seRkList'); if(!box) return;
+  pintaSeTopPrz();
   const s=S(), dn=todayNum();
   const rows=BOTS.map(b=>({nm:b.name, c:b.color, v:botTempEf(b,dn), me:false}));
   rows.push({nm:s.you, c:null, v:myTempCups(), me:true});
@@ -11567,7 +11863,12 @@ function pintaTopBanda(){
   const T=topEstado();
   if(T.pend){
     const p=T.pend;
-    box.innerHTML='<span class="tp-cel"><span class="tp-p">#'+p.puesto+'</span> '+nfmt(p.monedas)+' '+coinIco('chispa','sm')+'</span>';
+    //+AG doc 102 · el regalo del metal que te toco va DELANTE de la cifra. Antes esto era «#1 100 ✦»
+    //   pelado: el unico momento del juego en el que has ganado algo por competir se anunciaba con
+    //   menos ceremonia que un precio de la Tienda.
+    box.innerHTML='<span class="tp-cel"><i class="tp-g g'+Math.max(0,topFranjaIx(TOP_DIA,p.puesto,topPoblacion()))+'">'
+      + '<img src="'+rkGiftArt(topFranjaIx(TOP_DIA,p.puesto,topPoblacion()))+'" alt=""></i>'
+      + '<span class="tp-p">#'+p.puesto+'</span> '+nfmt(p.monedas)+' '+coinIco('chispa','sm')+'</span>';
     const b=document.createElement('button'); b.className='mi-cta ready tp-cobra'; b.textContent=s.miCobrar||'';
     b.onclick=()=>{
       const g=topCogerDia(); if(!g) return;
@@ -11582,10 +11883,83 @@ function pintaTopBanda(){
     box.appendChild(b);
     return;
   }
-  //   la tabla, en tres celdas. Se arma leyendo TOP_DIA, no escribiendo los numeros a mano: el dia que
-  //   se recalibre un premio, esto se entera solo (es el mismo principio que el precio por rareza).
-  const cel=f=>'<span class="tp-cel"><span class="tp-p">#'+f.max+'</span> '+nfmt(f.monedas)+' '+coinIco('chispa','sm')+'</span>';
-  box.innerHTML=TOP_DIA.map(cel).join('<span class="tp-sep">·</span>');
+  //   la tabla, en tres columnas. Se arma leyendo TOP_DIA, no escribiendo los numeros a mano: el dia
+  //   que se recalibre un premio, esto se entera solo (es el mismo principio que el precio por rareza).
+  //+AG doc 102 · DE TIRITA DE TEXTO A TARJETA. Lo que habia aqui era «#1 100 · #3 60 · #10 30» en 13 px:
+  //   decia la verdad y no la enseñaba, y ademas se dejaba fuera las dos cosas que mas importan — que
+  //   el #1 se lleva TAMBIEN un Duplicador, y que sin 3 partidas ese dia no cobra NADIE. Un jugador
+  //   podia quedar primero y no cobrar sin llegar a saber por que.
+  const pob=topPoblacion();
+  const cel=(f,i)=>'<span class="tp-cel">'
+      + '<i class="tp-g g'+i+'"><img src="'+rkGiftArt(i)+'" alt=""></i>'
+      + '<span class="tp-p">'+topRango(TOP_DIA,i,pob)+'</span>'
+      + '<span class="tp-pay">'+nfmt(f.monedas)+' '+coinIco('chispa')
+      + (f.dup ? ' '+dupIco()+'&times;2' : '')+'</span></span>';
+  const jug=topPartidasHoy(), ok=jug>=TOP_MIN_PARTIDAS;
+  //   el candado va en VERDE cuando ya esta cumplido: asi es una recompensa («ya cobras») y no un
+  //   reproche permanente. Es la misma regla del `.ready` frente al `.falta` del panel de Retos.
+  const b=document.createElement('button'); b.type='button'; b.className='tp-card';
+  b.innerHTML='<span class="tp-row">'+TOP_DIA.map(cel).join('')+'</span>'
+            + '<span class="tp-lock'+(ok?' ok':'')+'">'+(s.przMin ? s.przMin(TOP_MIN_PARTIDAS) : '')
+            + ' <b>'+Math.min(jug,TOP_MIN_PARTIDAS)+'/'+TOP_MIN_PARTIDAS+'</b></span>';
+  b.onclick=()=>abrePremios('dia');
+  box.appendChild(b);
+}
+//+AG doc 102 · LA HOJA DE PREMIOS: «cuando haces clic te dice que regalo va ahi» (Jaime, 8-ago).
+//   Un solo componente para las DOS cadencias. Si fueran dos hojas acabarian contando cosas distintas
+//   —es lo que ya paso con las cuatro familias de pestaña que el canon tuvo que unificar—, y ademas
+//   duplicaria el texto que hay que traducir a 20 idiomas.
+//   Lo que se enseña sale ENTERO de TOP_DIA / TOP_TEMP: los rangos, las cifras, los metales y hasta
+//   cuantas filas hay. Recalibrar un premio no toca esta funcion.
+let przModo='dia';
+function abrePremios(modo){
+  przModo = modo==='temp' ? 'temp' : 'dia';
+  //   los colores de las estelas viven en el chasis y llegan por import dinamico (doc 97 §6): se
+  //   pinta ya —en gris— y se repinta solo cuando aterrizan, comprobando que la hoja sigue abierta.
+  if(przModo==='temp' && !ESTELA_COLS) cargaEstelaCols(()=>{ if(el('przSheet').classList.contains('on') && przModo==='temp') pintaPremios(); });
+  pintaPremios();
+  const w=el('przSheet'); w.classList.add('on'); w.setAttribute('aria-hidden','false');
+}
+function cierraPremios(){ const w=el('przSheet'); w.classList.remove('on'); w.setAttribute('aria-hidden','true'); }
+function pintaPremios(){
+  const s=S(), temp=przModo==='temp', pob=topPoblacion(), tabla = temp ? TOP_TEMP : TOP_DIA;
+  el('przTit').textContent = (temp ? s.przTemp : s.przDia) || '';
+  //   TU franja de ahora mismo va marcada en oro. Sin esto la hoja es una tabla de precios; con esto
+  //   es una carrera en la que vas por un sitio concreto, que es lo que hace volver mañana.
+  const puesto = temp ? topPuestoTemp(myTempCups(), todayNum()) : topPuestoHoy();
+  const mio = topFranjaIx(tabla, puesto, pob);
+  el('przList').innerHTML = tabla.map((f,i)=>{
+    let pay='';
+    if(f.gemas)   pay += '<span>'+nfmt(f.gemas)+' '+coinIco('gema')+'</span>';
+    if(f.monedas) pay += '<span>'+nfmt(f.monedas)+' '+coinIco('chispa')+'</span>';
+    if(f.dup)     pay += '<span>'+dupIco()+'&times;2</span>';
+    //   la estela NO se nombra: se DIBUJA, con tu propia bola y la cola saliendole por detras. Es la
+    //   misma escenaEstela() del Garaje y de la Tienda, o sea que lo que se anuncia aqui y lo que se
+    //   entrega alli no pueden separarse nunca.
+    //+AG ⚠ EL `.es-mues` DE EN MEDIO NO ES DECORADO, ES LO QUE SUJETA LA ESCENA. escenaEstela()
+    //   devuelve tres piezas con `position:absolute; inset:0` y `blur`, y quien las contiene es el
+    //   `.es-mues` del Garaje, que es `position:relative`. Metidas directamente en `.prz-ex` se
+    //   anclaban al ancestro posicionado de mas arriba: medido en la primera captura, el halo se
+    //   comia LA HOJA ENTERA y tapaba dos de las cuatro franjas. Reusar una funcion de dibujo es
+    //   reusar tambien la caja para la que fue escrita.
+    const ex = f.estela ? '<div class="prz-ex"><div class="es-mues">'+escenaEstela(f.estela)+'</div></div>' : '';
+    return '<div class="prz-row'+(i===mio?' yours':'')+'">'
+         + '<div class="prz-g g'+i+'"><img src="'+rkGiftArt(i)+'" alt=""></div>'
+         + '<div class="prz-tx"><div class="prz-p">'+topRango(tabla,i,pob)+'</div>'
+         + '<div class="prz-pay">'+pay+'</div></div>'+ex+'</div>';
+  }).join('');
+  //   el pie: la CONDICION en el dia, y el reloj en la temporada. Los dos acaban con tu puesto de
+  //   ahora, que es la unica cifra de toda la hoja que cambia cuando juegas.
+  const pie=el('przFoot'), tuyo = (s.rkYouPos ? s.rkYouPos(puesto, pob) : '');
+  if(temp){
+    pie.className='prz-foot';
+    pie.innerHTML = tempHdTxt() + '<br>' + tuyo;
+  }else{
+    const jug=topPartidasHoy(), ok=jug>=TOP_MIN_PARTIDAS;
+    pie.className='prz-foot'+(ok?' ok':'');
+    pie.innerHTML = (s.przMin ? s.przMin(TOP_MIN_PARTIDAS) : '')
+                  + ' <b>'+Math.min(jug,TOP_MIN_PARTIDAS)+'/'+TOP_MIN_PARTIDAS+'</b><br>' + tuyo;
+  }
 }
 function paintRanking(){ applyShell(); const s=S();
   document.querySelectorAll('#ranking .rktab').forEach(b=>b.classList.toggle('on', b.dataset.rktab===rkTab));
@@ -11608,6 +11982,13 @@ function paintRanking(){ applyShell(); const s=S();
   //   sale en Diario y solo hasta el ultimo puesto que cobra de verdad, que se lee de TOP_DIA: si mañana
   //   se recalibra la tabla, la marca se mueve sola en vez de quedarse mintiendo en el 10.
   const prize = rkTab==='diario' ? TOP_DIA[TOP_DIA.length-1].max : 0;
+  //+AG ⚠⚠ doc 102 · Y AHORA SON TRES REGALOS, NO UNO. El marcador ya salia en la pestaña correcta
+  //   (eso lo arreglo doc 97), pero era EL MISMO DIBUJO para el #1 y para el #10 — y lo que cobran no
+  //   se parece: 100 Monedas mas un Duplicador contra 30 Monedas. Un icono igual para todos dice «hay
+  //   premio» y esconde «cual», que es justo el dato por el que se mira una tabla. El metal sale del
+  //   INDICE de la franja en TOP_DIA, o sea que si mañana se recalibra la tabla los tres se mueven
+  //   solos en vez de quedarse mintiendo.
+  const pobRk=topPoblacion();
   const medals={0:medalIco(1,'sm'),1:medalIco(2,'sm'),2:medalIco(3,'sm')}, list=el('rkList'); list.innerHTML='';
   function addRow(r,i){ const row=document.createElement('div'); row.className='rkrow'+(r.me?' meRow':'');
     let vTxt,vCls='';
@@ -11617,8 +11998,18 @@ function paintRanking(){ applyShell(); const s=S();
     row.innerHTML='<span class="kp">'+(medals[i]||'#'+(i+1))+'</span>'+disc+
       //+AG 1-ago: el marcador de franja era 🎟️ —un TICKET, o sea la moneda muerta—. Marca quién está
       //   dentro de la franja, no qué se cobra: pasa a 🎁, que es lo que dice el cartel de arriba.
-      '<span class="kn">'+r.name+'</span>'+(i<prize?'<span class="kt" title="'+S().rkPrizeTip+'">'+uiIco('ranking-regalo','sm')+'</span>':'')+
+      //+AG doc 102 · el retardo por fila (`--gd`) es lo que convierte diez latidos simultaneos en una
+      //   OLA que baja por la lista. Con todos a la vez, sobre una lista que ademas hace scroll, esto
+      //   se lee como un banner de publicidad y el ojo lo aparta.
+      '<span class="kn">'+r.name+'</span>'
+      + (i<prize ? '<span class="kt g'+Math.max(0,topFranjaIx(TOP_DIA,i+1,pobRk))+'" style="--gd:'+(i*140)+'ms">'
+                 + '<img class="gimg" src="'+rkGiftArt(topFranjaIx(TOP_DIA,i+1,pobRk))+'" alt=""></span>' : '')+
       '<span class="kv'+vCls+'">'+vTxt+'</span>';
+    //+AG ⚠ EL TOQUE VA EN LA FILA ENTERA Y NO EN EL DIBUJO. El regalo mide 26 px y el minimo tactil de
+    //   la casa son 44: colgar el gesto del icono seria construir un boton que falla con el dedo. La
+    //   fila da 48 px de alto por todo el ancho, y de paso acertar es imposible de fallar.
+    //   El `title` de antes NO era una explicacion: en un movil no existe, que es donde se juega esto.
+    if(i<prize){ row.classList.add('prz'); row.title=S().rkPrizeTip||''; row.onclick=()=>abrePremios('dia'); }
     list.appendChild(row); }
   const TOP=20; rows.slice(0,TOP).forEach(addRow);
   const extra=[]; rows.forEach((r,i)=>{ if(r.me&&i>=TOP) extra.push(i); });
@@ -11766,6 +12157,8 @@ el('askNo').onclick=()=>askCierra(false);   el('askSi').onclick=()=>askCierra(tr
 //   acabe de escribir. Sin esto habria que escribir y ADEMAS buscar el boton con el teclado encima.
 el('askIn').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); askCierra(true); } });
 el('infoBack').onclick=closeInfo; el('infoClose').onclick=closeInfo;
+//+AG doc 102 · la hoja de premios se cierra igual que todas las demas: por la X y tocando el velo.
+el('przBack').onclick=cierraPremios; el('przClose').onclick=cierraPremios;
 //+AG delegado y no un onclick por boton: las (i) de Temporada y Perfil viven en HTML estatico, pero
 //   nada impide que mañana alguna se pinte desde JS. Con el delegado, poner una (i) nueva es escribir
 //   dos atributos y ya suena, ya abre y ya cierra.
@@ -12213,7 +12606,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=797ae79';
+  import { startAmbient } from './arte/ambient.mjs?v=f83bb49';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -12229,7 +12622,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=797ae79').then(m => {
+  import('./arte/pista-preview.mjs?v=f83bb49').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -12241,8 +12634,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=797ae79';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=797ae79';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=f83bb49';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=f83bb49';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -12412,7 +12805,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=797ae79'), import('./motor/chassis/sincro.mjs?v=797ae79')]);
+        import('./motor/chassis/nube.mjs?v=f83bb49'), import('./motor/chassis/sincro.mjs?v=f83bb49')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
