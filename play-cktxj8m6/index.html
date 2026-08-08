@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-08 a8591c0"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-08 21012f2"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -6089,7 +6089,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=a8591c0"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=21012f2"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -8137,6 +8137,22 @@ function effTotal(bot, dn){ let s=0; bot.balls.forEach((b,i)=>s+=effBall(bot,i,d
 const BOT_SKILL=[[0.45,0.80],[0.75,1.05],[1.00,1.20]];   // pericia por franja: baja (70% del roster), media (22%), alta (8%)
 function botSkill(bot){ const R=BOT_SKILL[bot.tier||0], r=mulberry32((bot.seed^0x5bf03635)>>>0)();
   return R[0]+r*(R[1]-R[0]); }
+//+AG ⚠ EL CARÁCTER ES QUIÉN ES EL BOT, NO CÓMO LE HA IDO HOY (2026-08-08). Lo leen los motores por
+//   `&bchar=` y sale de la MISMA semilla del bot que su pericia, así que no cambia de una partida a
+//   otra: el que se pone nervioso hoy se pondrá nervioso mañana. Eso es lo que lo hace personaje.
+//   La pericia dice si juega BIEN; el carácter dice CUÁNDO suelta lo que tiene: el nervioso quema el
+//   escudo en cuanto le miran, el ahorrador se lo guarda hasta que lo tiene encima, el derrochador lo
+//   tira a la primera y el táctico lo usa cuando toca.
+//   ⚠ Se sortea con un XOR DISTINTO del de botSkill a propósito: con el mismo, carácter y pericia
+//   saldrían atados (todos los cracks del mismo palo) y la tabla sería una sola dimensión disfrazada
+//   de dos. Reparto plano 25/25/25/25, sin ponderar hacia el táctico: la variedad es el producto.
+//   ⚠⚠ Y el carácter SE DILUYE CON LA PERICIA POR DISEÑO, no por descuido: en la Sim el umbral se
+//   interpola entre la manía del carácter y el juego óptimo según lo bueno que sea el bot, así que un
+//   crack (pericia 1,20) converge al óptimo y su carácter no se nota. Donde se ve es en la franja baja
+//   y media, que es el 92 % del roster. Medido en tools/banco-pericia-cazador.mjs.
+const BOT_CHARS=['tactico','nervioso','derrochador','ahorrador'];
+function botChar(bot){ const r=mulberry32((bot.seed^0x2f9a1c73)>>>0)();
+  return BOT_CHARS[Math.min(BOT_CHARS.length-1, Math.floor(r*BOT_CHARS.length))]; }
 //   el ritmo YA NO ES UNA TABLA: sale de la pericia. La curva es cuadrática y no recta a propósito —
 //   con una recta, la mitad floja del roster subía casi tanto como la buena y la clasificación se
 //   apelotonaba. Al cuadrado, el reparto queda en 2-9 copas/día los flojos, 8-23 los medios y 20-35 los
@@ -8677,6 +8693,13 @@ function modeEmbedUrl(mode, fmt){
   if(fmt!=='equipos'){
     lastRivals = pickRivals(11);
     u += '&bskill=' + lastRivals.map(r=>botSkill(r.bot).toFixed(3)).join(',');
+    //+AG ⚠ Y EL CARÁCTER VIAJA EN LA MISMA LISTA Y EN EL MISMO ORDEN, que es la única forma de que la
+    //   pericia y el carácter que llegan al motor sean los del MISMO bot. Iba construido desde el 8-ago
+    //   —la Sim lo aceptaba y el motor leía `?bchar=`— y el shell no lo mandaba, así que los siete
+    //   rivales caían todos al neutro `tactico`: código vivo que no hacía nada.
+    //   Se manda también a los modos que todavía no lo leen (la Carrera): un parámetro que nadie lee no
+    //   toca la física ni un milímetro, y así el día que la Carrera lo implemente el hilo ya está atado.
+    u += '&bchar=' + lastRivals.map(r=>botChar(r.bot)).join(',');
   } else lastRivals = null;
   //+AG ⚠ LA VERSION DEL BUILD VA EN LA URL DEL IFRAME, Y NO ES COSMETICA: ES LO QUE HACE QUE UN
   //   DESPLIEGUE LLEGUE AL JUGADOR (2026-08-05). Los HTML del juego se sirven SIN `Cache-Control`, asi
@@ -9575,7 +9598,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=a8591c0').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=21012f2').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -9845,7 +9868,7 @@ const esEstela=id=>ESTELA_ORD.indexOf(id)>=0;
 let ESTELA_COLS=null;
 function cargaEstelaCols(cb){
   if(ESTELA_COLS) return cb();
-  import('./motor/chassis/estelas.mjs?v=a8591c0')
+  import('./motor/chassis/estelas.mjs?v=21012f2')
     .then(m=>{ ESTELA_COLS=m.ESTELAS||{}; cb(); })
     .catch(()=>{ ESTELA_COLS={}; cb(); });   //   sin red, fichas en gris: nunca una pantalla rota
 }
@@ -12190,7 +12213,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=a8591c0';
+  import { startAmbient } from './arte/ambient.mjs?v=21012f2';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -12206,7 +12229,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=a8591c0').then(m => {
+  import('./arte/pista-preview.mjs?v=21012f2').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -12218,8 +12241,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=a8591c0';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=a8591c0';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=21012f2';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=21012f2';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -12389,7 +12412,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=a8591c0'), import('./motor/chassis/sincro.mjs?v=a8591c0')]);
+        import('./motor/chassis/nube.mjs?v=21012f2'), import('./motor/chassis/sincro.mjs?v=21012f2')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };

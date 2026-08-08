@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-08 a8591c0">
+<meta name="bt-build" content="2026-08-08 21012f2">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <!--+AG el HTML se sirve en INGLES (defecto del juego); ?lang=es lo traduce por JS (applyLang) -->
 <title>YouBall · The Hunter (WebGL)</title>
@@ -395,7 +395,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=a8591c0"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=21012f2"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -406,30 +406,30 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 </script>
 
 <script type="module">
-import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, makeFacePlane, createItemPool, createItemPops, createStarBurst, createWindTrail, createBloom, frameOrtho } from '../chassis/gfx.mjs?v=a8591c0';
-import { archLook } from '../chassis/ballmat.mjs?v=a8591c0';   //+AG doc 41 bloque G: material de la bola-heroe
-import { attachSquash } from '../chassis/squash.mjs?v=a8591c0';
-import { crearEscudos } from '../chassis/escudo.mjs?v=a8591c0';   //+AG 2026-08-08: la burbuja que dice "llevo escudo puesto" (misma pieza que la Carrera)
-import { paleta as estelaPaleta, emiteEstela } from '../chassis/estelas.mjs?v=a8591c0';   //+AG doc 97 §6: la estela cosmetica del jugador
-import { Sim, RNG, TEAMS, BALL_R, ARENA_W, ARENA_H, FPS, AGENCIA } from './sim.js?v=a8591c0';
-import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=a8591c0';
-import { archFace } from '../chassis/facegen.mjs?v=a8591c0';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
-import { createCelebration } from '../chassis/celebration.mjs?v=a8591c0';
-import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=a8591c0';
-import { crearInventario } from '../chassis/invboost.mjs?v=a8591c0';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
-import { buildSfxBuffer } from './sfxmap.mjs?v=a8591c0';
-import { createCoach } from '../chassis/coach.mjs?v=a8591c0';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
-import { crearSalida } from '../chassis/salida.mjs?v=a8591c0';   //+AG 2026-08-08 · preparar la bola durante la cuenta atrás
-import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=a8591c0';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
-import { createUiSfx } from '../chassis/uisfx.mjs?v=a8591c0';   //+AG doc 88: el sonido de "no puedo"
-import { createJuice } from '../chassis/juice.mjs?v=a8591c0';   //+AG doc 88: lo que pasa cuando el dedo toca un botón (los 3 modos)
+import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, makeFacePlane, createItemPool, createItemPops, createStarBurst, createWindTrail, createBloom, frameOrtho } from '../chassis/gfx.mjs?v=21012f2';
+import { archLook } from '../chassis/ballmat.mjs?v=21012f2';   //+AG doc 41 bloque G: material de la bola-heroe
+import { attachSquash } from '../chassis/squash.mjs?v=21012f2';
+import { crearEscudos } from '../chassis/escudo.mjs?v=21012f2';   //+AG 2026-08-08: la burbuja que dice "llevo escudo puesto" (misma pieza que la Carrera)
+import { paleta as estelaPaleta, emiteEstela } from '../chassis/estelas.mjs?v=21012f2';   //+AG doc 97 §6: la estela cosmetica del jugador
+import { Sim, RNG, TEAMS, BALL_R, ARENA_W, ARENA_H, FPS, AGENCIA } from './sim.js?v=21012f2';
+import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=21012f2';
+import { archFace } from '../chassis/facegen.mjs?v=21012f2';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
+import { createCelebration } from '../chassis/celebration.mjs?v=21012f2';
+import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=21012f2';
+import { crearInventario } from '../chassis/invboost.mjs?v=21012f2';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
+import { buildSfxBuffer } from './sfxmap.mjs?v=21012f2';
+import { createCoach } from '../chassis/coach.mjs?v=21012f2';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { crearSalida } from '../chassis/salida.mjs?v=21012f2';   //+AG 2026-08-08 · preparar la bola durante la cuenta atrás
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=21012f2';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
+import { createUiSfx } from '../chassis/uisfx.mjs?v=21012f2';   //+AG doc 88: el sonido de "no puedo"
+import { createJuice } from '../chassis/juice.mjs?v=21012f2';   //+AG doc 88: lo que pasa cuando el dedo toca un botón (los 3 modos)
 //+AG el ámbito NO es opcional: la regla base es `#controls button` (id + etiqueta) y le gana en
 //   especificidad a cualquier `.j-hit` suelto. Es la misma trampa que ya costó una versión muerta en la
 //   Carrera y otra en Luz Roja; aquí va escrita para no repetirla una tercera vez.
 const juice = createJuice({ ambito:'#controls', reducido: new URLSearchParams(location.search).get('redfx')==='1' });
-import { createPausa } from '../chassis/pausa.mjs?v=a8591c0';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
-import { cantarPuesto } from '../chassis/veredicto.mjs?v=a8591c0';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
-import { runToEnd } from '../chassis/simrun.mjs?v=a8591c0';
+import { createPausa } from '../chassis/pausa.mjs?v=21012f2';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
+import { cantarPuesto } from '../chassis/veredicto.mjs?v=21012f2';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
+import { runToEnd } from '../chassis/simrun.mjs?v=21012f2';
 
 window.addEventListener('error', e => { document.getElementById('err').style.display='grid'; console.error(e.error||e.message); });
 
@@ -1171,20 +1171,38 @@ function ballOrder(){
   return [...sim.balls].sort((a,b)=>{ const A=key(a), B=key(b); return A[0]-B[0] || A[1]-B[1]; });
 }
 function standingsPayload(){
-  return ballOrder().map((b,i)=>({ place:i+1, ballId:b.id, teamIdx:b.team, isPlayer:b===sim.balls[0],
+  //+AG ⚠ 2026-08-08 · LA TABLA CUENTA IGUAL QUE EL PUESTO QUE SE PAGA, o Resultados diría una cosa y el
+  //   premio otra. Las que siguen vivas EMPATAN en el peor puesto que pueden ocupar (K = cuántas quedan);
+  //   las cazadas van detrás y conservan su orden de siempre (la última en caer, mejor), que como ya
+  //   ocupan los índices K…N-1 les sale solo con `i+1`.
+  const _vivas = sim.balls.filter(b=>b.rank===null).length;
+  return ballOrder().map((b,i)=>({ place: b.rank===null ? _vivas : i+1, ballId:b.id, teamIdx:b.team, isPlayer:b===sim.balls[0],
     color:[b.color[0],b.color[1],b.color[2]] }));
 }
 function emitEnd(){
   if(typeof TUTORIAL!=='undefined' && TUTORIAL) return;   //+AG tutorial: sin matchEnd ni economía; el COACH cierra con bt:tutorialEnd
   if(emitted || !EMBED) return; emitted=true;
   const p=sim.balls[0], survived=p.rank===null;
-  const playerPlace = survived ? 1 : (sim.balls.length-p.rank+1);   // superviviente -> 1; cazado -> puesto por orden de caza
+  //+AG ⚠⚠ 2026-08-08 (VB Jaime) · SOBREVIVIR AL RELOJ YA NO ES GANAR. Esta línea decía
+  //   `survived ? 1`, o sea que si la ronda se acababa por TIEMPO todos los que quedaban en pie
+  //   cobraban PRIMER PUESTO — medido: 4 de cada 200 partidas te pagaban la victoria por aguantar
+  //   escondido con 6 u 8 bolas vivas todavía en pista.
+  //   Decisión de Jaime, literal: «todos ganarían el peor puesto posible de los vivos, para que la
+  //   gente no quiera que eso pase». O sea: si al acabar el tiempo quedan K vivas, las K empatan en el
+  //   puesto K, que es el peor que pueden ocupar; las cazadas van detrás (K+1 … N).
+  //   La consecuencia buscada es de DISEÑO, no de cuentas: esconderse hasta que suene el reloj deja de
+  //   pagar, porque cuanta más gente aguante contigo, peor puesto te llevas. Y el 1º se conserva intacto
+  //   para lo único que lo merece: quedarte SOLO en pie (K=1 → puesto 1, igual que siempre).
+  const vivas = sim.balls.filter(b=>b.rank===null).length;
+  const playerPlace = survived ? vivas : (sim.balls.length-p.rank+1);   // superviviente -> el peor de los vivos; cazado -> por orden de caza
   //+AG POR EQUIPOS (Fase 3): puesto del EQUIPO por SUPERVIVENCIA — UN SOLO criterio, el MISMO con que la sim corona
   //   (winner_team = ultimo equipo en pie; por timeout, _finish() elige el de MAS bolas vivas). Por eso ordenamos por
   //   Nº DE BOLAS VIVAS desc (no por "vivo si/no": en un timeout con 2+ equipos vivos, el booleano empataba y el orden
   //   caia al indice del array —que es SIEMPRE el equipo del jugador, team 0— pagandole 1º aunque coronara otro; medido
   //   14/200). Empate en vivas → la ultima en caer (rank mayor) desc. Asi el coronado es SIEMPRE el 1º de la tabla.
-  let teamPlace = survived?1:0, tst=null;
+  //+AG en INDIVIDUAL este campo es un sí/no («¿has ganado?»), así que sigue la misma regla: sobrevivir
+  //   acompañado ya no es ganar, solo quedarse el último en pie lo es.
+  let teamPlace = (survived && vivas===1) ? 1 : 0, tst=null;
   if(sim.individual===false){ const arr=sim.teams.map((_,t)=>{ const ms=sim.byTeam[t];
       const aliveCount=ms.filter(b=>b.rank===null).length, best=aliveCount?Infinity:Math.max(...ms.map(b=>b.rank||0));
       return {t, aliveCount, best}; });
