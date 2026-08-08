@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-08 3357839">
+<meta name="bt-build" content="2026-08-08 68577ac">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>YouBall · La Gran Carrera (WebGL)</title>
 <style>
@@ -491,7 +491,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=3357839"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=68577ac"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -502,31 +502,31 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 </script>
 
 <script type="module">
-import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createItemPops, createBloom, frameOrtho, buildHud, updateHud } from '../chassis/gfx.mjs?v=3357839';
-import { archLook } from '../chassis/ballmat.mjs?v=3357839';   //+AG doc 41 bloque G: material de la bola-heroe
-import { attachSquash } from '../chassis/squash.mjs?v=3357839';
-import { crearEscudos } from '../chassis/escudo.mjs?v=3357839';   //+AG 2026-08-08: la burbuja que dice "llevo escudo puesto"
-import { paleta as estelaPaleta, emiteEstela } from '../chassis/estelas.mjs?v=3357839';   //+AG doc 97 §6: la estela cosmetica del jugador
+import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createItemPops, createBloom, frameOrtho, buildHud, updateHud } from '../chassis/gfx.mjs?v=68577ac';
+import { archLook } from '../chassis/ballmat.mjs?v=68577ac';   //+AG doc 41 bloque G: material de la bola-heroe
+import { attachSquash } from '../chassis/squash.mjs?v=68577ac';
+import { crearEscudos } from '../chassis/escudo.mjs?v=68577ac';   //+AG 2026-08-08: la burbuja que dice "llevo escudo puesto"
+import { paleta as estelaPaleta, emiteEstela } from '../chassis/estelas.mjs?v=68577ac';   //+AG doc 97 §6: la estela cosmetica del jugador
 import { Sim, RNG, TEAMS, SHORT_COLORS, BALL_R, WIDTH, GATE_Y, GATE_H, TOP, FPS,
-         DIR, N_BALLS, CAM_SCALE, ASPA_R, ASPA_THICK, PLAT_HW, PLAT_HH } from './sim.js?v=3357839';   //+AG extras de la capa de agencia
+         DIR, N_BALLS, CAM_SCALE, ASPA_R, ASPA_THICK, PLAT_HW, PLAT_HH } from './sim.js?v=68577ac';   //+AG extras de la capa de agencia
 //+AG doc 62: los encuadres del cierre (sim.hero_scale / sim.celeb_scale) se leen del OBJETO sim, no por
 //   import. Un export que la CDN aún no ha refrescado tumba el módulo entero y la partida no arranca (pasó
 //   en producción el 2-ago); un campo que falta degrada a la cámara de siempre. Ver la nota en sim.js.
-import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=3357839';
-import { archFace } from '../chassis/facegen.mjs?v=3357839';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
-import { itemTexture } from '../chassis/itemgen.mjs?v=3357839';
-import { crearInventario } from '../chassis/invboost.mjs?v=3357839';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
-import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=3357839';
-import { buildSfxBuffer } from './sfxmap.mjs?v=3357839';
-import { runToEnd } from '../chassis/simrun.mjs?v=3357839';
-import { createCoach } from '../chassis/coach.mjs?v=3357839';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
-import { crearSalida } from '../chassis/salida.mjs?v=3357839';   //+AG 2026-08-08 · preparar la bola durante la cuenta atrás
-import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=3357839';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
-import { leerEmparejamiento, createEmparejamiento } from '../chassis/emparejar.mjs?v=3357839';  //+AG docs/99 §6: los ocho con cara y nombre, en vez del "¡LISTO!"
-import { createPausa } from '../chassis/pausa.mjs?v=3357839';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
-import { cantarPuesto } from '../chassis/veredicto.mjs?v=3357839';   //+AG cartel de META: "en qué puesto has quedado", antes de soltar el resultado al shell
-import { createUiSfx } from '../chassis/uisfx.mjs?v=3357839';   //+AG doc 88: el sonido de "no puedo"
-import { createJuice } from '../chassis/juice.mjs?v=3357839';   //+AG doc 88: lo que pasa cuando el dedo toca un botón (los 3 modos)
+import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=68577ac';
+import { archFace } from '../chassis/facegen.mjs?v=68577ac';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
+import { itemTexture } from '../chassis/itemgen.mjs?v=68577ac';
+import { crearInventario } from '../chassis/invboost.mjs?v=68577ac';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
+import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=68577ac';
+import { buildSfxBuffer } from './sfxmap.mjs?v=68577ac';
+import { runToEnd } from '../chassis/simrun.mjs?v=68577ac';
+import { createCoach } from '../chassis/coach.mjs?v=68577ac';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { crearSalida } from '../chassis/salida.mjs?v=68577ac';   //+AG 2026-08-08 · preparar la bola durante la cuenta atrás
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=68577ac';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
+import { leerEmparejamiento, createEmparejamiento } from '../chassis/emparejar.mjs?v=68577ac';  //+AG docs/99 §6: los ocho con cara y nombre, en vez del "¡LISTO!"
+import { createPausa } from '../chassis/pausa.mjs?v=68577ac';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
+import { cantarPuesto } from '../chassis/veredicto.mjs?v=68577ac';   //+AG cartel de META: "en qué puesto has quedado", antes de soltar el resultado al shell
+import { createUiSfx } from '../chassis/uisfx.mjs?v=68577ac';   //+AG doc 88: el sonido de "no puedo"
+import { createJuice } from '../chassis/juice.mjs?v=68577ac';   //+AG doc 88: lo que pasa cuando el dedo toca un botón (los 3 modos)
 //+AG el ámbito NO es opcional: `#ctr button:disabled` le gana en especificidad a cualquier `.j-hit` suelto,
 //   y un booster se pone `disabled` en el MISMO frame en que se dispara. Sin el ámbito, el fogonazo del
 //   botón que más importa no se vería jamás (es la trampa del doc 74 §6, ahora con su nombre).

@@ -31,8 +31,8 @@
 //   igual y arranca en f=0. Sin &brival= (tutorial, torneo, motor abierto suelto) este módulo no se
 //   instancia siquiera y el cartel de siempre sigue en su sitio.
 
-import { TXT as TXT_ARR, blipSlot, blipFound } from './arranque.mjs?v=3357839';
-import { PAUSA } from './pausa.mjs?v=3357839';   //+AG "el mundo no se mueve": esta pantalla tampoco se auto-arranca (ver tick)
+import { TXT as TXT_ARR, blipSlot, blipFound } from './arranque.mjs?v=68577ac';
+import { PAUSA } from './pausa.mjs?v=68577ac';   //+AG "el mundo no se mueve": esta pantalla tampoco se auto-arranca (ver tick)
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────
 //  EL TRANSPORTE · qué le llega del shell y cómo se lee
