@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-08 ae32416">
+<meta name="bt-build" content="2026-08-08 66a6e7a">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>YouBall · La Gran Carrera (WebGL)</title>
 <style>
@@ -172,6 +172,20 @@
     box-shadow:0 5px 0 #0a2532, inset 0 2px 0 #ffffff55, inset 0 -3px 0 #00000044, 0 0 14px #59e0ff66}
   #ctr #bShd.ready{background:linear-gradient(180deg,#7fa8f5,#3f66c8 52%,#2c4b9e);
     box-shadow:0 5px 0 #0d1a38, inset 0 2px 0 #ffffff55, inset 0 -3px 0 #00000044, 0 0 14px #7fb2ff66}
+  /*+AG 2026-08-08 · EL ESCUDO PUESTO SE VE TAMBIÉN EN EL BOTÓN (Jaime: «no sabes si ni siquiera lo has
+     activado»). La burbuja sobre la bola es la respuesta principal, pero el dedo está AQUÍ y aquí es donde
+     mira quien acaba de pulsar. Mientras dura, la placa se enciende en cian claro; al acabarse cae sola al
+     gris de `.off` (recargando) y luego al azul de `.ready`, o sea que los tres estados son tres colores.
+     ⚠ ESTA REGLA VA DESPUÉS DE `#ctr #bShd.off` A PROPÓSITO: las dos son (2 ids, 1 clase), o sea que empatan
+       en especificidad y decide el ORDEN. Subida más arriba, el botón se quedaría gris estando activo — es la
+       cuarta vuelta de la misma trampa que documenta el bloque de `.off`, y esta vez está escrita antes de
+       tropezar. Y el icono se des-desatura aparte: `#ctr button.off .bi` lo grisea por su cuenta. */
+  #ctr #bShd.act{background:linear-gradient(180deg,#d3e8ff,#7fb2ff 52%,#4a86e8);
+    box-shadow:0 5px 0 #14346e, inset 0 2px 0 #ffffff88, inset 0 -3px 0 #00000033, 0 0 22px #8fd0ffcc;
+    animation:shdAct 1.2s ease-in-out infinite}
+  #ctr #bShd.act .bi{filter:none}
+  @keyframes shdAct{0%,100%{filter:drop-shadow(0 0 0 #8fd0ff00)}50%{filter:drop-shadow(0 0 9px #8fd0ffcc)}}
+  @media (prefers-reduced-motion:reduce){#ctr #bShd.act{animation:none}}
   /*+AG doc 40: el SUPER cargado usa el lenguaje unico de "listo para pulsar" del juego (shell juego.html):
      glow exterior que late + BARRIDO de brillo diagonal cada ~3s (el efecto canonico de Clash Royale para
      "hay una accion disponible ya"). Solo el super lo lleva: si brillan los tres botones, no avisa ninguno. */
@@ -300,8 +314,17 @@
   #count .n{letter-spacing:.05em}
   /* docs/56 regla 1: sobre el dorado el texto es BLANCO con trazo, NUNCA tinta oscura sobre amarillo
      (es el mismo arreglo que se le hizo al JUGAR del shell). Va aparte porque #bSup.ready le gana en
-     especificidad al grupo de arriba, no por orden. */
-  #bSup.ready{color:#fff}
+     especificidad al grupo de arriba, no por orden.
+     ⚠⚠ 2026-08-08 · ESTA REGLA NUNCA SE APLICÓ, y el fallo estaba en ella misma. Jaime, jugando: «el botón
+     de súper es texto negro con trazo negro, por lo cual queda feo». Y lo era: `#bSup.ready` es (1 id, 1
+     clase) y arriba está `#ctr #bSup.ready{color:#3a2400}`, que es (2 ids, 1 clase) y le gana. O sea que el
+     relleno se quedaba en el marrón oscuro del sistema viejo con el contorno indigo del kit encima: la
+     mitad de un patrón y la mitad del otro, exactamente la trampa que describe
+     `reference-trazo-de-la-letra` («si el color no es el que pusiste, busca el inline o la doble clase»).
+     Se le pone el MISMO número de ids que a la regla que le ganaba. Medido con getComputedStyle sobre el
+     botón pintado, no leído de aquí. El Cazador tenía el mismo fallo copiado; Luz Roja no, porque allí la
+     regla de arreglo ya llevaba `#controls` delante. */
+  #ctr #bSup.ready{color:#fff}
   /* doc 60 regla 9 · SUELO DE 11 px: ningun texto informativo del HUD baja de ahi. Los 10 y 9 px de este
      HUD venian de cuando el HUD era una herramienta de preview en pantalla grande. */
   #ctr .lbl, #superlbl, #ctr button .cd, #ctr button .k{font-size:11px}
@@ -380,7 +403,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=ae32416"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=66a6e7a"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -391,27 +414,28 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 </script>
 
 <script type="module">
-import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createItemPops, createBloom, frameOrtho, buildHud, updateHud } from '../chassis/gfx.mjs?v=ae32416';
-import { archLook } from '../chassis/ballmat.mjs?v=ae32416';   //+AG doc 41 bloque G: material de la bola-heroe
-import { attachSquash } from '../chassis/squash.mjs?v=ae32416';
+import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createItemPops, createBloom, frameOrtho, buildHud, updateHud } from '../chassis/gfx.mjs?v=66a6e7a';
+import { archLook } from '../chassis/ballmat.mjs?v=66a6e7a';   //+AG doc 41 bloque G: material de la bola-heroe
+import { attachSquash } from '../chassis/squash.mjs?v=66a6e7a';
+import { crearEscudos } from '../chassis/escudo.mjs?v=66a6e7a';   //+AG 2026-08-08: la burbuja que dice "llevo escudo puesto"
 import { Sim, RNG, TEAMS, SHORT_COLORS, BALL_R, WIDTH, GATE_Y, GATE_H, TOP, FPS,
-         DIR, N_BALLS, CAM_SCALE, ASPA_R, ASPA_THICK, PLAT_HW, PLAT_HH } from './sim.js?v=ae32416';   //+AG extras de la capa de agencia
+         DIR, N_BALLS, CAM_SCALE, ASPA_R, ASPA_THICK, PLAT_HW, PLAT_HH } from './sim.js?v=66a6e7a';   //+AG extras de la capa de agencia
 //+AG doc 62: los encuadres del cierre (sim.hero_scale / sim.celeb_scale) se leen del OBJETO sim, no por
 //   import. Un export que la CDN aún no ha refrescado tumba el módulo entero y la partida no arranca (pasó
 //   en producción el 2-ago); un campo que falta degrada a la cámara de siempre. Ver la nota en sim.js.
-import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=ae32416';
-import { archFace } from '../chassis/facegen.mjs?v=ae32416';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
-import { itemTexture } from '../chassis/itemgen.mjs?v=ae32416';
-import { crearInventario } from '../chassis/invboost.mjs?v=ae32416';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
-import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=ae32416';
-import { buildSfxBuffer } from './sfxmap.mjs?v=ae32416';
-import { runToEnd } from '../chassis/simrun.mjs?v=ae32416';
-import { createCoach } from '../chassis/coach.mjs?v=ae32416';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
-import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=ae32416';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
-import { createPausa } from '../chassis/pausa.mjs?v=ae32416';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
-import { cantarPuesto } from '../chassis/veredicto.mjs?v=ae32416';   //+AG cartel de META: "en qué puesto has quedado", antes de soltar el resultado al shell
-import { createUiSfx } from '../chassis/uisfx.mjs?v=ae32416';   //+AG doc 88: el sonido de "no puedo"
-import { createJuice } from '../chassis/juice.mjs?v=ae32416';   //+AG doc 88: lo que pasa cuando el dedo toca un botón (los 3 modos)
+import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=66a6e7a';
+import { archFace } from '../chassis/facegen.mjs?v=66a6e7a';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
+import { itemTexture } from '../chassis/itemgen.mjs?v=66a6e7a';
+import { crearInventario } from '../chassis/invboost.mjs?v=66a6e7a';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
+import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=66a6e7a';
+import { buildSfxBuffer } from './sfxmap.mjs?v=66a6e7a';
+import { runToEnd } from '../chassis/simrun.mjs?v=66a6e7a';
+import { createCoach } from '../chassis/coach.mjs?v=66a6e7a';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=66a6e7a';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
+import { createPausa } from '../chassis/pausa.mjs?v=66a6e7a';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
+import { cantarPuesto } from '../chassis/veredicto.mjs?v=66a6e7a';   //+AG cartel de META: "en qué puesto has quedado", antes de soltar el resultado al shell
+import { createUiSfx } from '../chassis/uisfx.mjs?v=66a6e7a';   //+AG doc 88: el sonido de "no puedo"
+import { createJuice } from '../chassis/juice.mjs?v=66a6e7a';   //+AG doc 88: lo que pasa cuando el dedo toca un botón (los 3 modos)
 //+AG el ámbito NO es opcional: `#ctr button:disabled` le gana en especificidad a cualquier `.j-hit` suelto,
 //   y un booster se pone `disabled` en el MISMO frame en que se dispara. Sin el ámbito, el fogonazo del
 //   botón que más importa no se vería jamás (es la trampa del doc 74 §6, ahora con su nombre).
@@ -553,6 +577,9 @@ const trophy=new THREE.Mesh(new THREE.PlaneGeometry(5,5), new THREE.MeshBasicMat
 const youRing=new THREE.Mesh(new THREE.RingGeometry(BALL_R*1.35, BALL_R*1.55, 36),
   new THREE.MeshBasicMaterial({color:0xffffff, toneMapped:false, transparent:true, opacity:0.8, side:THREE.DoubleSide, depthWrite:false}));
 youRing.visible=false; scene.add(youRing);
+//+AG 2026-08-08 · el pool de burbujas de escudo se construye MÁS ABAJO, en cuanto se sabe si esto es el juego
+//   o el vídeo del canal: la burbuja entra en el juego y el torneo 16:9 se queda como está (identidad).
+let escudos=null; const escItems=Array.from({length:N_BALLS},()=>({x:0,y:0,quedan:0}));
 const youLbl=document.getElementById('youlbl');
 const _v3=new THREE.Vector3();
 
@@ -808,6 +835,13 @@ function overtakes(){
 // (reloj determinista por frame, NO performance.now → en captura = tembleque de la copa).
 function sync(dt, a=1){
   const celebrating = sim.winner_team!==null && sim.decision_frame!==null;
+  //+AG 2026-08-08 · LA FIESTA ES CUANDO YO LLEGO, no cuando gana otro. Va de la mano del arreglo de cámara de
+  //   sim.js: antes, al decidirse la carrera, la cámara se iba a la meta y la copa + el confeti se pintaban
+  //   ENCIMA de ese encuadre, así que cuadraba. Ahora la cámara se queda contigo mientras bajas — y como la
+  //   copa se coloca RELATIVA A LA CÁMARA (camX, camY+camS·0.28), sin esto te bajaría una copa gigante y una
+  //   nube de confeti persiguiéndote por la pista, contando además una mentira: que has ganado tú.
+  //   El torneo/vídeo no se entera (INDIVIDUAL=false ⇒ fiesta === celebrating, mismo pixel de siempre).
+  const fiesta = celebrating && (!INDIVIDUAL || sim.player.rank!==null);
   const f=sim.f, fF=Math.max(0,sim.f-1+a), simNowF=fF*(1000/FPS);
   const camY=prevCam+(sim.cam-prevCam)*a, camS=prevScale+(sim.cam_scale-prevScale)*a, camX=camXAt(a);
   //+AG doc 62 EL PLANO DEL HÉROE (individual): la bola que protagoniza el cierre (TÚ si ganas, el GANADOR si no).
@@ -883,7 +917,10 @@ function sync(dt, a=1){
     platMs[i].userData.chev.scale.x=p.vx>=0?1:-1; }
   //+AG anillo TU sobre la bola del jugador (posicion interpolada; cian mientras dura el escudo), patron cazador
   { const plb=sim.balls[0];
-    if(plb.rank===null && !celebrating){
+    //+AG 2026-08-08: el anillo TU y la etiqueta se apagaban en cuanto GANABA OTRO, aunque tú siguieras bajando.
+    //   Era la misma familia que el fallo de la cámara: al decidirse la carrera dejabas de existir en pantalla.
+    //   Ahora, en el juego, mandan sólo dos cosas: sigues corriendo ⇒ se te ve quién eres. (El vídeo, igual.)
+    if(plb.rank===null && (INDIVIDUAL || !celebrating)){
       const pbx=px[0]+(plb.x-px[0])*a, pby=py[0]+(plb.y-py[0])*a, shieldOn=plb.shield>0;
       youRing.visible=true; youRing.position.set(pbx,pby,0.55+BALL_R+0.30);
       youRing.material.color.set(shieldOn?0x54d8ff:0xffffff);
@@ -947,10 +984,13 @@ function sync(dt, a=1){
     o.setExpr(archFace(i===0?ARCH_KEY_P:null, emo.resolve(i,f)));   //+AG en reposo, TU bola pone la cara de su ficha
   }
   // celebración: confeti cayendo sobre la meta (la cámara de la sim ya hace zoom a la meta)
-  if(celebrating){
+  if(fiesta){
     trophy.visible=true;
     if(sim.winner_team!=null){ const wc=PAL[sim.winner_team].color; trophy.material.color.setRGB(wc[0],wc[1],wc[2]); }   // copa del color del ganador (PAL activa)
-    const ts=Math.min(1,(fF-sim.decision_frame)/10);   // pop al decidirse
+    //+AG 2026-08-08: el golpe de entrada de la copa se mide desde que EMPIEZA LA FIESTA, no desde que se decidió
+    //   la carrera. En individual la fiesta arranca cuando cruzo yo, que puede ser 8 s después: con la cuenta
+    //   vieja el pop ya se había consumido a solas fuera de plano y la copa aparecía de golpe a tamaño final.
+    const ts=Math.min(1,(fF-(INDIVIDUAL?(sim.playerDoneF??sim.decision_frame):sim.decision_frame))/10);   // pop al empezar la fiesta
     //+AG doc 62: en el plano del héroe la copa y el confeti se miden en PANTALLA, no en mundo. Sin esto, al
     //   acortar el encuadre (13u → 8u) la copa crecía un 60% y se salía por arriba, y el confeti —repartido por
     //   el ancho de la PISTA— se veía a la mitad de denso. Con camS=CELEB_SCALE y camX=0 (torneo) sale la misma
@@ -969,6 +1009,16 @@ function sync(dt, a=1){
     }
     confettiInit=true;
   } else { trophy.visible=false; if(confettiInit){ for(const m of confetti) m.visible=false; confettiInit=false; } }
+  //+AG 2026-08-08 · LA BURBUJA DE ESCUDO (chassis/escudo.mjs). Se pinta para TODAS las bolas, no sólo la tuya:
+  //   una rival con escudo rebota como un muro, y hasta hoy lo hacía sin avisar. Se le pasa el frame que le
+  //   queda a cada una, y el módulo devuelve las que se les acaba de caer para tirarles el anillo de chispas
+  //   («se me ha acabado» es información: un escudo que se apaga en silencio se descubre a golpes).
+  if(escudos){
+    for(let i=0;i<sim.balls.length;i++){ const b=sim.balls[i];
+      const it=escItems[i]; it.quedan = b.rank===null ? b.shield : 0;
+      it.x = px[i]+(b.x-px[i])*a+(b===hero?heroDx:0); it.y = py[i]+(b.y-py[i])*a; }
+    for(const i of escudos.sync(escItems, simNowF)) P.ring(escItems[i].x, escItems[i].y, [0.33,0.85,1.0], 0.55);
+  }
 }
 
 // === PANELES LATERALES (broadcast 16:9): la carrera se renderiza en una COLUMNA CENTRAL y las bandas
@@ -1210,6 +1260,9 @@ if(indOpts && !INV.ilimitado) indOpts.botStock = BOT_STOCK;
 //   Es 100% cosmetico: no toca la Sim, asi que no puede mover el balance ni un milimetro.
 const ARCH_LOOK_P = INDIVIDUAL ? archLook(params.get('arch')) : null;
 const ARCH_KEY_P  = ARCH_LOOK_P ? params.get('arch') : null;   //+AG el prop pasa por la MISMA puerta que el material
+//+AG 2026-08-08 · aquí nace la burbuja de escudo (ver chassis/escudo.mjs y la nota del sync). Va DELANTE de la
+//   bola (z 0.5+BALL_R) y DETRÁS del anillo TU (z 1.27), que sigue mandando en "quién eres tú".
+if(INDIVIDUAL) escudos=crearEscudos({ scene, radio:BALL_R, n:N_BALLS, z:0.5+BALL_R+0.04, bloom:BLOOM });
 const PAL = INDIVIDUAL ? SHORT_COLORS : TEAMS;   // paleta ACTIVA (color por índice de "equipo": 4 torneo · 8 individual)
 const NT  = INDIVIDUAL ? 8 : 4;                  // nº de "equipos"/colores
 const NB  = INDIVIDUAL ? 8 : N_BALLS;            // nº de bolas (8 individual · 12 torneo)
@@ -1563,6 +1616,7 @@ function updateHUD(){ if(!sim) return; const t=T(), place=sim.playerPlace(), p=s
   //+AG doc 88: «listo» deja de ser un pie de 11 px y pasa a ser el propio botón (ver el CSS .ready).
   nb.classList.toggle('ready',nOk); sb.classList.toggle('ready',sOk);
   su.classList.toggle('ready',ready);
+  sb.classList.toggle('act', p.shield>0 && p.rank===null);   //+AG 2026-08-08: "lo llevo PUESTO" es un tercer estado, y hasta hoy no existía
   //+AG cuando hay inventario, el pie del botón es el CONTADOR (×3), que es el dato que importa cuando el
   //   recurso es finito. La recarga sigue mandando mientras corre, y "sin" es el final del camino.
   //   ⚠ el "sin stock" se dice con ×0 y no con una palabra: el juego va a 20 idiomas y el canon del
@@ -1581,6 +1635,7 @@ function updateHUD(){ if(!sim) return; const t=T(), place=sim.playerPlace(), p=s
 function startRound(){ phase='intro'; introT=0; introRingT=-1; clearTimeout(goT);
   btReset();   //+AG 2026-08-06 ronda nueva = uso gratis nuevo (el stock comprado ya lo descontó el shell al cerrar la anterior)
   seed=newSeed(); buildSim(seed); el('ov').classList.add('hide'); el('count').classList.add('show');
+  if(escudos) escudos.reset();   //+AG 2026-08-08: ronda nueva = burbujas apagadas (si no, la del último frame se quedaba pegada)
   //+AG los beeps se programan DE UNA VEZ con la misma cuenta que pintan los números (DIGITS/DIGIT), así caen
   //   clavados aunque un frame se retrase. Si el audio no está desbloqueado (nadie tocó "¡LISTO!") no suena nada.
   if(sfxOn && audio.unlocked) sfxCountdown(audio, { digits:DIGITS, digitDur:DIGIT, goAt:INTRO_DUR }); }

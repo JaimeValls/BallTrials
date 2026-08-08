@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-08 ae32416">
+<meta name="bt-build" content="2026-08-08 66a6e7a">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <!--+AG el HTML se sirve en INGLES (defecto del juego); ?lang=es lo traduce por JS (applyLang) -->
 <title>YouBall · The Hunter (WebGL)</title>
@@ -135,6 +135,16 @@
     box-shadow:0 5px 0 #0a2532, inset 0 2px 0 #ffffff55, inset 0 -3px 0 #00000044, 0 0 14px #59e0ff66}
   #controls #bShd.ready{background:linear-gradient(180deg,#7fa8f5,#3f66c8 52%,#2c4b9e);
     box-shadow:0 5px 0 #0d1a38, inset 0 2px 0 #ffffff55, inset 0 -3px 0 #00000044, 0 0 14px #7fb2ff66}
+  /*+AG 2026-08-08 · EL ESCUDO PUESTO SE VE TAMBIÉN EN EL BOTÓN (misma pieza y mismo porqué que en la Carrera:
+     Jaime, «no sabes si ni siquiera lo has activado»). Tres estados = tres colores: cian claro puesto, gris
+     recargando, azul listo.
+     ⚠ VA DESPUÉS DE `#controls #bShd.off` A PROPÓSITO: las dos son (2 ids, 1 clase) y decide el orden. */
+  #controls #bShd.act{background:linear-gradient(180deg,#d3e8ff,#7fb2ff 52%,#4a86e8);
+    box-shadow:0 5px 0 #14346e, inset 0 2px 0 #ffffff88, inset 0 -3px 0 #00000033, 0 0 22px #8fd0ffcc;
+    animation:shdAct 1.2s ease-in-out infinite}
+  #controls #bShd.act .bi{filter:none}
+  @keyframes shdAct{0%,100%{filter:drop-shadow(0 0 0 #8fd0ff00)}50%{filter:drop-shadow(0 0 9px #8fd0ffcc)}}
+  @media (prefers-reduced-motion:reduce){#controls #bShd.act{animation:none}}
   /*+AG doc 40: mismo lenguaje de "listo para pulsar" que el resto del juego (glow que late + barrido de brillo) */
   #controls #bSup.ready{background:linear-gradient(180deg,#ffe98f,#ffb84a 52%,#ff9021);color:#3a2400;
     box-shadow:0 5px 0 #a85a12, inset 0 2px 0 #ffffff77, inset 0 -3px 0 #00000033, 0 0 22px #ffb03dcc;
@@ -221,8 +231,13 @@
   #count .n{letter-spacing:.05em}
   /* docs/56 regla 1: sobre el dorado el texto es BLANCO con trazo, NUNCA tinta oscura sobre amarillo
      (es el mismo arreglo que se le hizo al JUGAR del shell). Van aparte porque #bSup.ready y #specExit
-     le ganan en especificidad al grupo de arriba, no por orden. */
-  #bSup.ready{color:#fff}
+     le ganan en especificidad al grupo de arriba, no por orden.
+     ⚠⚠ 2026-08-08 · LA DEL SÚPER NUNCA SE APLICÓ (Jaime lo vio en la Carrera: «texto negro con trazo negro,
+     por lo cual queda feo»; aquí estaba copiado igual). `#bSup.ready` es (1 id, 1 clase) y arriba está
+     `#controls #bSup.ready{color:#3a2400}`, que es (2 ids, 1 clase) y le gana: quedaba relleno marrón del
+     sistema viejo con el contorno indigo del kit encima. Se le pone el mismo número de ids. `#specExit` sí
+     funcionaba (no tiene ninguna regla de dos ids que le gane) y se queda como está. */
+  #controls #bSup.ready{color:#fff}
   #specExit{color:#fff}
   /* doc 60 regla 9 · SUELO DE 11 px: ningun texto informativo del HUD baja de ahi. Los 10 y 9 px de este
      HUD venian de cuando el HUD era una herramienta de preview en pantalla grande. */
@@ -304,7 +319,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=ae32416"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=66a6e7a"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -315,27 +330,28 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 </script>
 
 <script type="module">
-import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, makeFacePlane, createItemPool, createItemPops, createStarBurst, createWindTrail, createBloom, frameOrtho } from '../chassis/gfx.mjs?v=ae32416';
-import { archLook } from '../chassis/ballmat.mjs?v=ae32416';   //+AG doc 41 bloque G: material de la bola-heroe
-import { attachSquash } from '../chassis/squash.mjs?v=ae32416';
-import { Sim, RNG, TEAMS, BALL_R, ARENA_W, ARENA_H, FPS, AGENCIA } from './sim.js?v=ae32416';
-import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=ae32416';
-import { archFace } from '../chassis/facegen.mjs?v=ae32416';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
-import { createCelebration } from '../chassis/celebration.mjs?v=ae32416';
-import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=ae32416';
-import { crearInventario } from '../chassis/invboost.mjs?v=ae32416';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
-import { buildSfxBuffer } from './sfxmap.mjs?v=ae32416';
-import { createCoach } from '../chassis/coach.mjs?v=ae32416';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
-import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=ae32416';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
-import { createUiSfx } from '../chassis/uisfx.mjs?v=ae32416';   //+AG doc 88: el sonido de "no puedo"
-import { createJuice } from '../chassis/juice.mjs?v=ae32416';   //+AG doc 88: lo que pasa cuando el dedo toca un botón (los 3 modos)
+import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, makeFacePlane, createItemPool, createItemPops, createStarBurst, createWindTrail, createBloom, frameOrtho } from '../chassis/gfx.mjs?v=66a6e7a';
+import { archLook } from '../chassis/ballmat.mjs?v=66a6e7a';   //+AG doc 41 bloque G: material de la bola-heroe
+import { attachSquash } from '../chassis/squash.mjs?v=66a6e7a';
+import { crearEscudos } from '../chassis/escudo.mjs?v=66a6e7a';   //+AG 2026-08-08: la burbuja que dice "llevo escudo puesto" (misma pieza que la Carrera)
+import { Sim, RNG, TEAMS, BALL_R, ARENA_W, ARENA_H, FPS, AGENCIA } from './sim.js?v=66a6e7a';
+import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=66a6e7a';
+import { archFace } from '../chassis/facegen.mjs?v=66a6e7a';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
+import { createCelebration } from '../chassis/celebration.mjs?v=66a6e7a';
+import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=66a6e7a';
+import { crearInventario } from '../chassis/invboost.mjs?v=66a6e7a';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
+import { buildSfxBuffer } from './sfxmap.mjs?v=66a6e7a';
+import { createCoach } from '../chassis/coach.mjs?v=66a6e7a';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=66a6e7a';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
+import { createUiSfx } from '../chassis/uisfx.mjs?v=66a6e7a';   //+AG doc 88: el sonido de "no puedo"
+import { createJuice } from '../chassis/juice.mjs?v=66a6e7a';   //+AG doc 88: lo que pasa cuando el dedo toca un botón (los 3 modos)
 //+AG el ámbito NO es opcional: la regla base es `#controls button` (id + etiqueta) y le gana en
 //   especificidad a cualquier `.j-hit` suelto. Es la misma trampa que ya costó una versión muerta en la
 //   Carrera y otra en Luz Roja; aquí va escrita para no repetirla una tercera vez.
 const juice = createJuice({ ambito:'#controls', reducido: new URLSearchParams(location.search).get('redfx')==='1' });
-import { createPausa } from '../chassis/pausa.mjs?v=ae32416';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
-import { cantarPuesto } from '../chassis/veredicto.mjs?v=ae32416';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
-import { runToEnd } from '../chassis/simrun.mjs?v=ae32416';
+import { createPausa } from '../chassis/pausa.mjs?v=66a6e7a';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
+import { cantarPuesto } from '../chassis/veredicto.mjs?v=66a6e7a';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
+import { runToEnd } from '../chassis/simrun.mjs?v=66a6e7a';
 
 window.addEventListener('error', e => { document.getElementById('err').style.display='grid'; console.error(e.error||e.message); });
 
@@ -459,6 +475,13 @@ if(NEW_LOOK){ reticleTeeth=new THREE.Group();
 const youRing = new THREE.Mesh(new THREE.RingGeometry(BALL_R*1.35, BALL_R*1.55, 36),
   new THREE.MeshBasicMaterial({color:0xffffff, toneMapped:false, transparent:true, opacity:0.8, side:THREE.DoubleSide, depthWrite:false}));
 youRing.visible=false; scene.add(youRing);
+//+AG 2026-08-08 · LA BURBUJA DE ESCUDO (chassis/escudo.mjs, la misma pieza que la Carrera). Jaime lo vio allí
+//   —«no sale ningún efecto sobre la bola, por lo cual no sabes si ni siquiera lo has activado»— y aquí estaba
+//   igual: el único aviso era que este anillo de 0,2 u se ponía cian. Aquí sólo TÚ tienes escudo (`playerShield`
+//   es del jugador), así que el pool es de una. En Luz Roja el equivalente es el FANTASMA, y ese ya se ve: le
+//   cambia el material del cuerpo a translúcido.
+const escudos = crearEscudos({ scene, radio:BALL_R, n:1, z:0.55+BALL_R+0.04, bloom:BLOOM });
+const escItems = [{x:0,y:0,quedan:0}];
 const youLbl = document.getElementById('youlbl');
 const _v3 = new THREE.Vector3();
 
@@ -495,6 +518,7 @@ function buildSim(s){
   if(orbMeshes) orbMeshes.forEach(m=>itemPool.release(m));
   ballObjs=sim.balls.map((b,i)=>attachSquash(makeBallVinyl(scene,b,BALL_R, i===0?ARCH_LOOK_P:null, i===0?ARCH_KEY_P:null), { R:BALL_R, vRef:12, wind, stars }));   // VINILO v2; el CAZADOR conserva su cara de depredador (makeFacePlane)
   orbMeshes=new Map(); celCam=null; celHero=false;
+  escudos.reset();   //+AG 2026-08-08: ronda nueva = burbuja apagada (si no, la del último frame se queda pegada)
   if(stains.length){ stains.forEach(m=>{ scene.remove(m); m.material.dispose(); }); stains=[]; }   // limpiar manchas de la ronda anterior
   flashUntil=-1; if(flashEl) flashEl.style.opacity='0';
   px=sim.balls.map(b=>b.x); py=sim.balls.map(b=>b.y);
@@ -665,6 +689,12 @@ function sync(dt, a=1){
     youLbl.style.top=((-_v3.y*0.5+0.5)*innerHeight).toFixed(0)+'px';
     youLbl.style.opacity='1';
   } else { youRing.visible=false; youLbl.style.opacity='0'; }
+  //+AG 2026-08-08 · la burbuja de escudo sobre tu bola. `shield_until` de este modo es un SELLO DE FRAME (no
+  //   una cuenta atrás como en la Carrera), así que lo que se le pasa al módulo es la resta.
+  { const vivo = plb.rank===null && !celebrating;
+    escItems[0].quedan = vivo ? Math.max(0, plb.shield_until - f) : 0;
+    escItems[0].x = px[0]+(plb.x-px[0])*a; escItems[0].y = py[0]+(plb.y-py[0])*a;
+    for(const i of escudos.sync(escItems, simNowF)) P.ring(escItems[i].x, escItems[i].y, [0.33,0.85,1.0], 0.55); }
   // retícula
   if(sim.lock>=0 && sim.balls[sim.lock] && sim.balls[sim.lock].rank===null){
     const lb=sim.balls[sim.lock], li=sim.lock;
@@ -984,6 +1014,7 @@ function updateControls(){
   apaga(bShd,!sOk); cdShd.textContent=sd>0?Math.ceil(sd/30)+'s':(qs===Infinity?'':'×'+qs);
   //+AG doc 88: «listo» deja de ser un pie de 11 px y pasa a ser el propio botón (ver el CSS .ready).
   bDash.classList.toggle('ready',dOk); bShd.classList.toggle('ready',sOk);
+  bShd.classList.toggle('act', !dead && f < p.shield_until);   //+AG 2026-08-08: "lo llevo PUESTO" es un tercer estado (igual que en la Carrera)
   //+AG doc 61: sin ningún orbe en pista, "a por un booster" no hacía absolutamente nada y nadie te lo decía.
   //   Se apaga. Si esa YA es tu orden no se toca: la orden sigue viva y se cumple en cuanto salga un orbe
   //   (medido: solo el 3,9% del tiempo hay cero orbes, 1,4 veces por partida — no parpadea).

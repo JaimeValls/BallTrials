@@ -759,12 +759,23 @@ class Sim{
       ty=Math.max(hero.y+HERO_LIFT, this.cam_scale/2+HERO_BOTTOM);
     }
     else if(this.decision_frame!==null&&this.player.rank!==null){ ty=GATE_Y+CELEB_SCALE*0.32; tscale=CELEB_SCALE; }   // celebración plena solo cuando el jugador ya llegó
-    //+AG INDIVIDUAL: en cuanto hay ganador (aunque tú sigas cayendo) la cámara ENCUADRA LA META, no tu bola arriba.
-    //   Antes se quedaba contigo a media caída y el ganador cruzaba/celebraba fuera de plano → "me dice que ganó
-    //   rosa pero no veo bolas rosas bailando" (Jaime 2026-07-23). Con esto ves a la ganadora cruzar y bailar
-    //   mientras tú bajas hacia la meta a por tu puesto. Solo individual: el torneo/vídeo no cambia (identidad).
-    else if(this.individual&&this.decision_frame!==null){ ty=GATE_Y+FINISH_SCALE/2-3.0; tscale=FINISH_SCALE; }
-    else { const foc=Math.min(py,leadY+6); if(foc<GATE_Y+CAM_FOCUS_ZONE){ ty=GATE_Y+FINISH_SCALE/2-3.0; tscale=FINISH_SCALE; }
+    //+AG 2026-08-08 · LA CÁMARA NO SE OLVIDA DE TI. NUNCA. (Jaime, jugando el tutorial: «si alguien gana o va a
+    //   ganar y yo me he quedado muy atrasado, la cámara se olvida de mí y se centra en el ganador, lo cual es
+    //   horroroso. Eso no puede ocurrir»). Aquí había DOS agujeros, y los dos los abrí yo:
+    //     1) «VA A GANAR»: el foco era `Math.min(py, leadY+6)`, o sea que en cuanto el LÍDER entraba en la zona
+    //        de meta la cámara se clavaba abajo — tú podías ir 40 unidades más arriba y desaparecías de plano.
+    //     2) «HA GANADO»: al cruzar el primero se encuadraba la META hasta que tú llegaras. Lo puse el 23 de
+    //        julio para arreglar lo contrario («me dice que ganó rosa pero no veo bolas rosas bailando») y me
+    //        pasé al otro lado: el precio era perder al jugador, y ese precio no se paga.
+    //   La regla que queda, ELEGIDA POR ÉL entre tres opciones: la cámara sigue a TU bola de principio a fin, y
+    //   la fiesta del ganador se ve cuando TÚ cruzas, en el plano del héroe de arriba (doc 62), que para eso
+    //   existe. Es literalmente lo que ya hacían los otros dos modos: Luz Roja va centrada en ti (PCAM) y el
+    //   Cazador mezcla el centro con tu bola y abre el plano lo justo para que siempre entres (Jaime 2026-07-10).
+    //   La Carrera era el único modo sin esta regla.
+    //   ⚠ EL TORNEO/VÍDEO NO SE TOCA: `leadY` sigue mandando ahí y `decision_frame` sigue sin cortar nada, así
+    //     que el canal conserva su identidad byte a byte. Todo lo nuevo cuelga de `this.individual`.
+    else { const foc=this.individual?py:Math.min(py,leadY+6);
+      if(foc<GATE_Y+CAM_FOCUS_ZONE){ ty=GATE_Y+FINISH_SCALE/2-3.0; tscale=FINISH_SCALE; }
       else { ty=Math.min(Math.max(py,CAM_SCALE/2-1.0),TOP-CAM_SCALE/2); tscale=CAM_SCALE; } }
     this.cam+=(ty-this.cam)*0.12; this.cam_scale+=(tscale-this.cam_scale)*0.08;
     this.cam_x+=(tx-this.cam_x)*0.12;   //+AG doc 62: mismo suavizado que el vertical (tx=0 salvo plano del héroe)
