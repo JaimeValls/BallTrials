@@ -92,6 +92,32 @@ export const AGENCIA = {
   giroF: 8,        // cuántos frames dura ese extra (0,27 s: gira en 0,40 s en vez de 0,67 s)
   fijar: true,     // fijar el orbe al pulsar en vez de recalcular el más cercano cada frame (indecisión)
 };
+//+AG 2026-08-08 · docs/99 §3.1 · EL CARÁCTER DE UN BOT: CUÁNDO SUELTA LO QUE TIENE.
+//
+//   Encargo de Jaime, sus palabras: «un sistema que administre sus boosters acorde a su personalidad y
+//   su inventario durante la partida, para que ellos también intenten ganar».
+//
+//   QUÉ ES «PELIGRO» AQUÍ. En este modo no hay carril ni meta: lo único que puede matarte es el cazador.
+//   Así que el peligro de una bola es una sola cuenta — cómo de cerca está el cazador y si la ha FIJADO
+//   a ella (`lock`). Vale 1 pegado y fijada, y baja a 0 al alejarse. Cada carácter dispara a partir de
+//   un umbral distinto de esa cuenta, y ahí está toda su personalidad:
+//     · táctico  se cubre solo cuando el cazador va a por él de verdad — el que mejor rinde por moneda
+//     · nervioso salta con cualquier susto, aunque el cazador ni le mire: gasta el doble para lo mismo
+//     · derrochador lo suelta pronto, se queda seco y el tramo final lo juega desnudo
+//     · ahorrador espera tanto que a veces se cubre cuando ya se lo han comido
+//
+//   ⚠ Y LA PERICIA NO ES OTRO CARÁCTER: ES CUÁNTO SE ACERCA AL JUEGO ÓPTIMO. El umbral que usa un bot
+//   se interpola entre su manía y `OPTIMO` según su pericia, así que un crack converge al juego bueno
+//   haga el carácter que haga, y un flojo juega su manía entera. Eso es exactamente lo que Jaime
+//   describió —«hay unos bots que juegan muy bien y son los que están más arriba»— y es lo que hace que
+//   la clasificación signifique algo en vez de ser una lista ordenada por un número secreto.
+const BOT_OPTIMO = { escudo: 0.70, dash: 0.55 };
+const BOT_CHAR = {
+  tactico:     { escudo: 0.72, dash: 0.58 },
+  nervioso:    { escudo: 0.34, dash: 0.30 },
+  derrochador: { escudo: 0.26, dash: 0.22 },
+  ahorrador:   { escudo: 0.88, dash: 0.80 },
+};
 //+AG 2026-08-06 (Jaime): el ESCUDO pasa a durar 5 s en todos los modos que lo tienen (aquí y en la
 //   Carrera). A 30 fps son 150 frames. El DASH no se toca: es el booster propio de este modo y lo que
 //   se pidió alargar fue el nitro, que aquí no existe. El súper (señuelo) tampoco se toca.
@@ -180,6 +206,32 @@ export class Sim {
     this.pmul = _S ? { vel:statMul(_S[0]), ace:statMul(_S[1]), pes:statMul(_S[2]), aga:statMul(_S[3]), res:statMul(_S[4]), bst:statMul(_S[5]) } : NEUTRAL_MUL;
     //+AG doc 39: el RASGO de la bola equipada. Mismo doble candado y sin consumir RNG, como los stats.
     this.trait = (this.individual && TRAITS_CAZA.has(opts.trait)) ? opts.trait : null;
+    //+AG ⚠⚠ 2026-08-08 · docs/99 · LOS RIVALES DE ESTE MODO NO ERAN NADIE. Hasta hoy los siete bots del
+    //   Cazador eran EXACTAMENTE la misma bola siete veces: se movían por el mismo campo de fuerzas
+    //   (pánico + cohesión + orbes), sin una sola diferencia entre ellos, y NO USABAN NI UN BOOSTER —
+    //   ni escudo ni impulso, solo el jugador. Así que el bot que la clasificación pinta 3.º con 1.200
+    //   copas jugaba igual que el último de la tabla. Es el agujero 3 de docs/99, y en este modo era
+    //   peor de lo que decía el documento: no es que tuvieran boosters infinitos, es que no los tocaban.
+    //   `botSkills` trae la pericia de cada rival YA emparejado por el shell (mismo `&bskill=` que la
+    //   Carrera) y `botChars` su carácter de gasto. Mismo doble candado que stats/trait: solo INDIVIDUAL
+    //   y validado valor a valor, así que basura entra y no hace nada.
+    //   ⚠ Y NADA DE ESTO CONSUME RNG, a propósito y a diferencia de la Carrera: aquí el steering de los
+    //   bots es determinista puro (no hay una sola tirada por bola), así que meter uno desplazaría el
+    //   sorteo de spawns y la partida entera dejaría de ser la de antes. Las decisiones de abajo salen
+    //   del ESTADO (distancia al cazador y a quién ha fijado), no de dados. Verificado con
+    //   tools/huella-cazador.mjs: sin estos parámetros, 80/80 partidas bit-idénticas.
+    this.botSkills = null;
+    if (this.individual && Array.isArray(opts.botSkills)){
+      const v = opts.botSkills.filter(x => typeof x === 'number' && isFinite(x) && x >= 0 && x <= 2);
+      if (v.length === opts.botSkills.length && v.length) this.botSkills = v;
+    }
+    //+AG el carácter viaja aparte de la pericia porque son cosas distintas (docs/99 §3.1): la pericia
+    //   dice si el bot juega bien, el carácter dice CUÁNDO suelta lo que tiene. Sin lista, todos usan el
+    //   neutro y el modo sigue teniendo bots con pericia — degrada hacia lo razonable, no hacia lo roto.
+    this.botChars = (this.individual && Array.isArray(opts.botChars)) ? opts.botChars.map(c => BOT_CHAR[c] ? c : 'tactico') : null;
+    //+AG cuántos usos de cada booster tiene un bot en toda la partida. Igual que en la Carrera, el número
+    //   YA lleva sumado el uso gratis del jugador, para que la pista salga de la misma regla para todos.
+    this.botStock = (this.individual && typeof opts.botStock === 'number' && opts.botStock >= 0) ? (opts.botStock | 0) : null;
     const n6 = this.individual && opts.n === 6;
     this.teams = this.individual ? (n6 ? SHORT_COLORS_6 : SHORT_COLORS) : TEAMS;
     this.ballsPerTeam = this.individual ? 1 : BALLS_PER_TEAM;
@@ -223,7 +275,23 @@ export class Sim {
         x: bx, y: by, vx: JITTER0 * ux / ul, vy: JITTER0 * uy / ul, m: 1.0, scale: 1.0,
         rank: null, dash_until: -1, touch_f: -99, touch_by: null, aggro_immune_until: -1,
         isPlayer: i === 0, shield_until: -1, dash_cd: -1, shield_cd: -1,   /*+AG jugador = balls[0] */
-        appeal: rng.uniform(-1.0, 1.0) });
+        appeal: rng.uniform(-1.0, 1.0),
+        //+AG docs/99 · quién es este rival. Los tres campos van DESPUÉS del último `rng.uniform` y
+        //   ninguno consume RNG: la cinta de aleatoriedad queda intacta y el mapa, los spawns y las
+        //   direcciones iniciales salen clavados a los de antes. `null` = el bot anónimo de siempre.
+        //   El índice va -1 porque balls[0] es el jugador y el shell solo manda a los rivales.
+        _skill: (this.botSkills && i > 0 && this.botSkills[i - 1] != null) ? this.botSkills[i - 1] : null,
+        _char:  (this.botChars  && i > 0 && this.botChars[i - 1])          ? this.botChars[i - 1]  : 'tactico',
+        //+AG su inventario para ESTA partida, repartido por pericia (docs/99 §3.1: la pericia SÍ da más
+        //   boosters, que es lo que Jaime pidió con «los de arriba tienen muchos nitros»). Va de 0 a
+        //   2× el stock base y CONSERVA LA MEDIA de la población, así que en conjunto los bots gastan
+        //   lo mismo que gastarían con reparto plano: lo que cambia es quién.
+        _stock: (this.botStock === null || i === 0) ? null : (() => {
+          const t = (this.botSkills && this.botSkills[i - 1] != null)
+            ? Math.max(0, Math.min(1, (this.botSkills[i - 1] - 0.45) / 0.75)) : 0.5;
+          const k = Math.max(0, Math.round(this.botStock * 2 * t));
+          return { escudo: k, dash: k };
+        })() });
     }
     this.byTeam = this.teams.map((_, t) => this.balls.filter(b => b.team === t));
     //+AG doc 39 #1: PES → masa del jugador (ayuda a NO ser desviado por otras bolas ni por el empujón del cazador).
@@ -267,6 +335,37 @@ export class Sim {
     p.dash_until = this.f + Math.round(P_DASH_DUR * this._bstT()); p.dash_cd = this.f + P_DASH_CD; this._pushEv('dash', { f: this.f, id: 0 }); return true; }
   playerShield(){ const p = this.balls[0]; if (!p || p.rank !== null || this.f < p.shield_cd) return false;
     p.shield_until = this.f + Math.round(P_SHIELD_DUR * this._bstT()); p.shield_cd = this.f + P_SHIELD_CD; this._pushEv('save', { f: this.f, id: 0 }); return true; }
+  //+AG 2026-08-08 · docs/99 · UN BOT SE DEFIENDE. Es el gemelo de playerDash/playerShield para los
+  //   rivales, y pasa por las MISMAS puertas que el jugador —enfriamiento, duración, evento— para que
+  //   nadie tenga una versión mejor del mismo botón. Lo único que no comparte es el `_bstT()` de los
+  //   atributos: esos son de la bola equipada y un bot no lleva la tuya.
+  //
+  //   ⚠ SIN RNG, y no es una preferencia de estilo. En este modo los bots no tiran un solo dado: si
+  //   metiera uno aquí, la cinta de aleatoriedad se desplazaría y el mapa, los spawns y el `appeal` de
+  //   cada bola dejarían de coincidir con los de una partida sin pericias. La decisión sale del estado.
+  //
+  //   ⚠ EL ORDEN ES ESCUDO Y LUEGO IMPULSO, y ese orden es la diferencia entre defenderse y huir: el
+  //   escudo te salva de la captura de ESTE frame, el impulso te saca de ahí para los siguientes. Al
+  //   revés, un bot con los dos se iría corriendo con el peligro todavía encima.
+  _botDefiende(b, f, dl, lock_id, ev){
+    if (b._skill == null || b._stock === null || b.rank !== null) return;
+    //   cómo de mal lo está pasando, de 0 a 1: pegado y FIJADO vale 1; fijado importa casi el doble que
+    //   estar cerca, porque el cazador solo se come a quien persigue.
+    const peligro = (lock_id === b.id ? 1.0 : 0.55) * Math.max(0, 1 - dl / (FLEE_NEAR * 2));
+    if (peligro <= 0) return;
+    const t = Math.max(0, Math.min(1, (b._skill - 0.45) / 0.75));
+    const mania = BOT_CHAR[b._char] || BOT_CHAR.tactico;
+    //   el umbral se interpola entre la manía del carácter y el juego óptimo, según la pericia
+    const umbral = k => BOT_OPTIMO[k] * t + mania[k] * (1 - t);
+    if (peligro >= umbral('escudo') && b._stock.escudo > 0 && f >= b.shield_cd){
+      b.shield_until = f + P_SHIELD_DUR; b.shield_cd = f + P_SHIELD_CD; b._stock.escudo--;
+      const s = { f, id: b.id }; this.events.save.push(s); ev.save.push(s);
+    }
+    if (peligro >= umbral('dash') && b._stock.dash > 0 && f >= b.dash_cd){
+      b.dash_until = f + P_DASH_DUR; b.dash_cd = f + P_DASH_CD; b._stock.dash--;
+      const d = { f, id: b.id }; this.events.dash.push(d); ev.dash.push(d);
+    }
+  }
   playerDecoy(){ const p = this.balls[0]; if (!p || p.rank !== null) return false;   // SENUELO: el cazador te suelta y fija a otra presa
     //+AG doc 88 (2ª vuelta) · EL SEÑUELO NO PUEDE "CAMBIAR" AL OBJETIVO QUE YA ESTABA FIJADO. El filtro
     //   sólo te excluía a TI, así que si el cazador ya iba a por el más cercano, gastabas la barra
@@ -362,6 +461,10 @@ export class Sim {
       //   ×AGENCIA.calma. Solo el jugador; los bots siguen con el pánico entero. Con calma=1 es la línea de antes.
       const _pk = (b.isPlayer && this._intent !== 'escapar') ? AGENCIA.calma : 1;
       ax += dx / dl * panic * _pk; ay += dy / dl * panic * _pk;
+      //+AG docs/99: aquí es donde un rival decide si se cubre o si sale por patas. Va en este punto y no
+      //   antes porque necesita `dl` (lo cerca que tiene al cazador), que se acaba de calcular arriba.
+      //   Sin `botSkills` la guarda corta y no se ejecuta ni una línea: la partida es la de siempre.
+      if (this.botSkills && !b.isPlayer) this._botDefiende(b, f, dl, lock_id, ev);
       const near = ab_mv.filter(o => o !== b && (o.x - b.x) ** 2 + (o.y - b.y) ** 2 < COH_R * COH_R);
       if (near.length){
         let cx = 0, cy = 0; for (const o of near){ cx += o.x; cy += o.y; } cx /= near.length; cy /= near.length;
@@ -500,7 +603,12 @@ export class Sim {
       }
       if (cand){
         const b = cand;
-        if (b.isPlayer && f < b.shield_until){   //+AG ESCUDO: rechaza la captura (rebote mutuo), no elimina
+        //+AG ⚠ 2026-08-08 · docs/99 · EL ESCUDO DEJA DE SER SOLO TUYO. Esta línea llevaba `b.isPlayer`
+        //   a secas, o sea que un bot podía tener la burbuja encendida y el cazador se lo comía igual:
+        //   el booster no existía para ellos ni aunque se lo diéramos. `b._skill != null` es solo el
+        //   rival que trae perfil desde el shell, así que sin `botSkills` esto vale exactamente lo que
+        //   valía y el torneo, el tutorial y el vídeo del canal no se enteran.
+        if ((b.isPlayer || b._skill != null) && f < b.shield_until){   //+AG ESCUDO: rechaza la captura (rebote mutuo), no elimina
           const ex = b.x - H.x, ey = b.y - H.y, el = hyp(ex, ey) || 1e-6;
           b.vx = ex / el * V_CLAMP; b.vy = ey / el * V_CLAMP; H.vx *= -0.3; H.vy *= -0.3;
           if (f - (this.near_cd.get(b.id) ?? -99) > 24){ this.near_cd.set(b.id, f); const s = { f, id: b.id }; this.events.save.push(s); ev.save.push(s); }

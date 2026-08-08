@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-08 974380b">
+<meta name="bt-build" content="2026-08-08 bdafefb">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <!--+AG el HTML se sirve en INGLES (defecto del juego); ?lang=es lo traduce por JS (applyLang) -->
 <title>YouBall · The Hunter (WebGL)</title>
@@ -317,6 +317,17 @@
     box-shadow:0 5px 0 #12070f, inset 0 0 0 2px #00000066}
   #controls #supAro.lleno{box-shadow:0 5px 0 #8a5a10, 0 0 22px #ffb03daa, inset 0 0 0 2px #00000066}
   #controls #supAro #bSup{width:100%;height:100%;box-shadow:inset 0 3px 0 #ffffff30, inset 0 -6px 10px #00000066}
+
+  /*+AG ═══ 2026-08-08 (VB Jaime) · «ESTO SALE CONTIGO»: el estado ARMADO ══════════════════════════
+     Mismo token que la Carrera y Luz Roja: aro BLANCO que respira + un pelín de tamaño. Blanco porque es
+     el único color libre de mecánica aquí (cian=impulso, azul=escudo, oro=señuelo). Se apaga en el «¡YA!». */
+  #controls #bDash.arm, #controls #bShd.arm, #controls #bSup.arm,
+  #controls #iTum.arm, #controls #iBoo.arm, #controls #iEsc.arm{
+    box-shadow:0 0 0 3px #ffffffdd, 0 5px 0 var(--j-canto,#150c26), 0 0 20px #ffffff88, inset 0 2px 0 #ffffff44;
+    animation:armPulso 1.15s ease-in-out infinite}
+  @keyframes armPulso{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+  @media (prefers-reduced-motion:reduce){#controls button.arm{animation:none}}
+  html.redfx #controls button.arm{animation:none}
 </style>
 </head>
 <body>
@@ -384,7 +395,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=974380b"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=bdafefb"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -395,29 +406,30 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 </script>
 
 <script type="module">
-import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, makeFacePlane, createItemPool, createItemPops, createStarBurst, createWindTrail, createBloom, frameOrtho } from '../chassis/gfx.mjs?v=974380b';
-import { archLook } from '../chassis/ballmat.mjs?v=974380b';   //+AG doc 41 bloque G: material de la bola-heroe
-import { attachSquash } from '../chassis/squash.mjs?v=974380b';
-import { crearEscudos } from '../chassis/escudo.mjs?v=974380b';   //+AG 2026-08-08: la burbuja que dice "llevo escudo puesto" (misma pieza que la Carrera)
-import { paleta as estelaPaleta, emiteEstela } from '../chassis/estelas.mjs?v=974380b';   //+AG doc 97 §6: la estela cosmetica del jugador
-import { Sim, RNG, TEAMS, BALL_R, ARENA_W, ARENA_H, FPS, AGENCIA } from './sim.js?v=974380b';
-import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=974380b';
-import { archFace } from '../chassis/facegen.mjs?v=974380b';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
-import { createCelebration } from '../chassis/celebration.mjs?v=974380b';
-import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=974380b';
-import { crearInventario } from '../chassis/invboost.mjs?v=974380b';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
-import { buildSfxBuffer } from './sfxmap.mjs?v=974380b';
-import { createCoach } from '../chassis/coach.mjs?v=974380b';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
-import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=974380b';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
-import { createUiSfx } from '../chassis/uisfx.mjs?v=974380b';   //+AG doc 88: el sonido de "no puedo"
-import { createJuice } from '../chassis/juice.mjs?v=974380b';   //+AG doc 88: lo que pasa cuando el dedo toca un botón (los 3 modos)
+import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, makeFacePlane, createItemPool, createItemPops, createStarBurst, createWindTrail, createBloom, frameOrtho } from '../chassis/gfx.mjs?v=bdafefb';
+import { archLook } from '../chassis/ballmat.mjs?v=bdafefb';   //+AG doc 41 bloque G: material de la bola-heroe
+import { attachSquash } from '../chassis/squash.mjs?v=bdafefb';
+import { crearEscudos } from '../chassis/escudo.mjs?v=bdafefb';   //+AG 2026-08-08: la burbuja que dice "llevo escudo puesto" (misma pieza que la Carrera)
+import { paleta as estelaPaleta, emiteEstela } from '../chassis/estelas.mjs?v=bdafefb';   //+AG doc 97 §6: la estela cosmetica del jugador
+import { Sim, RNG, TEAMS, BALL_R, ARENA_W, ARENA_H, FPS, AGENCIA } from './sim.js?v=bdafefb';
+import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=bdafefb';
+import { archFace } from '../chassis/facegen.mjs?v=bdafefb';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
+import { createCelebration } from '../chassis/celebration.mjs?v=bdafefb';
+import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=bdafefb';
+import { crearInventario } from '../chassis/invboost.mjs?v=bdafefb';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
+import { buildSfxBuffer } from './sfxmap.mjs?v=bdafefb';
+import { createCoach } from '../chassis/coach.mjs?v=bdafefb';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { crearSalida } from '../chassis/salida.mjs?v=bdafefb';   //+AG 2026-08-08 · preparar la bola durante la cuenta atrás
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=bdafefb';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
+import { createUiSfx } from '../chassis/uisfx.mjs?v=bdafefb';   //+AG doc 88: el sonido de "no puedo"
+import { createJuice } from '../chassis/juice.mjs?v=bdafefb';   //+AG doc 88: lo que pasa cuando el dedo toca un botón (los 3 modos)
 //+AG el ámbito NO es opcional: la regla base es `#controls button` (id + etiqueta) y le gana en
 //   especificidad a cualquier `.j-hit` suelto. Es la misma trampa que ya costó una versión muerta en la
 //   Carrera y otra en Luz Roja; aquí va escrita para no repetirla una tercera vez.
 const juice = createJuice({ ambito:'#controls', reducido: new URLSearchParams(location.search).get('redfx')==='1' });
-import { createPausa } from '../chassis/pausa.mjs?v=974380b';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
-import { cantarPuesto } from '../chassis/veredicto.mjs?v=974380b';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
-import { runToEnd } from '../chassis/simrun.mjs?v=974380b';
+import { createPausa } from '../chassis/pausa.mjs?v=bdafefb';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
+import { cantarPuesto } from '../chassis/veredicto.mjs?v=bdafefb';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
+import { runToEnd } from '../chassis/simrun.mjs?v=bdafefb';
 
 window.addEventListener('error', e => { document.getElementById('err').style.display='grid'; console.error(e.error||e.message); });
 
@@ -558,7 +570,14 @@ let superVal=0, prevPlayerRank=null;   //+AG carga del senuelo (se gana jugando,
 //   cartel del modo de chassis/arranque.mjs, que es donde se desbloquea el audio) y luego la cuenta atrás, más
 //   lenta por cifra (1,15 s en vez de 1,00) y CON sonido. El "¡YA!" no congela la sim: se pinta encima ya jugando.
 const DIGITS=3, DIGIT=1.15, GO_HOLD=550;
-let phase='intro', introT=0, introRingT=-1; const INTRO_DUR=DIGITS*DIGIT;   //+AG cuenta atras + "este eres tu" (sim en pausa)
+let phase='intro', introT=0, introRingT=-1; const INTRO_DUR=DIGITS*DIGIT;
+//+AG 2026-08-08 (VB Jaime) · LA SALIDA ARMADA (misma pieza y mismo patrón en los tres modos).
+const salida = crearSalida();
+const armando = () => phase === 'intro';
+//+AG ⚠ mientras esto sea false, NINGUNA intención sale marcada. Antes salía «ESCAPAR COMO SEA»
+//   encendida en rojo —la orden más extrema de las tres— sin que el jugador la hubiera tocado, porque la
+//   sim arranca con `playerIntent='escapar'`. En el «¡YA!» se enciende la que la bola vaya a obedecer.
+let intentTocado = false;   //+AG cuenta atras + "este eres tu" (sim en pausa)
 //+AG tutorial v2: el COACH congela el mundo mientras pide una accion y lo suelta en cuanto el jugador toca.
 //   Solo lo activa el coach (?tutorial=1); en partida normal es false y el bucle va exactamente igual.
 let coachPaused=false;
@@ -593,6 +612,12 @@ function buildSim(s){
   document.getElementById('meta').textContent=T().meta(s, ARENA_W, ARENA_H);   //+AG texto por idioma (i18n del modo)
   document.getElementById('status').textContent='';
   superVal=0; prevPlayerRank=null; setIntent('escapar'); hideSpectator(); ended=false; INV.reset();   //+AG reset de la capa de agencia por ronda (INV.reset = uso gratis nuevo)
+  //+AG ⚠ 2026-08-08 · RONDA NUEVA = SALIDA LIMPIA, y `intentTocado` se pone a false DESPUÉS del
+  //   setIntent('escapar') de arriba: ese setIntent es del MOTOR, no del jugador, y si se pusiera antes el
+  //   propio reset dejaría «ESCAPAR COMO SEA» marcado como si la hubiera elegido él. Sin salida.reset(),
+  //   un impulso armado y no gastado en la ronda anterior prendería solo en esta.
+  salida.reset(); intentTocado = false;
+  for(const b of [bDash,bShd,bSup]) b.classList.remove('arm');
   pCamX=null; pCamY=null;   //+AG cámara de jugador: re-engancha en la primera llamada de la ronda nueva
   phase='intro'; introT=0; introRingT=-1;   //+AG arranca la cuenta atras; la musica y la sim se sueltan en el "YA" (loop)
 }
@@ -955,7 +980,18 @@ function loop(){
     sync(dt,1); P.update(dt); itemPops.update(dt); stars.update(dt); wind.update(dt); updateHud(); updateControls();
     introCamera(introT); if(phase==='intro') introUI(introT);
     celeb.update(false, cam, dt, null); bloom.renderScene();
-    if(phase==='intro' && introT>=INTRO_DUR){ phase='play'; acc=0; clock.getDelta(); goFlash(); startAudio(); }   // suelta la sim + arranca musica
+    if(phase==='intro' && introT>=INTRO_DUR){ phase='play'; acc=0; clock.getDelta(); goFlash(); startAudio();   // suelta la sim + arranca musica
+      //+AG 2026-08-08 · EL «¡YA!» SUELTA LO QUE EL JUGADOR PREPARÓ (después de `phase='play'`, o los
+      //   handlers se volverían a armar a sí mismos en bucle en vez de ejecutarse).
+      for(const b of [bDash,bShd,bSup]) b.classList.remove('arm');
+      salida.soltar();
+      //+AG y si no eligió intención, se enciende la que la bola va a obedecer de verdad: en la cuenta
+      //   atrás no hay ninguna marcada, pero en partida la sim SÍ tiene una y dejarlas las tres apagadas
+      //   sería el mismo fallo al revés (el HUD diciendo «ninguna» mientras la bola obedece a una).
+      if(!intentTocado && sim){ const k=sim.playerIntent;
+        for(const [id,key] of [['iTum','tumulto'],['iBoo','booster'],['iEsc','escapar']])
+          document.getElementById(id).classList.toggle('on', key===k); }
+    }
     requestAnimationFrame(loop); return;
   }
   acc+=dt;
@@ -1003,6 +1039,7 @@ addEventListener('resize',()=>{ renderer.setSize(innerWidth,innerHeight); bloom.
 //+AG controles del jugador: intenciones (1/2/3) + boosters (A/S/D). R y flechas del video se conservan.
 function setIntent(k){
   if(!sim || sim.balls[0].rank!==null) return; sim.playerIntent=k;
+  intentTocado = true;   //+AG 2026-08-08: desde aquí la intención marcada es SUYA, no la de por defecto
   for(const [id,key] of [['iTum','tumulto'],['iBoo','booster'],['iEsc','escapar']])
     document.getElementById(id).classList.toggle('on', key===k);
   //+AG doc 61: el botón contesta YA, en el frame del dedo, aunque la bola tarde 0,4 s en girar.
@@ -1054,11 +1091,21 @@ function fxPista(tipo){
 //   única reacción visible al pulsarlos era APAGARSE (opacity .35) — el mismo fallo que el doc 74 le
 //   arregló al nitro de la Carrera y que aquí se había quedado sin arreglar. El orden no cambia: se
 //   pregunta, se dispara, y sólo entonces se descuenta (ver invboost.mjs).
+//+AG ⚠⚠ 2026-08-08 · AQUÍ HABÍA UNA FUGA DE BOOSTERS, y la encontré midiendo esto: estos tres `onclick`
+//   NO comprobaban la fase (solo `if(!sim)`), así que tocar el IMPULSO durante la cuenta atrás lo
+//   disparaba de verdad — se descontaba del inventario y el efecto se consumía ANTES de que la bola se
+//   moviera. O sea: le comía al jugador una carga que había pagado y no le daba nada. Medido en el
+//   navegador con la cuenta atrás en pantalla: `ready` -> `j-hit off`.
+//   Ahora se ARMA (Jaime: «se arma y sale contigo») y prende en el «¡YA!». Segundo toque = desarmar.
 bDash.onclick=()=>{ if(!sim) return;
+  if(armando()){ const on = salida.alterna('dash', ()=>bDash.onclick());
+    bDash.classList.toggle('arm', on); juice.roce(bDash,{color:'#6fe4ff'}); return; }
   if(INV.quedan('dash')<=0){ juice.deny(bDash); return; }
   if(sim.playerDash()){ INV.consume('dash'); juice.hit(bDash,{color:'#6fe4ff',peso:'accion'}); fxPista('dash'); liveSfx({pdash:[{f:0}]}, false); }
   else juice.deny(bDash); };
 bShd.onclick=()=>{ if(!sim) return;
+  if(armando()){ const on = salida.alterna('escudo', ()=>bShd.onclick());
+    bShd.classList.toggle('arm', on); juice.roce(bShd,{color:'#7fb2ff'}); return; }
   if(INV.quedan('escudo')<=0){ juice.deny(bShd); return; }
   if(sim.playerShield()){ INV.consume('escudo'); juice.hit(bShd,{color:'#7fb2ff',peso:'accion'}); fxPista('escudo');
     escudoPropioF = sim.f;   //+AG ver la nota de `escudoPropioF` más abajo: el escudo se emite por el canal `save`
@@ -1067,6 +1114,8 @@ bShd.onclick=()=>{ if(!sim) return;
 //+AG el SEÑUELO es peso 'momento': se gana con la barra, no se compra (doc 83 §1), y es la jugada más
 //   gorda del modo. 18 chispas contra 10.
 bSup.onclick=()=>{ if(!sim) return;
+  //+AG el SEÑUELO no se arma: su barra empieza la ronda a CERO, así que no hay nada que armar.
+  if(armando()){ juice.deny(bSup); return; }
   if(superVal<1){ juice.deny(bSup); return; }
   if(sim.playerDecoy()){ superVal=0; juice.hit(bSup,{color:'#ffd23f',peso:'momento'}); fxPista('senuelo'); liveSfx({pdecoy:[{f:0}]}, false); }
   else juice.deny(bSup); };
@@ -1091,6 +1140,14 @@ function updateControls(){
   //   (medido: solo el 3,9% del tiempo hay cero orbes, 1,4 veces por partida — no parpadea).
   const iBoo=document.getElementById('iBoo');
   apaga(iBoo, (!sim.orbs.length && sim.playerIntent!=='booster') || dead);
+  //+AG ═══ 2026-08-08 (VB Jaime) · LA CUENTA ATRÁS ES PARA PREPARARSE ═══════════════════════════════
+  //   Va aquí, al final, porque el bucle repinta el estado «de partida» en cada frame y la única forma de
+  //   que la preparación no se borre 60 veces por segundo es tener la última palabra.
+  if(armando()){
+    if(!intentTocado) for(const id of ['iTum','iBoo','iEsc']) document.getElementById(id).classList.remove('on');
+    bDash.classList.toggle('arm', salida.armado('dash'));
+    bShd.classList.toggle('arm', salida.armado('escudo'));
+  }
   const ready=superVal>=1&&!dead; apaga(bSup,!ready); bSup.classList.toggle('ready',ready);
   //+AG ⚠ 2026-08-08 · SE ACABÓ EL PORCENTAJE (Jaime: «estás en acción y no tienes tiempo para ver
   //   números; una barra que se va llenando es mucho más intuitiva»). La carga se pinta en el ARO que

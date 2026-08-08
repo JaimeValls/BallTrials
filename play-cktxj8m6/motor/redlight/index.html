@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-08 974380b">
+<meta name="bt-build" content="2026-08-08 bdafefb">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <!--+AG el HTML se sirve en INGLES (defecto del juego); ?lang=es lo traduce por JS (applyLang) -->
 <title>YouBall · Red Light Rush (WebGL) · The Marble Games</title>
@@ -232,6 +232,22 @@
   /*+AG sin cifra no hay píldora: con inventario infinito, mientras el booster arde y en el súper (que
      cuenta con el aro) el pie va vacío, y una píldora dorada vacía sería una mancha sin significado. */
   #controls #bstRow button .cd:empty{display:none}
+  /*+AG ═══ 2026-08-08 (VB Jaime) · «ESTO SALE CONTIGO»: el estado ARMADO ══════════════════════════
+     Lo que el jugador prepara durante la cuenta atrás necesita una cara propia, y no puede ser ninguna
+     de las que ya existen: `.on` es «esto ES tu estado ahora mismo», `.ready` es «puedes pulsarlo».
+     Armado es otra cosa: «lo he pedido y todavía no ha pasado». Se dice con un aro BLANCO que respira
+     —blanco porque es el único color que no está cogido por una mecánica de este modo (verde=correr,
+     rojo=parar, cian=nitro, oro=súper)— y con el botón un pelín más grande, que es lo que se ve de
+     reojo sobre cualquier fondo. Se apaga solo en el «¡YA!», donde el botón vuelve a decir su estado.
+     ⚠ Lleva `#controls` delante y va al final del bloque por la misma razón que todo lo de aquí: los
+       tintes de reposo son (2 ids) y una regla de (1 id + 1 clase) no les gana. */
+  #controls button.arm{animation:armPulso 1.15s ease-in-out infinite}
+  #controls #bLaneL.arm, #controls #bLaneC.arm, #controls #bLaneR.arm,
+  #controls #bRun.arm, #controls #bStop.arm, #controls #bNitro.arm, #controls #bGhost.arm, #controls #bSup.arm{
+    box-shadow:0 0 0 3px #ffffffdd, 0 5px 0 var(--j-canto,#120a24), 0 0 20px #ffffff88, inset 0 2px 0 #ffffff44}
+  @keyframes armPulso{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+  @media (prefers-reduced-motion:reduce){#controls button.arm{animation:none}}
+  html.redfx #controls button.arm{animation:none}
   #controls #bstRow button .bi{height:42px;width:42px;margin:0;filter:drop-shadow(0 3px 5px #000a)}
   /*+AG ⚠ EL RÓTULO SE OCULTA A LA VISTA, NO SE BORRA. `display:none` habría dejado el botón MUDO para
      un lector de pantalla, y un `aria-label` escrito aquí lo habría dejado mudo en 19 idiomas (el
@@ -482,7 +498,9 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
        siguen existiendo vacíos porque applyLang() escribe en ellos y no puede quedarse sin destino. -->
   <div class="row" id="laneRow">
     <button id="bLaneL"><svg class="li" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4 7 12l8 8z"/></svg><span class="t"></span><span class="k">←/1</span></button>
-    <button id="bLaneC" class="on"><svg class="li" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6"/></svg><span class="t"></span><span class="k">2</span></button>
+    <!--+AG 2026-08-08 (VB Jaime) · el CENTRO ya no viene elegido: «cuando empieza la partida no haya
+         nadie seleccionado». Se enciende cuando el jugador lo toca, o solo en el «¡YA!» si no tocó nada. -->
+    <button id="bLaneC"><svg class="li" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6"/></svg><span class="t"></span><span class="k">2</span></button>
     <button id="bLaneR"><svg class="li" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4l8 8-8 8z"/></svg><span class="t"></span><span class="k">→/3</span></button>
   </div>
   <div class="row" id="mainRow">
@@ -518,7 +536,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=974380b"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=bdafefb"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -529,31 +547,32 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 </script>
 
 <script type="module">
-import { THREE, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createBloom, frameOrtho, BLOOM } from '../chassis/gfx.mjs?v=974380b';
-import { paleta as estelaPaleta, emiteEstela } from '../chassis/estelas.mjs?v=974380b';   //+AG doc 97 §6: la estela cosmetica del jugador
-import { archLook } from '../chassis/ballmat.mjs?v=974380b';   //+AG doc 41 bloque G: material de la bola-heroe
-import { attachSquash } from '../chassis/squash.mjs?v=974380b';
-import { createCelebration } from '../chassis/celebration.mjs?v=974380b';
-import { createKillfeed } from '../chassis/killfeed.mjs?v=974380b';
-import { createCensusBoard } from '../chassis/censusboard.mjs?v=974380b';
-import { createCupoGauge } from '../chassis/cupogauge.mjs?v=974380b';
-import { createKillTags } from '../chassis/killtag.mjs?v=974380b';
-import { crearInventario } from '../chassis/invboost.mjs?v=974380b';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
-import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=974380b';
-import { archFace } from '../chassis/facegen.mjs?v=974380b';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
-import { Sim, TEAMS, SHORT_COLORS, SHORT_COLORS_6, BALL_R, FPS, FIELD_W, FIELD_L, XL, XR, SPAWN_Y, GATE_Y, SAFE_Y } from './sim.js?v=974380b';
-import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=974380b';
-import { buildSfxBuffer } from './sfxmap.mjs?v=974380b';
-import { createCoach } from '../chassis/coach.mjs?v=974380b';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
-import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=974380b';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
-import { createUiSfx } from '../chassis/uisfx.mjs?v=974380b';   //+AG doc 88: el sonido de "no puedo"
-import { createJuice } from '../chassis/juice.mjs?v=974380b';   //+AG doc 88: lo que pasa cuando el dedo toca un botón (los 3 modos)
+import { THREE, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createBloom, frameOrtho, BLOOM } from '../chassis/gfx.mjs?v=bdafefb';
+import { paleta as estelaPaleta, emiteEstela } from '../chassis/estelas.mjs?v=bdafefb';   //+AG doc 97 §6: la estela cosmetica del jugador
+import { archLook } from '../chassis/ballmat.mjs?v=bdafefb';   //+AG doc 41 bloque G: material de la bola-heroe
+import { attachSquash } from '../chassis/squash.mjs?v=bdafefb';
+import { createCelebration } from '../chassis/celebration.mjs?v=bdafefb';
+import { createKillfeed } from '../chassis/killfeed.mjs?v=bdafefb';
+import { createCensusBoard } from '../chassis/censusboard.mjs?v=bdafefb';
+import { createCupoGauge } from '../chassis/cupogauge.mjs?v=bdafefb';
+import { createKillTags } from '../chassis/killtag.mjs?v=bdafefb';
+import { crearInventario } from '../chassis/invboost.mjs?v=bdafefb';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
+import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=bdafefb';
+import { archFace } from '../chassis/facegen.mjs?v=bdafefb';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
+import { Sim, TEAMS, SHORT_COLORS, SHORT_COLORS_6, BALL_R, FPS, FIELD_W, FIELD_L, XL, XR, SPAWN_Y, GATE_Y, SAFE_Y } from './sim.js?v=bdafefb';
+import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=bdafefb';
+import { buildSfxBuffer } from './sfxmap.mjs?v=bdafefb';
+import { createCoach } from '../chassis/coach.mjs?v=bdafefb';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { crearSalida } from '../chassis/salida.mjs?v=bdafefb';   //+AG 2026-08-08 · preparar la bola durante la cuenta atrás
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=bdafefb';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
+import { createUiSfx } from '../chassis/uisfx.mjs?v=bdafefb';   //+AG doc 88: el sonido de "no puedo"
+import { createJuice } from '../chassis/juice.mjs?v=bdafefb';   //+AG doc 88: lo que pasa cuando el dedo toca un botón (los 3 modos)
 //+AG el ámbito NO es opcional: la regla base es `#controls button` (id + etiqueta) y le gana en
 //   especificidad a cualquier `.j-hit` suelto. Es la trampa que ya costó una versión muerta en este
 //   mismo fichero (ver la nota de `#controls button#bGhost .bi`).
 const juice = createJuice({ ambito:'#controls', reducido: new URLSearchParams(location.search).get('redfx')==='1' });
-import { createPausa } from '../chassis/pausa.mjs?v=974380b';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
-import { cantarPuesto } from '../chassis/veredicto.mjs?v=974380b';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
+import { createPausa } from '../chassis/pausa.mjs?v=bdafefb';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
+import { cantarPuesto } from '../chassis/veredicto.mjs?v=bdafefb';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
 
 window.addEventListener('error', e => { document.getElementById('err').style.display='grid'; console.error(e.error||e.message); });
 
@@ -918,6 +937,13 @@ const _v3 = new THREE.Vector3();
 //   lenta por cifra (1,15 s) y CON sonido. El "¡YA!" no congela la sim: se pinta encima de la partida ya en marcha.
 const DIGITS=3, DIGIT=1.15, GO_HOLD=550;
 let phase='intro', introT=0, introRingT=-1; const INTRO_DUR=DIGITS*DIGIT;
+//+AG 2026-08-08 (VB Jaime) · LA SALIDA ARMADA. Lo que el jugador prepara durante la cuenta atrás se
+//   guarda aquí y se suelta en el «¡YA!». Ver chassis/salida.mjs para el porqué de armar y no ejecutar.
+const salida = crearSalida();
+const armando = () => phase === 'intro';
+//+AG mientras esto sea false y estemos en la cuenta atrás, NINGÚN carril sale encendido: el juego no
+//   elige por ti. En el «¡YA!» se enciende el que la bola vaya a tomar de verdad (ver updateHUD).
+let laneTocado = false;
 let running=false, prevPlayerRank=null, ended=false;
 //+AG doc 73: `estrenado` = el jugador ya ha encendido el motor alguna vez EN ESTA RONDA. Mientras no lo
 //   haya hecho, CORRER late para invitar a pulsarlo. Es la respuesta buena a «me quedo clavado en la
@@ -994,6 +1020,12 @@ function buildSim(s){
   //   jugador se sueltan en el "¡YA!" (loop). startAudio se llama allí, no aquí, para que vaya sincronizado.
   phase='intro'; introT=0; introRingT=-1; prevPlayerRank=null; ended=false; running=false; estrenado=false;
   superVal=0; redEntryMoving=false; ghostOn=false; setLane('center'); INV.reset();   //+AG reset de carril/boosters por ronda (ballObjs nuevos → material fantasma fuera solo; INV.reset = uso gratis nuevo)
+  //+AG ⚠ 2026-08-08 · RONDA NUEVA = SALIDA LIMPIA, y el orden importa: `laneTocado` se pone a false
+  //   DESPUÉS del setLane('center') de arriba, porque ese setLane es del motor y no del jugador — si se
+  //   pusiera antes, el propio reset dejaría el centro marcado como si lo hubiera elegido él. Y sin el
+  //   salida.reset(), un nitro armado y no gastado en la ronda anterior prendería solo en esta.
+  salida.reset(); laneTocado = false;
+  for(const b of [bRun,bStop,bNitro,bGhost,bSup]) b.classList.remove('arm');
   hideSpectator(); updateControls();
   window.dbg={ get sim(){return sim;}, get boulderM(){return boulderM;}, get audio(){return audio;}, get soundOn(){return musicOn||sfxOn;}, get scene(){return scene;}, get cam(){return cam;},
     //+AG ganchos de depuración de la capa de agencia (solo preview: fase/barra/bolas/refresco de controles)
@@ -1516,6 +1548,11 @@ function loop(){ const dt=Math.min(clock.getDelta(),0.05);
     introCamera(introT); if(phase==='intro') introUI(introT);
     celeb.update(false, cam, dt, null); census.update(dt, cam, sim.balls, rlCensus); ktags.update(dt); renderFrame();
     if(phase==='intro' && introT>=INTRO_DUR){ phase='play'; acc=0; clock.getDelta(); goFlash();
+      //+AG 2026-08-08 · EL «¡YA!» SUELTA LO QUE EL JUGADOR PREPARÓ. Va DESPUÉS de poner phase='play'
+      //   y no antes: los propios handlers comprueban la fase, así que con la fase vieja se volverían
+      //   a armar a sí mismos en bucle en vez de ejecutarse. Se limpian las marcas de armado porque a
+      //   partir de aquí los botones vuelven a decir su estado de siempre (listo / en marcha / gastado).
+      for(const b of [bRun,bStop,bNitro,bGhost,bSup]) b.classList.remove('arm');
       if(sim) sim.playerEngage();   //+AG desde el "¡YA!" manda el input: el motor va donde lo dejen CORRER/PARAR
       //+AG doc 73 · LA PARTIDA ARRANCA PARADA, Y ESO NO SE TOCA. El 2026-08-05 probé lo contrario —que el
       //   "¡YA!" encendiera el motor solo, porque con el mantener pulsado quien no tenía el dedo puesto se
@@ -1528,6 +1565,25 @@ function loop(){ const dt=Math.min(clock.getDelta(),0.05);
       //   dos mandos. Sin esta línea la partida abría con los dos apagados —ni CORRER ni PARAR— y se rompía
       //   la única regla de lectura del HUD: en todo momento hay exactamente uno encendido.
       setRun(false);
+      //+AG ⚠⚠ 2026-08-08 · LO ARMADO SE SUELTA **AQUÍ**, DESPUÉS DEL `setRun(false)` DE ARRIBA, Y EL
+      //   ORDEN ES TODO. Con el soltar antes, este `setRun(false)` pisaba el CORRER que el jugador había
+      //   dejado armado en la cuenta atrás y la bola salía parada — medido frame a frame: el botón perdía
+      //   su `.on` en el mismo frame del «¡YA!».
+      //   Y así conviven las dos reglas sin pelearse:
+      //     · `setRun(false)` sigue siendo el ESTADO POR DEFECTO, o sea que quien no toca nada arranca
+      //       parado, que es la decisión del doc 73 que Jaime cazó el 5-ago («automáticamente mi bola se
+      //       pone a correr sin que yo pulse ninguna tecla»). Eso NO se toca y sigue igual.
+      //     · lo armado va después y solo existe si el jugador LO PULSÓ. No es el juego moviéndole la
+      //       bola: es su propia orden, dada tres segundos antes. La regla de siempre —nada se mueve sin
+      //       que lo mande— se cumple igual; lo único que cambia es cuándo se le permite mandarlo.
+      salida.soltar();
+      //+AG ⚠ 2026-08-08 · Y SI NO ELIGIÓ CARRIL, SE ENCIENDE EL QUE LA BOLA VA A TOMAR DE VERDAD. Durante
+      //   la cuenta atrás no hay ninguno marcado a propósito (el juego no elige por ti), pero en cuanto
+      //   la partida arranca la bola SÍ va por un carril —el centro— y dejar los tres apagados sería el
+      //   mismo fallo al revés: el HUD diciendo «ninguno» mientras la bola va por uno. Medido: los tres
+      //   salían apagados con `pIn.lane === 'center'`.
+      if(!laneTocado && sim){ const k=sim.pIn.lane;
+        bLaneL.classList.toggle('on', k==='left'); bLaneC.classList.toggle('on', k==='center'); bLaneR.classList.toggle('on', k==='right'); }
       startAudio(); }               //+AG suelta la música (loop) sincronizada con f=0
     requestAnimationFrame(loop); return;
   }
@@ -1664,7 +1720,18 @@ const cdNitro=document.getElementById('cdNitro'), cdGhost=document.getElementByI
 const LANES=['left','center','right'];
 //+AG doc 73: el ESTADO del motor. No hay dedo que lo sostenga, así que lo sostiene esta variable y los dos
 //   botones se pintan siempre en espejo: uno encendido, el otro apagado.
-function setRun(on){ running=on && phase==='play'; if(running) estrenado=true;
+function setRun(on){
+  //+AG ⚠ 2026-08-08 · EN LA CUENTA ATRÁS, CORRER SE ARMA. Jaime: «puedas pulsar a run, se ponga verde y
+  //   sientas que estás preparando durante la cuenta atrás el personaje para correr». Antes esta línea
+  //   hacía `running = on && phase==='play'`, o sea que en la intro el botón se tragaba el dedo y se
+  //   quedaba igual. Ahora el toque queda ARMADO: el botón se enciende y el motor arranca en el «¡YA!».
+  //   Segundo toque = desarmar, que es cómo se cambia de idea antes de salir.
+  if(armando()){
+    const listo = on ? salida.alterna('run', ()=>setRun(true)) : (salida.desarma('run'), false);
+    bRun.classList.toggle('arm', listo); bStop.classList.remove('arm');
+    juice.roce(on?bRun:bStop, { color: on?'#8ff0c4':'#ffa596' });
+    return; }
+  running=on && phase==='play'; if(running) estrenado=true;
   bRun.classList.toggle('on', running); bStop.classList.toggle('on', !running && phase==='play');
   //+AG doc 88: CORRER y PARAR son los dos mandos del modo y no acusaban el dedo — sólo cambiaban de
   //   color cuando el bucle de render pasara por ahí, que es estado y no respuesta. Peso 'roce': se
@@ -1676,7 +1743,11 @@ function doBrake(){ return !!(sim && phase==='play' && sim.playerBrake()); }
 //   esté cargado. Un solo botón para una sola intención («¡para!»), con la escalera de pánico natural: le doy,
 //   veo que sigo deslizándome, le doy otra vez. Así el frenazo NO se gasta sin querer al levantar el pie, que
 //   es lo que pasaría si el primer toque ya lo consumiera.
-function doStop(){ if(!sim || phase!=='play') return;
+function doStop(){
+  //+AG en la cuenta atrás PARAR no frena nada (el motor está quieto): lo que hace es DESARMAR el CORRER
+  //   que hubieras dejado puesto. Así el botón contesta al dedo en vez de tragárselo.
+  if(armando()){ salida.desarma('run'); bRun.classList.remove('arm'); juice.roce(bStop,{color:'#ffa596'}); return; }
+  if(!sim || phase!=='play') return;
   //+AG doc 88: el segundo toque es el FRENAZO. Si está cargado, es una acción de verdad y se ve como
   //   tal; si no lo está, el botón lo DICE en vez de tragarse el dedo (que es lo que hacía).
   if(running){ setRun(false); return; }
@@ -1686,6 +1757,10 @@ function setLane(k){ if(!sim) return;
   const b={left:bLaneL,center:bLaneC,right:bLaneR}[k];
   if(!sim.playerLane(k)){ juice.deny(b); return; }   //+AG doc 88: si el carril no se puede tomar, se dice
   bLaneL.classList.toggle('on', k==='left'); bLaneC.classList.toggle('on', k==='center'); bLaneR.classList.toggle('on', k==='right');
+  //+AG 2026-08-08 · el carril YA valía en la cuenta atrás (la intención se cambia al instante), lo que no
+  //   había era forma de saber que tu toque había servido de algo. `laneTocado` apaga la marca automática
+  //   de la salida: mientras no toques, no hay ningún carril encendido.
+  laneTocado = true;
   juice.roce(b); }
 function shiftLane(d){ if(!sim) return; const i=LANES.indexOf(sim.pIn.lane); setLane(LANES[Math.max(0,Math.min(2,i+d))]); }
 //+AG 2026-08-06 · inventario: se pregunta ANTES y se descuenta DESPUÉS de que el motor confirme el
@@ -1728,16 +1803,33 @@ function fxPista(tipo){
     liveSfx({ [c.snd]: [{ f: 0 }] }, false);
   }catch(e){ console.error('[fxPista]', tipo, e); }   //+AG un efecto NUNCA puede tumbar el disparo
 }
-function doNitro(){ if(!(sim && phase==='play')) return;
+function doNitro(){
+  //+AG ⚠ 2026-08-08 (VB Jaime: «se arma y sale contigo») · EN LA CUENTA ATRÁS SE ARMA, NO SE DISPARA.
+  //   Dispararlo aquí gastaría la carga y el efecto se consumiría antes de que la bola se moviera: le
+  //   estaríamos comiendo al jugador algo que ha pagado sin darle nada. Segundo toque = desarmar.
+  if(armando()){ const on = salida.alterna('nitro', doNitro);
+    bNitro.classList.toggle('arm', on); juice.roce(bNitro, { color:'#59e0ff' }); return; }
+  if(!(sim && phase==='play')) return;
   if(INV.quedan('nitro')<=0){ juice.deny(bNitro); return; }
   if(sim.playerNitro()){ INV.consume('nitro'); juice.hit(bNitro,{color:'#59e0ff',peso:'accion'}); fxPista('nitro'); }
   else juice.deny(bNitro); }
-function doGhost(){ if(!(sim && phase==='play')) return;
+function doGhost(){
+  //+AG ⚠ 2026-08-08 (VB Jaime: «se arma y sale contigo») · EN LA CUENTA ATRÁS SE ARMA, NO SE DISPARA.
+  //   Dispararlo aquí gastaría la carga y el efecto se consumiría antes de que la bola se moviera: le
+  //   estaríamos comiendo al jugador algo que ha pagado sin darle nada. Segundo toque = desarmar.
+  if(armando()){ const on = salida.alterna('fantasma', doGhost);
+    bGhost.classList.toggle('arm', on); juice.roce(bGhost, { color:'#ffffff' }); return; }
+  if(!(sim && phase==='play')) return;
   if(INV.quedan('fantasma')<=0){ juice.deny(bGhost); return; }
   if(sim.playerGhost()){ INV.consume('fantasma'); juice.hit(bGhost,{color:'#ffffff',peso:'accion'}); fxPista('fantasma'); }
   else juice.deny(bGhost); }
 //+AG el SÚPER es peso 'momento': se gana con la barra, no se compra (doc 83 §1). 18 chispas contra 10.
-function doSuper(){ if(!(sim && phase==='play')) return;
+function doSuper(){
+  //+AG ⚠ 2026-08-08 · EL SÚPER NO SE ARMA, y no es un olvido: su barra empieza la ronda a CERO y se
+  //   llena jugando bien, así que en la cuenta atrás no hay nada que armar. Ofrecerlo sería un botón
+  //   que se enciende y luego no sale. Contesta que no, como cualquier booster sin carga.
+  if(armando()){ juice.deny(bSup); return; }
+  if(!(sim && phase==='play')) return;
   if(superVal<1){ juice.deny(bSup); return; }
   if(sim.playerSuper()){ superVal=0; juice.hit(bSup,{color:'#ffd23f',peso:'momento'});
     const p=sim.balls[0]; flashAt(p.x,p.y,0xffd34d,1.5,0.85); P.ring(p.x,p.y,[1,0.83,0.3],0.8); }   // flash DORADO al soltarlo (oro=acción)
@@ -1749,7 +1841,12 @@ function doSuper(){ if(!(sim && phase==='play')) return;
 //   quedarse pegado: no hay nada que soltar. Los dos van con `pointerdown` (en móvil `click` solo dispara al
 //   LEVANTAR el dedo y se cancela si el dedo se desliza un pelo; jugando eso se siente como un botón que te
 //   ignora) y ambos son gratis, así que un roce accidental no cuesta recurso.
-bRun.addEventListener('pointerdown',e=>{ e.preventDefault(); if(phase==='play') setRun(true); });
+//+AG ⚠ 2026-08-08 · el `if(phase==='play')` se va DE AQUÍ y vive dentro de setRun(). Estaba en el
+//   listener, así que en la cuenta atrás el toque no llegaba ni a entrar en la función y todo el armado
+//   de CORRER quedaba muerto — medido: el botón no se armaba y la bola salía parada. La regla que deja:
+//   **el guardia de fase va en la función que decide, nunca en el listener**, porque si no hay que
+//   acordarse de tocarlo en dos sitios y el segundo no aparece hasta que algo no funciona.
+bRun.addEventListener('pointerdown',e=>{ e.preventDefault(); setRun(true); });
 bStop.addEventListener('pointerdown',e=>{ e.preventDefault(); doStop(); });
 bRun.addEventListener('contextmenu',e=>e.preventDefault());
 bStop.addEventListener('contextmenu',e=>e.preventDefault());
@@ -1810,6 +1907,23 @@ function updateControls(){
   supAro.classList.toggle('lleno', sReady||( sAct&&!dead));
   cdSup.textContent='';
   for(const b of [bLaneL,bLaneC,bLaneR]) apaga(b,dead);
+  //+AG ═══ 2026-08-08 (VB Jaime) · LA CUENTA ATRÁS ES PARA PREPARARSE ═══════════════════════════════
+  //   Este bloque va AL FINAL de updateHUD y reescribe lo de arriba a propósito: el bucle pinta el
+  //   estado «de partida» en cada frame (y en la intro eso era todo gris y el centro elegido), así que
+  //   la única forma de que la preparación no se borre 60 veces por segundo es tener la última palabra.
+  //     · los armables se ENCIENDEN para que se vean tocables (un botón gris que sí responde miente);
+  //     · el SÚPER se queda apagado: su barra está a cero, no hay nada que armar;
+  //     · si el jugador no ha tocado ningún carril, NINGUNO sale marcado — el juego no elige por él;
+  //     · y lo que haya armado lleva `.arm`, que es «esto sale contigo».
+  if(armando()){
+    for(const b of [bLaneL,bLaneC,bLaneR,bRun,bStop,bNitro,bGhost]) apaga(b,false);
+    if(!laneTocado) for(const b of [bLaneL,bLaneC,bLaneR]) b.classList.remove('on');
+    bRun.classList.remove('on','urge'); bStop.classList.remove('on','urge');
+    bRun.classList.toggle('arm', salida.armado('run'));
+    bNitro.classList.toggle('arm', salida.armado('nitro'));
+    bGhost.classList.toggle('arm', salida.armado('fantasma'));
+    cdStop.textContent='';
+  }
 }
 addEventListener('keydown',e=>{
   if(e.repeat){ return; }
