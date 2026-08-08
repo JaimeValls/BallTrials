@@ -24,7 +24,7 @@
 //  blanco. Es la misma leccion que ya costo la pagina de previsualizacion.
 //
 //  COMO SE USA desde el shell:
-//     import { vivas } from './motor/chassis/vivas.mjs?v=bdafefb';
+//     import { vivas } from './motor/chassis/vivas.mjs?v=7bef0c0';
 //     ... pinta `<div class="gi" data-viva="cohete"></div>` en vez del <img> ...
 //     vivas.sincroniza();      // despues de cada render de la pantalla
 //     vivas.para();            // al salir de la pantalla (deja de gastar bateria)
@@ -34,10 +34,10 @@
 //   (motor/vendor/three/) y quien manda es el importmap de la pagina, igual que en gfx.mjs. Si aqui
 //   se dejara la URL absoluta se cargarian DOS copias de la libreria: la local y la de fuera.
 import * as THREE from 'three';
-import { makeBallVinyl } from './gfx.mjs?v=bdafefb';
-import { archLook } from './ballmat.mjs?v=bdafefb';
-import { archFace } from './facegen.mjs?v=bdafefb';
-import { attachSquash } from './squash.mjs?v=bdafefb';
+import { makeBallVinyl } from './gfx.mjs?v=7bef0c0';
+import { archLook } from './ballmat.mjs?v=7bef0c0';
+import { archFace } from './facegen.mjs?v=7bef0c0';
+import { attachSquash } from './squash.mjs?v=7bef0c0';
 
 // El mundo de cada celda. HW es el SEMIANCHO de la camara en radios de bola: cuanto MENOR, mas
 // grande sale la bola... y antes lo elegi mirando solo la bola. Error: lo que decide el encuadre no

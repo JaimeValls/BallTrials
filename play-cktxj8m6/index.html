@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-08 bdafefb"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-08 7bef0c0"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -6089,7 +6089,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=bdafefb"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=7bef0c0"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -8092,7 +8092,12 @@ const BOTS=(function(){
 })();
 // deriva diaria coherente: ±0-8 copas por bola, f(seed del bot, fecha) — la tabla se mueve sola (doc 36 §2)
 function driftFor(bot, i, dn){ const r=mulberry32((bot.seed ^ Math.imul(dn,2654435761)) + i*1013904223)(); return Math.round((r*2-1)*8); }
-function effBall(bot, i, dn){ return Math.max(0, bot.balls[i].cups + driftFor(bot, i, dn)); }
+//+AG ⚠ «la tabla se mueve sola» era falso en el sentido que importa, y lo dice la propia formula de
+//   arriba: `driftFor` es un RUIDO de ±8 que va y viene, no una tendencia, asi que la Global llevaba las
+//   copas de arranque del roster desde el dia 1. Lo que la mueve de verdad es `botLiveBall` (docs/99 §2 bis):
+//   lo que ese bot ha ganado o perdido en pista. Va aqui, en la unica cuenta que leen la tabla, el
+//   emparejamiento por franja y la ficha de su mejor bola, para que las tres digan lo mismo.
+function effBall(bot, i, dn){ return Math.max(0, bot.balls[i].cups + botLiveBall(bot, i) + driftFor(bot, i, dn)); }
 //+AG 1-ago: que BOLA REAL enseña un bot en el Ranking. Sus bolas solo guardan mote y color (arriba), asi
 //   que el arquetipo se deriva de su seed: determinista, o sea que el mismo bot sale siempre con la misma
 //   bola en todas las sesiones y aparatos. Existe porque la lista pintaba discos de color planos mientras
@@ -8148,6 +8153,82 @@ function botDia(bot, dn){ const r=mulberry32(((bot.seed^Math.imul(dn,374761393))
 function botTemp(bot, dn){ const ini=Math.floor(dn/TEMP_DIAS)*TEMP_DIAS; let s=0;
   for(let d=ini; d<=dn; d++) s+=botDia(bot,d); return s; }
 
+//+AG ⚠⚠ docs/99 §2 bis · EL ESTADO VIVO DE LOS BOTS: LA CLASIFICACION LA MUEVEN LOS RESULTADOS.
+//
+//   DECISION DE JAIME (2026-08-08), elegida sobre las otras dos que se le pusieron delante —que siguiera
+//   mandando el reloj, o sumar los dos motores—: ganarle a un bot le quita copas DE VERDAD (su D1), y el
+//   mundo se mueve porque la gente juega (su D10).
+//
+//   QUE HABIA, Y ERA PEOR DE LO QUE DECIA docs/99. La Global no subia NUNCA: `effBall` es la copa de
+//   arranque del roster mas `driftFor`, que es un RUIDO de ±8 sin tendencia. O sea que los 50 bots
+//   llevaban las mismas copas desde el dia 1 y lo unico que se movia era la columna DIARIO, por un ritmo
+//   de calendario. Podias ganarle diez veces al tercero y seguia tercero.
+//
+//   EL RELLENO NO SE BORRA: CAMBIA DE OFICIO. `botDia` sigue vivo, pero solo para el bot que HOY no ha
+//   jugado con nadie — es el relleno de fondo de la D10, el del dia 1 y las horas valle. En cuanto un bot
+//   juega una partida de verdad, ese dia manda su resultado y el relleno de ese dia se DESCUENTA (`sr`):
+//   si no, cobraria dos veces, por su partida y por el calendario.
+//
+//   ⚠ EL CUPO NO ES UN ADORNO: ES LO UNICO QUE QUEDA IMPIDIENDO QUE EL TOP SEA INALCANZABLE (docs/99 §9).
+//   Los ocho puestos reparten +8 copas netas por partida, y un bot sale de rival muchas mas veces al dia
+//   que juega una persona. Con cupo puntua como una persona (6-10 al dia); por encima sigue saliendo de
+//   rival —hace falta para llenar los ocho huecos— pero esa partida no le mueve las copas.
+//
+//   ⚠ Y AHORA UN BOT PUEDE PERDER COPAS, que es justo lo que `botDia` prohibia a proposito («un bot que
+//   restara haria bajar una tabla que el jugador no puede auditar»). Ese motivo deja de valer cuando la
+//   bajada sale de una carrera que el jugador ACABA DE VER: lo auditable no es la formula, es el resultado.
+//
+//   SE GUARDA POR SEMILLA y solo de los bots que se han movido — el roster se sigue generando de la seed
+//   global y no ocupa sitio (docs/99 §3):
+//     SAVE.bl[seed] = {v:[delta por bola], d:dia, n:partidas puntuadas ese dia, h:neto de ese dia,
+//                      s:temporada, sv:neto de la temporada, sr:relleno ya descontado de la temporada}
+//   ⚠ LA TEMPORADA SALE DE `dn` Y NO DE `tempNum()` a proposito: todas estas funciones reciben el dia,
+//   asi que un banco puede recorrer los 42 dias de una temporada sin recargar la pagina. Con `tempNum()`
+//   dentro, el dia se leeria de la URL una sola vez y el paso de temporada no lo podria medir nadie.
+function tempDe(dn){ return Math.floor(dn/TEMP_DIAS); }
+//   el cupo es DEL BOT y fijo, como su pericia: si se sorteara por dia, dos aparatos del mismo jugador
+//   verian tablas distintas del mismo mundo.
+function botCupo(bot){ return 6 + (Math.abs((bot.seed ^ 0x2f7c1b93) >>> 0) % 5); }
+function botLive(bot, crear){
+  const B = SAVE.bl || (crear ? (SAVE.bl = {}) : null); if(!B) return null;
+  const k = String(bot.seed >>> 0);
+  if(!B[k]){ if(!crear) return null; B[k] = {v:[], d:-1, n:0, h:0, s:-1, sv:0, sr:0}; }
+  return B[k];
+}
+//   lo que ese bot ha ganado o perdido EN PISTA con esa bola, para siempre. Entra en `effBall`, o sea que
+//   con una sola linea mueve la tabla Global, la franja de emparejamiento y cual es su mejor bola.
+function botLiveBall(bot, i){ const L = botLive(bot, false); return (L && L.v[i]) || 0; }
+//   lo que lleva HOY: su resultado real si hoy ha jugado, y el relleno si no se ha cruzado con nadie.
+function botDiaEf(bot, dn){ const L = botLive(bot, false);
+  return (L && L.d === dn && L.n > 0) ? L.h : botDia(bot, dn); }
+//   y lo de la TEMPORADA, que es la cuenta con la que se pagan los premios de cierre (doc 97 §3.2): el
+//   relleno acumulado, menos el de los dias en los que si jugo, mas lo que hizo en pista.
+//   ⚠ EL SUELO EN 0 ES A PROPOSITO Y SOLO AQUI: «copas ganadas esta temporada» en negativo se lee como un
+//   fallo de la pantalla de premios. Las copas de verdad (`effBall`) si bajan, y ahi es donde tiene que verse.
+function botTempEf(bot, dn){ const L = botLive(bot, false);
+  const vivo = (L && L.s === tempDe(dn)) ? (L.sv - L.sr) : 0;
+  return Math.max(0, botTemp(bot, dn) + vivo); }
+//+AG AQUI SE MUEVE UN BOT, y es la unica puerta: entra el puesto, salen las copas. Devuelve lo que se le
+//   ha movido —0 si estaba por encima de su cupo— para que el banco lo pueda medir sin adivinarlo.
+function botMueve(bot, ball, place, dn){
+  const L = botLive(bot, true), t = tempDe(dn);
+  if(L.d !== dn){ L.d = dn; L.n = 0; L.h = 0; }
+  if(L.s !== t){ L.s = t; L.sv = 0; L.sr = 0; }
+  if(L.n >= botCupo(bot)) return 0;
+  if(L.n === 0) L.sr += botDia(bot, dn);      // hoy manda lo que ha hecho: fuera el relleno de este dia
+  L.n++;
+  const d = PLACE_DELTA[Math.max(1, Math.min(8, place|0)) - 1];   // la MISMA tabla que te paga a ti
+  const i = Math.max(0, bot.balls.indexOf(ball));
+  //   el suelo va en el ACUMULADO y no en la lectura: dejando que `v` bajara sin fondo, un bot al que
+  //   machacas veinte veces necesitaria veinte victorias para volver a existir en la tabla.
+  L.v[i] = Math.max(-(bot.balls[i].cups|0), (L.v[i]||0) + d);
+  L.h += d; L.sv += d;
+  return d;
+}
+//   los rivales de la partida que acaba de acabar, con el puesto que hicieron. Le llega el emparejamiento
+//   YA resuelto por `buildStandings` a proposito: ver el aviso de alli.
+function moverRivales(pares, dn){ let n=0; for(const p of pares){ if(botMueve(p.bot, p.ball, p.place, dn)!==0) n++; } return n; }
+
 // ============================================================================
 //+AG doc 97 · LOS PREMIOS DEL TOP. Cumple la promesa que la banda del Ranking llevaba anunciando desde
 //   el 1-ago («Premios · Top 10 % y Top 1 % · pronto») sin entregar nada.
@@ -8172,8 +8253,13 @@ const TOP_MIN_PARTIDAS=3;
 function topPoblacion(){ return BOTS.length+1; }   // los 50 bots + tu
 //   los empates los gana el JUGADOR (solo cuenta quien te SUPERA, no quien te iguala). Es a su favor a
 //   proposito: explicarle a un niño que ha perdido un premio por un desempate invisible no se puede.
-function topPuestoDia(mias, dn){ let mejores=0; for(const b of BOTS) if(botDia(b,dn)>mias) mejores++; return mejores+1; }
-function topPuestoTemp(mias, dn){ let mejores=0; for(const b of BOTS) if(botTemp(b,dn)>mias) mejores++; return mejores+1; }
+//+AG docs/99 §2 bis · los premios del top CAMBIAN DE FUENTE SIN CAMBIAR DE REGLAS: los cortes, las cifras
+//   y los 20 idiomas se quedan igual, pero el puesto se cuenta contra lo que los bots han hecho de verdad
+//   (`botDiaEf`/`botTempEf`) y no contra el calendario. Tenia que cambiar aqui tambien y no solo en la
+//   tabla: si la pantalla contara con una formula y el premio con otra, el jugador veria un puesto y
+//   cobraria otro — que es el fallo exacto que doc 97 §5 ya habia tenido que cerrar una vez.
+function topPuestoDia(mias, dn){ let mejores=0; for(const b of BOTS) if(botDiaEf(b,dn)>mias) mejores++; return mejores+1; }
+function topPuestoTemp(mias, dn){ let mejores=0; for(const b of BOTS) if(botTempEf(b,dn)>mias) mejores++; return mejores+1; }
 function topFranja(tabla, puesto, pob){
   for(const f of tabla){ const tope = f.max!=null ? f.max : Math.ceil(pob*f.pct); if(puesto<=tope) return f; }
   return null;
@@ -8231,6 +8317,9 @@ function topCogerTemp(){
 //+AG los rivales de LA partida en curso, elegidos una sola vez al construir su URL. Es lo que ata la
 //   pericia que se manda al motor con el nombre que se pinta al final (ver el bloque de `&bskill=`).
 let lastRivals=null;
+//+AG docs/99 §2 bis · los rivales de la ultima partida CON EL PUESTO QUE HICIERON, que es lo que hace
+//   falta para moverles las copas. Lo rellena `buildStandings` y lo gasta `applyCupsForResult`.
+let lastBotPlaces=null;
 function pickRivals(n, seedNum){ n=n||7; const dn=todayNum(), mine=equippedBall()?.copas||0;
   const pool=BOTS.map(b=>{ let best=null; b.balls.forEach((bb,i)=>{ const c=effBall(b,i,dn); if(!best||Math.abs(c-mine)<Math.abs(best.c-mine)) best={c,ball:bb}; }); return {bot:b, c:best.c, ball:best.ball}; });
   pool.sort((a,b)=>Math.abs(a.c-mine)-Math.abs(b.c-mine));
@@ -8263,8 +8352,16 @@ function buildStandings(rows, seedNum, winnerTeam){
   //   cuya pericia se le mandó al motor, así que el nombre que se lee aquí es el de quien de verdad ha
   //   jugado así. Sin lista guardada (tutorial, vídeo, o una partida que no arrancó desde el menú) se
   //   sortea como siempre — el comportamiento viejo se conserva entero.
-  const rivals=(lastRivals && lastRivals.length>=others.length) ? lastRivals : pickRivals(others.length, seedNum), nameOf={};
+  const guardados=!!(lastRivals && lastRivals.length>=others.length);
+  const rivals=guardados ? lastRivals : pickRivals(others.length, seedNum), nameOf={};
   others.forEach((r,i)=>{ const rv=rivals[i]; nameOf[r.ballId]= rv?rv.bot.name:'—'; });
+  //+AG ⚠⚠ docs/99 §2 bis · EL EMPAREJAMIENTO QUE DA LOS NOMBRES ES EL QUE MUEVE LAS COPAS, y por eso sale
+  //   de aqui en vez de rehacerse donde se reparten. Con dos recorridos y dos `sort` propios, el dia que
+  //   uno de los dos cambiara de criterio le restariamos copas a un bot DISTINTO del que el jugador acaba
+  //   de ver quedar ultimo — y eso no da ningun error: se lee como que la tabla miente.
+  //   Sin lista guardada (el tutorial, el video del canal, o una partida que no arranco desde el menu) NO
+  //   se mueve a nadie: esos rivales son un sorteo de adorno para poner nombres, no los que jugaron.
+  lastBotPlaces = guardados ? others.map((r,i)=>({bot:rivals[i].bot, ball:rivals[i].ball, place:r.place})) : null;
   const out=rows.slice().sort((a,b)=>a.place-b.place).map(r=>({
     me:!!r.isPlayer, place:r.place, color:rgb(r.color,1.15), teamIdx:r.teamIdx,
     name: r.isPlayer ? S().you : (nameOf[r.ballId]||'—') }));
@@ -8800,6 +8897,16 @@ function applyCupsForResult(res, ball, place, d){
   //+AG el orden importa: la clasificacion se construye SIEMPRE (aunque no haya bola equipada y no haya copas)
   lastStandings = lastTeamMode ? buildTeamStandings(d&&d.teamStandings, d&&d.winnerTeam)
                                : buildStandings(d&&d.standings, d&&d.seed, d&&d.winnerTeam);
+  //+AG ⚠⚠ docs/99 §2 bis · Y AQUI LA PARTIDA MUEVE EL MUNDO. Los rivales cobran o pagan por su puesto con
+  //   la MISMA tabla que a ti (`PLACE_DELTA`), que es lo unico que hace que ganarle a alguien le cueste.
+  //   Va en esta funcion y no en `showResults` por lo mismo que las victorias de arriba: por aqui pasan
+  //   LOS DOS caminos de fin de partida y esto no se repinta al volver a la pantalla. En `showResults`,
+  //   cada visita a Resultados habria vuelto a hundir a los mismos siete bots.
+  //   Y va ANTES del `if(!ball)` por el mismo criterio: la carrera ha ocurrido y los rivales la han
+  //   corrido, tengas tu bola equipada o no.
+  //   ⚠ EN EQUIPOS NO SE MUEVE NADIE, y no es un olvido: alli corres contra bolas de equipo y no contra
+  //   los bots del roster, asi que `lastRivals` es null en ese formato y no hay a quien apuntarle el puesto.
+  if(!lastTeamMode && lastBotPlaces) moverRivales(lastBotPlaces, todayNum());
   if(!ball){ lastCups=null; return; }
   let delta;
   if(res.teamPlace!=null){ const tp=Math.max(1,Math.min(4,res.teamPlace)); delta=TEAM_DELTA[tp-1]; }
@@ -9468,7 +9575,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=bdafefb').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=7bef0c0').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -9738,7 +9845,7 @@ const esEstela=id=>ESTELA_ORD.indexOf(id)>=0;
 let ESTELA_COLS=null;
 function cargaEstelaCols(cb){
   if(ESTELA_COLS) return cb();
-  import('./motor/chassis/estelas.mjs?v=bdafefb')
+  import('./motor/chassis/estelas.mjs?v=7bef0c0')
     .then(m=>{ ESTELA_COLS=m.ESTELAS||{}; cb(); })
     .catch(()=>{ ESTELA_COLS={}; cb(); });   //   sin red, fichas en gris: nunca una pantalla rota
 }
@@ -10486,14 +10593,20 @@ function paintTempHd(){
 //+AG doc 79 · EL COFRE, pintado. Titulo y boton salen de cadenas que YA estan en los 20 idiomas
 //   (seLeague + el nombre del escalon + miCobrar): cero traducciones nuevas para estrenarlo.
 //+AG doc 97 §3.2 · LA TABLA DE LA TEMPORADA. Las copas ganadas en estos 42 dias: tu cuenta sale de
-//   SAVE.cupsTemp y la de cada bot de sumar su ritmo dia a dia desde que empezo la temporada.
+//   SAVE.cupsTemp y la de cada bot de `botTempEf`.
+//+AG ⚠⚠ docs/99 §2 bis · ESTA ES LA SEGUNDA TABLA Y CASI SE ME QUEDA CONTANDO EL CALENDARIO. Sumaba
+//   `botTemp` (el relleno puro) mientras `topPuestoTemp` —el que PAGA las gemas del cierre— ya contaba
+//   contra el estado vivo. O sea: el jugador habria visto un podio en la pantalla y habria cobrado por
+//   otro. Es el fallo exacto que doc 97 §5 ya tuvo que cerrar una vez en la columna de DIARIO, y la
+//   leccion es que una fuente de datos nueva hay que buscarla por TODOS sus lectores (`grep botTemp`),
+//   no solo en el sitio donde la escribes.
 //   Se enseñan las tres primeras filas Y LA TUYA, aunque vayas la 40: un ranking donde no te
 //   encuentras no es tuyo. Si ya vas en el podio entra la cuarta, para que el bloque no encoja de
 //   golpe y desmonte el alto de la pantalla (la escena de temporada, doc 93, vive del hueco que sobra).
 function paintSeRk(){
   const box=el('seRkList'); if(!box) return;
   const s=S(), dn=todayNum();
-  const rows=BOTS.map(b=>({nm:b.name, c:b.color, v:botTemp(b,dn), me:false}));
+  const rows=BOTS.map(b=>({nm:b.name, c:b.color, v:botTempEf(b,dn), me:false}));
   rows.push({nm:s.you, c:null, v:myTempCups(), me:true});
   rows.sort((a,b)=>b.v-a.v || a.nm.localeCompare(b.nm));
   const mi=rows.findIndex(r=>r.me), ver = mi<3 ? [0,1,2,3] : [0,1,2,mi];
@@ -11405,7 +11518,7 @@ function rankRows(){ const dn=todayNum(), rows=[], s=S();
       //   hacia que ser 1o fuera regalado: es lo que ese bot ha ganado hoy A SU RITMO. Y es la MISMA
       //   cuenta con la que se reparte el premio (topPuestoDia), no una parecida: si la tabla y el
       //   premio salieran de dos formulas distintas, el jugador veria un puesto y cobraria otro.
-      else v=botDia(b,dn);
+      else v=botDiaEf(b,dn);   //+AG docs/99 §2 bis: lo que ha hecho HOY de verdad; el relleno solo si hoy no ha jugado
       rows.push({name:b.name, color:b.color, v, me:false, arch:botArch(b, mejor)}); });
     const mc=rkTab==='global'?totalCopas():myTodayDelta();
     rows.push({name:s.you, color:rgb(ARCH_COLOR[(equippedBall()||{}).arch]||[0.16,0.42,1.0]), v:mc, me:true,
@@ -12077,7 +12190,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=bdafefb';
+  import { startAmbient } from './arte/ambient.mjs?v=7bef0c0';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -12093,7 +12206,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=bdafefb').then(m => {
+  import('./arte/pista-preview.mjs?v=7bef0c0').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -12105,8 +12218,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=bdafefb';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=bdafefb';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=7bef0c0';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=7bef0c0';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -12276,7 +12389,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=bdafefb'), import('./motor/chassis/sincro.mjs?v=bdafefb')]);
+        import('./motor/chassis/nube.mjs?v=7bef0c0'), import('./motor/chassis/sincro.mjs?v=7bef0c0')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };

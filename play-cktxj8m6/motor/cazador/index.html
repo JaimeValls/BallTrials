@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-08 bdafefb">
+<meta name="bt-build" content="2026-08-08 7bef0c0">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <!--+AG el HTML se sirve en INGLES (defecto del juego); ?lang=es lo traduce por JS (applyLang) -->
 <title>YouBall · The Hunter (WebGL)</title>
@@ -395,7 +395,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=bdafefb"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=7bef0c0"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -406,30 +406,30 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 </script>
 
 <script type="module">
-import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, makeFacePlane, createItemPool, createItemPops, createStarBurst, createWindTrail, createBloom, frameOrtho } from '../chassis/gfx.mjs?v=bdafefb';
-import { archLook } from '../chassis/ballmat.mjs?v=bdafefb';   //+AG doc 41 bloque G: material de la bola-heroe
-import { attachSquash } from '../chassis/squash.mjs?v=bdafefb';
-import { crearEscudos } from '../chassis/escudo.mjs?v=bdafefb';   //+AG 2026-08-08: la burbuja que dice "llevo escudo puesto" (misma pieza que la Carrera)
-import { paleta as estelaPaleta, emiteEstela } from '../chassis/estelas.mjs?v=bdafefb';   //+AG doc 97 §6: la estela cosmetica del jugador
-import { Sim, RNG, TEAMS, BALL_R, ARENA_W, ARENA_H, FPS, AGENCIA } from './sim.js?v=bdafefb';
-import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=bdafefb';
-import { archFace } from '../chassis/facegen.mjs?v=bdafefb';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
-import { createCelebration } from '../chassis/celebration.mjs?v=bdafefb';
-import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=bdafefb';
-import { crearInventario } from '../chassis/invboost.mjs?v=bdafefb';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
-import { buildSfxBuffer } from './sfxmap.mjs?v=bdafefb';
-import { createCoach } from '../chassis/coach.mjs?v=bdafefb';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
-import { crearSalida } from '../chassis/salida.mjs?v=bdafefb';   //+AG 2026-08-08 · preparar la bola durante la cuenta atrás
-import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=bdafefb';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
-import { createUiSfx } from '../chassis/uisfx.mjs?v=bdafefb';   //+AG doc 88: el sonido de "no puedo"
-import { createJuice } from '../chassis/juice.mjs?v=bdafefb';   //+AG doc 88: lo que pasa cuando el dedo toca un botón (los 3 modos)
+import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, makeFacePlane, createItemPool, createItemPops, createStarBurst, createWindTrail, createBloom, frameOrtho } from '../chassis/gfx.mjs?v=7bef0c0';
+import { archLook } from '../chassis/ballmat.mjs?v=7bef0c0';   //+AG doc 41 bloque G: material de la bola-heroe
+import { attachSquash } from '../chassis/squash.mjs?v=7bef0c0';
+import { crearEscudos } from '../chassis/escudo.mjs?v=7bef0c0';   //+AG 2026-08-08: la burbuja que dice "llevo escudo puesto" (misma pieza que la Carrera)
+import { paleta as estelaPaleta, emiteEstela } from '../chassis/estelas.mjs?v=7bef0c0';   //+AG doc 97 §6: la estela cosmetica del jugador
+import { Sim, RNG, TEAMS, BALL_R, ARENA_W, ARENA_H, FPS, AGENCIA } from './sim.js?v=7bef0c0';
+import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=7bef0c0';
+import { archFace } from '../chassis/facegen.mjs?v=7bef0c0';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
+import { createCelebration } from '../chassis/celebration.mjs?v=7bef0c0';
+import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=7bef0c0';
+import { crearInventario } from '../chassis/invboost.mjs?v=7bef0c0';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
+import { buildSfxBuffer } from './sfxmap.mjs?v=7bef0c0';
+import { createCoach } from '../chassis/coach.mjs?v=7bef0c0';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { crearSalida } from '../chassis/salida.mjs?v=7bef0c0';   //+AG 2026-08-08 · preparar la bola durante la cuenta atrás
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=7bef0c0';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
+import { createUiSfx } from '../chassis/uisfx.mjs?v=7bef0c0';   //+AG doc 88: el sonido de "no puedo"
+import { createJuice } from '../chassis/juice.mjs?v=7bef0c0';   //+AG doc 88: lo que pasa cuando el dedo toca un botón (los 3 modos)
 //+AG el ámbito NO es opcional: la regla base es `#controls button` (id + etiqueta) y le gana en
 //   especificidad a cualquier `.j-hit` suelto. Es la misma trampa que ya costó una versión muerta en la
 //   Carrera y otra en Luz Roja; aquí va escrita para no repetirla una tercera vez.
 const juice = createJuice({ ambito:'#controls', reducido: new URLSearchParams(location.search).get('redfx')==='1' });
-import { createPausa } from '../chassis/pausa.mjs?v=bdafefb';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
-import { cantarPuesto } from '../chassis/veredicto.mjs?v=bdafefb';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
-import { runToEnd } from '../chassis/simrun.mjs?v=bdafefb';
+import { createPausa } from '../chassis/pausa.mjs?v=7bef0c0';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
+import { cantarPuesto } from '../chassis/veredicto.mjs?v=7bef0c0';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
+import { runToEnd } from '../chassis/simrun.mjs?v=7bef0c0';
 
 window.addEventListener('error', e => { document.getElementById('err').style.display='grid'; console.error(e.error||e.message); });
 
@@ -1262,6 +1262,36 @@ if(shortOpts.individual){ const _s=(params.get('stats')||'').split(',').map(Numb
 //+AG doc 39: ?trait=<clave> → el RASGO de la bola equipada (aquí vive FANTASMA). La Sim valida la clave y solo
 //   reconoce los suyos: un rasgo de otro modo llega y no hace nada. Mismo candado que ?stats: solo INDIVIDUAL.
 if(shortOpts.individual){ const _t=params.get('trait'); if(_t) shortOpts.trait=_t; }
+//+AG 2026-08-08 · docs/99 · QUIÉNES SON LOS SIETE RIVALES. Hasta hoy eran la misma bola siete veces:
+//   mismo campo de pánico, sin una diferencia entre ellos, y sin usar un solo booster — el escudo ni
+//   siquiera funcionaba para un bot. Ahora el shell manda la pericia de los bots-persona que ya ha
+//   emparejado por copas (el mismo `&bskill=` que la Carrera) y, cuando lo mande, su carácter de gasto.
+//   Mismo doble candado que `stats`/`trait`: solo INDIVIDUAL, y la Sim lo vuelve a validar valor a valor.
+//   ⚠ MEDIDO ANTES DE ENCHUFARLO, y el resultado está en docs/99 §5.1: en ESTE modo la pericia del
+//   rival cambia tu resultado 2,3 puntos, mientras que jugar tú bien lo cambia 25. Jaime lo decidió
+//   sabiéndolo: aquí la dificultad la pone el cazador, y esto está para que los rivales se comporten
+//   como gente, no para hacer la partida más dura. Sin `bskill` la partida es bit-idéntica a la de
+//   antes (tools/huella-cazador.mjs, 80/80).
+if(shortOpts.individual){
+  //+AG ⚠ SE PREGUNTA SI EL PARÁMETRO EXISTE, Y NO ES UN DETALLE DE ESTILO: `''.split(',')` devuelve
+  //   `['']`, que con `map(Number)` es `[0]` y pasa cualquier `every(isFinite)`. O sea que la forma
+  //   corta —`(params.get('bskill')||'').split(',')`— enciende el sistema entero SIN parámetro y le
+  //   planta al primer rival pericia CERO y cero munición. Lo cazó tools/prueba-eslabon (la línea real
+  //   del fichero ejecutada con un params de mentira), no la lectura.
+  const _raw=params.get('bskill');
+  if(_raw){ const _bs=_raw.split(',').map(Number);
+    if(_bs.length && _bs.every(v=>isFinite(v))) shortOpts.botSkills=_bs; }
+  //+AG el carácter viaja aparte porque es otra cosa (docs/99 §3.1): la pericia dice si juega bien, el
+  //   carácter dice CUÁNDO suelta lo que tiene. El shell todavía no lo manda, así que hoy todos caen al
+  //   neutro y el modo sigue teniendo bots con pericia — degrada a lo razonable, no a lo roto.
+  const _bc=(params.get('bchar')||'').split(',').filter(Boolean);
+  if(_bc.length) shortOpts.botChars=_bc;
+}
+//+AG cuántos boosters puede gastar un bot en toda la partida. Va atado a que el JUGADOR tenga
+//   inventario limitado, igual que en la Carrera: si él juega con cuentagotas, ellos también. Con el
+//   motor abierto suelto (vídeo del canal, tutorial) `INV.ilimitado` es true y esto no se pone, así que
+//   los bots se quedan sin munición y el vídeo sale como siempre.
+if(shortOpts.individual && !INV.ilimitado) shortOpts.botStock = 1;
 //+AG doc 41 bloque G: ?arch=<clave> (la bola-heroe equipada) -> su MATERIAL solo para balls[0].
 //   Misma regla que ?stats: solo en INDIVIDUAL, y ausente o desconocido = null = el look de siempre.
 //   Es 100% cosmetico: no toca la Sim, asi que no puede mover el balance ni un milimetro.

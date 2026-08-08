@@ -111,6 +111,10 @@ export const AGENCIA = {
 //   haga el carácter que haga, y un flojo juega su manía entera. Eso es exactamente lo que Jaime
 //   describió —«hay unos bots que juegan muy bien y son los que están más arriba»— y es lo que hace que
 //   la clasificación signifique algo en vez de ser una lista ordenada por un número secreto.
+//   cuánto más fuerte va al orbe un bot con la audacia al máximo. 4,5 × (1+2) = 13,5, que es
+//   prácticamente el 14 con el que empuja un JUGADOR que pide «a por el booster» (AGENCIA.seek). El
+//   número no se elige a ojo: el techo de un bot es jugar tan bien como tú, no mejor.
+const BOT_SEEK_MUL = 2.0;
 const BOT_OPTIMO = { escudo: 0.70, dash: 0.55 };
 const BOT_CHAR = {
   tactico:     { escudo: 0.72, dash: 0.58 },
@@ -347,6 +351,18 @@ export class Sim {
   //   ⚠ EL ORDEN ES ESCUDO Y LUEGO IMPULSO, y ese orden es la diferencia entre defenderse y huir: el
   //   escudo te salva de la captura de ESTE frame, el impulso te saca de ahí para los siguientes. Al
   //   revés, un bot con los dos se iría corriendo con el peligro todavía encima.
+  //+AG docs/99 §5.1 · CUÁNTO SE ATREVE ESTE RIVAL AHORA MISMO, de 0 a 1. Dos cosas lo deciden y las dos
+  //   tienen que darse: su PERICIA (un flojo no se atreve nunca) y estar LEJOS del cazador (con el
+  //   cazador encima no se atreve nadie, por bueno que sea). Fuera de esa ventana devuelve 0 y todas
+  //   las líneas que lo usan valen exactamente lo que valían antes de docs/99.
+  _botAudacia(b, dl){
+    if (!this.botSkills || b.isPlayer || b._skill == null || b.rank !== null) return 0;
+    const t = Math.max(0, Math.min(1, (b._skill - 0.45) / 0.75));
+    //   la audacia entra a partir de FLEE_NEAR (donde el pánico deja de crecer) y llega al máximo al
+    //   doble de esa distancia. Es la misma frontera que ya usa el miedo, no un umbral inventado.
+    const lejos = Math.max(0, Math.min(1, (dl - FLEE_NEAR) / FLEE_NEAR));
+    return t * lejos;
+  }
   _botDefiende(b, f, dl, lock_id, ev){
     if (b._skill == null || b._stock === null || b.rank !== null) return;
     //   cómo de mal lo está pasando, de 0 a 1: pegado y FIJADO vale 1; fijado importa casi el doble que
@@ -459,7 +475,25 @@ export class Sim {
       //+AG doc 61: el pánico NUNCA se apaga (12.5 de lejos, hasta 25 pegado) y por eso se comía la orden del
       //   jugador justo cuando más importa. Pedir algo que no sea "escapar" es ACEPTAR EL RIESGO: su miedo baja a
       //   ×AGENCIA.calma. Solo el jugador; los bots siguen con el pánico entero. Con calma=1 es la línea de antes.
-      const _pk = (b.isPlayer && this._intent !== 'escapar') ? AGENCIA.calma : 1;
+      //+AG ⚠⚠ 2026-08-08 · docs/99 §5.1 · LA AUDACIA DEL RIVAL, Y ES EL ARREGLO DE UN FALLO MEDIDO.
+      //   La primera pasada solo les dio DEFENSA (escudo e impulso) y el banco la cazó INVERTIDA: contra
+      //   los cracks el jugador sobrevivía el 37,7 % y contra los flojos el 16,7 %, o sea que subir de
+      //   liga salía más barato. La causa: el escudo aparta al cazador, siete bots blindados hacen que
+      //   elimine a poca gente, la partida acaba por tiempo y ahí el que no hace nada sale ganando.
+      //   Defenderse no le quita nada a nadie — y en un modo de eliminación, la pericia de un rival
+      //   tiene que QUITARTE algo. Aquí lo que hay que quitar son los ORBES.
+      //
+      //   Y no se inventa una mecánica nueva: es LA DEL JUGADOR. Cuando tú pides «a por el booster», tu
+      //   miedo baja a AGENCIA.calma y tu empuje al orbe sube a AGENCIA.seek (14 contra el 4,5 de un
+      //   bot). Ahí estaba toda tu ventaja. Ahora un bot bueno hace lo mismo: acepta riesgo y va, y un
+      //   flojo sigue huyendo en pánico y dejando pasar el orbe.
+      //
+      //   ⚠ La audacia se APAGA con el cazador encima (`lejos`): hasta el mejor jugador huye cuando lo
+      //   tiene pegado, y un bot que fuera a por un orbe con el cazador en la nuca no parecería listo,
+      //   parecería roto.
+      const _aud = this._botAudacia(b, dl);
+      const _pk = b.isPlayer ? ((this._intent !== 'escapar') ? AGENCIA.calma : 1)
+                             : (1 - (1 - AGENCIA.calma) * _aud);
       ax += dx / dl * panic * _pk; ay += dy / dl * panic * _pk;
       //+AG docs/99: aquí es donde un rival decide si se cubre o si sale por patas. Va en este punto y no
       //   antes porque necesita `dl` (lo cerca que tiene al cazador), que se acaba de calcular arriba.
@@ -479,7 +513,11 @@ export class Sim {
         let o = this.orbs[0], bd = Infinity;
         for (const oo of this.orbs){ const dd = (oo.x - b.x) ** 2 + (oo.y - b.y) ** 2; if (dd < bd){ bd = dd; o = oo; } }
         let odx = o.x - b.x, ody = o.y - b.y, ol = hyp(odx, ody) || 1e-6;
-        ax += odx / ol * SEEKPU; ay += ody / ol * SEEKPU;
+        //+AG docs/99 §5.1: el crack empuja hacia el orbe casi tan fuerte como un jugador que lo pide
+        //   (4,5 × 3 = 13,5 contra los 14 de AGENCIA.seek); el flojo se queda en el 4,5 de siempre.
+        //   Con `_aud` a 0 —sin perfil, o con el cazador encima— la línea vale exactamente lo que valía.
+        const _sk = SEEKPU * (1 + BOT_SEEK_MUL * _aud);
+        ax += odx / ol * _sk; ay += ody / ol * _sk;
       }
       const tc = teamC[b.team];   // CZ4: cohesión de COLOR (los tríos se agrupan, legible desde arriba)
       if (tc.n > 1){ let tdx = tc.x - b.x, tdy = tc.y - b.y, tl = hyp(tdx, tdy) || 1e-6; ax += tdx / tl * TEAM_COH; ay += tdy / tl * TEAM_COH; }
