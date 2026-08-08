@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-08 05e5c3d"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-08 3914c92"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -740,10 +740,63 @@
        (nunca oculto), y ademas asi la de campeon hace de escaparate del premio. */
   .es-card.locked{ opacity:.42; cursor:default; }
   .es-card.locked:active{ transform:none; }
-  .es-mues{ position:relative; height:46px; border-radius:11px; overflow:hidden; background:#120d2b; }
-  .es-cola{ position:absolute; inset:0; clip-path:polygon(0 50%, 100% 4%, 100% 96%); }
-  .es-bola{ position:absolute; right:5px; top:50%; width:22px; height:22px; margin-top:-11px; border-radius:50%;
-    background:radial-gradient(circle at 34% 30%, #fff, #cdd6f5 55%, #8f9ac4); box-shadow:0 1px 3px #0008; }
+  /*   sube de 46 a 56 px: con la bola de verdad dentro (38 px), 46 la dejaba pegada al borde de arriba
+       y de abajo, y una bola que roza el marco se lee como un fallo de recorte, no como un retrato. */
+  /*   ⚠ SIN RECUADRO Y SIN FONDO PROPIO (3.ª pasada). Con su caja negra, la escena se leía como un
+       cromo pegado encima de la tarjeta en vez de como el contenido de la tarjeta. Ahora flota sobre
+       la placa, que es como Brawl enseña sus skins: el personaje ocupa la ficha, no vive en una
+       ventanita dentro de ella. */
+  .es-mues{ position:relative; height:56px; }
+  /*   la de la Tienda es la MISMA escena en grande: ocupa el hueco de 96 px de alto que ya tenía el
+       icono, así que la tarjeta no cambia de tamaño ni hay que remedir si la sección cabe.
+       ⚠ el selector lleva `.sh-item .sh-ic` delante A PROPÓSITO: sin eso, la regla de la Tienda
+         (`.sh-item .sh-ic{width:96px}`) gana por orden y le corta el ancho a la escena, con lo que la
+         cola se queda en un muñón. Con la clase encadenada gana esta, esté donde esté en la hoja. */
+  /*   ⚠ y `width:100%`, NO `auto`: `.sh-item` es un flex en columna con `align-items:center`, así que
+       un hijo en `auto` se encoge a su contenido — y aquí el contenido es la bola y la cola, las dos en
+       absoluto, o sea CERO. Medido: la caja salía de 0 px de ancho, la cola desaparecía y la bola se
+       iba a la izquierda de la tarjeta. Se ve vacía y no hay ningún error en consola que lo cante. */
+  .sh-item .sh-ic.es-mues.lg{ width:100%; height:96px; border-radius:14px; }
+  .es-mues.lg .es-bola{ width:66px; height:66px; margin-top:-33px; right:8px; }
+  /*   ⚠ EL DESENFOQUE NO ES ADORNO: sin él, el recorte deja un triángulo de bordes rectos y duros que
+       se lee como un BANDERÍN, no como algo que la bola va dejando detrás. Con 2,2 px de blur los
+       cantos se deshacen y el degradado que ya se desvanece por la izquierda remata la lectura de
+       rastro. Es lo mismo que hace el motor con sus partículas: nada de la estela tiene borde. */
+  /*   ⚠ LA FORMA SALE DE UNA MÁSCARA, NO DE UN RECORTE. El `clip-path` triangular de los dos primeros
+       intentos dejaba tres cantos rectos, y con desenfoque encima seguía leyéndose como un BANDERÍN:
+       la punta de un triángulo no es la punta de un rastro. La elipse pegada al lado derecho —donde
+       está la bola— se desvanece sola hacia atrás y hacia arriba y abajo a la vez, que es exactamente
+       la silueta de un cometa. Y como no hay borde, tampoco hace falta desenfocar para taparlo. */
+  /*   ⚠ LA FORMA, EN TRES INTENTOS MEDIDOS Y MIRADOS. (1) Recorte triangular limpio: se leía como un
+       BANDERÍN, tres cantos rectos. (2) Máscara elíptica: suave, pero perdía la DIRECCIÓN y quedaba una
+       mancha de color detrás de la bola — «¿qué es esto?». (3) Lo que funciona es lo de los dos: el
+       recorte da la dirección (se estrecha hacia atrás) y un desenfoque GRANDE le quita los cantos,
+       que es lo que separa un rastro de una pegatina. El desenfoque tiene que ser grande de verdad:
+       con 2 px seguía viéndose el triángulo. */
+  /*   ⚠⚠ Y POR QUÉ SON DOS CAPAS, que es lo que costó tres intentos: `filter` y `clip-path` en el MISMO
+       elemento no hacen lo que parece — el navegador recorta DESPUÉS de filtrar, así que el desenfoque
+       se corta por la línea del recorte y los cantos duros vuelven intactos por mucho blur que le
+       pongas. Se ve exactamente igual con 2 px que con 8, y eso es lo que me tuvo tres pasadas
+       subiéndole el número a algo que no podía funcionar. Con el recorte en el hijo y el desenfoque en
+       el padre, el blur se aplica sobre la forma YA recortada y los bordes se deshacen de verdad. */
+  .es-cola{ position:absolute; inset:0; filter:blur(5px); }
+  .es-cola b{ position:absolute; inset:0; clip-path:polygon(0 50%, 100% 10%, 100% 90%); }
+  .es-mues.lg .es-cola{ filter:blur(8px); }
+  /*   el halo: el mismo color de la cola tiñendo el fondo detrás de la bola. Sin él la escena es un
+       triángulo sobre negro; con él la estela parece que ILUMINA, que es lo que la hace apetecible. */
+  .es-halo{ position:absolute; inset:0; opacity:.5; filter:blur(13px); }
+  /*+AG ⚠ 2026-08-08, Jaime mirando la Tienda: «los iconos son una auténtica mierda… me pones un
+     arcoíris de dos líneas azules». Tenía razón y el fallo era mío: los seis cosméticos llevaban un
+     glifo SVG de trazo fino que dibujé yo para no bloquear el cambio, y un glifo de trazo NO es arte de
+     tienda. Su encargo, textual: «o me pones una bola con la estela para que se vea lo guay que es y la
+     gente lo quiera comprar, o alguna especie de icono», y eligió lo primero.
+     Así que la muestra deja de ser una cuña abstracta con un círculo blanco: es TU BOLA, la que llevas
+     equipada, con la estela saliéndole por detrás. Es lo que hace Brawl Stars —la skin se enseña puesta
+     en el personaje, nunca de perfil en una vitrina— y además es honesto: enseña exactamente lo que vas
+     a ver en pista. Cero arte nuevo: la bola es el mismo `.webp` del Garaje y la cola son los colores
+     que el motor va a pintar. */
+  .es-bola{ position:absolute; right:4px; top:50%; width:38px; height:38px; margin-top:-19px;
+    object-fit:contain; filter:drop-shadow(0 2px 4px #0009); }
   .es-nm{ font-size:var(--fs-3); font-weight:900; color:#fff; line-height:1.25; }
   .es-st{ font-size:var(--fs-2); font-weight:800; color:#ffd23f; text-transform:uppercase; letter-spacing:.05em; }
 
@@ -6036,7 +6089,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=05e5c3d"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=3914c92"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -9148,7 +9201,10 @@ const attrName =i=>((S().attrs||[])[i])||ATTRS[i];
 //   no lo trae, cae a la abreviatura de siempre: un idioma sin traducir enseña "VEL", que es lo que
 //   había ayer, en vez de romper la ficha o soltar un "undefined".
 const attrFull =i=>((S().attrsFull||[])[i])||attrName(i);
-const cosmName =c=>((S().cosmNames||{})[c.id])||c.nm;
+//+AG doc 97: las estelas pasan por estelaNombre(), que arma el nombre con palabras YA traducidas en los
+//   20 idiomas (la categoria «Estela» + «Campeón» / «Podio»). Sin esto, las dos que se ganan saldrian
+//   en español fijo con el juego en cualquier otra lengua.
+const cosmName =c=>(esEstela(c.id) ? estelaNombre(c.id) : ((S().cosmNames||{})[c.id])||c.nm);
 const cosmCat  =c=>((S().cosmCats ||{})[c.cat])||c.cat;
 const HXF="'Segoe UI Rounded','Nunito',system-ui,sans-serif";
 //+AG 1-ago: `gemaPrice(precio)` muere. Convertia Monedas a Gemas dividiendo entre 60, y ese numero
@@ -9223,6 +9279,22 @@ function renderVitrina(){
 //   nuevo y cero riesgo de descuadrar el encaje en movil.
 //   Las que NO tienes se pintan igual pero apagadas, nunca ocultas (canon §6). Ademas de ser la regla,
 //   aqui hace de escaparate: ves la estela de campeon en gris y sabes que existe y que se gana.
+//+AG doc 97 §6 · LA ESCENA DE UNA ESTELA: tu bola con la cola saliendole por detras. La usan la ficha
+//   del Garaje y la tarjeta de la Tienda, que es justo el motivo de que sea una funcion y no HTML
+//   repetido: el dia que la Tienda enseñe una cosa y el Garaje otra, el jugador compra A y recibe B.
+//   La bola es LA QUE LLEVAS EQUIPADA, no una generica: enseñar el cosmetico sobre tu propio personaje
+//   es lo que lo hace deseable, y ademas es lo que vas a ver de verdad al salir a pista.
+//   La cola arranca en transparente porque si no corta en seco por la izquierda y parece un trozo de
+//   bandera en vez de algo que se desvanece.
+function escenaEstela(id){
+  const E=(ESTELA_COLS&&ESTELA_COLS[id])||{cols:['#4a4370','#6d659c']}, n=E.cols.length;
+  const paradas=['transparent 0%'].concat(E.cols.map((h,i)=>h+' '+Math.round(12+i/Math.max(1,n-1)*88)+'%'));
+  const arch=(equippedBall()||{}).arch||'cohete';
+  const grad='linear-gradient(90deg,'+paradas.join(',')+')';
+  return '<i class="es-halo" style="background:'+grad+'"></i>'
+       + '<i class="es-cola"><b style="background:'+grad+'"></b></i>'
+       + '<img class="es-bola" src="'+ballArt(arch)+'" alt="" loading="lazy">';
+}
 function renderEstelas(){
   const s=S(), g=el('gGrid'), puesta=estelaPuesta();
   //   la primera vez los colores aun no han llegado del chasis: se pinta ya (en gris) y se repinta solo
@@ -9231,13 +9303,10 @@ function renderEstelas(){
   el('gCount').textContent = estelasTengo().length + '/' + ESTELA_ORD.length;
   g.innerHTML='';
   ESTELA_ORD.forEach(id=>{
-    const tengo=SAVE.cosmetics.includes(id), E=(ESTELA_COLS&&ESTELA_COLS[id])||{cols:['#4a4370','#6d659c']}, n=E.cols.length;
+    const tengo=SAVE.cosmetics.includes(id);
     const c=document.createElement('div');
     c.className='es-card'+(puesta===id?' on':'')+(tengo?'':' locked');
-    //   la cola arranca en transparente: sin eso la cuña corta en seco por la izquierda y parece un
-    //   trozo de bandera en vez de algo que se desvanece detras de la bola.
-    const paradas=['transparent 0%'].concat(E.cols.map((h,i)=>h+' '+Math.round(12+i/(n-1)*88)+'%'));
-    c.innerHTML='<div class="es-mues"><i class="es-cola" style="background:linear-gradient(90deg,'+paradas.join(',')+')"></i><i class="es-bola"></i></div>'
+    c.innerHTML='<div class="es-mues">'+escenaEstela(id)+'</div>'
               + '<div class="es-nm">'+estelaNombre(id)+'</div>'
               + (puesta===id ? '<div class="es-st">'+(s.equippedTag||'')+'</div>' : '');
     //   tocar la que YA llevas puesta te la quita. Asi no hace falta una ficha «Ninguna» —que serian
@@ -9326,7 +9395,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=05e5c3d').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=3914c92').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -9558,7 +9627,16 @@ const enMonedas = g => Math.round(g*CAMBIO);
 //   igual que las bolas: Monedas si te llegan, Gemas si tienes prisa.
 const COSM=[ {id:'sk_llamas',nm:'Llamas',cat:'Skin',rar:1,ic:CM.llama,g:150}, {id:'sk_galaxia',nm:'Galaxia',cat:'Skin',rar:3,ic:CM.galaxia,g:450},
   {id:'es_arcoiris',nm:'Estela Arcoíris',cat:'Estela',rar:2,ic:CM.estela,g:250}, {id:'ce_fuegos',nm:'Fuegos',cat:'Celebración',rar:2,ic:CM.fuegos,g:250},
-  {id:'em_gg',nm:'¡GG!',cat:'Emote',rar:0,ic:CM.emote,g:60}, {id:'ma_corona',nm:'Marco Corona',cat:'Marco',rar:4,ic:CM.corona,g:800} ];
+  {id:'em_gg',nm:'¡GG!',cat:'Emote',rar:0,ic:CM.emote,g:60}, {id:'ma_corona',nm:'Marco Corona',cat:'Marco',rar:4,ic:CM.corona,g:800},
+  //+AG doc 97 · LAS DOS ESTELAS DE PREMIO ENTRAN AL ESCAPARATE, y no para venderlas: `premio` marca que
+  //   NO se compran (el boton enseña la medalla del puesto que hay que hacer, sin precio). Estan aqui
+  //   por dos motivos. El primero, que una seccion con UN solo articulo no es una seccion. El segundo y
+  //   de verdad: el mejor sitio para enseñar lo que se gana compitiendo es el mismo donde el jugador
+  //   esta mirando lo que cuesta el dinero — «esta no se vende, esta se gana» dicho justo ahi vale mas
+  //   que cualquier cartel. Es la regla de la casa (doc 10 §4: lo mejor se gana compitiendo) puesta
+  //   donde se ve. `g:0` para que no herede precio en la linea de abajo.
+  {id:'es_podio',  nm:'Estela · Podio',   cat:'Estela',rar:3,ic:'',g:0,premio:3},
+  {id:'es_campeon',nm:'Estela · Campeón', cat:'Estela',rar:4,ic:'',g:0,premio:1} ];
 for(const c of COSM) c.m = enMonedas(c.g);   //+AG el precio en Monedas SALE del de Gemas: un cosmético nuevo lo hereda por construcción
 // ── LAS ESTELAS (doc 97 §6) ─────────────────────────────────────────────────
 //+AG ⚠ ESTO NACE DE UNA DEUDA QUE COBRABA DINERO DE VERDAD. La lista COSM de aqui arriba lleva desde
@@ -9587,7 +9665,7 @@ const esEstela=id=>ESTELA_ORD.indexOf(id)>=0;
 let ESTELA_COLS=null;
 function cargaEstelaCols(cb){
   if(ESTELA_COLS) return cb();
-  import('./motor/chassis/estelas.mjs?v=05e5c3d')
+  import('./motor/chassis/estelas.mjs?v=3914c92')
     .then(m=>{ ESTELA_COLS=m.ESTELAS||{}; cb(); })
     .catch(()=>{ ESTELA_COLS={}; cb(); });   //   sin red, fichas en gris: nunca una pantalla rota
 }
@@ -9997,16 +10075,24 @@ function bolasEl(){ const s=S(), d=document.createElement('div'); d.innerHTML=''
 }
 function cosmEl(){ const s=S(), d=document.createElement('div'); d.innerHTML='';
   const g=document.createElement('div'); g.className='sh-grid';
-  COSM.forEach(c=>{ const q=QUAL[c.rar], have=hasCosm(c.id); const it=document.createElement('div'); it.className='sh-item'; it.style.setProperty('--qc',q.c);
-    it.innerHTML=`<div class="sh-ic">${c.ic}</div><div class="sh-nm">${cosmName(c)}</div><div class="sh-cat">${cosmCat(c)} · ${qualName(c.rar)}</div>`;
+  //+AG los colores de las estelas viven en el chasis (motor/chassis/estelas.mjs, fuente unica) y llegan
+  //   por import dinamico. La primera vez que se abre esta seccion aun no estan: se pinta en gris y se
+  //   repinta solo al aterrizar. Mismo patron que la seccion del Garaje y que vivas.mjs.
+  if(!ESTELA_COLS) cargaEstelaCols(()=>{ if(el('tienda') && el('tienda').classList.contains('on')) renderTienda(); });
+  //+AG ⚠⚠ doc 97 · 2026-08-08 · LOS CUATRO QUE NO FUNCIONAN SALEN DEL ESCAPARATE. Primero se marcaron
+  //   «pronto» (esa misma mañana) para dejar de cobrar por cosméticos que no se podían equipar ni se
+  //   veían. No bastaba, y lo cazó Jaime mirando la pantalla: «los iconos son una auténtica mierda… se
+  //   supone que todo lo que está en la tienda tiene que ser superchulo». Un artículo con un glifo de
+  //   trazo fino, que además no se puede comprar, es lo peor de los dos mundos: ni vende ni ilusiona,
+  //   y encima baja el listón de los que sí están bien. Vuelven cuando tengan carril Y arte de verdad.
+  COSM.filter(c=>esEstela(c.id)).forEach(c=>{ const q=QUAL[c.rar], have=hasCosm(c.id); const it=document.createElement('div'); it.className='sh-item'; it.style.setProperty('--qc',q.c);
+    it.innerHTML=`<div class="sh-ic es-mues lg">${escenaEstela(c.id)}</div><div class="sh-nm">${cosmName(c)}</div><div class="sh-cat">${cosmCat(c)} · ${qualName(c.rar)}</div>`;
     const btn=document.createElement('button');
-    //+AG ⚠ doc 97 §6.1 · LOS CUATRO QUE NO FUNCIONAN DEJAN DE VENDERSE. Skin, Celebración, Emote y
-    //   Marco se compran desde siempre y no se pueden equipar ni se ven en ningún sitio: hasta el 8-ago
-    //   se cobraban hasta 800 Gemas por ellos. Se quedan en el escaparate marcados «pronto» —la misma
-    //   palabra y la misma pastilla que ya usan el Pase y JUGAR POR EQUIPOS, o sea cero traducciones
-    //   nuevas— pero con el botón apagado. Enseñar lo que viene está bien; cobrarlo antes de que
-    //   exista, no. Se quita esta rama entera el día que su carril esté construido, como el de estelas.
-    if(!esEstela(c.id)){ btn.className='sh-buy owned'; btn.textContent=s.soonTag||'pronto'; btn.disabled=true; it.classList.add('soon'); }
+    //+AG las de PREMIO no se venden: el botón enseña la medalla del puesto que hay que hacer para
+    //   ganarla, sin precio y sin una palabra. Se lee igual en las 20 lenguas y dice lo que hay que
+    //   hacer, no lo que cuesta. Si ya la tienes, gana la rama de abajo y pone «TIENES».
+    if(c.premio && !have){ btn.className='sh-buy owned'; btn.disabled=true;
+      btn.innerHTML=medalIco(c.premio,'sm')+' #'+c.premio; }
     else if(have){ btn.className='sh-buy owned'; btn.textContent=s.ownedCosm; btn.disabled=true; }
     //+AG 2026-08-06 los dos precios, EXACTAMENTE como las bolas (misma regla, mismo botón, mismo orden):
     //   paga en Monedas si te llegan y en Gemas si no. Nunca cobra Gemas teniendo Monedas suficientes,
@@ -11918,7 +12004,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=05e5c3d';
+  import { startAmbient } from './arte/ambient.mjs?v=3914c92';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -11934,7 +12020,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=05e5c3d').then(m => {
+  import('./arte/pista-preview.mjs?v=3914c92').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -11946,8 +12032,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=05e5c3d';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=05e5c3d';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=3914c92';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=3914c92';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -12117,7 +12203,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=05e5c3d'), import('./motor/chassis/sincro.mjs?v=05e5c3d')]);
+        import('./motor/chassis/nube.mjs?v=3914c92'), import('./motor/chassis/sincro.mjs?v=3914c92')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
