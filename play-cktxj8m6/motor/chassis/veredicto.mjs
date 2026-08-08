@@ -121,7 +121,23 @@ export function cantarPuesto({ place, total, lang = 'en', ms = 1700 } = {}, onDo
   if (pending) return;                      // ya hay uno vivo: ni dos carteles ni dos avisos
   pending = typeof onDone === 'function' ? onDone : null;
   try {
-    const t = T(lang), p = Math.max(1, place | 0), won = p === 1;
+    //+AG ⚠⚠ 2026-08-08 · «A VECES MUERO Y ME DICE QUE HE GANADO» (Jaime). Esta línea decía
+    //   `Math.max(1, place|0)`, y ahí estaba: `place|0` convierte en **0** cualquier cosa que no sea un
+    //   número (null, undefined, NaN, un texto), y `Math.max(1, 0)` lo sube a **1**, o sea a `won`, o sea
+    //   al cartel dorado de «¡GANASTE!». **El fallo de este cartel era coronar.** Y no es un caso de
+    //   laboratorio: en la Carrera el puesto de EQUIPO vale 0 cuando NO ganas (es un sí/no disfrazado de
+    //   número), así que basta con que ese 0 llegue por aquí para que se cante una victoria.
+    //   Ahora un puesto que no sea un entero >=1 NO se pinta como victoria: cae al peor puesto conocido
+    //   (`total`, o 8 si tampoco viene) y lo escribe en consola. Es el mismo arreglo que se le hizo el
+    //   mismo día a `onMatchEnd` del shell, que tenía escrito el mismo `||1`.
+    //   REGLA: el valor por defecto de un marcador nunca puede ser el mejor resultado posible. Si el dato
+    //   falta, el jugador tiene que notar que le falta algo, no llevarse una copa.
+    const t = T(lang);
+    const tot = Number.isInteger(total) && total >= 1 ? total : 8;
+    const crudo = place;
+    const valido = Number.isInteger(crudo) && crudo >= 1 && crudo <= tot;
+    if (!valido) console.error('[veredicto] puesto inválido:', crudo, '· NO se canta victoria, se usa el último (' + tot + ')');
+    const p = valido ? crudo : tot, won = p === 1;
     const h = build();
     h.classList.toggle('win', won);
     h.querySelector('.k').textContent = won ? '' : t.kicker;
