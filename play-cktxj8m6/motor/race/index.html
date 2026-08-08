@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-08 66a6e7a">
+<meta name="bt-build" content="2026-08-08 0c4584d">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>YouBall · La Gran Carrera (WebGL)</title>
 <style>
@@ -403,7 +403,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=66a6e7a"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=0c4584d"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -414,28 +414,29 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 </script>
 
 <script type="module">
-import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createItemPops, createBloom, frameOrtho, buildHud, updateHud } from '../chassis/gfx.mjs?v=66a6e7a';
-import { archLook } from '../chassis/ballmat.mjs?v=66a6e7a';   //+AG doc 41 bloque G: material de la bola-heroe
-import { attachSquash } from '../chassis/squash.mjs?v=66a6e7a';
-import { crearEscudos } from '../chassis/escudo.mjs?v=66a6e7a';   //+AG 2026-08-08: la burbuja que dice "llevo escudo puesto"
+import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, createStarBurst, createWindTrail, createItemPops, createBloom, frameOrtho, buildHud, updateHud } from '../chassis/gfx.mjs?v=0c4584d';
+import { archLook } from '../chassis/ballmat.mjs?v=0c4584d';   //+AG doc 41 bloque G: material de la bola-heroe
+import { attachSquash } from '../chassis/squash.mjs?v=0c4584d';
+import { crearEscudos } from '../chassis/escudo.mjs?v=0c4584d';   //+AG 2026-08-08: la burbuja que dice "llevo escudo puesto"
+import { paleta as estelaPaleta, emiteEstela } from '../chassis/estelas.mjs?v=0c4584d';   //+AG doc 97 §6: la estela cosmetica del jugador
 import { Sim, RNG, TEAMS, SHORT_COLORS, BALL_R, WIDTH, GATE_Y, GATE_H, TOP, FPS,
-         DIR, N_BALLS, CAM_SCALE, ASPA_R, ASPA_THICK, PLAT_HW, PLAT_HH } from './sim.js?v=66a6e7a';   //+AG extras de la capa de agencia
+         DIR, N_BALLS, CAM_SCALE, ASPA_R, ASPA_THICK, PLAT_HW, PLAT_HH } from './sim.js?v=0c4584d';   //+AG extras de la capa de agencia
 //+AG doc 62: los encuadres del cierre (sim.hero_scale / sim.celeb_scale) se leen del OBJETO sim, no por
 //   import. Un export que la CDN aún no ha refrescado tumba el módulo entero y la partida no arranca (pasó
 //   en producción el 2-ago); un campo que falta degrada a la cámara de siempre. Ver la nota en sim.js.
-import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=66a6e7a';
-import { archFace } from '../chassis/facegen.mjs?v=66a6e7a';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
-import { itemTexture } from '../chassis/itemgen.mjs?v=66a6e7a';
-import { crearInventario } from '../chassis/invboost.mjs?v=66a6e7a';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
-import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=66a6e7a';
-import { buildSfxBuffer } from './sfxmap.mjs?v=66a6e7a';
-import { runToEnd } from '../chassis/simrun.mjs?v=66a6e7a';
-import { createCoach } from '../chassis/coach.mjs?v=66a6e7a';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
-import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=66a6e7a';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
-import { createPausa } from '../chassis/pausa.mjs?v=66a6e7a';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
-import { cantarPuesto } from '../chassis/veredicto.mjs?v=66a6e7a';   //+AG cartel de META: "en qué puesto has quedado", antes de soltar el resultado al shell
-import { createUiSfx } from '../chassis/uisfx.mjs?v=66a6e7a';   //+AG doc 88: el sonido de "no puedo"
-import { createJuice } from '../chassis/juice.mjs?v=66a6e7a';   //+AG doc 88: lo que pasa cuando el dedo toca un botón (los 3 modos)
+import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=0c4584d';
+import { archFace } from '../chassis/facegen.mjs?v=0c4584d';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
+import { itemTexture } from '../chassis/itemgen.mjs?v=0c4584d';
+import { crearInventario } from '../chassis/invboost.mjs?v=0c4584d';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
+import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=0c4584d';
+import { buildSfxBuffer } from './sfxmap.mjs?v=0c4584d';
+import { runToEnd } from '../chassis/simrun.mjs?v=0c4584d';
+import { createCoach } from '../chassis/coach.mjs?v=0c4584d';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=0c4584d';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
+import { createPausa } from '../chassis/pausa.mjs?v=0c4584d';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
+import { cantarPuesto } from '../chassis/veredicto.mjs?v=0c4584d';   //+AG cartel de META: "en qué puesto has quedado", antes de soltar el resultado al shell
+import { createUiSfx } from '../chassis/uisfx.mjs?v=0c4584d';   //+AG doc 88: el sonido de "no puedo"
+import { createJuice } from '../chassis/juice.mjs?v=0c4584d';   //+AG doc 88: lo que pasa cuando el dedo toca un botón (los 3 modos)
 //+AG el ámbito NO es opcional: `#ctr button:disabled` le gana en especificidad a cualquier `.j-hit` suelto,
 //   y un booster se pone `disabled` en el MISMO frame en que se dispara. Sin el ámbito, el fogonazo del
 //   botón que más importa no se vería jamás (es la trampa del doc 74 §6, ahora con su nombre).
@@ -969,6 +970,15 @@ function sync(dt, a=1){
     if(b.turbo>0||b.in_boost){ P.trail(bx,by,b.vx,b.vy);
       if(b.turbo>0){ P.trail(bx,by,b.vx,b.vy); P.trail(bx,by,b.vx,b.vy);
         if(b.turbo>16) P.trail(bx,by,b.vx,b.vy); } }
+    //+AG doc 97 §6 · LA ESTELA COSMETICA, solo la del jugador (i===0, la misma bola que lleva el anillo
+    //   TU de arriba) y solo si el shell mando ?trail=. Sin ese parametro —torneo, video, o jugador sin
+    //   estela puesta— ESTELA_COLS es null y aqui no pasa nada.
+    //   ⚠ VA DESPUES de la estela de velocidad y NO la sustituye: son dos idiomas distintos y el de
+    //     arriba es el que importa. Aquella dice «voy rapido» y el jugador la usa para decidir; esta
+    //     solo dice quien eres. Lo que las separa es el COLOR (cian fijo contra la paleta de tu estela)
+    //     y que aquella se dobla o cuadruplica con el nitro; el porque de que la densidad base sea la
+    //     misma esta medido en chassis/estelas.mjs — con menos, la estela no se veia.
+    if(i===0 && ESTELA_COLS) emiteEstela(P.emit, ESTELA_COLS, bx, by, b.vx, b.vy, simNowF/60);
     // EMOCIONES (ojos ABIERTOS, NUNCA dormida): en carrera = concentrada/alerta; al llegar = excitada/celebra
     if(b.rank!==null){                                   // ya en meta
       const nArr=sim.byTeam[b.team].filter(x=>x.rank!==null).length;
@@ -1260,6 +1270,10 @@ if(indOpts && !INV.ilimitado) indOpts.botStock = BOT_STOCK;
 //   Es 100% cosmetico: no toca la Sim, asi que no puede mover el balance ni un milimetro.
 const ARCH_LOOK_P = INDIVIDUAL ? archLook(params.get('arch')) : null;
 const ARCH_KEY_P  = ARCH_LOOK_P ? params.get('arch') : null;   //+AG el prop pasa por la MISMA puerta que el material
+//+AG doc 97 §6 · ?trail=<id> · la estela cosmetica equipada. A diferencia de ?arch, NO se limita a
+//   INDIVIDUAL: la estela es tuya y se luce tambien jugando por equipos, que es lo unico cosmetico que
+//   no depende de con que bola corras. Un id sin paleta devuelve null y no pinta nada.
+const ESTELA_COLS = estelaPaleta(params.get('trail'));
 //+AG 2026-08-08 · aquí nace la burbuja de escudo (ver chassis/escudo.mjs y la nota del sync). Va DELANTE de la
 //   bola (z 0.5+BALL_R) y DETRÁS del anillo TU (z 1.27), que sigue mandando en "quién eres tú".
 if(INDIVIDUAL) escudos=crearEscudos({ scene, radio:BALL_R, n:N_BALLS, z:0.5+BALL_R+0.04, bloom:BLOOM });

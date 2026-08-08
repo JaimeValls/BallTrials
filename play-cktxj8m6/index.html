@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-08 66a6e7a"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-08 0c4584d"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -720,6 +720,32 @@
   .g-sec{ font-size:var(--fs-4); font-weight:900; letter-spacing:.06em; text-transform:uppercase;
     color:#fff; -webkit-text-stroke:var(--stroke-4) #241a3f; paint-order:stroke fill; text-shadow:0 2px 0 #241a3f; }
   .g-count{ margin-left:auto; font-size:var(--fs-3); font-weight:900; color:#c9d0f2; font-variant-numeric:tabular-nums; }
+  /*+AG doc 97 §6.1 · el rotulo de seccion pasa a ser PULSABLE (BOLAS / ESTELA). Conserva exactamente su
+     dibujo de antes cuando esta encendido —misma letra, mismo contorno, mismo alto de fila— y el
+     apagado pierde el contorno ademas del color: solo con el gris, a este cuerpo de letra y con el
+     trazo puesto, las dos seguian pesando lo mismo y no se leia cual mandaba. */
+  .g-sec{ position:relative; background:none; border:0; padding:0; font-family:inherit; cursor:pointer; }
+  .g-sec:not(.on){ color:#a79fc9; -webkit-text-stroke-width:0; text-shadow:none; }
+  .g-sec::before{ content:''; position:absolute; inset:-13px -9px; }   /* halo tactil: la receta de .coin */
+  .g-sec:active{ transform:translateY(1px); }
+  /*+AG LA FICHA DE ESTELA. La muestra es una CUÑA que se estrecha hacia atras con una bola delante:
+     es el dibujo de lo que veras en pista, no un icono abstracto. Cero arte de fichero — los colores
+     salen de la tabla ESTELAS, la misma que usa el motor para las particulas. */
+  .es-card{ position:relative; background:linear-gradient(#2a2050,#1d1640); border:1px solid #ffffff1c;
+    border-radius:16px; padding:11px 12px 12px; display:flex; flex-direction:column; gap:9px; cursor:pointer;
+    box-shadow:0 3px 0 #0d0726, inset 0 1px 0 #ffffff1a; }
+  .es-card:active{ transform:translateY(2px); box-shadow:0 1px 0 #0d0726, inset 0 1px 0 #ffffff1a; }
+  .es-card.on{ border-color:#ffd23f; box-shadow:0 3px 0 #0d0726, 0 0 0 2px #ffd23f55, inset 0 1px 0 #ffffff2e; }
+  /*   la que no tienes se enseña IGUAL pero apagada: el canon manda que lo que aun no es tuyo se vea
+       (nunca oculto), y ademas asi la de campeon hace de escaparate del premio. */
+  .es-card.locked{ opacity:.42; cursor:default; }
+  .es-card.locked:active{ transform:none; }
+  .es-mues{ position:relative; height:46px; border-radius:11px; overflow:hidden; background:#120d2b; }
+  .es-cola{ position:absolute; inset:0; clip-path:polygon(0 50%, 100% 4%, 100% 96%); }
+  .es-bola{ position:absolute; right:5px; top:50%; width:22px; height:22px; margin-top:-11px; border-radius:50%;
+    background:radial-gradient(circle at 34% 30%, #fff, #cdd6f5 55%, #8f9ac4); box-shadow:0 1px 3px #0008; }
+  .es-nm{ font-size:var(--fs-3); font-weight:900; color:#fff; line-height:1.25; }
+  .es-st{ font-size:var(--fs-2); font-weight:800; color:#ffd23f; text-transform:uppercase; letter-spacing:.05em; }
 
   /*+AG `scrollbar-width:none` + el pseudo de WebKit: el sintoma 1 de la lista. Las otras tres listas
      largas del juego ya lo hacian; esta se quedo sin el y era la mas visible de todas. */
@@ -4436,6 +4462,17 @@
      DIBUJADO que ya entrego el encargo 30/31 (`arte/ui/ranking-regalo.webp`), servido por uiArt() con
      su ART_V — la misma puerta por la que pasan las monedas y las medallas. */
   .rkprize{ display:flex; align-items:center; justify-content:center; gap:8px; }
+  /*+AG doc 97 · las celdas de la banda de premios. El puesto en oro y la cifra al lado: la misma
+     gramatica que ya usa cada fila de la lista («#4» + su numero), asi que no hay que aprender nada.
+     `flex-wrap` porque cuando hay premio por cobrar entra ademas el boton de 44 px, y en 320 de ancho
+     no caben los cuatro en una linea — que envuelvan es correcto; que se salgan, no. */
+  .rkprize{ flex-wrap:wrap; }
+  .rkprize:empty{ display:none; }   /* en Global y Por bola no se pinta nada: sin esto dejaba su hueco */
+  .tp-cel{ display:inline-flex; align-items:center; gap:5px; white-space:nowrap; }
+  .tp-cel .cico{ vertical-align:-2px; }
+  .tp-p{ color:#ffd23f; font-weight:900; font-variant-numeric:tabular-nums; }
+  .tp-sep{ opacity:.34; }
+  .tp-cobra{ width:100%; margin-top:2px; }
   .rkprize .gico{ flex:0 0 auto; width:22px; height:22px; object-fit:contain;
     filter:drop-shadow(0 2px 4px #0008); }
   /*+AG los siete rotulos de seccion de Ajustes eran 🔊🌐🎮♿👤🛟⚖ metidos DENTRO de la cadena de i18n,
@@ -5142,7 +5179,17 @@
       <div class="rkstrip" id="rkStrip"></div>
       <button class="rkarr" id="rkArrR" aria-label="›">›</button>
     </div>
-    <div class="rkprize"><img class="gico" src="arte/ui/ranking-regalo.webp?v=2" alt=""><span data-t="rkPrize">Franjas de premio · Top 10% y Top 1% · próximamente</span></div>
+    <!--+AG doc 97 · LA BANDA DE PREMIOS, viva. Aqui habia una FRASE que prometia «Premios · Top 10 % y
+         Top 1 % · pronto» en las tres pestañas y no entregaba nada en ninguna. Ahora la pinta
+         pintaTopBanda(): la tabla de premios de verdad en Diario, y NADA en Global y Por bola, que son
+         las dos que no pagan (Global no puede pagar nunca: doc 97 §2).
+         ⚠ Pierde su `data-t` a proposito. Es la trampa que ya se cazo en la Liga y en la cabecera de
+           Temporada (doc 78 §6): si lo conservara, cualquier applyShell() posterior —cambiar de idioma,
+           volver a la pantalla— le devolveria encima la frase de la maqueta.
+         Y lo que pinta NO LLEVA NI UNA PALABRA: son los «#1 / #3 / #10» con el mismo formato que la
+         propia lista y el icono de moneda. Cero traducciones nuevas, y se lee igual en las 20 lenguas
+         por construccion, incluidas las de derecha a izquierda. -->
+    <div class="rkprize" id="rkPrize"></div>
     <div class="rkme" id="rkMe"></div>
   </div>
   <div class="rklist" id="rkList" data-fit="scroll"></div>   <!-- misma excepcion que #gGrid: una clasificacion es una lista larga por definicion -->
@@ -5420,8 +5467,17 @@
       <span class="gh-chip c" id="gHeroCups"></span>
     </div>
   </div>
+  <!--+AG doc 97 §6.1 · LAS DOS SECCIONES DEL GARAJE. El sitio de equiparse la estela es este y no una
+       pantalla nueva: el Garaje YA es donde vistes a tu bola, y meter «Aspecto» en la barra de abajo
+       habria sido una sexta pestaña para tres fichas.
+       ⚠ Y NO CUESTA NI UN PIXEL DE ALTO, que es lo que decidio la forma: esta fila ya existia con su
+         rotulo fijo «BOLAS» y su contador. Ahora el rotulo son DOS, y el de la izquierda manda sobre lo
+         que pinta la rejilla de abajo. Nada crece, asi que no hay que remedir el encaje en movil.
+       El area de toque de cada palabra la sube a 44 px un halo transparente (la receta de `.coin`), no
+       un boton mas gordo. -->
   <div class="g-secrow">
-    <div class="g-sec" data-t="prBalls">Bolas</div>
+    <button class="g-sec on" id="gSecBolas" data-t="prBalls">Bolas</button>
+    <button class="g-sec" id="gSecEstelas">Estela</button>
     <div class="g-count" id="gCount"></div>
   </div>
   <!-- data-fit="scroll": la coleccion son 12 bolas y subiendo; deslizar DENTRO de la rejilla es su forma
@@ -5613,14 +5669,19 @@
     </div>
 
     <div class="sc-block" data-sub="rk">
-      <div class="sc-h"><svg class="sc-ico" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.4 20.2 H19.6"/><path d="M7.8 20.2 V13.4"/><path d="M12 20.2 V7.6"/><path d="M16.2 20.2 V11"/></g></svg><span data-t="seRkH">Rankings</span><button class="ibtn" data-info="seRkNote" data-info-tit="seRkH" data-tp="infoWord" title="Info"><svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 10.8 V17"/><path d="M12 6.9 V7.2"/></g></svg></button></div>
-      <div class="se-rk-tabs"><button class="se-rk-tab on" data-ti="seRkTabs:0">Diario</button><button class="se-rk-tab" data-ti="seRkTabs:1">Semanal</button><button class="se-rk-tab" data-ti="seRkTabs:2">General</button></div>
-      <!--+AG docs/60 F5: los rivales llevaban 🔵🔴🟢 y tu fila un ⭐, cuatro emojis del sistema en cuatro
-           lineas seguidas. Punto de color dibujado para ellos, estrella de marca para la tuya. -->
-      <div class="se-row"><div class="pos">1</div><div class="who"><i class="sd" style="--c:#4aa8ff"></i>Estela</div><div class="pts">3 420</div></div>
-      <div class="se-row"><div class="pos">2</div><div class="who"><i class="sd" style="--c:#ff5a5a"></i>Trompo</div><div class="pts">3 180</div></div>
-      <div class="se-row me"><div class="pos">3</div><div class="who"><i class="sd star"></i><span data-t="you">Tú</span></div><div class="pts">2 960</div></div>
-      <div class="se-row"><div class="pos">4</div><div class="who"><i class="sd" style="--c:#4ddc8a"></i>Bumper</div><div class="pts">2 610</div></div>
+      <div class="sc-h"><svg class="sc-ico" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.4 20.2 H19.6"/><path d="M7.8 20.2 V13.4"/><path d="M12 20.2 V7.6"/><path d="M16.2 20.2 V11"/></g></svg><span data-t="seRkH">Rankings</span></div>
+      <!--+AG doc 97 §3.2 · AQUI HABIA UNA MAQUETA MUERTA, y llevaba viva mas de un mes: tres pestañas
+           (Diario/Semanal/General) que no filtraban nada y CUATRO FILAS ESCRITAS A MANO —Estela 3 420,
+           Trompo 3 180, Tú 2 960, Bumper 2 610— identicas para un jugador con mil partidas y para uno
+           recien llegado. Exactamente el mismo fallo que doc 78 encontro en la tarjeta de la Liga.
+           Ahora es LA TABLA DE LA TEMPORADA, viva: las copas ganadas en estos 42 dias, que arrancan a
+           cero para todos y son las que deciden el premio de cierre. Y es la unica clasificacion del
+           juego que se puede perder y volver a ganar, que es justo lo que le falta a la Global.
+           ⚠ SE VA TAMBIEN EL BOTON DE INFO de la cabecera, y no por hueco: su texto (`seRkNote`)
+             prometia en los 20 idiomas «Top 10 % = Fichas · Top 1 % = título + skin», y las Fichas son
+             una moneda que NUNCA llego a existir en el juego (ya se cazo lo mismo en el cartel del
+             Ranking el 1-ago). Un texto de ayuda que miente es peor que no tener texto de ayuda. -->
+      <div class="se-rk" id="seRkList"></div>
     </div>
     <!--+AG LA ESCENA DE LA TEMPORADA (encargo 43). Va como ULTIMO hijo del cuerpo y no como fondo de
          la pantalla: asi ocupa el hueco que sobra y solo el hueco que sobra. Su CSS, arriba. -->
@@ -5975,7 +6036,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=66a6e7a"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=0c4584d"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -7450,6 +7511,9 @@ function relangScreens(){
     if(el('garaje') && el('garaje').classList.contains('on')) renderGaraje();
     if(el('tienda') && el('tienda').classList.contains('on')) renderTienda();
     if(el('ranking') && el('ranking').classList.contains('on')) paintRanking();
+    //+AG doc 97: la tabla de la temporada tambien se arma por JS (nombres de bot + tu rotulo «TÚ»), asi
+    //   que sin esta linea se quedaria en la lengua anterior. La misma trampa de siempre.
+    if(el('temporada') && el('temporada').classList.contains('on')) paintSeRk();
     //+AG doc 75: los RETOS se pintan por JS, asi que hay que repintarlos aqui como el resto de listas —
     //   `data-t` solo alcanza al HTML fijo. Sin esta linea el panel se quedaba EN INGLES en los 18
     //   idiomas que llegan por paquete: el panel se pinta al abrir la pantalla y el paquete aterriza
@@ -7772,7 +7836,17 @@ function tempEstado(){
   //   se reengancha. Cobrar por retroceder seria una maquina de fabricar Gemas.
   if(n!==T.n){
     if(n>T.n){ const esc=Math.max(0, Math.min(LIGA_COFRE.length-1, ligaAhora().t));
-      T.cofre={ n:T.n, esc, gemas:LIGA_COFRE[esc] }; }
+      T.cofre={ n:T.n, esc, gemas:LIGA_COFRE[esc] };
+      //+AG doc 97 §3.2 · EL PREMIO DEL TOP DE LA TEMPORADA, que se paga aqui mismo y por eso se calcula
+      //   aqui: sale de las copas ganadas en ESOS 42 dias, no de la clasificacion Global. El motivo
+      //   esta en doc 97 §2 y es que la Global no puede pagar: como tus copas no bajan nunca (doc 78),
+      //   pasadas ~1.800 eres 1o para siempre aunque no vuelvas a jugar, y quien empieza hoy no te
+      //   alcanza jamas. Un premio que se gana una vez y se cobra de por vida no es un premio.
+      const dnFin=T.n*TEMP_DIAS + TEMP_DIAS - 1;                       // ultimo dia de la temporada que cierra
+      const mias=(SAVE.cupsTemp && SAVE.cupsTemp.n===T.n) ? SAVE.cupsTemp.v : 0;
+      const puesto=topPuestoTemp(mias, dnFin), f=topFranja(TOP_TEMP, puesto, topPoblacion());
+      if(f) T.topTemp={ n:T.n, puesto, gemas:f.gemas||0, monedas:f.monedas||0, estela:f.estela||null };
+    }
     T.n=n; persist();
   }
   return T;
@@ -7920,8 +7994,22 @@ const PLACE_DELTA=[8,6,4,2,0,-2,-4,-6];
 const TEAM_DELTA=[8,4,0,-4];
 function applyCups(ball, delta){ const cur=ball.copas||0; let next=cur+delta, clamped=false;
   if(next<0){ next=0; clamped=true; } ball.copas=next; return {before:cur, after:next, clamped}; }
-function trackToday(d){ const k=todayKey();
-  if(SAVE.cupsToday && SAVE.cupsToday.k===k) SAVE.cupsToday.v+=d; else SAVE.cupsToday={k, v:d}; }
+//+AG doc 97 · aqui se apuntan las TRES cuentas que deciden los premios del top, y por eso este sitio:
+//   por applyCupsForResult pasan los dos caminos de fin de partida, y ninguno se repinta al volver.
+//   · `v` las copas del dia (ya estaba) · `p` las PARTIDAS del dia (el candado del minimo, doc 97 §3.1)
+//   · `n` el numero de dia, que es lo que permite calcular tu puesto de AYER cuando vuelves
+//   · `cupsTemp` lo ganado en la temporada, que es de donde sale el premio de cierre
+//   ⚠ topEstado() va PRIMERO: cierra la cuenta del dia anterior antes de que la linea de abajo machaque
+//     el registro. Si fuera despues, el jugador que abre el juego y se mete directo a una partida
+//     perderia el premio del dia anterior sin enterarse.
+function trackToday(d){ const k=todayKey(), n=todayNum(), t=tempNum();
+  topEstado();
+  if(SAVE.cupsToday && SAVE.cupsToday.k===k){ SAVE.cupsToday.v+=d; SAVE.cupsToday.p=(SAVE.cupsToday.p||0)+1; SAVE.cupsToday.n=n; }
+  else SAVE.cupsToday={k, n, v:d, p:1};
+  if(!SAVE.cupsTemp || SAVE.cupsTemp.n!==t) SAVE.cupsTemp={n:t, v:0};
+  //   la cuenta de temporada tambien baja al perder (un 8o resta), pero nunca por debajo de cero: si
+  //   no, un mal arranque dejaria al jugador en negativo y con la tabla cerrada para el resto del mes.
+  SAVE.cupsTemp.v=Math.max(0, SAVE.cupsTemp.v+d); }
 function myTodayDelta(){ return (SAVE.cupsToday && SAVE.cupsToday.k===todayKey()) ? SAVE.cupsToday.v : 0; }
 function deltaTxt(d){ return d>0 ? '+'+d : (d<0 ? '−'+Math.abs(d) : '±0'); }
 function deltaCls(d){ return d>0?'up':(d<0?'dn':'fl'); }
@@ -7937,12 +8025,15 @@ const BOTS=(function(){
     const name=BOT_PRE[Math.floor(rnd()*BOT_PRE.length)]+BOT_SUF[Math.floor(rnd()*BOT_SUF.length)];
     const color=BOT_COLORS[Math.floor(rnd()*BOT_COLORS.length)];
     const seed=Math.floor(rnd()*4294967296);
-    const r=rnd(); let lo,hi;                                        // piramide de habilidad (doc 36) en copas por bola
-    if(r<.70){ lo=0; hi=120; } else if(r<.92){ lo=100; hi=300; } else { lo=300; hi=600; }
+    const r=rnd(); let lo,hi,tier;                                   // piramide de habilidad (doc 36) en copas por bola
+    //+AG doc 97: la franja se GUARDA (tier). Antes solo servia para sortear las copas de arranque y se
+    //   perdia; ahora es lo que decide el RITMO con el que ese bot sube (doc 97 §5), asi que tiene que
+    //   sobrevivir a la construccion. No se toca ni una llamada a rnd(): el roster sale identico.
+    if(r<.70){ lo=0; hi=120; tier=0; } else if(r<.92){ lo=100; hi=300; tier=1; } else { lo=300; hi=600; tier=2; }
     const nb=1+Math.floor(rnd()*3), balls=[];
     for(let k=0;k<nb;k++){ const bn=BALL_NAMES[Math.floor(rnd()*BALL_NAMES.length)], bc=BOT_COLORS[Math.floor(rnd()*BOT_COLORS.length)], cups=Math.round(lo+rnd()*(hi-lo));
       if(balls.some(x=>x.name===bn)) continue; balls.push({name:bn, color:bc, cups}); }
-    if(used[name]) continue; used[name]=1; list.push({name, color, seed, balls});
+    if(used[name]) continue; used[name]=1; list.push({name, color, seed, balls, tier});
   }
   return list;
 })();
@@ -7955,6 +8046,114 @@ function effBall(bot, i, dn){ return Math.max(0, bot.balls[i].cups + driftFor(bo
 //   la pestaña de al lado ya enseñaba la bola de verdad.
 function botArch(bot, i){ return ARCH_KEYS[Math.abs((bot.seed ^ Math.imul(i+1, 2246822519)) >>> 0) % ARCH_KEYS.length]; }
 function effTotal(bot, dn){ let s=0; bot.balls.forEach((b,i)=>s+=effBall(bot,i,dn)); return s; }
+
+// ============================================================================
+//+AG doc 97 §5 · EL RITMO DE LOS BOTS. Sin esto, los premios del top se REGALAN, y por eso es la
+//   primera pieza que se construye. Antes toda la poblacion se movia solo con driftFor(): ruido de
+//   ±8 copas por bola y dia, CENTRADO EN CERO. Servia para que la tabla temblara, pero no para
+//   repartir nada, y las dos cuentas estan hechas:
+//   · En DIARIO, un bot de 3 bolas se movia ±24 al dia como mucho, y un jugador con cinco partidas
+//     decentes hace ~40: era 1o todos los dias sin esforzarse.
+//   · En una TEMPORADA, un ruido centrado en cero acumula ~0 en 42 dias, asi que los 50 bots la
+//     cerraban con cero copas ganadas y el jugador era 1o con UNA sola partida.
+//   Ahora cada bot sube a su RITMO segun su franja de habilidad, determinista f(seed), y el ruido se
+//   conserva ENCIMA para que la tabla siga temblando dia a dia.
+//   ⚠ EL RITMO NO ENTRA EN effTotal() —la pestaña Global— Y ES A PROPOSITO. Si lo que se gana cada dia
+//     se sumara al total de por vida, en un año los bots acumularian entre 7.000 y 12.000 copas y el
+//     jugador no volveria a ser 1o jamas. Global es la foto de por vida (base + ruido) y NO paga nada
+//     (doc 97 §2, que es justo el motivo de que el premio de cierre no salga de ahi); las que compiten
+//     y pagan son Diario y la tabla de temporada, y esas dos si llevan ritmo.
+const BOT_RITMO=[[2,6],[8,15],[20,35]];   // copas/dia por franja: baja (70% del roster), media (22%), alta (8%)
+//   el ritmo de ESE bot, fijo de por vida: dos bots de la misma franja no suben igual.
+function botRitmo(bot){ const R=BOT_RITMO[bot.tier||0], r=mulberry32((bot.seed^0x9E3779B9)>>>0)();
+  return R[0]+r*(R[1]-R[0]); }
+//   lo que gana ESE dia. Nunca negativo: un dia flojo es un dia de cero copas, no un dia de perderlas.
+//   Perder copas es cosa del jugador, que si puede quedar 8o; un bot que restara haria bajar una tabla
+//   que el jugador no puede auditar, y eso se lee como un fallo.
+function botDia(bot, dn){ const r=mulberry32(((bot.seed^Math.imul(dn,374761393))>>>0))();
+  return Math.max(0, Math.round(botRitmo(bot)*(0.4+r*1.2))); }
+//   lo acumulado en la temporada a la que pertenece ese dia. 50 bots x 42 dias = 2.100 cuentas de
+//   nada: se recalcula entero en vez de guardarse, que es lo que lo hace inmune a que el jugador
+//   cambie la hora del movil o a que un guardado viejo llegue de otro aparato.
+function botTemp(bot, dn){ const ini=Math.floor(dn/TEMP_DIAS)*TEMP_DIAS; let s=0;
+  for(let d=ini; d<=dn; d++) s+=botDia(bot,d); return s; }
+
+// ============================================================================
+//+AG doc 97 · LOS PREMIOS DEL TOP. Cumple la promesa que la banda del Ranking llevaba anunciando desde
+//   el 1-ago («Premios · Top 10 % y Top 1 % · pronto») sin entregar nada.
+//   EL CORTE VA POR PUESTOS Y NO POR PORCENTAJES (decision de Jaime, 8-ago): con 51 filas el «top 1 %»
+//   es exactamente una persona, y encima obliga a un niño a calcular un porcentaje para saber si cobra.
+//   El dia que haya jugadores de verdad se vuelve a porcentajes cambiando SOLO estas dos tablas: ni la
+//   pantalla ni los 20 idiomas se enteran (el mismo truco que doc 78 §2 dejo hecho para la Liga).
+const TOP_DIA =[{max:1, monedas:100, dup:3}, {max:3, monedas:60}, {max:10, monedas:30}];
+const TOP_TEMP=[{max:1, gemas:60, estela:'es_campeon'}, {max:3, gemas:30, estela:'es_podio'},
+                {max:10, gemas:15}, {pct:.5, monedas:500}];
+//+AG ⚠ LA FRANJA DE CONSUELO ERA UN 25 % Y SE MIDIO. Con el reparto real de la poblacion, entrar en el
+//   top 25 % de la temporada pedia 451 copas y entrar en el TOP 10 pedia 501: cincuenta copas de
+//   diferencia entre el premio de consuelo y el premio de verdad. O sea que la franja no consolaba a
+//   nadie —quien llegaba ahi ya estaba rozando el top 10— y el jugador que juega dos partidas al dia,
+//   que es justo para quien existe, se iba de vacio igual. Al 50 % pide 213 copas (unas 5 al dia, dos
+//   partidas buenas), que si es el suelo de «has jugado esta temporada». El coste no se mueve: los
+//   otros 50 puestos son bots y el unico que cobra es el jugador.
+//+AG ⚠ EL MINIMO DE PARTIDAS NO ES UN CASTIGO, ES UN CANDADO. Sin el, quien no juega se queda con
+//   delta 0 y —como la mitad de la tabla puede tener un dia de cero— se colaria en el top 10 SIN
+//   HABER JUGADO. Es el veneno del «abrir-recoger-cerrar» que doc 75 §7 ya cierra en los retos.
+const TOP_MIN_PARTIDAS=3;
+function topPoblacion(){ return BOTS.length+1; }   // los 50 bots + tu
+//   los empates los gana el JUGADOR (solo cuenta quien te SUPERA, no quien te iguala). Es a su favor a
+//   proposito: explicarle a un niño que ha perdido un premio por un desempate invisible no se puede.
+function topPuestoDia(mias, dn){ let mejores=0; for(const b of BOTS) if(botDia(b,dn)>mias) mejores++; return mejores+1; }
+function topPuestoTemp(mias, dn){ let mejores=0; for(const b of BOTS) if(botTemp(b,dn)>mias) mejores++; return mejores+1; }
+function topFranja(tabla, puesto, pob){
+  for(const f of tabla){ const tope = f.max!=null ? f.max : Math.ceil(pob*f.pct); if(puesto<=tope) return f; }
+  return null;
+}
+//+AG EL ESTADO, con la misma disciplina que tempEstado(): idempotente, y el reloj hacia ATRAS no paga
+//   nada. `d` es el ultimo dia YA evaluado (para no evaluarlo dos veces) y `pend` lo que hay en la mesa.
+function topEstado(){
+  if(!SAVE.top || typeof SAVE.top!=='object') SAVE.top={d:'', pend:null};
+  const T=SAVE.top, C=SAVE.cupsToday, hoy=todayKey();
+  //   hay un dia CERRADO sin evaluar: el registro de copas guardado es de otro dia distinto de hoy.
+  //   ⚠ pide C.n (el numero de dia). Los guardados de antes del 8-ago no lo llevan y por eso no cobran
+  //     retroactivo, igual que el cofre de Liga no se paga por temporadas anteriores a su estreno.
+  if(C && C.k!==hoy && typeof C.n==='number' && T.d!==C.k){
+    T.d=C.k;
+    const p=topPremioDia(C);
+    //   si ya habia uno sin recoger (dos dias sin abrir), se acumulan: se suman las monedas y los
+    //   duplicadores, y se conserva el MEJOR puesto, que es el que se canta en la celebracion.
+    if(p) T.pend = T.pend ? {puesto:Math.min(T.pend.puesto,p.puesto), monedas:T.pend.monedas+p.monedas,
+                             dup:(T.pend.dup||0)+(p.dup||0)} : p;
+    persist();
+  }
+  return T;
+}
+function topPremioDia(C){
+  if((C.p||0) < TOP_MIN_PARTIDAS) return null;
+  const puesto=topPuestoDia(C.v, C.n), f=topFranja(TOP_DIA, puesto, topPoblacion());
+  return f ? {puesto, monedas:f.monedas||0, dup:f.dup||0} : null;
+}
+function topHayDia(){ return !!topEstado().pend; }
+function topCogerDia(){
+  const T=topEstado(); if(!T.pend) return null;
+  const p=T.pend; T.pend=null;
+  if(p.monedas) dinero('chispas', p.monedas, 'top_diario');   //   por la puerta unica del dinero (doc 53)
+  if(p.dup){ const M=misEstado(); M.dup=(M.dup||0)+p.dup; }
+  persist(); return p;
+}
+//   copas que llevas ganadas ESTA temporada (la cuenta que decide el premio de cierre, doc 97 §3.2)
+function myTempCups(){ return (SAVE.cupsTemp && SAVE.cupsTemp.n===tempNum()) ? SAVE.cupsTemp.v : 0; }
+function topHayTemp(){ return !!tempEstado().topTemp; }
+function topCogerTemp(){
+  const T=tempEstado(); if(!T.topTemp) return null;
+  const p=T.topTemp; T.topTemp=null;
+  if(p.gemas)   dinero('gemas', p.gemas, 'top_temporada');
+  if(p.monedas) dinero('chispas', p.monedas, 'top_temporada');
+  //+AG LA ESTELA SE ENTREGA Y SE PONE PUESTA. Un premio que hay que ir a buscar al Garaje para
+  //   enterarte de que lo tienes es medio premio: quien acaba de ganar la temporada la quiere ver en
+  //   la siguiente carrera, no dos menus mas alla.
+  if(p.estela && !SAVE.cosmetics.includes(p.estela)){ SAVE.cosmetics.push(p.estela); equipaEstela(p.estela); }
+  persist(); return p;
+}
 
 // rivales de partida = N bots de la FRANJA de copas de la bola equipada (doc 37 §4), barajados por partida (no memorizable)
 //+AG el barajado acepta SEED: con la seed de la partida los mismos rivales salen siempre igual (nombres estables al
@@ -8271,6 +8470,11 @@ function modeEmbedUrl(mode, fmt){
   //   de ese modo llega y no hace nada: cada motor solo reconoce los suyos.
   if(fmt!=='equipos'){ const eb=equippedBall(); if(eb){ u += '&stats=' + attrsOf(eb).join(',') + '&arch=' + encodeURIComponent(eb.arch);
     if(traitOf(eb.arch)) u += '&trait=' + encodeURIComponent(eb.arch); } }
+  //+AG doc 97 §6 · LA ESTELA VIAJA POR LA MISMA PUERTA QUE LA BOLA. Va fuera del `if` de arriba a
+  //   proposito: en EQUIPOS no se manda ni bola ni stats (corres con la del equipo), pero la estela es
+  //   TUYA y se luce igual — es lo unico cosmetico que no depende de con que bola juegues.
+  //   Es 100% cosmetica: el motor solo pinta particulas de color, no toca la Sim ni un milimetro.
+  { const es=estelaPuesta(); if(es) u += '&trail=' + encodeURIComponent(es); }
   //+AG ⚠ LA VERSION DEL BUILD VA EN LA URL DEL IFRAME, Y NO ES COSMETICA: ES LO QUE HACE QUE UN
   //   DESPLIEGUE LLEGUE AL JUGADOR (2026-08-05). Los HTML del juego se sirven SIN `Cache-Control`, asi
   //   que el navegador decide por su cuenta cuanto vale su copia; y como el iframe se abria siempre con
@@ -8975,7 +9179,15 @@ function syncBadges(){
   //+AG doc 79: el cofre de temporada cuenta como pendiente. Ademas esta es la llamada que se come el
   //   arranque (renderHome → refreshTabBadges → aqui), o sea el sitio donde se detecta que la temporada
   //   ha rodado aunque el jugador no abra Temporada.
-  pintaBadge('#hPass,[data-nav="temporada"]', misPendientes() + ((typeof cofreHay==='function' && cofreHay())?1:0));
+  //+AG doc 97: y el premio del top de la temporada, que se cobra en esa misma pantalla y al lado del
+  //   cofre. Sin esto seria dinero en la mesa sin aviso — que es como estuvo el cofre hasta doc 79.
+  pintaBadge('#hPass,[data-nav="temporada"]', misPendientes()
+    + ((typeof cofreHay==='function' && cofreHay())?1:0)
+    + ((typeof topHayTemp==='function' && topHayTemp())?1:0));
+  //+AG doc 97 · EL PREMIO DIARIO SE COBRA EN EL RANKING, asi que el aviso va en la puerta del Ranking:
+  //   el boton del riel de la portada. Es la unica de las cuatro teclas de ese riel que lleva a una
+  //   pantalla que puede tener dinero esperando.
+  pintaBadge('#rrRanking', (typeof topHayDia==='function' && topHayDia()) ? 1 : 0);
   //+AG ⚠ 7-ago · FALTABA LA PORTADA, que es donde mas importa. La pestaña de Tienda de la Home es
   //   `#homeShopTab` y no lleva `data-nav="tienda"` (las de Garaje/Temporada/Perfil si), asi que este
   //   selector la dejaba fuera: en la pantalla donde el jugador pasa mas rato, la Tienda NUNCA avisaba
@@ -8985,7 +9197,7 @@ function syncBadges(){
   pintaBadge('#shTabTienda,#homeShopTab,[data-nav="tienda"]', camHay() ? 1 : 0);
 }
 
-function openGaraje(){ checkHitos(); showScreen('garaje'); applyShell(); renderGaraje(); }
+function openGaraje(){ checkHitos(); garSec='bolas'; showScreen('garaje'); applyShell(); renderGaraje(); }
 //+AG LA VITRINA (7-ago). Pinta al protagonista: la bola que llevas puesta, grande y con sus datos.
 //   ⚠ NO se fia de que `SAVE.equipped` apunte a algo. Es un INDICE dentro de `SAVE.balls`, y ese
 //   array cambia de longitud cada vez que compras o te regalan una bola; un save viejo o a medio
@@ -9006,8 +9218,55 @@ function renderVitrina(){
   el('gHeroCups').innerHTML    = coinIco('copa') + ' ' + nfmt(b.copas||0);
   h.onclick = ()=>openDetail(k);
 }
+//+AG doc 97 §6.1 · LA REJILLA DE ESTELAS. Reutiliza el MISMO contenedor que las bolas (`#gGrid`), asi
+//   que hereda su rejilla de dos columnas, su scroll y su excepcion en __fitCheck: cero CSS de layout
+//   nuevo y cero riesgo de descuadrar el encaje en movil.
+//   Las que NO tienes se pintan igual pero apagadas, nunca ocultas (canon §6). Ademas de ser la regla,
+//   aqui hace de escaparate: ves la estela de campeon en gris y sabes que existe y que se gana.
+function renderEstelas(){
+  const s=S(), g=el('gGrid'), puesta=estelaPuesta();
+  //   la primera vez los colores aun no han llegado del chasis: se pinta ya (en gris) y se repinta solo
+  //   cuando aterrizan. Se comprueba que sigues en esta seccion, no vaya a repintar encima de las bolas.
+  if(!ESTELA_COLS) cargaEstelaCols(()=>{ if(garSec==='estelas') renderEstelas(); });
+  el('gCount').textContent = estelasTengo().length + '/' + ESTELA_ORD.length;
+  g.innerHTML='';
+  ESTELA_ORD.forEach(id=>{
+    const tengo=SAVE.cosmetics.includes(id), E=(ESTELA_COLS&&ESTELA_COLS[id])||{cols:['#4a4370','#6d659c']}, n=E.cols.length;
+    const c=document.createElement('div');
+    c.className='es-card'+(puesta===id?' on':'')+(tengo?'':' locked');
+    //   la cola arranca en transparente: sin eso la cuña corta en seco por la izquierda y parece un
+    //   trozo de bandera en vez de algo que se desvanece detras de la bola.
+    const paradas=['transparent 0%'].concat(E.cols.map((h,i)=>h+' '+Math.round(12+i/(n-1)*88)+'%'));
+    c.innerHTML='<div class="es-mues"><i class="es-cola" style="background:linear-gradient(90deg,'+paradas.join(',')+')"></i><i class="es-bola"></i></div>'
+              + '<div class="es-nm">'+estelaNombre(id)+'</div>'
+              + (puesta===id ? '<div class="es-st">'+(s.equippedTag||'')+'</div>' : '');
+    //   tocar la que YA llevas puesta te la quita. Asi no hace falta una ficha «Ninguna» —que serian
+    //   20 traducciones nuevas para decir que no— y el gesto se explica solo: la enciendes y la apagas.
+    //   se apunta solo al PONERSELA, no al quitarsela: la metrica que interesa es «¿se la pone quien
+    //   la gana?» (doc 97 §10). Si la gana y no se la pone, el premio no vale lo que creemos.
+    if(tengo) c.onclick=()=>{ const quitar=(puesta===id);
+      equipaEstela(quitar?null:id); if(!quitar) apunta('estela_equipada', { id }); renderGaraje(); };
+    g.appendChild(c);
+  });
+}
+//+AG doc 97 §6.1 · que seccion del Garaje se esta mirando. Vive fuera del SAVE a proposito: es donde
+//   estabas hace dos segundos, no una preferencia — al volver a entrar, el Garaje abre por BOLAS.
+let garSec='bolas';
+el('gSecBolas').onclick  =()=>{ garSec='bolas';   el('gGrid').scrollTop=0; renderGaraje(); };
+el('gSecEstelas').onclick=()=>{ garSec='estelas'; el('gGrid').scrollTop=0; renderGaraje(); };
 function renderGaraje(){ pildora('gChispas', SAVE.chispas); pildora('gGemas', SAVE.gemas);
   renderVitrina();
+  //+AG el rotulo de la seccion de estelas se pinta A MANO (no lleva data-t) porque reutiliza una
+  //   palabra que ya vive en otro sitio del diccionario: `cosmCats.Estela`, la categoria con la que la
+  //   Tienda lleva meses etiquetando la Estela Arcoiris en los 20 idiomas.
+  //   ⚠ Por eso mismo hay que repintarlo al cambiar de idioma, y de eso se encarga relangScreens: es la
+  //     trampa que ya se cazo dos veces (el panel de Retos y la Liga, doc 78 §6), y sin ella cambiar de
+  //     idioma con el Garaje abierto dejaria esta palabra en la lengua anterior.
+  const enEstelas = garSec==='estelas';
+  el('gSecBolas').classList.toggle('on', !enEstelas);
+  const bEs=el('gSecEstelas'); bEs.classList.toggle('on', enEstelas);
+  bEs.textContent=(S().cosmCats||{}).Estela||'Estela';
+  if(enEstelas){ renderEstelas(); return; }
   //+AG el contador de la coleccion. Va DETRAS de su rotulo («BOLAS   3/12»), nunca solo: un numero
   //   suelto no dice de que es. Sale de contar `owned()`, no de `SAVE.balls.length`, para que no lo
   //   descuadre nada que se llegue a guardar ahi y no sea una de las doce del roster.
@@ -9067,7 +9326,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=66a6e7a').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=0c4584d').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -9301,6 +9560,58 @@ const COSM=[ {id:'sk_llamas',nm:'Llamas',cat:'Skin',rar:1,ic:CM.llama,g:150}, {i
   {id:'es_arcoiris',nm:'Estela Arcoíris',cat:'Estela',rar:2,ic:CM.estela,g:250}, {id:'ce_fuegos',nm:'Fuegos',cat:'Celebración',rar:2,ic:CM.fuegos,g:250},
   {id:'em_gg',nm:'¡GG!',cat:'Emote',rar:0,ic:CM.emote,g:60}, {id:'ma_corona',nm:'Marco Corona',cat:'Marco',rar:4,ic:CM.corona,g:800} ];
 for(const c of COSM) c.m = enMonedas(c.g);   //+AG el precio en Monedas SALE del de Gemas: un cosmético nuevo lo hereda por construcción
+// ── LAS ESTELAS (doc 97 §6) ─────────────────────────────────────────────────
+//+AG ⚠ ESTO NACE DE UNA DEUDA QUE COBRABA DINERO DE VERDAD. La lista COSM de aqui arriba lleva desde
+//   siempre vendiendo seis cosmeticos, y NINGUNO de los seis hacia nada: al comprar, el id entraba en
+//   SAVE.cosmetics y ahi moria. No habia estado de "cual llevo puesto", no habia pantalla para
+//   ponerselos, y los tres motores no los mencionaban ni una vez — comprobado buscando cada referencia:
+//   la lista solo se leia para pintar «TIENES» en la propia Tienda. O sea que se podian pagar 250 Gemas
+//   (unos 3 EUR) por una Estela Arcoiris invisible. Lo destapo Jaime preguntando, antes de aprobar el
+//   premio del campeon, «¿como se equipa ese cosmetico? ¿hay una seccion para equiparse cosmeticos?».
+//   Se arregla el carril de las ESTELAS entero (decision suya, 8-ago). Skin, Celebracion, Emote y Marco
+//   siguen sin funcionar y por eso se marcan «pronto» en la Tienda y NO se pueden comprar: no se
+//   arregla una mentira dejando cuatro al lado.
+//
+//   Los colores son el cosmetico: no hay fichero de arte que cargar, la estela son PARTICULAS del
+//   propio motor.
+//+AG ⚠ Y LOS COLORES NO VIVEN AQUI: viven en motor/chassis/estelas.mjs, que es de donde los leen los
+//   tres motores para pintarla en pista. Aqui esta solo la LISTA DE IDS, que es lo que va al guardado
+//   del jugador. Si la paleta estuviera copiada en los dos sitios, el dia que se retoque una estela la
+//   ficha del Garaje enseñaria una cosa y la partida entregaria otra — que es LITERALMENTE lo que ya
+//   paso en este juego con los retratos de bola (ver el comentario de renderGaraje).
+//   Se cargan al vuelo la primera vez que se abre la seccion, como vivas.mjs: hasta que llegan, la
+//   muestra se pinta en gris y se repinta sola. Nada de esto bloquea equiparse ni jugar, porque para
+//   eso basta el id.
+const ESTELA_ORD=['es_arcoiris','es_podio','es_campeon'];
+const esEstela=id=>ESTELA_ORD.indexOf(id)>=0;
+let ESTELA_COLS=null;
+function cargaEstelaCols(cb){
+  if(ESTELA_COLS) return cb();
+  import('./motor/chassis/estelas.mjs?v=0c4584d')
+    .then(m=>{ ESTELA_COLS=m.ESTELAS||{}; cb(); })
+    .catch(()=>{ ESTELA_COLS={}; cb(); });   //   sin red, fichas en gris: nunca una pantalla rota
+}
+//+AG ⚠ CERO TRADUCCIONES NUEVAS, y no por pereza: estrenar dos nombres son 40 cadenas en los 20
+//   diccionarios para decir algo que ya esta dicho. «Estela» vive en cosmCats, «Campeón» es el rotulo
+//   del ganador en Resultados (champ) y «Podio» el del 2º-3º (podium), los tres traducidos hace meses.
+//   A los dos ultimos se les quitan los signos de admiracion porque ahi son una exclamacion («¡Podio!»)
+//   y aqui son el nombre de un objeto. Se limpian tambien los de ancho completo del japones y el chino.
+function estelaNombre(id){
+  const s=S(), cn=s.cosmNames||{}, cc=s.cosmCats||{};
+  if(cn[id]) return cn[id];
+  const base=cc.Estela||'Estela', limpio=t=>String(t||'').replace(/[!¡！]/g,'').trim();
+  if(id==='es_campeon') return base+' · '+limpio(s.champ);
+  if(id==='es_podio')   return base+' · '+limpio(s.podium);
+  return base;
+}
+//+AG el estado, creado al vuelo: un guardado de antes del 8-ago no lo trae y no hace falta migracion
+//   ninguna (no llevar estela puesta es un estado valido, que es justo con el que arranca todo el mundo).
+function cosmEq(){ if(!SAVE.cosmEquip || typeof SAVE.cosmEquip!=='object') SAVE.cosmEquip={estela:null}; return SAVE.cosmEquip; }
+//   se comprueba SIEMPRE contra lo que tienes: si un dia se retira una estela del juego, el guardado
+//   que la llevara puesta se queda sin ella en vez de mandarle al motor un id que no existe.
+function estelaPuesta(){ const e=cosmEq().estela; return (e && SAVE.cosmetics.includes(e) && esEstela(e)) ? e : null; }
+function equipaEstela(id){ cosmEq().estela = (id && SAVE.cosmetics.includes(id) && esEstela(id)) ? id : null; persist(); }
+function estelasTengo(){ return ESTELA_ORD.filter(id=>SAVE.cosmetics.includes(id)); }
 // ── LOS BOOSTERS DE LA TIENDA ───────────────────────────────────────────────
 //+AG PRECIO: 12 monedas = 1 gema = 1 booster. Y el 12 NO es redondo por gusto, es el suelo que marca
 //   el banco (tools/banco-inventario.mjs): cada booster extra le RENTA al jugador 2,95 monedas de
@@ -9688,7 +9999,15 @@ function cosmEl(){ const s=S(), d=document.createElement('div'); d.innerHTML='';
   const g=document.createElement('div'); g.className='sh-grid';
   COSM.forEach(c=>{ const q=QUAL[c.rar], have=hasCosm(c.id); const it=document.createElement('div'); it.className='sh-item'; it.style.setProperty('--qc',q.c);
     it.innerHTML=`<div class="sh-ic">${c.ic}</div><div class="sh-nm">${cosmName(c)}</div><div class="sh-cat">${cosmCat(c)} · ${qualName(c.rar)}</div>`;
-    const btn=document.createElement('button'); if(have){ btn.className='sh-buy owned'; btn.textContent=s.ownedCosm; btn.disabled=true; }
+    const btn=document.createElement('button');
+    //+AG ⚠ doc 97 §6.1 · LOS CUATRO QUE NO FUNCIONAN DEJAN DE VENDERSE. Skin, Celebración, Emote y
+    //   Marco se compran desde siempre y no se pueden equipar ni se ven en ningún sitio: hasta el 8-ago
+    //   se cobraban hasta 800 Gemas por ellos. Se quedan en el escaparate marcados «pronto» —la misma
+    //   palabra y la misma pastilla que ya usan el Pase y JUGAR POR EQUIPOS, o sea cero traducciones
+    //   nuevas— pero con el botón apagado. Enseñar lo que viene está bien; cobrarlo antes de que
+    //   exista, no. Se quita esta rama entera el día que su carril esté construido, como el de estelas.
+    if(!esEstela(c.id)){ btn.className='sh-buy owned'; btn.textContent=s.soonTag||'pronto'; btn.disabled=true; it.classList.add('soon'); }
+    else if(have){ btn.className='sh-buy owned'; btn.textContent=s.ownedCosm; btn.disabled=true; }
     //+AG 2026-08-06 los dos precios, EXACTAMENTE como las bolas (misma regla, mismo botón, mismo orden):
     //   paga en Monedas si te llegan y en Gemas si no. Nunca cobra Gemas teniendo Monedas suficientes,
     //   que sería cobrar de más. Y el botón se pinta del color de LO QUE VA A COBRAR (verde = Gemas),
@@ -10007,10 +10326,64 @@ function paintTempHd(){
 }
 //+AG doc 79 · EL COFRE, pintado. Titulo y boton salen de cadenas que YA estan en los 20 idiomas
 //   (seLeague + el nombre del escalon + miCobrar): cero traducciones nuevas para estrenarlo.
+//+AG doc 97 §3.2 · LA TABLA DE LA TEMPORADA. Las copas ganadas en estos 42 dias: tu cuenta sale de
+//   SAVE.cupsTemp y la de cada bot de sumar su ritmo dia a dia desde que empezo la temporada.
+//   Se enseñan las tres primeras filas Y LA TUYA, aunque vayas la 40: un ranking donde no te
+//   encuentras no es tuyo. Si ya vas en el podio entra la cuarta, para que el bloque no encoja de
+//   golpe y desmonte el alto de la pantalla (la escena de temporada, doc 93, vive del hueco que sobra).
+function paintSeRk(){
+  const box=el('seRkList'); if(!box) return;
+  const s=S(), dn=todayNum();
+  const rows=BOTS.map(b=>({nm:b.name, c:b.color, v:botTemp(b,dn), me:false}));
+  rows.push({nm:s.you, c:null, v:myTempCups(), me:true});
+  rows.sort((a,b)=>b.v-a.v || a.nm.localeCompare(b.nm));
+  const mi=rows.findIndex(r=>r.me), ver = mi<3 ? [0,1,2,3] : [0,1,2,mi];
+  box.innerHTML=ver.filter(i=>i<rows.length).map(i=>{
+    const r=rows[i];
+    //   punto de color para ellos, estrella de marca para la tuya: los mismos dos glifos DIBUJADOS que
+    //   ya traia la maqueta (docs/60 F5 los puso para matar los 🔵🔴🟢 del sistema).
+    const punto = r.me ? '<i class="sd star"></i>' : '<i class="sd" style="--c:'+r.c+'"></i>';
+    return '<div class="se-row'+(r.me?' me':'')+'"><div class="pos">'+(i+1)+'</div>'
+         + '<div class="who">'+punto+'<span>'+r.nm+'</span></div>'
+         + '<div class="pts">'+nfmt(r.v)+'</div></div>';
+  }).join('');
+}
+//+AG doc 97 §3.2 · EL PREMIO DEL TOP DE LA TEMPORADA se cobra AQUI, pegado al cofre de Liga y en el
+//   mismo viaje: los dos son «lo que te llevas por haber cerrado la temporada», y mandar al jugador a
+//   dos pantallas distintas a recoger dos sobres el mismo dia es trabajo suyo que nos ahorramos.
+//   Como el resto de la fila, no estrena ni una palabra: el puesto es «#N» y el premio son cifras con
+//   su moneda al lado.
+function pintaTopTemp(c){
+  const s=S(), p=tempEstado().topTemp; if(!p) return;
+  const d=document.createElement('div'); d.className='mi-row mi-cobra';
+  const ico = p.puesto<=3 ? medalIco(p.puesto,'sm') : uiIco('ranking-regalo','sm');
+  let paga='';
+  if(p.gemas)   paga += '+'+nfmt(p.gemas)+' '+coinIco('gema','sm');
+  if(p.monedas) paga += (paga?' · ':'')+'+'+nfmt(p.monedas)+' '+coinIco('chispa','sm');
+  d.innerHTML='<span style="width:34px;flex:0 0 auto;display:grid;place-items:center">'+ico+'</span>'
+            + '<div class="mi-tx"><div class="mi-t"><span>#'+p.puesto+'</span>'
+            + '<b class="mi-n">'+paga+'</b></div></div>';
+  const b=document.createElement('button'); b.className='mi-cta ready'; b.textContent=s.miCobrar;
+  b.onclick=()=>{
+    const g=topCogerTemp(); if(!g) return;
+    if(el('seGemas')) pildora('seGemas', SAVE.gemas);
+    if(el('seChispas')) pildora('seChispas', SAVE.chispas);
+    paintLiga(); paintSeRk(); syncBadges(); applyShell();
+    //   el titulo es LA ESTELA cuando la hay, no las Gemas: el premio de haber ganado la temporada es
+    //   la estela —lo unico del juego que no vuelve nunca— y las Gemas son el acompañamiento.
+    celebra({ ico:uiArt('ranking-regalo'), color:'#ffd23f',
+      titulo: g.estela ? estelaNombre(g.estela) : (g.gemas?(s.gemasWord||''):(s.chispasWord||'')),
+      sub: g.gemas ? '+'+nfmt(g.gemas) : '+'+nfmt(g.monedas),
+      pie: '#'+g.puesto, peso: g.puesto===1?40:15, vuela: g.gemas?'gemas':'chispas' });
+    apunta('top_temporada_cobrado', { puesto:g.puesto });
+  };
+  d.appendChild(b); c.appendChild(d);
+}
 function pintaCofre(){
   const c=el('seCofre'); if(!c) return;
   const s=S(), T=tempEstado();
   c.innerHTML='';
+  pintaTopTemp(c);   //+AG doc 97: el premio del top va PRIMERO — es el que se ha ganado compitiendo
   if(!T.cofre) return;
   const tiers=(s.seTiers&&s.seTiers.length===5)?s.seTiers:SHELL.en.seTiers;
   const d=document.createElement('div'); d.className='mi-row';
@@ -10034,7 +10407,7 @@ function pintaCofre(){
   d.classList.add('mi-cobra'); d.appendChild(b);
   c.appendChild(d);
 }
-function openTemporada(){ showScreen('temporada'); applyShell(); pildora('seChispas', SAVE.chispas); pildora('seGemas', SAVE.gemas); paintTempHd(); buildPaseTrack(); paintLiga(); renderRetos(); }
+function openTemporada(){ showScreen('temporada'); applyShell(); pildora('seChispas', SAVE.chispas); pildora('seGemas', SAVE.gemas); paintTempHd(); buildPaseTrack(); paintLiga(); paintSeRk(); renderRetos(); }
 //+AG doc 75 · EL PANEL DE RETOS. Pinta la semanal arriba y las 3 diarias debajo. Todo lo que decide
 //   (que retos, cuanto llevas, si esta cobrado) sale del motor de misiones; aqui solo se dibuja.
 function retoTxt(m){ const s=S(), T=MIS_TPL[m.p]||{};
@@ -10869,7 +11242,11 @@ function rankRows(){ const dn=todayNum(), rows=[], s=S();
     //   El arquetipo se DERIVA de la seed del bot, que es fija: mismo bot, misma bola, siempre.
     BOTS.forEach(b=>{ let v=0, mejor=0;
       if(rkTab==='global'){ v=effTotal(b,dn); b.balls.forEach((bb,i)=>{ if(effBall(b,i,dn)>effBall(b,mejor,dn)) mejor=i; }); }
-      else b.balls.forEach((bb,i)=>{ v+=effBall(b,i,dn)-effBall(b,i,dn-1); });
+      //+AG doc 97 §5 · la columna de DIARIO ya no es la diferencia de dos dias de ruido, que es lo que
+      //   hacia que ser 1o fuera regalado: es lo que ese bot ha ganado hoy A SU RITMO. Y es la MISMA
+      //   cuenta con la que se reparte el premio (topPuestoDia), no una parecida: si la tabla y el
+      //   premio salieran de dos formulas distintas, el jugador veria un puesto y cobraria otro.
+      else v=botDia(b,dn);
       rows.push({name:b.name, color:b.color, v, me:false, arch:botArch(b, mejor)}); });
     const mc=rkTab==='global'?totalCopas():myTodayDelta();
     rows.push({name:s.you, color:rgb(ARCH_COLOR[(equippedBall()||{}).arch]||[0.16,0.42,1.0]), v:mc, me:true,
@@ -10882,16 +11259,61 @@ function rankRows(){ const dn=todayNum(), rows=[], s=S();
     if(vis[r.name]){ rows.splice(i--,1); continue; } vis[r.name]=1; } }
   return rows;
 }
+//+AG doc 97 · LA BANDA DE PREMIOS DEL RANKING. Dos estados y ninguno lleva una palabra nueva:
+//   · sin nada que cobrar → la tabla de premios de la pestaña Diario (#1 / #3 / #10 y lo que paga cada
+//     uno). Es el gancho: se ve lo que hay ANTES de jugar, que es la regla de la casa contra el azar.
+//   · con premio en la mesa → el puesto que hiciste ayer y el boton de cobrar, con `.ready` puesto.
+//   En Global y Por bola no se pinta NADA. Global no puede pagar (doc 97 §2) y prometerlo ahi era
+//   exactamente la mentira que este documento viene a arreglar.
+function pintaTopBanda(){
+  const box=el('rkPrize'); if(!box) return;
+  const s=S(); box.innerHTML='';
+  if(rkTab!=='diario') return;
+  const T=topEstado();
+  if(T.pend){
+    const p=T.pend;
+    box.innerHTML='<span class="tp-cel"><span class="tp-p">#'+p.puesto+'</span> '+nfmt(p.monedas)+' '+coinIco('chispa','sm')+'</span>';
+    const b=document.createElement('button'); b.className='mi-cta ready tp-cobra'; b.textContent=s.miCobrar||'';
+    b.onclick=()=>{
+      const g=topCogerDia(); if(!g) return;
+      syncBadges(); paintRanking(); applyShell();
+      //   la celebracion es la MISMA que ya usan el cofre y la Tienda. Un premio de ranking resuelto
+      //   con un toast seria repetir el fallo que la auditoria del 7-ago canto en las dos.
+      celebra({ ico:uiArt('moneda-chispa'), color:'#ffd23f', titulo:s.chispasWord||'', sub:'+'+nfmt(g.monedas),
+        pie:'#'+g.puesto, peso: g.monedas>=100?15:5, vuela:'chispas' });
+      if(g.dup) toast(s.dupGan||'');
+      apunta('top_diario_cobrado', { puesto:g.puesto });
+    };
+    box.appendChild(b);
+    return;
+  }
+  //   la tabla, en tres celdas. Se arma leyendo TOP_DIA, no escribiendo los numeros a mano: el dia que
+  //   se recalibre un premio, esto se entera solo (es el mismo principio que el precio por rareza).
+  const cel=f=>'<span class="tp-cel"><span class="tp-p">#'+f.max+'</span> '+nfmt(f.monedas)+' '+coinIco('chispa','sm')+'</span>';
+  box.innerHTML=TOP_DIA.map(cel).join('<span class="tp-sep">·</span>');
+}
 function paintRanking(){ applyShell(); const s=S();
   document.querySelectorAll('#ranking .rktab').forEach(b=>b.classList.toggle('on', b.dataset.rktab===rkTab));
+  pintaTopBanda();
   renderRkFilt();
   const rows=rankRows(), total=rows.length; let myIdx=-1; rows.forEach((r,i)=>{ if(r.me&&myIdx<0) myIdx=i; });
   el('rkMe').innerHTML = rkTab==='bola'
     ? (myIdx<0 ? s.rkNoBall : s.rkYouBest(rows[myIdx].ball, myIdx+1, total))
-    : s.rkYouPos(myIdx+1, total) + (rkTab==='diario'?s.rkTodayTail:'');
+    //+AG doc 97: se cae el sufijo «· deriva de hoy» (`rkTodayTail`). Describia el modelo VIEJO, en el
+    //   que la columna era un vaiven de ruido alrededor de cero y «deriva» era la palabra exacta. Desde
+    //   hoy esa columna son las copas que se han GANADO hoy, y llamarlo deriva es contarlo mal. La
+    //   frase «Tu puesto: #4 de 51» se sostiene sola, asi que quitarlo no pide ni una traduccion nueva.
+    : s.rkYouPos(myIdx+1, total);
   //+AG 1-ago (encargo 31): los tres primeros puestos llevan la MEDALLA DIBUJADA, no el emoji. El indice
   //   de la fila es 0-based y medalIco pide el PUESTO, de ahi el i+1.
-  const prize=Math.ceil(total*0.10), medals={0:medalIco(1,'sm'),1:medalIco(2,'sm'),2:medalIco(3,'sm')}, list=el('rkList'); list.innerHTML='';
+  //+AG ⚠ doc 97 · EL MARCADOR DE FRANJA SE DA LA VUELTA, y no es cosmetico: marca QUIEN COBRA. Antes
+  //   era `ceil(total*0.10)` en Global y Por bola, y expresamente NO en Diario — o sea justo al reves de
+  //   como paga el juego desde hoy. Global no reparte nada (doc 97 §2) y ponerle el regalito a sus seis
+  //   primeros era prometer con un icono lo mismo que el cartel prometia con palabras. Ahora el regalo
+  //   sale en Diario y solo hasta el ultimo puesto que cobra de verdad, que se lee de TOP_DIA: si mañana
+  //   se recalibra la tabla, la marca se mueve sola en vez de quedarse mintiendo en el 10.
+  const prize = rkTab==='diario' ? TOP_DIA[TOP_DIA.length-1].max : 0;
+  const medals={0:medalIco(1,'sm'),1:medalIco(2,'sm'),2:medalIco(3,'sm')}, list=el('rkList'); list.innerHTML='';
   function addRow(r,i){ const row=document.createElement('div'); row.className='rkrow'+(r.me?' meRow':'');
     let vTxt,vCls='';
     if(rkTab==='diario'){ vTxt=deltaTxt(r.v); vCls=r.v>0?' up':(r.v<0?' dn':''); } else vTxt=coinIco('copa','sm')+' '+nfmt(r.v);
@@ -10900,7 +11322,7 @@ function paintRanking(){ applyShell(); const s=S();
     row.innerHTML='<span class="kp">'+(medals[i]||'#'+(i+1))+'</span>'+disc+
       //+AG 1-ago: el marcador de franja era 🎟️ —un TICKET, o sea la moneda muerta—. Marca quién está
       //   dentro de la franja, no qué se cobra: pasa a 🎁, que es lo que dice el cartel de arriba.
-      '<span class="kn">'+r.name+'</span>'+(i<prize&&rkTab!=='diario'?'<span class="kt" title="'+S().rkPrizeTip+'">'+uiIco('ranking-regalo','sm')+'</span>':'')+
+      '<span class="kn">'+r.name+'</span>'+(i<prize?'<span class="kt" title="'+S().rkPrizeTip+'">'+uiIco('ranking-regalo','sm')+'</span>':'')+
       '<span class="kv'+vCls+'">'+vTxt+'</span>';
     list.appendChild(row); }
   const TOP=20; rows.slice(0,TOP).forEach(addRow);
@@ -11496,7 +11918,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=66a6e7a';
+  import { startAmbient } from './arte/ambient.mjs?v=0c4584d';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -11512,7 +11934,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=66a6e7a').then(m => {
+  import('./arte/pista-preview.mjs?v=0c4584d').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -11524,8 +11946,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=66a6e7a';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=66a6e7a';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=0c4584d';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=0c4584d';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -11695,7 +12117,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=66a6e7a'), import('./motor/chassis/sincro.mjs?v=66a6e7a')]);
+        import('./motor/chassis/nube.mjs?v=0c4584d'), import('./motor/chassis/sincro.mjs?v=0c4584d')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
