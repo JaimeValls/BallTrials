@@ -298,6 +298,7 @@ redlightCoach: {
 
 arranque: {
   kicker:'MODUS', ready:'KLAAR!', auto:n=>`begint vanzelf over ${n}`, tapHint:'tik voor geluid', escHint:'Esc om te stoppen',
+  mmFind:'SPELERS ZOEKEN…', mmFound:'MATCH GEVONDEN!',
   name:{ race:'De Grote Race', cazador:'De Jager', redlight:'Rood Licht' },
   goal:{ race:'Rol de baan af en bereik de FINISH voor iedereen.',
          cazador:'Ontwijk de JAGER. De laatste bal overeind wint.',

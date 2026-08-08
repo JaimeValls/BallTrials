@@ -298,6 +298,7 @@ redlightCoach: {
 
 arranque: {
   kicker:'MODE', ready:'SIAP!', auto:n=>`mulai sendiri dalam ${n}`, tapHint:'ketuk untuk suara', escHint:'Esc untuk keluar',
+  mmFind:'MENCARI PEMAIN…', mmFound:'PERTANDINGAN DITEMUKAN!',
   name:{ race:'Balapan Akbar', cazador:'Sang Pemburu', redlight:'Lampu Merah' },
   goal:{ race:'Meluncur menuruni lintasan dan capai GARIS FINIS sebelum yang lain.',
          cazador:'Hindari SANG PEMBURU. Bola terakhir yang bertahan menang.',

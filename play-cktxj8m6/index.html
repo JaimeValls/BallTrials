@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-08 60055fe"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-08 3357839"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -3598,7 +3598,11 @@
      recuperan el canto corto, y solo ellas: las otras 41 filas siguen sin promesa porque siguen sin
      destino. El contraste no es un descuido, es el mensaje — el canto marca exactamente las diez que
      llevan a algun sitio. Regla que se conserva intacta: la afordancia se pone cuando existe el
-     destino, nunca antes. */
+     destino, nunca antes.
+     ⚠⚠ Y ESTO SE HA REPUESTO A MANO (8-ago, segunda vez): venia del commit 02c0386, estaba en
+     produccion, y un merge de la sesion paralela se lo llevo por delante sin avisar — el resto del
+     doc 102 sobrevivio y solo cayo este trozo. Si vuelve a desaparecer, no es que se decidiera
+     quitarlo: es el mismo merge. */
   /*+AG doc 102 · y el `:active` es el MISMO de la casa (hundirse 1 px, no encogerse): dos maneras de
      acusar el dedo en la misma pantalla es justo lo que el pase de homogeneidad vino a matar. */
   .rkrow.prz{ box-shadow:0 2px 0 #0d0726, inset 0 1px 0 #ffffff18; }
@@ -6332,7 +6336,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=60055fe"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=3357839"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -8993,6 +8997,27 @@ function modeEmbedUrl(mode, fmt){
     //   Se manda también a los modos que todavía no lo leen (la Carrera): un parámetro que nadie lee no
     //   toca la física ni un milímetro, y así el día que la Carrera lo implemente el hilo ya está atado.
     u += '&bchar=' + lastRivals.map(r=>botChar(r.bot)).join(',');
+    //+AG ⚠⚠ docs/99 §6 · Y QUIÉNES SON: EL NOMBRE Y LA LIGA DE CADA RIVAL. Sin esto el emparejamiento
+    //   de chassis/emparejar.mjs no puede existir, y ese fue el bloqueo que el plan no había visto: al
+    //   motor solo le viajaban NÚMEROS (pericia y carácter), así que no tenía con qué llenar los ocho
+    //   huecos. Los nombres los pintaba únicamente el SHELL, al final, en Resultados.
+    //   ⚠ VA EN LA MISMA LISTA Y EL MISMO ORDEN que `bskill`/`bchar`, y eso NO es estilo: son los mismos
+    //   bots cuyos puestos se pagan luego (`lastBotPlaces`). Con dos listas distintas el emparejamiento
+    //   presentaría a unos y jugarías contra otros, que es exactamente el fallo que esto viene a evitar.
+    //   ⚠ NO SE MANDA EL COLOR DEL BOT, y es a propósito: en pista cada bola lleva el color de la PALETA
+    //   DEL MOTOR por su índice (SHORT_COLORS), y Resultados pinta ese mismo color porque lo recibe del
+    //   motor en `bt:matchEnd`. Mandar aquí el color del roster (BOT_COLORS) haría que el jugador viera
+    //   a MegaZía naranja en el emparejamiento y azul en la carrera. El motor ya sabe su color: lo pone él.
+    u += '&brival=' + lastRivals.map(r=>{ const L=ligaDe(r.c);
+      return encodeURIComponent(r.bot.name)+'~'+L.t+'~'+L.d; }).join(',');
+    //   el hueco del jugador: su nombre traducido, su bola de verdad (el motor ya tiene `&arch`) y su liga.
+    { const Lme=ligaAhora(); u += '&byo=' + encodeURIComponent(S().you) + '~' + Lme.t + '~' + Lme.d; }
+    //+AG LAS CINCO PALABRAS DE LIGA VAN UNA SOLA VEZ, ya traducidas, y el número romano lo compone el
+    //   motor. Dos motivos: el diccionario de las ligas vive aquí (`ligaNombre`) y llevarle los 20 idiomas
+    //   al motor sería duplicarlo; y repetir «Diamante» ocho veces en la URL cuesta ocho veces más que
+    //   mandarlo una — en tailandés o árabe cada letra son 9 bytes percent-encoded y eso se nota.
+    { const s=S(), tiers=(s.seTiers&&s.seTiers.length===5)?s.seTiers:SHELL.en.seTiers;
+      u += '&bligas=' + tiers.map(encodeURIComponent).join('~'); }
   } else lastRivals = null;
   //+AG ⚠ LA VERSION DEL BUILD VA EN LA URL DEL IFRAME, Y NO ES COSMETICA: ES LO QUE HACE QUE UN
   //   DESPLIEGUE LLEGUE AL JUGADOR (2026-08-05). Los HTML del juego se sirven SIN `Cache-Control`, asi
@@ -9891,7 +9916,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=60055fe').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=3357839').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -10161,7 +10186,7 @@ const esEstela=id=>ESTELA_ORD.indexOf(id)>=0;
 let ESTELA_COLS=null;
 function cargaEstelaCols(cb){
   if(ESTELA_COLS) return cb();
-  import('./motor/chassis/estelas.mjs?v=60055fe')
+  import('./motor/chassis/estelas.mjs?v=3357839')
     .then(m=>{ ESTELA_COLS=m.ESTELAS||{}; cb(); })
     .catch(()=>{ ESTELA_COLS={}; cb(); });   //   sin red, fichas en gris: nunca una pantalla rota
 }
@@ -12632,7 +12657,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=60055fe';
+  import { startAmbient } from './arte/ambient.mjs?v=3357839';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -12648,7 +12673,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=60055fe').then(m => {
+  import('./arte/pista-preview.mjs?v=3357839').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -12660,8 +12685,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=60055fe';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=60055fe';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=3357839';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=3357839';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -12831,7 +12856,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=60055fe'), import('./motor/chassis/sincro.mjs?v=60055fe')]);
+        import('./motor/chassis/nube.mjs?v=3357839'), import('./motor/chassis/sincro.mjs?v=3357839')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };

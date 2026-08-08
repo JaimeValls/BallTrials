@@ -298,6 +298,7 @@ redlightCoach: {
 
 arranque: {
   kicker:'MODO', ready:'PRONTO!', auto:n=>`parte da sola tra ${n}`, tapHint:'tocca per l\'audio', escHint:'Esc per uscire',
+  mmFind:'RICERCA GIOCATORI…', mmFound:'PARTITA TROVATA!',
   name:{ race:'La Grande Corsa', cazador:'Il Cacciatore', redlight:'Luce Rossa' },
   goal:{ race:'Scendi lungo la pista e arriva al TRAGUARDO prima di tutti.',
          cazador:'Schiva il CACCIATORE. Vince l\'ultima pallina in piedi.',

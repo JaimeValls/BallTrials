@@ -298,6 +298,7 @@ redlightCoach: {
 
 arranque: {
   kicker:'MODE', ready:'PRÊT !', auto:n=>`démarre toute seule dans ${n}`, tapHint:'touche pour le son', escHint:'Échap pour quitter',
+  mmFind:'RECHERCHE DE JOUEURS…', mmFound:'PARTIE TROUVÉE !',
   name:{ race:'La Grande Course', cazador:'Le Chasseur', redlight:'Feu Rouge' },
   goal:{ race:'Descends la piste et atteins l\'ARRIVÉE avant tout le monde.',
          cazador:'Esquive le CHASSEUR. La dernière bille debout gagne.',

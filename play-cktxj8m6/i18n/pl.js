@@ -300,6 +300,7 @@ redlightCoach: {
 
 arranque: {
   kicker:'TRYB', ready:'GOTOWE!', auto:n=>`startuje sam za ${n}`, tapHint:'dotknij, żeby był dźwięk', escHint:'Esc, aby wyjść',
+  mmFind:'SZUKANIE GRACZY…', mmFound:'ZNALEZIONO MECZ!',
   name:{ race:'Wielki Wyścig', cazador:'Łowca', redlight:'Czerwone Światło' },
   goal:{ race:'Zjedź po torze i dotrzyj na METĘ przed wszystkimi.',
          cazador:'Unikaj ŁOWCY. Wygrywa ostatnia kula na nogach.',

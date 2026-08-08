@@ -300,6 +300,7 @@ redlightCoach: {
 
 arranque: {
   kicker:'MODUS', ready:'BEREIT!', auto:n=>`startet von allein in ${n}`, tapHint:'tippen für Ton', escHint:'Esc zum Beenden',
+  mmFind:'SPIELER WERDEN GESUCHT…', mmFound:'SPIEL GEFUNDEN!',
   name:{ race:'Das große Rennen', cazador:'Der Jäger', redlight:'Rotes Licht' },
   goal:{ race:'Roll die Strecke runter und erreiche das ZIEL vor allen anderen.',
          cazador:'Weich dem JÄGER aus. Die letzte Kugel im Spiel gewinnt.',

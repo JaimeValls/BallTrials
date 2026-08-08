@@ -19,24 +19,32 @@
 //   · UN SOLO LENGUAJE DE "PÚLSAME": el CTA usa el mismo oro del motor (#bSup.ready / #ovBtn), no inventa brillos.
 //   · CABE EN EL MÓVIL SIN DESLIZAR: todo el cartel se mide en vh/vw y el texto se recorta con line-clamp.
 
-import { createSynth, makeRng, peakGain } from './synth.mjs?v=60055fe';
-import { PAUSA } from './pausa.mjs?v=60055fe';   //+AG "el mundo no se mueve": el cartel tampoco se auto-arranca (ver tick)
+import { createSynth, makeRng, peakGain } from './synth.mjs?v=3357839';
+import { PAUSA } from './pausa.mjs?v=3357839';   //+AG "el mundo no se mueve": el cartel tampoco se auto-arranca (ver tick)
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────
 //  TEXTOS · en+es con fallback a INGLÉS, igual que el SHELL y que los motores de Cazador/Luz Roja
 //  (la Carrera tiene sus 9 idiomas porque ya los tenía: su nombre de modo entra por cfg.title).
 //  El OBJETIVO es una frase, en imperativo, sin jerga: es lo único que lee quien no ha hecho el tutorial.
 // ─────────────────────────────────────────────────────────────────────────────────────────────────
-const TXT = {
+//+AG SE EXPORTA (docs/99 §6) porque chassis/emparejar.mjs pinta EL MISMO encabezado —icono, "MODO", nombre y
+//   objetivo— que este cartel: el emparejamiento lo sustituye, no lo acompaña, así que lo que decía el cartel
+//   tiene que seguir dicho. Compartiendo la tabla, los dos hablan los 20 idiomas con UNA sola entrada de
+//   diccionario ('arranque'), y el día que se retoque el objetivo de un modo se retoca en un sitio.
+//   ⚠ mmFind/mmFound viven aquí y no en una sección nueva por lo mismo: BTI18N.tabla funde por sección, y
+//   una sección 'emparejar' con dos claves obligaría a tocar los 20 paquetes para crearla vacía.
+export const TXT = {
   //+AG escHint (3-ago-2026): «Esc para salir». Solo se pinta donde hay teclado (lo decide refresh()) y
   //   solo en este cartel, que es el momento en que el jugador esta leyendo y no jugando. Existe porque
   //   docs/71 dio a Escape el papel de atras del ordenador y nadie se lo estaba contando a nadie.
   en: { kicker:'MODE', ready:'READY!', auto:n=>`starts on its own in ${n}`, tapHint:'tap for sound', escHint:'Esc to quit',
+    mmFind:'FINDING PLAYERS…', mmFound:'MATCH FOUND!',
     name:{ race:'The Great Race', cazador:'The Hunter', redlight:'Red Light' },
     goal:{ race:'Roll down and reach the FINISH before anyone else.',
            cazador:'Dodge the HUNTER. Last ball standing wins.',
            redlight:'Run on GREEN, freeze on RED. Get caught moving and you are out.' } },
   es: { kicker:'MODO', ready:'¡LISTO!', auto:n=>`empieza sola en ${n}`, tapHint:'toca para tener sonido', escHint:'Esc para salir',
+    mmFind:'BUSCANDO RIVALES…', mmFound:'¡PARTIDA ENCONTRADA!',
     name:{ race:'La Gran Carrera', cazador:'El Cazador', redlight:'Luz Roja' },
     goal:{ race:'Baja por la pista y llega a la META antes que nadie.',
            cazador:'Esquiva al CAZADOR. Gana la última bola en pie.',
@@ -180,6 +188,29 @@ export function blipReady(audio){
   S.note(0,    0.10, 880,  0.30, { wave:'pulse', duty:0.42, decay:12 });
   S.note(0.075,0.20, 1319, 0.27, { wave:'pulse', duty:0.42, decay:7 });
   S.note(0.075,0.20, 1760, 0.08, { wave:'sine', decay:6 });
+  play(audio, buf);
+}
+
+//+AG docs/99 §6 · LOS DOS SONIDOS DEL EMPAREJAMIENTO. Viven AQUÍ y no en emparejar.mjs a propósito: este
+// fichero ya es "todos los sonidos del ritual de empezar una partida" (blipReady + la cuenta atrás), y un
+// grep por el ritual tiene que encontrarlos juntos. emparejar.mjs los importa.
+//
+// TICK de hueco lleno: un pluck cortísimo que SUBE de tono con cada jugador que entra (i de 0 a n-1). La
+// subida es la que hace que ocho ticks se lean como "se está llenando" y no como ocho clics iguales.
+export function blipSlot(audio, i = 0, n = 8){
+  const { buf, S } = mkBuf(0.16);
+  const f = 440 * Math.pow(2, (i / Math.max(1, n - 1)) * 0.75);   // ~440 → ~740 Hz repartido entre los huecos
+  S.note(0, 0.09, f, 0.20, { wave:'pulse', duty:0.36, decay:16 });
+  S.add(0, 0.035, 1600, 700, 0.05, 0.5, 22);                      // el aire del ataque: el "clic" del hueco
+  play(audio, buf);
+}
+// PARTIDA ENCONTRADA: la confirmación. Más cuerpo que el tick (es el final de la búsqueda) y más corta que
+// el ¡YA! (no puede competir con el pistoletazo, que llega tres segundos después).
+export function blipFound(audio){
+  const { buf, S } = mkBuf(0.55);
+  S.add(0, 0.16, 320, 120, 0.16, 0.3, 12);                        // golpe suave: el "clac" del match
+  [659.25, 987.77, 1318.5].forEach((f,i)=> S.note(0.02 + i*0.045, 0.30, f, 0.20, { wave:'pulse', duty:0.46, decay:6 }));
+  S.note(0.02, 0.42, 1975.5, 0.05, { wave:'sine', decay:4 });
   play(audio, buf);
 }
 

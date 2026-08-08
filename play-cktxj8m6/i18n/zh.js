@@ -299,6 +299,7 @@ redlightCoach: {
 
 arranque: {
   kicker:'模式', ready:'就绪！', auto:n=>`${n} 后自动开始`, tapHint:'点一下就有声音', escHint:'按 Esc 退出',
+  mmFind:'正在寻找玩家…', mmFound:'匹配成功！',
   name:{ race:'超级弹珠赛', cazador:'猎手', redlight:'红灯停' },
   goal:{ race:'顺着赛道滚下去，抢在所有人前面冲过终点。',
          cazador:'躲开猎手。最后一颗还站着的弹珠获胜。',

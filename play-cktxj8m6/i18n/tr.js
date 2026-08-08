@@ -298,6 +298,7 @@ redlightCoach: {
 
 arranque: {
   kicker:'MOD', ready:'HAZIR!', auto:n=>`${n} sonra kendi başlıyor`, tapHint:'ses için dokun', escHint:'Çıkmak için Esc',
+  mmFind:'OYUNCULAR ARANIYOR…', mmFound:'MAÇ BULUNDU!',
   name:{ race:'Büyük Yarış', cazador:'Avcı', redlight:'Kırmızı Işık' },
   goal:{ race:'Pistten aşağı in ve BİTİŞ\'e herkesten önce var.',
          cazador:'AVCI\'dan kaç. Ayakta kalan son top kazanır.',

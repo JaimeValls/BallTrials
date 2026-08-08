@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-08 60055fe">
+<meta name="bt-build" content="2026-08-08 3357839">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <!--+AG el HTML se sirve en INGLES (defecto del juego); ?lang=es lo traduce por JS (applyLang) -->
 <title>YouBall · The Hunter (WebGL)</title>
@@ -395,7 +395,7 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 
 <!--+AG ICONO DE MODO para el cartel de arranque: script CLÁSICO (se ejecuta antes del módulo) igual que en
      juego.html, así window.VENDORED_MODE_ICONS ya existe cuando chassis/arranque.mjs construye el cartel. -->
-<script src="../../i18n/idiomas.js?v=60055fe"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
+<script src="../../i18n/idiomas.js?v=3357839"></script><!--+AG doc 49: catalogo y cargador de los 20 idiomas, compartido con el shell. Clasico y antes del modulo. -->
 <script src="../../arte/modeicons-vendored.js"></script>
 
 <script type="importmap">
@@ -406,30 +406,31 @@ if(new URLSearchParams(location.search).get('drive')==='1'){
 </script>
 
 <script type="module">
-import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, makeFacePlane, createItemPool, createItemPops, createStarBurst, createWindTrail, createBloom, frameOrtho } from '../chassis/gfx.mjs?v=60055fe';
-import { archLook } from '../chassis/ballmat.mjs?v=60055fe';   //+AG doc 41 bloque G: material de la bola-heroe
-import { attachSquash } from '../chassis/squash.mjs?v=60055fe';
-import { crearEscudos } from '../chassis/escudo.mjs?v=60055fe';   //+AG 2026-08-08: la burbuja que dice "llevo escudo puesto" (misma pieza que la Carrera)
-import { paleta as estelaPaleta, emiteEstela } from '../chassis/estelas.mjs?v=60055fe';   //+AG doc 97 §6: la estela cosmetica del jugador
-import { Sim, RNG, TEAMS, BALL_R, ARENA_W, ARENA_H, FPS, AGENCIA } from './sim.js?v=60055fe';
-import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=60055fe';
-import { archFace } from '../chassis/facegen.mjs?v=60055fe';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
-import { createCelebration } from '../chassis/celebration.mjs?v=60055fe';
-import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=60055fe';
-import { crearInventario } from '../chassis/invboost.mjs?v=60055fe';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
-import { buildSfxBuffer } from './sfxmap.mjs?v=60055fe';
-import { createCoach } from '../chassis/coach.mjs?v=60055fe';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
-import { crearSalida } from '../chassis/salida.mjs?v=60055fe';   //+AG 2026-08-08 · preparar la bola durante la cuenta atrás
-import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=60055fe';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
-import { createUiSfx } from '../chassis/uisfx.mjs?v=60055fe';   //+AG doc 88: el sonido de "no puedo"
-import { createJuice } from '../chassis/juice.mjs?v=60055fe';   //+AG doc 88: lo que pasa cuando el dedo toca un botón (los 3 modos)
+import { THREE, BLOOM, sat, createStage, createParticles, makeBallVinyl, makeFacePlane, createItemPool, createItemPops, createStarBurst, createWindTrail, createBloom, frameOrtho } from '../chassis/gfx.mjs?v=3357839';
+import { archLook } from '../chassis/ballmat.mjs?v=3357839';   //+AG doc 41 bloque G: material de la bola-heroe
+import { attachSquash } from '../chassis/squash.mjs?v=3357839';
+import { crearEscudos } from '../chassis/escudo.mjs?v=3357839';   //+AG 2026-08-08: la burbuja que dice "llevo escudo puesto" (misma pieza que la Carrera)
+import { paleta as estelaPaleta, emiteEstela } from '../chassis/estelas.mjs?v=3357839';   //+AG doc 97 §6: la estela cosmetica del jugador
+import { Sim, RNG, TEAMS, BALL_R, ARENA_W, ARENA_H, FPS, AGENCIA } from './sim.js?v=3357839';
+import { EmoBook, PRIO } from '../chassis/emotions.mjs?v=3357839';
+import { archFace } from '../chassis/facegen.mjs?v=3357839';   //+AG archFace: la cara de la FICHA (ceja+boca del heroe) sobre el reposo
+import { createCelebration } from '../chassis/celebration.mjs?v=3357839';
+import { createWebAudio, pickTrack } from '../chassis/webaudio.mjs?v=3357839';
+import { crearInventario } from '../chassis/invboost.mjs?v=3357839';   //+AG 2026-08-06 inventario de boosters (1 uso gratis + stock comprado)
+import { buildSfxBuffer } from './sfxmap.mjs?v=3357839';
+import { createCoach } from '../chassis/coach.mjs?v=3357839';   //+AG COACH del tutorial "Cómo jugar" (solo se usa con ?tutorial=1)
+import { crearSalida } from '../chassis/salida.mjs?v=3357839';   //+AG 2026-08-08 · preparar la bola durante la cuenta atrás
+import { createArranque, modeBanner, sfxCountdown } from '../chassis/arranque.mjs?v=3357839';   //+AG cartel "¿LISTO?" + cuenta atrás CON sonido (los 3 modos)
+import { leerEmparejamiento, createEmparejamiento } from '../chassis/emparejar.mjs?v=3357839';  //+AG docs/99 §6: los ocho con cara y nombre, en vez del "¡LISTO!"
+import { createUiSfx } from '../chassis/uisfx.mjs?v=3357839';   //+AG doc 88: el sonido de "no puedo"
+import { createJuice } from '../chassis/juice.mjs?v=3357839';   //+AG doc 88: lo que pasa cuando el dedo toca un botón (los 3 modos)
 //+AG el ámbito NO es opcional: la regla base es `#controls button` (id + etiqueta) y le gana en
 //   especificidad a cualquier `.j-hit` suelto. Es la misma trampa que ya costó una versión muerta en la
 //   Carrera y otra en Luz Roja; aquí va escrita para no repetirla una tercera vez.
 const juice = createJuice({ ambito:'#controls', reducido: new URLSearchParams(location.search).get('redfx')==='1' });
-import { createPausa } from '../chassis/pausa.mjs?v=60055fe';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
-import { cantarPuesto } from '../chassis/veredicto.mjs?v=60055fe';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
-import { runToEnd } from '../chassis/simrun.mjs?v=60055fe';
+import { createPausa } from '../chassis/pausa.mjs?v=3357839';   //+AG la partida se PARA cuando el shell pregunta encima (los 3 modos)
+import { cantarPuesto } from '../chassis/veredicto.mjs?v=3357839';   //+AG cartel de FIN: "en qué puesto has quedado", antes de soltar el resultado al shell
+import { runToEnd } from '../chassis/simrun.mjs?v=3357839';
 
 window.addEventListener('error', e => { document.getElementById('err').style.display='grid'; console.error(e.error||e.message); });
 
@@ -1511,8 +1512,18 @@ if(params.get('capture')==='1'){ document.getElementById('hud').style.display='n
 //+AG ARRANQUE (chassis/arranque.mjs) — SOLO EN EMBED, o sea en el juego de verdad: el Cazador abria de golpe en
 //   3-2-1, sin decir que modo era y sin que el sonido hubiera podido desbloquearse todavia (feedback Jaime
 //   2026-07-26). En standalone se entra directo a la cuenta atras, como siempre: es la herramienta de video.
+//+AG docs/99 §6 · Y DESDE EL 8-AGO EL CARTEL SOLO SALE CUANDO NO HAY A QUIEN PRESENTAR: con &brival= en su
+//   sitio va el EMPAREJAMIENTO (los ocho con bola, nombre y liga). Misma interfaz, así que arranque.refresh()
+//   y arranque.show() de más abajo no se enteran de cuál de los dos tienen delante.
 else if(EMBED){
-  arranque = createArranque({
+  const MMDATOS = TUTORIAL ? null : leerEmparejamiento(params);
+  arranque = MMDATOS ? createEmparejamiento({
+    mode:'cazador', lang:()=>LANG, audio, sfxOn:()=>sfxOn,
+    //   la paleta viva sale de la Sim (aquí no hay PAL: el Cazador la lee de sim.teams), y la Sim ya está
+    //   construida en este punto — es la MISMA lista de colores con la que van a salir las bolas a pista.
+    datos:MMDATOS, colors:(sim&&sim.teams)||[], arch:ARCH_KEY_P, n:(shortOpts&&shortOpts.n)||8,
+    onStart: ()=> startCountdown(),
+  }) : createArranque({
     mode:'cazador', lang:()=>LANG, audio, sfxOn:()=>sfxOn,
     autoSec: TUTORIAL ? 0 : 5,              // CÓMO JUGAR: sin reloj, se entra cuando el jugador quiere
     onStart: ()=> startCountdown(),
