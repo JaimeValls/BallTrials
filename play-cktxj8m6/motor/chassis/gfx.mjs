@@ -9,8 +9,8 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { faceTexture, hunterTexture, faceLayers, bareExpr, PRESETS as FACE_PRESETS } from './facegen.mjs?v=2a5528f';
-import { geometriaCuerpo } from './silueta.mjs?v=2a5528f';   //+AG doc 55 capa 1: cuerpos que no son esferas
+import { faceTexture, hunterTexture, faceLayers, bareExpr, PRESETS as FACE_PRESETS } from './facegen.mjs?v=60055fe';
+import { geometriaCuerpo } from './silueta.mjs?v=60055fe';   //+AG doc 55 capa 1: cuerpos que no son esferas
 
 //+AG doc 55 capa 1 v2: bolas cuyo cuerpo es una FORMA PINTADA (bola invisible + sprite teñible).
 const CUERPO_SPRITE = new Set(['fantasma']);
@@ -53,9 +53,9 @@ export function makeCuerpo(arch, R, col, onReady){
   pl.material.map = cuerpoTexture(arch, () => { pl.visible = true; pl.material.needsUpdate = true; onReady && onReady(); });
   return pl;
 }
-import { itemTexture } from './itemgen.mjs?v=2a5528f';
-import { ballMaterial, skinTexture } from './ballmat.mjs?v=2a5528f';   //+AG skinTexture: la piel del cuerpo (encargo 17)
-import { makeProp } from './propgen.mjs?v=2a5528f';   //+AG doc 41 bloque G: prop de la bola-heroe
+import { itemTexture } from './itemgen.mjs?v=60055fe';
+import { ballMaterial, skinTexture } from './ballmat.mjs?v=60055fe';   //+AG skinTexture: la piel del cuerpo (encargo 17)
+import { makeProp } from './propgen.mjs?v=60055fe';   //+AG doc 41 bloque G: prop de la bola-heroe
 
 export { THREE };
 export const BLOOM = 1; // capa de bloom: SOLO partículas/orbes/ondas/retícula la activan
