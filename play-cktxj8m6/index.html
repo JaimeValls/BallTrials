@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="bt-build" content="2026-08-08 02c0386"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
+<meta name="bt-build" content="2026-08-08 2a5528f"><!--+AG doc 34 Fase B: sin esto el navegador adivina el encoding y los emojis/flechas salen como mojibake (a-¶ PLAY) -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>BallTrials · El juego</title>
 <!--+AG doc 41 bloque E: el mapa de librerias (three, para el fondo vivo y las bolas de los menus).
@@ -2017,9 +2017,12 @@
   .pr-code .cd.nm + button{ margin-left:9px; }   /* ya lo empuja el valor: sin esto el boton se pega al borde */
   .pr-slots{ display:flex; gap:9px; margin-top:11px; align-items:center; } .pr-slots .s{ width:44px; height:44px; border-radius:50%; border:2px dashed #ffffff2e; color:var(--muted); display:grid; place-items:center; font-size:var(--fs-5); background:var(--plate-a); cursor:pointer; }
   /*+AG doc 41 §1: el regalo era un emoji del sistema sobre un azulejo dorado. Ahora es arte propio
-     (ui-regalo.webp, morado con lazo dorado) y va DESNUDO, sin plato: el plato dorado le peleaba el
-     color al lazo, y en este archivo el azulejo se reserva a lo que se pulsa (.ricon), no a lo
-     decorativo (.pi, .tlk tambien van sueltos). */
+     (ui-regalo.webp, ROJO con lazo dorado desde el 8-ago) y va DESNUDO, sin plato: el plato dorado le
+     peleaba el color al lazo, y en este archivo el azulejo se reserva a lo que se pulsa (.ricon), no
+     a lo decorativo (.pi, .tlk tambien van sueltos).
+     ⚠ 8-ago · ERA MORADO, y por eso cambio: sobre el violeta del juego un regalo morado casi no se
+       ve. Medido contra el fondo real de la fila del Ranking, la caja pasa de 59 a 94 de separacion
+       de color. Lo canto Jaime mirando la pantalla, no un banco. Ver doc 102. */
   .pr-ref{ display:flex; align-items:center; gap:12px; } .pr-ref img.gift{ width:46px; height:46px; flex:0 0 auto; object-fit:contain; display:block; filter:drop-shadow(0 3px 7px #0009); } .pr-ref .tx{ flex:1; font-size:var(--fs-3); color:#d6dbf4; line-height:1.4; } .pr-ref .tx b{ color:var(--gold2); }
   .pr-emotes{ display:flex; gap:8px; flex-wrap:wrap; } .pr-emote{ background:var(--plate-a); border:1px solid var(--line); border-radius:12px; padding:8px 12px; font-size:var(--fs-3); font-weight:700; color:#e7ebff; cursor:pointer; }
   .pr-toggle{ display:flex; align-items:center; gap:11px; } .pr-toggle .tx{ flex:1; font-size:var(--fs-3); color:#d6dbf4; line-height:1.4; }
@@ -6051,7 +6054,13 @@
            `prRefShort` no es copy nuevo: son las mismas palabras del principio de `prRefTx` en los 20
            diccionarios, cortadas donde acaba la promesa. -->
       <div class="pr-ref">
-        <img class="gift" src="arte/ui/ui-regalo.webp" alt="">
+        <!--+AG ⚠ 8-ago · LE FALTABA EL `?v=` Y ERA EL UNICO REGALO DEL JUEGO SIN EL. Todos los demas
+             pasan por uiArt(), que les cuelga el ART_V; este estaba escrito a mano. Mientras el
+             fichero no cambiaba no se notaba — el dia que cambio de morado a rojo (doc 102) habria
+             sido el unico que se quedaba morado en el navegador de quien ya hubiera entrado, y sin
+             fecha de caducidad. Un `src` a mano en un fichero que puede cambiar es una bomba de
+             relojeria de cache. -->
+        <img class="gift" src="arte/ui/ui-regalo.webp?v=4" alt="">
         <div class="tx" data-th="prRefShort"></div>
       </div>
       <button class="se-cta oro" style="margin-top:11px" data-soonk="sSoonInviteGame" data-t="prRefCta">Invitar al juego</button>
@@ -6323,7 +6332,7 @@
 
 <!--+AG doc 41 bloque C: iconos de modo canonicos (SVG plano dorado del canal). Script CLASICO y
      antes del principal a proposito: se ejecuta en orden y la constante existe ya en el primer render. -->
-<script src="i18n/idiomas.js?v=02c0386"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
+<script src="i18n/idiomas.js?v=2a5528f"></script><!--+AG doc 49: catalogo de los 20 idiomas + cargador de paquetes. Clasico y ANTES del script principal: LANGS/ord/nfmt se construyen con el. -->
 <script src="arte/modeicons-vendored.js"></script>
 <script src="arte/bolas-canon.js"></script><!--+AG el color canonico de las 12 bolas, fuente unica (lo lee tambien integrar-bolas.py). Tiene que ir ANTES del script principal: ARCH_COLOR se construye con el. -->
 <script>
@@ -7634,7 +7643,9 @@ const nfmt=n=>Number(n||0).toLocaleString(BTI18N.nloc(LANG));
 //   `curl` devolvia los bytes nuevos y el navegador seguia pintando los viejos). La nota larga esta
 //   encima de `.cico` en el CSS. Al SUSTITUIR una imagen ya desplegada, sube este numero.
 //   v2 = 1-ago-2026: monedas de oro y gema (encargo 29) + trofeo con tinta (encargo 30).
-const ART_V='3';   /*+AG 7-ago: sube a 3 al entrar los 4 iconos de booster nuevos, que sustituyen a ficheros del mismo nombre */
+const ART_V='4';   /*+AG 7-ago: sube a 3 al entrar los 4 iconos de booster nuevos, que sustituyen a ficheros del mismo nombre.
+                      8-ago: sube a 4 porque los TRES REGALOS pasan de morado a rojo (doc 102) sin cambiar de nombre de
+                      fichero — sin esto, el navegador y la CDN seguirian sirviendo la caja morada durante dias. */
 const uiArt=n=>`arte/ui/${n}.webp?v=${ART_V}`;
 const coinIco=(n,cls)=>`<img class="cico${cls?' '+cls:''}" src="${uiArt('moneda-'+n)}" alt="">`;
 //+AG 1-ago (encargo 31): los OBJETOS DE LOGRO — puesto 1º/2º/3º, corona del ganador y "hay premio"—
@@ -9877,7 +9888,7 @@ function vivasSync(){
   if(_vivas){ _vivas.sincroniza(raiz,z); return; }
   if(_vivasCargando) return;
   _vivasCargando=true;
-  import('./motor/chassis/vivas.mjs?v=02c0386').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
+  import('./motor/chassis/vivas.mjs?v=2a5528f').then(m=>{ _vivas=m.vivas; _vivasCargando=false; window.__vivasInfo=()=>_vivas.info(); const [r,zz]=vivasQue(); _vivas.sincroniza(r,zz); })
     .catch(e=>{ _vivasCargando=false; console.warn('[vivas] no cargo; las cartas se quedan sin bola', e); });
 }
 //+AG y se PARAN al salir: doce bolas en 3D girando detras de una pantalla que ya no miras es bateria
@@ -10147,7 +10158,7 @@ const esEstela=id=>ESTELA_ORD.indexOf(id)>=0;
 let ESTELA_COLS=null;
 function cargaEstelaCols(cb){
   if(ESTELA_COLS) return cb();
-  import('./motor/chassis/estelas.mjs?v=02c0386')
+  import('./motor/chassis/estelas.mjs?v=2a5528f')
     .then(m=>{ ESTELA_COLS=m.ESTELAS||{}; cb(); })
     .catch(()=>{ ESTELA_COLS={}; cb(); });   //   sin red, fichas en gris: nunca una pantalla rota
 }
@@ -12618,7 +12629,7 @@ atrasSync();
 <!--+AG El mapa de librerias (importmap) YA NO VIVE AQUI: se subio al <head>, arriba del todo.
      Tiene que estar parseado ANTES del primer import, y desde aqui abajo no lo estaba. -->
 <script type="module">
-  import { startAmbient } from './arte/ambient.mjs?v=02c0386';
+  import { startAmbient } from './arte/ambient.mjs?v=2a5528f';
   //+AG el modulo se ejecuta DESPUES del script clasico, asi que al llegar aqui la Home ya esta
   //   pintada: por eso se enciende a mano si toca, en vez de esperar a un cambio de pantalla.
   //+AG feedback Jaime 2026-07-27: ahora hay DOS lienzos posibles (Home #ambient y Resultados #ambientR);
@@ -12634,7 +12645,7 @@ atrasSync();
   //+AG doc 51: «asi se ve en pista» dentro de la ficha del Garaje. Se expone en window porque
   //   openDetail/closeDetail viven en el script CLASICO de arriba, que no puede importar modulos.
   //   Mismo trato que el fondo vivo: un solo contexto WebGL a la vez, y se apaga al salir.
-  import('./arte/pista-preview.mjs?v=02c0386').then(m => {
+  import('./arte/pista-preview.mjs?v=2a5528f').then(m => {
     window.BT_PISTA = { show:(el,k)=>{ try{ m.showPista(el,k); }catch(e){} }, stop:()=>m.stopPista() };
   });
 </script>
@@ -12646,8 +12657,8 @@ atrasSync();
      Se reusa el reproductor DEL MOTOR (chassis/webaudio.mjs), no uno nuevo: mismo desbloqueo por gesto, mismo
      rescate al volver de segundo plano en movil. -->
 <script type="module">
-  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=02c0386';
-  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=02c0386';   //+AG el clic de los menus (VB Jaime 2026-07-27)
+  import { createWebAudio } from './motor/chassis/webaudio.mjs?v=2a5528f';
+  import { createUiSfx } from './motor/chassis/uisfx.mjs?v=2a5528f';   //+AG el clic de los menus (VB Jaime 2026-07-27)
   //+AG VOLUMEN MEDIDO, no a ojo. La pista de lobby ya viene suavizada de origen (-22,3 LUFS) y las de partida
   //   estan a -15, o sea 7 dB mas fuertes. Con el 0.26 que usa la web oficial esto quedaria 8,5 dB por debajo de
   //   la partida: casi inaudible. Con 0.40 se queda ~5 dB por debajo, que es lo que se busca: los menus suenan de
@@ -12817,7 +12828,7 @@ atrasSync();
   (async ()=>{
     try{
       const [{crearNube},{crearSincro}] = await Promise.all([
-        import('./motor/chassis/nube.mjs?v=02c0386'), import('./motor/chassis/sincro.mjs?v=02c0386')]);
+        import('./motor/chassis/nube.mjs?v=2a5528f'), import('./motor/chassis/sincro.mjs?v=2a5528f')]);
       const nube   = crearNube();
       const sincro = crearSincro({ nube, aviso:(q,d)=>console.log('[nube]', q, d||'') });
       window.BT_NUBE = { nube, sincro };
